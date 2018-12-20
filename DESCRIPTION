@@ -1,0 +1,57 @@
+Package: LandR
+Type: Package
+Title: Landscape Ecosystem Modelling in R
+Description: Utilities for 'LandR' suite of landscape simulation models.
+    These models simulate forest vegetation dynamics based on LANDIS-II, and 
+    incorporate fire and insect disturbance, as well as other important ecological
+    processes. Models are implemented as 'SpaDES' modules.
+URL: 
+    http://landr.predictiveecology.org,
+    https://github.com/PredictiveEcology/LandR
+Date: 2018-12-20
+Version: 0.0.1.9000
+Authors@R: c(
+    person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
+    role = c("aut", "cre"), comment=c(ORCID = "0000-0002-6914-8316")),
+    person("Alex M", "Chubaty", email = "alex.chubaty@gmail.com",
+    role = c("aut"), comment = c(ORCID = "0000-0001-7146-8135")),
+    person("Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources Canada",
+    role = "cph")
+    )
+Depends:
+    R (>= 3.3.0)
+Imports:
+    backports,
+    data.table,
+    dplyr,
+    fasterize,
+    gdalUtils,
+    ggplot2,
+    grDevices,
+    magrittr,
+    methods,
+    parallel,
+    quickPlot,
+    raster,
+    RColorBrewer,
+    reproducible,
+    sp,
+    SpaDES.tools,
+    stats,
+    tools,
+    utils
+Suggests:
+    knitr,
+    roxygen2,
+    rmarkdown,
+    testthat
+Remotes:
+    PredictiveEcology/reproducible@development
+Encoding: UTF-8
+Language: en-CA
+License: GPL-3
+VignetteBuilder: knitr, rmarkdown
+BugReports: https://github.com/PredictiveEcology/LandR/issues
+ByteCompile: yes
+LazyData: true
+RoxygenNote: 6.1.1
