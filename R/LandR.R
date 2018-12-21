@@ -6,7 +6,13 @@ if (getRversion() >= "3.1.0") {
                            "temppixelGroup", "year"))
 }
 
-#' Add new cohorts
+#' Add cohorts to cohortData and pixelGroupMap, in one fn
+#'
+#' This is a wrapper for  \code{addPixelGroup}, \code{initiateNewCohort} and
+#' updates to \code{pixelGroupMap} via assignment to new \code{pixelIndex}
+#' values in \code{newCohortData}. By running these all together,
+#' there is less chance that they will diverge. There are some checks
+#' internally for consistency.
 #'
 #' Does the following:
 #' \enumerate{
@@ -29,13 +35,71 @@ if (getRversion() >= "3.1.0") {
 #' @param speciesEcoregion A speciesEcoregion table.
 #'
 #' @return
-#' A \code{data.table} with a new, \code{rbindlist}ed cohortData
+#' A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
+#' \code{newCohortData} inserted.
 #'
+#' @export
+#' @rdname addCohorts
+#' @importFrom data.table copy rbindlist set setkey
+#' @importFrom raster getValues
+#' @importFrom stats na.omit
+addCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion) {
+
+  maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
+
+  if (isTRUE(getOption("LandR.assertions"))) {
+    maxPixelGroupFromCohortData <- max(cohortData$pixelGroup)
+    if (!identical(maxPixelGroup, maxPixelGroupFromCohortData)) {
+
+      stop("The sim$pixelGroupMap and cohortData have unmatching pixelGroup. They must be matching. ",
+           "If this occurs, please contact the module developers")
+    }
+  }
+
+
+  # Assigns continguous pixelGroup number to each unique pixelGroup, starting from maxPixelGroup
+  newCohortData <- addPixelGroup(newCohortData, maxPixelGroup = maxPixelGroup)
+
+  # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
+  postFireSeroResprUniquePixels <- unique(newCohortData, by = c("pixelIndex"))
+  postFireSeroResprUniquePixels[, speciesCode := NULL]
+
+  pixelGroupMap[postFireSeroResprUniquePixels$pixelIndex] <- postFireSeroResprUniquePixels$pixelGroup
+
+  if (isTRUE(getOption("LandR.assertions"))) {
+    if (!isTRUE(all(postFireSeroResprUniquePixels$pixelGroup ==
+                  pixelGroupMap[postFireSeroResprUniquePixels$pixelIndex])))
+    stop("pixelGroupMap and newCohortData$pixelGroupMap don't match in addCohorts fn")
+  }
+  ## give biomass in pixels that have serotiny/resprouting
+  cohortData[, sumB := sum(B, na.rm = TRUE), by = pixelGroup]
+
+  ##########################################################
+  # Add new cohorts and rm missing cohorts (i.e., those pixelGroups that are gone)
+  ##########################################################
+  cohortData <- initiateNewCohort(newCohortData, cohortData, pixelGroupMap,
+                              time = time, speciesEcoregion = speciesEcoregion)
+
+  return(list(cohortData = cohortData,
+              pixelGroupMap = pixelGroupMap))
+
+}
+
+
+#' \code{initiateNewCohort} will calculate new values for \code{B}, add
+#' \code{age}, then \code{rbindlist} this with \code{cohortData}
+#'
+#' @inheritParams addCohorts
+#' @return
+#' \code{initiateNewCohort} returns A \code{data.table} with a new,
+#' \code{rbindlist}ed cohortData
+#'
+#' @rdname addCohorts
 #' @export
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
-addNewCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion) {
+initiateNewCohort <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion) {
   ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum biomass per ecoregion, join to new cohort data
   namesNCD <- names(newCohortData)
@@ -188,3 +252,6 @@ speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
   spEco <- speciesEcoregion[year <= currentTime]
   spEco[year == max(spEco$year)]
 }
+
+
+

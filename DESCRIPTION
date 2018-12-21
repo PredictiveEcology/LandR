@@ -58,3 +58,13 @@ BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
 RoxygenNote: 6.1.1
+Collate: 
+    'LANDIS-II-tables.R'
+    'LandR-package.R'
+    'LandR.R'
+    'chooseName.R'
+    'cleanLandWebStudyArea.R'
+    'maps.R'
+    'plotting.R'
+    'sppEquivalencies_CA.R'
+    'studyArea.R'
