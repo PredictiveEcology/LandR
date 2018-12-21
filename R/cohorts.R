@@ -119,8 +119,8 @@ initiateNewCohort <- function(newCohortData, cohortData, pixelGroupMap, time, sp
                                                   .(speciesCode, maxANPP, maxB, ecoregionGroup)],
                                speciesCode, ecoregionGroup)
 
-  # Note that after the following join, some cohorts will be lost due to lack of parameters in speciesEcoregion
-  #  These need to be modified in pixelGroupMap
+  # Note that after the following join, some cohorts will be lost due to lack of
+  #  parameters in speciesEcoregion. These need to be modified in pixelGroupMap.
   missingNewCohortData <- newCohortData[!specieseco_current, on = c("speciesCode", "ecoregionGroup")]
   specieseco_current[, maxB_eco := max(maxB), by = ecoregionGroup]
   newCohortData <- specieseco_current[newCohortData, on = c("speciesCode", "ecoregionGroup")]
