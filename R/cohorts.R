@@ -1,12 +1,11 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c(".", ":=", "age", "ecoregion", "ecoregionGroup",
-                           "lightProb", "maxANPP", "maxB", "maxB_eco", "pixelIndex",
-                           "shadetolerance", "siteShade", "speciesposition",
-                           "speciesGroup", "speciesInt", "sumB",
+                           "maxANPP", "maxB", "maxB_eco", "pixelIndex",
+                           "speciesposition", "speciesGroup", "speciesInt", "sumB",
                            "temppixelGroup", "year"))
 }
 
-#' Add cohorts to cohortData and pixelGroupMap, in one fn
+#' Add cohorts to \code{cohortData} and \code{pixelGroupMap}
 #'
 #' This is a wrapper for  \code{addPixelGroup}, \code{initiateNewCohort} and
 #' updates to \code{pixelGroupMap} via assignment to new \code{pixelIndex}
@@ -27,16 +26,16 @@ if (getRversion() >= "3.1.0") {
 #'   \code{cohortData}. Columns it must have: \code{pixelGroup}, \code{speciesCode},
 #'   \code{ecoregionGroup}
 #' @param cohortData a \code{data.table} with columns:
-#'   "pixelGroup", "ecoregionGroup", "speciesCode", "age", "B", "mortality", "aNPPAct", "sumB"
+#'   \code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
+#'   \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.
 #' @param pixelGroupMap Raster layer with pixel values equal to a pixel group number that
-#'   correspondsd exactly to ]\code{pixelGroup} column in \code{cohortData}
+#'   correspondsd exactly to \code{pixelGroup} column in \code{cohortData}
 #' @param time Current time e.g., time(sim). This is used to extract the correct
 #'   parameters in \code{speciesEcoregion} table if there are different values over time
-#' @param speciesEcoregion A speciesEcoregion table.
+#' @param speciesEcoregion A \code{speciesEcoregion} table.
 #'
-#' @return
-#' A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
-#' \code{newCohortData} inserted.
+#' @return A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
+#'         \code{newCohortData} inserted.
 #'
 #' @export
 #' @rdname addCohorts
@@ -44,7 +43,6 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
 addCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion) {
-
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
 
   if (isTRUE(getOption("LandR.assertions"))) {
@@ -57,7 +55,6 @@ addCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEc
     }
   }
 
-
   # Assigns continguous pixelGroup number to each unique pixelGroup, starting from maxPixelGroup
   newCohortData <- addPixelGroup(newCohortData, maxPixelGroup = maxPixelGroup)
 
@@ -69,8 +66,8 @@ addCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEc
 
   if (isTRUE(getOption("LandR.assertions"))) {
     if (!isTRUE(all(postFireSeroResprUniquePixels$pixelGroup ==
-                  pixelGroupMap[postFireSeroResprUniquePixels$pixelIndex])))
-    stop("pixelGroupMap and newCohortData$pixelGroupMap don't match in addCohorts fn")
+                    pixelGroupMap[postFireSeroResprUniquePixels$pixelIndex])))
+      stop("pixelGroupMap and newCohortData$pixelGroupMap don't match in addCohorts fn")
   }
   ## give biomass in pixels that have serotiny/resprouting
   cohortData[, sumB := sum(B, na.rm = TRUE), by = pixelGroup]
@@ -79,16 +76,17 @@ addCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEc
   # Add new cohorts and rm missing cohorts (i.e., those pixelGroups that are gone)
   ##########################################################
   cohortData <- initiateNewCohort(newCohortData, cohortData, pixelGroupMap,
-                              time = time, speciesEcoregion = speciesEcoregion)
+                                  time = time, speciesEcoregion = speciesEcoregion)
 
   return(list(cohortData = cohortData,
               pixelGroupMap = pixelGroupMap))
 
 }
 
-
-#' \code{initiateNewCohort} will calculate new values for \code{B}, add
-#' \code{age}, then \code{rbindlist} this with \code{cohortData}
+#' Initiate new cohort
+#'
+#' Calculate new values for \code{B}, add \code{age}, then \code{rbindlist} this
+#' with \code{cohortData}.
 #'
 #' @inheritParams addCohorts
 #' @return
@@ -144,8 +142,6 @@ initiateNewCohort <- function(newCohortData, cohortData, pixelGroupMap, time, sp
   return(cohortData)
 }
 
-
-
 #' Remove missing cohorts from cohortData based on pixelGroupMap
 #'
 #'
@@ -191,21 +187,29 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap, firePixelTable) {
   cohortData
 }
 
-#' Assign light probability
+#' Test that \code{pixelGroupMap} and \code{cohortData} match
 #'
-#' @param sufficientLight TODO: description needed
-#' @param newCohortData  TODO: description needed
-#'
-#' @return  TODO: description needed
+#' @inheritParams addCohorts
+#' @param sim If the simList is included, then the browser() call will be more useful
+#' @param maxExpectedNumDiverge A numeric, length 1, indicating by how many they
+#'   can diverge. Default 1.
+#' @note
+#' TODO
 #'
 #' @export
-assignLightProb <- function(sufficientLight, newCohortData) {
-  ## for each line, get the survival probability from sufficientLight table
-  ## note that sufficentLight is a table of survival probs for each tolerance level (row) by and shade level (column)
-  ## siteShade + 2 is necessary to skip the first column
-  newCohortData[ , lightProb := sufficientLight[cbind(shadetolerance, siteShade + 2)]]
+testCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1) {
+  a <- sort(unique(na.omit(pixelGroupMap[])))
+  b <- sort(unique(cohortData$pixelGroup))
+  test1 <- sum(!a %in% b)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
+  test2 <- sum(!b %in% a)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
+  if (test1 > maxExpectedNumDiverge || test2 > maxExpectedNumDiverge) {
+    message("test1 is ", test1)
+    message("test2 is ", test2)
+    warning("The sim$pixelGroupMap and cohortData have unmatching pixelGroup. They must be matching. ",
+            "If this occurs, please contact the module developers")
+    browser()
+  }
 }
-
 
 #' Create the correct string for pixelGroups
 #'
@@ -241,44 +245,4 @@ addPixelGroup <- function(pixelCohortData, maxPixelGroup) {
   pixelCohortData[ , pixelGroup := makePixelGroups(maxPixelGroup, ecoregionGroup, speciesGroup)]
   pixelCohortData[, c("speciesInt", "speciesGroup") := NULL]
   pixelCohortData
-}
-
-#' Pull out the values from speciesEcoregion table for current time
-#'
-#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
-#' @param currentTime The current time e.g., \code{time(sim)}
-#'
-#' @note
-#' TODO
-#'
-#' @export
-speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
-  spEco <- speciesEcoregion[year <= currentTime]
-  spEco[year == max(spEco$year)]
-}
-
-
-
-#' A test that pixelGroupMap and cohortData match
-#'
-#' @inheritParams addCohorts
-#' @param sim If the simList is included, then the browser() call will be more useful
-#' @param maxExpectedNumDiverge A numeric, length 1, indicating by how many they
-#'   can diverge. Default 1.
-#' @note
-#' TODO
-#'
-#' @export
-testCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1) {
-  a <- sort(unique(na.omit(pixelGroupMap[])))
-  b <- sort(unique(cohortData$pixelGroup))
-  test1 <- sum(!a %in% b)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
-  test2 <- sum(!b %in% a)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
-  if (test1 > maxExpectedNumDiverge || test2 > maxExpectedNumDiverge) {
-    message("test1 is ", test1)
-    message("test2 is ", test2)
-    warning("The sim$pixelGroupMap and cohortData have unmatching pixelGroup. They must be matching. ",
-            "If this occurs, please contact the module developers")
-    browser()
-  }
 }
