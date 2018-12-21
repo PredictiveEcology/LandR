@@ -4,7 +4,7 @@
 \alias{sppColors}
 \title{Create species color vector from a sppEquiv table}
 \usage{
-sppColors(sppEquiv, sppEquivCol, newVals, palette)
+sppColors(sppEquiv, sppEquivCol, newVals = NULL, palette)
 }
 \arguments{
 \item{sppEquiv}{A species equivalency table, e.g., \code{data("sppEquivalencies_CA")}.}

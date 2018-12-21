@@ -130,7 +130,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 #' @export
 #' @importFrom RColorBrewer brewer.pal brewer.pal.info
 #' @importFrom stats na.omit
-sppColors <- function(sppEquiv, sppEquivCol, newVals, palette) {
+sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
   sppColorNames <- c(na.omit(unique(sppEquiv[[sppEquivCol]])), newVals)
 
   sppColors <- NULL
