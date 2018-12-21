@@ -36,6 +36,7 @@ Imports:
     RColorBrewer,
     reproducible,
     sp,
+    SpaDES.core,
     SpaDES.tools,
     stats,
     tools,
