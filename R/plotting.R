@@ -25,9 +25,11 @@
 #' @importFrom data.table data.table setkeyv
 #' @importFrom ggplot2 aes element_blank element_text geom_bar ggplot scale_fill_manual theme
 #' @importFrom ggplot2 guides guide_legend guide_legend scale_x_discrete
+#' @importFrom pemisc factorValues2
 #' @importFrom quickPlot Plot setColors<-
 #' @importFrom raster factorValues maxValue minValue
 #' @importFrom reproducible Cache
+#' @importFrom stats na.omit
 plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
                     sppEquiv, sppEquivCol, colors, title = "Leading vegetation types") {
 
@@ -126,6 +128,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 #'
 #' @export
 #' @importFrom RColorBrewer brewer.pal brewer.pal.info
+#' @importFrom stats na.omit
 sppColors <- function(sppEquiv, sppEquivCol, newVals, palette) {
   sppColorNames <- c(na.omit(unique(sppEquiv[[sppEquivCol]])), newVals)
 

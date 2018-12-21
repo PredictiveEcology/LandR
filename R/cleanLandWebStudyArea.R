@@ -5,8 +5,8 @@
 #'               that will be part of the cleanup of polygon. Anything below
 #'               this will be \code{NA}.
 #' @export
+#' @importFrom pemisc createPrjFile
 #' @importFrom raster shapefile
-#'
 .cleanLandWebStudyArea <- function(poly, minFRI = 40) {
   if (is.character(poly)) {
     createPrjFile(poly)
@@ -28,4 +28,30 @@
   poly@data <- poly@data[, !(names(poly) %in% "ECODISTRIC")]
 
   poly
+}
+
+#' Do an arbitrary set of operations on a polygon
+#'
+#' @param poly A polygon object, or a character string identifying the shapefile
+#'             path to load, and clean.
+#' @param fn   A function identifying the type of cleaning to do.
+#' @param type If fn is not known, an character string can be specified to
+#'             identify which \code{fn} to use.
+#'             This MUST be a known type for this function.
+#' @param ...  Passed to \code{fn}
+#'
+#' @export
+#' @importFrom stats na.omit
+polygonClean <- function(poly, fn = NULL, type = NULL, ...) {
+  if (is.null(fn)) {
+    if (is.null(type)) {
+      stop("Either fn or type must be specified")
+    } else {
+      if (length(na.omit(pmatch(c("ANC", "DMI", "LandWeb", "LP", "testing", "tolko"), type))))
+        fn <- .cleanLandWebStudyArea
+      else
+        stop("Unknown type")
+    }
+  }
+  poly <- fn(poly, ...)
 }

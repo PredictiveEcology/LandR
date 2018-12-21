@@ -34,7 +34,7 @@ if (getRversion() >= "3.1.0") {
 #' @export
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
-#'
+#' @importFrom stats na.omit
 addNewCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion) {
   ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum biomass per ecoregion, join to new cohort data
@@ -95,7 +95,7 @@ addNewCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, specie
 #' @export
 #' @importFrom data.table rbindlist set setkey
 #' @importFrom raster getValues
-#'
+#' @importFrom stats na.omit
 rmMissingCohorts <- function(cohortData, pixelGroupMap, firePixelTable) {
   pgmVals <- na.omit(getValues(pixelGroupMap))
   pgsStillInCDGoneFromPGM <- setdiff(cohortData$pixelGroup, pgmVals)
