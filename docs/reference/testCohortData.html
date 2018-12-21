@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Pull out the values from speciesEcoregion table for current time — speciesEcoregionLatestYear • LandR</title>
+<title>Test that <code>pixelGroupMap</code> and <code>cohortData</code> match — testCohortData • LandR</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,9 @@
 
 
 
-<meta property="og:title" content="Pull out the values from speciesEcoregion table for current time — speciesEcoregionLatestYear" />
+<meta property="og:title" content="Test that <code>pixelGroupMap</code> and <code>cohortData</code> match — testCohortData" />
 
-<meta property="og:description" content="Pull out the values from speciesEcoregion table for current time" />
+<meta property="og:description" content="Test that pixelGroupMap and cohortData match" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -112,29 +112,41 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Pull out the values from speciesEcoregion table for current time</h1>
-    <small class="dont-index">Source: <a href='https://github.com/PredictiveEcology/LandR/blob/master/R/misc.R'><code>R/misc.R</code></a></small>
-    <div class="hidden name"><code>speciesEcoregionLatestYear.Rd</code></div>
+    <h1>Test that <code>pixelGroupMap</code> and <code>cohortData</code> match</h1>
+    <small class="dont-index">Source: <a href='https://github.com/PredictiveEcology/LandR/blob/master/R/cohorts.R'><code>R/cohorts.R</code></a></small>
+    <div class="hidden name"><code>testCohortData.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Pull out the values from speciesEcoregion table for current time</p>
+    <p>Test that <code>pixelGroupMap</code> and <code>cohortData</code> match</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>speciesEcoregionLatestYear</span>(<span class='no'>speciesEcoregion</span>, <span class='no'>currentTime</span>)</pre>
+    <pre class="usage"><span class='fu'>testCohortData</span>(<span class='no'>cohortData</span>, <span class='no'>pixelGroupMap</span>, <span class='no'>sim</span>, <span class='kw'>maxExpectedNumDiverge</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>speciesEcoregion</th>
-      <td><p>A <code>data.table</code> with <code>speciesEcoregion</code> values</p></td>
+      <th>cohortData</th>
+      <td><p>a <code>data.table</code> with columns:
+<code>pixelGroup</code>, <code>ecoregionGroup</code>, <code>speciesCode</code>, <code>age</code>,
+<code>B</code>, <code>mortality</code>, <code>aNPPAct</code>, and <code>sumB</code>.</p></td>
     </tr>
     <tr>
-      <th>currentTime</th>
-      <td><p>The current time e.g., <code><a href='https://www.rdocumentation.org/packages/stats/topics/time'>time(sim)</a></code></p></td>
+      <th>pixelGroupMap</th>
+      <td><p>Raster layer with pixel values equal to a pixel group number that
+correspondsd exactly to <code>pixelGroup</code> column in <code>cohortData</code></p></td>
+    </tr>
+    <tr>
+      <th>sim</th>
+      <td><p>If the simList is included, then the browser() call will be more useful</p></td>
+    </tr>
+    <tr>
+      <th>maxExpectedNumDiverge</th>
+      <td><p>A numeric, length 1, indicating by how many they
+can diverge. Default 1.</p></td>
     </tr>
     </table>
     

@@ -7,7 +7,7 @@
     <loc>http://landr.predictiveecology.org/reference/LandR-package.html</loc>
   </url>
   <url>
-    <loc>http://landr.predictiveecology.org/reference/addNewCohorts.html</loc>
+    <loc>http://landr.predictiveecology.org/reference/addCohorts.html</loc>
   </url>
   <url>
     <loc>http://landr.predictiveecology.org/reference/addPixelGroup.html</loc>
@@ -83,6 +83,9 @@
   </url>
   <url>
     <loc>http://landr.predictiveecology.org/reference/sumRastersBySpecies.html</loc>
+  </url>
+  <url>
+    <loc>http://landr.predictiveecology.org/reference/testCohortData.html</loc>
   </url>
   <url>
     <loc>http://landr.predictiveecology.org/reference/vegTypeMapGenerator.html</loc>
