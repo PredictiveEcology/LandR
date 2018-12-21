@@ -49,10 +49,11 @@ addCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEc
 
   if (isTRUE(getOption("LandR.assertions"))) {
     maxPixelGroupFromCohortData <- max(cohortData$pixelGroup)
-    if (!identical(maxPixelGroup, maxPixelGroupFromCohortData)) {
-
-      stop("The sim$pixelGroupMap and cohortData have unmatching pixelGroup. They must be matching. ",
-           "If this occurs, please contact the module developers")
+    test1 <- (!identical(maxPixelGroup, maxPixelGroupFromCohortData))
+    if (test1) {
+      warning("The sim$pixelGroupMap and cohortData have unmatching pixelGroup. They must be matching. ",
+              "If this occurs, please contact the module developers")
+      browser()
     }
   }
 
@@ -165,23 +166,26 @@ initiateNewCohort <- function(newCohortData, cohortData, pixelGroupMap, time, sp
 #' @importFrom stats na.omit
 rmMissingCohorts <- function(cohortData, pixelGroupMap, firePixelTable) {
   pgmVals <- na.omit(getValues(pixelGroupMap))
-  pgsStillInCDGoneFromPGM <- setdiff(cohortData$pixelGroup, pgmVals)
+  pgsStillInCDGoneFromPGM <- setdiff(unique(cohortData$pixelGroup), unique(pgmVals))
 
   # REMOVE lines in cohortData that are no longer in the pixelGroupMap
   cohortData <- cohortData[!pixelGroup %in% pgsStillInCDGoneFromPGM]
 
   if (isTRUE(getOption("LandR.assertions"))) {
-    # All pixels in pgsStillInCDGoneFromPGM should have been touched by a fire
-    test1 <- isTRUE(all(pgsStillInCDGoneFromPGM %in% na.omit(firePixelTable$pixelGroup)))
-
-    # There should still be some burned pixel groups that are still on the map, i.e., only some pixels from a PG got burned
-    burnedByPGStillOnMap <- setdiff(na.omit(firePixelTable$pixelGroup), pgsStillInCDGoneFromPGM)
-    test2 <- isTRUE(all(burnedByPGStillOnMap %in% pgmVals))
-
-    test3 <- length(setdiff(cohortData$pixelGroup, pgmVals)) == 0
-
-    if (!isTRUE(all(test1, test2, test3)))
-      stop("cohortData and pixelGroupMap don't match")
+    testCohortData(cohortData, pixelGroupMap)
+    # # All pixels in pgsStillInCDGoneFromPGM should have been touched by a fire
+    # test1 <- isTRUE(all(pgsStillInCDGoneFromPGM %in% na.omit(firePixelTable$pixelGroup)))
+    #
+    # # There should still be some burned pixel groups that are still on the map, i.e., only some pixels from a PG got burned
+    # burnedByPGStillOnMap <- setdiff(na.omit(firePixelTable$pixelGroup), pgsStillInCDGoneFromPGM)
+    # test2 <- isTRUE(all(burnedByPGStillOnMap %in% pgmVals))
+    #
+    # test3 <- length(setdiff(cohortData$pixelGroup, pgmVals)) == 0
+    #
+    # if (!isTRUE(all(test1, test2, test3))) {
+    #   warning("cohortData and pixelGroupMap don't match")
+    #   browser()
+    # }
   }
 
   cohortData
@@ -255,3 +259,26 @@ speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
 
 
 
+#' A test that pixelGroupMap and cohortData match
+#'
+#' @inheritParams addCohorts
+#' @param sim If the simList is included, then the browser() call will be more useful
+#' @param maxExpectedNumDiverge A numeric, length 1, indicating by how many they
+#'   can diverge. Default 1.
+#' @note
+#' TODO
+#'
+#' @export
+testCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1) {
+  a <- sort(unique(na.omit(pixelGroupMap[])))
+  b <- sort(unique(cohortData$pixelGroup))
+  test1 <- sum(!a %in% b)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
+  test2 <- sum(!b %in% a)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
+  if (test1 > maxExpectedNumDiverge || test2 > maxExpectedNumDiverge) {
+    message("test1 is ", test1)
+    message("test2 is ", test2)
+    warning("The sim$pixelGroupMap and cohortData have unmatching pixelGroup. They must be matching. ",
+            "If this occurs, please contact the module developers")
+    browser()
+  }
+}
