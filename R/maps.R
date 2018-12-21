@@ -158,6 +158,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #' @author Eliot McIntire
 #' @export
 #' @importFrom data.table data.table setkey
+#' @importFrom pemisc factorValues2
 #' @importFrom raster getValues projection projection<- setValues
 #' @importFrom SpaDES.tools rasterizeReduced
 vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
@@ -289,6 +290,7 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
 #' @importFrom reproducible Cache .prefix preProcess
+#' @importFrom tools file_path_sans_ext
 #' @importFrom utils untar
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {

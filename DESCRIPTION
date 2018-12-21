@@ -31,6 +31,7 @@ Imports:
     magrittr,
     methods,
     parallel,
+    pemisc,
     quickPlot,
     raster,
     RColorBrewer,
@@ -47,6 +48,7 @@ Suggests:
     rmarkdown,
     testthat
 Remotes:
+    PredictiveEcology/pemisc@development,
     PredictiveEcology/reproducible@development
 Encoding: UTF-8
 Language: en-CA
