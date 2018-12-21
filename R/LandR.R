@@ -38,11 +38,14 @@ if (getRversion() >= "3.1.0") {
 addNewCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion) {
   ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum biomass per ecoregion, join to new cohort data
-  if (isTRUE(getOption("LandR.assertions"))) {
-    ncd <- copy(newCohortData)
-    CD <- copy(cohortData)
+  namesNCD <- names(newCohortData)
+  if (!isTRUE("pixelGroup" %in% namesNCD)) {
+    if (isTRUE("pixelIndex" %in% namesNCD)) {
+      newCohortData[, pixelGroup := getValues(pixelGroupMap)[pixelIndex]]
+    } else {
+      stop("newCohortData must have either pixelIndex or pixelGroup")
+    }
   }
-
   # This removes the duplicated pixels within pixelGroup, i.e., the reason we want pixelGroups
   newCohortData <- unique(newCohortData, by = c("pixelGroup", "speciesCode"))
 
@@ -72,7 +75,7 @@ addNewCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, specie
                                      mortality = 0, aNPPAct = 0, sumB = 0)]
 
   # unique(cohortData, by = c("pixelGroup", "speciesCode", "age"))
-  cohortData <- rbindlist(list(cohortData, newCohortData))
+  cohortData <- rbindlist(list(cohortData, newCohortData), use.names = TRUE)
   return(cohortData)
 }
 
