@@ -1,7 +1,7 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c(".", ":=", "B", "HQ", "leading", "LQ", "mixed",
                            "pixelGroup", "speciesCode", "speciesGroupB",
-                           "speciesProportion","SPP", "totalB"))
+                           "speciesProportion", "SPP", "totalB"))
 }
 
 #' Define flammability map
@@ -126,8 +126,8 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
   }
 
   a <- speciesStack[]
-  nas <- is.na(a[,1])
-  maxes <- apply(a[!nas,], 1, function(x) {
+  nas <- is.na(a[, 1])
+  maxes <- apply(a[!nas, ], 1, function(x) {
     whMax <- which(x == max(x, na.rm = TRUE))
     if (length(whMax) > 1) {
       whMax <- sample(whMax, size = 1)
@@ -163,8 +163,8 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #' @importFrom SpaDES.tools rasterizeReduced
 vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
                                 colors, unitTest = getOption("pemisc.unitTest", FALSE)) {
-  # shortcohortdata <- setkey(cohortdata, speciesCode)[setkey(species[, .(speciesCode, speciesGroup)],
-  #                                                           speciesCode), nomatch = 0]
+  # shortcohortdata <- setkey(cohortdata, speciesCode)[
+  #   setkey(species[, .(speciesCode, speciesGroup)], speciesCode), nomatch = 0]
   pixelGroupData <- cohortdata[, list(totalB = sum(B, na.rm = TRUE),
                                       speciesCode, B), by = pixelGroup]
 
@@ -209,8 +209,8 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   #   species[species == "Pice_gla", speciesGroup := "PICE_GLA"]
   #   species[species == "Abie_sp", speciesGroup := "ABIE"]
   #
-  #   shortcohortdata <- setkey(cohortdata, speciesCode)[setkey(species[, .(speciesCode, speciesGroup)],
-  #                                                             speciesCode), nomatch = 0]
+  #   shortcohortdata <- setkey(cohortdata, speciesCode)[
+  #     setkey(species[, .(speciesCode, speciesGroup)], speciesCode), nomatch = 0]
   #   shortcohortdata[, totalB := sum(B, na.rm = TRUE), by = pixelGroup]
   #   shortcohortdata <- shortcohortdata[, .(speciesGroupB = sum(B, na.rm = TRUE),
   #                                          totalB = mean(totalB, na.rm = TRUE)),
@@ -296,7 +296,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   dots <- list(...)
 
-  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]),]
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   sppMerge <- unique(sppEquiv[[sppEquivCol]][duplicated(sppEquiv[[sppEquivCol]])])
 
@@ -324,12 +324,14 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
       sppNameVector <- allSpp
 
   ## Make sure spp names are compatible with kNN names
-  kNNnames <- as.character(equivalentName(sppNameVector, sppEquiv, column = knnNamesCol, multi = TRUE))
+  kNNnames <- as.character(equivalentName(sppNameVector, sppEquiv,
+                                          column = knnNamesCol, multi = TRUE))
 
   ## if there are NA's, that means some species can't be found in kNN data base
   if (any(is.na(kNNnames))) {
     warning(paste0("Can't find ", sppNameVector[is.na(kNNnames)], " in `sppEquiv$",
-                   knnNamesCol, ".\n Will use remaining matching species, but check if this is correct"))
+                   knnNamesCol, ".\n",
+                   "Will use remaining matching species, but check if this is correct."))
     ## select only available species
     kNNnames <- kNNnames[!is.na(kNNnames)]
     sppNameVector <- sppNameVector[!is.na(kNNnames)]
@@ -361,7 +363,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                     archive2 = paste0("NFI_MODIS250m_kNN_Species_", kNNnames, "_v0.zip"))
   archives <- split(archives, archives[, "archive2"])
 
-  if (!all(file_path_sans_ext(names(archives))==file_path_sans_ext(targetFiles)))
+  if (!all(file_path_sans_ext(names(archives)) == file_path_sans_ext(targetFiles)))
     stop("Something is wrong. File a bug report re: loadkNNSpeciesLayers and archive ordering")
 
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
@@ -394,7 +396,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   nameChangeNA <- is.na(nameChanges)
   names(speciesLayers)[!nameChangeNA] <- nameChanges[!nameChangeNA]
 
-  nameChangesNonMerged <- equivalentName(names(speciesLayers)[nameChangeNA], sppEquiv, column = sppEquivCol)
+  nameChangesNonMerged <- equivalentName(names(speciesLayers)[nameChangeNA],
+                                         sppEquiv, column = sppEquivCol)
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
 
   ## remove layers that have less data than thresh (i.e. spp absent in study area)

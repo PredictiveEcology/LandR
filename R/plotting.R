@@ -58,7 +58,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   }
 
   ## the ones we want
-  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]),]
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   facLevels <- raster::levels(vtm)[[1]]
   vtmTypes <- as.character(factorValues2(vtm, facLevels$ID, att = "Species"))
   vtmCols <- colors[match(vtmTypes, names(colors))]
@@ -75,7 +75,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   df <- df[!is.na(df$species)]
 
   speciesEN <- equivalentName(df$species, sppEquiv, "EN_generic_short")
-  if (all(na.omit(speciesEN) %in% colorsEN) ){
+  if (all(na.omit(speciesEN) %in% colorsEN)){
     whMixed <- which(df$species == mixedString)
 
     df$species <- speciesEN
@@ -107,7 +107,8 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 
   ## plot inital types raster
   levels(vtm) <- facLevels
-  setColors(vtm, length(vtmTypes)) <- vtmCols # setColors for factors must have an entry for each row in raster::levels
+  setColors(vtm, length(vtmTypes)) <- vtmCols ## setColors for factors must have an
+                                              ## entry for each row in raster::levels
 
   Plot(vtm, title = title)
 }

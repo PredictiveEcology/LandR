@@ -49,8 +49,9 @@ addCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEc
     maxPixelGroupFromCohortData <- max(cohortData$pixelGroup)
     test1 <- (!identical(maxPixelGroup, maxPixelGroupFromCohortData))
     if (test1) {
-      warning("The sim$pixelGroupMap and cohortData have unmatching pixelGroup. They must be matching. ",
-              "If this occurs, please contact the module developers")
+      warning("The sim$pixelGroupMap and cohortData have unmatching pixelGroup.",
+              " They must be matching.",
+              " If this occurs, please contact the module developers")
       browser()
     }
   }
@@ -62,7 +63,7 @@ addCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEc
   postFireSeroResprUniquePixels <- unique(newCohortData, by = c("pixelIndex"))
   postFireSeroResprUniquePixels[, speciesCode := NULL]
 
-  pixelGroupMap[postFireSeroResprUniquePixels$pixelIndex] <- postFireSeroResprUniquePixels$pixelGroup
+  pixelGroupMap[postFireSeroResprUniquePixels$pixelIndex] <- postFireSeroResprUniquePixels$pixelGroup # nolint
 
   if (isTRUE(getOption("LandR.assertions"))) {
     if (!isTRUE(all(postFireSeroResprUniquePixels$pixelGroup ==
