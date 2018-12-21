@@ -163,7 +163,6 @@ makePixelGroups <- function(maxPixelGroup, ecoregionGroup, speciesGroup) {
 #' @importFrom data.table setkey
 #' @importFrom SpaDES.core paddedFloatToChar
 addPixelGroup <- function(pixelCohortData, maxPixelGroup) {
-
   pixelCohortData[, speciesInt := as.integer(speciesCode)]
   pixelCohortData[, speciesGroup := sum(2^(unique(speciesInt)-1)),  by = "pixelIndex"]
   pixelCohortData[, speciesGroup := paddedFloatToChar(speciesGroup, padL = max(nchar(as.character(speciesGroup))))]
@@ -171,4 +170,18 @@ addPixelGroup <- function(pixelCohortData, maxPixelGroup) {
   pixelCohortData[ , pixelGroup := makePixelGroups(maxPixelGroup, ecoregionGroup, speciesGroup)]
   pixelCohortData[, c("speciesInt", "speciesGroup") := NULL]
   pixelCohortData
+}
+
+#' Pull out the values from speciesEcoregion table for current time
+#'
+#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
+#' @param currentTime The current time e.g., \code{time(sim)}
+#'
+#' @note
+#' TODO
+#'
+#' @export
+speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
+  spEco <- speciesEcoregion[year <= currentTime]
+  spEco[year == max(spEco$year)]
 }
