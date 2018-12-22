@@ -47,7 +47,7 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
 updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion,
-                       firePixelTable = NULL, successionTimestep) {
+                             firePixelTable = NULL, successionTimestep) {
 
   if (!is.null(firePixelTable)) {
     pixelGroupMap[firePixelTable$pixelIndex] <- 0
@@ -74,8 +74,8 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
     newCohortData[, pixelGroup2 := NULL]
   } else {
 
-  # Deal with the non-zeros on pixelGroupMap --> those pixels regenerated in the understory
-  #if (!all(zeroOnPixelGroupMap)) {
+    # Deal with the non-zeros on pixelGroupMap --> those pixels regenerated in the understory
+    #if (!all(zeroOnPixelGroupMap)) {
     allNewPixelGroups <- FALSE
 
     #ncdOrig <- copy(newCohortData)
@@ -90,8 +90,8 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
     cohorts <- rbindlist(list(cdLong, newCohortData), use.names = TRUE, fill = TRUE)
 
     cohorts[, pixelGroup := addPixelGroup(.SD, maxPixelGroup = 0,
-                                           columns = c("ecoregionGroup", "speciesCode", "age", "B"),
-                                           successionTimestep = successionTimestep)]
+                                          columns = c("ecoregionGroup", "speciesCode", "age", "B"),
+                                          successionTimestep = successionTimestep)]
 
     newCohortData <- cohorts # a pointer -- should be dealt with better
   }
@@ -110,7 +110,7 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
   if (allNewPixelGroups) {
     # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
     pixelsToChange <- unique(newCohortData[, c("pixelIndex", "pixelGroup")],
-                                            by = c("pixelIndex"))
+                             by = c("pixelIndex"))
   } else {
     browser()
   }
@@ -120,8 +120,8 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
 
   if (isTRUE(getOption("LandR.assertions"))) {
     if (!isTRUE(all(pixelsToChange$pixelGroup ==
-                  pixelGroupMap[pixelsToChange$pixelIndex])))
-    stop("pixelGroupMap and newCohortData$pixelGroupMap don't match in updateCohortData fn")
+                    pixelGroupMap[pixelsToChange$pixelIndex])))
+      stop("pixelGroupMap and newCohortData$pixelGroupMap don't match in updateCohortData fn")
   }
 
   ## give biomass in pixels that have serotiny/resprouting
@@ -131,7 +131,7 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
   # Add new cohorts and rm missing cohorts (i.e., those pixelGroups that are gone)
   ##########################################################
   cohortData <- .initiateNewCohorts(newCohortData, cohortData, pixelGroupMap,
-                              time = time, speciesEcoregion = speciesEcoregion)
+                                    time = time, speciesEcoregion = speciesEcoregion)
 
   cohortData <- rmMissingCohorts(cohortData, pixelGroupMap, firePixelTable)
 
@@ -271,7 +271,7 @@ assignLightProb <- function(sufficientLight, newCohortData) {
 #' @return  TODO: description needed
 #'
 .makePixelGroups <- function(maxPixelGroup, ecoregionGroup, speciesGroup,
-                            columns = c("ecoregionGroup", "speciesGroup", "age")) {
+                             columns = c("ecoregionGroup", "speciesGroup", "age")) {
   as.integer(maxPixelGroup) +
     as.integer(factor(paste(ecoregionGroup, speciesGroup, sep = "_")))
 }
@@ -301,7 +301,7 @@ addPixelGroup <- function(pixelCohortData, maxPixelGroup, columns = c("ecoregion
   if (!all(columns == columnsOrig))
     message("Creating pixelGroup values, but not using all columns requested. Only using, ",
             paste(columns, collapse = ", "), " instead of ", paste(columnsOrig, collapse = ", "))
-    # Sort them so that Pice_mar_Pinu_sp is the same as Pinu_sp_Pice_mar
+  # Sort them so that Pice_mar_Pinu_sp is the same as Pinu_sp_Pice_mar
 
 
   pcd <- copy(pixelCohortData)
@@ -371,11 +371,11 @@ addPixelGroup <- function(pixelCohortData, maxPixelGroup, columns = c("ecoregion
       setkey(pcd, "pixelIndex")
 
       a <- factor(pcd$newPixelGroup2,
-                             labels = seq(unique(pcd$newPixelGroup2)),
-                             levels = unique(pcd$newPixelGroup2))
+                  labels = seq(unique(pcd$newPixelGroup2)),
+                  levels = unique(pcd$newPixelGroup2))
       b <- factor(pcd2$newPixelGroup2,
-                             labels = seq(unique(pcd2$newPixelGroup2)),
-                             levels = unique(pcd2$newPixelGroup2))
+                  labels = seq(unique(pcd2$newPixelGroup2)),
+                  levels = unique(pcd2$newPixelGroup2))
       test2 <-  (!identical(a, b))
 
       pcd <- unique(pcd[, c("pixelIndex", "newPixelGroup2")], by = "pixelIndex")[pcd3, on = "pixelIndex"]
