@@ -54,8 +54,6 @@ if (getRversion() >= "3.1.0") {
 updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion,
                              firePixelTable = NULL, successionTimestep) {
 
-  ncd1 <- copy(newCohortData)
-  cd1 <- copy(cohortData)
   if (!is.null(firePixelTable)) {
     pixelGroupMap[firePixelTable$pixelIndex] <- 0
   }
