@@ -85,15 +85,40 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
                                        pixelGroup = pixelGroupMap[][pixelIndex])
     cdLong <- cohortDataPixelIndex[cohortData,#[, c("speciesCode", "ecoregionGroup", "pixelGroup")],
                                    on = "pixelGroup", allow.cartesian = TRUE]
-    cdLong[, pixelGroup := NULL]
-    if ("pixelGroup" %in% colnames(newCohortData))
-      newCohortData[, pixelGroup := NULL]
+    #cdLong[, pixelGroup := NULL]
+    #if ("pixelGroup" %in% colnames(newCohortData))
+      #newCohortData[, pixelGroup := NULL]
     cohorts <- rbindlist(list(cdLong, newCohortData), use.names = TRUE, fill = TRUE)
 
     cohorts[, pixelGroup := addPixelGroup(.SD, maxPixelGroup = 0,
                                           columns = c("ecoregionGroup", "speciesCode", "age", "B"),
                                           successionTimestep = successionTimestep)]
 
+    if (isTRUE(getOption("LandR.assertions"))) {
+
+      uniquePixelsInCohorts <- pixelGroupMap[unique(cohorts$pixelIndex)]
+      pixelsOnMap <- sum(!is.na(pixelGroupMap[]), na.rm = TRUE)
+      lenUniquePixelsInCohorts <- length(unique(cohorts$pixelIndex))
+      lenBurnedPixels <- sum(pixelGroupMap[] == 0, na.rm = TRUE) # 30927
+      pixelsRegeneratedOnZeros <- sum(uniquePixelsInCohorts == 0)
+      b <- pixelGroupMap[][-unique(cohorts$pixelIndex)]
+      tableB <- table(b) # 25166
+
+      test2 <- identical(pixelsOnMap -
+                  (pixelsRegeneratedOnZeros + # 5761
+                     tableB), # 25166
+                lenUniquePixelsInCohorts)
+
+
+
+      uniqueB <- unique(b)
+      test1 <- all(uniqueB %in% c(NA, 0))
+      if (!test1 | !test2) {
+        message("Every value on pixelGroupMap greater than 0 must have a pixelIndex in cohorts.",
+                " This test is failing, i.e., there are some pixelGroupMaps have pixelGroups, and aren't in cohorts.")
+        browser()
+      }
+    }
     newCohortData <- cohorts # a pointer -- should be dealt with better
   }
 
