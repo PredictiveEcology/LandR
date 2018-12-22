@@ -18,7 +18,8 @@ This will be used in conjunction
 with cohortData and pixelGroupMap to ensure that everything matches correctly.}
 }
 \value{
-A \code{data.table} with a new, cohortData
+A \code{list} with 2 \code{data.table} objects, \code{cohortData} and \code{pixelGroupMap},
+each updated based on missing pixelGroups in the other.
 }
 \description{
 Remove missing cohorts from cohortData based on pixelGroupMap

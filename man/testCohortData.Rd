@@ -2,9 +2,10 @@
 % Please edit documentation in R/cohorts.R
 \name{testCohortData}
 \alias{testCohortData}
-\title{Test that \code{pixelGroupMap} and \code{cohortData} match}
+\title{A test that pixelGroupMap and cohortData match}
 \usage{
-testCohortData(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1)
+testCohortData(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1,
+  message = "")
 }
 \arguments{
 \item{cohortData}{a \code{data.table} with columns:
@@ -18,9 +19,12 @@ correspondsd exactly to \code{pixelGroup} column in \code{cohortData}}
 
 \item{maxExpectedNumDiverge}{A numeric, length 1, indicating by how many they
 can diverge. Default 1.}
+
+\item{message}{An optional message to print. This may help identify where this function
+was called.}
 }
 \description{
-Test that \code{pixelGroupMap} and \code{cohortData} match
+A test that pixelGroupMap and cohortData match
 }
 \note{
 TODO
