@@ -4,17 +4,22 @@
 \alias{addPixelGroup}
 \title{Add the correct \code{pixelGroups} to a \code{pixelCohortData} object}
 \usage{
-addPixelGroup(pixelCohortData, maxPixelGroup)
+addPixelGroup(pixelCohortData, maxPixelGroup,
+  columns = c("ecoregionGroup", "speciesCode", "age"),
+  successionTimestep)
 }
 \arguments{
 \item{pixelCohortData}{# pixel groups are groups of identical pixels based
 on \code{speciesGroup} x \code{Age} and \code{ecoregionGroup}.}
 
 \item{maxPixelGroup}{A length 1 numeric/integer indicating the current maximum pixelGroup value}
+
+\item{columns}{A character vector of column names to use as part of the generation of unique
+combinations of features. Default is \code{c("ecoregionGroup", "speciesCode", "age")}}
+}
+\value{
+Returns original \code{pixelCohortData} with 1 new column, \code{pixelGroup2}
 }
 \description{
 Add the correct \code{pixelGroups} to a \code{pixelCohortData} object
-}
-\note{
-This should not (yet) be used where age is an issue.
 }

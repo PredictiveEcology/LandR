@@ -8,7 +8,7 @@ if (getRversion() >= "3.1.0") {
 
 #' Add cohorts to cohortData and pixelGroupMap, in one fn
 #'
-#' This is a wrapper for  \code{addPixelGroup}, \code{initiateNewCohort} and
+#' This is a wrapper for  \code{addPixelGroup}, \code{.initiateNewCohorts} and
 #' updates to \code{pixelGroupMap} via assignment to new \code{pixelIndex}
 #' values in \code{newCohortData}. By running these all together,
 #' there is less chance that they will diverge. There are some checks
@@ -33,19 +33,69 @@ if (getRversion() >= "3.1.0") {
 #' @param time Current time e.g., time(sim). This is used to extract the correct
 #'   parameters in \code{speciesEcoregion} table if there are different values over time
 #' @param speciesEcoregion A speciesEcoregion table.
+#' @param firePixelTable A data.table with 2 columns, \code{pixelIndex} and \code{pixelGroup}
+#' @param successionTimestep The time between successive seed dispersal events. In LANDIS-II, this
+#'   is called "Succession Timestep". This is used here
 #'
 #' @return
 #' A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
 #' \code{newCohortData} inserted.
 #'
 #' @export
-#' @rdname addCohorts
+#' @rdname updateCohortData
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
-addCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion) {
+updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion,
+                       firePixelTable = NULL, successionTimestep) {
 
+  if (!is.null(firePixelTable)) {
+    pixelGroupMap[firePixelTable$pixelIndex] <- 0
+  }
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
+
+  # Check if these newCohortData are filling in empty pixels (i.e., post fire) or
+  #    infilling existing pixels
+  # OVERRIDE the pixelGroup that is in newCohortData -- as it is the former PG
+  if (!"age" %in% colnames(newCohortData))
+    newCohortData[, age := 1]
+
+  # Step 1 -- deal with pixels on the map that have no pixelGroup -- these are burned pixels
+  relevantPixels <- pixelGroupMap[newCohortData$pixelIndex]
+  zeroOnPixelGroupMap <- relevantPixels == 0
+
+  # Deal with the zeros on pixelGroupMap --> the entirely newly regenerated pixels
+  allNewPixelGroups <- all(zeroOnPixelGroupMap)
+  if (all(zeroOnPixelGroupMap)) {
+    newCohortData[zeroOnPixelGroupMap,
+                  pixelGroup2 := addPixelGroup(.SD, maxPixelGroup = maxPixelGroup,
+                                               successionTimestep = successionTimestep)]
+    newCohortData[, pixelGroup := pixelGroup2]
+    newCohortData[, pixelGroup2 := NULL]
+  } else {
+
+  # Deal with the non-zeros on pixelGroupMap --> those pixels regenerated in the understory
+  #if (!all(zeroOnPixelGroupMap)) {
+    allNewPixelGroups <- FALSE
+
+    #ncdOrig <- copy(newCohortData)
+    pixelIndex <- which(pixelGroupMap[] %in% cohortData$pixelGroup)
+    cohortDataPixelIndex <- data.table(pixelIndex = pixelIndex,
+                                       pixelGroup = pixelGroupMap[][pixelIndex])
+    cdLong <- cohortDataPixelIndex[cohortData,#[, c("speciesCode", "ecoregionGroup", "pixelGroup")],
+                                   on = "pixelGroup", allow.cartesian = TRUE]
+    cdLong[, pixelGroup := NULL]
+    if ("pixelGroup" %in% colnames(newCohortData))
+      newCohortData[, pixelGroup := NULL]
+    cohorts <- rbindlist(list(cdLong, newCohortData), use.names = TRUE, fill = TRUE)
+
+    cohorts[, pixelGroup := addPixelGroup(.SD, maxPixelGroup = 0,
+                                           columns = c("ecoregionGroup", "speciesCode", "age", "B"),
+                                           successionTimestep = successionTimestep)]
+
+    newCohortData <- cohorts # a pointer -- should be dealt with better
+  }
+
 
   if (isTRUE(getOption("LandR.assertions"))) {
     maxPixelGroupFromCohortData <- max(cohortData$pixelGroup)
@@ -57,29 +107,35 @@ addCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEc
     }
   }
 
+  if (allNewPixelGroups) {
+    # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
+    pixelsToChange <- unique(newCohortData[, c("pixelIndex", "pixelGroup")],
+                                            by = c("pixelIndex"))
+  } else {
+    browser()
+  }
 
-  # Assigns continguous pixelGroup number to each unique pixelGroup, starting from maxPixelGroup
-  newCohortData <- addPixelGroup(newCohortData, maxPixelGroup = maxPixelGroup)
-
-  # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
-  postFireSeroResprUniquePixels <- unique(newCohortData, by = c("pixelIndex"))
-  postFireSeroResprUniquePixels[, speciesCode := NULL]
-
-  pixelGroupMap[postFireSeroResprUniquePixels$pixelIndex] <- postFireSeroResprUniquePixels$pixelGroup
+  # update pixelGroupMap
+  pixelGroupMap[pixelsToChange$pixelIndex] <- pixelsToChange$pixelGroup
 
   if (isTRUE(getOption("LandR.assertions"))) {
-    if (!isTRUE(all(postFireSeroResprUniquePixels$pixelGroup ==
-                  pixelGroupMap[postFireSeroResprUniquePixels$pixelIndex])))
-    stop("pixelGroupMap and newCohortData$pixelGroupMap don't match in addCohorts fn")
+    if (!isTRUE(all(pixelsToChange$pixelGroup ==
+                  pixelGroupMap[pixelsToChange$pixelIndex])))
+    stop("pixelGroupMap and newCohortData$pixelGroupMap don't match in updateCohortData fn")
   }
+
   ## give biomass in pixels that have serotiny/resprouting
   cohortData[, sumB := sum(B, na.rm = TRUE), by = pixelGroup]
 
   ##########################################################
   # Add new cohorts and rm missing cohorts (i.e., those pixelGroups that are gone)
   ##########################################################
-  cohortData <- initiateNewCohort(newCohortData, cohortData, pixelGroupMap,
+  cohortData <- .initiateNewCohorts(newCohortData, cohortData, pixelGroupMap,
                               time = time, speciesEcoregion = speciesEcoregion)
+
+  cohortData <- rmMissingCohorts(cohortData, pixelGroupMap, firePixelTable)
+
+  message(crayon::red("NUMBER OF UNIQUE PIXELGROUPS: ", length(unique(cohortData$pixelGroup))))
 
   return(list(cohortData = cohortData,
               pixelGroupMap = pixelGroupMap))
@@ -87,20 +143,19 @@ addCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEc
 }
 
 
-#' \code{initiateNewCohort} will calculate new values for \code{B}, add
+#' \code{.initiateNewCohorts} will calculate new values for \code{B}, add
 #' \code{age}, then \code{rbindlist} this with \code{cohortData}
 #'
-#' @inheritParams addCohorts
+#' @inheritParams updateCohortData
 #' @return
-#' \code{initiateNewCohort} returns A \code{data.table} with a new,
+#' \code{.initiateNewCohorts} returns A \code{data.table} with a new,
 #' \code{rbindlist}ed cohortData
 #'
-#' @rdname addCohorts
-#' @export
+#' @rdname updateCohortData
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
-initiateNewCohort <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion) {
+.initiateNewCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion) {
   ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum biomass per ecoregion, join to new cohort data
   namesNCD <- names(newCohortData)
@@ -209,38 +264,131 @@ assignLightProb <- function(sufficientLight, newCohortData) {
 
 #' Create the correct string for pixelGroups
 #'
-#' @param maxPixelGroup A length 1 numeric/integer indicating the current maximum pixelGroup value
+#' @inheritParams addPixelGroup
 #' @param ecoregionGroup  A vector of ecoregionGroup strings
 #' @param speciesGroup  A vector of speciesGroup strings
 #'
 #' @return  TODO: description needed
 #'
-#' @export
-makePixelGroups <- function(maxPixelGroup, ecoregionGroup, speciesGroup) {
+.makePixelGroups <- function(maxPixelGroup, ecoregionGroup, speciesGroup,
+                            columns = c("ecoregionGroup", "speciesGroup", "age")) {
   as.integer(maxPixelGroup) +
     as.integer(factor(paste(ecoregionGroup, speciesGroup, sep = "_")))
 }
 
 #' Add the correct \code{pixelGroups} to a \code{pixelCohortData} object
 #'
-#' @inheritParams makePixelGroups
+#' @param maxPixelGroup A length 1 numeric/integer indicating the current maximum pixelGroup value
 #' @param pixelCohortData  # pixel groups are groups of identical pixels based
 #'   on \code{speciesGroup} x \code{Age} and \code{ecoregionGroup}.
+#' @param columns A character vector of column names to use as part of the generation of unique
+#'   combinations of features. Default is \code{c("ecoregionGroup", "speciesCode", "age")}
 #'
-#' @note
-#' This should not (yet) be used where age is an issue.
+#' @return
+#' Returns original \code{pixelCohortData} with 1 new column, \code{pixelGroup2}
+#'
 #'
 #' @export
 #' @importFrom data.table setkey
 #' @importFrom SpaDES.core paddedFloatToChar
-addPixelGroup <- function(pixelCohortData, maxPixelGroup) {
-  pixelCohortData[, speciesInt := as.integer(speciesCode)]
-  pixelCohortData[, speciesGroup := sum(2^(unique(speciesInt)-1)),  by = "pixelIndex"]
-  pixelCohortData[, speciesGroup := paddedFloatToChar(speciesGroup, padL = max(nchar(as.character(speciesGroup))))]
-  setkey(pixelCohortData, ecoregionGroup, speciesGroup)
-  pixelCohortData[ , pixelGroup := makePixelGroups(maxPixelGroup, ecoregionGroup, speciesGroup)]
-  pixelCohortData[, c("speciesInt", "speciesGroup") := NULL]
-  pixelCohortData
+addPixelGroup <- function(pixelCohortData, maxPixelGroup, columns = c("ecoregionGroup", "speciesCode", "age"),
+                          successionTimestep) {
+
+  browser(expr = exists("aaaa"))
+  columnsOrig <- columns
+  columns <- columns[columns %in% names(pixelCohortData)]
+  columns2 <- paste0(columns, "2")
+  if (!all(columns == columnsOrig))
+    message("Creating pixelGroup values, but not using all columns requested. Only using, ",
+            paste(columns, collapse = ", "), " instead of ", paste(columnsOrig, collapse = ", "))
+    # Sort them so that Pice_mar_Pinu_sp is the same as Pinu_sp_Pice_mar
+
+
+  pcd <- copy(pixelCohortData)
+  setkeyv(pcd, columns)
+
+  pcd[, N := .N, by = "pixelIndex"]
+
+  speciesColumn <- grep("species", columns)
+  speciesColumnName <- columns[speciesColumn]
+  speciesColumnName2 <- columns2[speciesColumn]
+
+  ageColumn <- grep("age", columns)
+  ageColumnName <- columns[ageColumn]
+  ageColumnName2 <- columns2[ageColumn]
+
+  otherColumns <- which(!columns %in% c(speciesColumnName, ageColumnName))
+  otherColumnsNames <- columns[otherColumns]
+  otherColumnsNames2 <- columns2[otherColumns]
+
+  speciesAgeColumnNames2 <- c(speciesColumnName2, ageColumnName2)
+
+  # Convert to unique numeric
+  pcd[ , c(columns2) := lapply(.SD, function(x) {
+    a <- as.integer(as.factor(x))
+  }), .SDcols = columns]
+
+  if (FALSE) {
+    pcd[ , c("uniqueCombo") := apply(pcd[, speciesAgeColumnNames2, with = FALSE], 1, paste, collapse = "_"), with = TRUE]
+    pcd[ , c("uniqueCombo2") := as.integer(as.factor(uniqueCombo)) ]
+
+    pcd[ , c("uniqueCombo3") := apply(pcd[, c(otherColumnsNames2, "uniqueCombo2"), with = FALSE], 1, paste, collapse = "_"), with = TRUE]
+    pcd[ , c("uniqueCombo4") := as.integer(as.factor(uniqueCombo3))]
+
+    pcd[ , c("uniqueCombo5") := paste(uniqueCombo4, collapse = "_"), by = "pixelIndex"]
+    pcd[ , c("newPixelGroup2") := as.integer(as.factor(uniqueCombo5))]
+  }
+
+
+  pcd[ , c("uniqueCombo") := apply(pcd[, columns2, with = FALSE], 1, paste, collapse = "_"), with = TRUE]
+  pcd[ , c("uniqueCombo2") := as.integer(as.factor(uniqueCombo)) ]
+
+  pcd[ , c("uniqueCombo5") := paste(uniqueCombo2, collapse = "_"), by = "pixelIndex"]
+  pcd[ , c("newPixelGroup2") := as.integer(maxPixelGroup) + as.integer(as.factor(uniqueCombo5))]
+
+  setkeyv(pcd, "pixelIndex")
+  pcd3 <- copy(pixelCohortData)
+  pcd3[, origOrd := seq(.N)]
+
+  if (FALSE) { # This assertion no longer works correctly
+    if (isTRUE(getOption("LandR.assertions"))) {
+
+      # This is the old way -- should check out for some cases, but NOT ALL
+      pcd2 <- copy(pixelCohortData)
+      setkeyv(pcd2, columns)
+      pcd2[, speciesInt := as.integer(speciesCode)]
+      pcd2[, speciesGroup := sum(2^(unique(speciesInt)-1)),  by = "pixelIndex"]
+      pcd2[, speciesGroup := paddedFloatToChar(speciesGroup, padL = max(nchar(as.character(speciesGroup))))]
+      setkey(pcd2, ecoregionGroup, speciesGroup)
+      pcd2[ , pixelGroup := .makePixelGroups(maxPixelGroup, ecoregionGroup, speciesGroup)]
+      pcd2[, c("speciesInt", "speciesGroup") := NULL]
+      setkey(pcd2, "pixelIndex")
+      setkey(pcd, "pixelIndex")
+      pcd2[, newPixelGroup2 := pixelGroup]
+      pcd[, newPixelGroup3 := as.integer(factor(newPixelGroup2, labels = seq(unique(newPixelGroup2)), levels = seq(unique(newPixelGroup2))))]
+      pcd2[, pixelGroup3 := as.integer(factor(pixelGroup, labels = seq(unique(newPixelGroup2)), levels = seq(unique(newPixelGroup2))))]
+
+      setkey(pcd, "pixelIndex")
+
+      a <- factor(pcd$newPixelGroup2,
+                             labels = seq(unique(pcd$newPixelGroup2)),
+                             levels = unique(pcd$newPixelGroup2))
+      b <- factor(pcd2$newPixelGroup2,
+                             labels = seq(unique(pcd2$newPixelGroup2)),
+                             levels = unique(pcd2$newPixelGroup2))
+      test2 <-  (!identical(a, b))
+
+      pcd <- unique(pcd[, c("pixelIndex", "newPixelGroup2")], by = "pixelIndex")[pcd3, on = "pixelIndex"]
+      test1 <- (!all(pcd$origOrd == pcd3$origOrd))
+      if (test1 || test2) {
+        message("This is the old way -- should check out for some cases, but NOT ALL. So a failure may be OK.",
+                " Cases with age, for example, should fail")
+        browser()
+      }
+    }
+  }
+  pcd <- unique(pcd[, c("pixelIndex", "newPixelGroup2")], by = "pixelIndex")[pcd3, on = "pixelIndex"]
+  pcd$newPixelGroup2
 }
 
 #' Pull out the values from speciesEcoregion table for current time
@@ -261,7 +409,7 @@ speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
 
 #' A test that pixelGroupMap and cohortData match
 #'
-#' @inheritParams addCohorts
+#' @inheritParams updateCohortData
 #' @param sim If the simList is included, then the browser() call will be more useful
 #' @param maxExpectedNumDiverge A numeric, length 1, indicating by how many they
 #'   can diverge. Default 1.
@@ -271,7 +419,7 @@ speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
 #' @export
 testCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1) {
   a <- sort(unique(na.omit(pixelGroupMap[])))
-  b <- sort(unique(cohortData$pixelGroup))
+  b <- sort(unique(na.omit(cohortData$pixelGroup)))
   test1 <- sum(!a %in% b)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
   test2 <- sum(!b %in% a)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
   if (test1 > maxExpectedNumDiverge || test2 > maxExpectedNumDiverge) {
@@ -281,4 +429,8 @@ testCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge
             "If this occurs, please contact the module developers")
     browser()
   }
+}
+
+.ageRndUpSuccessionTimestep <- function(age, successionTimestep) {
+  as.integer(ceiling(as.numeric(age) / successionTimestep) * successionTimestep)
 }
