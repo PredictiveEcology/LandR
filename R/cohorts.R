@@ -74,7 +74,6 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
     newCohortData[, pixelGroup2 := NULL]
   } else {
 
-    browser()
     # Deal with the non-zeros on pixelGroupMap --> those pixels regenerated in the understory
     #if (!all(zeroOnPixelGroupMap)) {
     allNewPixelGroups <- FALSE
@@ -101,19 +100,16 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
       lenUniquePixelsInCohorts <- length(unique(cohorts$pixelIndex))
       lenBurnedPixels <- sum(pixelGroupMap[] == 0, na.rm = TRUE) # 30927
       pixelsRegeneratedOnZeros <- sum(uniquePixelsInCohorts == 0)
-      b <- pixelGroupMap[][-unique(cohorts$pixelIndex)]
-      tableB <- table(b) # 25166
+      allPixelsNotInCohortData <- pixelGroupMap[][-unique(cohorts$pixelIndex)]
+      numPixelsNoRegen <- sum(allPixelsNotInCohortData == 0, na.rm = TRUE)
+      tableB <- table(allPixelsNotInCohortData) # 25166
 
-      test2 <- identical(pixelsOnMap -
-                  (pixelsRegeneratedOnZeros + # 5761
-                     tableB), # 25166
-                lenUniquePixelsInCohorts)
+      test2 <- identical(as.integer(pixelsOnMap - tableB), lenUniquePixelsInCohorts)
+      test3 <- identical(as.integer(pixelsOnMap - (lenBurnedPixels - pixelsRegeneratedOnZeros)), lenUniquePixelsInCohorts)
 
-
-
-      uniqueB <- unique(b)
-      test1 <- all(uniqueB %in% c(NA, 0))
-      if (!test1 | !test2) {
+      uniqueAllPixelsNotInCohortData <- unique(allPixelsNotInCohortData)
+      test1 <- all(uniqueAllPixelsNotInCohortData %in% c(NA, 0))
+      if (!test1 | !test2 | !test3) {
         message("Every value on pixelGroupMap greater than 0 must have a pixelIndex in cohorts.",
                 " This test is failing, i.e., there are some pixelGroupMaps have pixelGroups, and aren't in cohorts.")
         browser()
@@ -134,13 +130,9 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
     }
   }
 
-  if (allNewPixelGroups) {
-    # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
-    pixelsToChange <- unique(newCohortData[, c("pixelIndex", "pixelGroup")],
-                             by = c("pixelIndex"))
-  } else {
-    browser()
-  }
+  # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
+  pixelsToChange <- unique(newCohortData[, c("pixelIndex", "pixelGroup")],
+                           by = c("pixelIndex"))
 
   # update pixelGroupMap
   pixelGroupMap[pixelsToChange$pixelIndex] <- pixelsToChange$pixelGroup
@@ -329,7 +321,7 @@ testCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge
 addPixelGroup <- function(pixelCohortData, maxPixelGroup, columns = c("ecoregionGroup", "speciesCode", "age"),
                           successionTimestep) {
 
-  browser(expr = exists("aaaa"))
+#  browser(expr = exists("aaaa"))
   columnsOrig <- columns
   columns <- columns[columns %in% names(pixelCohortData)]
   columns2 <- paste0(columns, "2")
