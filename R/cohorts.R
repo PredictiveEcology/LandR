@@ -55,58 +55,47 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
                              firePixelTable = NULL, successionTimestep) {
 
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
-  #zeroOnPixelGroupMap <- newCohortData$pixelIndex %in% firePixelTable$pixelIndex
+
   if (!is.null(firePixelTable)) {
     pixelGroupMap[firePixelTable$pixelIndex] <- 0
   }
   relevantPixels <- pixelGroupMap[][newCohortData$pixelIndex]
   zeroOnPixelGroupMap <- relevantPixels == 0
 
-  # Check if these newCohortData are filling in empty pixels (i.e., post fire) or
-  #    infilling existing pixels
-  # OVERRIDE the pixelGroup that is in newCohortData -- as it is the former PG
   if (!"age" %in% colnames(newCohortData))
     newCohortData[, age := 1]
 
-  # Step 1 -- deal with pixels on the map that have no pixelGroup -- these are burned pixels
-
-  # Deal with the zeros on pixelGroupMap --> the entirely newly regenerated pixels
   allNewPixelGroups <- all(zeroOnPixelGroupMap)
   if (all(zeroOnPixelGroupMap)) {
-    message(crayon::green("  Regenerating only open pixels (e.g., likely resprouting & serotiny only"))
-    newCohortData[, pixelGroup2 := addPixelGroup(.SD, maxPixelGroup = maxPixelGroup,
-                                               successionTimestep = successionTimestep)]
-    newCohortData[, pixelGroup := pixelGroup2]
-    newCohortData[, pixelGroup2 := NULL]
+    # Deal with pixels on the map that have no pixelGroup -- these are burned
+    # pixels --> the entirely newly regenerated pixels DOes not require a
+    # re-pixelGroupMaping  -- can just add to existing pixelGroup values
+    message(crayon::green("  Regenerating only open pixels (e.g., likely resprouting & serotiny only)"))
+    newCohortData <- addPixelGroup(newCohortData,
+                                   maxPixelGroup = maxPixelGroup,
+                                   successionTimestep = successionTimestep)
 
     # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
     pixelsToChange <- unique(newCohortData[, c("pixelIndex", "pixelGroup")],
                              by = c("pixelIndex"))
 
   } else {
+    # THis is for situations where there are some empty pixels being filled,
+    #   and some occupied pixels getting infilling. This requires a wholesale
+    #   re-pixelGroup
     message(crayon::green("  Regenerating open and pixels with biomass (likely after seed dispersal)"))
 
-    # newCohortData1 <- copy(newCohortData)
-    # cohortData1 <- copy(cohortData)
-    # pixelGroupMap1 <- pixelGroupMap
-    # Deal with the non-zeros on pixelGroupMap --> those pixels regenerated in the understory
-    #if (!all(zeroOnPixelGroupMap)) {
     allNewPixelGroups <- FALSE
 
-    #ncdOrig <- copy(newCohortData)
     pixelIndex <- which(pixelGroupMap[] %in% cohortData$pixelGroup)
     cohortDataPixelIndex <- data.table(pixelIndex = pixelIndex,
                                        pixelGroup = pixelGroupMap[][pixelIndex])
-    cdLong <- cohortDataPixelIndex[cohortData,#[, c("speciesCode", "ecoregionGroup", "pixelGroup")],
-                                   on = "pixelGroup", allow.cartesian = TRUE]
-    #cdLong[, pixelGroup := NULL]
-    #if ("pixelGroup" %in% colnames(newCohortData))
-      #newCohortData[, pixelGroup := NULL]
+    cdLong <- cohortDataPixelIndex[cohortData, on = "pixelGroup", allow.cartesian = TRUE]
     cohorts <- rbindlist(list(cdLong, newCohortData), use.names = TRUE, fill = TRUE)
 
-    cohorts[, pixelGroup := addPixelGroup(.SD, maxPixelGroup = 0,
-                                          columns = c("ecoregionGroup", "speciesCode", "age", "B"),
-                                          successionTimestep = successionTimestep)]
+    cohorts <- addPixelGroup(cohorts, maxPixelGroup = 0,
+                              columns = c("ecoregionGroup", "speciesCode", "age", "B"),
+                              successionTimestep = successionTimestep)
 
     if (isTRUE(getOption("LandR.assertions"))) {
 
@@ -125,12 +114,12 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
       uniqueAllPixelsNotInCohortData <- unique(allPixelsNotInCohortData)
       test1 <- all(uniqueAllPixelsNotInCohortData %in% c(NA, 0))
       if (!test1 | !test2 | !test3) {
-        message("Every value on pixelGroupMap greater than 0 must have a pixelIndex in cohorts.",
+        stop("Every value on pixelGroupMap greater than 0 must have a pixelIndex in cohorts.",
                 " This test is failing, i.e., there are some pixelGroupMaps have pixelGroups, and aren't in cohorts.")
-        browser()
       }
     }
-    # cohorts1 <- copy(cohorts)
+
+    # Bring to pixelGroup level -- this will squash the data.table
     allCohortData <- cohorts[ , .(ecoregionGroup = ecoregionGroup[1],
                                   mortality = mortality[1],
                                   aNPPAct = aNPPAct[1],
@@ -174,18 +163,17 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
     maxPixelGroup <- as.integer(maxValue(outs$pixelGroupMap))
     test1 <- (!identical(maxPixelGroup, maxPixelGroupFromCohortData))
     if (test1) {
-      warning("The sim$pixelGroupMap and cohortData have unmatching pixelGroup.",
+      stop("The sim$pixelGroupMap and cohortData have unmatching pixelGroup.",
               " They must be matching.",
               " If this occurs, please contact the module developers")
-      browser()
     }
   }
 
-  message(crayon::red("NUMBER OF UNIQUE PIXELGROUPS: ", length(unique(cohortData$pixelGroup))))
+  message(crayon::magenta("NUMBER OF UNIQUE PIXELGROUPS: ", length(unique(outs$cohortData$pixelGroup)),
+                          " AND FORESTED PIXELS: ", sum(!is.na(outs$pixelGroupMap[]))))
 
   return(list(cohortData = outs$cohortData,
               pixelGroupMap = outs$pixelGroupMap))
-
 }
 
 
@@ -287,20 +275,9 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap, firePixelTable) {
 
   if (isTRUE(getOption("LandR.assertions"))) {
     testCohortData(cohortData, pixelGroupMap, message = "rmMissingCohorts")
-    # # All pixels in pgsStillInCDGoneFromPGM should have been touched by a fire
-    # test1 <- isTRUE(all(pgsStillInCDGoneFromPGM %in% na.omit(firePixelTable$pixelGroup)))
-    #
-    # # There should still be some burned pixel groups that are still on the map, i.e., only some pixels from a PG got burned
-    # burnedByPGStillOnMap <- setdiff(na.omit(firePixelTable$pixelGroup), pgsStillInCDGoneFromPGM)
-    # test2 <- isTRUE(all(burnedByPGStillOnMap %in% pgmVals))
-    #
-    # test3 <- length(setdiff(cohortData$pixelGroup, pgmVals)) == 0
-    #
-    # if (!isTRUE(all(test1, test2, test3))) {
-    #   warning("cohortData and pixelGroupMap don't match")
-    #   browser()
-    # }
   }
+
+  if (NROW(unique(cohortData[pixelGroup == 67724]$ecoregionGroup)) > 1) stop()
 
   return(list(cohortData = cohortData,
               pixelGroupMap = pixelGroupMap))
@@ -345,13 +322,16 @@ addPixelGroup <- function(pixelCohortData, maxPixelGroup, columns = c("ecoregion
   if (!all(columns == columnsOrig))
     message("Creating pixelGroup values, but not using all columns requested. Only using, ",
             paste(columns, collapse = ", "), " instead of ", paste(columnsOrig, collapse = ", "))
-  # Sort them so that Pice_mar_Pinu_sp is the same as Pinu_sp_Pice_mar
 
+  #pcd3 <- pixelCohortData
+  #pcd3[, origOrd := seq(.N)]
 
-  pcd <- copy(pixelCohortData)
-  setkeyv(pcd, columns)
+  #pcd1 <- pixelCohortData
+  pcd <- pixelCohortData # no copy -- just for simpler name
 
-  pcd[, N := .N, by = "pixelIndex"]
+  #setkeyv(pcd, columns)
+
+  #pcd[, N := .N, by = "pixelIndex"]
 
   speciesColumn <- grep("species", columns)
   speciesColumnName <- columns[speciesColumn]
@@ -372,74 +352,29 @@ addPixelGroup <- function(pixelCohortData, maxPixelGroup, columns = c("ecoregion
     a <- as.integer(factor(x))
   }), .SDcols = columns]
 
-  if (FALSE) {
-    pcd[ , c("uniqueCombo") := apply(pcd[, speciesAgeColumnNames2, with = FALSE], 1, paste, collapse = "_"), with = TRUE]
-    pcd[ , c("uniqueCombo2") := as.integer(factor(uniqueCombo)) ]
-
-    pcd[ , c("uniqueCombo3") := apply(pcd[, c(otherColumnsNames2, "uniqueCombo2"), with = FALSE], 1, paste, collapse = "_"), with = TRUE]
-    pcd[ , c("uniqueCombo4") := as.integer(factor(uniqueCombo3))]
-
-    pcd[ , c("uniqueCombo5") := paste(uniqueCombo4, collapse = "_"), by = "pixelIndex"]
-    pcd[ , c("newPixelGroup2") := as.integer(factor(uniqueCombo5))]
-  }
-
-
   pcd[ , c("uniqueCombo") := apply(pcd[, columns2, with = FALSE], 1, paste, collapse = "_"), with = TRUE]
   pcd[ , c("uniqueCombo2") := as.integer(factor(uniqueCombo)) ]
 
   pcd[ , c("uniqueCombo5") := paste(uniqueCombo2, collapse = "_"), by = "pixelIndex"]
-  pcd[ , c("newPixelGroup2") := as.integer(maxPixelGroup) + as.integer(factor(uniqueCombo5))]
+  pcd[ , c("pixelGroup") := as.integer(maxPixelGroup) + as.integer(factor(uniqueCombo5))]
 
-  setkeyv(pcd, "pixelIndex")
-  pcd3 <- copy(pixelCohortData)
-  pcd3[, origOrd := seq(.N)]
+  #setkeyv(pcd, "pixelIndex")
 
-  if (FALSE) { # This assertion no longer works correctly
-    if (isTRUE(getOption("LandR.assertions"))) {
-      # This is the old way -- should check out for some cases, but NOT ALL
-      pcd2 <- copy(pixelCohortData)
-      setkeyv(pcd2, columns)
-      pcd2[, speciesInt := as.integer(speciesCode)]
-      pcd2[, speciesGroup := sum(2^(unique(speciesInt)-1)),  by = "pixelIndex"]
-      pcd2[, speciesGroup := paddedFloatToChar(speciesGroup, padL = max(nchar(as.character(speciesGroup))))]
-      setkey(pcd2, ecoregionGroup, speciesGroup)
-      pcd2[ , pixelGroup := .makePixelGroups(maxPixelGroup, ecoregionGroup, speciesGroup)]
-      pcd2[, c("speciesInt", "speciesGroup") := NULL]
-      setkey(pcd2, "pixelIndex")
-      setkey(pcd, "pixelIndex")
-      pcd2[, newPixelGroup2 := pixelGroup]
-      pcd[, newPixelGroup3 := as.integer(factor(newPixelGroup2, labels = seq(unique(newPixelGroup2)), levels = seq(unique(newPixelGroup2))))]
-      pcd2[, pixelGroup3 := as.integer(factor(pixelGroup, labels = seq(unique(newPixelGroup2)), levels = seq(unique(newPixelGroup2))))]
-
-      setkey(pcd, "pixelIndex")
-
-      a <- factor(pcd$newPixelGroup2,
-                  labels = seq(unique(pcd$newPixelGroup2)),
-                  levels = unique(pcd$newPixelGroup2))
-      b <- factor(pcd2$newPixelGroup2,
-                  labels = seq(unique(pcd2$newPixelGroup2)),
-                  levels = unique(pcd2$newPixelGroup2))
-      test2 <-  (!identical(a, b))
-
-      pcd <- unique(pcd[, c("pixelIndex", "newPixelGroup2")], by = "pixelIndex")[pcd3, on = "pixelIndex"]
-      test1 <- (!all(pcd$origOrd == pcd3$origOrd))
-      if (test1 || test2) {
-        message("This is the old way -- should check out for some cases, but NOT ALL. So a failure may be OK.",
-                " Cases with age, for example, should fail")
-        browser()
-      }
-    }
-  }
-  pcd <- unique(pcd[, c("pixelIndex", "newPixelGroup2")], by = "pixelIndex")[pcd3, on = "pixelIndex"]
+  #pcd <- unique(pcd[, c("pixelIndex", "newPixelGroup2")], by = "pixelIndex")[pcd3, on = "pixelIndex"]
   if (isTRUE(getOption("LandR.assertions"))) {
     test1 <- identical(pcd$origOrd, seq(NROW(pcd)))
     if (!test1) {
-      message("The order of the newPixelCohort table is wrong")
-      browser()
+      #stop("The order of the newPixelCohort table is wrong")
     }
   }
 
-  pcd$newPixelGroup2
+  pcd[, `:=`(ecoregionGroup2 = NULL,
+             speciesCode2 = NULL,
+             age2 = NULL,
+             uniqueCombo = NULL,
+             uniqueCombo2 = NULL,
+             uniqueCombo5 = NULL)]
+  return(pcd)
 }
 
 #' Pull out the values from speciesEcoregion table for current time
@@ -480,10 +415,10 @@ testCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge
     if (nchar(message) > 0) message(message)
     if (test1 > maxExpectedNumDiverge) message("test1 is ", test1, " -- too many pixelGroups on pixelGroupMap")
     if (test2 > maxExpectedNumDiverge) message("test2 is ", test2, " -- too many pixelGroups in cohortData")
-    warning("The sim$pixelGroupMap and cohortData have unmatching pixelGroup. They must be matching. ",
+    stop("The sim$pixelGroupMap and cohortData have unmatching pixelGroup. They must be matching. ",
             "If this occurs, please contact the module developers")
-    browser()
   }
+  message(crayon::green("  -- assertion passed using testCohortData --"))
 }
 
 .ageRndUpSuccessionTimestep <- function(age, successionTimestep) {
