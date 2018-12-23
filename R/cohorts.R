@@ -73,6 +73,7 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
   # Deal with the zeros on pixelGroupMap --> the entirely newly regenerated pixels
   allNewPixelGroups <- all(zeroOnPixelGroupMap)
   if (all(zeroOnPixelGroupMap)) {
+    message(crayon::green("  Regenerating only open pixels (e.g., likely resprouting & serotiny only"))
     newCohortData[, pixelGroup2 := addPixelGroup(.SD, maxPixelGroup = maxPixelGroup,
                                                successionTimestep = successionTimestep)]
     newCohortData[, pixelGroup := pixelGroup2]
@@ -83,6 +84,7 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
                              by = c("pixelIndex"))
 
   } else {
+    message(crayon::green("  Regenerating open and pixels with biomass (likely after seed dispersal)"))
 
     # newCohortData1 <- copy(newCohortData)
     # cohortData1 <- copy(cohortData)
