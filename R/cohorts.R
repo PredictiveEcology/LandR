@@ -54,10 +54,10 @@ if (getRversion() >= "3.1.0") {
 updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion,
                              firePixelTable = NULL, successionTimestep) {
 
+  maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
   if (!is.null(firePixelTable)) {
     pixelGroupMap[firePixelTable$pixelIndex] <- 0
   }
-  maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
 
   # Check if these newCohortData are filling in empty pixels (i.e., post fire) or
   #    infilling existing pixels
