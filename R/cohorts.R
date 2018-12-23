@@ -55,9 +55,12 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
                              firePixelTable = NULL, successionTimestep) {
 
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
+  #zeroOnPixelGroupMap <- newCohortData$pixelIndex %in% firePixelTable$pixelIndex
   if (!is.null(firePixelTable)) {
     pixelGroupMap[firePixelTable$pixelIndex] <- 0
   }
+  relevantPixels <- pixelGroupMap[][newCohortData$pixelIndex]
+  zeroOnPixelGroupMap <- relevantPixels == 0
 
   # Check if these newCohortData are filling in empty pixels (i.e., post fire) or
   #    infilling existing pixels
@@ -66,8 +69,6 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
     newCohortData[, age := 1]
 
   # Step 1 -- deal with pixels on the map that have no pixelGroup -- these are burned pixels
-  relevantPixels <- pixelGroupMap[newCohortData$pixelIndex]
-  zeroOnPixelGroupMap <- relevantPixels == 0
 
   # Deal with the zeros on pixelGroupMap --> the entirely newly regenerated pixels
   allNewPixelGroups <- all(zeroOnPixelGroupMap)
@@ -107,7 +108,7 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
 
     if (isTRUE(getOption("LandR.assertions"))) {
 
-      uniquePixelsInCohorts <- pixelGroupMap[unique(cohorts$pixelIndex)]
+      uniquePixelsInCohorts <- pixelGroupMap[][unique(cohorts$pixelIndex)]
       pixelsOnMap <- sum(!is.na(pixelGroupMap[]), na.rm = TRUE)
       lenUniquePixelsInCohorts <- length(unique(cohorts$pixelIndex))
       lenBurnedPixels <- sum(pixelGroupMap[] == 0, na.rm = TRUE) # 30927
@@ -127,7 +128,6 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
         browser()
       }
     }
-    cohorts
     # cohorts1 <- copy(cohorts)
     allCohortData <- cohorts[ , .(ecoregionGroup = ecoregionGroup[1],
                                   mortality = mortality[1],
@@ -151,7 +151,7 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
 
   if (isTRUE(getOption("LandR.assertions"))) {
     if (!isTRUE(all(pixelsToChange$pixelGroup ==
-                    pixelGroupMap[pixelsToChange$pixelIndex])))
+                    pixelGroupMap[][pixelsToChange$pixelIndex])))
       stop("pixelGroupMap and newCohortData$pixelGroupMap don't match in updateCohortData fn")
   }
 
