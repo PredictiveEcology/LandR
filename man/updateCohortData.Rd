@@ -12,27 +12,32 @@ updateCohortData(newCohortData, cohortData, pixelGroupMap, time,
   speciesEcoregion)
 }
 \arguments{
-\item{newCohortData}{must be a complete cohortData object with entirely new
-\code{pixelGroup} values (i.e., already non-overlapping with
-\code{cohortData}. Columns it must have: \code{pixelGroup}, \code{speciesCode},
-\code{ecoregionGroup}}
+\item{newCohortData}{must be a complete cohortData object with newly
+created cohorts. They do not have to have \code{pixelGroup} values yet; they
+can be overlapping with \code{cohortData}, (i.e., they can be regenerated on
+empty pixels or on alreayd occupied pixels). Columns it must have:
+\code{pixelGroup}, \code{speciesCode}, \code{age}, \code{ecoregionGroup}. The
+remaining 4 (see \code{cohortData}) will be created with \code{0}s}
 
-\item{cohortData}{a \code{data.table} with columns:
-\code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
-\code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
+\item{cohortData}{a \code{data.table} with columns: \code{pixelGroup},
+\code{ecoregionGroup}, \code{speciesCode}, \code{age}, \code{B},
+\code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
-\item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group number that
-correspondsd exactly to \code{pixelGroup} column in \code{cohortData}}
+\item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group
+number that correspondsd exactly to \code{pixelGroup} column in
+\code{cohortData}}
 
 \item{time}{Current time e.g., time(sim). This is used to extract the correct
-parameters in \code{speciesEcoregion} table if there are different values over time}
+parameters in \code{speciesEcoregion} table if there are different values
+over time}
 
 \item{speciesEcoregion}{A \code{speciesEcoregion} table.}
 
-\item{firePixelTable}{A data.table with 2 columns, \code{pixelIndex} and \code{pixelGroup}}
+\item{firePixelTable}{A data.table with 2 columns, \code{pixelIndex} and
+\code{pixelGroup}}
 
-\item{successionTimestep}{The time between successive seed dispersal events. In LANDIS-II, this
-is called "Succession Timestep". This is used here}
+\item{successionTimestep}{The time between successive seed dispersal events.
+In LANDIS-II, this is called "Succession Timestep". This is used here}
 }
 \value{
 A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with

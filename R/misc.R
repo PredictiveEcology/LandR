@@ -17,17 +17,3 @@ assignLightProb <- function(sufficientLight, newCohortData) {
   ## first column
   newCohortData[ , lightProb := sufficientLight[cbind(shadetolerance, siteShade + 2)]]
 }
-
-#' Pull out the values from speciesEcoregion table for current time
-#'
-#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
-#' @param currentTime The current time e.g., \code{time(sim)}
-#'
-#' @note
-#' TODO
-#'
-#' @export
-speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
-  spEco <- speciesEcoregion[year <= currentTime]
-  spEco[year == max(spEco$year)]
-}

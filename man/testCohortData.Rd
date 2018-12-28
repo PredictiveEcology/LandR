@@ -8,12 +8,13 @@ testCohortData(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1,
   message = "")
 }
 \arguments{
-\item{cohortData}{a \code{data.table} with columns:
-\code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
-\code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
+\item{cohortData}{a \code{data.table} with columns: \code{pixelGroup},
+\code{ecoregionGroup}, \code{speciesCode}, \code{age}, \code{B},
+\code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
-\item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group number that
-correspondsd exactly to \code{pixelGroup} column in \code{cohortData}}
+\item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group
+number that correspondsd exactly to \code{pixelGroup} column in
+\code{cohortData}}
 
 \item{sim}{If the simList is included, then the browser() call will be more useful}
 

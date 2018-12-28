@@ -16,6 +16,8 @@ on \code{speciesGroup} x \code{Age} and \code{ecoregionGroup}.}
 
 \item{columns}{A character vector of column names to use as part of the generation of unique
 combinations of features. Default is \code{c("ecoregionGroup", "speciesCode", "age")}}
+
+\item{successionTimestep}{TODO: description needed}
 }
 \value{
 Returns original \code{pixelCohortData} with 1 new column, \code{pixelGroup2}

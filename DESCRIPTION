@@ -8,7 +8,7 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2018-12-20
+Date: 2018-12-28
 Version: 0.0.1.9000
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
@@ -22,6 +22,7 @@ Depends:
     R (>= 3.3.0)
 Imports:
     backports,
+    crayon,
     data.table,
     dplyr,
     fasterize,

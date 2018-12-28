@@ -1,8 +1,9 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(".", ":=", "age", "ecoregion", "ecoregionGroup",
-                           "maxANPP", "maxB", "maxB_eco", "pixelIndex",
+  utils::globalVariables(c(".", ":=", "age", "aNPPAct", "ecoregion", "ecoregionGroup",
+                           "maxANPP", "maxB", "maxB_eco", "mortality", "pixelIndex",
                            "speciesposition", "speciesGroup", "speciesInt", "sumB",
-                           "temppixelGroup", "year"))
+                           "temppixelGroup", "uniqueCombo", "uniqueCombo2", "uniqueCombo5",
+                           "year"))
 }
 
 #' Add cohorts to \code{cohortData} and \code{pixelGroupMap}
@@ -48,6 +49,7 @@ if (getRversion() >= "3.1.0") {
 #'
 #' @export
 #' @rdname updateCohortData
+#' @importFrom crayon green magenta
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
@@ -78,9 +80,8 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
     # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
     pixelsToChange <- unique(newCohortData[, c("pixelIndex", "pixelGroup")],
                              by = c("pixelIndex"))
-
   } else {
-    # THis is for situations where there are some empty pixels being filled,
+    # This is for situations where there are some empty pixels being filled,
     #   and some occupied pixels getting infilling. This requires a wholesale
     #   re-pixelGroup
     message(crayon::green("  Regenerating open and pixels with biomass (likely after seed dispersal)"))
@@ -135,7 +136,6 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
                              by = c("pixelIndex"))
 
   }
-
 
   # update pixelGroupMap
   pixelGroupMap[pixelsToChange$pixelIndex] <- pixelsToChange$pixelGroup
@@ -300,20 +300,21 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap, firePixelTable) {
 
 #' Add the correct \code{pixelGroups} to a \code{pixelCohortData} object
 #'
-#' @param maxPixelGroup A length 1 numeric/integer indicating the current maximum pixelGroup value
 #' @param pixelCohortData  # pixel groups are groups of identical pixels based
 #'   on \code{speciesGroup} x \code{Age} and \code{ecoregionGroup}.
+#' @param maxPixelGroup A length 1 numeric/integer indicating the current maximum pixelGroup value
 #' @param columns A character vector of column names to use as part of the generation of unique
 #'   combinations of features. Default is \code{c("ecoregionGroup", "speciesCode", "age")}
+#' @param successionTimestep TODO: description needed
 #'
 #' @return
 #' Returns original \code{pixelCohortData} with 1 new column, \code{pixelGroup2}
 #'
-#'
 #' @export
 #' @importFrom data.table setkey
 #' @importFrom SpaDES.core paddedFloatToChar
-addPixelGroup <- function(pixelCohortData, maxPixelGroup, columns = c("ecoregionGroup", "speciesCode", "age"),
+addPixelGroup <- function(pixelCohortData, maxPixelGroup,
+                          columns = c("ecoregionGroup", "speciesCode", "age"),
                           successionTimestep) {
 
   columnsOrig <- columns
@@ -391,8 +392,6 @@ speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
   spEco[year == max(spEco$year)]
 }
 
-
-
 #' A test that pixelGroupMap and cohortData match
 #'
 #' @inheritParams updateCohortData
@@ -405,6 +404,8 @@ speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
 #' TODO
 #'
 #' @export
+#' @importFrom crayon green
+#' @importFrom stats na.omit
 testCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1,
                            message = "") {
   a <- sort(unique(na.omit(pixelGroupMap[])))
@@ -415,10 +416,11 @@ testCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge
     if (nchar(message) > 0) message(message)
     if (test1 > maxExpectedNumDiverge) message("test1 is ", test1, " -- too many pixelGroups on pixelGroupMap")
     if (test2 > maxExpectedNumDiverge) message("test2 is ", test2, " -- too many pixelGroups in cohortData")
-    stop("The sim$pixelGroupMap and cohortData have unmatching pixelGroup. They must be matching. ",
-            "If this occurs, please contact the module developers")
+    stop("The sim$pixelGroupMap and cohortData have unmatching pixelGroup. They must be matching.",
+         " Please contact the module developers")
+  } else {
+    message(crayon::green("  -- assertion passed using testCohortData --"))
   }
-  message(crayon::green("  -- assertion passed using testCohortData --"))
 }
 
 .ageRndUpSuccessionTimestep <- function(age, successionTimestep) {
