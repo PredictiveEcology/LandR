@@ -59,13 +59,13 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
 
   if (!is.null(firePixelTable)) {
-    pixelGroupMap[firePixelTable$pixelIndex] <- 0
+    pixelGroupMap[firePixelTable$pixelIndex] <- 0L
   }
   relevantPixels <- pixelGroupMap[][newCohortData$pixelIndex]
   zeroOnPixelGroupMap <- relevantPixels == 0
 
   if (!"age" %in% colnames(newCohortData))
-    newCohortData[, age := 1]
+    newCohortData[, age := 1L]
 
   allNewPixelGroups <- all(zeroOnPixelGroupMap)
   if (all(zeroOnPixelGroupMap)) {
@@ -94,7 +94,7 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
     cdLong <- cohortDataPixelIndex[cohortData, on = "pixelGroup", allow.cartesian = TRUE]
     cohorts <- rbindlist(list(cdLong, newCohortData), use.names = TRUE, fill = TRUE)
 
-    cohorts <- addPixelGroup(cohorts, maxPixelGroup = 0,
+    cohorts <- addPixelGroup(cohorts, maxPixelGroup = 0L,
                               columns = c("ecoregionGroup", "speciesCode", "age", "B"),
                               successionTimestep = successionTimestep)
 
@@ -113,7 +113,7 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
       test3 <- identical(as.integer(pixelsOnMap - (lenBurnedPixels - pixelsRegeneratedOnZeros)), lenUniquePixelsInCohorts)
 
       uniqueAllPixelsNotInCohortData <- unique(allPixelsNotInCohortData)
-      test1 <- all(uniqueAllPixelsNotInCohortData %in% c(NA, 0))
+      test1 <- all(uniqueAllPixelsNotInCohortData %in% c(NA, 0L))
       if (!test1 | !test2 | !test3) {
         stop("Every value on pixelGroupMap greater than 0 must have a pixelIndex in cohorts.",
                 " This test is failing, i.e., there are some pixelGroupMaps have pixelGroups, and aren't in cohorts.")
@@ -226,7 +226,7 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
   set(newCohortData, NULL, "B", as.integer(pmin(newCohortData$maxANPP, newCohortData$B)))
 
   newCohortData <- newCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
-                                     mortality = 0, aNPPAct = 0, sumB = 0)]
+                                     mortality = 0L, aNPPAct = 0L, sumB = 0)]
 
   # This removes the duplicated pixels within pixelGroup, i.e., the reason we want pixelGroups
   newCohortData <- unique(newCohortData, by = uniqueCohortDefinition)

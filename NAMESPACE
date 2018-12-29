@@ -2,6 +2,7 @@
 
 export(.cleanLandWebStudyArea)
 export(addPixelGroup)
+export(asInteger)
 export(assignLightProb)
 export(defineFlammable)
 export(equivalentName)
