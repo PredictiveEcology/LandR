@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{asInteger}
 \alias{asInteger}
-\title{as.integer(round(x, 0))}
+\title{Convert numeric values to rounded integers}
 \usage{
 asInteger(x)
 }
@@ -14,5 +14,5 @@ An integer vector of length \code{x}, rounded to zero decimal places
   prior to \code{as.integer}
 }
 \description{
-Simply a wrapper so that as.integer actually rounds, rather than trunc
+Simple wrapper around \code{as.integer} to round, rather than truncate, values.
 }

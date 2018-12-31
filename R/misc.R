@@ -18,13 +18,15 @@ assignLightProb <- function(sufficientLight, newCohortData) {
   newCohortData[ , lightProb := sufficientLight[cbind(shadetolerance, siteShade + 2)]]
 }
 
-#' as.integer(round(x, 0))
+#' Convert numeric values to rounded integers
 #'
-#' Simply a wrapper so that as.integer actually rounds, rather than trunc
+#' Simple wrapper around \code{as.integer} to round, rather than truncate, values.
 #'
 #' @param x A numeric vector
+#'
 #' @return An integer vector of length \code{x}, rounded to zero decimal places
 #'   prior to \code{as.integer}
+#'
 #' @export
 asInteger <- function(x)
   as.integer(round(x, 0))
