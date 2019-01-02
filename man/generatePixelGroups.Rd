@@ -5,7 +5,7 @@
 \title{Add the correct \code{pixelGroups} to a \code{pixelCohortData} object}
 \usage{
 generatePixelGroups(pixelCohortData, maxPixelGroup,
-  columns = c("ecoregionGroup", "speciesCode", "age", , "biomass"))
+  columns = c("ecoregionGroup", "speciesCode", "age", "biomass"))
 }
 \arguments{
 \item{pixelCohortData}{# pixel groups are groups of identical pixels based
