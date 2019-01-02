@@ -47,7 +47,7 @@ A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
 \code{rbindlist}ed cohortData
 }
 \description{
-This is a wrapper for  \code{addPixelGroup}, \code{initiateNewCohort} and
+This is a wrapper for  \code{generatePixelGroups}, \code{initiateNewCohort} and
 updates to \code{pixelGroupMap} via assignment to new \code{pixelIndex}
 values in \code{newCohortData}. By running these all together,
 there is less chance that they will diverge. There are some checks
