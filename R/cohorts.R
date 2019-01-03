@@ -53,8 +53,9 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
-updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion,
-                             firePixelTable = NULL, successionTimestep) {
+updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
+                             speciesEcoregion, firePixelTable = NULL,
+                             successionTimestep) {
 
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
 
@@ -103,7 +104,6 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
                                                 columns = columnForPG)]
 
     if (isTRUE(getOption("LandR.assertions"))) {
-
       uniquePixelsInCohorts <- pixelGroupMap[][unique(cohorts$pixelIndex)]
       pixelsOnMap <- sum(!is.na(pixelGroupMap[]), na.rm = TRUE)
       lenUniquePixelsInCohorts <- length(unique(cohorts$pixelIndex))
@@ -180,20 +180,22 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
               pixelGroupMap = outs$pixelGroupMap))
 }
 
-
-#' \code{.initiateNewCohorts} will calculate new values for \code{B}, add
-#' \code{age}, then \code{rbindlist} this with \code{cohortData}
+#' Initiate new cohorts
+#'
+#' Calculate new values for \code{B}, add \code{age}, then \code{rbindlist} this
+#' with \code{cohortData}.
 #'
 #' @inheritParams updateCohortData
 #' @return
 #' \code{.initiateNewCohorts} returns A \code{data.table} with a new,
 #' \code{rbindlist}ed cohortData
 #'
-#' @rdname updateCohortData
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
-.initiateNewCohorts <- function(newCohortData, cohortData, pixelGroupMap, time, speciesEcoregion) {
+#' @rdname updateCohortData
+.initiateNewCohorts <- function(newCohortData, cohortData, pixelGroupMap, time,
+                                speciesEcoregion) {
   ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum biomass per ecoregion, join to new cohort data
   namesNCD <- names(newCohortData)
@@ -239,18 +241,17 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time, spe
   return(cohortData)
 }
 
-
-
 #' Remove missing cohorts from cohortData based on pixelGroupMap
 #'
 #'
-#' @param cohortData a \code{data.table} with columns:
-#'   "pixelGroup", "ecoregionGroup", "speciesCode", "age", "B", "mortality", "aNPPAct", "sumB"
-#' @param pixelGroupMap Raster layer with pixel values equal to a pixel group number that
-#'   correspondsd exactly to ]\code{pixelGroup} column in \code{cohortData}
+#' @param cohortData A \code{data.table} with columns:
+#'   \code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
+#'   \code{B}, \code{mortality}, \code{aNPPAct}, ond \code{sumB}.
+#' @param pixelGroupMap Raster layer with pixel values equal to a pixel group number
+#'   that correspondsd exactly to ]\code{pixelGroup} column in \code{cohortData}.
 #' @param firePixelTable A data.table with 2 columns, \code{pixelIndex} and \code{pixelGroup}.
-#'   This will be used in conjunction
-#'   with cohortData and pixelGroupMap to ensure that everything matches correctly.
+#'   This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
+#'   to ensure that everything matches correctly.
 #'
 #' @return
 #' A \code{list} with 2 \code{data.table} objects, \code{cohortData} and \code{pixelGroupMap},
@@ -287,7 +288,6 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap, firePixelTable) {
               pixelGroupMap = pixelGroupMap))
 }
 
-
 #' Create the correct string for pixelGroups
 #'
 #' @inheritParams generatePixelGroups
@@ -314,12 +314,12 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap, firePixelTable) {
 #' Returns a vector of pixelGroup in the original order of the input \code{pixelCohortData}.
 #' This should likely be added to the \code{pixelCohortData} object immediately.
 #'
-#'
 #' @export
 #' @importFrom data.table setkey
 #' @importFrom SpaDES.core paddedFloatToChar
 generatePixelGroups <- function(pixelCohortData, maxPixelGroup,
-                                columns = c("ecoregionGroup", "speciesCode", "age", "biomass")) {
+                                columns = c("ecoregionGroup", "speciesCode",
+                                            "age", "biomass")) {
 
   columnsOrig <- columns
   columns <- columns[columns %in% names(pixelCohortData)]

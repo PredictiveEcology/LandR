@@ -52,6 +52,9 @@ updates to \code{pixelGroupMap} via assignment to new \code{pixelIndex}
 values in \code{newCohortData}. By running these all together,
 there is less chance that they will diverge. There are some checks
 internally for consistency.
+
+Calculate new values for \code{B}, add \code{age}, then \code{rbindlist} this
+with \code{cohortData}.
 }
 \details{
 Does the following:

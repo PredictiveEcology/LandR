@@ -7,15 +7,16 @@
 rmMissingCohorts(cohortData, pixelGroupMap, firePixelTable)
 }
 \arguments{
-\item{cohortData}{a \code{data.table} with columns:
-"pixelGroup", "ecoregionGroup", "speciesCode", "age", "B", "mortality", "aNPPAct", "sumB"}
+\item{cohortData}{A \code{data.table} with columns:
+\code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
+\code{B}, \code{mortality}, \code{aNPPAct}, ond \code{sumB}.}
 
-\item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group number that
-correspondsd exactly to ]\code{pixelGroup} column in \code{cohortData}}
+\item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group number
+that correspondsd exactly to ]\code{pixelGroup} column in \code{cohortData}.}
 
 \item{firePixelTable}{A data.table with 2 columns, \code{pixelIndex} and \code{pixelGroup}.
-This will be used in conjunction
-with cohortData and pixelGroupMap to ensure that everything matches correctly.}
+This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
+to ensure that everything matches correctly.}
 }
 \value{
 A \code{list} with 2 \code{data.table} objects, \code{cohortData} and \code{pixelGroupMap},
