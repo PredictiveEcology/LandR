@@ -447,3 +447,30 @@ uniqueCohortDefinition <- c("pixelGroup", "speciesCode", "age", "B")
 #' @export
 #' @rdname uniqueDefinitions
 uniqueSpeciesEcoregionDefinition <- c("speciesCode", "ecoregionGroup")
+
+
+#' Summary for cohortData
+#' @param cohortData A cohortData object
+#' @export
+describeCohortData <- function(cohortData) {
+  vals <- c("biomass", "totalBiomass", "age", "cover")
+  names(vals) <- vals
+  out <- lapply(vals, function(val)
+    .cohortMessages(cohortData, val)
+  )
+  message(magenta("Pixels with non-NA cover:, ", cohortData[!is.na(cover), length(unique(pixelIndex))]))
+}
+
+.cohortMessages <- function(cohortData, val) {
+  out <- list()
+  if (val %in% colnames(cohortData)) {
+    pixelsNA <- NROW(cohortData[is.na(get(val)), unique("pixelIndex"), with = FALSE])
+    message(magenta("Pixels with missing", val, ":", format(pixelsNA, big.mark = ",")))
+    pixelsZero <- NROW(cohortData[, all(get(val) == 0), by = "pixelIndex"][get("V1") ==TRUE])
+    message(magenta("Pixels with all(",val," == 0): ", format(pixelsZero, big.mark = ",")))
+    pixelsBiomassNonZero <- NROW(cohortData[, any(get(val) > 0), by = "pixelIndex"][get("V1") ==TRUE])
+    message(magenta("Pixels with all(",val," > 0): ", format(pixelsBiomassNonZero, big.mark = ",")))
+    out <- list(pixelsNA = pixelsNA, pixelsZero = pixelsZero, pixelsBiomassNonZero = pixelsBiomassNonZero)
+  }
+  return(invisible(out))
+}
