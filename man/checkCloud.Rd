@@ -19,8 +19,3 @@ provided as a character string}
 \description{
 Very experimental
 }
-\examples{
-\dontrun{
-
-}
-}

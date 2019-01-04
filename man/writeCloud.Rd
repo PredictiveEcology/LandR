@@ -20,11 +20,6 @@ is the the checksums file}
 \description{
 Very experimental
 }
-\examples{
-\dontrun{
-
-}
-}
 \seealso{
 \code{\link{checkCloud}}
 }
