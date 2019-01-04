@@ -380,7 +380,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                          datatype = "INT2U",
                                          overwrite = TRUE,
                                          userTags = dots$userTags
-                          ),
+                         ),
                          prepInputs)
 
   names(speciesLayers) <- kNNnames
