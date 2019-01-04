@@ -1,9 +1,11 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(".", ":=", "age", "aNPPAct", "ecoregion", "ecoregionGroup",
-                           "maxANPP", "maxB", "maxB_eco", "mortality", "pixelIndex",
-                           "speciesposition", "speciesGroup", "speciesInt", "sumB",
-                           "temppixelGroup", "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex",
-                           "year"))
+  utils::globalVariables(c(
+    ".", ":=", "age", "aNPPAct", "columnForPG", "cover", "ecoregion", "ecoregionGroup",
+    "maxANPP", "maxB", "maxB_eco", "mortality", "outBiomass", "pixelIndex",
+    "speciesposition", "speciesGroup", "speciesInt", "sumB",
+    "temppixelGroup", "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex",
+    "year"
+  ))
 }
 
 #' Add cohorts to \code{cohortData} and \code{pixelGroupMap}
