@@ -364,7 +364,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   archives <- split(archives, archives[, "archive2"])
 
   if (!all(file_path_sans_ext(names(archives)) == file_path_sans_ext(targetFiles)))
-    stop("Something is wrong. File a bug report re: loadkNNSpeciesLayers and archive ordering")
+    stop("Something is wrong. File a bug report re: loadkNNSpeciesLayers and archive ordering.")
 
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
 
@@ -388,8 +388,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   if (!is.null(sppMerge)) {
     if (length(sppMerge) > 0)
       speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
-                                    sppEquiv = sppEquiv, column = "KNN", suffix = suffix,
-                                    dPath = dPath)
+                                      sppEquiv = sppEquiv, column = "KNN", suffix = suffix,
+                                      dPath = dPath)
   }
 
   ## Rename species layers - There will be 2 groups -- one
@@ -439,9 +439,12 @@ sumRastersBySpecies <- function(speciesLayers, layersToSum, filenameToSave, newL
 #' If only high or low resolution data are available, it will use it without
 #' attempting to overlay.
 #'
-#' @param highQualityStack      high quality list/stack of rasters (will be used preferencially)
-#' @param lowQualityStack       low quality list/stack of rasters (will be used to fill NAs in highQualityStack)
-#' @param outputFilenameSuffix  file suffix to save raster if there was overlaying. Defautls to "overlay"
+#' @param highQualityStack      high quality list/stack of rasters
+#'                              (will be used preferentially)
+#' @param lowQualityStack       low quality list/stack of rasters
+#'                              (will be used to fill \code{NA}s in \code{highQualityStack})
+#' @param outputFilenameSuffix  file suffix to save raster if there was overlaying.
+#'                              Defaults to \code{"overlay"}.
 #' @param destinationPath       directory for saved rasters
 #'
 #' @export
@@ -590,7 +593,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
   }
 }
 
-#' Merge species pecent-cover rasters
+#' Merge species percent-cover rasters
 #'
 #' Used internally in \code{overlayStacks}.
 #'
