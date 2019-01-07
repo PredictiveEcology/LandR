@@ -24,3 +24,6 @@ and assign them new values in the output object. This function will
 also check that it must be an \code{ecoregionCode} that already exists in
 \code{cohortData}, i.e., not create new \code{ecoregionCode} values.
 }
+\author{
+Eliot McIntire
+}

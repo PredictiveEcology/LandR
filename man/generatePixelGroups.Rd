@@ -5,7 +5,7 @@
 \title{Add the correct \code{pixelGroups} to a \code{pixelCohortData} object}
 \usage{
 generatePixelGroups(pixelCohortData, maxPixelGroup,
-  columns = c("ecoregionGroup", "speciesCode", "age", "biomass"))
+  columns = c("ecoregionGroup", "speciesCode", "age", "B"))
 }
 \arguments{
 \item{pixelCohortData}{# pixel groups are groups of identical pixels based
@@ -14,7 +14,7 @@ on \code{speciesGroup} x \code{Age} and \code{ecoregionGroup}.}
 \item{maxPixelGroup}{A length 1 numeric/integer indicating the current maximum pixelGroup value}
 
 \item{columns}{A character vector of column names to use as part of the generation of unique
-combinations of features. Default is \code{c("ecoregionGroup", "speciesCode", "age", "biomass")}}
+combinations of features. Default is \code{c("ecoregionGroup", "speciesCode", "age", "B")}}
 }
 \value{
 Returns a vector of pixelGroup in the original order of the input \code{pixelCohortData}.

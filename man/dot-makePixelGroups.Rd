@@ -15,7 +15,7 @@
 \item{speciesGroup}{A vector of speciesGroup strings}
 
 \item{columns}{A character vector of column names to use as part of the generation of unique
-combinations of features. Default is \code{c("ecoregionGroup", "speciesCode", "age", "biomass")}}
+combinations of features. Default is \code{c("ecoregionGroup", "speciesCode", "age", "B")}}
 }
 \value{
 TODO: description needed

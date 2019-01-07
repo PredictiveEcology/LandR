@@ -60,7 +60,7 @@ with \code{cohortData}.
 Does the following:
 \enumerate{
   \item add new cohort data into \code{cohortdata};
-  \item assign initial biomass and age for new cohort;
+  \item assign initial B and age for new cohort;
   \item assign the new pixelgroup to the pixels that have new cohort;
   \item update the pixelgroup map.
 }
