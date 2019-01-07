@@ -545,6 +545,8 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC, pixelCohor
 #' @author Eliot McIntire
 #' @export
 #' @importFrom crayon blue
+#' @importFrom data.table melt setnames
+#' @importFrom reproducible Cache
 makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroupBiomassClass) {
   ### Create groupings
   if (isTRUE(getOption("LandR.assertions"))) {
@@ -577,7 +579,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   cohortData[cover == 0, `:=`(age = 0L, B = 0L)]
   message(blue("assign totalBiomass = 0 sum(cover) = 0 in a pixel, ",
                "\n  because cover is most reliable dataset"))
-  cohortData <- cohortData[, sum(cover)==0, by = "pixelIndex"][V1 == TRUE][
+  cohortData <- cohortData[, sum(cover) == 0, by = "pixelIndex"][V1 == TRUE][
     cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
   cohortData[, V1 := NULL]
 
@@ -591,7 +593,6 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     }
     cover
   }, by = "pixelIndex"]
-
 
   # Biomass -- by cohort
   message(crayon::blue("Divide total B of each pixel by the relative cover of the cohorts"))
