@@ -5,7 +5,7 @@
 \title{Generate vegetation type map}
 \usage{
 vegTypeMapGenerator(cohortdata, pixelGroupMap, vegLeadingProportion,
-  colors, unitTest = getOption("pemisc.unitTest", FALSE))
+  colors, unitTest = getOption("LandR.assertions", FALSE))
 }
 \arguments{
 \item{cohortdata}{A different \code{data.table} of stuff}

@@ -16,7 +16,7 @@ loadkNNSpeciesLayers(dPath, rasterToMatch, studyArea, sppEquiv,
 
 \item{sppEquiv}{table with species name equivalencies between the
 kNN format and the final naming format.
-See \code{data("sppEquivalencies_CA", "pemisc")}.}
+See \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{knnNamesCol}{character string indicating the column in \code{sppEquiv}
 containing kNN species names.
