@@ -444,3 +444,71 @@ describeCohortData <- function(cohortData) {
   }
   return(invisible(out))
 }
+
+
+#' Convert Land Cover Classes to another value in is neighbourhood
+#'
+#' This will search around the pixels on \code{rstLCC} that have
+#' \code{pixelClassesToReplace}, and search in iteratively increasing
+#' radii outwards for other Land Cover Classes than \code{pixelClassesToReplace}.
+#' It will then take the cohorts that were in pixels with \code{pixelClassesToReplace}
+#' and assign them new values in the output object. This function will
+#' also check that it must be an \code{ecoregionCode} that already exists in
+#' \code{cohortData}, i.e., not create new \code{ecoregionCode} values.
+#'
+#' @export
+#' @param pixelClassesToReplace Integer vector of classes that are are to be replaced, e.g.,
+#'      34, 35, 36 on LCC2005, which are burned young, burned 10yr, and cities
+#' @param rstLCC LCC raster, e.g., LCC2005
+#' @param cohortData A data.table with individual cohorts, with data for every pixel
+convertUnwantedLCC <- function(pixelClassesToReplace = 34:36,
+                              rstLCC, pixelCohortData) {
+
+  burnedLCC <- raster(rstLCC);
+  burnedLCC[] <- NA;
+  burnedLCC[rstLCC[] %in% pixelClassesToReplace] <- 1
+  theBurnedCells <- which(burnedLCC[] == 1)
+  cdEcoregionCodes <- as.character(unique(pixelCohortData$initialEcoregionCode))
+  if (getOption("LandR.assertions")) {
+    theBurnedCellsFromCD <- unique(pixelCohortData[lcc %in% pixelClassesToReplace]$pixelIndex)
+    iden <- identical(sort(theBurnedCells), sort(theBurnedCellsFromCD))
+    if (!iden)
+      stop("values of 34 and 35 on pixelCohortData and sim$LCC2005 don't match")
+  }
+  iterations <- 1
+  try(rm(list = "out3"), silent = TRUE)
+  cd <- pixelCohortData[, .(pixelIndex, initialEcoregionCode)]
+  numCharEcoregion <- nchar(gsub("_.*", "", cd$initialEcoregionCode[1]))
+  while (length(theBurnedCells) > 0) {
+    print(iterations)
+    out <- spread2(rstLCC, start = theBurnedCells, asRaster = FALSE,
+                   iterations = iterations, allowOverlap = TRUE, spreadProb = 1)
+    out <- out[initialPixels != pixels] # rm pixels which are same as initialPixels --> these are known wrong
+    iterations <- iterations + 1
+    out[, lcc := rstLCC[][pixels]]
+    out <- unique(cd)[out, on = c("pixelIndex" = "pixels")] # join the cd which has initialEcoregionCode
+    out[lcc %in% c(pixelClassesToReplace, 37:39), lcc:=NA]
+    out <- na.omit(out)
+    rowsToKeep <- out[, list(keep = SpaDES.tools:::resample(.I, 1)), by = "initialPixels"] # random sample of available, weighted by abundance
+    out2 <- out[, list(newPossLCC = lcc,
+                       initialEcoregion = substr(initialEcoregionCode, 1, numCharEcoregion),
+                       initialPixels)]
+    out2 <- out2[rowsToKeep$keep]
+    out2[, ecoregionGroup := paste0(initialEcoregion, "_",
+                                    paddedFloatToChar(as.numeric(newPossLCC), padL = 2, padR = 0))]
+    out2[, initialEcoregion := NULL]
+    out2 <- out2[ecoregionGroup %in% cdEcoregionCodes] # remove codes that don't exist in pixelCohortData
+
+    theBurnedCells <- theBurnedCells[!theBurnedCells %in% out2$initialPixels]
+    if (!exists("out3")) {
+      out3 <- out2
+    } else {
+      out3 <- rbindlist(list(out2, out3))
+    }
+  }
+  setnames(out3, "initialPixels", "pixelIndex")
+  out3[, newPossLCC := NULL]
+  out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
+
+  out3
+}

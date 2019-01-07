@@ -3,6 +3,7 @@
 export(.cleanLandWebStudyArea)
 export(asInteger)
 export(assignLightProb)
+export(convertUnwantedLCC)
 export(defineFlammable)
 export(describeCohortData)
 export(equivalentName)
