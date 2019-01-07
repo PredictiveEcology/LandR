@@ -178,6 +178,10 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   pixelGroupData2[mixed == TRUE, leading := "Mixed"]
 
   vegTypeMap <- rasterizeReduced(pixelGroupData2, pixelGroupMap, "leading", "pixelGroup")
+  levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]], colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
+                              stringsAsFactors = FALSE)
+  setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
+
 
   if (isTRUE(unitTest)) {
     # TEST THE MAP
