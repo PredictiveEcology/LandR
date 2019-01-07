@@ -13,7 +13,7 @@ convertUnwantedLCC(pixelClassesToReplace = 34:36, rstLCC,
 
 \item{rstLCC}{LCC raster, e.g., LCC2005}
 
-\item{cohortData}{A data.table with individual cohorts, with data for every pixel}
+\item{pixelCohortData}{A \code{data.table} with individual cohorts, with data for every pixel}
 }
 \description{
 This will search around the pixels on \code{rstLCC} that have

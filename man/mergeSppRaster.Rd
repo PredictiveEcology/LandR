@@ -2,7 +2,7 @@
 % Please edit documentation in R/maps.R
 \name{mergeSppRaster}
 \alias{mergeSppRaster}
-\title{Merge species pecent-cover rasters}
+\title{Merge species percent-cover rasters}
 \usage{
 mergeSppRaster(sppMerge, speciesLayers, sppEquiv, column, suffix, dPath,
   ...)
