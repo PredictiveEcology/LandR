@@ -30,3 +30,12 @@ assignLightProb <- function(sufficientLight, newCohortData) {
 #' @export
 asInteger <- function(x)
   as.integer(round(x, 0))
+
+#' Resample
+#'
+#' Imports the non-exported function \code{SpaDES.tools:::resample}.
+#'
+#' @keywords internal
+#' @rdname resample
+#' @seealso \code{\link[SpaDES.tools]{resample}}
+.resample <- getFromNamespace("resample", "SpaDES.tools")

@@ -1,10 +1,11 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c(
-    ".", ":=", "age", "aNPPAct", "columnForPG", "cover", "ecoregion", "ecoregionGroup",
-    "maxANPP", "maxB", "maxB_eco", "mortality", "outBiomass", "pixelIndex",
-    "speciesposition", "speciesGroup", "speciesInt", "sumB",
-    "temppixelGroup", "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex",
-    "year"
+    ".", ".I", ":=", "age", "aNPPAct", "columnForPG", "cover",
+    "ecoregion", "ecoregionGroup", "initialEcoregion", "initialEcoregionCode",
+    "initialPixels", "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
+    "newPossLCC", "outBiomass", "pixelIndex", "pixels",
+    "speciesposition", "speciesGroup", "speciesInt", "sumB", "temppixelGroup",
+    "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "year"
   ))
 }
 
@@ -456,15 +457,20 @@ describeCohortData <- function(cohortData) {
 #' also check that it must be an \code{ecoregionCode} that already exists in
 #' \code{cohortData}, i.e., not create new \code{ecoregionCode} values.
 #'
-#' @export
 #' @param pixelClassesToReplace Integer vector of classes that are are to be replaced, e.g.,
 #'      34, 35, 36 on LCC2005, which are burned young, burned 10yr, and cities
+#'
 #' @param rstLCC LCC raster, e.g., LCC2005
-#' @param cohortData A data.table with individual cohorts, with data for every pixel
-convertUnwantedLCC <- function(pixelClassesToReplace = 34:36,
-                              rstLCC, pixelCohortData) {
-
-  burnedLCC <- raster(rstLCC);
+#'
+#' @param pixelCohortData A \code{data.table} with individual cohorts, with data for every pixel
+#'
+#' @export
+#' @importFrom data.table rbindlist setnames
+#' @importFrom raster raster
+#' @importFrom SpaDES.core paddedFloatToChar
+#' @importFrom SpaDES.tools spread2
+convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC, pixelCohortData) {
+  burnedLCC <- raster(rstLCC)
   burnedLCC[] <- NA;
   burnedLCC[rstLCC[] %in% pixelClassesToReplace] <- 1
   theBurnedCells <- which(burnedLCC[] == 1)
@@ -487,9 +493,9 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36,
     iterations <- iterations + 1
     out[, lcc := rstLCC[][pixels]]
     out <- unique(cd)[out, on = c("pixelIndex" = "pixels")] # join the cd which has initialEcoregionCode
-    out[lcc %in% c(pixelClassesToReplace, 37:39), lcc:=NA]
+    out[lcc %in% c(pixelClassesToReplace, 37:39), lcc := NA]
     out <- na.omit(out)
-    rowsToKeep <- out[, list(keep = SpaDES.tools:::resample(.I, 1)), by = "initialPixels"] # random sample of available, weighted by abundance
+    rowsToKeep <- out[, list(keep = .resample(.I, 1)), by = "initialPixels"] # random sample of available, weighted by abundance
     out2 <- out[, list(newPossLCC = lcc,
                        initialEcoregion = substr(initialEcoregionCode, 1, numCharEcoregion),
                        initialPixels)]
