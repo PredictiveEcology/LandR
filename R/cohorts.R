@@ -459,8 +459,12 @@ describeCohortData <- function(cohortData) {
 #'
 #' @param pixelClassesToReplace Integer vector of classes that are are to be replaced, e.g.,
 #'      34, 35, 36 on LCC2005, which are burned young, burned 10yr, and cities
-#'
 #' @param rstLCC LCC raster, e.g., LCC2005
+#' @param pixelCohortData A \code{data.table} with individual cohorts, with data for every pixel
+#' @importFrom data.table rbindlist setnames
+#' @importFrom raster raster
+#' @importFrom SpaDES.core paddedFloatToChar
+#' @importFrom SpaDES.tools spread2
 #' @author Eliot McIntire
 convertUnwantedLCC <- function(pixelClassesToReplace = 34:36,
                               rstLCC, pixelCohortData) {
@@ -469,11 +473,6 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36,
   rstUnwantedLCC[] <- NA;
   rstUnwantedLCC[rstLCC[] %in% pixelClassesToReplace] <- 1
   theUnwantedPixels <- which(rstUnwantedLCC[] == 1)
-#' @importFrom data.table rbindlist setnames
-#' @importFrom raster raster
-#' @importFrom SpaDES.core paddedFloatToChar
-#' @importFrom SpaDES.tools spread2
-#' @param pixelCohortData A \code{data.table} with individual cohorts, with data for every pixel
   cdEcoregionCodes <- as.character(unique(pixelCohortData$initialEcoregionCode))
   if (getOption("LandR.assertions")) {
     theUnwantedCellsFromCD <- unique(pixelCohortData[lcc %in% pixelClassesToReplace]$pixelIndex)
@@ -531,7 +530,6 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36,
 #' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
 #'   to establish unique pixelGroups
 #' @author Eliot McIntire
-#' @importFrom assertthat assert_that
 makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroupBiomassClass) {
   ### Create groupings
   if (isTRUE(getOption("LandR.assertions"))) {
