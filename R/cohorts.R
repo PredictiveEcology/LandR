@@ -521,17 +521,13 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC, pixelCohor
 
 #' Generate initial \code{cohortData} table
 #'
-#' Takes a single data.table input, which has the following columns:
+#' Takes a single data.table input, which has the following columns in addition to
+#' others that will be labelled with species name, and contain percent cover of each:
 #' \itemize{
 #'   \item age
 #'   \item logAge
 #'   \item initialEcoregionCode
 #'   \item totalBiomass
-#'   \item Abie_sp
-#'   \item Pice_gla
-#'   \item Pice_mar
-#'   \item Pinu_sp
-#'   \item Popu_sp
 #'   \item pixelIndex
 #'   \item lcc
 #' }

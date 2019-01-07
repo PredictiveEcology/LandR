@@ -63,7 +63,7 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
 
   if (is.null(sppEquiv))
     sppEquiv <- data.table(utils::data("sppEquivalencies_CA",
-                                                 package = "pemisc",
+                                                 package = "LandR",
                                                  envir = environment()))
 
   names(speciesTable) <- c(

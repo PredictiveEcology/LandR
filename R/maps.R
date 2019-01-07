@@ -162,7 +162,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #' @importFrom raster getValues projection projection<- setValues
 #' @importFrom SpaDES.tools rasterizeReduced
 vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
-                                colors, unitTest = getOption("pemisc.unitTest", FALSE)) {
+                                colors, unitTest = getOption("LandR.assertions", FALSE)) {
   # shortcohortdata <- setkey(cohortdata, speciesCode)[
   #   setkey(species[, .(speciesCode, speciesGroup)], speciesCode), nomatch = 0]
   pixelGroupData <- cohortdata[, list(totalB = sum(B, na.rm = TRUE),
@@ -178,6 +178,10 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   pixelGroupData2[mixed == TRUE, leading := "Mixed"]
 
   vegTypeMap <- rasterizeReduced(pixelGroupData2, pixelGroupMap, "leading", "pixelGroup")
+  levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]], colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
+                              stringsAsFactors = FALSE)
+  setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
+
 
   if (isTRUE(unitTest)) {
     # TEST THE MAP
@@ -196,7 +200,7 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
     length(pgs %in% unique(pgTest2$pixelGroup))
     pgs2 <- pgs[pgs %in% unique(pgTest2$pixelGroup)]
     if (!all(setkey(pgTest2, pixelGroup)$leading == names(pgs)[order(pgs)]))
-      stop("The vegTypeMap is incorrect. Please debug pemisc::vegTypeMapGenerator")
+      stop("The vegTypeMap is incorrect. Please debug LandR::vegTypeMapGenerator")
   }
 
   # if (FALSE) {
@@ -266,7 +270,7 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
 #'
 #' @param sppEquiv table with species name equivalencies between the
 #'                           kNN format and the final naming format.
-#'                           See \code{data("sppEquivalencies_CA", "pemisc")}.
+#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
 #'
 #' @param knnNamesCol character string indicating the column in \code{sppEquiv}
 #'                    containing kNN species names.
