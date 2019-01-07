@@ -1,11 +1,13 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c(
-    ".", ".I", ":=", "age", "aNPPAct", "columnForPG", "cover",
-    "ecoregion", "ecoregionGroup", "initialEcoregion", "initialEcoregionCode",
-    "initialPixels", "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
+    ".", ".I", ":=", "age", "aNPPAct", "columnForPG", "cover", "coverOrig",
+    "ecoregion", "ecoregionGroup", "hasBadAge",
+    "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
+    "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
     "newPossLCC", "outBiomass", "pixelIndex", "pixels",
-    "speciesposition", "speciesGroup", "speciesInt", "sumB", "temppixelGroup",
-    "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "year"
+    "speciesposition", "speciesGroup", "speciesInt", "sumB",
+    "temppixelGroup", "totalBiomass",
+    "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
   ))
 }
 
@@ -459,16 +461,17 @@ describeCohortData <- function(cohortData) {
 #'
 #' @param pixelClassesToReplace Integer vector of classes that are are to be replaced, e.g.,
 #'      34, 35, 36 on LCC2005, which are burned young, burned 10yr, and cities
+#'
 #' @param rstLCC LCC raster, e.g., LCC2005
+#'
 #' @param pixelCohortData A \code{data.table} with individual cohorts, with data for every pixel
+#'
+#' @author Eliot McIntire
 #' @importFrom data.table rbindlist setnames
 #' @importFrom raster raster
 #' @importFrom SpaDES.core paddedFloatToChar
 #' @importFrom SpaDES.tools spread2
-#' @author Eliot McIntire
-convertUnwantedLCC <- function(pixelClassesToReplace = 34:36,
-                              rstLCC, pixelCohortData) {
-
+convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC, pixelCohortData) {
   rstUnwantedLCC <- raster(rstLCC);
   rstUnwantedLCC[] <- NA;
   rstUnwantedLCC[rstLCC[] %in% pixelClassesToReplace] <- 1
@@ -516,25 +519,37 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36,
   out3
 }
 
-
 #' Generate initial \code{cohortData} table
 #'
 #' Takes a single data.table input, which has the following columns:
-#' c("age", "logAge", "initialEcoregionCode", "totalBiomass", "Abie_sp",
-#' "Pice_gla", "Pice_mar", "Pinu_sp", "Popu_sp", "pixelIndex", "lcc")
+#' \itemize{
+#'   \item age
+#'   \item logAge
+#'   \item initialEcoregionCode
+#'   \item totalBiomass
+#'   \item Abie_sp
+#'   \item Pice_gla
+#'   \item Pice_mar
+#'   \item Pinu_sp
+#'   \item Popu_sp
+#'   \item pixelIndex
+#'   \item lcc
+#' }
 #'
-#' @export
 #' @param inputDataTable A \code{data.table} with columns described above.
 #' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
 #'   represent percent cover by species
 #' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
 #'   to establish unique pixelGroups
+#'
 #' @author Eliot McIntire
+#' @export
+#' @importFrom crayon blue
 makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroupBiomassClass) {
   ### Create groupings
   if (isTRUE(getOption("LandR.assertions"))) {
-    expectedColNames <- c("age", "logAge", "initialEcoregionCode", "totalBiomass", "lcc",
-                          "pixelIndex")
+    expectedColNames <- c("age", "logAge", "initialEcoregionCode", "totalBiomass",
+                          "lcc", "pixelIndex")
     if (!all(expectedColNames %in% colnames(inputDataTable)))
       stop("Column names for inputDataTable must include ", expectedColNames)
     if (!all(sppColumns %in% colnames(inputDataTable)))
@@ -557,16 +572,15 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
 
   if (getOption("LandR.assertions"))
     #describeCohortData(cohortData)
-
     message(blue("assign B = 0 and age = 0 for pixels where cover = 0, ",
                  "\n  because cover is most reliable dataset"))
   cohortData[cover == 0, `:=`(age = 0L, B = 0L)]
   message(blue("assign totalBiomass = 0 sum(cover) = 0 in a pixel, ",
                "\n  because cover is most reliable dataset"))
-  cohortData <- cohortData[, sum(cover)==0, by = "pixelIndex"][V1 == TRUE][cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
+  cohortData <- cohortData[, sum(cover)==0, by = "pixelIndex"][V1 == TRUE][
+    cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
   cohortData[, V1 := NULL]
 
-  #####################
   ######################
   message(crayon::blue("POSSIBLE ALERT -- assume deciduous cover is 1/2 the conversion to B as conifer"))
   cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)] # CRAZY TODO -- DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
@@ -624,7 +638,6 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   cohortData
 }
 
-
 #' The generic statistical model -- to run lmer or glmer
 #'
 #' This does a few things including R squared, gets the fitted values.
@@ -637,23 +650,24 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
 #' @param ... Anything passed to args for the model
 #'
 #' @export
+#' @importFrom lme4 glmer lmer
+#' @importFrom MuMIn r.squaredGLMM
+#' @importFrom stats fitted predict
 statsModel <- function(form, .specialData, ...) {
   if ("family" %in% names(list(...))) {
-    modelFn <- glmer
+    modelFn <- lme4::glmer
   } else {
-    modelFn <- lmer
+    modelFn <- lme4::lmer
   }
   mod <- modelFn(
     formula = eval(form),
     data = .specialData,
     ...)
 
-  list(mod = mod, pred = fitted(mod),
-       rsq = MuMIn::r.squaredGLMM(mod))
+  list(mod = mod, pred = fitted(mod), rsq = MuMIn::r.squaredGLMM(mod))
 }
 
-
-#' default columns that define pixel groups
+#' Default columns that define pixel groups
+#'
 #' @export
 columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
-

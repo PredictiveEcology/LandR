@@ -3,12 +3,12 @@
 \docType{data}
 \name{columnsForPixelGroups}
 \alias{columnsForPixelGroups}
-\title{default columns that define pixel groups}
+\title{Default columns that define pixel groups}
 \format{An object of class \code{character} of length 4.}
 \usage{
 columnsForPixelGroups
 }
 \description{
-default columns that define pixel groups
+Default columns that define pixel groups
 }
 \keyword{datasets}

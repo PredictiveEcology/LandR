@@ -1,7 +1,10 @@
 #' Assertions
 #'
-#' @param cohortData34to36 A cohortData data.table with only the pixels what were lcc 34:36
-#' @param cohortData The full cohortData data.table
+#' @param cohortData34to36 A \code{cohortData} \code{data.table} with only the
+#'                         pixels what were lcc 34:36
+#'
+#' @param cohortData The full \code{cohortData} \code{data.table}
+#'
 #' @export
 #' @rdname assertions
 assert1 <- function(cohortData34to36, cohortData) {
@@ -15,13 +18,14 @@ assert1 <- function(cohortData34to36, cohortData) {
     if (!onlyExistingCodes)
       stop("There are some ecoregionCodes created post replacement of 34 and 35")
   }
-
 }
 
-#' @param cohortData The full cohortData data.table
-#' @param ecoregionMap The ecoregionMap, a raster of all the unique groupings
-#' @param speciesEcoregion The speciesEcoregion data.table
+#' @param ecoregionMap The \code{ecoregionMap}, a raster of all the unique groupings
+#' @param speciesEcoregion The \code{speciesEcoregion} \code{data.table}
+#' @param minRelativeB TODO: add description
+#'
 #' @export
+#' @importFrom utils str
 #' @rdname assertions
 assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB) {
   erg <- list()
@@ -44,7 +48,6 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB)
     stop("speciesEcoregion, cohortData, and ecoregionMap should all have exactly the same",
          "\n  ecoregionGroups. They do not. This needs to be fixed before proceeding.")
   }
-
 }
 
 #' @param obj A data.frame or data.table-like object
@@ -66,4 +69,3 @@ assertColumns <- function(obj, colClasses) {
            " ... of classes: ", paste(colClasses, collapse = ", "))
   }
 }
-

@@ -18,8 +18,19 @@ to establish unique pixelGroups}
 }
 \description{
 Takes a single data.table input, which has the following columns:
-c("age", "logAge", "initialEcoregionCode", "totalBiomass", "Abie_sp",
-"Pice_gla", "Pice_mar", "Pinu_sp", "Popu_sp", "pixelIndex", "lcc")
+\itemize{
+  \item age
+  \item logAge
+  \item initialEcoregionCode
+  \item totalBiomass
+  \item Abie_sp
+  \item Pice_gla
+  \item Pice_mar
+  \item Pinu_sp
+  \item Popu_sp
+  \item pixelIndex
+  \item lcc
+}
 }
 \author{
 Eliot McIntire

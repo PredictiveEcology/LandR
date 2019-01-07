@@ -638,12 +638,11 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
   return(speciesLayers)
 }
 
-
 #' Fasterize polygons using \code{fasterize}
 #'
 #' @param sp a shapefile to rasterize
 #' @param raster the template raster to use
-#' @param fieldname the field to use for the rasterizing (will be ignored if the
+#' @param fieldName the field to use for the rasterizing (will be ignored if the
 #'                  shapefile has no fields)
 #'
 #' @return TODO: is it a \code{RasterLayer}?

@@ -11,7 +11,7 @@ fasterizeFromSp(sp, raster, fieldName)
 
 \item{raster}{the template raster to use}
 
-\item{fieldname}{the field to use for the rasterizing (will be ignored if the
+\item{fieldName}{the field to use for the rasterizing (will be ignored if the
 shapefile has no fields)}
 }
 \value{

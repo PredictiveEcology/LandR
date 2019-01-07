@@ -13,19 +13,20 @@ assertERGs(ecoregionMap, cohortData, speciesEcoregion, minRelativeB)
 assertColumns(obj, colClasses)
 }
 \arguments{
-\item{cohortData34to36}{A cohortData data.table with only the pixels what were lcc 34:36}
+\item{cohortData34to36}{A \code{cohortData} \code{data.table} with only the
+pixels what were lcc 34:36}
 
-\item{cohortData}{The full cohortData data.table}
+\item{cohortData}{The full \code{cohortData} \code{data.table}}
 
-\item{ecoregionMap}{The ecoregionMap, a raster of all the unique groupings}
+\item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique groupings}
 
-\item{speciesEcoregion}{The speciesEcoregion data.table}
+\item{speciesEcoregion}{The \code{speciesEcoregion} \code{data.table}}
+
+\item{minRelativeB}{TODO: add description}
 
 \item{obj}{A data.frame or data.table-like object}
 
 \item{colClasses}{A named vector of column classes, where the names are the column names}
-
-\item{cohortData}{The full cohortData data.table}
 }
 \description{
 Assertions
