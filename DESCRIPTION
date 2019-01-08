@@ -34,7 +34,7 @@ Imports:
     lme4,
     magrittr,
     methods,
-    MuMIn,
+    MuMIn (>= 1.42.5),
     parallel,
     pemisc,
     quickPlot,
