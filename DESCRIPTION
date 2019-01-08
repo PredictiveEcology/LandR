@@ -55,7 +55,8 @@ Suggests:
     testthat
 Remotes:
     PredictiveEcology/pemisc@development,
-    PredictiveEcology/reproducible@development
+    PredictiveEcology/reproducible@development,
+    rforge/mumin/pkg
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
