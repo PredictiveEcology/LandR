@@ -464,13 +464,14 @@ describeCohortData <- function(cohortData) {
 #'
 #' @param rstLCC LCC raster, e.g., LCC2005
 #'
-#' @param pixelCohortData A \code{data.table} with individual cohorts, with data for every pixel,
-#'   columns: \code{initialEcoregionCode}, \code{speciesCode}
-#' @param rowsInPCDToKeep An unevaluated expression, e.g., \code{quote(B > 0)} that will be run
-#'     on \code{pixelCohortData} to determine what are available combinations of
-#'     \code{initialEcoregionCode} by speciesCodes
+#' @param pixelCohortData A \code{data.table} with individual cohorts, with data
+#'     for every pixel, columns: \code{initialEcoregionCode}, \code{speciesCode}.
+#' @param rowsInPCDToKeep An unevaluated expression, e.g., \code{quote(B > 0)}
+#'     that will be run on \code{pixelCohortData} to determine what are available
+#'     combinations of \code{initialEcoregionCode} by \code{speciesCodes}.
 #'
 #' @author Eliot McIntire
+#' @export
 #' @importFrom data.table rbindlist setnames
 #' @importFrom raster raster
 #' @importFrom SpaDES.core paddedFloatToChar
