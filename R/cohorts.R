@@ -368,38 +368,6 @@ speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
   spEco[year == max(spEco$year)]
 }
 
-#' A test that pixelGroupMap and cohortData match
-#'
-#' @inheritParams updateCohortData
-#' @param sim If the simList is included, then the browser() call will be more useful
-#' @param maxExpectedNumDiverge A numeric, length 1, indicating by how many they
-#'   can diverge. Default 1.
-#' @param message An optional message to print. This may help identify where this function
-#'   was called.
-#' @note
-#' TODO
-#'
-#' @export
-#' @importFrom crayon green
-#' @importFrom stats na.omit
-testCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1,
-                           message = "") {
-  browser(expr = exists("aaaa"))
-
-  a <- sort(unique(na.omit(pixelGroupMap[])))
-  b <- sort(unique(na.omit(cohortData$pixelGroup)))
-  test1 <- sum(!a %in% b)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
-  test2 <- sum(!b %in% a)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
-  if (test1 > maxExpectedNumDiverge || test2 > maxExpectedNumDiverge) {
-    if (nchar(message) > 0) message(message)
-    if (test1 > maxExpectedNumDiverge) message("test1 is ", test1, " -- too many pixelGroups on pixelGroupMap")
-    if (test2 > maxExpectedNumDiverge) message("test2 is ", test2, " -- too many pixelGroups in cohortData")
-    stop("The sim$pixelGroupMap and cohortData have unmatching pixelGroup. They must be matching.",
-         " Please contact the module developers")
-  } else {
-    message(crayon::green("  -- assertion passed using testCohortData --"))
-  }
-}
 
 .ageRndUpSuccessionTimestep <- function(age, successionTimestep) {
   as.integer(ceiling(as.numeric(age) / successionTimestep) * successionTimestep)
@@ -490,7 +458,7 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC, pixelCohor
                             cover = NULL, coverOrig = NULL, B = NULL, lcc = NULL)]
   if (getOption("LandR.assertions")) {
     theUnwantedCellsFromCD <- unique(pixelCohortData[lcc %in% pixelClassesToReplace]$pixelIndex)
-    iden <- identical(sort(theUnwantedPixels), sort(theUnwantedCellsFromCD))
+    iden <- identical(sort(unique(theUnwantedPixels)), sort(theUnwantedCellsFromCD))
     if (!iden)
       stop("values of 34 and 35 on pixelCohortData and sim$LCC2005 don't match")
   }
@@ -530,7 +498,7 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC, pixelCohor
   }
 
   setnames(out3, c("initialPixels", "initialEcoregionCode"), c("pixelIndex", "ecoregionGroup"))
-  out3[, newPossLCC := NULL]
+  out3[, `:=`(newPossLCC = NULL, rasterToMatch = NULL)]
   out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
 
   out3
@@ -570,8 +538,9 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     if (!all(sppColumns %in% colnames(inputDataTable)))
       stop("Species names are incorrect")
     if (!all(unlist(lapply(inputDataTable[, sppColumns, with = FALSE],
-                           function(x) all(x >= 0 & x <= 100)))))
-      stop("Species columns are not percent cover between 0 and 100")
+                           function(x) all(x >= 0 & x <= 100)  ))))
+      stop("Species columns are not percent cover between 0 and 100. This may",
+           " be because they more NA values than the Land Cover raster")
 
   }
   coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
@@ -597,8 +566,8 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   cohortData[, V1 := NULL]
 
   ######################
-  message(crayon::blue("POSSIBLE ALERT -- assume deciduous cover is 1/2 the conversion to B as conifer"))
-  cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)] # CRAZY TODO -- DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
+  # message(crayon::blue("POSSIBLE ALERT -- assume deciduous cover is 1/2 the conversion to B as conifer"))
+  # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)] # CRAZY TODO -- DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
   cohortData[ , cover := {
     sumCover <- sum(cover)
     if (sumCover > 100) {
