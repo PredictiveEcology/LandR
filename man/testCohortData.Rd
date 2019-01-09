@@ -2,7 +2,7 @@
 % Please edit documentation in R/assertions.R
 \name{testCohortData}
 \alias{testCohortData}
-\title{A test that pixelGroupMap and cohortData match}
+\title{A test that \code{pixelGroupMap} and \code{cohortData} match}
 \usage{
 testCohortData(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1,
   message = "")
@@ -25,7 +25,7 @@ can diverge. Default 1.}
 was called.}
 }
 \description{
-A test that pixelGroupMap and cohortData match
+A test that \code{pixelGroupMap} and \code{cohortData} match
 }
 \note{
 TODO

@@ -1,3 +1,7 @@
+if (getRversion() >= "3.1.0") {
+  utils::globalVariables(c(".N"))
+}
+
 #' Assertions
 #'
 #' @param cohortData34to36 A \code{cohortData} \code{data.table} with only the
@@ -73,7 +77,7 @@ assertColumns <- function(obj, colClasses) {
   }
 }
 
-#' A test that pixelGroupMap and cohortData match
+#' A test that \code{pixelGroupMap} and \code{cohortData} match
 #'
 #' @inheritParams updateCohortData
 #' @param sim If the simList is included, then the browser() call will be more useful
@@ -81,6 +85,7 @@ assertColumns <- function(obj, colClasses) {
 #'   can diverge. Default 1.
 #' @param message An optional message to print. This may help identify where this function
 #'   was called.
+#'
 #' @note
 #' TODO
 #'
