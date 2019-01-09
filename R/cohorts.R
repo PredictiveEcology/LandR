@@ -498,7 +498,7 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC, pixelCohor
   }
 
   setnames(out3, c("initialPixels", "initialEcoregionCode"), c("pixelIndex", "ecoregionGroup"))
-  out3[, `:=`(newPossLCC = NULL, speciesCode = NULL, rasterToMatch = NULL)]
+  out3[, `:=`(newPossLCC = NULL, rasterToMatch = NULL)]
   out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
 
   out3
