@@ -15,10 +15,10 @@ if (getRversion() >= "3.1.0") {
 #'
 #' @param filename2 See \code{\link[reproducible]{postProcess}}. Default \code{NULL}.
 #'
+#' @export
 #' @importFrom grDevices colorRampPalette
 #' @importFrom quickPlot setColors<-
 #' @importFrom raster maxValue minValue ratify reclassify writeRaster
-#' @export
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
                             nonFlammClasses = c(36L, 37L, 38L, 39L),
                             mask = NULL, filename2 = NULL) {
