@@ -490,7 +490,7 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC, pixelCohor
                             cover = NULL, coverOrig = NULL, B = NULL, lcc = NULL)]
   if (getOption("LandR.assertions")) {
     theUnwantedCellsFromCD <- unique(pixelCohortData[lcc %in% pixelClassesToReplace]$pixelIndex)
-    iden <- identical(sort(theUnwantedPixels), sort(theUnwantedCellsFromCD))
+    iden <- identical(sort(unique(theUnwantedPixels)), sort(theUnwantedCellsFromCD))
     if (!iden)
       stop("values of 34 and 35 on pixelCohortData and sim$LCC2005 don't match")
   }
@@ -570,8 +570,9 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     if (!all(sppColumns %in% colnames(inputDataTable)))
       stop("Species names are incorrect")
     if (!all(unlist(lapply(inputDataTable[, sppColumns, with = FALSE],
-                           function(x) all(x >= 0 & x <= 100)))))
-      stop("Species columns are not percent cover between 0 and 100")
+                           function(x) all(x >= 0 & x <= 100)  ))))
+      stop("Species columns are not percent cover between 0 and 100. This may",
+           " be because they more NA values than the Land Cover raster")
 
   }
   coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
@@ -597,8 +598,8 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   cohortData[, V1 := NULL]
 
   ######################
-  message(crayon::blue("POSSIBLE ALERT -- assume deciduous cover is 1/2 the conversion to B as conifer"))
-  cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)] # CRAZY TODO -- DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
+  # message(crayon::blue("POSSIBLE ALERT -- assume deciduous cover is 1/2 the conversion to B as conifer"))
+  # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)] # CRAZY TODO -- DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
   cohortData[ , cover := {
     sumCover <- sum(cover)
     if (sumCover > 100) {
