@@ -24,6 +24,26 @@ assert1 <- function(cohortData34to36, cohortData) {
   }
 }
 
+
+#' Assertions
+#'
+#'
+#' @param cohortData The full \code{cohortData} \code{data.table}
+#' @param columns Vector of column names on which to test for unique cohortData
+#'
+#' @export
+#' @rdname assertions
+assertUniqueCohortData <- function(cd, columns) {
+  if (getOption("LandR.assertions")) {
+    obj <- cd[ , .N, by = columns]
+    whNEQOne <- which(obj$N != 1)
+    test1 <- length(whNEQOne) == 0
+    if (!test1)
+      stop("There are identical cohorts (based on ", paste(columns, collapse = ", "),
+           ") within the same pixelGroup")
+  }
+}
+
 #' @param ecoregionMap The \code{ecoregionMap}, a raster of all the unique groupings
 #' @param speciesEcoregion The \code{speciesEcoregion} \code{data.table}
 #' @param minRelativeB TODO: add description
@@ -99,6 +119,8 @@ testCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge
     b <- sort(unique(na.omit(cohortData$pixelGroup)))
     test1 <- sum(!a %in% b)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
     test2 <- sum(!b %in% a)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
+
+    browser(expr = exists("aaaa"))
     cohortDataN <- cohortData[, .N, by = c("pixelGroup", "speciesCode", "age", "B")]
     test3 <- which(cohortDataN$N != 1)
     if (test1 > maxExpectedNumDiverge || test2 > maxExpectedNumDiverge) {

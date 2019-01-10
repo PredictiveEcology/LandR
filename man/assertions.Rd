@@ -2,11 +2,14 @@
 % Please edit documentation in R/assertions.R
 \name{assert1}
 \alias{assert1}
+\alias{assertUniqueCohortData}
 \alias{assertERGs}
 \alias{assertColumns}
 \title{Assertions}
 \usage{
 assert1(cohortData34to36, cohortData)
+
+assertUniqueCohortData(cd, columns)
 
 assertERGs(ecoregionMap, cohortData, speciesEcoregion, minRelativeB)
 
@@ -18,6 +21,8 @@ pixels what were lcc 34:36}
 
 \item{cohortData}{The full \code{cohortData} \code{data.table}}
 
+\item{columns}{Vector of column names on which to test for unique cohortData}
+
 \item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique groupings}
 
 \item{speciesEcoregion}{The \code{speciesEcoregion} \code{data.table}}
@@ -27,7 +32,11 @@ pixels what were lcc 34:36}
 \item{obj}{A data.frame or data.table-like object}
 
 \item{colClasses}{A named vector of column classes, where the names are the column names}
+
+\item{cohortData}{The full \code{cohortData} \code{data.table}}
 }
 \description{
+Assertions
+
 Assertions
 }
