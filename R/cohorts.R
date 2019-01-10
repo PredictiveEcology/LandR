@@ -6,7 +6,7 @@ if (getRversion() >= "3.1.0") {
     "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
     "newPossLCC", "outBiomass", "pixelIndex", "pixels",
     "speciesposition", "speciesGroup", "speciesInt", "sumB",
-    "temppixelGroup", "totalBiomass",
+    "temppixelGroup", "toDelete", "totalBiomass",
     "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
   ))
 }
@@ -434,8 +434,9 @@ describeCohortData <- function(cohortData) {
 #'
 #' @param ecoregionGroupVec The vector of ecoregionGroup codes
 #'
-#' @param pixelCohortData A \code{data.table} with individual cohorts, with data
-#'     for every pixel, columns: \code{initialEcoregionCode}, \code{speciesCode}.
+#' @param speciesEcoregion TODO: description needed
+#'
+#' @param availableERC_by_Sp TODO: description needed
 #'
 #' @author Eliot McIntire
 #' @export

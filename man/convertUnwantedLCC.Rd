@@ -15,8 +15,9 @@ convertUnwantedLCC(pixelClassesToReplace = 34:36, rstLCC,
 
 \item{ecoregionGroupVec}{The vector of ecoregionGroup codes}
 
-\item{pixelCohortData}{A \code{data.table} with individual cohorts, with data
-for every pixel, columns: \code{initialEcoregionCode}, \code{speciesCode}.}
+\item{speciesEcoregion}{TODO: description needed}
+
+\item{availableERC_by_Sp}{TODO: description needed}
 }
 \description{
 This will search around the pixels on \code{rstLCC} that have

@@ -24,18 +24,13 @@ assert1 <- function(cohortData34to36, cohortData) {
   }
 }
 
-
-#' Assertions
-#'
-#'
-#' @param cohortData The full \code{cohortData} \code{data.table}
 #' @param columns Vector of column names on which to test for unique cohortData
 #'
 #' @export
 #' @rdname assertions
-assertUniqueCohortData <- function(cd, columns) {
+assertUniqueCohortData <- function(cohortData, columns) {
   if (getOption("LandR.assertions")) {
-    obj <- cd[ , .N, by = columns]
+    obj <- cohortData[ , .N, by = columns]
     whNEQOne <- which(obj$N != 1)
     test1 <- length(whNEQOne) == 0
     if (!test1)
@@ -73,7 +68,6 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB)
       stop("speciesEcoregion, cohortData, and ecoregionMap should all have exactly the same",
            "\n  ecoregionGroups. They do not. This needs to be fixed before proceeding.")
     }
-
   }
 }
 
