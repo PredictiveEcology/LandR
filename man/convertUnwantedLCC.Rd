@@ -5,7 +5,7 @@
 \title{Convert Land Cover Classes to another value in is neighbourhood}
 \usage{
 convertUnwantedLCC(pixelClassesToReplace = 34:36, rstLCC,
-  pixelCohortData, rowsInPCDToKeep)
+  ecoregionGroupVec, speciesEcoregion, availableERC_by_Sp)
 }
 \arguments{
 \item{pixelClassesToReplace}{Integer vector of classes that are are to be replaced, e.g.,
@@ -13,12 +13,10 @@ convertUnwantedLCC(pixelClassesToReplace = 34:36, rstLCC,
 
 \item{rstLCC}{LCC raster, e.g., LCC2005}
 
+\item{ecoregionGroupVec}{The vector of ecoregionGroup codes}
+
 \item{pixelCohortData}{A \code{data.table} with individual cohorts, with data
 for every pixel, columns: \code{initialEcoregionCode}, \code{speciesCode}.}
-
-\item{rowsInPCDToKeep}{An unevaluated expression, e.g., \code{quote(B > 0)}
-that will be run on \code{pixelCohortData} to determine what are available
-combinations of \code{initialEcoregionCode} by \code{speciesCodes}.}
 }
 \description{
 This will search around the pixels on \code{rstLCC} that have

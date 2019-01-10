@@ -432,11 +432,10 @@ describeCohortData <- function(cohortData) {
 #'
 #' @param rstLCC LCC raster, e.g., LCC2005
 #'
+#' @param ecoregionGroupVec The vector of ecoregionGroup codes
+#'
 #' @param pixelCohortData A \code{data.table} with individual cohorts, with data
 #'     for every pixel, columns: \code{initialEcoregionCode}, \code{speciesCode}.
-#' @param rowsInPCDToKeep An unevaluated expression, e.g., \code{quote(B > 0)}
-#'     that will be run on \code{pixelCohortData} to determine what are available
-#'     combinations of \code{initialEcoregionCode} by \code{speciesCodes}.
 #'
 #' @author Eliot McIntire
 #' @export
@@ -444,52 +443,69 @@ describeCohortData <- function(cohortData) {
 #' @importFrom raster raster
 #' @importFrom SpaDES.core paddedFloatToChar
 #' @importFrom SpaDES.tools spread2
-convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC, pixelCohortData,
-                               rowsInPCDToKeep) {
-  rstUnwantedLCC <- raster(rstLCC);
+convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC,
+                               ecoregionGroupVec, speciesEcoregion,
+                               availableERC_by_Sp) {
+  rstUnwantedLCC <- integer(length(ecoregionGroupVec))
   rstUnwantedLCC[] <- NA;
-  rstUnwantedLCC[rstLCC[] %in% pixelClassesToReplace] <- 1
-  theUnwantedPixels <- which(rstUnwantedLCC[] == 1)
-  cdEcoregionCodes <- as.character(unique(pixelCohortData$initialEcoregionCode))
-  availableERC_by_Sp <- unique(pixelCohortData, by = c("initialEcoregionCode", "speciesCode", "B"))
-  availableERC_by_Sp <- availableERC_by_Sp[eval(rowsInPCDToKeep)]
-  availableERC_by_Sp <- unique(availableERC_by_Sp, by = c("initialEcoregionCode", "speciesCode"))
-  availableERC_by_Sp[, `:=`(pixelIndex = NULL, age = NULL, logAge = NULL, totalBiomass = NULL,
-                            cover = NULL, coverOrig = NULL, B = NULL, lcc = NULL)]
+  rstUnwantedLCC[gsub(".*_", "", ecoregionGroupVec) %in% pixelClassesToReplace] <- 1
+  theUnwantedPixels <- which(rstUnwantedLCC == 1)
+  theUnwantedPixels <- theUnwantedPixels[theUnwantedPixels %in% availableERC_by_Sp$pixelIndex]
+  #cdEcoregionCodes <- as.character(unique(pixelCohortData$initialEcoregionCode))
+  #availableERC_by_Sp <- unique(pixelCohortData, by = c("initialEcoregionCode", "speciesCode", "B"))
+  #availableERC_by_Sp <- availableERC_by_Sp[eval(rowsInPCDToKeep)]
+  #availableERC_by_Sp <- unique(availableERC_by_Sp, by = c("initialEcoregionCode", "speciesCode"))
+  #availableERC_by_Sp[, `:=`(age = NULL, logAge = NULL, totalBiomass = NULL,
+  #                          cover = NULL, coverOrig = NULL, B = NULL, lcc = NULL)]
   if (getOption("LandR.assertions")) {
-    theUnwantedCellsFromCD <- unique(pixelCohortData[lcc %in% pixelClassesToReplace]$pixelIndex)
-    iden <- identical(sort(unique(theUnwantedPixels)), sort(theUnwantedCellsFromCD))
-    if (!iden)
-      stop("values of 34 and 35 on pixelCohortData and sim$LCC2005 don't match")
+    #theUnwantedCellsFromCD <- unique(pixelCohortData[lcc %in% pixelClassesToReplace]$pixelIndex)
+    #iden <- identical(sort(unique(theUnwantedPixels)), sort(theUnwantedCellsFromCD))
+    #if (!iden)
+    #  stop("values of 34 and 35 on pixelCohortData and sim$LCC2005 don't match")
   }
   iterations <- 1
-  cd <- pixelCohortData[, .(pixelIndex, initialEcoregionCode, speciesCode)]
-  numCharEcoregion <- nchar(gsub("_.*", "", cd$initialEcoregionCode[1]))
+  # cd <- pixelCohortData[, .(pixelIndex, initialEcoregionCode, speciesCode)]
+  numCharEcoregion <- nchar(gsub("_.*", "", availableERC_by_Sp$initialEcoregionCode[1]))
   while (length(theUnwantedPixels) > 0) {
     out <- spread2(rstLCC, start = theUnwantedPixels, asRaster = FALSE,
                    iterations = iterations, allowOverlap = TRUE, spreadProb = 1)
     out <- out[initialPixels != pixels] # rm pixels which are same as initialPixels --> these are known wrong
     iterations <- iterations + 1
     out[, lcc := rstLCC[][pixels]]
-    out <- unique(cd)[out, on = c("pixelIndex" = "pixels")] # join the cd which has initialEcoregionCode
+    # out <- unique(availableERC_by_Sp)[out, on = c("pixelIndex" = "pixels"), nomatch = 0] # join the availableERC_by_Sp which has initialEcoregionCode
     out[lcc %in% c(pixelClassesToReplace), lcc:=NA]
     out <- na.omit(out)
-    rowsToKeep <- out[, list(keep = .resample(.I, 1)), by = "initialPixels"] # random sample of available, weighted by abundance
-    out2 <- out[, list(newPossLCC = lcc,
-                       initialEcoregion = substr(initialEcoregionCode, 1, numCharEcoregion),
-                       initialPixels,
-                       speciesCode)]
-    out2 <- out2[rowsToKeep$keep]
+    # out[, `:=`(potentialNewERG = ecoregionGroupVec[pixels])]
+    # attach speciesCode -- need this so that we know which speciesCodes to test against speciesEcoregion
+    a <- out[availableERC_by_Sp, allow.cartesian = TRUE, on = c("initialPixels" = "pixelIndex"), nomatch = NA]
+    out5 <- availableERC_by_Sp[out, allow.cartesian = TRUE,
+                               on = c("pixelIndex" = "initialPixels"), nomatch = NA] # join the availableERC_by_Sp which has initialEcoregionCode
+
+    # Any that don't have all species, should be removed
+    out5[, toDelete := any(is.na(speciesCode)), by = "pixelIndex"]
+    out6 <- out5[toDelete == FALSE]
+    # out7 <- out5[toDelete == TRUE]
+
+    # browser(expr = out6[pixelIndex == 194455])
+    rowsToKeep <- out6[, list(keep = .resample(.I, 1)), by = c("pixelIndex")] # random sample of available, weighted by abundance
+    out2 <- out6[rowsToKeep$keep,
+                 list(newPossLCC = lcc,
+                      initialEcoregion = substr(initialEcoregionCode, 1, numCharEcoregion),
+                      pixelIndex)]
+    #out2 <- out2[rowsToKeep$keep]
     out2[, ecoregionGroup := paste0(initialEcoregion, "_",
                                     paddedFloatToChar(as.numeric(newPossLCC), padL = 2, padR = 0))]
     out2[, initialEcoregion := NULL]
 
     # remove combinations of ecoregionGroup and speciesCode that don't exist -- Now this excludes B = 0
-    out2 <- availableERC_by_Sp[out2, on = c("initialEcoregionCode" = "ecoregionGroup", "speciesCode"),
-                               nomatch = 0]
+    #out2 <- availableERC_by_Sp[out2, on = c("pixelIndex" = "initialPixels", "initialEcoregionCode" = "ecoregionGroup", "speciesCode"),
+    #                           nomatch = NA]
+    #hasMatch <- out2[, all(!is.na(rasterToMatch)), by = c("pixelIndex", "initialEcoregionCode", "speciesCode")][V1 == TRUE]
+    keepPixels <- unique(out2$pixelIndex)
     # out2 <- out2[ecoregionGroup %in% cdEcoregionCodes] # remove codes that don't exist in pixelCohortData
 
-    theUnwantedPixels <- theUnwantedPixels[!theUnwantedPixels %in% out2$initialPixels]
+    theUnwantedPixels <- theUnwantedPixels[!theUnwantedPixels %in% keepPixels]
+    out2 <- unique(out2)
     if (!exists("out3")) {
       out3 <- out2
     } else {
@@ -497,9 +513,9 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC, pixelCohor
     }
   }
 
-  setnames(out3, c("initialPixels", "initialEcoregionCode"), c("pixelIndex", "ecoregionGroup"))
-  out3[, `:=`(newPossLCC = NULL, rasterToMatch = NULL)]
-  out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
+  # setnames(out3, c("initialPixels", "initialEcoregionCode"), c("pixelIndex", "ecoregionGroup"))
+  out3[, `:=`(newPossLCC = NULL)]
+  # out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
 
   out3
 }
