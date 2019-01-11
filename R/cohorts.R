@@ -81,9 +81,8 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
     message(crayon::green("  Regenerating only open pixels (e.g., likely resprouting & serotiny only)"))
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age") # no Biomass because they all have zero
     cd <- newCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
-    newCohortData[, pixelGroup :=
-                    generatePixelGroups(cd, maxPixelGroup = maxPixelGroup,
-                                        columns = columnsForPG)]#,
+    newCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = maxPixelGroup,
+                                                      columns = columnsForPG)]#,
     #successionTimestep = successionTimestep)
 
     # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
@@ -119,7 +118,8 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
       tableB <- table(allPixelsNotInCohortData) # 25166
 
       test2 <- identical(as.integer(pixelsOnMap - tableB), lenUniquePixelsInCohorts)
-      test3 <- identical(as.integer(pixelsOnMap - (lenBurnedPixels - pixelsRegeneratedOnZeros)), lenUniquePixelsInCohorts)
+      test3 <- identical(as.integer(pixelsOnMap - (lenBurnedPixels - pixelsRegeneratedOnZeros)),
+                         lenUniquePixelsInCohorts)
 
       uniqueAllPixelsNotInCohortData <- unique(allPixelsNotInCohortData)
       test1 <- all(uniqueAllPixelsNotInCohortData %in% c(NA, 0L))
@@ -143,7 +143,6 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
     # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
     pixelsToChange <- unique(cohorts[, c("pixelIndex", "pixelGroup")],
                              by = c("pixelIndex"))
-
   }
 
   # update pixelGroupMap
@@ -180,7 +179,7 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
 
   message(crayon::magenta("NUMBER OF UNIQUE PIXELGROUPS:", length(unique(outs$cohortData$pixelGroup)),
                           ", FORESTED PIXELS:", sum(!is.na(outs$pixelGroupMap[])),
-                          ", PIXELS WITH NO PIXEL GROUP:", sum(outs$pixelGroupMap[]==0, na.rm = TRUE)))
+                          ", PIXELS WITH NO PIXEL GROUP:", sum(outs$pixelGroupMap[] == 0, na.rm = TRUE)))
 
   return(list(cohortData = outs$cohortData,
               pixelGroupMap = outs$pixelGroupMap))
