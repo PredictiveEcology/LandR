@@ -57,6 +57,7 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom crayon green magenta
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
+#' @importFrom SpaDES.core paddedFloatToChar
 #' @importFrom stats na.omit
 updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
                              speciesEcoregion, firePixelTable = NULL,
@@ -177,9 +178,16 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
     }
   }
 
-  message(crayon::magenta("NUMBER OF UNIQUE PIXELGROUPS:", length(unique(outs$cohortData$pixelGroup)),
-                          ", FORESTED PIXELS:", sum(!is.na(outs$pixelGroupMap[])),
-                          ", PIXELS WITH NO PIXEL GROUP:", sum(outs$pixelGroupMap[] == 0, na.rm = TRUE)))
+  nPixForest <- sum(!is.na(outs$pixelGroupMap[]))
+  nPixGrps <- length(unique(outs$cohortData$pixelGroup))
+  nPixNoPixGrp <- sum(outs$pixelGroupMap[] == 0, na.rm = TRUE)
+  nDigits <- max(nchar(c(nPixForest, nPixGrps, nPixNoPixGrp))) + 3
+  message(crayon::magenta("NUMBER OF FORESTED PIXELS          :",
+                          paddedFloatToChar(nPixForest, padL = nDigits, pad = " ")))
+  message(crayon::magenta("NUMBER OF UNIQUE PIXELGROUPS       :",
+                          paddedFloatToChar(nPixGrps, padL = nDigits, pad = " ")))
+  message(crayon::magenta("NUMBER OF PIXELS WITH NO PIXELGROUP:",
+                          paddedFloatToChar(nPixNoPixGrp, padL = nDigits, pad = " ")))
 
   return(list(cohortData = outs$cohortData,
               pixelGroupMap = outs$pixelGroupMap))
