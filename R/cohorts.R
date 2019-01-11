@@ -1,6 +1,6 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c(
-    ".", ".I", ":=", "age", "aNPPAct", "columnForPG", "cover", "coverOrig",
+    ".", ".I", ":=", "age", "aNPPAct", "columnsForPG", "cover", "coverOrig",
     "ecoregion", "ecoregionGroup", "hasBadAge",
     "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
     "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
@@ -106,7 +106,7 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B")
     cd <- cohorts[,c("pixelIndex", columnsForPG), with = FALSE]
     cohorts[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L,
-                                                columns = columnForPG)]
+                                                columns = columnsForPG)]
 
     if (isTRUE(getOption("LandR.assertions"))) {
       uniquePixelsInCohorts <- pixelGroupMap[][unique(cohorts$pixelIndex)]
@@ -178,8 +178,9 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
     }
   }
 
-  message(crayon::magenta("NUMBER OF UNIQUE PIXELGROUPS: ", length(unique(outs$cohortData$pixelGroup)),
-                          " AND FORESTED PIXELS: ", sum(!is.na(outs$pixelGroupMap[]))))
+  message(crayon::magenta("NUMBER OF UNIQUE PIXELGROUPS:", length(unique(outs$cohortData$pixelGroup)),
+                          ", FORESTED PIXELS:", sum(!is.na(outs$pixelGroupMap[])),
+                          ", PIXELS WITH NO PIXEL GROUP:", sum(outs$pixelGroupMap[]==0, na.rm = TRUE)))
 
   return(list(cohortData = outs$cohortData,
               pixelGroupMap = outs$pixelGroupMap))
