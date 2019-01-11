@@ -55,6 +55,7 @@ Suggests:
     rmarkdown,
     testthat
 Remotes:
+    PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/reproducible@development,
     rforge/mumin/pkg
