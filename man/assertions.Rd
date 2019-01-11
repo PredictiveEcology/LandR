@@ -9,7 +9,7 @@
 \usage{
 assert1(cohortData34to36, cohortData)
 
-assertUniqueCohortData(cd, columns)
+assertUniqueCohortData(cohortData, columns)
 
 assertERGs(ecoregionMap, cohortData, speciesEcoregion, minRelativeB)
 
@@ -32,11 +32,7 @@ pixels what were lcc 34:36}
 \item{obj}{A data.frame or data.table-like object}
 
 \item{colClasses}{A named vector of column classes, where the names are the column names}
-
-\item{cohortData}{The full \code{cohortData} \code{data.table}}
 }
 \description{
-Assertions
-
 Assertions
 }

@@ -35,7 +35,7 @@ prepSpeciesLayers_ForestInventory(destinationPath, outputPath,
 \item{sppEquivCol}{TODO: description needed}
 }
 \value{
-
+TODO: description needed
 }
 \description{
 TODO: description needed
