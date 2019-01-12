@@ -164,21 +164,22 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     }
   }
 
-  nPixForest <- sum(!is.na(outs$pixelGroupMap[]))
-  nPixGrps <- length(unique(outs$cohortData$pixelGroup))
-  nPixNoPixGrp <- sum(outs$pixelGroupMap[] == 0, na.rm = TRUE)
-  nPixTreed <- sum(outs$pixelGroupMap[] != 0, na.rm = TRUE)
+  if (verbose > 0) {
+    nPixForest <- sum(!is.na(outs$pixelGroupMap[]))
+    nPixGrps <- length(unique(outs$cohortData$pixelGroup))
+    nPixNoPixGrp <- sum(outs$pixelGroupMap[] == 0, na.rm = TRUE)
+    nPixTreed <- sum(outs$pixelGroupMap[] != 0, na.rm = TRUE)
 
-  nDigits <- max(nchar(c(nPixForest, nPixGrps, nPixNoPixGrp))) + 3
-  message(crayon::magenta("NUMBER OF FORESTED PIXELS          :",
-                          paddedFloatToChar(nPixForest, padL = nDigits, pad = " ")))
-  message(crayon::magenta("NUMBER OF UNIQUE PIXELGROUPS       :",
-                          paddedFloatToChar(nPixGrps, padL = nDigits, pad = " ")))
-  message(crayon::magenta("NUMBER OF PIXELS WITH NO PIXELGROUP:",
-                          paddedFloatToChar(nPixNoPixGrp, padL = nDigits, pad = " ")))
-  message(crayon::magenta("NUMBER OF PIXELS WITH TREES:",
-                          paddedFloatToChar(nPixTreed, padL = nDigits, pad = " ")))
-
+    nDigits <- max(nchar(c(nPixForest, nPixGrps, nPixNoPixGrp))) + 3
+    message(crayon::magenta("NUMBER OF FORESTED PIXELS          :",
+                            paddedFloatToChar(nPixForest, padL = nDigits, pad = " ")))
+    message(crayon::magenta("NUMBER OF UNIQUE PIXELGROUPS       :",
+                            paddedFloatToChar(nPixGrps, padL = nDigits, pad = " ")))
+    message(crayon::magenta("NUMBER OF PIXELS WITH NO PIXELGROUP:",
+                            paddedFloatToChar(nPixNoPixGrp, padL = nDigits, pad = " ")))
+    message(crayon::magenta("NUMBER OF PIXELS WITH TREES:",
+                            paddedFloatToChar(nPixTreed, padL = nDigits, pad = " ")))
+  }
 
   return(list(cohortData = outs$cohortData,
               pixelGroupMap = outs$pixelGroupMap))
