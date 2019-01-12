@@ -120,7 +120,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
   spRasts <- list()
   spRas <- raster(CASFRIRas) %>% setValues(., NA_integer_)
 
-  ## NOT SURE IF THESE LINES ABOUT NA are relevant -- ELiot Dec 7
+  ## NOT SURE IF THESE LINES ABOUT NA are relevant -- Eliot Dec 7
   ## selected spp absent from CASFRI data
   NA_Sp <- which(is.na(sppListMergesCASFRI))#setdiff(speciesLandR, unique(keepSpecies$spGroup))
 
