@@ -106,8 +106,8 @@ assertColumns <- function(obj, colClasses) {
 #' @export
 #' @importFrom crayon green
 #' @importFrom stats na.omit
-testCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1,
-                           message = "") {
+assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1,
+                           message = "", verbose = getOption("LandR.verbose", TRUE)) {
   if (getOption("LandR.assertions", FALSE)) {
     a <- sort(unique(na.omit(pixelGroupMap[])))
     b <- sort(unique(na.omit(cohortData$pixelGroup)))
@@ -127,6 +127,38 @@ testCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge
     if (length(test3) != 0)
       stop("There are duplicate, identical cohorts: ", cohortDataN[test3])
 
-    message(crayon::green("  -- assertion passed using testCohortData --"))
+    if (verbose > 1) {
+      message(crayon::green("  -- assertion passed using assertCohortData --"))
+    }
+  }
+}
+
+#' A test that \code{pixelGroupMap} and \code{pixelCohortData} match pixelIndex
+#'
+#' This is the full pixelCohortData, not the collapsed one
+#'
+#' @param cohortData The full \code{cohortData} \code{data.table}
+#' @inheritParams updateCohortData
+#' @export
+assertPixelCohortData <- function(pixelCohortData, pixelGroupMap) {
+  if (isTRUE(getOption("LandR.assertions"))) {
+    uniquePixelsInCohorts <- pixelGroupMap[][unique(pixelCohortData$pixelIndex)]
+    pixelsOnMap <- sum(!is.na(pixelGroupMap[]), na.rm = TRUE)
+    lenUniquePixelsInCohorts <- length(unique(pixelCohortData$pixelIndex))
+    lenBurnedPixels <- sum(pixelGroupMap[] == 0, na.rm = TRUE) # 30927
+    pixelsRegeneratedOnZeros <- sum(uniquePixelsInCohorts == 0)
+    allPixelsNotInCohortData <- pixelGroupMap[][-unique(pixelCohortData$pixelIndex)]
+    numPixelsNoRegen <- sum(allPixelsNotInCohortData == 0, na.rm = TRUE)
+    tableB <- table(allPixelsNotInCohortData) # 25166
+
+    test2 <- identical(as.integer(pixelsOnMap - tableB), lenUniquePixelsInCohorts)
+    test3 <- identical(as.integer(pixelsOnMap - (lenBurnedPixels - pixelsRegeneratedOnZeros)), lenUniquePixelsInCohorts)
+
+    uniqueAllPixelsNotInCohortData <- unique(allPixelsNotInCohortData)
+    test1 <- all(uniqueAllPixelsNotInCohortData %in% c(NA, 0L))
+    if (!test1 | !test2 | !test3) {
+      stop("Every value on pixelGroupMap greater than 0 must have a pixelIndex in pixelCohortData.",
+           " This test is failing, i.e., there are some pixelGroupMaps have pixelGroups, and aren't in pixelCohortData.")
+    }
   }
 }

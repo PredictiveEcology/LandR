@@ -4,7 +4,7 @@
 \alias{rmMissingCohorts}
 \title{Remove missing cohorts from cohortData based on pixelGroupMap}
 \usage{
-rmMissingCohorts(cohortData, pixelGroupMap, firePixelTable)
+rmMissingCohorts(cohortData, pixelGroupMap)
 }
 \arguments{
 \item{cohortData}{A \code{data.table} with columns:
@@ -13,10 +13,6 @@ rmMissingCohorts(cohortData, pixelGroupMap, firePixelTable)
 
 \item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group number
 that correspondsd exactly to ]\code{pixelGroup} column in \code{cohortData}.}
-
-\item{firePixelTable}{A data.table with 2 columns, \code{pixelIndex} and \code{pixelGroup}.
-This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
-to ensure that everything matches correctly.}
 }
 \value{
 A \code{list} with 2 \code{data.table} objects, \code{cohortData} and \code{pixelGroupMap},

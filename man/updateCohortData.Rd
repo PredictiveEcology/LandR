@@ -5,14 +5,15 @@
 \alias{.initiateNewCohorts}
 \title{Add cohorts to \code{cohortData} and \code{pixelGroupMap}}
 \usage{
-updateCohortData(newCohortData, cohortData, pixelGroupMap, time,
-  speciesEcoregion, firePixelTable = NULL, successionTimestep)
+updateCohortData(newPixelCohortData, cohortData, pixelGroupMap, time,
+  speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
+  successionTimestep, verbose = getOption("LandR.verbose", TRUE))
 
-.initiateNewCohorts(newCohortData, cohortData, pixelGroupMap, time,
+.initiateNewCohorts(newPixelCohortData, cohortData, pixelGroupMap, time,
   speciesEcoregion)
 }
 \arguments{
-\item{newCohortData}{must be a complete cohortData object with newly
+\item{newPixelCohortData}{must be a complete cohortData object with newly
 created cohorts. They do not have to have \code{pixelGroup} values yet; they
 can be overlapping with \code{cohortData}, (i.e., they can be regenerated on
 empty pixels or on alreayd occupied pixels). Columns it must have:
@@ -33,15 +34,19 @@ over time}
 
 \item{speciesEcoregion}{A \code{speciesEcoregion} table.}
 
-\item{firePixelTable}{A data.table with 2 columns, \code{pixelIndex} and
-\code{pixelGroup}}
+\item{treedFirePixelTableSinceLastDisp}{A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
+This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
+to ensure that everything matches correctly.}
 
 \item{successionTimestep}{The time between successive seed dispersal events.
 In LANDIS-II, this is called "Succession Timestep". This is used here}
+
+\item{verbose}{Integer, where increasing number is increasing verbosity. Currently,
+only level 1 exists; but this may change.}
 }
 \value{
 A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
-\code{newCohortData} inserted.
+\code{newPixelCohortData} inserted.
 
 \code{.initiateNewCohorts} returns A \code{data.table} with a new,
 \code{rbindlist}ed cohortData
@@ -49,7 +54,7 @@ A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
 \description{
 This is a wrapper for  \code{generatePixelGroups}, \code{initiateNewCohort} and
 updates to \code{pixelGroupMap} via assignment to new \code{pixelIndex}
-values in \code{newCohortData}. By running these all together,
+values in \code{newPixelCohortData}. By running these all together,
 there is less chance that they will diverge. There are some checks
 internally for consistency.
 

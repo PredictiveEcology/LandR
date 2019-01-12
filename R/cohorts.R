@@ -15,7 +15,7 @@ if (getRversion() >= "3.1.0") {
 #'
 #' This is a wrapper for  \code{generatePixelGroups}, \code{initiateNewCohort} and
 #' updates to \code{pixelGroupMap} via assignment to new \code{pixelIndex}
-#' values in \code{newCohortData}. By running these all together,
+#' values in \code{newPixelCohortData}. By running these all together,
 #' there is less chance that they will diverge. There are some checks
 #' internally for consistency.
 #'
@@ -27,7 +27,7 @@ if (getRversion() >= "3.1.0") {
 #'   \item update the pixelgroup map.
 #' }
 #'
-#' @param newCohortData must be a complete cohortData object with newly
+#' @param newPixelCohortData must be a complete cohortData object with newly
 #' created cohorts. They do not have to have \code{pixelGroup} values yet; they
 #' can be overlapping with \code{cohortData}, (i.e., they can be regenerated on
 #' empty pixels or on alreayd occupied pixels). Columns it must have:
@@ -43,14 +43,17 @@ if (getRversion() >= "3.1.0") {
 #'   parameters in \code{speciesEcoregion} table if there are different values
 #'   over time
 #' @param speciesEcoregion A \code{speciesEcoregion} table.
-#' @param firePixelTable A data.table with 2 columns, \code{pixelIndex} and
-#'   \code{pixelGroup}
+#' @param treedFirePixelTableSinceLastDisp A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
+#'   This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
+#'   to ensure that everything matches correctly.
 #' @param successionTimestep The time between successive seed dispersal events.
 #'   In LANDIS-II, this is called "Succession Timestep". This is used here
+#' @param verbose Integer, where increasing number is increasing verbosity. Currently,
+#'    only level 1 exists; but this may change.
 #'
 #' @return
 #' A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
-#' \code{newCohortData} inserted.
+#' \code{newPixelCohortData} inserted.
 #'
 #' @export
 #' @rdname updateCohortData
@@ -58,42 +61,45 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
-updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
-                             speciesEcoregion, firePixelTable = NULL,
-                             successionTimestep) {
+updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
+                             speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
+                             successionTimestep,
+                             verbose = getOption("LandR.verbose", TRUE)) {
 
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
 
-  if (!is.null(firePixelTable)) {
-    pixelGroupMap[firePixelTable$pixelIndex] <- 0L
+  if (!is.null(treedFirePixelTableSinceLastDisp)) {
+    pixelGroupMap[treedFirePixelTableSinceLastDisp$pixelIndex] <- 0L
   }
-  relevantPixels <- pixelGroupMap[][newCohortData$pixelIndex]
+  relevantPixels <- pixelGroupMap[][newPixelCohortData$pixelIndex]
   zeroOnPixelGroupMap <- relevantPixels == 0
 
-  if (!"age" %in% colnames(newCohortData))
-    newCohortData[, age := 1L]
+  if (!"age" %in% colnames(newPixelCohortData))
+    newPixelCohortData[, age := 1L]
 
   allNewPixelGroups <- all(zeroOnPixelGroupMap)
   if (all(zeroOnPixelGroupMap)) {
     # Deal with pixels on the map that have no pixelGroup -- these are burned
     # pixels --> the entirely newly regenerated pixels DOes not require a
     # re-pixelGroupMaping  -- can just add to existing pixelGroup values
-    message(crayon::green("  Regenerating only open pixels (e.g., likely resprouting & serotiny only)"))
+    if (verbose > 0)
+      message(crayon::green("  Regenerating only open pixels (e.g., likely resprouting & serotiny only)"))
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age") # no Biomass because they all have zero
-    cd <- newCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
-    newCohortData[, pixelGroup :=
+    cd <- newPixelCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
+    newPixelCohortData[, pixelGroup :=
                     generatePixelGroups(cd, maxPixelGroup = maxPixelGroup,
                                         columns = columnsForPG)]#,
     #successionTimestep = successionTimestep)
 
     # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
-    pixelsToChange <- unique(newCohortData[, c("pixelIndex", "pixelGroup")],
+    pixelsToChange <- unique(newPixelCohortData[, c("pixelIndex", "pixelGroup")],
                              by = c("pixelIndex"))
   } else {
     # This is for situations where there are some empty pixels being filled,
     #   and some occupied pixels getting infilling. This requires a wholesale
     #   re-pixelGroup
-    message(crayon::green("  Regenerating open and pixels with B (likely after seed dispersal)"))
+    if (verbose > 0)
+      message(crayon::green("  Regenerating open and pixels with B (likely after seed dispersal)"))
 
     allNewPixelGroups <- FALSE
 
@@ -101,33 +107,14 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
     cohortDataPixelIndex <- data.table(pixelIndex = pixelIndex,
                                        pixelGroup = pixelGroupMap[][pixelIndex])
     cdLong <- cohortDataPixelIndex[cohortData, on = "pixelGroup", allow.cartesian = TRUE]
-    cohorts <- rbindlist(list(cdLong, newCohortData), use.names = TRUE, fill = TRUE)
+    cohorts <- rbindlist(list(cdLong, newPixelCohortData), use.names = TRUE, fill = TRUE)
 
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B")
     cd <- cohorts[,c("pixelIndex", columnsForPG), with = FALSE]
     cohorts[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L,
                                                 columns = columnsForPG)]
 
-    if (isTRUE(getOption("LandR.assertions"))) {
-      uniquePixelsInCohorts <- pixelGroupMap[][unique(cohorts$pixelIndex)]
-      pixelsOnMap <- sum(!is.na(pixelGroupMap[]), na.rm = TRUE)
-      lenUniquePixelsInCohorts <- length(unique(cohorts$pixelIndex))
-      lenBurnedPixels <- sum(pixelGroupMap[] == 0, na.rm = TRUE) # 30927
-      pixelsRegeneratedOnZeros <- sum(uniquePixelsInCohorts == 0)
-      allPixelsNotInCohortData <- pixelGroupMap[][-unique(cohorts$pixelIndex)]
-      numPixelsNoRegen <- sum(allPixelsNotInCohortData == 0, na.rm = TRUE)
-      tableB <- table(allPixelsNotInCohortData) # 25166
-
-      test2 <- identical(as.integer(pixelsOnMap - tableB), lenUniquePixelsInCohorts)
-      test3 <- identical(as.integer(pixelsOnMap - (lenBurnedPixels - pixelsRegeneratedOnZeros)), lenUniquePixelsInCohorts)
-
-      uniqueAllPixelsNotInCohortData <- unique(allPixelsNotInCohortData)
-      test1 <- all(uniqueAllPixelsNotInCohortData %in% c(NA, 0L))
-      if (!test1 | !test2 | !test3) {
-        stop("Every value on pixelGroupMap greater than 0 must have a pixelIndex in cohorts.",
-             " This test is failing, i.e., there are some pixelGroupMaps have pixelGroups, and aren't in cohorts.")
-      }
-    }
+    assertPixelCohortData(cohorts, pixelGroupMap)
 
     # Bring to pixelGroup level -- this will squash the data.table
     allCohortData <- cohorts[ , .(ecoregionGroup = ecoregionGroup[1],
@@ -138,7 +125,7 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
 
     theNewOnes <- is.na(allCohortData$B)
     cohortData <- allCohortData[!theNewOnes]
-    newCohortData <- allCohortData[theNewOnes]
+    newPixelCohortData <- allCohortData[theNewOnes]
 
     # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
     pixelsToChange <- unique(cohorts[, c("pixelIndex", "pixelGroup")],
@@ -152,20 +139,20 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
   if (isTRUE(getOption("LandR.assertions"))) {
     if (!isTRUE(all(pixelsToChange$pixelGroup ==
                     pixelGroupMap[][pixelsToChange$pixelIndex])))
-      stop("pixelGroupMap and newCohortData$pixelGroupMap don't match in updateCohortData fn")
+      stop("pixelGroupMap and newPixelCohortData$pixelGroupMap don't match in updateCohortData fn")
   }
 
   ## give B in pixels that have serotiny/resprouting
-  # newCohortData[, sumB := sum(B, na.rm = TRUE), by = pixelGroup]
+  # newPixelCohortData[, sumB := sum(B, na.rm = TRUE), by = pixelGroup]
 
   ##########################################################
   # Add new cohorts and rm missing cohorts (i.e., those pixelGroups that are gone)
   ##########################################################
-  cohortData <- .initiateNewCohorts(newCohortData, cohortData,
+  cohortData <- .initiateNewCohorts(newPixelCohortData, cohortData,
                                     pixelGroupMap,
                                     time = time, speciesEcoregion = speciesEcoregion)
 
-  outs <- rmMissingCohorts(cohortData, pixelGroupMap, firePixelTable)
+  outs <- rmMissingCohorts(cohortData, pixelGroupMap)
 
   if (isTRUE(getOption("LandR.assertions"))) {
     maxPixelGroupFromCohortData <- max(outs$cohortData$pixelGroup)
@@ -200,16 +187,16 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
 #' @rdname updateCohortData
-.initiateNewCohorts <- function(newCohortData, cohortData, pixelGroupMap, time,
+.initiateNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
                                 speciesEcoregion) {
   ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum B per ecoregion, join to new cohort data
-  namesNCD <- names(newCohortData)
+  namesNCD <- names(newPixelCohortData)
   if (!isTRUE("pixelGroup" %in% namesNCD)) {
     if (isTRUE("pixelIndex" %in% namesNCD)) {
-      newCohortData[, pixelGroup := getValues(pixelGroupMap)[pixelIndex]]
+      newPixelCohortData[, pixelGroup := getValues(pixelGroupMap)[pixelIndex]]
     } else {
-      stop("newCohortData must have either pixelIndex or pixelGroup")
+      stop("newPixelCohortData must have either pixelIndex or pixelGroup")
     }
   }
 
@@ -219,29 +206,29 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
 
   # Note that after the following join, some cohorts will be lost due to lack of
   #  parameters in speciesEcoregion. These need to be modified in pixelGroupMap.
-  missingNewCohortData <- newCohortData[!specieseco_current, on = uniqueSpeciesEcoregionDefinition]
+  # missingNewPixelCohortData <- newPixelCohortData[!specieseco_current, on = uniqueSpeciesEcoregionDefinition]
   specieseco_current <- specieseco_current[!is.na(maxB)]
   specieseco_current[, maxB_eco := max(maxB), by = ecoregionGroup]
-  newCohortData <- specieseco_current[newCohortData, on = uniqueSpeciesEcoregionDefinition]
-  newCohortData <- newCohortData[!is.na(maxB)]
-  # newCohortData <- newCohortData[specieseco_current, on = uniqueSpeciesEcoregionDefinition,
+  newPixelCohortData <- specieseco_current[newPixelCohortData, on = uniqueSpeciesEcoregionDefinition]
+  newPixelCohortData <- newPixelCohortData[!is.na(maxB)]
+  # newPixelCohortData <- newPixelCohortData[specieseco_current, on = uniqueSpeciesEcoregionDefinition,
   #                                nomatch = 0]
-  #newCohortData <- setkey(newCohortData, speciesCode, ecoregionGroup)[specieseco_current, nomatch = 0]
-  set(newCohortData, NULL, "age", 1)  ## set age to 1
-  set(newCohortData, NULL, "sumB", 0)
+  #newPixelCohortData <- setkey(newPixelCohortData, speciesCode, ecoregionGroup)[specieseco_current, nomatch = 0]
+  set(newPixelCohortData, NULL, "age", 1)  ## set age to 1
+  set(newPixelCohortData, NULL, "sumB", 0)
   ## set B - if B=0, it's getting maxANPP ???
-  if ("B" %in% names(newCohortData))
-    newCohortData[, B := NULL]
-  set(newCohortData, NULL, "B",
-      as.integer(pmax(1, newCohortData$maxANPP *
-                        exp(-1.6 * newCohortData$sumB / newCohortData$maxB_eco))))
-  set(newCohortData, NULL, "B", as.integer(pmin(newCohortData$maxANPP, newCohortData$B)))
+  if ("B" %in% names(newPixelCohortData))
+    newPixelCohortData[, B := NULL]
+  set(newPixelCohortData, NULL, "B",
+      as.integer(pmax(1, newPixelCohortData$maxANPP *
+                        exp(-1.6 * newPixelCohortData$sumB / newPixelCohortData$maxB_eco))))
+  set(newPixelCohortData, NULL, "B", as.integer(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
 
-  newCohortData <- newCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
+  newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
                                      mortality = 0L, aNPPAct = 0L, sumB = 0)]
 
   # This removes the duplicated pixels within pixelGroup, i.e., the reason we want pixelGroups
-  newCohortData <- unique(newCohortData, by = uniqueCohortDefinition)
+  newCohortData <- unique(newPixelCohortData, by = uniqueCohortDefinition)
 
   cohortData <- rbindlist(list(cohortData, newCohortData), fill = TRUE, use.names = TRUE)
   return(cohortData)
@@ -255,9 +242,6 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
 #'   \code{B}, \code{mortality}, \code{aNPPAct}, ond \code{sumB}.
 #' @param pixelGroupMap Raster layer with pixel values equal to a pixel group number
 #'   that correspondsd exactly to ]\code{pixelGroup} column in \code{cohortData}.
-#' @param firePixelTable A data.table with 2 columns, \code{pixelIndex} and \code{pixelGroup}.
-#'   This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
-#'   to ensure that everything matches correctly.
 #'
 #' @return
 #' A \code{list} with 2 \code{data.table} objects, \code{cohortData} and \code{pixelGroupMap},
@@ -267,7 +251,8 @@ updateCohortData <- function(newCohortData, cohortData, pixelGroupMap, time,
 #' @importFrom data.table rbindlist set setkey
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
-rmMissingCohorts <- function(cohortData, pixelGroupMap, firePixelTable) {
+rmMissingCohorts <- function(cohortData, pixelGroupMap) {
+  browser(expr = exists("aaaa"))
   pgmValues <- data.table(pixelGroup = getValues(pixelGroupMap),
                           pixelIndex = seq(ncell(pixelGroupMap)))
 
@@ -285,7 +270,7 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap, firePixelTable) {
   pixelGroupMap[pgsStillInPGMGoneFromCD$pixelIndex] <- NA
 
   if (isTRUE(getOption("LandR.assertions"))) {
-    testCohortData(cohortData, pixelGroupMap, message = "rmMissingCohorts")
+    assertCohortData(cohortData, pixelGroupMap, message = "rmMissingCohorts")
   }
 
   if (NROW(unique(cohortData[pixelGroup == 67724]$ecoregionGroup)) > 1) stop()
