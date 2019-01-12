@@ -133,12 +133,14 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
   }
 }
 
-#' A test that \code{pixelGroupMap} and \code{pixelCohortData} match pixelIndex
+#' A test that \code{pixelGroupMap} and \code{pixelCohortData} match \code{pixelIndex}
 #'
 #' This is the full pixelCohortData, not the collapsed one
 #'
-#' @param cohortData The full \code{cohortData} \code{data.table}
+#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#'
 #' @inheritParams updateCohortData
+#'
 #' @export
 assertPixelCohortData <- function(pixelCohortData, pixelGroupMap) {
   if (isTRUE(getOption("LandR.assertions"))) {

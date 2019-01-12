@@ -2,16 +2,16 @@
 % Please edit documentation in R/assertions.R
 \name{assertPixelCohortData}
 \alias{assertPixelCohortData}
-\title{A test that \code{pixelGroupMap} and \code{pixelCohortData} match pixelIndex}
+\title{A test that \code{pixelGroupMap} and \code{pixelCohortData} match \code{pixelIndex}}
 \usage{
 assertPixelCohortData(pixelCohortData, pixelGroupMap)
 }
 \arguments{
+\item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
+
 \item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group
 number that correspondsd exactly to \code{pixelGroup} column in
 \code{cohortData}}
-
-\item{cohortData}{The full \code{cohortData} \code{data.table}}
 }
 \description{
 This is the full pixelCohortData, not the collapsed one
