@@ -86,8 +86,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     if (verbose > 0)
       message(crayon::green("  Regenerating only open pixels (e.g., likely resprouting & serotiny only)"))
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age") # no Biomass because they all have zero
-    cd <- newCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
-    newCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = maxPixelGroup,
+    cd <- newPixelCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
+    newPixelCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = maxPixelGroup,
                                                       columns = columnsForPG)]#,
     #successionTimestep = successionTimestep)
 
@@ -173,12 +173,12 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     nDigits <- max(nchar(c(nPixForest, nPixGrps, nPixNoPixGrp))) + 3
     message(crayon::magenta("NUMBER OF FORESTED PIXELS          :",
                             paddedFloatToChar(nPixForest, padL = nDigits, pad = " ")))
+    message(crayon::magenta("NUMBER OF PIXELS WITH TREES        :",
+                            paddedFloatToChar(nPixTreed, padL = nDigits, pad = " ")))
     message(crayon::magenta("NUMBER OF UNIQUE PIXELGROUPS       :",
                             paddedFloatToChar(nPixGrps, padL = nDigits, pad = " ")))
     message(crayon::magenta("NUMBER OF PIXELS WITH NO PIXELGROUP:",
                             paddedFloatToChar(nPixNoPixGrp, padL = nDigits, pad = " ")))
-    message(crayon::magenta("NUMBER OF PIXELS WITH TREES:",
-                            paddedFloatToChar(nPixTreed, padL = nDigits, pad = " ")))
   }
 
   return(list(cohortData = outs$cohortData,
