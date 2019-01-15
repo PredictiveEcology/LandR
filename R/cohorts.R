@@ -339,8 +339,6 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
   pcd[ , c("uniqueComboByPixelIndex") := paste(uniqueComboByRow, collapse = "__"), by = "pixelIndex"]
   pcd[ , c("pixelGroup") := as.integer(maxPixelGroup) + as.integer(factor(uniqueComboByPixelIndex))]
 
-  # clean up
-  pcd[, c(columns2, "uniqueComboByPixelIndex", "uniqueComboByRow") := (NULL)]
   return(pcd$pixelGroup)
 }
 
