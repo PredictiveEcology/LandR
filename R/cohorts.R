@@ -291,47 +291,39 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap) {
               pixelGroupMap = pixelGroupMap))
 }
 
-#' Create the correct string for pixelGroups
-#'
-#' @inheritParams generatePixelGroups
-#' @param ecoregionGroup  A vector of ecoregionGroup strings
-#' @param speciesGroup  A vector of speciesGroup strings
-#'
-#' @return  TODO: description needed
-#'
-.makePixelGroups <- function(maxPixelGroup, ecoregionGroup, speciesGroup,
-                             columns = c("ecoregionGroup", "speciesGroup", "age")) {
-  as.integer(maxPixelGroup) +
-    as.integer(factor(paste(ecoregionGroup, speciesGroup, sep = "_")))
-}
 
-#' Add the correct \code{pixelGroups} to a \code{pixelCohortData} object
+#' Add the correct \code{pixelGroups} to a \code{pixelDataTable} object
 #'
-#' @param pixelCohortData  # pixel groups are groups of identical pixels based
-#'   on \code{speciesGroup} x \code{Age} and \code{ecoregionGroup}.
-#' @param maxPixelGroup A length 1 numeric/integer indicating the current maximum pixelGroup value
+#' Generates unique groupings of a data.table object where one or more rows can
+#' all belong to the same \code{pixelIndex}. Pixel groups will be identical pixels based
+#'   on unique combinations of \code{columns}.
+#' @param pixelDataTable  A \code{data.table} with column-based descriptions. This data.table
+#'   must have a column called \code{"pixelIndex"}, which allows for multiple rows to be associated
+#'   with a single pixel.
+#' @param maxPixelGroup A length 1 numeric/integer indicating the current maximum pixelGroup value;
+#'    the pixelGroup numbers returned from this function will start at \code{maxPixelGroup} + 1
 #' @param columns A character vector of column names to use as part of the generation of unique
 #'   combinations of features. Default is \code{c("ecoregionGroup", "speciesCode", "age", "B")}
 #'
 #' @return
-#' Returns a vector of pixelGroup in the original order of the input \code{pixelCohortData}.
-#' This should likely be added to the \code{pixelCohortData} object immediately.
+#' Returns a vector of pixelGroup in the original order of the input \code{pixelDataTable}.
+#' This should likely be added to the \code{pixelDataTable} object immediately.
 #'
 #' @export
 #' @importFrom data.table setkey
 #' @importFrom SpaDES.core paddedFloatToChar
-generatePixelGroups <- function(pixelCohortData, maxPixelGroup,
+generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
                                 columns = c("ecoregionGroup", "speciesCode",
                                             "age", "B")) {
 
   columnsOrig <- columns
-  columns <- columns[columns %in% names(pixelCohortData)]
+  columns <- columns[columns %in% names(pixelDataTable)]
   columns2 <- paste0(columns, "2")
   if (!all(columns == columnsOrig))
     message("Creating pixelGroup values, but not using all columns requested. Only using, ",
             paste(columns, collapse = ", "), " instead of ", paste(columnsOrig, collapse = ", "))
 
-  pcd <- pixelCohortData # no copy -- just for simpler name
+  pcd <- pixelDataTable # no copy -- just for simpler name
 
   # Convert to unique numeric
   pcd[ , c(columns2) := lapply(.SD, function(x) {
