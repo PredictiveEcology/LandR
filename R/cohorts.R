@@ -347,8 +347,9 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
 #' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
 #' @param currentTime The current time e.g., \code{time(sim)}
 #'
-#' @note
-#' TODO
+#' @return
+#' The speciesEcoregion input object, but with data from only one year, the year
+#' that is less than or equal to the \code{currentTime}
 #'
 #' @export
 speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
