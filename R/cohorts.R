@@ -355,7 +355,7 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
 #' @export
 speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
   spEco <- speciesEcoregion[year <= currentTime]
-  spEco[year == max(spEco$year)]
+  spEco[year == max(year)]
 }
 
 
