@@ -603,7 +603,9 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   ageQuotedFormula <- quote(age ~ B * speciesCode + (1 | initialEcoregionCode) + cover)
   cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(B, age, speciesCode, initialEcoregionCode, cover)]
   message(blue("Impute missing age values"))
-  system.time(outAge <- Cache(statsModel, form = ageQuotedFormula, .specialData = cohortDataMissingAgeUnique))
+  system.time(outAge <- Cache(statsModel, form = ageQuotedFormula,
+                              uniqueEcoregionGroup = unique(cohortDataMissingAgeUnique$ecoregionGroup),
+                              .specialData = cohortDataMissingAgeUnique))
 
   print(outAge$rsq)
 
