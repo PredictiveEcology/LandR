@@ -632,9 +632,13 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
 #' This does a few things including R squared, gets the fitted values.
 #' It appears that running the models "asis" without this wrapper
 #' does not work with \code{Cache}. The return of the model in
-#' a list solves this problem.
+#' a list solves this problem. For Caching, the \code{.specialData}
+#' should be "omitted" via \code{omitArgs}, and \code{uniqueEcoregionGroups}
+#' should not be omitted.
 #'
 #' @param form A quoted formula to test
+#' @param uniqueEcoregionGroups Unique values of ecoregionGroups. This
+#'   is the basis for the statistics.
 #' @param .specialData The custom dataset required for the model
 #' @param ... Anything passed to args for the model
 #'
@@ -642,7 +646,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
 #' @importFrom lme4 glmer lmer
 #' @importFrom MuMIn r.squaredGLMM
 #' @importFrom stats fitted predict
-statsModel <- function(form, .specialData, ...) {
+statsModel <- function(form, uniqueEcoregionGroups, .specialData, ...) {
   if ("family" %in% names(list(...))) {
     modelFn <- lme4::glmer
   } else {

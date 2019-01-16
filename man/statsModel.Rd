@@ -4,10 +4,13 @@
 \alias{statsModel}
 \title{The generic statistical model -- to run lmer or glmer}
 \usage{
-statsModel(form, .specialData, ...)
+statsModel(form, uniqueEcoregionGroups, .specialData, ...)
 }
 \arguments{
 \item{form}{A quoted formula to test}
+
+\item{uniqueEcoregionGroups}{Unique values of ecoregionGroups. This
+is the basis for the statistics.}
 
 \item{.specialData}{The custom dataset required for the model}
 
@@ -17,5 +20,7 @@ statsModel(form, .specialData, ...)
 This does a few things including R squared, gets the fitted values.
 It appears that running the models "asis" without this wrapper
 does not work with \code{Cache}. The return of the model in
-a list solves this problem.
+a list solves this problem. For Caching, the \code{.specialData}
+should be "omitted" via \code{omitArgs}, and \code{uniqueEcoregionGroups}
+should not be omitted.
 }

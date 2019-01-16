@@ -11,9 +11,10 @@ speciesEcoregionLatestYear(speciesEcoregion, currentTime)
 
 \item{currentTime}{The current time e.g., \code{time(sim)}}
 }
+\value{
+The speciesEcoregion input object, but with data from only one year, the year
+that is less than or equal to the \code{currentTime}
+}
 \description{
 Pull out the values from speciesEcoregion table for current time
-}
-\note{
-TODO
 }
