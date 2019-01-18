@@ -264,7 +264,6 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
 rmMissingCohorts <- function(cohortData, pixelGroupMap) {
-  browser(expr = exists("aaaa"))
   pgmValues <- data.table(pixelGroup = getValues(pixelGroupMap),
                           pixelIndex = seq(ncell(pixelGroupMap)))
 
@@ -441,6 +440,8 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC,
   rstUnwantedLCC[gsub(".*_", "", ecoregionGroupVec) %in% pixelClassesToReplace] <- 1
   theUnwantedPixels <- which(rstUnwantedLCC == 1)
   theUnwantedPixels <- theUnwantedPixels[theUnwantedPixels %in% availableERC_by_Sp$pixelIndex]
+  availableERC_by_Sp[, ecoregion := gsub("_.*", "", initialEcoregionCode)]
+
   #cdEcoregionCodes <- as.character(unique(pixelCohortData$initialEcoregionCode))
   #availableERC_by_Sp <- unique(pixelCohortData, by = c("initialEcoregionCode", "speciesCode", "B"))
   #availableERC_by_Sp <- availableERC_by_Sp[eval(rowsInPCDToKeep)]
@@ -454,6 +455,11 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC,
     #  stop("values of 34 and 35 on pixelCohortData and sim$LCC2005 don't match")
   }
   iterations <- 1
+  availableERG2 <- availableERC_by_Sp[-which(gsub(".*_", "", initialEcoregionCode) %in%
+                                               pixelClassesToReplace)]
+  # availableERC_by_Sp[, initialEcoregionCode := NULL]
+  availableERG2 <- unique(availableERG2, by = c("speciesCode", "initialEcoregionCode"))
+  availableERG2[, `:=`(pixelIndex = NULL, ecoregion = NULL)]
   # cd <- pixelCohortData[, .(pixelIndex, initialEcoregionCode, speciesCode)]
   numCharEcoregion <- nchar(gsub("_.*", "", availableERC_by_Sp$initialEcoregionCode[1]))
   while (length(theUnwantedPixels) > 0) {
@@ -467,13 +473,17 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC,
     out <- na.omit(out)
     # out[, `:=`(potentialNewERG = ecoregionGroupVec[pixels])]
     # attach speciesCode -- need this so that we know which speciesCodes to test against speciesEcoregion
-    a <- out[availableERC_by_Sp, allow.cartesian = TRUE, on = c("initialPixels" = "pixelIndex"), nomatch = NA]
-    out5 <- availableERC_by_Sp[out, allow.cartesian = TRUE,
+    # a <- out[availableERC_by_Sp, allow.cartesian = TRUE, on = c("initialPixels" = "pixelIndex"), nomatch = NA]
+    out5 <- availableERC_by_Sp[out[, state := NULL], allow.cartesian = TRUE,
                                on = c("pixelIndex" = "initialPixels"), nomatch = NA] # join the availableERC_by_Sp which has initialEcoregionCode
 
+    out5[, possERC := paste0(ecoregion, "_", paddedFloatToChar(as.numeric(lcc), padL = 2, padR = 0))]
+    out7 <- out5[availableERG2, on = c("speciesCode", "possERC" = "initialEcoregionCode"), nomatch = NA]
+    out6 <- na.omit(out7)
+
     # Any that don't have all species, should be removed
-    out5[, toDelete := any(is.na(speciesCode)), by = "pixelIndex"]
-    out6 <- out5[toDelete == FALSE]
+    #out5[, toDelete := any(is.na(speciesCode)), by = "pixelIndex"]
+    #out6 <- out5[toDelete == FALSE]
     # out7 <- out5[toDelete == TRUE]
 
     # browser(expr = out6[pixelIndex == 194455])
