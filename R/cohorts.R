@@ -4,8 +4,8 @@ if (getRversion() >= "3.1.0") {
     "ecoregion", "ecoregionGroup", "hasBadAge",
     "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
     "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
-    "newPossLCC", "outBiomass", "pixelIndex", "pixels",
-    "speciesposition", "speciesGroup", "speciesInt", "sumB",
+    "newPossLCC", "outBiomass", "pixelIndex", "pixels", "possERC",
+    "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
     "temppixelGroup", "toDelete", "totalBiomass",
     "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
   ))
