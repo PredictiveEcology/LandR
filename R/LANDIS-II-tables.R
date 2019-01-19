@@ -87,6 +87,8 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
     "hardsoft"
   )
 
+  speciesTable[, growthcurve := as.numeric(growthcurve)]
+
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv,
