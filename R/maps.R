@@ -1,7 +1,7 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c(".", ":=", "B", "HQ", "leading", "LQ", "mixed",
                            "pixelGroup", "speciesCode", "speciesGroupB",
-                           "speciesProportion","SPP", "totalB"))
+                           "speciesProportion", "SPP", "totalB"))
 }
 
 #' Define flammability map
@@ -15,10 +15,10 @@ if (getRversion() >= "3.1.0") {
 #'
 #' @param filename2 See \code{\link[reproducible]{postProcess}}. Default \code{NULL}.
 #'
+#' @export
 #' @importFrom grDevices colorRampPalette
 #' @importFrom quickPlot setColors<-
 #' @importFrom raster maxValue minValue ratify reclassify writeRaster
-#' @export
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
                             nonFlammClasses = c(36L, 37L, 38L, 39L),
                             mask = NULL, filename2 = NULL) {
@@ -126,8 +126,8 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
   }
 
   a <- speciesStack[]
-  nas <- is.na(a[,1])
-  maxes <- apply(a[!nas,], 1, function(x) {
+  nas <- is.na(a[, 1])
+  maxes <- apply(a[!nas, ], 1, function(x) {
     whMax <- which(x == max(x, na.rm = TRUE))
     if (length(whMax) > 1) {
       whMax <- sample(whMax, size = 1)
@@ -162,9 +162,9 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #' @importFrom raster getValues projection projection<- setValues
 #' @importFrom SpaDES.tools rasterizeReduced
 vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
-                                colors, unitTest = getOption("pemisc.unitTest", FALSE)) {
-  # shortcohortdata <- setkey(cohortdata, speciesCode)[setkey(species[, .(speciesCode, speciesGroup)],
-  #                                                           speciesCode), nomatch = 0]
+                                colors, unitTest = getOption("LandR.assertions", FALSE)) {
+  # shortcohortdata <- setkey(cohortdata, speciesCode)[
+  #   setkey(species[, .(speciesCode, speciesGroup)], speciesCode), nomatch = 0]
   pixelGroupData <- cohortdata[, list(totalB = sum(B, na.rm = TRUE),
                                       speciesCode, B), by = pixelGroup]
 
@@ -178,6 +178,10 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   pixelGroupData2[mixed == TRUE, leading := "Mixed"]
 
   vegTypeMap <- rasterizeReduced(pixelGroupData2, pixelGroupMap, "leading", "pixelGroup")
+  levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]], colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
+                              stringsAsFactors = FALSE)
+  setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
+
 
   if (isTRUE(unitTest)) {
     # TEST THE MAP
@@ -196,7 +200,7 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
     length(pgs %in% unique(pgTest2$pixelGroup))
     pgs2 <- pgs[pgs %in% unique(pgTest2$pixelGroup)]
     if (!all(setkey(pgTest2, pixelGroup)$leading == names(pgs)[order(pgs)]))
-      stop("The vegTypeMap is incorrect. Please debug pemisc::vegTypeMapGenerator")
+      stop("The vegTypeMap is incorrect. Please debug LandR::vegTypeMapGenerator")
   }
 
   # if (FALSE) {
@@ -209,8 +213,8 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   #   species[species == "Pice_gla", speciesGroup := "PICE_GLA"]
   #   species[species == "Abie_sp", speciesGroup := "ABIE"]
   #
-  #   shortcohortdata <- setkey(cohortdata, speciesCode)[setkey(species[, .(speciesCode, speciesGroup)],
-  #                                                             speciesCode), nomatch = 0]
+  #   shortcohortdata <- setkey(cohortdata, speciesCode)[
+  #     setkey(species[, .(speciesCode, speciesGroup)], speciesCode), nomatch = 0]
   #   shortcohortdata[, totalB := sum(B, na.rm = TRUE), by = pixelGroup]
   #   shortcohortdata <- shortcohortdata[, .(speciesGroupB = sum(B, na.rm = TRUE),
   #                                          totalB = mean(totalB, na.rm = TRUE)),
@@ -266,7 +270,7 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
 #'
 #' @param sppEquiv table with species name equivalencies between the
 #'                           kNN format and the final naming format.
-#'                           See \code{data("sppEquivalencies_CA", "pemisc")}.
+#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
 #'
 #' @param knnNamesCol character string indicating the column in \code{sppEquiv}
 #'                    containing kNN species names.
@@ -296,7 +300,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   dots <- list(...)
 
-  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]),]
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   sppMerge <- unique(sppEquiv[[sppEquivCol]][duplicated(sppEquiv[[sppEquivCol]])])
 
@@ -324,12 +328,14 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
       sppNameVector <- allSpp
 
   ## Make sure spp names are compatible with kNN names
-  kNNnames <- as.character(equivalentName(sppNameVector, sppEquiv, column = knnNamesCol, multi = TRUE))
+  kNNnames <- as.character(equivalentName(sppNameVector, sppEquiv,
+                                          column = knnNamesCol, multi = TRUE))
 
   ## if there are NA's, that means some species can't be found in kNN data base
   if (any(is.na(kNNnames))) {
     warning(paste0("Can't find ", sppNameVector[is.na(kNNnames)], " in `sppEquiv$",
-                   knnNamesCol, ".\n Will use remaining matching species, but check if this is correct"))
+                   knnNamesCol, ".\n",
+                   "Will use remaining matching species, but check if this is correct."))
     ## select only available species
     kNNnames <- kNNnames[!is.na(kNNnames)]
     sppNameVector <- sppNameVector[!is.na(kNNnames)]
@@ -361,32 +367,33 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                     archive2 = paste0("NFI_MODIS250m_kNN_Species_", kNNnames, "_v0.zip"))
   archives <- split(archives, archives[, "archive2"])
 
-  if (!all(file_path_sans_ext(names(archives))==file_path_sans_ext(targetFiles)))
-    stop("Something is wrong. File a bug report re: loadkNNSpeciesLayers and archive ordering")
+  if (!all(file_path_sans_ext(names(archives)) == file_path_sans_ext(targetFiles)))
+    stop("Something is wrong. File a bug report re: loadkNNSpeciesLayers and archive ordering.")
 
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
 
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
   speciesLayers <- Cache(Map, targetFile = targetFiles, archive = archives,
-                       filename2 = postProcessedFilenames,
-                       MoreArgs = list(url = url,
-                                       destinationPath = asPath(dPath),
-                                       fun = "raster::raster",
-                                       studyArea = studyArea,
-                                       rasterToMatch = rasterToMatch,
-                                       method = "bilinear",
-                                       datatype = "INT2U",
-                                       overwrite = TRUE,
-                                       userTags = dots$userTags
-                       ),
-                       prepInputs)
+                         filename2 = postProcessedFilenames,
+                         MoreArgs = list(url = url,
+                                         destinationPath = asPath(dPath),
+                                         fun = "raster::raster",
+                                         studyArea = studyArea,
+                                         rasterToMatch = rasterToMatch,
+                                         method = "bilinear",
+                                         datatype = "INT2U",
+                                         overwrite = TRUE,
+                                         userTags = dots$userTags
+                         ),
+                         prepInputs)
 
   names(speciesLayers) <- kNNnames
 
   if (!is.null(sppMerge)) {
-    speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
-                                    sppEquiv = sppEquiv, column = "KNN", suffix = suffix,
-                                    dPath = dPath)
+    if (length(sppMerge) > 0)
+      speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
+                                      sppEquiv = sppEquiv, column = "KNN", suffix = suffix,
+                                      dPath = dPath)
   }
 
   ## Rename species layers - There will be 2 groups -- one
@@ -394,7 +401,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   nameChangeNA <- is.na(nameChanges)
   names(speciesLayers)[!nameChangeNA] <- nameChanges[!nameChangeNA]
 
-  nameChangesNonMerged <- equivalentName(names(speciesLayers)[nameChangeNA], sppEquiv, column = sppEquivCol)
+  nameChangesNonMerged <- equivalentName(names(speciesLayers)[nameChangeNA],
+                                         sppEquiv, column = sppEquivCol)
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
 
   ## remove layers that have less data than thresh (i.e. spp absent in study area)
@@ -435,9 +443,12 @@ sumRastersBySpecies <- function(speciesLayers, layersToSum, filenameToSave, newL
 #' If only high or low resolution data are available, it will use it without
 #' attempting to overlay.
 #'
-#' @param highQualityStack      high quality list/stack of rasters (will be used preferencially)
-#' @param lowQualityStack       low quality list/stack of rasters (will be used to fill NAs in highQualityStack)
-#' @param outputFilenameSuffix  file suffix to save raster if there was overlaying. Defautls to "overlay"
+#' @param highQualityStack      high quality list/stack of rasters
+#'                              (will be used preferentially)
+#' @param lowQualityStack       low quality list/stack of rasters
+#'                              (will be used to fill \code{NA}s in \code{highQualityStack})
+#' @param outputFilenameSuffix  file suffix to save raster if there was overlaying.
+#'                              Defaults to \code{"overlay"}.
 #' @param destinationPath       directory for saved rasters
 #'
 #' @export
@@ -586,7 +597,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
   }
 }
 
-#' Merge species pecent-cover rasters
+#' Merge species percent-cover rasters
 #'
 #' Used internally in \code{overlayStacks}.
 #'
@@ -602,28 +613,57 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' @importFrom reproducible .suffix prepInputs
 #' @keywords internal
 mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dPath, ...) {
-    ## make sure species names and list names are in the right formats
-    names(sppMerge) <- sppMerge
-    sppMerges <- lapply(sppMerge, FUN = function(x) {
-      equivalentName(x, sppEquiv,  column = "KNN", multi = TRUE)
-    })
-    #names(sppMerges) <- equivalentName(names(sppMerges), sppEquiv,  column = sppEquivCol)
+  stopifnot(!is.null(sppMerge), length(sppMerge) > 0)
 
-    ## keep species present in the data
-    sppMerges <- lapply(sppMerges, FUN = function(x) x[x %in% names(speciesLayers)])
+  ## make sure species names and list names are in the right formats
+  names(sppMerge) <- sppMerge
+  sppMerges <- lapply(sppMerge, FUN = function(x) {
+    equivalentName(x, sppEquiv,  column = "KNN", multi = TRUE)
+  })
+  #names(sppMerges) <- equivalentName(names(sppMerges), sppEquiv,  column = sppEquivCol)
 
-    for (i in seq(length(sppMerges))) {
-      sumSpecies <- sppMerges[[i]]
-      newLayerName <- names(sppMerges)[i]
+  ## keep species present in the data
+  sppMerges <- lapply(sppMerges, FUN = function(x) x[x %in% names(speciesLayers)])
 
-      fname <- .suffix(file.path(dPath, paste0("kNN", newLayerName, ".tif")), suffix)
-      a <- calc(stack(speciesLayers[sumSpecies]), sum, na.rm = TRUE)
-      names(a) <- newLayerName
-      a <- writeRaster(a, filename = fname, overwrite = TRUE, ...)
-      ## replace spp rasters by the summed one
-      speciesLayers[sumSpecies] <- NULL
-      speciesLayers[[newLayerName]] <- a
-      message("  Merging ", paste(sumSpecies, collapse = ", "), "; becoming: ", newLayerName)
-    }
-  speciesLayers
+  for (i in seq(length(sppMerges))) {
+    sumSpecies <- sppMerges[[i]]
+    newLayerName <- names(sppMerges)[i]
+
+    fname <- .suffix(file.path(dPath, paste0("kNN", newLayerName, ".tif")), suffix)
+    a <- calc(stack(speciesLayers[sumSpecies]), sum, na.rm = TRUE)
+    names(a) <- newLayerName
+    a <- writeRaster(a, filename = fname, overwrite = TRUE, ...)
+    ## replace spp rasters by the summed one
+    speciesLayers[sumSpecies] <- NULL
+    speciesLayers[[newLayerName]] <- a
+    message("  Merging ", paste(sumSpecies, collapse = ", "), "; becoming: ", newLayerName)
+  }
+
+  return(speciesLayers)
+}
+
+#' Fasterize polygons using \code{fasterize}
+#'
+#' @param sp a shapefile to rasterize
+#' @param raster the template raster to use
+#' @param fieldName the field to use for the rasterizing (will be ignored if the
+#'                  shapefile has no fields)
+#'
+#' @return TODO: is it a \code{RasterLayer}?
+#'
+#' @export
+#' @importFrom fasterize fasterize
+#' @importFrom sf st_as_sf
+fasterizeFromSp <- function(sp, raster, fieldName) {
+  ## check if projections are the same
+  if (!identical(crs(sp), crs(raster)))
+    stop("fasterize will probably be wrong, as shp and raster projections do not match")
+
+  tempSf <- sf::st_as_sf(sp)
+
+  if (all(names(tempSf) == "geometry")) {
+    ## if there are no fields, ignore fieldname
+    fasterize::fasterize(tempSf, raster)
+  } else
+    fasterize::fasterize(tempSf, raster, field = fieldName)
 }

@@ -8,11 +8,14 @@ overlayStacks(highQualityStack, lowQualityStack,
   outputFilenameSuffix = "overlay", destinationPath)
 }
 \arguments{
-\item{highQualityStack}{high quality list/stack of rasters (will be used preferencially)}
+\item{highQualityStack}{high quality list/stack of rasters
+(will be used preferentially)}
 
-\item{lowQualityStack}{low quality list/stack of rasters (will be used to fill NAs in highQualityStack)}
+\item{lowQualityStack}{low quality list/stack of rasters
+(will be used to fill \code{NA}s in \code{highQualityStack})}
 
-\item{outputFilenameSuffix}{file suffix to save raster if there was overlaying. Defautls to "overlay"}
+\item{outputFilenameSuffix}{file suffix to save raster if there was overlaying.
+Defaults to \code{"overlay"}.}
 
 \item{destinationPath}{directory for saved rasters}
 }

@@ -11,22 +11,31 @@ if (getRversion() >= "3.1.0") {
 #'
 #' @export
 assignLightProb <- function(sufficientLight, newCohortData) {
-  ## for each line, get the survival probability from sufficientLight table
-  ## note that sufficentLight is a table of survival probs for each tolerance level (row) by and shade level (column)
-  ## siteShade + 2 is necessary to skip the first column
+  ## for each line, get the survival probability from sufficientLight table note
+  ## that sufficentLight is a table of survival probs for each tolerance level
+  ## (row) by and shade level (column) siteShade + 2 is necessary to skip the
+  ## first column
   newCohortData[ , lightProb := sufficientLight[cbind(shadetolerance, siteShade + 2)]]
 }
 
-#' Pull out the values from speciesEcoregion table for current time
+#' Convert numeric values to rounded integers
 #'
-#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
-#' @param currentTime The current time e.g., \code{time(sim)}
+#' Simple wrapper around \code{as.integer} to round, rather than truncate, values.
 #'
-#' @note
-#' TODO
+#' @param x A numeric vector
+#'
+#' @return An integer vector of length \code{x}, rounded to zero decimal places
+#'   prior to \code{as.integer}
 #'
 #' @export
-speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
-  spEco <- speciesEcoregion[year <= currentTime]
-  spEco[year == max(spEco$year)]
-}
+asInteger <- function(x)
+  as.integer(round(x, 0))
+
+#' Resample
+#'
+#' Imports the non-exported function \code{SpaDES.tools:::resample}.
+#'
+#' @keywords internal
+#' @rdname resample
+#' @seealso \code{\link[SpaDES.tools]{resample}}
+.resample <- getFromNamespace("resample", "SpaDES.tools")

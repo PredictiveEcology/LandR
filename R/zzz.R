@@ -6,7 +6,8 @@
   opts <- options()
   reproCachePath <- getOption("reproducible.cachePath")
   opts.LandR <- list( # nolint
-    LandR.assertions = FALSE
+    LandR.assertions = TRUE,
+    LandR.verbose = 1
   )
   toset <- !(names(opts.LandR) %in% names(opts))
   if (any(toset)) options(opts.LandR[toset])

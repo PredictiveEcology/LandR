@@ -63,7 +63,7 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
 
   if (is.null(sppEquiv))
     sppEquiv <- data.table(utils::data("sppEquivalencies_CA",
-                                                 package = "pemisc",
+                                                 package = "LandR",
                                                  envir = environment()))
 
   names(speciesTable) <- c(
@@ -87,7 +87,9 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
     "hardsoft"
   )
 
-  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]),]
+  speciesTable[, growthcurve := as.numeric(growthcurve)]
+
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv,
                                                            "LANDIS_traits", multi = TRUE) &
@@ -128,7 +130,7 @@ prepInputsSpecies <- function(url = NULL, dPath, cacheTags = NULL) {
 
   mainInput <- prepInputsMainInput(url = NULL, dPath, cacheTags) ## uses default URL
 
-  maxcol <- 13#max(count.fields(file.path(dPath, "species.txt"), sep = ""))
+  maxcol <- 13 #max(count.fields(file.path(dPath, "species.txt"), sep = ""))
   species <- Cache(prepInputs,
                    url = url,
                    targetFile = "species.txt",
@@ -142,8 +144,8 @@ prepInputsSpecies <- function(url = NULL, dPath, cacheTags = NULL) {
                    stringsAsFactors = FALSE,
                    overwrite = TRUE)
   species <- data.table(species[, 1:11])
-  species <- species[col1 != "LandisData",]
-  species <- species[col1 != ">>",]
+  species <- species[col1 != "LandisData", ]
+  species <- species[col1 != ">>", ]
   colNames <- c("species", "longevity", "sexualmature", "shadetolerance",
                 "firetolerance", "seeddistance_eff", "seeddistance_max",
                 "resproutprob", "resproutage_min", "resproutage_max",

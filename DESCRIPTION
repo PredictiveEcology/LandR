@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2018-12-20
-Version: 0.0.1.9000
+Date: 2019-01-16
+Version: 0.0.1.9005
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
     role = c("aut", "cre"), comment=c(ORCID = "0000-0002-6914-8316")),
@@ -22,20 +22,27 @@ Depends:
     R (>= 3.3.0)
 Imports:
     backports,
+    crayon,
     data.table,
     dplyr,
+    fastdigest,
     fasterize,
     gdalUtils,
     ggplot2,
+    googledrive,
     grDevices,
+    lme4,
     magrittr,
+    map,
     methods,
+    MuMIn (>= 1.42.5),
     parallel,
     pemisc,
     quickPlot,
     raster,
     RColorBrewer,
     reproducible,
+    sf,
     sp,
     SpaDES.core,
     SpaDES.tools,
@@ -48,8 +55,10 @@ Suggests:
     rmarkdown,
     testthat
 Remotes:
+    PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
-    PredictiveEcology/reproducible@development
+    PredictiveEcology/reproducible@development,
+    rforge/mumin/pkg
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
