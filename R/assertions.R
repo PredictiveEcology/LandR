@@ -125,7 +125,7 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
            " Please contact the module developers")
     }
     if (length(test3) != 0)
-      stop("There are duplicate, identical cohorts: ", cohortDataN[test3])
+      stop("There are duplicate, identical cohorts: ", print(cohortDataN[test3]))
 
     if (verbose > 1) {
       message(crayon::green("  -- assertion passed using assertCohortData --"))
