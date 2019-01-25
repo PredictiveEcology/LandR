@@ -294,7 +294,7 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
 #' @importFrom raster ncell raster
 #' @importFrom reproducible Cache .prefix preProcess basename2
 #' @importFrom tools file_path_sans_ext
-#' @importFrom utils untar
+#' @importFrom utils capture.output untar
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   dots <- list(...)
