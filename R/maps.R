@@ -32,17 +32,17 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
   if (is.null(nonFlammClasses))
     stop("Need nonFlammClasses, which are the classes that cannot burn in",
          "the LandCoverClassifiedMap")
-  
+
   oldClass <- minValue(LandCoverClassifiedMap):maxValue(LandCoverClassifiedMap)
   newClass <- ifelse(oldClass %in% nonFlammClasses, 0L, 1L) ## NOTE: 0 codes for NON-flammable
   flammableTable <- cbind(oldClass, newClass)
   rstFlammable <- ratify(reclassify(LandCoverClassifiedMap, flammableTable))
   if (!is.null(filename2))
     rstFlammable <- writeRaster(rstFlammable, filename = filename2, overwrite = TRUE)
-  
+
   setColors(rstFlammable, n = 2) <- colorRampPalette(c("blue", "red"))(2)
   if (!is.null(mask)) rstFlammable[is.na(mask[])] <- NA_integer_
-  
+
   rstFlammable[] <- as.integer(rstFlammable[])
   rstFlammable
 }
@@ -64,7 +64,7 @@ prepInputsLCC <- function(year = 2005,
                           studyArea = NULL,
                           rasterToMatch = NULL,
                           filename2 = NULL, ...) {
-  
+
   dots <- list(...)
   if (is.null(dots$url)) {
     if (identical(as.integer(year), 2005L)) {
@@ -76,7 +76,7 @@ prepInputsLCC <- function(year = 2005,
       stop("Don't have the url for LCC2010 yet. Plese pass it using 'url'.")
     }
   }
-  
+
   Cache(prepInputs, targetFile = filename,
         archive = asPath("LandCoverOfCanada2005_V1_4.zip"),
         url = url,
@@ -106,10 +106,9 @@ prepInputsLCC <- function(year = 2005,
 makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
   if (!inRange(vegLeadingProportion, 0, 1))
     stop("vegLeadingProportion must be a proportion")
-  
+
   sumVegPct <- sum(speciesStack) ## TODO: how is the sum >100 ?
-  
-  
+
   if (isTRUE(mixed)) {
     ## create "mixed" layer, which is given a value slightly higher than any
     ## other layer. if it is deemed a mixed pixel
@@ -121,10 +120,10 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
     MixedRas <- speciesStack[[1]]
     MixedRas[!is.na(speciesStack[[1]][])] <- 0
     MixedRas[whMixed] <- max(maxValue(speciesStack)) * 1.01
-    
+
     speciesStack$Mixed <- MixedRas
   }
-  
+
   a <- speciesStack[]
   nas <- is.na(a[, 1])
   maxes <- apply(a[!nas, ], 1, function(x) {
@@ -134,11 +133,11 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
     }
     return(whMax)
   })
-  
+
   vegTypeMap <- raster(speciesStack[[1]])
-  
+
   vegTypeMap[!nas] <- maxes
-  
+
   layerNames <- names(speciesStack)
   names(layerNames) <- layerNames
   levels(vegTypeMap) <- data.frame(ID = seq(layerNames), Species = names(layerNames))
@@ -167,22 +166,22 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   #   setkey(species[, .(speciesCode, speciesGroup)], speciesCode), nomatch = 0]
   pixelGroupData <- cohortdata[, list(totalB = sum(B, na.rm = TRUE),
                                       speciesCode, B), by = pixelGroup]
-  
+
   pixelGroupData <- pixelGroupData[, .(speciesGroupB = sum(B, na.rm = TRUE),
                                        totalB = mean(totalB, na.rm = TRUE)),
                                    by = c("pixelGroup", "speciesCode")]
   pixelGroupData[, speciesProportion := speciesGroupB / totalB]
-  
+
   pixelGroupData2 <- pixelGroupData[, list(mixed = all(speciesProportion < vegLeadingProportion),
                                            leading = speciesCode[which.max(speciesProportion)]), by = "pixelGroup"]
   pixelGroupData2[mixed == TRUE, leading := "Mixed"]
-  
+
   vegTypeMap <- rasterizeReduced(pixelGroupData2, pixelGroupMap, "leading", "pixelGroup")
   levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]], colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
                               stringsAsFactors = FALSE)
   setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
-  
-  
+
+
   if (isTRUE(unitTest)) {
     # TEST THE MAP
     ids <- sample(which(!is.na(vegTypeMap[])), 100, replace = FALSE)
@@ -202,7 +201,7 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
     if (!all(setkey(pgTest2, pixelGroup)$leading == names(pgs)[order(pgs)]))
       stop("The vegTypeMap is incorrect. Please debug LandR::vegTypeMapGenerator")
   }
-  
+
   # if (FALSE) {
   #
   #   species[species == "Pinu_ban" | species == "Pinu_con" | species == "Pinu_sp",
@@ -299,41 +298,40 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   dots <- list(...)
-  
+
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   sppMerge <- unique(sppEquiv[[sppEquivCol]][duplicated(sppEquiv[[sppEquivCol]])])
   sppMerge <- sppMerge[nzchar(sppMerge)]
-  
   if ("cachePath" %in% names(dots)) {
     cachePath <- dots$cachePath
   } else {
     cachePath <- getOption("reproducible.cachePath")
   }
-  
+
   ## get .tar file first - no extraction
   outPreProcess <- preProcess(targetFile = file.path(dPath, "kNN-Species.tar"),
                               archive = file.path(dPath, "kNN-Species.tar"),
                               url = url, destinationPath = dPath)
-  
+
   ## get all kNN species - names only
   allSpp <- untar(tarfile = outPreProcess$targetFilePath, list = TRUE)
   allSpp <- allSpp %>%
     grep(".zip", ., value = TRUE) %>%
     sub("_v0.zip", "", .) %>%
     sub(".*Species_", "", .)
-  
+
   ## get all species layers from .tar
   if (length(sppNameVector) == 1) ## avoids a warning in next if
     if (sppNameVector == "all")
       sppNameVector <- allSpp
-  
+
   ## Make sure spp names are compatible with kNN names
   kNNnames <- as.character(equivalentName(sppNameVector, sppEquiv,
                                           column = knnNamesCol, multi = TRUE))
   sppNameVector <- as.character(equivalentName(sppNameVector, sppEquiv,
                                                column = sppEquivCol, multi = TRUE))
-  
+
   ## if there are NA's, that means some species can't be found in kNN data base
   if (any(is.na(kNNnames))) {
     warning(paste0("Can't find ", sppNameVector[is.na(kNNnames)], " in `sppEquiv$",
@@ -343,14 +341,14 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
     kNNnames <- kNNnames[!is.na(kNNnames)]
     sppNameVector <- sppNameVector[!is.na(kNNnames)]
   }
-  
+
   emptySppNames <- kNNnames == ""
   if (any(emptySppNames)) {
     ## select only available species
     kNNnames <- kNNnames[!emptySppNames]
     sppNameVector <- sppNameVector[!emptySppNames]
   }
-  
+
   ## same as above
   if (any(!kNNnames %in% allSpp)) {
     warning(paste0("Can't find ", sppNameVector[is.na(kNNnames)], " in kNN database.\n",
@@ -358,7 +356,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
     kNNnames <- kNNnames[kNNnames %in% allSpp]
     sppNameVector <- sppNameVector[kNNnames %in% allSpp]
   }
-  
+
   ## define suffix to append to file names
   suffix <- if (basename(cachePath) == "cache") {
     paste0(as.character(ncell(rasterToMatch)), "px")
@@ -366,7 +364,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
     basename(cachePath)
   }
   suffix <- paste0("_", suffix)
-  
+
   ## select which archives/targetFiles to extract -- because there was "multi" above, need unique here
   targetFiles <- paste0("NFI_MODIS250m_kNN_Species_", unique(kNNnames), "_v0.tif")
   # this sorting is necessary because split fn call below will sort
@@ -376,19 +374,19 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   archives <- cbind(archive1 = file.path(dPath, "kNN-Species.tar"),
                     archive2 = file.path(dPath, paste0("NFI_MODIS250m_kNN_Species_", kNNnames, "_v0.zip")))
   archives <- split(archives, archives[, "archive2"])
-  
+
   if (!all(SpaDES.core::.basename(file_path_sans_ext(names(archives))) == file_path_sans_ext(targetFiles)))
     stop("Something is wrong. File a bug report re: loadkNNSpeciesLayers and archive ordering.")
-  
+
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
-  
+
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
   if (length(kNNnames) > 15) {
     message("This looks like a lot of species; did you mean to pass only a subset of this to sppEquiv?",
             "\n  You can use the list above to choose species, then select only those rows ",
             "\n  in sppEquiv before passing here")
   }
-  speciesLayers <- Cache(Map, 
+  speciesLayers <- Cache(Map,
                          targetFile = asPath(targetFiles),
                          archive = lapply(archives, asPath),
                          filename2 = postProcessedFilenames,
@@ -403,7 +401,6 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                          userTags = dots$userTags
                          ),
                          prepInputs, quick = TRUE) # don't need to digest all the "targetFile" and "archives"
-  
   names(speciesLayers) <- unique(kNNnames)
   noDataLayers <- sapply(speciesLayers, function(x) if (maxValue(x) < thresh ) FALSE else TRUE)
   if (sum(!noDataLayers) > 0) {
@@ -414,24 +411,22 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
             sppKeep)
   }
   speciesLayers <- speciesLayers[noDataLayers]
-  
-  
   if (!is.null(sppMerge)) {
     if (length(sppMerge) > 0)
       speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
                                       sppEquiv = sppEquiv, column = "KNN", suffix = suffix,
                                       dPath = dPath)
   }
-  
+
   ## Rename species layers - There will be 2 groups -- one
   nameChanges <- equivalentName(names(speciesLayers), sppEquiv, column = sppEquivCol)
   nameChangeNA <- is.na(nameChanges)
   names(speciesLayers)[!nameChangeNA] <- nameChanges[!nameChangeNA]
-  
+
   nameChangesNonMerged <- equivalentName(names(speciesLayers)[nameChangeNA],
                                          sppEquiv, column = sppEquivCol)
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
-  
+
   # ## remove layers that have less data than thresh (i.e. spp absent in study area)
   # ## count no. of pixels that have biomass
   # layerData <- Cache(sapply, X = speciesLayers, function(x) sum(x[] > 0, na.rm = TRUE))
@@ -487,18 +482,18 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
   ## check if HQ resolution > LQ resolutions
   hqLarger <- ncell(lowQualityStack) * prod(res(lowQualityStack)) <
     ncell(highQualityStack) * prod(res(highQualityStack))
-  
+
   ## make table of species layers in HQ and LQ
   dt1 <- data.table(SPP = layerNames(highQualityStack), HQ = layerNames(highQualityStack))
   dt2 <- data.table(SPP = layerNames(lowQualityStack), LQ = layerNames(lowQualityStack))
   setkey(dt1, SPP); setkey(dt2, SPP)
   dtj <- merge(dt1, dt2, all = TRUE)
   dtj[, c("HQ", "LQ") := list(!is.na(HQ), !is.na(LQ))]
-  
+
   ## check which layers have species info in HQ and LQ
   #dtj[, HQ := any(!is.na(highQualityStack[[SPP]][])), by = 1:nrow(dtj)] #nolint
   #dtj[, LQ := any(!is.na(lowQualityStack[[SPP]][])), by = 1:nrow(dtj)] #nolint
-  
+
   stackRas <- list()
   for (x in seq(nrow(dtj))) {
     stackRas[[x]] <- dtj[x, .overlay(SPP, HQ, LQ, hqLarger = hqLarger,
@@ -508,7 +503,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
                                      destinationPath = destinationPath)]
   }
   names(stackRas) <- dtj$SPP
-  
+
   stack(stackRas)
 }
 
@@ -547,7 +542,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
                                               filename = LQCurName,
                                               datatype = "INT2U")
       }
-      
+
       LQRastInHQcrs <- projectExtent(lowQualityStack, crs = crs(highQualityStack))
       # project LQ raster into HQ dimensions
       gdalwarp(overwrite = TRUE,
@@ -560,16 +555,16 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
                       xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
                filename(lowQualityStack[[SPP]]), ot = "Byte",
                LQRastName)
-      
+
       LQRast <- raster(LQRastName)
       LQRast[] <- LQRast[]
       unlink(LQRastName)
-      
+
       try(unlink(LQCurName), silent = TRUE)
-      
+
       if (hqLarger) {
         tmpHQName <- basename(tempfile(fileext = ".tif"))
-        
+
         gdalwarp(overwrite = TRUE,
                  dstalpha = TRUE,
                  s_srs = as.character(crs(highQualityStack[[SPP]])),
@@ -590,13 +585,13 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
       LQRast <- lowQualityStack[[SPP]]
       HQRast <- highQualityStack[[SPP]]
     }
-    
+
     message("  Writing new, overlaid ", SPP, " raster to disk.")
     if (!compareRaster(LQRast, HQRast))
       stop("Stacks not identical, something is wrong with overlayStacks function.")
-    
+
     NAs <- is.na(HQRast[])
-    
+
     ## complete missing HQ data with LQ data
     HQRast[NAs] <- LQRast[][NAs]
     HQRast <- writeRaster(HQRast, datatype = "INT1U",
@@ -641,17 +636,17 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' @keywords internal
 mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dPath, ...) {
   stopifnot(!is.null(sppMerge), length(sppMerge) > 0)
-  
+
   ## make sure species names and list names are in the right formats
   names(sppMerge) <- sppMerge
   sppMerges <- lapply(sppMerge, FUN = function(x) {
     unique(equivalentName(x, sppEquiv,  column = "KNN", multi = TRUE))
   })
   #names(sppMerges) <- equivalentName(names(sppMerges), sppEquiv,  column = sppEquivCol)
-  
+
   ## keep species present in the data
   sppMerges <- lapply(sppMerges, FUN = function(x) x[x %in% names(speciesLayers)])
-  
+
   for (i in seq(length(sppMerges))) {
     sumSpecies <- sppMerges[[i]]
     if (length(sumSpecies) > 1) {
@@ -668,7 +663,7 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
       message("  Merging ", paste(sumSpecies, collapse = ", "), "; becoming: ", newLayerName)
     } 
   }
-  
+
   return(speciesLayers)
 }
 
@@ -688,9 +683,9 @@ fasterizeFromSp <- function(sp, raster, fieldName) {
   ## check if projections are the same
   if (!identical(crs(sp), crs(raster)))
     stop("fasterize will probably be wrong, as shp and raster projections do not match")
-  
+
   tempSf <- sf::st_as_sf(sp)
-  
+
   if (all(names(tempSf) == "geometry")) {
     ## if there are no fields, ignore fieldname
     fasterize::fasterize(tempSf, raster)
