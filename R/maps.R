@@ -375,7 +375,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                     archive2 = file.path(dPath, paste0("NFI_MODIS250m_kNN_Species_", kNNnames, "_v0.zip")))
   archives <- split(archives, archives[, "archive2"])
 
-  if (!all(SpaDES.core::.basename(file_path_sans_ext(names(archives))) == file_path_sans_ext(targetFiles)))
+  if (!all(.basename(file_path_sans_ext(names(archives))) == file_path_sans_ext(targetFiles)))
     stop("Something is wrong. File a bug report re: loadkNNSpeciesLayers and archive ordering.")
 
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
