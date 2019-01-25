@@ -40,11 +40,3 @@ asInteger <- function(x)
 #' @seealso \code{\link[SpaDES.tools]{resample}}
 .resample <- getFromNamespace("resample", "SpaDES.tools")
 
-#' Basename
-#'
-#' Imports the non-exported function \code{SpaDES.core:::.basename}, which is a
-#' simple wrapper around \code{\link{basename}} that deals with \code{NULL} values.
-#'
-#' @keywords internal
-#' @rdname basename
-.basename <- getFromNamespace(".basename", "SpaDES.core")
