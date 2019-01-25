@@ -294,7 +294,7 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
 #' @importFrom raster ncell raster
 #' @importFrom reproducible Cache .prefix preProcess
 #' @importFrom tools file_path_sans_ext
-#' @importFrom utils untar
+#' @importFrom utils capture.output untar
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   dots <- list(...)
@@ -407,7 +407,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
     sppKeep <- capture.output(dput(names(speciesLayers)[noDataLayers]))
     message("removing ", sum(!noDataLayers), " species because they had <",thresh,
             " % cover in the study area",
-            "\n  These species are retained (and could be further culled manually, if desired):\n  ", 
+            "\n  These species are retained (and could be further culled manually, if desired):\n  ",
             sppKeep)
   }
   speciesLayers <- speciesLayers[noDataLayers]
@@ -430,14 +430,14 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   # ## remove layers that have less data than thresh (i.e. spp absent in study area)
   # ## count no. of pixels that have biomass
   # layerData <- Cache(sapply, X = speciesLayers, function(x) sum(x[] > 0, na.rm = TRUE))
-  # 
+  #
   # ## remove layers that had < thresh pixels with biomass
   # belowThresh <- layerData < thresh
   # if (any(belowThresh)) {
   #   message(names(belowThresh)[belowThresh], " was removed because it had no data")
   #   speciesLayers[belowThresh] <- NULL
   # }
-  # 
+  #
   ## return stack and updated species names vector
   stack(speciesLayers)
 }
@@ -652,7 +652,7 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
     if (length(sumSpecies) > 1) {
       browser()
       newLayerName <- names(sppMerges)[i]
-      
+
       fname <- .suffix(file.path(dPath, paste0("kNN", newLayerName, ".tif")), suffix)
       a <- calc(stack(speciesLayers[sumSpecies]), sum, na.rm = TRUE)
       names(a) <- newLayerName
@@ -661,7 +661,7 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
       speciesLayers[sumSpecies] <- NULL
       speciesLayers[[newLayerName]] <- a
       message("  Merging ", paste(sumSpecies, collapse = ", "), "; becoming: ", newLayerName)
-    } 
+    }
   }
 
   return(speciesLayers)
