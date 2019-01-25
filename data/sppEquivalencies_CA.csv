@@ -34,8 +34,8 @@ alnurubr,ALNU.RUB,Alnu_rub,Acer_Sah,Acer sach,Acer saccharum,,,,,Acer_Sah
 ,BETU.ALL,Betu_sp,Betu_All,Betu alle,Betula alleghaniensis,,,,,Betu_All
 ,,Betu_len,,Betu lent,Betula lenta,,,,,
 ,,Betu_man,,Betu mand,Betula mandschurica var japonica,,,,,
-,,Betu_neo,,Betu neoa,Betula neoalaskana,,,,,0
-,,Betu_occ,,Betu occi,Betula occidentalis,,,,,0
+,,Betu_neo,,Betu neoa,Betula neoalaskana,,,,,
+,,Betu_occ,,Betu occi,Betula occidentalis,,,,,
 betupapy,BETU.PAP,Betu_pap,Betu_Pap,Betu papy,Betula papyrifera,,,,,Betu_Pap
 ,,Betu_pen,,Betu pend,Betula pendula,,,,,
 ,,Betu_pop,Betu_Pop,Betu popu,Betula populifolia,,,,,Betu_Pop
