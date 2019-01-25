@@ -606,24 +606,26 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   ######################################################
   cohortDataMissingAge <- cohortData[, hasBadAge := all(age == 0 & cover > 0) | any(is.na(age)), by = "pixelIndex"][
     hasBadAge == TRUE]
-  cohortDataMissingAgeUnique <- unique(cohortDataMissingAge,
-                                       by = c("initialEcoregionCode", "speciesCode"))[
-                                         , .(initialEcoregionCode, speciesCode)]
-  cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[cohortData, on = c("initialEcoregionCode", "speciesCode"), nomatch = 0]
-  ageQuotedFormula <- quote(age ~ B * speciesCode + (1 | initialEcoregionCode) + cover)
-  cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(B, age, speciesCode, initialEcoregionCode, cover)]
-  message(blue("Impute missing age values"))
-  system.time(outAge <- Cache(statsModel, form = ageQuotedFormula,
-                              uniqueEcoregionGroup = unique(cohortDataMissingAgeUnique$ecoregionGroup),
-                              .specialData = cohortDataMissingAgeUnique))
-
-  print(outAge$rsq)
-
-  cohortDataMissingAge[, imputedAge := pmax(0L, asInteger(predict(outAge$mod, newdata = cohortDataMissingAge)))]
-  cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][cohortData, on = c("pixelIndex", "speciesCode")]
-  cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = log(imputedAge))]
-  cohortData[, `:=`(imputedAge = NULL, hasBadAge = NULL)]
-
+  if (NROW(cohortDataMissingAge) > 0) {
+    cohortDataMissingAgeUnique <- unique(cohortDataMissingAge,
+                                         by = c("initialEcoregionCode", "speciesCode"))[
+                                           , .(initialEcoregionCode, speciesCode)]
+    cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[cohortData, on = c("initialEcoregionCode", "speciesCode"), nomatch = 0]
+    ageQuotedFormula <- quote(age ~ B * speciesCode + (1 | initialEcoregionCode) + cover)
+    cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(B, age, speciesCode, initialEcoregionCode, cover)]
+    message(blue("Impute missing age values"))
+    system.time(outAge <- Cache(statsModel, form = ageQuotedFormula,
+                                uniqueEcoregionGroup = unique(cohortDataMissingAgeUnique$ecoregionGroup),
+                                .specialData = cohortDataMissingAgeUnique))
+  
+    print(outAge$rsq)
+    cohortDataMissingAge[, imputedAge := pmax(0L, asInteger(predict(outAge$mod, newdata = cohortDataMissingAge)))]
+    cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][cohortData, on = c("pixelIndex", "speciesCode")]
+    cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = log(imputedAge))]
+    cohortData[, `:=`(imputedAge = NULL)]
+  }
+  cohortData[, `:=`(hasBadAge = NULL)]
+  
   #######################################################
   # set B to zero if age is zero because B is lowest quality dataset
   #######################################################
