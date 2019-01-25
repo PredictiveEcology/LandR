@@ -303,6 +303,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   sppMerge <- unique(sppEquiv[[sppEquivCol]][duplicated(sppEquiv[[sppEquivCol]])])
+  sppMerge <- sppMerge[nzchar(sppMerge)]
   
   if ("cachePath" %in% names(dots)) {
     cachePath <- dots$cachePath
@@ -403,7 +404,17 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                          ),
                          prepInputs, quick = TRUE) # don't need to digest all the "targetFile" and "archives"
   
-  names(speciesLayers) <- kNNnames
+  names(speciesLayers) <- unique(kNNnames)
+  noDataLayers <- sapply(speciesLayers, function(x) if (maxValue(x) < thresh ) FALSE else TRUE)
+  if (sum(!noDataLayers) > 0) {
+    sppKeep <- capture.output(dput(names(speciesLayers)[noDataLayers]))
+    message("removing ", sum(!noDataLayers), " species because they had <",thresh,
+            " % cover in the study area",
+            "\n  These species are retained (and could be further culled manually, if desired):\n  ", 
+            sppKeep)
+  }
+  speciesLayers <- speciesLayers[noDataLayers]
+  
   
   if (!is.null(sppMerge)) {
     if (length(sppMerge) > 0)
@@ -421,17 +432,17 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                          sppEquiv, column = sppEquivCol)
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
   
-  ## remove layers that have less data than thresh (i.e. spp absent in study area)
-  ## count no. of pixels that have biomass
-  layerData <- Cache(sapply, X = speciesLayers, function(x) sum(x[] > 0, na.rm = TRUE))
-  
-  ## remove layers that had < thresh pixels with biomass
-  belowThresh <- layerData < thresh
-  if (any(belowThresh)) {
-    message(names(belowThresh)[belowThresh], " was removed because it had no data")
-    speciesLayers[belowThresh] <- NULL
-  }
-  
+  # ## remove layers that have less data than thresh (i.e. spp absent in study area)
+  # ## count no. of pixels that have biomass
+  # layerData <- Cache(sapply, X = speciesLayers, function(x) sum(x[] > 0, na.rm = TRUE))
+  # 
+  # ## remove layers that had < thresh pixels with biomass
+  # belowThresh <- layerData < thresh
+  # if (any(belowThresh)) {
+  #   message(names(belowThresh)[belowThresh], " was removed because it had no data")
+  #   speciesLayers[belowThresh] <- NULL
+  # }
+  # 
   ## return stack and updated species names vector
   stack(speciesLayers)
 }
@@ -634,7 +645,7 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
   ## make sure species names and list names are in the right formats
   names(sppMerge) <- sppMerge
   sppMerges <- lapply(sppMerge, FUN = function(x) {
-    equivalentName(x, sppEquiv,  column = "KNN", multi = TRUE)
+    unique(equivalentName(x, sppEquiv,  column = "KNN", multi = TRUE))
   })
   #names(sppMerges) <- equivalentName(names(sppMerges), sppEquiv,  column = sppEquivCol)
   
@@ -643,16 +654,19 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
   
   for (i in seq(length(sppMerges))) {
     sumSpecies <- sppMerges[[i]]
-    newLayerName <- names(sppMerges)[i]
-    
-    fname <- .suffix(file.path(dPath, paste0("kNN", newLayerName, ".tif")), suffix)
-    a <- calc(stack(speciesLayers[sumSpecies]), sum, na.rm = TRUE)
-    names(a) <- newLayerName
-    a <- writeRaster(a, filename = fname, overwrite = TRUE, ...)
-    ## replace spp rasters by the summed one
-    speciesLayers[sumSpecies] <- NULL
-    speciesLayers[[newLayerName]] <- a
-    message("  Merging ", paste(sumSpecies, collapse = ", "), "; becoming: ", newLayerName)
+    if (length(sumSpecies) > 1) {
+      browser()
+      newLayerName <- names(sppMerges)[i]
+      
+      fname <- .suffix(file.path(dPath, paste0("kNN", newLayerName, ".tif")), suffix)
+      a <- calc(stack(speciesLayers[sumSpecies]), sum, na.rm = TRUE)
+      names(a) <- newLayerName
+      a <- writeRaster(a, filename = fname, overwrite = TRUE, ...)
+      ## replace spp rasters by the summed one
+      speciesLayers[sumSpecies] <- NULL
+      speciesLayers[[newLayerName]] <- a
+      message("  Merging ", paste(sumSpecies, collapse = ", "), "; becoming: ", newLayerName)
+    } 
   }
   
   return(speciesLayers)
