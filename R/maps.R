@@ -650,7 +650,6 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
   for (i in seq(length(sppMerges))) {
     sumSpecies <- sppMerges[[i]]
     if (length(sumSpecies) > 1) {
-      browser()
       newLayerName <- names(sppMerges)[i]
 
       fname <- .suffix(file.path(dPath, paste0("kNN", newLayerName, ".tif")), suffix)
