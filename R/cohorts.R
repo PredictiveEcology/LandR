@@ -462,6 +462,8 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC,
   availableERG2[, `:=`(pixelIndex = NULL, ecoregion = NULL)]
   # cd <- pixelCohortData[, .(pixelIndex, initialEcoregionCode, speciesCode)]
   numCharEcoregion <- nchar(gsub("_.*", "", availableERC_by_Sp$initialEcoregionCode[1]))
+  currentLenUnwantedPixels <- length(theUnwantedPixels)
+  repeatsOnSameUnwanted <- 0
   while (length(theUnwantedPixels) > 0) {
     out <- spread2(rstLCC, start = theUnwantedPixels, asRaster = FALSE,
                    iterations = iterations, allowOverlap = TRUE, spreadProb = 1)
@@ -481,36 +483,50 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC,
     out7 <- out5[availableERG2, on = c("speciesCode", "possERC" = "initialEcoregionCode"), nomatch = NA]
     out6 <- na.omit(out7)
 
-    # Any that don't have all species, should be removed
-    #out5[, toDelete := any(is.na(speciesCode)), by = "pixelIndex"]
-    #out6 <- out5[toDelete == FALSE]
-    # out7 <- out5[toDelete == TRUE]
+    # sanity check -- don't let an infinite loop
+    if (currentLenUnwantedPixels == length(theUnwantedPixels))
+      repeatsOnSameUnwanted <- repeatsOnSameUnwanted + 1
+    else {
+      currentLenUnwantedPixels <- length(theUnwantedPixels)
+      repeatsOnSameUnwanted <- 0
+    }
 
-    # browser(expr = out6[pixelIndex == 194455])
-    rowsToKeep <- out6[, list(keep = .resample(.I, 1)), by = c("pixelIndex")] # random sample of available, weighted by abundance
-    out2 <- out6[rowsToKeep$keep,
-                 list(newPossLCC = lcc,
-                      initialEcoregion = substr(initialEcoregionCode, 1, numCharEcoregion),
-                      pixelIndex)]
-    #out2 <- out2[rowsToKeep$keep]
-    out2[, ecoregionGroup := paste0(initialEcoregion, "_",
-                                    paddedFloatToChar(as.numeric(newPossLCC), padL = 2, padR = 0))]
-    out2[, initialEcoregion := NULL]
+    if (repeatsOnSameUnwanted > 5) {
+      out2 <- data.table(newPossLCC = NA, pixelIndex = theUnwantedPixels, ecoregionGroup = NA)
+      message("  removing ", NROW(theUnwantedPixels), " pixel of class ",
+              paste(rstLCC[theUnwantedPixels], collapse = ", "), " because couldn't",
+              " find a suitable replacement")
+      theUnwantedPixels <- integer()
+    }
 
-    # remove combinations of ecoregionGroup and speciesCode that don't exist -- Now this excludes B = 0
-    #out2 <- availableERC_by_Sp[out2, on = c("pixelIndex" = "initialPixels", "initialEcoregionCode" = "ecoregionGroup", "speciesCode"),
-    #                           nomatch = NA]
-    #hasMatch <- out2[, all(!is.na(rasterToMatch)), by = c("pixelIndex", "initialEcoregionCode", "speciesCode")][V1 == TRUE]
-    keepPixels <- unique(out2$pixelIndex)
-    # out2 <- out2[ecoregionGroup %in% cdEcoregionCodes] # remove codes that don't exist in pixelCohortData
+    if (NROW(out6) > 0) {
+      rowsToKeep <- out6[, list(keep = .resample(.I, 1)), by = c("pixelIndex")] # random sample of available, weighted by abundance
+      out2 <- out6[rowsToKeep$keep,
+                   list(newPossLCC = lcc,
+                        initialEcoregion = substr(initialEcoregionCode, 1, numCharEcoregion),
+                        pixelIndex)]
+      #out2 <- out2[rowsToKeep$keep]
+      out2[, ecoregionGroup := paste0(initialEcoregion, "_",
+                                      paddedFloatToChar(as.numeric(newPossLCC), padL = 2, padR = 0))]
+      out2[, initialEcoregion := NULL]
 
-    theUnwantedPixels <- theUnwantedPixels[!theUnwantedPixels %in% keepPixels]
-    out2 <- unique(out2)
+      # remove combinations of ecoregionGroup and speciesCode that don't exist -- Now this excludes B = 0
+      #out2 <- availableERC_by_Sp[out2, on = c("pixelIndex" = "initialPixels", "initialEcoregionCode" = "ecoregionGroup", "speciesCode"),
+      #                           nomatch = NA]
+      #hasMatch <- out2[, all(!is.na(rasterToMatch)), by = c("pixelIndex", "initialEcoregionCode", "speciesCode")][V1 == TRUE]
+      keepPixels <- unique(out2$pixelIndex)
+      # out2 <- out2[ecoregionGroup %in% cdEcoregionCodes] # remove codes that don't exist in pixelCohortData
+
+      theUnwantedPixels <- theUnwantedPixels[!theUnwantedPixels %in% keepPixels]
+      out2 <- unique(out2)
+    }
+
     if (!exists("out3")) {
       out3 <- out2
     } else {
       out3 <- rbindlist(list(out2, out3))
     }
+
   }
 
   # setnames(out3, c("initialPixels", "initialEcoregionCode"), c("pixelIndex", "ecoregionGroup"))
@@ -617,7 +633,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     system.time(outAge <- Cache(statsModel, form = ageQuotedFormula,
                                 uniqueEcoregionGroup = unique(cohortDataMissingAgeUnique$ecoregionGroup),
                                 .specialData = cohortDataMissingAgeUnique))
-  
+
     print(outAge$rsq)
     cohortDataMissingAge[, imputedAge := pmax(0L, asInteger(predict(outAge$mod, newdata = cohortDataMissingAge)))]
     cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][cohortData, on = c("pixelIndex", "speciesCode")]
@@ -625,7 +641,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     cohortData[, `:=`(imputedAge = NULL)]
   }
   cohortData[, `:=`(hasBadAge = NULL)]
-  
+
   #######################################################
   # set B to zero if age is zero because B is lowest quality dataset
   #######################################################
