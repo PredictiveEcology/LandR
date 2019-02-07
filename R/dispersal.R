@@ -62,9 +62,10 @@
 #' @importFrom CircStats deg rad
 #' @importFrom fpCompare %>=%
 #' @importFrom raster xyFromCell
-#' @importFrom SpaDES.tools spread2 pointDistance
+#' @importFrom SpaDES.tools spread2
+#' @importFrom raster pointDistance
 #' @importFrom quickPlot Plot clearPlot
-#' @importFrom data.table := setattr [
+#' @importFrom data.table := setattr
 spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
                     advectionMag, kernel, meanDist, plot.it = TRUE,
                     minNumAgents = 50) {

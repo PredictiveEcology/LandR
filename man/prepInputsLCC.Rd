@@ -8,7 +8,7 @@ prepInputsLCC(year = 2005, destinationPath = asPath("."),
   studyArea = NULL, rasterToMatch = NULL, filename2 = NULL, ...)
 }
 \arguments{
-\item{year}{Numeric, either 2005 or 2010 (not yet implemented)}
+\item{year}{Numeric, either 2005 or 2010}
 
 \item{destinationPath}{Character string of a directory in which to download
 and save the file that comes from \code{url} and is also where the function

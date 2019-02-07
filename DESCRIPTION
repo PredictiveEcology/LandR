@@ -21,6 +21,8 @@ Authors@R: c(
 Depends:
     R (>= 3.3.0)
 Imports:
+    CircStats,
+    fpCompare,
     backports,
     crayon,
     data.table,
