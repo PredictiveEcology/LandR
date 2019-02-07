@@ -1,3 +1,13 @@
+if (getRversion() >= "3.1.0") {
+  utils::globalVariables(
+    c("abund", "abundActive", "abundSettled", "direction", "distance", "from",
+      "indFull", "lenRec", "lenSrc", "mags", "meanNumNeighs", "newDirs",
+      "newMags", "prop", "srcAbundActive", "sumAbund", "sumAbund2")
+  )
+}
+
+
+
 #' An alternative spread function -- conceived for insects
 #'
 #' This is built with \code{\link[SpaDES.tools]{spread2}} and
@@ -60,15 +70,16 @@
 #'
 #'
 #' @importFrom CircStats deg rad
-#' @importFrom fpCompare %>=%
+#' @importFrom fpCompare %>=% %>>%
 #' @importFrom raster xyFromCell
 #' @importFrom SpaDES.tools spread2
 #' @importFrom raster pointDistance
 #' @importFrom quickPlot Plot clearPlot
 #' @importFrom data.table := setattr
+#' @importFrom stats pexp
 #' @export
 spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
-                    advectionMag, kernel, meanDist, plot.it = TRUE,
+                    advectionMag, meanDist, plot.it = TRUE,
                     minNumAgents = 50) {
   if (advectionDir > 2 * pi) {
     message("assuming that advectionDir is in geographic degrees")
@@ -205,8 +216,13 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
 
 #' Return the (approximate) middle pixel on a raster
 #'
-#' This calculation is different depending on whether
+#' This calculation is slightly different depending on whether
 #' the \code{nrow(ras)} and \code{ncol(ras)} are even or odd.
+#' It will return the exact middle pixel if these are odd, and
+#' the pixel just left and/or above the middle pixel if either
+#' dimension is even, respectively.
+#' @param ras A \code{Raster}
+#' @export
 middlePixel <- function(ras) {
   if (nrow(ras) %% 2 == 1) {
     floor(ncell(ras) / 2)

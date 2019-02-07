@@ -5,7 +5,7 @@
 \title{An alternative spread function -- conceived for insects}
 \usage{
 spread3(start, rasQuality, rasAbundance, advectionDir, advectionMag,
-  kernel, meanDist, plot.it = TRUE, minNumAgents = 50)
+  meanDist, plot.it = TRUE, minNumAgents = 50)
 }
 \arguments{
 \item{start}{Raster indices from which to initiate dispersal}
