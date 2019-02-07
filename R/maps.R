@@ -55,7 +55,7 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #' @inheritParams reproducible::postProcess
 #' @inheritParams reproducible::prepInputs
 #'
-#' @param year Numeric, either 2005 or 2010 (not yet implemented)
+#' @param year Numeric, either 2005 or 2010
 #'
 #' @export
 #' @importFrom reproducible asPath prepInputs
@@ -72,13 +72,20 @@ prepInputsLCC <- function(year = 2005,
       #               "LandcoverCanada2005_250m/LandCoverOfCanada2005_V1_4.zip")
       url <- "https://drive.google.com/file/d/1g9jr0VrQxqxGjZ4ckF6ZkSMP-zuYzHQC/view?usp=sharing" #nolint
       filename <- asPath("LCC2005_V1_4a.tif")
+      archive = asPath("LandCoverOfCanada2005_V1_4.zip")
     } else {
-      stop("Don't have the url for LCC2010 yet. Plese pass it using 'url'.")
+      if (identical(as.integer(year), 2010L)){
+        url <- "http://ftp.maps.canada.ca/pub/nrcan_rncan/Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/CanadaLandcover2010.zip"
+        filename <- asPath("CAN_NALCMS_LC_30m_LAEA_mmu12_urb05_CAL.tif")
+        archive = asPath("CanadaLandcover2010.zip")
+      } else {
+        stop("Other LCC covers don't exist yet.")
+      }
     }
   }
 
   Cache(prepInputs, targetFile = filename,
-        archive = asPath("LandCoverOfCanada2005_V1_4.zip"),
+        archive = archive,
         url = url,
         destinationPath = asPath(destinationPath),
         studyArea = studyArea,
