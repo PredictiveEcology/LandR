@@ -45,7 +45,7 @@
 #' #rasQuality[] <- 1
 #' rasAbundance <- raster(rasQuality)
 #' rasAbundance[] <- 0
-#' startPixel <- middlePixel(rasAbundance)
+#' # startPixel <- middlePixel(rasAbundance)
 #' startPixel <- sample(seq(ncell(rasAbundance)), 3)
 #' rasAbundance[startPixel] <- 1000
 #' advectionDir <- 90
@@ -66,6 +66,7 @@
 #' @importFrom raster pointDistance
 #' @importFrom quickPlot Plot clearPlot
 #' @importFrom data.table := setattr
+#' @export
 spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
                     advectionMag, kernel, meanDist, plot.it = TRUE,
                     minNumAgents = 50) {
@@ -89,7 +90,7 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
   while (abundanceDispersing > minNumAgents) {
     b <- spread2(landscape = rasQuality, start = start,
                  spreadProb = 1, iterations = 1, asRaster = FALSE,
-                 returnDistance = TRUE, returnFrom = TRUE,
+                 returnDistances = TRUE, returnFrom = TRUE,
                  returnDirections = TRUE,
                  circle = TRUE, allowOverlap = 3)
     #b <- b[!duplicated(b, by = c("initialPixels", "pixels"))]
@@ -206,7 +207,6 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
 #'
 #' This calculation is different depending on whether
 #' the \code{nrow(ras)} and \code{ncol(ras)} are even or odd.
-#' @export
 middlePixel <- function(ras) {
   if (nrow(ras) %% 2 == 1) {
     floor(ncell(ras) / 2)

@@ -62,7 +62,7 @@ rasQuality[] <- 1
 #rasQuality[] <- 1
 rasAbundance <- raster(rasQuality)
 rasAbundance[] <- 0
-startPixel <- middlePixel(rasAbundance)
+# startPixel <- middlePixel(rasAbundance)
 startPixel <- sample(seq(ncell(rasAbundance)), 3)
 rasAbundance[startPixel] <- 1000
 advectionDir <- 90
