@@ -26,15 +26,21 @@ if (getRversion() >= "3.1.0") {
 #' @param advectionDir A single number in degrees from North = 0, indicating
 #'   the direction of advective forcing (i.e., wind). Will soon allow a
 #'   raster of advection vectors.
-#' @param advectionMag A single number in distance units of the \code{rasQuality},
-#'   e.g., meters, indicating the relative forcing that will occur for
-#'   each 1 pixel of attempted spreading.
-#' @param meanDist A single number indicating the mean distance parameter
-#'    for a negative exponential distribution dispersal kernel (e.g., \code{dexp}).
+#' @param advectionMag A single number in distance units of the
+#'   \code{rasQuality}, e.g., meters, indicating the relative forcing that will
+#'   occur. It is imposed on the total event, i.e., if the \code{meanDist} is
+#'   \code{10000}, and \code{advectionMag} is \code{5000}, then the expected
+#'   distance (i.e., 63% of agents) will have settled by \code{15000} map units.
+#' @param meanDist A single number indicating the mean distance parameter in map units
+#'    (not pixels), for a negative exponential distribution
+#'    dispersal kernel (e.g., \code{dexp}). This will mean that 63% of agents will have
+#'    settled at this \code{meanDist} (still experimental)
 #' @param plot.it Logical. If \code{TRUE}, there will be 2 plots that occur
 #'    as iterations happen.
 #' @param minNumAgents Single numeric indicating the minimum number of agents
 #'    to consider all dispersing finished. Default is 50
+#' @return
+#' A \code{data.table} with all information used during the spreading
 #' @examples
 #'
 #' # Simple case, no variation in rasQuality, numeric advectionDir and advectionMag
@@ -51,13 +57,24 @@ if (getRversion() >= "3.1.0") {
 #' rasAbundance[startPixel] <- 1000
 #' advectionDir <- 90
 #' advectionMag <- 4 * res(rasAbundance)[1]
+#' meanDist <- 2600
 #'
 #' clearPlot()
-#' spread3(rasAbundance = rasAbundance,
+#' out <- spread3(rasAbundance = rasAbundance,
 #'         rasQuality = rasQuality,
 #'         advectionDir = advectionDir,
 #'         advectionMag = advectionMag,
-#'         meanDist = 600, verbose = 2)
+#'         meanDist = meanDist, verbose = 2)
+#'
+#' # Test the dispersal kernel
+#' out[, disGroup:=round(distance/100)*100]
+#' freqs <- out[, .N, by = "disGroup"]
+#' freqs[, cumSum := cumsum(N) ]
+#' plot(freqs$disGroup, freqs$cumSum)
+#' abline(v = advectionMag + meanDist)
+#' # should be 0.63:
+#' freqs[disGroup == advectionMag + meanDist, cumSum]/
+#'    tail(freqs,1)[, cumSum]
 #'
 #' ### The case of variable quality raster
 #' library(sf) # needed to use fasterize
@@ -107,8 +124,6 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
   start <- spread2(rasQuality, start, iterations = 0, returnDistances = TRUE,
           returnDirections = TRUE, returnFrom = TRUE, asRaster = FALSE)
   start[, `:=`(abundActive = rasAbundance[][start$pixels],
-               indWithin = 1L,
-               indFull = 1L,
                abundSettled = 0)]
   abundanceDispersing <- sum(start$abundActive)
   plotMultiplier <- mean(start$abundActive) /
@@ -186,27 +201,24 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
     #    then collapse so only one row per receiving cell,
     #    it is a markov chain of order 1 only, except for some initial info
     b[active, `:=`(sumAbund = sum(abund, na.rm = TRUE),
-                   #maxAbund = max(abund, na.rm = TRUE),
                    indWithin = seq(.N),
                    indFull = .I), by = c('initialPixels', 'pixels')]
     b[active, meanNumNeighs := mean(lenSrc / lenRec) * mean(mags), by = c("pixels", "initialPixels")]
-    keepRows <- which(b$indWithin == 1)
+    keepRows <- which(b$indWithin == 1 | is.na(b$indWithin))
     b <- b[keepRows]
     active <- na.omit(match(active, b$indFull))
-    b[, indFull := seq(NROW(b))]
+    #b[, indFull := seq(NROW(b))]
 
     b[active, sumAbund2 := sumAbund * meanNumNeighs/ mean(mags)]
 
-    #toSubtract <- sum(b[active]$sumAbund2 - b[active]$sumAbund, na.rm = TRUE)
     totalSumAbund <- sum(b[active]$sumAbund, na.rm = TRUE)
     totalSumAbund2 <- sum(b[active]$sumAbund2, na.rm = TRUE)
     multiplyAll <- totalSumAbund/totalSumAbund2
-    #browser()
+
     b[active, sumAbund := sumAbund2 * multiplyAll]
-    b[, abund := NULL]
-    #b[is.na(ind), ind := 1]
-    #rmFromActive <- which(b$ind > 1)
-    #active <- active[na.omit(match(keepRows, active))]
+    b[, `:=`(abund = NULL, sumAbund2 = NULL, mags = NULL,
+             lenSrc = NULL, lenRec = NULL, meanNumNeighs = NULL,
+             prop = NULL, indWithin = NULL, indFull = NULL)]
 
     # Some of those active will not stop: estimate here by kernel probability
     b[active, abundSettled :=
