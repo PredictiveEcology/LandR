@@ -1,8 +1,8 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(
-    c("abund", "abundActive", "abundSettled", "direction", "distance", "from",
-      "indFull", "lenRec", "lenSrc", "mags", "meanNumNeighs", "newDirs",
-      "newMags", "prop", "srcAbundActive", "sumAbund", "sumAbund2")
+    c("abund", "abundActive", "abundSettled", "direction", "distance", "distGrp",
+      "from", "indFull", "lenRec", "lenSrc", "mags", "meanNumNeighs",
+      "newDirs", "newMags", "prop", "srcAbundActive", "sumAbund", "sumAbund2")
   )
 }
 
@@ -29,11 +29,13 @@ if (getRversion() >= "3.1.0") {
 #'   \code{rasQuality}, e.g., meters, indicating the relative forcing that will
 #'   occur. It is imposed on the total event, i.e., if the \code{meanDist} is
 #'   \code{10000}, and \code{advectionMag} is \code{5000}, then the expected
-#'   distance (i.e., 63% of agents) will have settled by \code{15000} map units.
+#'   distance (i.e., 63\% of agents) will have settled by \code{15000} map units.
 #' @param meanDist A single number indicating the mean distance parameter in map units
 #'    (not pixels), for a negative exponential distribution
 #'    dispersal kernel (e.g., \code{dexp}). This will mean that 63% of agents will have
 #'    settled at this \code{meanDist} (still experimental)
+#' @param verbose Numeric. With increasing numbers above 0, there will be more
+#'     messages produced. Currently, only 0, 1, or 2+ are discinct.
 #' @param plot.it Numeric. With increasing numbers above 0, there will be plots
 #'     produced during iterations. Currently, only 0, 1, or 2+ are discinct.
 #' @param minNumAgents Single numeric indicating the minimum number of agents

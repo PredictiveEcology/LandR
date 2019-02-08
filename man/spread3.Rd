@@ -28,7 +28,7 @@ the direction of advective forcing (i.e., wind).}
 \code{rasQuality}, e.g., meters, indicating the relative forcing that will
 occur. It is imposed on the total event, i.e., if the \code{meanDist} is
 \code{10000}, and \code{advectionMag} is \code{5000}, then the expected
-distance (i.e., 63% of agents) will have settled by \code{15000} map units.}
+distance (i.e., 63\% of agents) will have settled by \code{15000} map units.}
 
 \item{meanDist}{A single number indicating the mean distance parameter in map units
 (not pixels), for a negative exponential distribution
@@ -40,6 +40,9 @@ produced during iterations. Currently, only 0, 1, or 2+ are discinct.}
 
 \item{minNumAgents}{Single numeric indicating the minimum number of agents
 to consider all dispersing finished. Default is 50}
+
+\item{verbose}{Numeric. With increasing numbers above 0, there will be more
+messages produced. Currently, only 0, 1, or 2+ are discinct.}
 
 \item{saveStack}{If provided as a character string, it will save each iteration
 as part of a \code{rasterStack} to disk upon exit.}
