@@ -5,7 +5,7 @@
 \title{An alternative spread function -- conceived for insects}
 \usage{
 spread3(start, rasQuality, rasAbundance, advectionDir, advectionMag,
-  meanDist, plot.it = TRUE, minNumAgents = 50,
+  meanDist, plot.it = 2, minNumAgents = 50,
   verbose = getOption("LandR.verbose", 0))
 }
 \arguments{
@@ -19,22 +19,29 @@ of "agents" or pseudo-agents contained. This number of agents, will
 be spread horizontally, and distributed from each pixel
 that contains a non-zero non NA value.}
 
-\item{advectionDir}{A single number in degrees from North = 0, indicating
+\item{advectionDir}{A single number or RasterLayer in degrees from North = 0, indicating
 the direction of advective forcing (i.e., wind). Will soon allow a
 raster of advection vectors.}
 
-\item{advectionMag}{A single number in distance units of the \code{rasQuality},
-e.g., meters, indicating the relative forcing that will occur for
-each 1 pixel of attempted spreading.}
+\item{advectionMag}{A single number in distance units of the
+\code{rasQuality}, e.g., meters, indicating the relative forcing that will
+occur. It is imposed on the total event, i.e., if the \code{meanDist} is
+\code{10000}, and \code{advectionMag} is \code{5000}, then the expected
+distance (i.e., 63% of agents) will have settled by \code{15000} map units.}
 
-\item{meanDist}{A single number indicating the mean distance parameter
-for a negative exponential distribution dispersal kernel (e.g., \code{dexp}).}
+\item{meanDist}{A single number indicating the mean distance parameter in map units
+(not pixels), for a negative exponential distribution
+dispersal kernel (e.g., \code{dexp}). This will mean that 63% of agents will have
+settled at this \code{meanDist} (still experimental)}
 
-\item{plot.it}{Logical. If \code{TRUE}, there will be 2 plots that occur
-as iterations happen.}
+\item{plot.it}{Numeric. With increasing numbers above 0, there will be plots
+produced during iterations. Currently, only 0, 1, or 2+ are discinct.}
 
 \item{minNumAgents}{Single numeric indicating the minimum number of agents
 to consider all dispersing finished. Default is 50}
+}
+\value{
+A \code{data.table} with all information used during the spreading
 }
 \description{
 This is built with \code{\link[SpaDES.tools]{spread2}} and
@@ -45,7 +52,9 @@ centres.
 }
 \examples{
 
+#########################################################
 # Simple case, no variation in rasQuality, numeric advectionDir and advectionMag
+#########################################################
 library(raster)
 library(quickPlot)
 maxDim <- 10000
@@ -55,19 +64,34 @@ rasQuality[] <- 1
 rasAbundance <- raster(rasQuality)
 rasAbundance[] <- 0
 # startPixel <- middlePixel(rasAbundance)
-startPixel <- sample(seq(ncell(rasAbundance)), 3)
+startPixel <- sample(seq(ncell(rasAbundance)), 30)
 rasAbundance[startPixel] <- 1000
-advectionDir <- 90
+advectionDir <- 70
 advectionMag <- 4 * res(rasAbundance)[1]
+meanDist <- 2600
 
+dev() # don't use Rstudio windows, which is very slow
 clearPlot()
-spread3(rasAbundance = rasAbundance,
+out <- spread3(rasAbundance = rasAbundance,
         rasQuality = rasQuality,
         advectionDir = advectionDir,
         advectionMag = advectionMag,
-        meanDist = 600, verbose = 2)
+        meanDist = meanDist, verbose = 2,
+        plot.it = 2)
 
+# Test the dispersal kernel
+out[, disGroup:=round(distance/100)*100]
+freqs <- out[, .N, by = "disGroup"]
+freqs[, cumSum := cumsum(N) ]
+#plot(freqs$disGroup, freqs$cumSum) # can plot the distance X number
+#abline(v = advectionMag + meanDist)
+# should be 0.63:
+freqs[disGroup == advectionMag + meanDist, cumSum]/
+   tail(freqs,1)[, cumSum]
+
+#########################################################
 ### The case of variable quality raster
+#########################################################
 library(sf) # needed to use fasterize
 library(SpaDES.tools) # for gaussMap
 library(fasterize) # faster than raster::rasterize
@@ -86,10 +110,39 @@ rasAbundance[startPixel] <- 1000
 advectionDir <- 90
 advectionMag <- 4 * res(rasAbundance)[1]
 clearPlot()
-spread3(rasAbundance = rasAbundance,
+out <- spread3(rasAbundance = rasAbundance,
         rasQuality = rasQuality,
         advectionDir = advectionDir,
         advectionMag = advectionMag,
-        meanDist = 600, verbose = 2)
+        meanDist = 600, verbose = 2,
+        plot.it = 1)
 
+#########################################################
+### The case of variable quality raster, raster for advectionDir
+#########################################################
+library(raster)
+library(quickPlot)
+library(SpaDES.tools)
+maxDim <- 10000
+ras <- raster::raster(extent(c(0, maxDim, 0, maxDim)), res = 100, vals = 0)
+rasQuality <- raster(ras)
+rasQuality[] <- 1
+rasAbundance <- raster(rasQuality)
+rasAbundance[] <- 0
+# startPixel <- middlePixel(rasAbundance)
+startPixel <- sample(seq(ncell(rasAbundance)), 2)
+rasAbundance[startPixel] <- 1000
+advectionDir <- gaussMap(ras)
+crs(advectionDir) <- crs(rasQuality)
+# rescale so min is 0.75 and max is 1
+advectionDir[] <- advectionDir[] / (maxValue(advectionDir)) * 360
+advectionMag <- 4 * res(rasAbundance)[1]
+dev() # don't use Rstudio windows, which is very slow
+clearPlot()
+out <- spread3(rasAbundance = rasAbundance,
+        rasQuality = rasQuality,
+        advectionDir = advectionDir,
+        advectionMag = advectionMag,
+        meanDist = 600, verbose = 2,
+        plot.it = 1)
 }

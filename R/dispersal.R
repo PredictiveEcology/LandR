@@ -23,7 +23,7 @@ if (getRversion() >= "3.1.0") {
 #'   of "agents" or pseudo-agents contained. This number of agents, will
 #'   be spread horizontally, and distributed from each pixel
 #'   that contains a non-zero non NA value.
-#' @param advectionDir A single number in degrees from North = 0, indicating
+#' @param advectionDir A single number or RasterLayer in degrees from North = 0, indicating
 #'   the direction of advective forcing (i.e., wind). Will soon allow a
 #'   raster of advection vectors.
 #' @param advectionMag A single number in distance units of the
@@ -35,15 +35,17 @@ if (getRversion() >= "3.1.0") {
 #'    (not pixels), for a negative exponential distribution
 #'    dispersal kernel (e.g., \code{dexp}). This will mean that 63% of agents will have
 #'    settled at this \code{meanDist} (still experimental)
-#' @param plot.it Logical. If \code{TRUE}, there will be 2 plots that occur
-#'    as iterations happen.
+#' @param plot.it Numeric. With increasing numbers above 0, there will be plots
+#'     produced during iterations. Currently, only 0, 1, or 2+ are discinct.
 #' @param minNumAgents Single numeric indicating the minimum number of agents
 #'    to consider all dispersing finished. Default is 50
 #' @return
 #' A \code{data.table} with all information used during the spreading
 #' @examples
 #'
+#' #########################################################
 #' # Simple case, no variation in rasQuality, numeric advectionDir and advectionMag
+#' #########################################################
 #' library(raster)
 #' library(quickPlot)
 #' maxDim <- 10000
@@ -53,30 +55,34 @@ if (getRversion() >= "3.1.0") {
 #' rasAbundance <- raster(rasQuality)
 #' rasAbundance[] <- 0
 #' # startPixel <- middlePixel(rasAbundance)
-#' startPixel <- sample(seq(ncell(rasAbundance)), 3)
+#' startPixel <- sample(seq(ncell(rasAbundance)), 30)
 #' rasAbundance[startPixel] <- 1000
-#' advectionDir <- 90
+#' advectionDir <- 70
 #' advectionMag <- 4 * res(rasAbundance)[1]
 #' meanDist <- 2600
 #'
+#' dev() # don't use Rstudio windows, which is very slow
 #' clearPlot()
 #' out <- spread3(rasAbundance = rasAbundance,
 #'         rasQuality = rasQuality,
 #'         advectionDir = advectionDir,
 #'         advectionMag = advectionMag,
-#'         meanDist = meanDist, verbose = 2)
+#'         meanDist = meanDist, verbose = 2,
+#'         plot.it = 2)
 #'
 #' # Test the dispersal kernel
 #' out[, disGroup:=round(distance/100)*100]
 #' freqs <- out[, .N, by = "disGroup"]
 #' freqs[, cumSum := cumsum(N) ]
-#' plot(freqs$disGroup, freqs$cumSum)
-#' abline(v = advectionMag + meanDist)
+#' #plot(freqs$disGroup, freqs$cumSum) # can plot the distance X number
+#' #abline(v = advectionMag + meanDist)
 #' # should be 0.63:
 #' freqs[disGroup == advectionMag + meanDist, cumSum]/
 #'    tail(freqs,1)[, cumSum]
 #'
+#' #########################################################
 #' ### The case of variable quality raster
+#' #########################################################
 #' library(sf) # needed to use fasterize
 #' library(SpaDES.tools) # for gaussMap
 #' library(fasterize) # faster than raster::rasterize
@@ -95,12 +101,41 @@ if (getRversion() >= "3.1.0") {
 #' advectionDir <- 90
 #' advectionMag <- 4 * res(rasAbundance)[1]
 #' clearPlot()
-#' spread3(rasAbundance = rasAbundance,
+#' out <- spread3(rasAbundance = rasAbundance,
 #'         rasQuality = rasQuality,
 #'         advectionDir = advectionDir,
 #'         advectionMag = advectionMag,
-#'         meanDist = 600, verbose = 2)
+#'         meanDist = 600, verbose = 2,
+#'         plot.it = 1)
 #'
+#' #########################################################
+#' ### The case of variable quality raster, raster for advectionDir
+#' #########################################################
+#' library(raster)
+#' library(quickPlot)
+#' library(SpaDES.tools)
+#' maxDim <- 10000
+#' ras <- raster::raster(extent(c(0, maxDim, 0, maxDim)), res = 100, vals = 0)
+#' rasQuality <- raster(ras)
+#' rasQuality[] <- 1
+#' rasAbundance <- raster(rasQuality)
+#' rasAbundance[] <- 0
+#' # startPixel <- middlePixel(rasAbundance)
+#' startPixel <- sample(seq(ncell(rasAbundance)), 2)
+#' rasAbundance[startPixel] <- 1000
+#' advectionDir <- gaussMap(ras)
+#' crs(advectionDir) <- crs(rasQuality)
+#' # rescale so min is 0.75 and max is 1
+#' advectionDir[] <- advectionDir[] / (maxValue(advectionDir)) * 360
+#' advectionMag <- 4 * res(rasAbundance)[1]
+#' dev() # don't use Rstudio windows, which is very slow
+#' clearPlot()
+#' out <- spread3(rasAbundance = rasAbundance,
+#'         rasQuality = rasQuality,
+#'         advectionDir = advectionDir,
+#'         advectionMag = advectionMag,
+#'         meanDist = 600, verbose = 2,
+#'         plot.it = 1)
 #' @importFrom CircStats deg rad
 #' @importFrom fpCompare %>=% %>>%
 #' @importFrom raster xyFromCell
@@ -111,12 +146,33 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom stats pexp
 #' @export
 spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
-                    advectionMag, meanDist, plot.it = TRUE,
+                    advectionMag, meanDist, plot.it = 2,
                     minNumAgents = 50, verbose = getOption("LandR.verbose", 0)) {
-  if (advectionDir > 2 * pi) {
-    message("assuming that advectionDir is in geographic degrees")
-    advectionDir <- CircStats::rad(advectionDir)
+
+  testEquivalentMetadata(rasAbundance, rasQuality)
+
+  if (is(advectionDir, "Raster")) {
+    testEquivalentMetadata(rasAbundance, advectionDir)
+    advectionDir <- advectionDir[]
+  } else if (length(advectionDir) != 1) {
+    if (length(advectionDir) != ncell(rasAbundance)) {
+      stop("advectionDir must be length 1, length ncell(rasAbundance), or a Raster with ",
+           "identical metadata as rasAbundance")
+    }
   }
+  if (is(advectionMag, "Raster")) {
+    testEquivalentMetadata(rasAbundance, advectionMag)
+    advectionMag <- advectionMag[]
+  }
+
+  if (any(advectionDir > 2 * pi)) {
+    messAngles <- "degrees"
+    advectionDir <- CircStats::rad(advectionDir)
+  } else {
+    messAngles <- "radians"
+  }
+  message("assuming that advectionDir is in geographic ", messAngles,
+          "(i.e., North is 0)")
 
   if (missing(start))
     start <- which(!is.na(rasAbundance[]) & rasAbundance[] > 0)
@@ -147,7 +203,7 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
 
     iteration <- spreadState$totalIterations
     if (verbose > 1) message("Iteration ", iteration)
-    if (isTRUE(plot.it)) {
+    if (isTRUE(plot.it > 1)) {
       rasIterations[b[active]$pixels] <- iteration
       Plot(rasIterations, new = iteration == 1,
            legendRange = c(0, meanDist / (res(rasQuality)[1] / 12)))
@@ -157,9 +213,15 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
     toPts <- xyFromCell(rasQuality, b[active]$pixels)
     dists <- pointDistance(p1 = fromPts, p2 = toPts, lonlat = FALSE)
     dirs <- b[active]$direction
-    #dists <- b[active]$distance
-    xDist <- round(sin(advectionDir) * advectionMag + sin(dirs) * dists, 4)
-    yDist <- round(cos(advectionDir) * advectionMag + cos(dirs) * dists, 4)
+
+    # Convert advection vector into length of dirs from pixels, if length is not 1
+    advectionDirTmp <- if (length(advectionDir) > 1) {
+      advectionDir[b[active]$pixels]
+    } else {
+      advectionDir
+    }
+    xDist <- round(sin(advectionDirTmp) * advectionMag + sin(dirs) * dists, 4)
+    yDist <- round(cos(advectionDirTmp) * advectionMag + cos(dirs) * dists, 4)
 
     # This calculates: "what fraction of the distance being moved is along the dirs axis"
     #   This means that negative mags is "along same axis, but in the opposite direction"
@@ -216,9 +278,9 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
     multiplyAll <- totalSumAbund/totalSumAbund2
 
     b[active, sumAbund := sumAbund2 * multiplyAll]
-    b[, `:=`(abund = NULL, sumAbund2 = NULL, mags = NULL,
-             lenSrc = NULL, lenRec = NULL, meanNumNeighs = NULL,
-             prop = NULL, indWithin = NULL, indFull = NULL)]
+    set(b, NULL, c("abund", "sumAbund2", "mags", "lenSrc", "lenRec",
+                   "meanNumNeighs", "prop", "indWithin", "indFull"),
+        NULL)
 
     # Some of those active will not stop: estimate here by kernel probability
     b[active, abundSettled :=
@@ -237,7 +299,7 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
 
     abundanceDispersing <- sum(b[active]$abundActive, na.rm = TRUE)
     if (verbose > 1) message("Number still dispersing ", abundanceDispersing)
-    if (isTRUE(plot.it)) {
+    if (isTRUE(plot.it > 0)) {
       b2 <- b[, sum(abundSettled), by = "pixels"]
       rasAbundance[b2$pixels] <- ceiling(b2$V1)
       needNew <- FALSE
@@ -246,7 +308,7 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
         needNew <- TRUE
       }
       Plot(rasAbundance, new = iteration == 1 || needNew,
-           legendRange = c(0, plotMultiplier))
+           legendRange = c(0, plotMultiplier), title = "Abundance")
     }
 
     newInactive <- b[active]$abundActive == 0
@@ -279,4 +341,38 @@ middlePixel <- function(ras) {
   } else {
     floor(nrow(ras)/2) * ncol(ras) - floor(ncol(ras)/2)
   }
+}
+
+#' Test that metadata of 2 or more objects is the same
+#'
+#' Currently, only Raster class has a useful method. Defaults to
+#' \code{all(sapply(list(...)[-1], function(x) identical(list(...)[1], x)))}
+#' @param ... 2 or more of the same type of object to test
+#'   for equivalent metadata
+#' @export
+testEquivalentMetadata <- function(...) {
+  UseMethod("testEquivalentMetadata")
+}
+
+#' @export
+fixErrors.default <- function(x, objectName, attemptErrorFixes = TRUE,
+                              useCache = getOption("reproducible.useCache", FALSE), ...) {
+  x
+}
+
+testEquivalentMetadata.Raster <- function(...) {
+  d <- list(...)
+  res <- lapply(d[-1], function(x) {
+    if (!identical(d[[1]]@extent, x@extent)) {
+      stop("rasAbundance and rasQuality must have same extent")
+    }
+    if (!identical(d[[1]]@crs, x@crs)) {
+      stop("rasAbundance and rasQuality must have same crs")
+    }
+    if (!identical(res(d[[1]]), res(x))) {
+      stop("rasAbundance and rasQuality must have same res")
+    }
+
+  })
+  return(invisible())
 }
