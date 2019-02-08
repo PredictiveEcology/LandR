@@ -6,7 +6,7 @@
 \usage{
 spread3(start, rasQuality, rasAbundance, advectionDir, advectionMag,
   meanDist, plot.it = 2, minNumAgents = 50,
-  verbose = getOption("LandR.verbose", 0))
+  verbose = getOption("LandR.verbose", 0), saveStack = NULL)
 }
 \arguments{
 \item{start}{Raster indices from which to initiate dispersal}
@@ -19,11 +19,12 @@ of "agents" or pseudo-agents contained. This number of agents, will
 be spread horizontally, and distributed from each pixel
 that contains a non-zero non NA value.}
 
-\item{advectionDir}{A single number or RasterLayer in degrees from North = 0, indicating
-the direction of advective forcing (i.e., wind). Will soon allow a
-raster of advection vectors.}
+\item{advectionDir}{A single number or \code{RasterLayer} in degrees
+from North = 0 (though it will use radians if all values are
+\code{abs(advectionDir) > 2 * pi)}. This indicates
+the direction of advective forcing (i.e., wind).}
 
-\item{advectionMag}{A single number in distance units of the
+\item{advectionMag}{A single number or \code{RasterLayer} in distance units of the
 \code{rasQuality}, e.g., meters, indicating the relative forcing that will
 occur. It is imposed on the total event, i.e., if the \code{meanDist} is
 \code{10000}, and \code{advectionMag} is \code{5000}, then the expected
@@ -39,6 +40,9 @@ produced during iterations. Currently, only 0, 1, or 2+ are discinct.}
 
 \item{minNumAgents}{Single numeric indicating the minimum number of agents
 to consider all dispersing finished. Default is 50}
+
+\item{saveStack}{If provided as a character string, it will save each iteration
+as part of a \code{rasterStack} to disk upon exit.}
 }
 \value{
 A \code{data.table} with all information used during the spreading
@@ -117,9 +121,9 @@ out <- spread3(rasAbundance = rasAbundance,
         meanDist = 600, verbose = 2,
         plot.it = 1)
 
-#########################################################
-### The case of variable quality raster, raster for advectionDir
-#########################################################
+###############################################################################
+### The case of variable quality raster, raster for advectionDir & advectionMag
+###############################################################################
 library(raster)
 library(quickPlot)
 library(SpaDES.tools)
@@ -128,21 +132,54 @@ ras <- raster::raster(extent(c(0, maxDim, 0, maxDim)), res = 100, vals = 0)
 rasQuality <- raster(ras)
 rasQuality[] <- 1
 rasAbundance <- raster(rasQuality)
-rasAbundance[] <- 0
+rasAbundance[] <- NA
 # startPixel <- middlePixel(rasAbundance)
-startPixel <- sample(seq(ncell(rasAbundance)), 2)
+startPixel <- sample(seq(ncell(rasAbundance)), 25)
 rasAbundance[startPixel] <- 1000
+
+# raster for advectionDir
 advectionDir <- gaussMap(ras)
 crs(advectionDir) <- crs(rasQuality)
 # rescale so min is 0.75 and max is 1
-advectionDir[] <- advectionDir[] / (maxValue(advectionDir)) * 360
-advectionMag <- 4 * res(rasAbundance)[1]
+advectionDir[] <- advectionDir[] / (maxValue(advectionDir)) * 180
+
+# raster for advectionMap
+advectionMag <- gaussMap(ras)
+crs(advectionMag) <- crs(rasQuality)
+# rescale so min is 0.75 and max is 1
+advectionMag[] <- advectionMag[] / (maxValue(advectionMag)) * 600
+
 dev() # don't use Rstudio windows, which is very slow
 clearPlot()
+Plot(advectionDir, title = "Wind direction", cols = "Reds")
+Plot(advectionMag, title = "Wind speed", cols = "Blues")
 out <- spread3(rasAbundance = rasAbundance,
         rasQuality = rasQuality,
         advectionDir = advectionDir,
         advectionMag = advectionMag,
-        meanDist = 600, verbose = 2,
+        meanDist = 2600, verbose = 2,
         plot.it = 1)
+Plot(rasAbundance, addTo = "rasAbundance", cols = "black", title = "")
+
+#########################################
+# save iterations to a stack to make animated GIF
+########################################
+tmpStack <- raster::rasterTmpFile("stackToAnimate")
+out <- spread3(rasAbundance = rasAbundance,
+        rasQuality = rasQuality,
+        advectionDir = advectionDir,
+        advectionMag = advectionMag,
+        meanDist = 2600, verbose = 2,
+        plot.it = 0, saveStack = tmpStack)
+
+ out2 <- raster::stack(tmpStack)
+ gifName <- file.path(tempdir(), "animation.gif")
+ animation::saveGIF(interval = 0.1,
+                    movie.name = gifName,
+                    expr = {
+                      for(i in seq(numLayers(out2)))
+                        plot(out2[[i]])
+                     })
+
+
 }

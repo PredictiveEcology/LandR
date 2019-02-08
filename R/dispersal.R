@@ -23,10 +23,11 @@ if (getRversion() >= "3.1.0") {
 #'   of "agents" or pseudo-agents contained. This number of agents, will
 #'   be spread horizontally, and distributed from each pixel
 #'   that contains a non-zero non NA value.
-#' @param advectionDir A single number or RasterLayer in degrees from North = 0, indicating
-#'   the direction of advective forcing (i.e., wind). Will soon allow a
-#'   raster of advection vectors.
-#' @param advectionMag A single number in distance units of the
+#' @param advectionDir A single number or \code{RasterLayer} in degrees
+#'   from North = 0 (though it will use radians if all values are
+#'   \code{abs(advectionDir) > 2 * pi)}. This indicates
+#'   the direction of advective forcing (i.e., wind).
+#' @param advectionMag A single number or \code{RasterLayer} in distance units of the
 #'   \code{rasQuality}, e.g., meters, indicating the relative forcing that will
 #'   occur. It is imposed on the total event, i.e., if the \code{meanDist} is
 #'   \code{10000}, and \code{advectionMag} is \code{5000}, then the expected
@@ -108,9 +109,9 @@ if (getRversion() >= "3.1.0") {
 #'         meanDist = 600, verbose = 2,
 #'         plot.it = 1)
 #'
-#' #########################################################
-#' ### The case of variable quality raster, raster for advectionDir
-#' #########################################################
+#' ###############################################################################
+#' ### The case of variable quality raster, raster for advectionDir & advectionMag
+#' ###############################################################################
 #' library(raster)
 #' library(quickPlot)
 #' library(SpaDES.tools)
@@ -119,23 +120,34 @@ if (getRversion() >= "3.1.0") {
 #' rasQuality <- raster(ras)
 #' rasQuality[] <- 1
 #' rasAbundance <- raster(rasQuality)
-#' rasAbundance[] <- 0
+#' rasAbundance[] <- NA
 #' # startPixel <- middlePixel(rasAbundance)
-#' startPixel <- sample(seq(ncell(rasAbundance)), 2)
+#' startPixel <- sample(seq(ncell(rasAbundance)), 25)
 #' rasAbundance[startPixel] <- 1000
+#'
+#' # raster for advectionDir
 #' advectionDir <- gaussMap(ras)
 #' crs(advectionDir) <- crs(rasQuality)
 #' # rescale so min is 0.75 and max is 1
-#' advectionDir[] <- advectionDir[] / (maxValue(advectionDir)) * 360
-#' advectionMag <- 4 * res(rasAbundance)[1]
+#' advectionDir[] <- advectionDir[] / (maxValue(advectionDir)) * 180
+#'
+#' # raster for advectionMag
+#' advectionMag <- gaussMap(ras)
+#' crs(advectionMag) <- crs(rasQuality)
+#' # rescale so min is 0.75 and max is 1
+#' advectionMag[] <- advectionMag[] / (maxValue(advectionMag)) * 600
+#'
 #' dev() # don't use Rstudio windows, which is very slow
 #' clearPlot()
+#' Plot(advectionDir, title = "Wind direction", cols = "Reds")
+#' Plot(advectionMag, title = "Wind speed", cols = "Blues")
 #' out <- spread3(rasAbundance = rasAbundance,
 #'         rasQuality = rasQuality,
 #'         advectionDir = advectionDir,
 #'         advectionMag = advectionMag,
-#'         meanDist = 600, verbose = 2,
+#'         meanDist = 2600, verbose = 2,
 #'         plot.it = 1)
+#' Plot(rasAbundance, addTo = "rasAbundance", cols = "black", title = "")
 #' @importFrom CircStats deg rad
 #' @importFrom fpCompare %>=% %>>%
 #' @importFrom raster xyFromCell
@@ -163,9 +175,14 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
   if (is(advectionMag, "Raster")) {
     testEquivalentMetadata(rasAbundance, advectionMag)
     advectionMag <- advectionMag[]
+  } else if (length(advectionMag) != 1) {
+    if (length(advectionMag) != ncell(rasAbundance)) {
+      stop("advectionMag must be length 1, length ncell(rasAbundance), or a Raster with ",
+           "identical metadata as rasAbundance")
+    }
   }
 
-  if (any(advectionDir > 2 * pi)) {
+  if (any(abs(advectionDir) > 2 * pi)) {
     messAngles <- "degrees"
     advectionDir <- CircStats::rad(advectionDir)
   } else {
@@ -220,8 +237,13 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
     } else {
       advectionDir
     }
-    xDist <- round(sin(advectionDirTmp) * advectionMag + sin(dirs) * dists, 4)
-    yDist <- round(cos(advectionDirTmp) * advectionMag + cos(dirs) * dists, 4)
+    advectionMagTmp <- if (length(advectionMag) > 1) {
+      advectionMag[b[active]$pixels]
+    } else {
+      advectionMag
+    }
+    xDist <- round(sin(advectionDirTmp) * advectionMagTmp + sin(dirs) * dists, 4)
+    yDist <- round(cos(advectionDirTmp) * advectionMagTmp + cos(dirs) * dists, 4)
 
     # This calculates: "what fraction of the distance being moved is along the dirs axis"
     #   This means that negative mags is "along same axis, but in the opposite direction"
@@ -283,8 +305,13 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
         NULL)
 
     # Some of those active will not stop: estimate here by kernel probability
+    advectionMagTmp <- if (length(advectionMag) > 1) {
+      advectionMag[b[active]$pixels]
+    } else {
+      advectionMag
+    }
     b[active, abundSettled :=
-        pexp(q = distance, rate = pi/(meanDist+advectionMag)^1.5) * sumAbund] # kernel is 1 dimensional,
+        pexp(q = distance, rate = pi/(meanDist+advectionMagTmp)^1.5) * sumAbund] # kernel is 1 dimensional,
     # b[active, abundSettled :=
     #     dexp(x = distance, rate = 1/(meanDist+advectionMag)) * sumAbund] # kernel is 1 dimensional,
     # but spreading is dropping agents in 2 dimensions
