@@ -75,6 +75,8 @@ if (getRversion() >= "3.1.0") {
 #' rasAbundance[] <- 0
 #' startPixel <- sample(seq(ncell(rasAbundance)), 3)
 #' rasAbundance[startPixel] <- 1000
+#' advectionDir <- 90
+#' advectionMag <- 4 * res(rasAbundance)[1]
 #' clearPlot()
 #' spread3(rasAbundance = rasAbundance,
 #'         rasQuality = rasQuality,
