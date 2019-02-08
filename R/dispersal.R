@@ -6,8 +6,6 @@ if (getRversion() >= "3.1.0") {
   )
 }
 
-
-
 #' An alternative spread function -- conceived for insects
 #'
 #' This is built with \code{\link[SpaDES.tools]{spread2}} and
@@ -42,8 +40,10 @@ if (getRversion() >= "3.1.0") {
 #'    to consider all dispersing finished. Default is 50
 #' @param saveStack If provided as a character string, it will save each iteration
 #'   as part of a \code{rasterStack} to disk upon exit.
+#'
 #' @return
 #' A \code{data.table} with all information used during the spreading
+#'
 #' @examples
 #'
 #' #########################################################
@@ -418,12 +418,8 @@ testEquivalentMetadata <- function(...) {
   UseMethod("testEquivalentMetadata")
 }
 
-#' @export
-fixErrors.default <- function(x, objectName, attemptErrorFixes = TRUE,
-                              useCache = getOption("reproducible.useCache", FALSE), ...) {
-  x
-}
 
+#' @export
 testEquivalentMetadata.Raster <- function(...) {
   d <- list(...)
   res <- lapply(d[-1], function(x) {

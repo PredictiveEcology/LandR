@@ -143,7 +143,7 @@ crs(advectionDir) <- crs(rasQuality)
 # rescale so min is 0.75 and max is 1
 advectionDir[] <- advectionDir[] / (maxValue(advectionDir)) * 180
 
-# raster for advectionMap
+# raster for advectionMag
 advectionMag <- gaussMap(ras)
 crs(advectionMag) <- crs(rasQuality)
 # rescale so min is 0.75 and max is 1
