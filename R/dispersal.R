@@ -37,22 +37,13 @@ if (getRversion() >= "3.1.0") {
 #'    to consider all dispersing finished. Default is 50
 #' @examples
 #'
+#' # Simple case, no variation in rasQuality, numeric advectionDir and advectionMag
 #' library(raster)
-#' library(sf)
 #' library(quickPlot)
-#' #a <- randomStudyArea(size = 1e8)
-#' maxDim <- 10000
+#' maxDim <- 100000
 #' ras <- raster::raster(extent(c(0, maxDim, 0, maxDim)), res = 100, vals = 0)
 #' rasQuality <- raster(ras)
 #' rasQuality[] <- 1
-#' #ras <- raster::raster(extent(a), res = 100)
-#' #mask <- fasterize::fasterize(st_as_sf(a), ras)
-#' #rasQuality <- gaussMap(ras)
-#' #crs(rasQuality) <- crs(a)
-#' #rasQuality[is.na(mask)] <- NA
-#' # rescale so min is 0.75 and max is 1
-#' #rasQuality[] <- rasQuality[] / (maxValue(rasQuality * 4) ) + 3/4
-#' #rasQuality[] <- 1
 #' rasAbundance <- raster(rasQuality)
 #' rasAbundance[] <- 0
 #' # startPixel <- middlePixel(rasAbundance)
@@ -68,6 +59,28 @@ if (getRversion() >= "3.1.0") {
 #'         advectionMag = advectionMag,
 #'         meanDist = 600)
 #'
+#' ### The case of variable quality raster
+#' library(sf) # needed to use fasterize
+#' library(SpaDES.tools) # for gaussMap
+#' library(fasterize) # faster than raster::rasterize
+#' a <- randomStudyArea(size = 1e9)
+#' ras <- raster(extent(a), res = 100)
+#' mask <- fasterize(st_as_sf(a), ras)
+#' rasQuality <- gaussMap(ras)
+#' crs(rasQuality) <- crs(a)
+#' rasQuality[is.na(mask)] <- NA
+#' # rescale so min is 0.75 and max is 1
+#' rasQuality[] <- rasQuality[] / (maxValue(rasQuality) * 4 ) + 3/4
+#' rasAbundance <- raster(rasQuality)
+#' rasAbundance[] <- 0
+#' startPixel <- sample(seq(ncell(rasAbundance)), 3)
+#' rasAbundance[startPixel] <- 1000
+#' clearPlot()
+#' spread3(rasAbundance = rasAbundance,
+#'         rasQuality = rasQuality,
+#'         advectionDir = advectionDir,
+#'         advectionMag = advectionMag,
+#'         meanDist = 600)
 #'
 #' @importFrom CircStats deg rad
 #' @importFrom fpCompare %>=% %>>%
@@ -80,7 +93,7 @@ if (getRversion() >= "3.1.0") {
 #' @export
 spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
                     advectionMag, meanDist, plot.it = TRUE,
-                    minNumAgents = 50) {
+                    minNumAgents = 50, verbose = getOption("LandR.verbose", 0)) {
   if (advectionDir > 2 * pi) {
     message("assuming that advectionDir is in geographic degrees")
     advectionDir <- CircStats::rad(advectionDir)
@@ -112,9 +125,12 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
 
 
     iteration <- spreadState$totalIterations
+    if (abundanceDispersing < 100)
+      browser()
+    if (verbose > 1) message("Iteration ", iteration)
     if (isTRUE(plot.it)) {
       rasIterations[b[active]$pixels] <- iteration
-      Plot(rasIterations, new = TRUE)
+      Plot(rasIterations, new = iteration == 1, legendRange = c(0, meanDist / (res(rasQuality)[1] / 12)))
     }
 
     fromPts <- xyFromCell(rasQuality, b[active]$from)
@@ -179,7 +195,7 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
     #b[is.na(ind), ind := 1]
     #rmFromActive <- which(b$ind > 1)
     keepRows <- which(b$indWithin == 1)
-    b2 <- copy(b)
+    # b2 <- copy(b)
     b <- b[keepRows]
     active <- na.omit(match(active, b$indFull))
     b[, indFull := seq(NROW(b))]
@@ -192,11 +208,12 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
     b[active, abundActive := sumAbund - abundSettled]
 
     abundanceDispersing <- sum(b[active]$abundActive, na.rm = TRUE)
+    if (verbose > 1) message("Number still dispersing ", abundanceDispersing)
     if (isTRUE(plot.it)) {
       b1 <- copy(b)
       b2 <- b1[, sum(abundSettled), by = "pixels"]
       rasAbundance[b2$pixels] <- ceiling(b2$V1)
-      Plot(rasAbundance, new = TRUE)
+      Plot(rasAbundance, new = iteration == 1, legendRange = c(0, abundanceDispersing))
     }
 
     newInactive <- b[active]$abundActive == 0

@@ -5,7 +5,8 @@
 \title{An alternative spread function -- conceived for insects}
 \usage{
 spread3(start, rasQuality, rasAbundance, advectionDir, advectionMag,
-  meanDist, plot.it = TRUE, minNumAgents = 50)
+  meanDist, plot.it = TRUE, minNumAgents = 50,
+  verbose = getOption("LandR.verbose", 0))
 }
 \arguments{
 \item{start}{Raster indices from which to initiate dispersal}
@@ -44,22 +45,13 @@ centres.
 }
 \examples{
 
+# Simple case, no variation in rasQuality, numeric advectionDir and advectionMag
 library(raster)
-library(sf)
 library(quickPlot)
-#a <- randomStudyArea(size = 1e8)
-maxDim <- 10000
+maxDim <- 100000
 ras <- raster::raster(extent(c(0, maxDim, 0, maxDim)), res = 100, vals = 0)
 rasQuality <- raster(ras)
 rasQuality[] <- 1
-#ras <- raster::raster(extent(a), res = 100)
-#mask <- fasterize::fasterize(st_as_sf(a), ras)
-#rasQuality <- gaussMap(ras)
-#crs(rasQuality) <- crs(a)
-#rasQuality[is.na(mask)] <- NA
-# rescale so min is 0.75 and max is 1
-#rasQuality[] <- rasQuality[] / (maxValue(rasQuality * 4) ) + 3/4
-#rasQuality[] <- 1
 rasAbundance <- raster(rasQuality)
 rasAbundance[] <- 0
 # startPixel <- middlePixel(rasAbundance)
@@ -75,5 +67,27 @@ spread3(rasAbundance = rasAbundance,
         advectionMag = advectionMag,
         meanDist = 600)
 
+### The case of variable quality raster
+library(sf) # needed to use fasterize
+library(SpaDES.tools) # for gaussMap
+library(fasterize) # faster than raster::rasterize
+a <- randomStudyArea(size = 1e9)
+ras <- raster(extent(a), res = 100)
+mask <- fasterize(st_as_sf(a), ras)
+rasQuality <- gaussMap(ras)
+crs(rasQuality) <- crs(a)
+rasQuality[is.na(mask)] <- NA
+# rescale so min is 0.75 and max is 1
+rasQuality[] <- rasQuality[] / (maxValue(rasQuality) * 4 ) + 3/4
+rasAbundance <- raster(rasQuality)
+rasAbundance[] <- 0
+startPixel <- sample(seq(ncell(rasAbundance)), 3)
+rasAbundance[startPixel] <- 1000
+clearPlot()
+spread3(rasAbundance = rasAbundance,
+        rasQuality = rasQuality,
+        advectionDir = advectionDir,
+        advectionMag = advectionMag,
+        meanDist = 600)
 
 }
