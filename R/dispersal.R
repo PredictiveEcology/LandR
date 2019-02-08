@@ -40,6 +40,8 @@ if (getRversion() >= "3.1.0") {
 #'     produced during iterations. Currently, only 0, 1, or 2+ are discinct.
 #' @param minNumAgents Single numeric indicating the minimum number of agents
 #'    to consider all dispersing finished. Default is 50
+#' @param saveStack If provided as a character string, it will save each iteration
+#'   as part of a \code{rasterStack} to disk upon exit.
 #' @return
 #' A \code{data.table} with all information used during the spreading
 #' @examples
@@ -148,6 +150,28 @@ if (getRversion() >= "3.1.0") {
 #'         meanDist = 2600, verbose = 2,
 #'         plot.it = 1)
 #' Plot(rasAbundance, addTo = "rasAbundance", cols = "black", title = "")
+#'
+#' #########################################
+#' # save iterations to a stack to make animated GIF
+#' ########################################
+#' tmpStack <- raster::rasterTmpFile("stackToAnimate")
+#' out <- spread3(rasAbundance = rasAbundance,
+#'         rasQuality = rasQuality,
+#'         advectionDir = advectionDir,
+#'         advectionMag = advectionMag,
+#'         meanDist = 2600, verbose = 2,
+#'         plot.it = 0, saveStack = tmpStack)
+#'
+#'  out2 <- raster::stack(tmpStack)
+#'  gifName <- file.path(tempdir(), "animation.gif")
+#'  animation::saveGIF(interval = 0.1,
+#'                     movie.name = gifName,
+#'                     expr = {
+#'                       for(i in seq(numLayers(out2)))
+#'                         plot(out2[[i]])
+#'                      })
+#'
+#'
 #' @importFrom CircStats deg rad
 #' @importFrom fpCompare %>=% %>>%
 #' @importFrom raster xyFromCell
@@ -159,7 +183,8 @@ if (getRversion() >= "3.1.0") {
 #' @export
 spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
                     advectionMag, meanDist, plot.it = 2,
-                    minNumAgents = 50, verbose = getOption("LandR.verbose", 0)) {
+                    minNumAgents = 50, verbose = getOption("LandR.verbose", 0),
+                    saveStack = NULL) {
 
   testEquivalentMetadata(rasAbundance, rasQuality)
 
@@ -348,6 +373,18 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
     set(b, NULL, c("sumAbund", "srcAbundActive"), NULL)
 
     start <- b
+  }
+  if (!is.null(saveStack)) {
+    b[, distGrp := floor(distance/100)]
+    ras <- raster(rasAbundance)
+    out1 <- lapply(unique(b$distGrp), function(x)  {
+      r <- raster(ras)
+      x1 <- b[distGrp <= x, sum(abundSettled), by = "pixels"]
+      r[x1$pixels] <- ceiling(x1$V1)
+      r
+    })
+    writeRaster(raster::stack(out1), filename = saveStack, overwrite = TRUE)
+    message("stack saved to ", saveStack)
   }
 
   return(start)
