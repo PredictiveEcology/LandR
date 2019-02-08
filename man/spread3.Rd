@@ -48,7 +48,7 @@ centres.
 # Simple case, no variation in rasQuality, numeric advectionDir and advectionMag
 library(raster)
 library(quickPlot)
-maxDim <- 100000
+maxDim <- 10000
 ras <- raster::raster(extent(c(0, maxDim, 0, maxDim)), res = 100, vals = 0)
 rasQuality <- raster(ras)
 rasQuality[] <- 1
@@ -65,7 +65,7 @@ spread3(rasAbundance = rasAbundance,
         rasQuality = rasQuality,
         advectionDir = advectionDir,
         advectionMag = advectionMag,
-        meanDist = 600)
+        meanDist = 600, verbose = 2)
 
 ### The case of variable quality raster
 library(sf) # needed to use fasterize
@@ -81,7 +81,7 @@ rasQuality[is.na(mask)] <- NA
 rasQuality[] <- rasQuality[] / (maxValue(rasQuality) * 4 ) + 3/4
 rasAbundance <- raster(rasQuality)
 rasAbundance[] <- 0
-startPixel <- sample(seq(ncell(rasAbundance)), 3)
+startPixel <- sample(seq(ncell(rasAbundance)), 300)
 rasAbundance[startPixel] <- 1000
 advectionDir <- 90
 advectionMag <- 4 * res(rasAbundance)[1]
@@ -90,6 +90,6 @@ spread3(rasAbundance = rasAbundance,
         rasQuality = rasQuality,
         advectionDir = advectionDir,
         advectionMag = advectionMag,
-        meanDist = 600)
+        meanDist = 600, verbose = 2)
 
 }

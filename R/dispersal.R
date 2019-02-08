@@ -40,7 +40,7 @@ if (getRversion() >= "3.1.0") {
 #' # Simple case, no variation in rasQuality, numeric advectionDir and advectionMag
 #' library(raster)
 #' library(quickPlot)
-#' maxDim <- 100000
+#' maxDim <- 10000
 #' ras <- raster::raster(extent(c(0, maxDim, 0, maxDim)), res = 100, vals = 0)
 #' rasQuality <- raster(ras)
 #' rasQuality[] <- 1
@@ -57,7 +57,7 @@ if (getRversion() >= "3.1.0") {
 #'         rasQuality = rasQuality,
 #'         advectionDir = advectionDir,
 #'         advectionMag = advectionMag,
-#'         meanDist = 600)
+#'         meanDist = 600, verbose = 2)
 #'
 #' ### The case of variable quality raster
 #' library(sf) # needed to use fasterize
@@ -73,7 +73,7 @@ if (getRversion() >= "3.1.0") {
 #' rasQuality[] <- rasQuality[] / (maxValue(rasQuality) * 4 ) + 3/4
 #' rasAbundance <- raster(rasQuality)
 #' rasAbundance[] <- 0
-#' startPixel <- sample(seq(ncell(rasAbundance)), 3)
+#' startPixel <- sample(seq(ncell(rasAbundance)), 300)
 #' rasAbundance[startPixel] <- 1000
 #' advectionDir <- 90
 #' advectionMag <- 4 * res(rasAbundance)[1]
@@ -82,7 +82,7 @@ if (getRversion() >= "3.1.0") {
 #'         rasQuality = rasQuality,
 #'         advectionDir = advectionDir,
 #'         advectionMag = advectionMag,
-#'         meanDist = 600)
+#'         meanDist = 600, verbose = 2)
 #'
 #' @importFrom CircStats deg rad
 #' @importFrom fpCompare %>=% %>>%
@@ -108,11 +108,15 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
           returnDirections = TRUE, returnFrom = TRUE, asRaster = FALSE)
   start[, `:=`(abundActive = rasAbundance[][start$pixels],
                indWithin = 1L,
-               indFull = 1L)]
+               indFull = 1L,
+               abundSettled = 0)]
   abundanceDispersing <- sum(start$abundActive)
+  plotMultiplier <- mean(start$abundActive) /
+    ((meanDist * 10 / res(rasQuality)[1]))
   rasIterations <- raster(rasQuality)
   rasIterations[] <- NA
   rasIterations[start$pixels] <- 0
+
   while (abundanceDispersing > minNumAgents) {
     b <- spread2(landscape = rasQuality, start = start,
                  spreadProb = 1, iterations = 1, asRaster = FALSE,
@@ -127,12 +131,11 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
 
 
     iteration <- spreadState$totalIterations
-    if (abundanceDispersing < 100)
-      browser()
     if (verbose > 1) message("Iteration ", iteration)
     if (isTRUE(plot.it)) {
       rasIterations[b[active]$pixels] <- iteration
-      Plot(rasIterations, new = iteration == 1, legendRange = c(0, meanDist / (res(rasQuality)[1] / 12)))
+      Plot(rasIterations, new = iteration == 1,
+           legendRange = c(0, meanDist / (res(rasQuality)[1] / 12)))
     }
 
     fromPts <- xyFromCell(rasQuality, b[active]$from)
@@ -187,35 +190,51 @@ spread3 <- function(start, rasQuality, rasAbundance, advectionDir,
                    indWithin = seq(.N),
                    indFull = .I), by = c('initialPixels', 'pixels')]
     b[active, meanNumNeighs := mean(lenSrc / lenRec) * mean(mags), by = c("pixels", "initialPixels")]
+    keepRows <- which(b$indWithin == 1)
+    b <- b[keepRows]
+    active <- na.omit(match(active, b$indFull))
+    b[, indFull := seq(NROW(b))]
+
     b[active, sumAbund2 := sumAbund * meanNumNeighs/ mean(mags)]
-    toSubtract <- sum(b[active]$sumAbund2 - b[active]$sumAbund, na.rm = TRUE)
+
+    #toSubtract <- sum(b[active]$sumAbund2 - b[active]$sumAbund, na.rm = TRUE)
     totalSumAbund <- sum(b[active]$sumAbund, na.rm = TRUE)
     totalSumAbund2 <- sum(b[active]$sumAbund2, na.rm = TRUE)
     multiplyAll <- totalSumAbund/totalSumAbund2
+    #browser()
     b[active, sumAbund := sumAbund2 * multiplyAll]
     b[, abund := NULL]
     #b[is.na(ind), ind := 1]
     #rmFromActive <- which(b$ind > 1)
-    keepRows <- which(b$indWithin == 1)
-    # b2 <- copy(b)
-    b <- b[keepRows]
-    active <- na.omit(match(active, b$indFull))
-    b[, indFull := seq(NROW(b))]
     #active <- active[na.omit(match(keepRows, active))]
 
     # Some of those active will not stop: estimate here by kernel probability
-    b[active, abundSettled := pexp(q = distance, rate = 1/meanDist) * sumAbund]
+    b[active, abundSettled :=
+        pexp(q = distance, rate = pi/(meanDist+advectionMag)^1.5) * sumAbund] # kernel is 1 dimensional,
+    # b[active, abundSettled :=
+    #     dexp(x = distance, rate = 1/(meanDist+advectionMag)) * sumAbund] # kernel is 1 dimensional,
+    # but spreading is dropping agents in 2 dimensions
+             # It doesn't work to use ^2, I think because we are discretizing the landscape
+             # from a continuous surface, so, the number of pixels with agents settled
+             # is not actually the full square on a 1 dimensional line ... I might be wrong
     # Some of the estimated dropped will not drop because of quality
-    b[active, abundSettled := floor(abundSettled  * rasQuality[][pixels])]
+    #   First place to round to whole numbers
+    b[active, abundSettled := abundSettled  * rasQuality[][pixels]]
     b[active, abundActive := sumAbund - abundSettled]
+    b[active[active %in% which(b$abundActive < 1)], abundActive := 0]
 
     abundanceDispersing <- sum(b[active]$abundActive, na.rm = TRUE)
     if (verbose > 1) message("Number still dispersing ", abundanceDispersing)
     if (isTRUE(plot.it)) {
-      b1 <- copy(b)
-      b2 <- b1[, sum(abundSettled), by = "pixels"]
+      b2 <- b[, sum(abundSettled), by = "pixels"]
       rasAbundance[b2$pixels] <- ceiling(b2$V1)
-      Plot(rasAbundance, new = iteration == 1, legendRange = c(0, abundanceDispersing))
+      needNew <- FALSE
+      if (max(ceiling(b2$V1), na.rm = TRUE) > plotMultiplier) {
+        plotMultiplier <- plotMultiplier * 1.5
+        needNew <- TRUE
+      }
+      Plot(rasAbundance, new = iteration == 1 || needNew,
+           legendRange = c(0, plotMultiplier))
     }
 
     newInactive <- b[active]$abundActive == 0
