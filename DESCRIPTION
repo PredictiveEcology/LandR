@@ -61,7 +61,7 @@ Remotes:
     PredictiveEcology/pemisc@development,
     PredictiveEcology/reproducible@development,
     PredictiveEcology/SpaDES.core@development,
-    PredictiveEcology/SpaDES.tools@spreadEnhance,
+    PredictiveEcology/SpaDES.tools@development,
     rforge/mumin/pkg
 Encoding: UTF-8
 Language: en-CA
