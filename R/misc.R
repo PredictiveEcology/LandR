@@ -35,6 +35,7 @@ asInteger <- function(x)
 #'
 #' Imports the non-exported function \code{SpaDES.tools:::resample}.
 #'
+#' @importFrom utils getFromNamespace
 #' @keywords internal
 #' @rdname resample
 #' @seealso \code{\link[SpaDES.tools]{resample}}

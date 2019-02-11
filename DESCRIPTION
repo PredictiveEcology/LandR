@@ -21,14 +21,14 @@ Authors@R: c(
 Depends:
     R (>= 3.3.0)
 Imports:
-    CircStats,
-    fpCompare,
     backports,
+    CircStats,
     crayon,
     data.table,
     dplyr,
     fastdigest,
     fasterize,
+    fpCompare,
     gdalUtils,
     ggplot2,
     googledrive,
@@ -47,7 +47,7 @@ Imports:
     sf,
     sp,
     SpaDES.core,
-    SpaDES.tools,
+    SpaDES.tools (>= 0.3.1.9000),
     stats,
     tools,
     utils
