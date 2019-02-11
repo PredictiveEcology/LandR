@@ -47,7 +47,7 @@ polygonClean <- function(poly, fn = NULL, type = NULL, ...) {
     if (is.null(type)) {
       stop("Either fn or type must be specified")
     } else {
-      if (length(na.omit(pmatch(c("ANC", "DMI", "LandWeb", "LP", "testing", "tolko"), type))))
+      if (length(na.omit(pmatch(c("ANC", "DMI", "LandWeb", "LP", "MPB", "testing", "tolko"), type))))
         fn <- .cleanLandWebStudyArea
       else
         stop("Unknown type")
