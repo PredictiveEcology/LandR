@@ -25,9 +25,11 @@ randomStudyArea <- function(center = NULL, size = 1e4, seed = NULL) {
   if (!exists(".Random.seed", envir = .GlobalEnv)) set.seed(NULL)
   prevSeed <- get(".Random.seed", envir = .GlobalEnv)
 
-  set.seed(seed)
+  if (!is.null(seed))
+    set.seed(seed)
   studyArea <- SpaDES.tools::randomPolygon(x = center, area = size)
-  set.seed(prevSeed)
+  if (!is.null(seed))
+    set.seed(prevSeed)
 
   dfData <- if (is.null(rownames(studyArea))) {
     polyID <- sapply(slot(studyArea, "polygons"), function(x) slot(x, "ID"))
