@@ -107,7 +107,7 @@ picesitc,PICE.SIT,Pice_sit,Pice_Sit,Pice sitc,Picea sitchensis,,,,,
 ,,Pinu_alb,Pinu_Alb,Pinu albi,Pinus albicaulis,Pine,Pine,Pine leading,,Pinu_Alb
 pinubank,PINU.BAN,Pinu_ban,Pinu_Ban,Pinu bank,Pinus banksiana,Pine,Pine,Pine leading,,Pinu_Ban
 ,PINU.CON.CON,Pinu_con,Pinu_Con,Pinu conc,Pinus contorta var. contorta,Pine,Pine,Pine leading,,Pinu_Con
-,PINU.CON.LAT,Pinu_con,Pinu_Con_Lat,Pinu cont,Pinus contorta,Pine,Pine,Pine leading,Pinus contorta latifolia is a synonim of var. latifolia,Pinu_Con_Lat
+,PINU.CON.LAT,Pinu_con,Pinu_Con_Lat,Pinu cont,Pinus contorta,Pine,Pine,Pine leading,Pinus contorta latifolia is a synonym of var. latifolia,Pinu_Con_Lat
 ,,Pinu_fle,Pinu_Fle,Pinu flex,Pinus flexilis,Pine,Pine,Pine leading,,
 ,,Pinu_lam,,Pinu lamb,Pinus lambertiana,Pine,Pine,Pine leading,,
 ,,Pinu_mon,Pinu_Mon,Pinu mont,Pinus monticola,Pine,Pine,Pine leading,,Pinu_Mon
@@ -180,7 +180,7 @@ tiliamer,TILI.AME,Tili_ame,Tili_Ame,Tili amer,Tilia americana,,,,,
 ,,Tili_cor,,Tili cord,Tilia cordata,,,,,
 ,,Tili_pla,,Tili plat,Tilia platyphyllos,,,,,
 tsugcana,TSUG.CAN,Tsug_can,Tsug_Can,Tsug cana,Tsuga canadensis,,,,,Tsug_Can
-tsughete,TSUG.HET,Tsug_het,Tsug_Het,Tsug hete,Tsuga heterophylla,,,,,  
+tsughete,TSUG.HET,Tsug_het,Tsug_Het,Tsug hete,Tsuga heterophylla,,,,,
 ,,Tsug_mer,Tsug_Mer_Het,Tsug merx,Tsuga mertensiana,,,,,
 tsugmert,TSUG.MER,Tsug_mer,Tsug_Mer,Tsug mert,Tsuga mertensiana x heterophylla,,,,,
 ,,Tsug_sp,Tsug_Spp,Tsug spp,Tsuga spp.,,,,,Tsug_Spp
