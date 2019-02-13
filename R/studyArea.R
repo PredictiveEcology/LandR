@@ -12,12 +12,15 @@ randomStudyArea <- getFromNamespace("randomStudyArea", "SpaDES.tools")
 #'
 #' @param country Character string giving the country code (default \code{"CAN"}).
 #' @param level   Numeric giving the ADM level to use (default \code{1}).
-#' @param prj     Character string giving the projection to use.
+#' @param proj     Character string giving the projection to use.
 #' @param dPath   The destination path in which to save the data file.
 #'
 #' @export
-prepGADM <- function(country = "CAN", level = 1, prj, dPath) {
+#' @importFrom raster getData
+#' @importFrom reproducible fixErrors
+#' @importFrom sp spTransform
+prepGADM <- function(country = "CAN", level = 1, proj, dPath) {
   getData("GADM", country = country, level = level, path = dPath) %>%
-    spTransform(mod$prj) %>%
+    spTransform(prj) %>%
     fixErrors(objectName = paste0("GDAM_", country, level))
 }

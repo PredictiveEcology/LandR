@@ -4,14 +4,14 @@
 \alias{prepGADM}
 \title{Get and prep GADM maps}
 \usage{
-prepGADM(country = "CAN", level = 1, prj, dPath)
+prepGADM(country = "CAN", level = 1, proj, dPath)
 }
 \arguments{
 \item{country}{Character string giving the country code (default \code{"CAN"}).}
 
 \item{level}{Numeric giving the ADM level to use (default \code{1}).}
 
-\item{prj}{Character string giving the projection to use.}
+\item{proj}{Character string giving the projection to use.}
 
 \item{dPath}{The destination path in which to save the data file.}
 }
