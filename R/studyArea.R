@@ -16,6 +16,7 @@ randomStudyArea <- getFromNamespace("randomStudyArea", "SpaDES.tools")
 #' @param dPath   The destination path in which to save the data file.
 #'
 #' @export
+#' @importFrom magrittr %>%
 #' @importFrom raster getData
 #' @importFrom reproducible fixErrors
 #' @importFrom sp spTransform
