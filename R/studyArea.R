@@ -21,6 +21,6 @@ randomStudyArea <- getFromNamespace("randomStudyArea", "SpaDES.tools")
 #' @importFrom sp spTransform
 prepGADM <- function(country = "CAN", level = 1, proj, dPath) {
   getData("GADM", country = country, level = level, path = dPath) %>%
-    spTransform(prj) %>%
+    spTransform(proj) %>%
     fixErrors(objectName = paste0("GDAM_", country, level))
 }
