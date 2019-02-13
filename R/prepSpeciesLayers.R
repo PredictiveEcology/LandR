@@ -343,7 +343,9 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
                                                          paste0("Pickell", sp, ".tif"))),
                              overwrite = TRUE, datatype = "INT1U")
     }
-    if (sp == equivalentName("Pinu_sp", sppEquiv, sppEquivCol)) {
+    if (sp %in% c(equivalentName("Pinu_ban", sppEquiv, sppEquivCol),
+                  equivalentName("Pinu_con", sppEquiv, sppEquivCol),
+                  equivalentName("Pinu_sp", sppEquiv, sppEquivCol))) {
       spRasts[[sp]] <- spRas
       spRasts[[sp]][PickellRaster[] %in% c(31, 32, 34)] <- 60
       spRasts[[sp]][PickellRaster[] %in% c(33)] <- 80
