@@ -302,9 +302,9 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
   )
 
   # Check that each of the layers that Pickell did are actually desired in speciesEquivalency
-  needPickell <- sapply(sppInPickell, function(sp) {
+  needPickell <- vapply(sppInPickell, function(sp) {
     any(sp %in% sppOfInterest)
-  })
+  }, logical(1))
 
   # These are the ones in Pickell data set that we want according to speciesEquivalency
   PickellSpp <- equivalentName(PickellSpp[needPickell], sppEquiv, sppEquivCol)
