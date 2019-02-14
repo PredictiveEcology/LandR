@@ -4,4 +4,5 @@
 #'
 #' @export
 #' @importFrom utils getFromNamespace
+#' @inheritParams SpaDES.tools::randomStudyArea
 randomStudyArea <- getFromNamespace("randomStudyArea", "SpaDES.tools")
