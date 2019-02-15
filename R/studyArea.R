@@ -2,7 +2,8 @@
 #'
 #' This simply re-exports \code{SpaDES.tools::randomStudyArea}
 #'
+#' @inheritParams SpaDES.tools::randomStudyArea
+#'
 #' @export
 #' @importFrom utils getFromNamespace
-#' @inheritParams SpaDES.tools::randomStudyArea
 randomStudyArea <- getFromNamespace("randomStudyArea", "SpaDES.tools")
