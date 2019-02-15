@@ -323,47 +323,60 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
   for (sp in PickellSpp) {
     message("  converting Pickell's codes to pct cover raster, for ", sp)
 
-    if (sp == equivalentName("Pice_gla", sppEquiv, sppEquivCol)) {
-      spRasts[[sp]] <- spRas
-      spRasts[[sp]][PickellRaster[] %in% c(41, 42, 43)] <- 60
-      spRasts[[sp]][PickellRaster[] %in% c(44)] <- 80
-      spRasts[[sp]][PickellRaster[] %in% c(14, 34)] <- 40
-      spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
-                             filename = asPath(file.path(destinationPath,
-                                                         paste0("Pickell", sp, ".tif"))),
-                             overwrite = TRUE, datatype = "INT1U")
+    if (!is.na(equivalentName("Pice_gla", sppEquiv, sppEquivCol))) {
+      if (sp == equivalentName("Pice_gla", sppEquiv, sppEquivCol)) {
+        spRasts[[sp]] <- spRas
+        spRasts[[sp]][PickellRaster[] %in% c(41, 42, 43)] <- 60
+        spRasts[[sp]][PickellRaster[] %in% c(44)] <- 80
+        spRasts[[sp]][PickellRaster[] %in% c(14, 34)] <- 40
+        spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
+                               filename = asPath(file.path(destinationPath,
+                                                           paste0("Pickell", sp, ".tif"))),
+                               overwrite = TRUE, datatype = "INT1U")
+      }
     }
-    if (sp == equivalentName("Pice_mar", sppEquiv, sppEquivCol)) {
-      spRasts[[sp]] <- spRas
-      spRasts[[sp]][PickellRaster[] %in% c(23, 26)] <- 60
-      spRasts[[sp]][PickellRaster[] %in% c(22)] <- 80
-      spRasts[[sp]][PickellRaster[] %in% c(32, 42)] <- 40
-      spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
-                             filename = asPath(file.path(destinationPath,
-                                                         paste0("Pickell", sp, ".tif"))),
-                             overwrite = TRUE, datatype = "INT1U")
+
+    if (!is.na(equivalentName("Pice_mar", sppEquiv, sppEquivCol))) {
+      if (sp == equivalentName("Pice_mar", sppEquiv, sppEquivCol)) {
+        spRasts[[sp]] <- spRas
+        spRasts[[sp]][PickellRaster[] %in% c(23, 26)] <- 60
+        spRasts[[sp]][PickellRaster[] %in% c(22)] <- 80
+        spRasts[[sp]][PickellRaster[] %in% c(32, 42)] <- 40
+        spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
+                               filename = asPath(file.path(destinationPath,
+                                                           paste0("Pickell", sp, ".tif"))),
+                               overwrite = TRUE, datatype = "INT1U")
+      }
     }
-    if (sp %in% c(equivalentName("Pinu_ban", sppEquiv, sppEquivCol),
-                  equivalentName("Pinu_con", sppEquiv, sppEquivCol),
-                  equivalentName("Pinu_sp", sppEquiv, sppEquivCol))) {
-      spRasts[[sp]] <- spRas
-      spRasts[[sp]][PickellRaster[] %in% c(31, 32, 34)] <- 60
-      spRasts[[sp]][PickellRaster[] %in% c(33)] <- 80
-      spRasts[[sp]][PickellRaster[] %in% c(23, 43)] <- 40
-      spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
-                             filename = asPath(file.path(destinationPath,
-                                                         paste0("Pickell", sp, ".tif"))),
-                             overwrite = TRUE, datatype = "INT1U")
+
+    if (any(!is.na(equivalentName("Pinu_ban", sppEquiv, sppEquivCol)),
+            !is.na(equivalentName("Pinu_con", sppEquiv, sppEquivCol)),
+            !is.na(equivalentName("Pinu_spp", sppEquiv, sppEquivCol)))) {
+      if (sp %in% c(equivalentName("Pinu_ban", sppEquiv, sppEquivCol),
+                    equivalentName("Pinu_con", sppEquiv, sppEquivCol),
+                    equivalentName("Pinu_sp", sppEquiv, sppEquivCol))) {
+        spRasts[[sp]] <- spRas
+        spRasts[[sp]][PickellRaster[] %in% c(31, 32, 34)] <- 60
+        spRasts[[sp]][PickellRaster[] %in% c(33)] <- 80
+        spRasts[[sp]][PickellRaster[] %in% c(23, 43)] <- 40
+        spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
+                               filename = asPath(file.path(destinationPath,
+                                                           paste0("Pickell", sp, ".tif"))),
+                               overwrite = TRUE, datatype = "INT1U")
+      }
     }
-    if (sp == equivalentName("Popu_tre", sppEquiv, sppEquivCol)) {
-      spRasts[[sp]] <- spRas
-      spRasts[[sp]][PickellRaster[] %in% c(14)] <- 60
-      spRasts[[sp]][PickellRaster[] %in% c(11)] <- 80
-      spRasts[[sp]][PickellRaster[] %in% c(31, 41)] <- 40
-      spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
-                             filename = asPath(file.path(destinationPath,
-                                                         paste0("Pickell", sp, ".tif"))),
-                             overwrite = TRUE, datatype = "INT2U")
+
+    if (!is.na(equivalentName("Popu_tre", sppEquiv, sppEquivCol))) {
+      if (sp == equivalentName("Popu_tre", sppEquiv, sppEquivCol)) {
+        spRasts[[sp]] <- spRas
+        spRasts[[sp]][PickellRaster[] %in% c(14)] <- 60
+        spRasts[[sp]][PickellRaster[] %in% c(11)] <- 80
+        spRasts[[sp]][PickellRaster[] %in% c(31, 41)] <- 40
+        spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
+                               filename = asPath(file.path(destinationPath,
+                                                           paste0("Pickell", sp, ".tif"))),
+                               overwrite = TRUE, datatype = "INT2U")
+      }
     }
   }
 
