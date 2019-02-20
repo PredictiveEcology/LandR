@@ -135,11 +135,14 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
 
   sppColors <- NULL
   sppColors <- if (is.character(palette))
-    if (palette %in% rownames(RColorBrewer::brewer.pal.info))
-      RColorBrewer::brewer.pal(length(sppColorNames), palette)
+    if (palette %in% rownames(RColorBrewer::brewer.pal.info)) {
+      colorPalette <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 8, name = palette))
+      colorPalette(length(sppColorNames))
+    }
 
   if (is.null(sppColors))
     stop("Currently palette must be one of the RColorBrewer::brewer.pal names")
+
   names(sppColors) <- sppColorNames
   sppColors
 }
