@@ -583,9 +583,10 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   cohortData <- data.table::melt(inputDataTable,
                                  value.name = "cover",
                                  measure.vars = newCoverColNames,
-                                 variable.name = "speciesCode") %>%
-    unique()
+                                 variable.name = "speciesCode")
   cohortData[, coverOrig := cover]
+  if (length(duplicated(cohortData)) > 0)
+    warning("cohortData contains duplicate rows.")
 
   if (getOption("LandR.assertions"))
     #describeCohortData(cohortData)
