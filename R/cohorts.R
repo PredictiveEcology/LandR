@@ -570,11 +570,11 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     if (!all(sppColumns %in% colnames(inputDataTable)))
       stop("Species names are incorrect")
     if (!all(unlist(lapply(inputDataTable[, sppColumns, with = FALSE],
-                           function(x) all(x >= 0 & x <= 100)  ))))
+                           function(x) all(x >= 0 & x <= 100)))))
       stop("Species columns are not percent cover between 0 and 100. This may",
            " be because they more NA values than the Land Cover raster")
-
   }
+
   coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
   newCoverColNames <- gsub("cover\\.", "", coverColNames)
   setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
@@ -583,7 +583,8 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   cohortData <- data.table::melt(inputDataTable,
                                  value.name = "cover",
                                  measure.vars = newCoverColNames,
-                                 variable.name = "speciesCode")
+                                 variable.name = "speciesCode") %>%
+    unique()
   cohortData[, coverOrig := cover]
 
   if (getOption("LandR.assertions"))
@@ -640,7 +641,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     print(outAge$rsq)
     cohortDataMissingAge[
       , imputedAge := pmax(0L, asInteger(predict(outAge$mod, newdata = cohortDataMissingAge)))]
-    cohortData <- unique(cohortDataMissingAge)[, .(pixelIndex, imputedAge, speciesCode)][
+    cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
       cohortData, on = c("pixelIndex", "speciesCode")]
     cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = log(imputedAge))]
     cohortData[, `:=`(imputedAge = NULL)]
