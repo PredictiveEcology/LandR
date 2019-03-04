@@ -636,11 +636,10 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     system.time(outAge <- Cache(statsModel, form = ageQuotedFormula,
                                 uniqueEcoregionGroup = unique(cohortDataMissingAgeUnique$ecoregionGroup),
                                 .specialData = cohortDataMissingAgeUnique))
-
     print(outAge$rsq)
     cohortDataMissingAge[
       , imputedAge := pmax(0L, asInteger(predict(outAge$mod, newdata = cohortDataMissingAge)))]
-    cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
+    cohortData <- unique(cohortDataMissingAge)[, .(pixelIndex, imputedAge, speciesCode)][
       cohortData, on = c("pixelIndex", "speciesCode")]
     cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = log(imputedAge))]
     cohortData[, `:=`(imputedAge = NULL)]
