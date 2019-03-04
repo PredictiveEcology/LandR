@@ -597,9 +597,10 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
   cohortData[, V1 := NULL]
 
-  ######################
-  # message(crayon::blue("POSSIBLE ALERT -- assume deciduous cover is 1/2 the conversion to B as conifer"))
-  # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)] # CRAZY TODO -- DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
+  ## CRAZY TODO: DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
+  # message(crayon::blue(paste("POSSIBLE ALERT:",
+  #                            "assume deciduous cover is 1/2 the conversion to B as conifer")))
+  # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)]
   cohortData[ , cover := {
     sumCover <- sum(cover)
     if (sumCover > 100) {
@@ -621,8 +622,8 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   # Impute missing ages on poor age dataset
   ######################################################
   cohortDataMissingAge <- cohortData[, hasBadAge := all(age == 0 & cover > 0) |
-                                       any(is.na(age)), by = "pixelIndex"][
-    hasBadAge == TRUE]
+                                       any(is.na(age)), by = "pixelIndex"][hasBadAge == TRUE]
+
   if (NROW(cohortDataMissingAge) > 0) {
     cohortDataMissingAgeUnique <- unique(cohortDataMissingAge,
                                          by = c("initialEcoregionCode", "speciesCode"))[
