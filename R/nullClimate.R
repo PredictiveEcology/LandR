@@ -1,5 +1,6 @@
 #'  Predict biomass change with climate variables
 #'  @return NULL in place of a model object
+#'  @export
 calculateClimateEffect <- function(...){
 
   return(NULL)
