@@ -6,7 +6,9 @@
 \usage{
 calculateClimateEffect(...)
 }
+\value{
+NULL in place of a model object
+}
 \description{
-@return NULL in place of a model object
- @export
+calculateClimateEffect
 }
