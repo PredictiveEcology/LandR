@@ -2,14 +2,11 @@
 % Please edit documentation in R/nullClimate.R
 \name{calculateClimateEffect}
 \alias{calculateClimateEffect}
-\title{Predict biomass change with climate variables
- @return NULL in place of a model object
- @export}
+\title{calculateClimateEffect}
 \usage{
 calculateClimateEffect(...)
 }
 \description{
-Predict biomass change with climate variables
- @return NULL in place of a model object
+@return NULL in place of a model object
  @export
 }
