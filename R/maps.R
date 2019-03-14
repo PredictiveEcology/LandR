@@ -70,14 +70,16 @@ prepInputsLCC <- function(year = 2005,
     if (identical(as.integer(year), 2005L)) {
       # url <- paste0("ftp://ftp.ccrs.nrcan.gc.ca/ad/NLCCLandCover/",
       #               "LandcoverCanada2005_250m/LandCoverOfCanada2005_V1_4.zip")
-      url <- "https://drive.google.com/file/d/1g9jr0VrQxqxGjZ4ckF6ZkSMP-zuYzHQC/view?usp=sharing" #nolint
+      url <- "https://drive.google.com/file/d/1g9jr0VrQxqxGjZ4ckF6ZkSMP-zuYzHQC/view?usp=sharing"
       filename <- asPath("LCC2005_V1_4a.tif")
-      archive = asPath("LandCoverOfCanada2005_V1_4.zip")
+      archive <- asPath("LandCoverOfCanada2005_V1_4.zip")
     } else {
-      if (identical(as.integer(year), 2010L)){
-        url <- "http://ftp.maps.canada.ca/pub/nrcan_rncan/Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/CanadaLandcover2010.zip"
+      if (identical(as.integer(year), 2010L)) {
+        url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/",
+                      "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
+                      "CanadaLandcover2010.zip")
         filename <- asPath("CAN_NALCMS_LC_30m_LAEA_mmu12_urb05_CAL.tif")
-        archive = asPath("CanadaLandcover2010.zip")
+        archive <- asPath("CanadaLandcover2010.zip")
       } else {
         stop("Other LCC covers don't exist yet.")
       }

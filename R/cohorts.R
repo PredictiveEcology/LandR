@@ -570,11 +570,11 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     if (!all(sppColumns %in% colnames(inputDataTable)))
       stop("Species names are incorrect")
     if (!all(unlist(lapply(inputDataTable[, sppColumns, with = FALSE],
-                           function(x) all(x >= 0 & x <= 100)  ))))
+                           function(x) all(x >= 0 & x <= 100)))))
       stop("Species columns are not percent cover between 0 and 100. This may",
            " be because they more NA values than the Land Cover raster")
-
   }
+
   coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
   newCoverColNames <- gsub("cover\\.", "", coverColNames)
   setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
@@ -585,6 +585,8 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
                                  measure.vars = newCoverColNames,
                                  variable.name = "speciesCode")
   cohortData[, coverOrig := cover]
+  if (length(duplicated(cohortData)) > 0)
+    warning("cohortData contains duplicate rows.")
 
   if (getOption("LandR.assertions"))
     #describeCohortData(cohortData)
@@ -597,9 +599,10 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
   cohortData[, V1 := NULL]
 
-  ######################
-  # message(crayon::blue("POSSIBLE ALERT -- assume deciduous cover is 1/2 the conversion to B as conifer"))
-  # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)] # CRAZY TODO -- DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
+  ## CRAZY TODO: DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
+  # message(crayon::blue(paste("POSSIBLE ALERT:",
+  #                            "assume deciduous cover is 1/2 the conversion to B as conifer")))
+  # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)]
   cohortData[ , cover := {
     sumCover <- sum(cover)
     if (sumCover > 100) {
@@ -620,23 +623,27 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   ######################################################
   # Impute missing ages on poor age dataset
   ######################################################
-  cohortDataMissingAge <- cohortData[, hasBadAge := all(age == 0 & cover > 0) | any(is.na(age)), by = "pixelIndex"][
-    hasBadAge == TRUE]
+  cohortDataMissingAge <- cohortData[, hasBadAge := all(age == 0 & cover > 0) |
+                                       any(is.na(age)), by = "pixelIndex"][hasBadAge == TRUE]
+
   if (NROW(cohortDataMissingAge) > 0) {
     cohortDataMissingAgeUnique <- unique(cohortDataMissingAge,
                                          by = c("initialEcoregionCode", "speciesCode"))[
                                            , .(initialEcoregionCode, speciesCode)]
-    cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[cohortData, on = c("initialEcoregionCode", "speciesCode"), nomatch = 0]
+    cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[
+      cohortData, on = c("initialEcoregionCode", "speciesCode"), nomatch = 0]
     ageQuotedFormula <- quote(age ~ B * speciesCode + (1 | initialEcoregionCode) + cover)
-    cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(B, age, speciesCode, initialEcoregionCode, cover)]
+    cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(B, age, speciesCode,
+                                                                 initialEcoregionCode, cover)]
     message(blue("Impute missing age values"))
     system.time(outAge <- Cache(statsModel, form = ageQuotedFormula,
                                 uniqueEcoregionGroup = unique(cohortDataMissingAgeUnique$ecoregionGroup),
                                 .specialData = cohortDataMissingAgeUnique))
-
     print(outAge$rsq)
-    cohortDataMissingAge[, imputedAge := pmax(0L, asInteger(predict(outAge$mod, newdata = cohortDataMissingAge)))]
-    cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][cohortData, on = c("pixelIndex", "speciesCode")]
+    cohortDataMissingAge[
+      , imputedAge := pmax(0L, asInteger(predict(outAge$mod, newdata = cohortDataMissingAge)))]
+    cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
+      cohortData, on = c("pixelIndex", "speciesCode")]
     cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = log(imputedAge))]
     cohortData[, `:=`(imputedAge = NULL)]
   }
