@@ -526,14 +526,16 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC,
     } else {
       out3 <- rbindlist(list(out2, out3))
     }
-
   }
 
-  # setnames(out3, c("initialPixels", "initialEcoregionCode"), c("pixelIndex", "ecoregionGroup"))
-  out3[, `:=`(newPossLCC = NULL)]
-  # out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
-
-  out3
+  if (!exists("out3")) {
+    out3 <- data.table(pixelIndex = NA, ecoregionGroup = NA)[!is.na(pixelIndex)]
+  } else {
+    # setnames(out3, c("initialPixels", "initialEcoregionCode"), c("pixelIndex", "ecoregionGroup"))
+    out3[, `:=`(newPossLCC = NULL)]
+    # out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
+    out3
+  }
 }
 
 #' Generate initial \code{cohortData} table
