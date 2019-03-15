@@ -114,8 +114,6 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     cohorts[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L,
                                                 columns = columnsForPG)]
 
-    assertPixelCohortData(cohorts, pixelGroupMap)
-
     # Bring to pixelGroup level -- this will squash the data.table
     allCohortData <- cohorts[ , .(ecoregionGroup = ecoregionGroup[1],
                                   mortality = mortality[1],
@@ -154,6 +152,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   outs <- rmMissingCohorts(cohortData, pixelGroupMap)
 
   if (isTRUE(getOption("LandR.assertions"))) {
+    assertCohortData(outs$cohortData, outs$pixelGroupMap)
+
     maxPixelGroupFromCohortData <- max(outs$cohortData$pixelGroup)
     maxPixelGroup <- as.integer(maxValue(outs$pixelGroupMap))
     test1 <- (!identical(maxPixelGroup, maxPixelGroupFromCohortData))
