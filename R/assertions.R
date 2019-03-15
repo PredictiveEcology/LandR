@@ -108,7 +108,7 @@ assertColumns <- function(obj, colClasses) {
 #' @importFrom stats na.omit
 assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1,
                            message = "", verbose = getOption("LandR.verbose", TRUE)) {
-  if (getOption("LandR.assertions", FALSE)) {
+  if (verbose) {
     a <- sort(unique(na.omit(pixelGroupMap[])))
     b <- sort(unique(na.omit(cohortData$pixelGroup)))
     test1 <- sum(!a %in% b)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
