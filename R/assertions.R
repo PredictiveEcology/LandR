@@ -160,7 +160,7 @@ assertPixelCohortData <- function(pixelCohortData, pixelGroupMap) {
     test1 <- all(uniqueAllPixelsNotInCohortData %in% c(NA, 0L))
     if (!test1 | !test2 | !test3) {
       stop("Every value on pixelGroupMap greater than 0 must have a pixelIndex in pixelCohortData.",
-           " This test is failing, i.e., there are some pixelGroupMaps have pixelGroups, and aren't in pixelCohortData.")
+           " This test is failing, i.e., there are some pixelGroups in pixelGroupMap that aren't in pixelCohortData.")
     }
   }
 }
