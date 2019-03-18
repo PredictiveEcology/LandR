@@ -54,8 +54,8 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
       message("remove CASFRI entries with <15 cover as dominant species, i.e., these pixels are deemed untreed")
       CASFRIattr <- CASFRIattr[which(CASFRIattr[[paste0("SPECIES_PER_", i)]] > 15), ]
     }
+    message("set CASFRI entries with <15 cover in 2nd-5th dominance class to NA")
     for (i in 2:5) {
-      message("set CASFRI entries with <15 cover in 2nd-5th dominance class to NA")
       set(CASFRIattr, which(CASFRIattr[[paste0("SPECIES_PER_", i)]] <= 15),
           paste0("SPECIES_", i), NA_character_)
     }
