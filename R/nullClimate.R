@@ -6,16 +6,10 @@ calculateClimateEffect <- function(...) {
   return(NULL)
 }
 
-#' calculateClimateGrowth
+#' assignClimateEffect
 #' @return null estimate of growth due to climate
 #' @export
-calculateClimateGrowth <- function(...) {
+assignClimateEffect <- function(...) {
   0
 }
 
-#' calculateClimateMortality
-#' @return null estimate of mortality due to climate
-#' @export
-calculateClimateMortality <- function(...) {
-  0
-}
