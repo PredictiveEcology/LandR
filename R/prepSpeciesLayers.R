@@ -435,11 +435,6 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   names(sppNameVector) <- sppNameVector
 
-  # This
-  sppListMergesCASFRI <-lapply(sppNameVector, function(x)
-    equivalentName(x, sppEquiv,  column = "CASFRI", multi = TRUE)
-  )
-
   # This includes LandType because it will use that at the bottom of this function to
   #  remove NAs
   CClayerNames <- c("Pine", "Black Spruce", "Deciduous", "Fir", "White Spruce", "LandType")
