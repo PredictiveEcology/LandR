@@ -707,7 +707,11 @@ statsModel <- function(form, uniqueEcoregionGroups, .specialData, ...) {
   if (!keepGrouping) {
     form2 <- sub("\\+ \\(.*\\|.*\\)", "", form2)
     form <- as.formula(form2)
+
+    message(blue("Grouping variable "), red("only has one level. "), blue("Formula changed to\n",
+                 magenta(paste0(format(form, appendLF = FALSE), collapse = ""))))
   }
+
 
   mod <- modelFn(
     formula = eval(form),
