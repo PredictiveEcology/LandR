@@ -685,12 +685,30 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
 #' @importFrom lme4 glmer lmer
 #' @importFrom MuMIn r.squaredGLMM
 #' @importFrom stats fitted predict
+
 statsModel <- function(form, uniqueEcoregionGroups, .specialData, ...) {
+  ## check the no of grouping levels
+  form2 <-  paste(deparse(form), collapse = "")
+  groupVar <- sub("\\).*", "", sub(".*\\| ", "", form2))
+  keepGrouping <- NROW(unique(.specialData[, ..groupVar])) >= 2
+
   if ("family" %in% names(list(...))) {
-    modelFn <- lme4::glmer
+    if(keepGrouping)
+      modelFn <- lme4::glmer
+    else
+      modelFn <- stats::glm
   } else {
-    modelFn <- lme4::lmer
+    if(keepGrouping)
+      modelFn <- lme4::lmer
+    else
+      modelFn <- stats::lm
   }
+
+  if (!keepGrouping) {
+    form2 <- sub("\\+ \\(.*\\|.*\\)", "", form2)
+    form <- as.formula(form2)
+  }
+
   mod <- modelFn(
     formula = eval(form),
     data = .specialData,
