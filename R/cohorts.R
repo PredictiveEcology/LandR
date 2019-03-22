@@ -677,7 +677,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
 #'
 #' @param form A quoted formula to test
 #' @param uniqueEcoregionGroups Unique values of ecoregionGroups. This
-#'   is the basis for the statistics.
+#'   is the basis for the statistics, and can be used to optimize caching, e.g. ignore \code{.specialData} in .omitArgs
 #' @param .specialData The custom dataset required for the model
 #' @param ... Anything passed to args for the model
 #'
@@ -692,17 +692,14 @@ statsModel <- function(form, uniqueEcoregionGroups, .specialData, ...) {
   groupVar <- sub("\\).*", "", sub(".*\\| ", "", form2))
   keepGrouping <- NROW(unique(.specialData[, ..groupVar])) >= 2
 
-  if ("family" %in% names(list(...))) {
-    if(keepGrouping)
+  if (keepGrouping) {
+    if ("family" %in% names(list(...))) {
       modelFn <- lme4::glmer
-    else
-      modelFn <- stats::glm
-  } else {
-    if(keepGrouping)
+    } else {
       modelFn <- lme4::lmer
-    else
-      modelFn <- stats::lm
-  }
+    }
+  } else
+    modelFn <- stats::glm
 
   if (!keepGrouping) {
     form2 <- sub("\\+ \\(.*\\|.*\\)", "", form2)
@@ -712,13 +709,12 @@ statsModel <- function(form, uniqueEcoregionGroups, .specialData, ...) {
                  magenta(paste0(format(form, appendLF = FALSE), collapse = ""))))
   }
 
-
   mod <- modelFn(
     formula = eval(form),
     data = .specialData,
     ...)
 
-  list(mod = mod, pred = fitted(mod), rsq = MuMIn::r.squaredGLMM(mod))
+    list(mod = mod, pred = fitted(mod), rsq = MuMIn::r.squaredGLMM(mod))
 }
 
 #' Default columns that define pixel groups
