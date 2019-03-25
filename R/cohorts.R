@@ -577,12 +577,11 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
            " be because they more NA values than the Land Cover raster")
   }
 
-  cohortData <- copy(inputDataTable)
-  coverColNames <- grep(colnames(cohortData), pattern = "cover", value = TRUE)
+  coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
   newCoverColNames <- gsub("cover\\.", "", coverColNames)
-  setnames(cohortData, old = coverColNames, new = newCoverColNames)
+  setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
   message(crayon::blue("Create initial cohortData object, with no pixelGroups yet"))
-  cohortData <- data.table::melt(cohortData,
+  cohortData <- data.table::melt(inputDataTable,
                                  value.name = "cover",
                                  measure.vars = newCoverColNames,
                                  variable.name = "speciesCode")
