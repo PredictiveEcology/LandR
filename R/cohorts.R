@@ -1,6 +1,6 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c(
-    ".", ".I", ":=", "age", "aNPPAct", "cover", "coverOrig",
+    ".", ".I", ":=", "..groupVar", "age", "aNPPAct", "cover", "coverOrig",
     "ecoregion", "ecoregionGroup", "hasBadAge",
     "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
     "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
@@ -682,10 +682,10 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
 #' @param ... Anything passed to args for the model
 #'
 #' @export
+#' @importFrom crayon blue magenta red
 #' @importFrom lme4 glmer lmer
 #' @importFrom MuMIn r.squaredGLMM
-#' @importFrom stats fitted predict
-
+#' @importFrom stats as.formula glm fitted predict
 statsModel <- function(form, uniqueEcoregionGroups, .specialData, ...) {
   ## check the no of grouping levels
   form2 <-  paste(deparse(form), collapse = "")
