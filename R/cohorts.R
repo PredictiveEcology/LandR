@@ -568,7 +568,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     expectedColNames <- c("age", "logAge", "initialEcoregionCode", "totalBiomass",
                           "lcc", "pixelIndex")
     if (!all(expectedColNames %in% colnames(inputDataTable)))
-      stop("Column names for inputDataTable must include ", paste(expectedColNames, collapse= " "))
+      stop("Column names for inputDataTable must include ", paste(expectedColNames, collapse = " "))
     if (!all(sppColumns %in% colnames(inputDataTable)))
       stop("Species names are incorrect")
     if (!all(unlist(lapply(inputDataTable[, sppColumns, with = FALSE],
