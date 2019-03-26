@@ -2,7 +2,7 @@
 % Please edit documentation in R/nullClimate.R
 \name{calculateClimateEffect}
 \alias{calculateClimateEffect}
-\title{calculateClimateEffect}
+\title{\code{calculateClimateEffect}}
 \usage{
 calculateClimateEffect(...)
 }
@@ -13,5 +13,5 @@ calculateClimateEffect(...)
 NULL in place of a model object
 }
 \description{
-calculateClimateEffect
+\code{calculateClimateEffect}
 }

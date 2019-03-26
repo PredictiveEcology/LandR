@@ -2,7 +2,7 @@
 % Please edit documentation in R/nullClimate.R
 \name{assignClimateEffect}
 \alias{assignClimateEffect}
-\title{assignClimateEffect}
+\title{\code{assignClimateEffect}}
 \usage{
 assignClimateEffect(...)
 }
@@ -10,8 +10,8 @@ assignClimateEffect(...)
 \item{...}{additional arguments that are passed to LandR.CS}
 }
 \value{
-null estimate of growth due to climate
+null (zero) estimate of growth due to climate
 }
 \description{
-assignClimateEffect
+\code{assignClimateEffect}
 }
