@@ -67,7 +67,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   vtmTypes <- equivalentName(vtmTypes, sppEquiv, "EN_generic_short")
   vtmTypes[whMixed] <- "Mixed"
   names(vtmCols) <- vtmTypes
-  facLevels$Species <- vtmTypes
+  facLevels$Species <- vtmTypes #nolint
 
   ## plot initial types bar chart
   facVals <- factorValues2(vtm, vtm[], att = "Species", na.rm = TRUE)

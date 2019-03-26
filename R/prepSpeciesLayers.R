@@ -21,7 +21,7 @@ if (getRversion() >= "3.1.0") {
 loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
                        type = c("cover", "age")) {
   # The ones we want
-  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]),]
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
   # Take this from the sppEquiv table; user cannot supply manually
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
@@ -51,7 +51,8 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
           paste0("SPECIES_", i), NA_character_)
     }
     for (i in 1:1) {
-      message("remove CASFRI entries with <15 cover as dominant species, i.e., these pixels are deemed untreed")
+      message("remove CASFRI entries with <15 cover as dominant species,",
+              " i.e., these pixels are deemed untreed")
       CASFRIattr <- CASFRIattr[which(CASFRIattr[[paste0("SPECIES_PER_", i)]] > 15), ]
     }
     message("set CASFRI entries with <15 cover in 2nd-5th dominance class to NA")
@@ -105,7 +106,7 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
                             sppEquiv, sppEquivCol, destinationPath) {
   # The ones we want
-  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]),]
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
   # Take this from the sppEquiv table; user cannot supply manually
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
@@ -135,7 +136,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     spRasts[[sp]] <- spRas
     spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                            filename = asPath(file.path(destinationPath,
-                                                       paste0("CASFRI", sp,".tif"))),
+                                                       paste0("CASFRI", sp, ".tif"))),
                            overwrite = TRUE, datatype = "INT2U")
   }
 
@@ -159,7 +160,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     startCRS <- crs(spRasts[[sp]])
     spRasts[[sp]] <- writeRaster(spRasts[[sp]],
                                  filename = asPath(file.path(destinationPath,
-                                                             paste0("CASFRI", sp,".tif"))),
+                                                             paste0("CASFRI", sp, ".tif"))),
                                  datatype = "INT1U", overwrite = TRUE)
 
     if (is(spRasts[[sp]], "Raster")) {
@@ -204,7 +205,7 @@ prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
 
   CASFRItiffFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs.tif"))
   CASFRIattrFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs_attributes3.csv"))
-  CASFRIheaderFile <- asPath(file.path(destinationPath,"Landweb_CASFRI_GIDs_README.txt"))
+  CASFRIheaderFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs_README.txt"))
 
   message("  Loading CASFRI layers...")
   CASFRIRas <- Cache(prepInputs,
@@ -237,7 +238,7 @@ prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
                         #"speciesLayers", "KNN")
   )
 
-  message('Make stack from CASFRI data and headers')
+  message("Make stack from CASFRI data and headers")
   CASFRISpStack <- CASFRItoSpRasts(CASFRIRas = CASFRIRas,
                                    sppEquiv = sppEquiv,
                                    sppEquivCol = sppEquivCol,
@@ -286,7 +287,7 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
 #' @importFrom reproducible asPath Cache
 #' @importFrom raster raster rasterOptions setValues stack
 makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPath) {
-  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]),]
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
   # Take this from the speciesEquivalency table; user cannot supply manually
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
@@ -429,7 +430,7 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
     url <- "https://drive.google.com/file/d/1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1/view?usp=sharing"
 
   # The ones we want
-  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]),]
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
   # Take this from the sppEquiv table; user cannot supply manually
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])

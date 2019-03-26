@@ -15,7 +15,7 @@ assignLightProb <- function(sufficientLight, newCohortData) {
   ## that sufficentLight is a table of survival probs for each tolerance level
   ## (row) by and shade level (column) siteShade + 2 is necessary to skip the
   ## first column
-  newCohortData[ , lightProb := sufficientLight[cbind(shadetolerance, siteShade + 2)]]
+  newCohortData[, lightProb := sufficientLight[cbind(shadetolerance, siteShade + 2)]]
 }
 
 #' Convert numeric values to rounded integers
@@ -40,4 +40,3 @@ asInteger <- function(x)
 #' @rdname resample
 #' @seealso \code{\link[SpaDES.tools]{resample}}
 .resample <- getFromNamespace("resample", "SpaDES.tools")
-

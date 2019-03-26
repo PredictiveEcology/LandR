@@ -17,4 +17,3 @@ calculateClimateEffect <- function(...) {
 assignClimateEffect <- function(...) {
   return(0)
 }
-
