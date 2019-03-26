@@ -1,6 +1,6 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c(
-    ".", ".I", ":=", "age", "aNPPAct", "cover", "coverOrig",
+    ".", ".I", ":=", "..groupVar", "age", "aNPPAct", "cover", "coverOrig",
     "ecoregion", "ecoregionGroup", "hasBadAge",
     "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
     "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
@@ -114,8 +114,6 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     cohorts[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L,
                                                 columns = columnsForPG)]
 
-    assertPixelCohortData(cohorts, pixelGroupMap)
-
     # Bring to pixelGroup level -- this will squash the data.table
     allCohortData <- cohorts[ , .(ecoregionGroup = ecoregionGroup[1],
                                   mortality = mortality[1],
@@ -154,6 +152,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   outs <- rmMissingCohorts(cohortData, pixelGroupMap)
 
   if (isTRUE(getOption("LandR.assertions"))) {
+    assertCohortData(outs$cohortData, outs$pixelGroupMap)
+
     maxPixelGroupFromCohortData <- max(outs$cohortData$pixelGroup)
     maxPixelGroup <- as.integer(maxValue(outs$pixelGroupMap))
     test1 <- (!identical(maxPixelGroup, maxPixelGroupFromCohortData))
@@ -526,14 +526,16 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC,
     } else {
       out3 <- rbindlist(list(out2, out3))
     }
-
   }
 
-  # setnames(out3, c("initialPixels", "initialEcoregionCode"), c("pixelIndex", "ecoregionGroup"))
-  out3[, `:=`(newPossLCC = NULL)]
-  # out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
-
-  out3
+  if (!exists("out3")) {
+    out3 <- data.table(pixelIndex = NA, ecoregionGroup = NA)[!is.na(pixelIndex)]
+  } else {
+    # setnames(out3, c("initialPixels", "initialEcoregionCode"), c("pixelIndex", "ecoregionGroup"))
+    out3[, `:=`(newPossLCC = NULL)]
+    # out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
+    out3
+  }
 }
 
 #' Generate initial \code{cohortData} table
@@ -566,7 +568,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     expectedColNames <- c("age", "logAge", "initialEcoregionCode", "totalBiomass",
                           "lcc", "pixelIndex")
     if (!all(expectedColNames %in% colnames(inputDataTable)))
-      stop("Column names for inputDataTable must include ", expectedColNames)
+      stop("Column names for inputDataTable must include ", paste(expectedColNames, collapse = " "))
     if (!all(sppColumns %in% colnames(inputDataTable)))
       stop("Species names are incorrect")
     if (!all(unlist(lapply(inputDataTable[, sppColumns, with = FALSE],
@@ -579,7 +581,6 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   newCoverColNames <- gsub("cover\\.", "", coverColNames)
   setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
   message(crayon::blue("Create initial cohortData object, with no pixelGroups yet"))
-
   cohortData <- data.table::melt(inputDataTable,
                                  value.name = "cover",
                                  measure.vars = newCoverColNames,
@@ -675,26 +676,44 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
 #'
 #' @param form A quoted formula to test
 #' @param uniqueEcoregionGroups Unique values of ecoregionGroups. This
-#'   is the basis for the statistics.
+#'   is the basis for the statistics, and can be used to optimize caching, e.g. ignore \code{.specialData} in .omitArgs
 #' @param .specialData The custom dataset required for the model
 #' @param ... Anything passed to args for the model
 #'
 #' @export
+#' @importFrom crayon blue magenta red
 #' @importFrom lme4 glmer lmer
 #' @importFrom MuMIn r.squaredGLMM
-#' @importFrom stats fitted predict
+#' @importFrom stats as.formula glm fitted predict
 statsModel <- function(form, uniqueEcoregionGroups, .specialData, ...) {
-  if ("family" %in% names(list(...))) {
-    modelFn <- lme4::glmer
-  } else {
-    modelFn <- lme4::lmer
+  ## check the no of grouping levels
+  form2 <-  paste(deparse(form), collapse = "")
+  groupVar <- sub("\\).*", "", sub(".*\\| ", "", form2))
+  keepGrouping <- NROW(unique(.specialData[, ..groupVar])) >= 2
+
+  if (keepGrouping) {
+    if ("family" %in% names(list(...))) {
+      modelFn <- lme4::glmer
+    } else {
+      modelFn <- lme4::lmer
+    }
+  } else
+    modelFn <- stats::glm
+
+  if (!keepGrouping) {
+    form2 <- sub("\\+ \\(.*\\|.*\\)", "", form2)
+    form <- as.formula(form2)
+
+    message(blue("Grouping variable "), red("only has one level. "), blue("Formula changed to\n",
+                 magenta(paste0(format(form, appendLF = FALSE), collapse = ""))))
   }
+
   mod <- modelFn(
     formula = eval(form),
     data = .specialData,
     ...)
 
-  list(mod = mod, pred = fitted(mod), rsq = MuMIn::r.squaredGLMM(mod))
+    list(mod = mod, pred = fitted(mod), rsq = MuMIn::r.squaredGLMM(mod))
 }
 
 #' Default columns that define pixel groups

@@ -10,7 +10,7 @@ statsModel(form, uniqueEcoregionGroups, .specialData, ...)
 \item{form}{A quoted formula to test}
 
 \item{uniqueEcoregionGroups}{Unique values of ecoregionGroups. This
-is the basis for the statistics.}
+is the basis for the statistics, and can be used to optimize caching, e.g. ignore \code{.specialData} in .omitArgs}
 
 \item{.specialData}{The custom dataset required for the model}
 
