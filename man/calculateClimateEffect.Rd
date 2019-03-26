@@ -6,6 +6,9 @@
 \usage{
 calculateClimateEffect(...)
 }
+\arguments{
+\item{...}{additional arguments that are passed to LandR.CS}
+}
 \value{
 NULL in place of a model object
 }

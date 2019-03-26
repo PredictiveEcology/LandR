@@ -6,6 +6,9 @@
 \usage{
 assignClimateEffect(...)
 }
+\arguments{
+\item{...}{additional arguments that are passed to LandR.CS}
+}
 \value{
 null estimate of growth due to climate
 }
