@@ -500,22 +500,29 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC,
     }
 
     if (NROW(out6) > 0) {
-      rowsToKeep <- out6[, list(keep = .resample(.I, 1)), by = c("pixelIndex")] # random sample of available, weighted by abundance
+      ## take random sample of available, weighted by abundance
+      rowsToKeep <- out6[, list(keep = .resample(.I, 1)), by = c("pixelIndex")]
       out2 <- out6[rowsToKeep$keep,
                    list(newPossLCC = lcc,
                         initialEcoregion = substr(initialEcoregionCode, 1, numCharEcoregion),
                         pixelIndex)]
       #out2 <- out2[rowsToKeep$keep]
       out2[, ecoregionGroup := paste0(initialEcoregion, "_",
-                                      paddedFloatToChar(as.numeric(newPossLCC), padL = 2, padR = 0))]
+                                      paddedFloatToChar(as.numeric(newPossLCC), padL = 2, padR = 0))] #nolint
       out2[, initialEcoregion := NULL]
 
-      # remove combinations of ecoregionGroup and speciesCode that don't exist -- Now this excludes B = 0
-      #out2 <- availableERC_by_Sp[out2, on = c("pixelIndex" = "initialPixels", "initialEcoregionCode" = "ecoregionGroup", "speciesCode"),
-      #                           nomatch = NA]
-      #hasMatch <- out2[, all(!is.na(rasterToMatch)), by = c("pixelIndex", "initialEcoregionCode", "speciesCode")][V1 == TRUE]
+      ## remove combinations of ecoregionGroup and speciesCode that don't exist
+      ## -- Now this excludes B = 0
+      # out2 <- availableERC_by_Sp[out2, on = c("pixelIndex" = "initialPixels",
+      #                                         "initialEcoregionCode" = "ecoregionGroup",
+      #                                         "speciesCode"),
+      #                            nomatch = NA]
+      # hasMatch <- out2[, all(!is.na(rasterToMatch)), by = c("pixelIndex",
+      #                                                       "initialEcoregionCode",
+      #                                                       "speciesCode")][V1 == TRUE]
       keepPixels <- unique(out2$pixelIndex)
-      # out2 <- out2[ecoregionGroup %in% cdEcoregionCodes] # remove codes that don't exist in pixelCohortData
+      ## remove codes that don't exist in pixelCohortData:
+      # out2 <- out2[ecoregionGroup %in% cdEcoregionCodes]
 
       theUnwantedPixels <- theUnwantedPixels[!theUnwantedPixels %in% keepPixels]
       out2 <- unique(out2)
@@ -568,7 +575,8 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     expectedColNames <- c("age", "logAge", "initialEcoregionCode", "totalBiomass",
                           "lcc", "pixelIndex")
     if (!all(expectedColNames %in% colnames(inputDataTable)))
-      stop("Column names for inputDataTable must include ", paste(expectedColNames, collapse = " "))
+      stop("Column names for inputDataTable must include ",
+           paste(expectedColNames, collapse = " "))
     if (!all(sppColumns %in% colnames(inputDataTable)))
       stop("Species names are incorrect")
     if (!all(unlist(lapply(inputDataTable[, sppColumns, with = FALSE],
@@ -612,12 +620,12 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     cover
   }, by = "pixelIndex"]
 
-  # Biomass -- by cohort
+  # Biomass -- by cohort (NOTE: divide by 100 becasu ecover is percent)
   message(crayon::blue("Divide total B of each pixel by the relative cover of the cohorts"))
-  cohortData[ , B := asInteger(mean(totalBiomass) * cover / 100), by = "pixelIndex"] # /100 because cover is percent
+  cohortData[ , B := asInteger(mean(totalBiomass) * cover / 100), by = "pixelIndex"]
   message(crayon::blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
   cohortData[ , B := asInteger(ceiling(B / pixelGroupBiomassClass) *
-                                       pixelGroupBiomassClass)] # /100 because cover is percent
+                                       pixelGroupBiomassClass)]
   message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
   cohortData[ , totalBiomass := asInteger(totalBiomass)]
 
@@ -638,7 +646,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
                                                                  initialEcoregionCode, cover)]
     message(blue("Impute missing age values"))
     system.time(outAge <- Cache(statsModel, form = ageQuotedFormula,
-                                uniqueEcoregionGroup = unique(cohortDataMissingAgeUnique$ecoregionGroup),
+                                uniqueEcoregionGroup = unique(cohortDataMissingAgeUnique$ecoregionGroup), #nolint
                                 .specialData = cohortDataMissingAgeUnique))
     print(outAge$rsq)
     cohortDataMissingAge[
@@ -653,12 +661,13 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   #######################################################
   # set B to zero if age is zero because B is lowest quality dataset
   #######################################################
-  message(blue("Set recalculate totalBiomass as sum(B); many biomasses will have been set to 0 in previous steps"))
+  message(blue("Set recalculate totalBiomass as sum(B);",
+               "many biomasses will have been set to 0 in previous steps"))
   cohortData[cover > 0 & age == 0, B := 0L]
   cohortData[, totalBiomass := sum(B), by = "pixelIndex"]
 
-  # This was unused, but for beta regression, this can allow 0s and 1s without needing a separate
-  #   model for zeros and ones
+  # This was unused, but for beta regression, this can allow 0s and 1s without
+  #   needing a separate model for zeros and ones
   # https://stats.stackexchange.com/questions/31300/dealing-with-0-1-values-in-a-beta-regression
   # cohortData[ , coverProp := (cover/100 * (NROW(cohortData) - 1) + 0.5) / NROW(cohortData)]
 
@@ -675,8 +684,9 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
 #' should not be omitted.
 #'
 #' @param form A quoted formula to test
-#' @param uniqueEcoregionGroups Unique values of ecoregionGroups. This
-#'   is the basis for the statistics, and can be used to optimize caching, e.g. ignore \code{.specialData} in .omitArgs
+#' @param uniqueEcoregionGroups Unique values of ecoregionGroups.
+#'   This is the basis for the statistics, and can be used to optimize caching,
+#'   e.g. ignore \code{.specialData} in \code{.omitArgs}
 #' @param .specialData The custom dataset required for the model
 #' @param ... Anything passed to args for the model
 #'
@@ -704,7 +714,8 @@ statsModel <- function(form, uniqueEcoregionGroups, .specialData, ...) {
     form2 <- sub("\\+ \\(.*\\|.*\\)", "", form2)
     form <- as.formula(form2)
 
-    message(blue("Grouping variable "), red("only has one level. "), blue("Formula changed to\n",
+    message(blue("Grouping variable "), red("only has one level. "),
+            blue("Formula changed to\n",
                  magenta(paste0(format(form, appendLF = FALSE), collapse = ""))))
   }
 

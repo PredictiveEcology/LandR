@@ -18,7 +18,8 @@ assert1 <- function(cohortData34to36, cohortData) {
     if (!allCodesAre34to36)
       stop("lcc classes were mismanaged; contact developers: code 234")
 
-    onlyExistingCodes <- all(unique(cohortData34to36$ecoregionGroup) %in% unique(cohortData$initialEcoregionCode))
+    onlyExistingCodes <- all(unique(cohortData34to36$ecoregionGroup) %in%
+                               unique(cohortData$initialEcoregionCode))
     if (!onlyExistingCodes)
       stop("There are some ecoregionCodes created post replacement of 34 and 35")
   }
@@ -30,7 +31,7 @@ assert1 <- function(cohortData34to36, cohortData) {
 #' @rdname assertions
 assertUniqueCohortData <- function(cohortData, columns) {
   if (getOption("LandR.assertions")) {
-    obj <- cohortData[ , .N, by = columns]
+    obj <- cohortData[, .N, by = columns]
     whNEQOne <- which(obj$N != 1)
     test1 <- length(whNEQOne) == 0
     if (!test1)
@@ -50,7 +51,8 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB)
   if (getOption("LandR.assertions", FALSE)) {
     erg <- list()
     if (!missing(ecoregionMap))
-      erg[[1]] <- sort(na.omit(unique(factorValues2(ecoregionMap, ecoregionMap[], att = "ecoregionGroup"))))
+      erg[[1]] <- sort(na.omit(unique(factorValues2(ecoregionMap, ecoregionMap[],
+                                                    att = "ecoregionGroup"))))
     if (!missing(cohortData))
       erg[[2]] <- sort(unique(cohortData$ecoregionGroup))
     if (!missing(speciesEcoregion))
@@ -58,7 +60,7 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB)
     if (!missing(minRelativeB))
       erg[[4]] <- sort(unique(minRelativeB$ecoregionGroup))
 
-    lens <- sapply(erg, function(x) length(x)>1)
+    lens <- sapply(erg, function(x) length(x) > 1)
     erg <- erg[lens]
     test3 <- all(sapply(seq(erg)[-1], function(x)
       identical(erg[[1]], erg[[x]])))
@@ -85,7 +87,7 @@ assertColumns <- function(obj, colClasses) {
                              colClasses[colNum])
                         }))
     if (!test1 || !test2)
-      stop("obj should be a data.table with at least ",NROW(colNames)," columns: ",
+      stop("obj should be a data.table with at least ", NROW(colNames), " columns: ",
            paste(colNames, collapse = ", "),
            " ... of classes: ", paste(colClasses, collapse = ", "))
   }
@@ -111,18 +113,22 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
   if (verbose) {
     a <- sort(unique(na.omit(pixelGroupMap[])))
     b <- sort(unique(na.omit(cohortData$pixelGroup)))
-    test1 <- sum(!a %in% b)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
-    test2 <- sum(!b %in% a)  # can be 1 because there could be pixelGroup of 0, which is OK to not match
+    ## test1 and test2 can be 1 because there could be pixelGroup of 0,
+    ##   which is OK to not match
+    test1 <- sum(!a %in% b)
+    test2 <- sum(!b %in% a)
 
     browser(expr = exists("aaaa"))
     cohortDataN <- cohortData[, .N, by = c("pixelGroup", "speciesCode", "age", "B")]
     test3 <- which(cohortDataN$N != 1)
     if (test1 > maxExpectedNumDiverge || test2 > maxExpectedNumDiverge) {
       if (nchar(message) > 0) message(message)
-      if (test1 > maxExpectedNumDiverge) message("test1 is ", test1, " -- too many pixelGroups on pixelGroupMap")
-      if (test2 > maxExpectedNumDiverge) message("test2 is ", test2, " -- too many pixelGroups in cohortData")
-      stop("The sim$pixelGroupMap and cohortData have unmatching pixelGroup. They must be matching.",
-           " Please contact the module developers")
+      if (test1 > maxExpectedNumDiverge) message("test1 is ", test1,
+                                                 " -- too many pixelGroups on pixelGroupMap")
+      if (test2 > maxExpectedNumDiverge) message("test2 is ", test2,
+                                                 " -- too many pixelGroups in cohortData")
+      stop("The sim$pixelGroupMap and cohortData have unmatching pixelGroup.",
+           " They must be matching. Please contact the module developers")
     }
     if (length(test3) != 0)
       stop("There are duplicate, identical cohorts: ", print(cohortDataN[test3]))
@@ -154,13 +160,15 @@ assertPixelCohortData <- function(pixelCohortData, pixelGroupMap) {
     tableB <- table(allPixelsNotInCohortData) # 25166
 
     test2 <- identical(as.integer(pixelsOnMap - tableB), lenUniquePixelsInCohorts)
-    test3 <- identical(as.integer(pixelsOnMap - (lenBurnedPixels - pixelsRegeneratedOnZeros)), lenUniquePixelsInCohorts)
+    test3 <- identical(as.integer(pixelsOnMap - (lenBurnedPixels - pixelsRegeneratedOnZeros)),
+                       lenUniquePixelsInCohorts)
 
     uniqueAllPixelsNotInCohortData <- unique(allPixelsNotInCohortData)
     test1 <- all(uniqueAllPixelsNotInCohortData %in% c(NA, 0L))
     if (!test1 | !test2 | !test3) {
-      stop("Every value on pixelGroupMap greater than 0 must have a pixelIndex in pixelCohortData.",
-           " This test is failing, i.e., there are some pixelGroups in pixelGroupMap that aren't in pixelCohortData.")
+      stop("Every value on pixelGroupMap >0 must have a pixelIndex in pixelCohortData.\n",
+           "This test is failing, i.e., there are some pixelGroups in pixelGroupMap",
+           " that aren't in pixelCohortData.")
     }
   }
 }
