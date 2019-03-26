@@ -410,7 +410,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                          userTags = dots$userTags
                          ),
                          prepInputs, quick = TRUE) # don't need to digest all the "targetFile" and "archives"
-  names(speciesLayers) <- unique(kNNnames)
+  names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
   noDataLayers <- sapply(speciesLayers, function(x) if (maxValue(x) < thresh ) FALSE else TRUE)
   if (sum(!noDataLayers) > 0) {
     sppKeep <- capture.output(dput(names(speciesLayers)[noDataLayers]))
