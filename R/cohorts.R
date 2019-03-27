@@ -541,8 +541,8 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC,
     # setnames(out3, c("initialPixels", "initialEcoregionCode"), c("pixelIndex", "ecoregionGroup"))
     out3[, `:=`(newPossLCC = NULL)]
     # out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
-    out3
   }
+  out3
 }
 
 #' Generate initial \code{cohortData} table
