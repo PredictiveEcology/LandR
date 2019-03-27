@@ -436,7 +436,7 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC,
                                ecoregionGroupVec, speciesEcoregion,
                                availableERC_by_Sp) {
   rstUnwantedLCC <- integer(length(ecoregionGroupVec))
-  rstUnwantedLCC[] <- NA;
+  rstUnwantedLCC[] <- NA
   rstUnwantedLCC[gsub(".*_", "", ecoregionGroupVec) %in% pixelClassesToReplace] <- 1
   theUnwantedPixels <- which(rstUnwantedLCC == 1)
   theUnwantedPixels <- theUnwantedPixels[theUnwantedPixels %in% availableERC_by_Sp$pixelIndex]
@@ -541,8 +541,9 @@ convertUnwantedLCC <- function(pixelClassesToReplace = 34:36, rstLCC,
     # setnames(out3, c("initialPixels", "initialEcoregionCode"), c("pixelIndex", "ecoregionGroup"))
     out3[, `:=`(newPossLCC = NULL)]
     # out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
-    out3
+    out3 <- unique(out3)
   }
+  out3
 }
 
 #' Generate initial \code{cohortData} table
@@ -602,7 +603,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     message(blue("assign B = 0 and age = 0 for pixels where cover = 0, ",
                  "\n  because cover is most reliable dataset"))
   cohortData[cover == 0, `:=`(age = 0L, B = 0L)]
-  message(blue("assign totalBiomass = 0 sum(cover) = 0 in a pixel, ",
+  message(blue("assign totalBiomass = 0 if sum(cover) = 0 in a pixel, ",
                "\n  because cover is most reliable dataset"))
   cohortData <- cohortData[, sum(cover) == 0, by = "pixelIndex"][V1 == TRUE][
     cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
@@ -620,7 +621,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     cover
   }, by = "pixelIndex"]
 
-  # Biomass -- by cohort (NOTE: divide by 100 becasu ecover is percent)
+  # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
   message(crayon::blue("Divide total B of each pixel by the relative cover of the cohorts"))
   cohortData[ , B := asInteger(mean(totalBiomass) * cover / 100), by = "pixelIndex"]
   message(crayon::blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
