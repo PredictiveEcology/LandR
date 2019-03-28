@@ -10,11 +10,13 @@ if (getRversion() >= "3.1.0") {
 #' and creates a map and table of containing their combined values and pixel IDs.
 #' Used internally in LandR modules to prepare maps for to make \code{cohortData}.
 #'
-#' @param ecoregionMaps a \code{list} with two rasters, one with eco-regions (e.g. eco-districts) and
-#' another with land cover (e.g. LCC)
-#' @param ecoregionName the name describing the type of eco-regions in first map (e.g. "ecoDistrict")
-#' @param ecoregionActiveStatus A two column \code{data.table} detailing with eco-regions are to be considered
-#'  active for the simulations. Columns should be named 'active' (with 'yes' or 'no' values) and 'ecoregion'.
+#' @param ecoregionMaps a \code{list} with two rasters, one with eco-regions (e.g. eco-districts)
+#' and another with land cover (e.g. LCC)
+#' @param ecoregionName the name describing the type of eco-regions in first map
+#' (e.g. "ecoDistrict")
+#' @param ecoregionActiveStatus A two column \code{data.table} detailing with eco-regions
+#' are to be considered active for the simulations. Columns should be named 'active'
+#' (with 'yes' or 'no' values) and 'ecoregion'.
 #' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used throughout the simulation)
 #'
 #' @return
@@ -50,7 +52,7 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName,
   }
   rstEcoregionNAs <- do.call(`|`, lapply(rstEcoregion, function(x) is.na(x[]) | x[] == 0))
   NAs <- rtmNAs | rstEcoregionNAs
-  a <- lapply(rstEcoregion, function(x) getValues(x)[!NAs] )
+  a <- lapply(rstEcoregion, function(x) getValues(x)[!NAs])
   b <- as.data.table(a)
   b[, (names(b)) := lapply(.SD, function(x) paddedFloatToChar(x, max(nchar(x), na.rm = TRUE)))]
 
@@ -78,7 +80,7 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName,
     message("ecoregionProducer mapvalues: ", Sys.time())
     # rstEcoregion[] <- plyr::mapvalues(rstEcoregion[], from = ecoregionTable$ecoregion, to = ecoregionTable$mapcode)
     ecoregionActiveStatus[, ecoregion := as.factor(ecoregion)]
-    ecoregionTable <- ecoregionTable[!is.na(mapcode),][, ecoregion := as.character(ecoregion)]
+    ecoregionTable <- ecoregionTable[!is.na(mapcode), ][, ecoregion := as.character(ecoregion)]
     message("ecoregionProducer dplyr_leftjoin: ", Sys.time())
     ecoregionTable <- dplyr::left_join(ecoregionTable,
                                        ecoregionActiveStatus,
@@ -86,7 +88,7 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName,
       data.table()
     ecoregionTable[is.na(active), active := "no"]
 
-    ecoregionTable <- ecoregionTable[,.(active, mapcode, ecoregion)]
+    ecoregionTable <- ecoregionTable[, .(active, mapcode, ecoregion)]
   }
 
   ecoregionTable <- as.data.table(raster::levels(rstEcoregion)[[1]])
