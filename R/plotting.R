@@ -136,7 +136,7 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
   sppColors <- NULL
   sppColors <- if (is.character(palette))
     if (palette %in% rownames(RColorBrewer::brewer.pal.info)) {
-      colorPalette <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 8, name = palette))
+      colorPalette <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 7, name = palette))
       colorPalette(length(sppColorNames))
     }
 
