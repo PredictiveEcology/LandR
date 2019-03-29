@@ -182,18 +182,24 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   pixelGroupData[, speciesProportion := speciesGroupB / totalB]
 
   pixelGroupData2 <- pixelGroupData[, list(mixed = all(speciesProportion < vegLeadingProportion),
-                                           leading = speciesCode[which.max(speciesProportion)]), by = "pixelGroup"]
+                                           leading = speciesCode[which.max(speciesProportion)]),
+                                    by = "pixelGroup"]
   pixelGroupData2[mixed == TRUE, leading := "Mixed"]
 
   vegTypeMap <- rasterizeReduced(pixelGroupData2, pixelGroupMap, "leading", "pixelGroup")
-  levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]], colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
+  levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]],
+                              colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
                               stringsAsFactors = FALSE)
   setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
 
 
   if (isTRUE(unitTest)) {
     # TEST THE MAP
-    ids <- sample(which(!is.na(vegTypeMap[])), 100, replace = FALSE)
+    if (sum(!is.na(vegTypeMap[])) < 100)
+      ids <- sample(which(!is.na(vegTypeMap[])), sum(!is.na(vegTypeMap[])), replace = FALSE)
+    else
+      ids <- sample(which(!is.na(vegTypeMap[])), 100, replace = FALSE)
+
     pgs <- pixelGroupMap[][ids]
     dups <- duplicated(pgs)
     pgs <- pgs[!dups]
