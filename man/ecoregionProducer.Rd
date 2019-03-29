@@ -8,13 +8,15 @@ ecoregionProducer(ecoregionMaps, ecoregionName, ecoregionActiveStatus,
   rasterToMatch)
 }
 \arguments{
-\item{ecoregionMaps}{a \code{list} with two rasters, one with eco-regions (e.g. eco-districts) and
-another with land cover (e.g. LCC)}
+\item{ecoregionMaps}{a \code{list} with two rasters, one with eco-regions (e.g. eco-districts)
+and another with land cover (e.g. LCC)}
 
-\item{ecoregionName}{the name describing the type of eco-regions in first map (e.g. "ecoDistrict")}
+\item{ecoregionName}{the name describing the type of eco-regions in first map
+(e.g. "ecoDistrict")}
 
-\item{ecoregionActiveStatus}{A two column \code{data.table} detailing with eco-regions are to be considered
-active for the simulations. Columns should be named 'active' (with 'yes' or 'no' values) and 'ecoregion'.}
+\item{ecoregionActiveStatus}{A two column \code{data.table} detailing with eco-regions
+are to be considered active for the simulations. Columns should be named 'active'
+(with 'yes' or 'no' values) and 'ecoregion'.}
 
 \item{rasterToMatch}{a \code{rasterToMatch} (e.g. the one used throughout the simulation)}
 }
