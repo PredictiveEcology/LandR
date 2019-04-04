@@ -439,8 +439,6 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   # This includes LandType because it will use that at the bottom of this function to
   #  remove NAs
   CClayerNames <- c("Pine", "Black Spruce", "Deciduous", "Fir", "White Spruce", "LandType")
-  CClayerNamesWDots <- gsub(" ", ".", CClayerNames)
-  CClayerNamesLandR <- equivalentName(CClayerNamesWDots, sppEquiv, sppEquivCol, multi = TRUE)
   CClayerNamesFiles <- paste0(gsub(" ", "", CClayerNames), "1.tif")
   options(map.useParallel = FALSE) ## TODO: pass additional arg to function
   ml <- mapAdd(rasterToMatch, isRasterToMatch = TRUE, layerName = "rasterToMatch",
@@ -461,15 +459,15 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   ccs <- ml@metadata[CC == TRUE & !(layerName == "LandType"), ]
   CCs <- maps(ml, layerName = ccs$layerName)
   CCstack <- raster::stack(CCs)
-  CCstack[CCstack[] < 0] <- 0
+  CCstackNames <- names(CCstack)
+  CCstack[CCstack[] < 0] <- 0  ## turns stack into brick, so need to restack later
   CCstack[CCstack[] > 10] <- 10
   CCstack <- CCstack * 10 # convert back to percent
   NA_ids <- which(is.na(ml$LandType[]) |  # outside of studyArea polygon
                     ml$LandType[] == 1)   # 1 is cities -- NA it here -- will be filled in with another veg layer if available (e.g. Pickell)
   message("  Setting NA, 1 in LandType to NA in speciesLayers in ForestInventory data")
   CCstack[NA_ids] <- NA
+  names(CCstack) <- equivalentName(CCstackNames, sppEquiv, sppEquivCol)
 
-  names(CCstack) <- equivalentName(names(CCstack), sppEquiv, sppEquivCol)
-
-  CCstack
+  stack(CCstack)
 }
