@@ -602,7 +602,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     #describeCohortData(cohortData)
     message(blue("assign B = 0 and age = 0 for pixels where cover = 0, ",
                  "\n  because cover is most reliable dataset"))
-  cohortData[cover == 0, `:=`(age = 0L, B = 0L)]
+  cohortData[cover == 0, `:=`(age = 0L, logAge = -Inf, B = 0L)]
   message(blue("assign totalBiomass = 0 if sum(cover) = 0 in a pixel, ",
                "\n  because cover is most reliable dataset"))
   cohortData <- cohortData[, sum(cover) == 0, by = "pixelIndex"][V1 == TRUE][
