@@ -1,198 +1,198 @@
-LANDIS_test,LANDIS_traits,LandR,KNN,CASFRI,Latin_full,EN_generic_short,EN_generic_full,Leading,Notes,Boreal
-abieamab,ABIE.AMA,Abie_ama,Abie_Ama,Abie amab,Abies amabilis,,,,,
-abiebals,ABIE.BAL,Abie_bal,Abie_Bal,Abie bals,Abies balsamea,Fir,Balsam Fir,Fir leading,,Abie_Bal
-,,Abie_con,,Abie conc,Abies concolor,,,,,
-abiegran,ABIE.GRA,Abie_gra,Abie_Gra,Abie gran,Abies grandis,,,,,
-abielasi,ABIE.LAS,Abie_sp,Abie_Las,Abie lasi,Abies lasiocarpa,,,,,Abie_Las
-,,Abie_mag,,Abie magn,Abies magnifica var shastensis,,,,,
-,,Abie_pic,,Abie pice,,Fir-Sp,Fir-Spruce,Fir-Spruce mix,Abies pice in CASFRI is a Spruce-balsam fir or Balsam fir-spruce mix,
-,,Abie_pro,,Abie proc,Abies procera,,,,,
-,ABIE.ALL,Abie_sp,Abie_Spp,Abie spp,Abies spp.,Fir,Fir,Fir leading,,
-,,Acer_cir,Acer_Cir,Acer circ,Acer circinatum,,,,,
-,,Acer_fre,,Acer free,Acer X freemanii,,,,,
-,,Acer_gla,,Acer glab,Acer glabrum,,,,,
-acermacr,ACER.MAC,Acer_mac,Acer_Mac,Acer macr,Acer macrophyllum,,,,,
-,,Acer_neg,Acer_Neg,Acer negu,Acer negundo,,,,,Acer_Neg
-,,Acer_nig,,Acer nigr,Acer nigrum,,,,,
-,,Acer_pen,Acer_Pen,Acer pens,Acer pensylvanicum,,,,,Acer_Pen
-,,Acer_pla,,Acer plat,Acer platanoides,,,,,
-,,Acer_pse,,Acer pseu,Acer pseudoplatanus,,,,,
-acerrubr,ACER.RUB,Acer_rub,Acer_Rub,Acer rubr,Acer rubrum,,,,,
-acersacc,ACER.SAH,Acer_sah,Acer_Sac,Acer sacc,Acer saccharinum,,,,,
-alnurubr,ALNU.RUB,Alnu_rub,Acer_Sah,Acer sach,Acer saccharum,,,,,Acer_Sah
-,,Acer_spi,Acer_Spi,Acer spic,Acer spicatum,,,,,Acer_Spi
-,,Acer_sp,Acer_Spp,Acer spp,Acer spp.,,,,,Acer_Spp
-,,Aesc_hip,,Aesc hipp,Aesculus hippocastanum,,,,,
-,,Alnu_inc,Alnu_Inc_Rug,Alnu inca,Alnus incana,,,,,
-,,Alnu_inc,Alnu_Inc_Ten,Alnu inca,,,,,,
-,,Alnu_inc,Alnu_Inc,Alnu inca,,,,,,
-,,Alnu_rub,Alnu_Rub,Alnu rubr,Alnus rubra,,,,,
-,,Alnu_sp,Alnu_Spp,Alnu spp,Alnus spp,,,,,Alnu_Spp
-,,Alnu_vir,,Alnu viri,Alnus viridis,,,,,
-,,Arbu_men,Arbu_Men,Arbu menz,Arbutus menziesii,,,,,
-,,Asim_tri,Asim_Tri,Asim tril,Asimina triloba,,,,,
-,BETU.ALL,Betu_sp,Betu_All,Betu alle,Betula alleghaniensis,,,,,Betu_All
-,,Betu_len,,Betu lent,Betula lenta,,,,,
-,,Betu_man,,Betu mand,Betula mandschurica var japonica,,,,,
-,,Betu_neo,,Betu neoa,Betula neoalaskana,,,,,
-,,Betu_occ,,Betu occi,Betula occidentalis,,,,,
-betupapy,BETU.PAP,Betu_pap,Betu_Pap,Betu papy,Betula papyrifera,,,,,Betu_Pap
-,,Betu_pen,,Betu pend,Betula pendula,,,,,
-,,Betu_pop,Betu_Pop,Betu popu,Betula populifolia,,,,,Betu_Pop
-,,Betu_pub,,Betu pube,Betula pubescens,,,,,
-,BETU.ALL,Betu_sp,Betu_Spp,Betu spp,Betula spp.,,,,,Betu_Spp
-,,Betu_win,,Betu winx,Betula x winteri,,,,,
-,,Calc_dec,,Calc decu,Calocedrus decurrens,,,,,
-,,Carp_car,Carp_Car,Carp caro,Carpinus caroliniana,,,,,
-,,Cary_cor,Cary_Cor,Cary cord,Carya cordiformis,,,,,
-,,Cary_gla,,Cary glab,Carya glabra,,,,,
-,,Cary_lac,,Cary laci,Carya laciniosa,,,,,
-,,Cary_ora,,Cary orav,Carya orava,,,,,
-,,Cary_sp,,Cary spp,Carya spp.,,,,,
-,,Cary_tom,,Cary tome,Carya tomentosa,,,,,
-,,Cast_den,Cast_Den,Cast dent,Castanea dentata,,,,,
-,,Cata_spe,,Cata spec,Catalpa speciosa,,,,,
-,,Celt_occ,,Celt occi,Celtix occidentalis,,,,,
-,,Cerc_can,,Cerci cana,Cercis canadensis,,,,,
-,,Cham_law,,Cham laws,Chamaecyparis lawsoniana,,,,,
-chamnoot,CHAM.NOO,Cham_noo,Cham_Noo,Cham noot,Chamaecyparis nootkatensis,,,,,
-,,Corn_nut,,Corn nutt,Cornus nuttallii,,,,,
-,,Crat_sp,Crat_Spp,Crat spp,Crataegus spp,,,,,
-fagugran,FAGU.GRA,Fagu_gra,Fagu_Gra,Fagu gran,Fagus grandifolia,,,,,Fagu_Gra
-fraxamer,FRAX.AME,Frax_ame,Frax_Ame,Frax amer,Fraxinus americana,,,,,Frax_Ame
-,,Frax_lat,,Frax lati,Fraxinus latifolia,,,,,
-,,Frax_nig,Frax_Nig,Frax nigr,Fraxinus nigra,,,,,Frax_Nig
-,,Frax_pen,Frax_Pen_Sub,Frax penn,Fraxinus pennsylvanica,,,,Fraxinus pennsylvanica subintegerrima is a synonym,
-,,Frax_pen,Frax_Pen,Frax penn,Fraxinus pennsylvanica,,,,,
-,,Frax_pro,,Frax prof,Fraxinus profunda,,,,,
-,,Frax_qua,,Frax quad,Fraxinus quadrangulata,,,,,
-,,Frax_sp,Frax_Spp,Frax spp,Fraxinus spp.,,,,,Frax_Spp
-,,Gled_tri,Gled_Tri,Gled tria,Gleditsia triacanthos,,,,,
-,,Gymn_dio,,Gymn dioi,Gymnocladus dioicus,,,,,
-,,Hana_vir,,Hana virg,Hamamelis virginiana,,,,,
-,,Jugl_cin,Jugl_Cin,Jugl cine,Juglans cinerea,,,,,
-,,Jugl_nig,Jugl_Nig,Jugl nigr,Juglans nigra,,,,,
-,,Thuj_jun,Juni_Vir,Thuj juni,Juniperus virginiana,,,,Not clear why CASFRI name doesn't match,
-,,Juni_sco,,Juni scop,Juniperus scopulorum,,,,,
-,,Lari_dec,,Lari deci,Larix decidua,,,,,
-,,Lari_kae,Lari_Kae,Lari kaem,Larix kaempferi,,,,,
-larilari,LARI.LAR,Lari_lar,Lari_Lar,Lari lari,Larix laricina,,,,,Lari_Lar
-,,Lari_lya,Lari_Lya,Lari lyal,Larix lyallii,,,,,Lari_Lya
-lariocci,LARI.OCC,Lari_occ,Lari_Occ,Lari occi,Larix occidentalis,,,,,Lari_Occ
-,,Lari_sib,,Lari sibi,Larix sibitica,,,,,
-,,Lari_sp,Lari_Spp,Lari spp,Larix spp.,,,,,Lari_Spp
-,,Lari_sp,,Lari x mar,Larix x marschlinsii,,,,,
-,,Liri_tul,,Liri tuli,Liriodendron tulipifera,,,,,
-,,Magn_acu,,Magn acum,Magnolia acuminata,,,,,
-,,Malu_fus,Malu_Fus,Malu fusc,Malus fusca,,,,,
-,,Malu_pum,,Malu pumi,Malus pumila,,,,,
-,,Malu_sp,Malu_Spp,,,,,,,
-,,Moru_rub,,Moru rubr,Morus rubra,,,,,
-,,Nyss_syl,,Nyss sylv,Nyssa sylvatica,,,,,
-,,Ostr_vir,Ostr_Vir,Ostr virg,Ostrya virginiana,,,,,
-,,Pice_abi,Pice_Abi,Pice abie,Picea abies,,,,,
-,,Pice_sp,Pice_Eng_Gla,Pice hybr,Picea engelmannii x glauca,,,,Pice hybr is not on the maual CASFRI list but appears in database,Pice_Eng_Gla
-,,Pice_sp,Pice_Eng_Gla,Pice engx,Picea engelmannii x glauca,,,,,Pice_Eng_Gla
-piceengl,PICE.ENG,Pice_eng,Pice_Eng,Pice enge,Picea engelmannii,,,,,Pice_Eng
-piceglau,PICE.GLA,Pice_gla,Pice_Gla,Pice glau,Picea glauca,Wh spruce,White.Spruce,White spruce leading,,Pice_Gla
-,,Pice_koy,,Pice koya,Picea koyamai,,,,,
-,,Pice_lut,,Pice lutx,Picea x lutzii,,,,,
-picemari,PICE.MAR,Pice_mar,Pice_Mar,Pice mari,Picea mariana,Bl spruce,Black.Spruce,Black spruce leading,,Pice_Mar
-,,Pice_pun,,Pice pung,Picea pungens,,,,,
-picerube,PICE.RUB,Pice_rub,Pice_Rub,Pice rube,Picea rubens,,,,,
-picesitc,PICE.SIT,Pice_sit,Pice_Sit,Pice sitc,Picea sitchensis,,,,,
-,,Pice_sit,,Pice sitx,Picea sitchensis x ?,,,,,
-,,Pice_sp,Pice_Spp,Pice spp,Picea spp., , ,,,Pice_Spp
-,,Pice_sp,,Pice sppx,Picea spp x,,,,,
-,,Pinu_alb,Pinu_Alb,Pinu albi,Pinus albicaulis,Pine,Pine,Pine leading,,Pinu_Alb
-pinubank,PINU.BAN,Pinu_ban,Pinu_Ban,Pinu bank,Pinus banksiana,Pine,Pine,Pine leading,,Pinu_Ban
-,PINU.CON.CON,Pinu_con,Pinu_Con,Pinu conc,Pinus contorta var. contorta,Pine,Pine,Pine leading,,Pinu_Con
-,PINU.CON.LAT,Pinu_con,Pinu_Con_Lat,Pinu cont,Pinus contorta,Pine,Pine,Pine leading,Pinus contorta latifolia is a synonym of var. latifolia,Pinu_Con_Lat
-,,Pinu_fle,Pinu_Fle,Pinu flex,Pinus flexilis,Pine,Pine,Pine leading,,
-,,Pinu_lam,,Pinu lamb,Pinus lambertiana,Pine,Pine,Pine leading,,
-,,Pinu_mon,Pinu_Mon,Pinu mont,Pinus monticola,Pine,Pine,Pine leading,,Pinu_Mon
-,,Pinu_mur,,Pinu murx,Pinus x murraybanksiana,Pine,Pine,Pine leading,,
-,,Pinu_nig,,Pinu nigr,Pinus nigra,Pine,Pine,Pine leading,,
-,,Pinu_pon,Pinu_Pon,Pinu pond,Pinus ponderosa,Pine,Pine,Pine leading,,
-,,Pinu_rad,,Pinu radi,Pinus radiata,Pine,Pine,Pine leading,,
-pinuresi,PINU.RES,Pinu_res,Pinu_Res,Pinu resi,Pinus resinosa,Pine,Pine,Pine leading,,Pinu_Res
-,,Pinu_rig,Pinu_Rig,Pinu rigi,Pinus rigida,Pine,Pine,Pine leading,,
-,PINU.ALL,Pinu_sp,Pinu_Spp,Pinu spp,Pinus spp.,Pine,Pine,Pine leading,,Pinu_Spp
-pinustro,PINU.STR,Pinu_str,Pinu_Str,Pinu stro,Pinus strobus,Pine,Pine,Pine leading,,
-,,Pinu_syl,Pinu_Syl,Pinu sylv,Pinus sylvestris,Pine,Pine,Pine leading,,
-,,Plan_occ,Plat_Occ,Plan occi,Platanus occidentalis,,,,,
-,,Popu_ang,,Popu angu,Populus angustifolia,,,,,
-popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamifera v. balsamifera,,,,,Popu_Bal
-,,Popu_bal,Popu_Tri,Popu balt,Populus trichocarpa,,,,Populus balsamifera trichocarpa is a synonym of Populus trichocarpa,Popu_Tri
-,,Popu_can,,Popu cana,Populus X canadensis,,,,,
-,,Popu_del,Popu_Del,Popu delo,Populus deltoides v. occidentalis,,,,,
-,,Popu_del,Popu_Del,Popu delt,Populus deltoides,,,,,
-,,Popu_del,Popu_Del,Popu delx,Populus deltoides,,,,,
-,,Popu_gra,Popu_Gra,Popu gran,Populus grandidentata,,,,,Popu_Gra
-,,Popu_nig,,Popu nigr,Populus nigra,,,,,
-,,Popu_sp,Popu_Spp,Popu spp,Populus spp.,Decid,Deciduous,Deciduous leading,,Popu_Spp
-poputrem,POPU.TRE,Popu_tre,Popu_Tre,Popu trem,Populus tremuloides,Decid,Deciduous,Deciduous leading,,Popu_Tre
-,,Prun_avi,,Prun aviu,Prunus avium,,,,,
-,,Prun_cer,,Prun cera,Prunus cerasus,,,,,
-,,Prun_ema,,Prun emar,Prunus emarginata,,,,,
-,,Prun_pen,Prun_Pen,Prun pens,Prunus pensylvanica,,,,,
-,,Prun_ser,Prun_Ser,Prun sero,Prunus serotina,,,,,
-,,Prun_sp,,Prun spp,Prunus spp.,,,,,
-,,Prun_vir,Prun_Vir,Prun virg,Prunus virginiana,,,,,
-pseumenz,PSEU.MEN,Pseu_men,Pseu_Men_Gla,Pseu meng,Pseudotsuga menziesii var. glauca ,,,,,
-pseumenz,PSEU.MEN,Pseu_men,Pseu_Men_Men,Pseu menm,Pseudotsuga menziesii var. menziesii ,,,,,
-pseumenz,PSEU.MEN,Pseu_men,Pseu_Men,Pseu menz,Pseudotsuga menziesii,,,,,
-,,Pyru_com,,Pyru comm,Pyrus communis,,,,,
-,,Quer_alb,Quer_Alb,Quer alba,Quercus alba,,,,,
-,,Quer_bic,Quer_Bic,Quer bico,Quercus bicolor,,,,,
-querelli,QUER.ELL,Quer_ell,,,,,,,,
-,,Quer_gar,Quer_Gar,Quer garr,Quercus garryana,,,,,
-,,Quer_mac,Quer_Mac,Quer macr,Quercus macrocarpa,,,,,
-,,Quer_mue,,Quer mueh,Quercus muehlenbergii,,,,,
-,,Quer_pal,,Quer palu,Quercus palustris,,,,,
-,,Quer_rob,,Quer robu,Quercus robur,,,,,
-querrubr,QUER.RUB,Quer_rub,Quer_Rub,Quer rubr,Quercus rubra,,,,,
-,,Quer_shu,,Quer shum,Quercus shumardii,,,,,
-,,Quer_sp,,Quer spp,Quercus spp.,,,,,
-,,Quer_vel,,Quer velu,Quercus velutina (nigra),,,,,
-,,Rham_pur,,Rham purs,Rhamnus purshianus,,,,,
-,,Robi_pse,Robi_Pse,Robi pseu,Robina spp.,,,,,
-,,Robi_sp,,Robi spp,Robinia pseudoacacia,,,,,
-,,Sali_amy,,Sali amyg,Salix amygdaloides,,,,,
-,,Sali_beb,Sali_Beb,Sali bebb,Salix bebbiana,,,,,
-,,Sali_dis,,Sali disc,Salix discolor,,,,,
-,,Sali_luc,,Sali luci,Salix lucida,,,,,
-,,Sali_nig,Sali_Nig,Sali nigr,Salix nigra,,,,,
-,,Sali_sco,,Sali scou,Salix scouleriana,,,,,
-,,Sali_sit,,Sali sitc,Salix sitchensis,,,,,
-,,Sali_sp,Sali_Spp,Sali spp,Salix spp.,,,,,
-,,Sass_alb,Sass_Alb,Sass albi,Sassafras albidum,,,,,
-,,Sequ_gig,,Sequ giga,Sequoadendron giganteum,,,,,
-,,Sequ_sem,,Sequ semp,Sequoia sempervirens,,,,,
-,,Sorb_auc,Sorb_Ame,Sorb aucu,Sorbus aucuparia,,,,Sorbus aucuparia is a synonym of Sorbus americana,
-,,Sorb_dec,Sorb_Dec,,,,,,,
-,,Sorb_sp,Sorb_Spp,,,,,,,
-,,Taxu_bre,,Taxu brev,Taxus brevifolia,,,,,
-thujocci,THUJ.OCC,Thuj_occ,Thuj_Occ,Thuj occi,Thuja occidentalis,,,,,
-thujplic,THUJ.PLI,Thuj_pli,Thuj_Pli,Thuj plic,Thuja plicata,,,,,
-,THUJ.SPP.ALL,Thuj_sp,Thuj_Spp,,,,,,,
-tiliamer,TILI.AME,Tili_ame,Tili_Ame,Tili amer,Tilia americana,,,,,
-,,Tili_cor,,Tili cord,Tilia cordata,,,,,
-,,Tili_pla,,Tili plat,Tilia platyphyllos,,,,,
-tsugcana,TSUG.CAN,Tsug_can,Tsug_Can,Tsug cana,Tsuga canadensis,,,,,Tsug_Can
-tsughete,TSUG.HET,Tsug_het,Tsug_Het,Tsug hete,Tsuga heterophylla,,,,,
-,,Tsug_mer,Tsug_Mer_Het,Tsug merx,Tsuga mertensiana,,,,,
-tsugmert,TSUG.MER,Tsug_mer,Tsug_Mer,Tsug mert,Tsuga mertensiana x heterophylla,,,,,
-,,Tsug_sp,Tsug_Spp,Tsug spp,Tsuga spp.,,,,,Tsug_Spp
-,,Ulmu_ame,Ulmu_Ame,Ulmu amer,Ulmus americana,,,,,
-,,Ulmu_pum,Ulmu_Rub,Ulmu pumi,Ulmus pumila,,,,,
-,,Ulmu_rub,Ulmu_Spp,Ulmu rubr,Ulmus rubra,,,,,
-,,Ulmu_sp,Ulmu_Tho,Ulmu spp,Ulmus spp.,,,,,
-,,,,Ulmu thom,Ulmus thomasii,,,,,
-,,,Generic_BroadLeaf_Spp,Hard unkn,,Decid,Deciduous,Deciduous leading,,
-,,,Generic_NeedleLeaf_Spp,Soft unkn,,Conif,Coniferous,Coniferous leading,,
-,,,,Nonc hard,,Decid,Deciduous,Deciduous leading,,
-,,,,Hard tole,,,,,,
-,,,,Hard into,,,,,,
-,,,,Mois hard,,,,,,
-,,,,Uncl spp,,,,,,
+"","LANDIS_test","LANDIS_traits","LandR","KNN","CASFRI","Latin_full","EN_generic_short","EN_generic_full","Leading","Notes","Boreal"
+"1","abieamab","ABIE.AMA","Abie_ama","Abie_Ama","Abie amab","Abies amabilis","","","","",""
+"2","abiebals","ABIE.BAL","Abie_bal","Abie_Bal","Abie bals","Abies balsamea","Fir","Balsam Fir","Fir leading","","Abie_Bal"
+"3","","","Abie_con","","Abie conc","Abies concolor","","","","",""
+"4","abiegran","ABIE.GRA","Abie_gra","Abie_Gra","Abie gran","Abies grandis","","","","",""
+"5","abielasi","ABIE.LAS","Abie_sp","Abie_Las","Abie lasi","Abies lasiocarpa","","","","","Abie_Las"
+"6","","","Abie_mag","","Abie magn","Abies magnifica var shastensis","","","","",""
+"7","","","Abie_pic","","Abie pice","","Fir-Sp","Fir-Spruce","Fir-Spruce mix","Abies pice in CASFRI is a Spruce-balsam fir or Balsam fir-spruce mix",""
+"8","","","Abie_pro","","Abie proc","Abies procera","","","","",""
+"9","","ABIE.ALL","Abie_sp","Abie_Spp","Abie spp","Abies spp.","Fir","Fir","Fir leading","",""
+"10","","","Acer_cir","Acer_Cir","Acer circ","Acer circinatum","","","","",""
+"11","","","Acer_fre","","Acer free","Acer X freemanii","","","","",""
+"12","","","Acer_gla","","Acer glab","Acer glabrum","","","","",""
+"13","acermacr","ACER.MAC","Acer_mac","Acer_Mac","Acer macr","Acer macrophyllum","","","","",""
+"14","","","Acer_neg","Acer_Neg","Acer negu","Acer negundo","","","","","Acer_Neg"
+"15","","","Acer_nig","","Acer nigr","Acer nigrum","","","","",""
+"16","","","Acer_pen","Acer_Pen","Acer pens","Acer pensylvanicum","","","","","Acer_Pen"
+"17","","","Acer_pla","","Acer plat","Acer platanoides","","","","",""
+"18","","","Acer_pse","","Acer pseu","Acer pseudoplatanus","","","","",""
+"19","acerrubr","ACER.RUB","Acer_rub","Acer_Rub","Acer rubr","Acer rubrum","","","","",""
+"20","acersacc","ACER.SAH","Acer_sah","Acer_Sac","Acer sacc","Acer saccharinum","","","","",""
+"21","alnurubr","ALNU.RUB","Alnu_rub","Acer_Sah","Acer sach","Acer saccharum","","","","","Acer_Sah"
+"22","","","Acer_spi","Acer_Spi","Acer spic","Acer spicatum","","","","","Acer_Spi"
+"23","","","Acer_sp","Acer_Spp","Acer spp","Acer spp.","","","","","Acer_Spp"
+"24","","","Aesc_hip","","Aesc hipp","Aesculus hippocastanum","","","","",""
+"25","","","Alnu_inc","Alnu_Inc_Rug","Alnu inca","Alnus incana","","","","",""
+"26","","","Alnu_inc","Alnu_Inc_Ten","Alnu inca","","","","","",""
+"27","","","Alnu_inc","Alnu_Inc","Alnu inca","","","","","",""
+"28","","","Alnu_rub","Alnu_Rub","Alnu rubr","Alnus rubra","","","","",""
+"29","","","Alnu_sp","Alnu_Spp","Alnu spp","Alnus spp","","","","","Alnu_Spp"
+"30","","","Alnu_vir","","Alnu viri","Alnus viridis","","","","",""
+"31","","","Arbu_men","Arbu_Men","Arbu menz","Arbutus menziesii","","","","",""
+"32","","","Asim_tri","Asim_Tri","Asim tril","Asimina triloba","","","","",""
+"33","","BETU.ALL","Betu_sp","Betu_All","Betu alle","Betula alleghaniensis","","","","","Betu_All"
+"34","","","Betu_len","","Betu lent","Betula lenta","","","","",""
+"35","","","Betu_man","","Betu mand","Betula mandschurica var japonica","","","","",""
+"36","","","Betu_neo","","Betu neoa","Betula neoalaskana","","","","",""
+"37","","","Betu_occ","","Betu occi","Betula occidentalis","","","","",""
+"38","betupapy","BETU.PAP","Betu_pap","Betu_Pap","Betu papy","Betula papyrifera","","","","","Betu_Pap"
+"39","","","Betu_pen","","Betu pend","Betula pendula","","","","",""
+"40","","","Betu_pop","Betu_Pop","Betu popu","Betula populifolia","","","","","Betu_Pop"
+"41","","","Betu_pub","","Betu pube","Betula pubescens","","","","",""
+"42","","BETU.ALL","Betu_sp","Betu_Spp","Betu spp","Betula spp.","","","","","Betu_Spp"
+"43","","","Betu_win","","Betu winx","Betula x winteri","","","","",""
+"44","","","Calc_dec","","Calc decu","Calocedrus decurrens","","","","",""
+"45","","","Carp_car","Carp_Car","Carp caro","Carpinus caroliniana","","","","",""
+"46","","","Cary_cor","Cary_Cor","Cary cord","Carya cordiformis","","","","",""
+"47","","","Cary_gla","","Cary glab","Carya glabra","","","","",""
+"48","","","Cary_lac","","Cary laci","Carya laciniosa","","","","",""
+"49","","","Cary_ora","","Cary orav","Carya orava","","","","",""
+"50","","","Cary_sp","","Cary spp","Carya spp.","","","","",""
+"51","","","Cary_tom","","Cary tome","Carya tomentosa","","","","",""
+"52","","","Cast_den","Cast_Den","Cast dent","Castanea dentata","","","","",""
+"53","","","Cata_spe","","Cata spec","Catalpa speciosa","","","","",""
+"54","","","Celt_occ","","Celt occi","Celtix occidentalis","","","","",""
+"55","","","Cerc_can","","Cerci cana","Cercis canadensis","","","","",""
+"56","","","Cham_law","","Cham laws","Chamaecyparis lawsoniana","","","","",""
+"57","chamnoot","CHAM.NOO","Cham_noo","Cham_Noo","Cham noot","Chamaecyparis nootkatensis","","","","",""
+"58","","","Corn_nut","","Corn nutt","Cornus nuttallii","","","","",""
+"59","","","Crat_sp","Crat_Spp","Crat spp","Crataegus spp","","","","",""
+"60","fagugran","FAGU.GRA","Fagu_gra","Fagu_Gra","Fagu gran","Fagus grandifolia","","","","","Fagu_Gra"
+"61","fraxamer","FRAX.AME","Frax_ame","Frax_Ame","Frax amer","Fraxinus americana","","","","","Frax_Ame"
+"62","","","Frax_lat","","Frax lati","Fraxinus latifolia","","","","",""
+"63","","","Frax_nig","Frax_Nig","Frax nigr","Fraxinus nigra","","","","","Frax_Nig"
+"64","","","Frax_pen","Frax_Pen_Sub","Frax penn","Fraxinus pennsylvanica","","","","Fraxinus pennsylvanica subintegerrima is a synonym",""
+"65","","","Frax_pen","Frax_Pen","Frax penn","Fraxinus pennsylvanica","","","","",""
+"66","","","Frax_pro","","Frax prof","Fraxinus profunda","","","","",""
+"67","","","Frax_qua","","Frax quad","Fraxinus quadrangulata","","","","",""
+"68","","","Frax_sp","Frax_Spp","Frax spp","Fraxinus spp.","","","","","Frax_Spp"
+"69","","","Gled_tri","Gled_Tri","Gled tria","Gleditsia triacanthos","","","","",""
+"70","","","Gymn_dio","","Gymn dioi","Gymnocladus dioicus","","","","",""
+"71","","","Hana_vir","","Hana virg","Hamamelis virginiana","","","","",""
+"72","","","Jugl_cin","Jugl_Cin","Jugl cine","Juglans cinerea","","","","",""
+"73","","","Jugl_nig","Jugl_Nig","Jugl nigr","Juglans nigra","","","","",""
+"74","","","Thuj_jun","Juni_Vir","Thuj juni","Juniperus virginiana","","","","Not clear why CASFRI name doesn't match",""
+"75","","","Juni_sco","","Juni scop","Juniperus scopulorum","","","","",""
+"76","","","Lari_dec","","Lari deci","Larix decidua","","","","",""
+"77","","","Lari_kae","Lari_Kae","Lari kaem","Larix kaempferi","","","","",""
+"78","larilari","LARI.LAR","Lari_lar","Lari_Lar","Lari lari","Larix laricina","","","","","Lari_Lar"
+"79","","","Lari_lya","Lari_Lya","Lari lyal","Larix lyallii","","","","","Lari_Lya"
+"80","lariocci","LARI.OCC","Lari_occ","Lari_Occ","Lari occi","Larix occidentalis","","","","","Lari_Occ"
+"81","","","Lari_sib","","Lari sibi","Larix sibitica","","","","",""
+"82","","","Lari_sp","Lari_Spp","Lari spp","Larix spp.","","","","","Lari_Spp"
+"83","","","Lari_sp","","Lari x mar","Larix x marschlinsii","","","","",""
+"84","","","Liri_tul","","Liri tuli","Liriodendron tulipifera","","","","",""
+"85","","","Magn_acu","","Magn acum","Magnolia acuminata","","","","",""
+"86","","","Malu_fus","Malu_Fus","Malu fusc","Malus fusca","","","","",""
+"87","","","Malu_pum","","Malu pumi","Malus pumila","","","","",""
+"88","","","Malu_sp","Malu_Spp","","","","","","",""
+"89","","","Moru_rub","","Moru rubr","Morus rubra","","","","",""
+"90","","","Nyss_syl","","Nyss sylv","Nyssa sylvatica","","","","",""
+"91","","","Ostr_vir","Ostr_Vir","Ostr virg","Ostrya virginiana","","","","",""
+"92","","","Pice_abi","Pice_Abi","Pice abie","Picea abies","","","","",""
+"93","","","Pice_sp","Pice_Eng_Gla","Pice hybr","Picea engelmannii x glauca","","","","Pice hybr is not on the maual CASFRI list but appears in database","Pice_Eng_Gla"
+"94","","","Pice_sp","Pice_Eng_Gla","Pice engx","Picea engelmannii x glauca","","","","","Pice_Eng_Gla"
+"95","piceengl","PICE.ENG","Pice_eng","Pice_Eng","Pice enge","Picea engelmannii","","","","","Pice_Eng"
+"96","piceglau","PICE.GLA","Pice_gla","Pice_Gla","Pice glau","Picea glauca","Wh spruce","White.Spruce","White spruce leading","","Pice_Gla"
+"97","","","Pice_koy","","Pice koya","Picea koyamai","","","","",""
+"98","","","Pice_lut","","Pice lutx","Picea x lutzii","","","","",""
+"99","picemari","PICE.MAR","Pice_mar","Pice_Mar","Pice mari","Picea mariana","Bl spruce","Black.Spruce","Black spruce leading","","Pice_Mar"
+"100","","","Pice_pun","","Pice pung","Picea pungens","","","","",""
+"101","picerube","PICE.RUB","Pice_rub","Pice_Rub","Pice rube","Picea rubens","","","","",""
+"102","picesitc","PICE.SIT","Pice_sit","Pice_Sit","Pice sitc","Picea sitchensis","","","","",""
+"103","","","Pice_sit","","Pice sitx","Picea sitchensis x ?","","","","",""
+"104","","","Pice_sp","Pice_Spp","Pice spp","Picea spp.","","","","","Pice_Spp"
+"105","","","Pice_sp","","Pice sppx","Picea spp x","","","","",""
+"106","","","Pinu_alb","Pinu_Alb","Pinu albi","Pinus albicaulis","Pine","Pine","Pine leading","","Pinu_Alb"
+"107","pinubank","PINU.BAN","Pinu_ban","Pinu_Ban","Pinu bank","Pinus banksiana","Pine","Pine","Pine leading","","Pinu_Ban"
+"108","","PINU.CON.CON","Pinu_con","Pinu_Con","Pinu conc","Pinus contorta var. contorta","Pine","Pine","Pine leading","","Pinu_Con"
+"109","","PINU.CON.LAT","Pinu_con","Pinu_Con_Lat","Pinu cont","Pinus contorta","Pine","Pine","Pine leading","Pinus contorta latifolia is a synonym of var. latifolia","Pinu_Con_Lat"
+"110","","","Pinu_fle","Pinu_Fle","Pinu flex","Pinus flexilis","Pine","Pine","Pine leading","",""
+"111","","","Pinu_lam","","Pinu lamb","Pinus lambertiana","Pine","Pine","Pine leading","",""
+"112","","","Pinu_mon","Pinu_Mon","Pinu mont","Pinus monticola","Pine","Pine","Pine leading","","Pinu_Mon"
+"113","","","Pinu_mur","","Pinu murx","Pinus x murraybanksiana","Pine","Pine","Pine leading","",""
+"114","","","Pinu_nig","","Pinu nigr","Pinus nigra","Pine","Pine","Pine leading","",""
+"115","","","Pinu_pon","Pinu_Pon","Pinu pond","Pinus ponderosa","Pine","Pine","Pine leading","",""
+"116","","","Pinu_rad","","Pinu radi","Pinus radiata","Pine","Pine","Pine leading","",""
+"117","pinuresi","PINU.RES","Pinu_res","Pinu_Res","Pinu resi","Pinus resinosa","Pine","Pine","Pine leading","","Pinu_Res"
+"118","","","Pinu_rig","Pinu_Rig","Pinu rigi","Pinus rigida","Pine","Pine","Pine leading","",""
+"119","","PINU.ALL","Pinu_sp","Pinu_Spp","Pinu spp","Pinus spp.","Pine","Pine","Pine leading","","Pinu_Spp"
+"120","pinustro","PINU.STR","Pinu_str","Pinu_Str","Pinu stro","Pinus strobus","Pine","Pine","Pine leading","",""
+"121","","","Pinu_syl","Pinu_Syl","Pinu sylv","Pinus sylvestris","Pine","Pine","Pine leading","",""
+"122","","","Plan_occ","Plat_Occ","Plan occi","Platanus occidentalis","","","","",""
+"123","","","Popu_ang","","Popu angu","Populus angustifolia","","","","",""
+"124","popubals","POPU.BAL","Popu_bal","Popu_Bal","Popu balb","Populus balsamifera v. balsamifera","","","","","Popu_Bal"
+"125","","","Popu_bal","Popu_Tri","Popu balt","Populus trichocarpa","","","","Populus balsamifera trichocarpa is a synonym of Populus trichocarpa","Popu_Tri"
+"126","","","Popu_can","","Popu cana","Populus X canadensis","","","","",""
+"127","","","Popu_del","Popu_Del","Popu delo","Populus deltoides v. occidentalis","","","","",""
+"128","","","Popu_del","Popu_Del","Popu delt","Populus deltoides","","","","",""
+"129","","","Popu_del","Popu_Del","Popu delx","Populus deltoides","","","","",""
+"130","","","Popu_gra","Popu_Gra","Popu gran","Populus grandidentata","","","","","Popu_Gra"
+"131","","","Popu_nig","","Popu nigr","Populus nigra","","","","",""
+"132","","","Popu_sp","Popu_Spp","Popu spp","Populus spp.","Decid","Deciduous","Deciduous leading","","Popu_Spp"
+"133","poputrem","POPU.TRE","Popu_tre","Popu_Tre","Popu trem","Populus tremuloides","Decid","Deciduous","Deciduous leading","","Popu_Tre"
+"134","","","Prun_avi","","Prun aviu","Prunus avium","","","","",""
+"135","","","Prun_cer","","Prun cera","Prunus cerasus","","","","",""
+"136","","","Prun_ema","","Prun emar","Prunus emarginata","","","","",""
+"137","","","Prun_pen","Prun_Pen","Prun pens","Prunus pensylvanica","","","","",""
+"138","","","Prun_ser","Prun_Ser","Prun sero","Prunus serotina","","","","",""
+"139","","","Prun_sp","","Prun spp","Prunus spp.","","","","",""
+"140","","","Prun_vir","Prun_Vir","Prun virg","Prunus virginiana","","","","",""
+"141","pseumenz","PSEU.MEN","Pseu_men","Pseu_Men_Gla","Pseu meng","Pseudotsuga menziesii var. glauca","","","","",""
+"142","pseumenz","PSEU.MEN","Pseu_men","Pseu_Men_Men","Pseu menm","Pseudotsuga menziesii var. menziesii","","","","",""
+"143","pseumenz","PSEU.MEN","Pseu_men","Pseu_Men","Pseu menz","Pseudotsuga menziesii","","","","",""
+"144","","","Pyru_com","","Pyru comm","Pyrus communis","","","","",""
+"145","","","Quer_alb","Quer_Alb","Quer alba","Quercus alba","","","","",""
+"146","","","Quer_bic","Quer_Bic","Quer bico","Quercus bicolor","","","","",""
+"147","querelli","QUER.ELL","Quer_ell","","","","","","","",""
+"148","","","Quer_gar","Quer_Gar","Quer garr","Quercus garryana","","","","",""
+"149","","","Quer_mac","Quer_Mac","Quer macr","Quercus macrocarpa","","","","",""
+"150","","","Quer_mue","","Quer mueh","Quercus muehlenbergii","","","","",""
+"151","","","Quer_pal","","Quer palu","Quercus palustris","","","","",""
+"152","","","Quer_rob","","Quer robu","Quercus robur","","","","",""
+"153","querrubr","QUER.RUB","Quer_rub","Quer_Rub","Quer rubr","Quercus rubra","","","","",""
+"154","","","Quer_shu","","Quer shum","Quercus shumardii","","","","",""
+"155","","","Quer_sp","","Quer spp","Quercus spp.","","","","",""
+"156","","","Quer_vel","","Quer velu","Quercus velutina (nigra)","","","","",""
+"157","","","Rham_pur","","Rham purs","Rhamnus purshianus","","","","",""
+"158","","","Robi_pse","Robi_Pse","Robi pseu","Robina spp.","","","","",""
+"159","","","Robi_sp","","Robi spp","Robinia pseudoacacia","","","","",""
+"160","","","Sali_amy","","Sali amyg","Salix amygdaloides","","","","",""
+"161","","","Sali_beb","Sali_Beb","Sali bebb","Salix bebbiana","","","","",""
+"162","","","Sali_dis","","Sali disc","Salix discolor","","","","",""
+"163","","","Sali_luc","","Sali luci","Salix lucida","","","","",""
+"164","","","Sali_nig","Sali_Nig","Sali nigr","Salix nigra","","","","",""
+"165","","","Sali_sco","","Sali scou","Salix scouleriana","","","","",""
+"166","","","Sali_sit","","Sali sitc","Salix sitchensis","","","","",""
+"167","","","Sali_sp","Sali_Spp","Sali spp","Salix spp.","","","","",""
+"168","","","Sass_alb","Sass_Alb","Sass albi","Sassafras albidum","","","","",""
+"169","","","Sequ_gig","","Sequ giga","Sequoadendron giganteum","","","","",""
+"170","","","Sequ_sem","","Sequ semp","Sequoia sempervirens","","","","",""
+"171","","","Sorb_auc","Sorb_Ame","Sorb aucu","Sorbus aucuparia","","","","Sorbus aucuparia is a synonym of Sorbus americana",""
+"172","","","Sorb_dec","Sorb_Dec","","","","","","",""
+"173","","","Sorb_sp","Sorb_Spp","","","","","","",""
+"174","","","Taxu_bre","","Taxu brev","Taxus brevifolia","","","","",""
+"175","thujocci","THUJ.OCC","Thuj_occ","Thuj_Occ","Thuj occi","Thuja occidentalis","","","","",""
+"176","thujplic","THUJ.PLI","Thuj_pli","Thuj_Pli","Thuj plic","Thuja plicata","","","","",""
+"177","","THUJ.SPP.ALL","Thuj_sp","Thuj_Spp","","","","","","",""
+"178","tiliamer","TILI.AME","Tili_ame","Tili_Ame","Tili amer","Tilia americana","","","","",""
+"179","","","Tili_cor","","Tili cord","Tilia cordata","","","","",""
+"180","","","Tili_pla","","Tili plat","Tilia platyphyllos","","","","",""
+"181","tsugcana","TSUG.CAN","Tsug_can","Tsug_Can","Tsug cana","Tsuga canadensis","","","","","Tsug_Can"
+"182","tsughete","TSUG.HET","Tsug_het","Tsug_Het","Tsug hete","Tsuga heterophylla","","","","",""
+"183","","","Tsug_mer","Tsug_Mer_Het","Tsug merx","Tsuga mertensiana","","","","",""
+"184","tsugmert","TSUG.MER","Tsug_mer","Tsug_Mer","Tsug mert","Tsuga mertensiana x heterophylla","","","","",""
+"185","","","Tsug_sp","Tsug_Spp","Tsug spp","Tsuga spp.","","","","","Tsug_Spp"
+"186","","","Ulmu_ame","Ulmu_Ame","Ulmu amer","Ulmus americana","","","","",""
+"187","","","Ulmu_pum","Ulmu_Rub","Ulmu pumi","Ulmus pumila","","","","",""
+"188","","","Ulmu_rub","Ulmu_Spp","Ulmu rubr","Ulmus rubra","","","","",""
+"189","","","Ulmu_sp","Ulmu_Tho","Ulmu spp","Ulmus spp.","","","","",""
+"190","","","","","Ulmu thom","Ulmus thomasii","","","","",""
+"191","","","","Generic_BroadLeaf_Spp","Hard unkn","","Decid","Deciduous","Deciduous leading","",""
+"192","","","","Generic_NeedleLeaf_Spp","Soft unkn","","Conif","Coniferous","Coniferous leading","",""
+"193","","","","","Nonc hard","","Decid","Deciduous","Deciduous leading","",""
+"194","","","","","Hard tole","","","","","",""
+"195","","","","","Hard into","","","","","",""
+"196","","","","","Mois hard","","","","","",""
+"197","","","","","Uncl spp","","","","","",""
