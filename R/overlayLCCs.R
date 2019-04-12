@@ -4,7 +4,7 @@ if (getRversion() >= "3.1.0") {
 
 #' Overlay different LCC data sources
 #'
-#' @param LCCs A named list or named \code{RasterStack} of rasters whose content is Land Cover Class
+#' @param LCCs A named list or named \code{RasterStack} of layers whose content is Land Cover Class
 #' @param forestedList A named list of same length and names as \code{LCCs} indicating
 #'   which classes in each LCC raster are 'forested', either permanent or transient
 #' @param outputLayer A character string that matches one of the named elements in \code{LCCs}.
@@ -13,12 +13,14 @@ if (getRversion() >= "3.1.0") {
 #'   parsed within the "forestEquivalencies" table.
 #'   It should be a set of conditions with \code{== 0}, i.e., non-forested.
 #'   Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
-#'   where \code{0} is the non-forested pixels based on converting LCCs and forestedList to 1s and 0s.
-#' @param NNcondition A character string of a vectorized logical statement that will be parsed
-#'   within the "forestEquivalencies" table.
+#'   where \code{0} is the non-forested pixels based on converting LCCs and
+#'   \code{forestedList} to 1s and 0s.
+#' @param NNcondition A character string of a vectorized logical statement that
+#'   will be parsed within the "forestEquivalencies" table.
 #'   It should be a set of conditions with \code{== 0}, i.e., non-forested.
 #'   Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
-#'   where \code{0} is the non-forested pixels based on converting LCCs and forestedList to 1s and 0s.
+#'   where \code{0} is the non-forested pixels based on converting LCCs and
+#'   \code{forestedList} to 1s and 0s.
 #' @param remapCondition Not yet implemented. This would be for a situation where
 #'   2 LCC layers are provided, one has information in a pixel, but not the one
 #'   which is \code{outputLayer}, so this needs a reclassify or remap.
@@ -28,10 +30,11 @@ if (getRversion() >= "3.1.0") {
 #'   \code{NNcondition} is \code{TRUE}. If this is \code{NULL}, then it will be
 #'   created internally with all pixels with:
 #'   \code{data.table(initialEcoregionCode = LCCs[[outputLayer]][])}
-#' @param forestEquivalencies A data.frame or NULL. If \code{NULL}, this function will
-#'   derive this table automatically from the other arguments. Otherwise, the user must
-#'   provide a data.frame with \code{length(LCCs) + 1} columns, and \code{2 ^ length(LCCs)}
-#'   rows. Currently not used.
+#' @param forestEquivalencies A \code{data.frame} or \code{NULL}.
+#'   If \code{NULL}, this function will derive this table automatically from the
+#'   other arguments. Otherwise, the user must provide a \code{data.frame} with
+#'   \code{length(LCCs) + 1} columns, and \code{2 ^ length(LCCs)} rows.
+#'   Currently not used.
 #'
 #' @author Eliot McIntire
 #' @export

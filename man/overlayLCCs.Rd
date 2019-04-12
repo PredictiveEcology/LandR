@@ -9,7 +9,7 @@ overlayLCCs(LCCs, forestedList, outputLayer, NAcondition, NNcondition,
   forestEquivalencies = NULL)
 }
 \arguments{
-\item{LCCs}{A named list or named \code{RasterStack} of rasters whose content is Land Cover Class}
+\item{LCCs}{A named list or named \code{RasterStack} of layers whose content is Land Cover Class}
 
 \item{forestedList}{A named list of same length and names as \code{LCCs} indicating
 which classes in each LCC raster are 'forested', either permanent or transient}
@@ -21,13 +21,15 @@ This will be the classification system returned.}
 parsed within the "forestEquivalencies" table.
 It should be a set of conditions with \code{== 0}, i.e., non-forested.
 Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
-where \code{0} is the non-forested pixels based on converting LCCs and forestedList to 1s and 0s.}
+where \code{0} is the non-forested pixels based on converting LCCs and
+\code{forestedList} to 1s and 0s.}
 
-\item{NNcondition}{A character string of a vectorized logical statement that will be parsed
-within the "forestEquivalencies" table.
+\item{NNcondition}{A character string of a vectorized logical statement that
+will be parsed within the "forestEquivalencies" table.
 It should be a set of conditions with \code{== 0}, i.e., non-forested.
 Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
-where \code{0} is the non-forested pixels based on converting LCCs and forestedList to 1s and 0s.}
+where \code{0} is the non-forested pixels based on converting LCCs and
+\code{forestedList} to 1s and 0s.}
 
 \item{remapCondition}{Not yet implemented. This would be for a situation where
 2 LCC layers are provided, one has information in a pixel, but not the one
@@ -41,10 +43,11 @@ which is \code{outputLayer}, so this needs a reclassify or remap.}
 created internally with all pixels with:
 \code{data.table(initialEcoregionCode = LCCs[[outputLayer]][])}}
 
-\item{forestEquivalencies}{A data.frame or NULL. If \code{NULL}, this function will
-derive this table automatically from the other arguments. Otherwise, the user must
-provide a data.frame with \code{length(LCCs) + 1} columns, and \code{2 ^ length(LCCs)}
-rows. Currently not used.}
+\item{forestEquivalencies}{A \code{data.frame} or \code{NULL}.
+If \code{NULL}, this function will derive this table automatically from the
+other arguments. Otherwise, the user must provide a \code{data.frame} with
+\code{length(LCCs) + 1} columns, and \code{2 ^ length(LCCs)} rows.
+Currently not used.}
 }
 \description{
 Overlay different LCC data sources
