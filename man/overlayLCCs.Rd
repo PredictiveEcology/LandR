@@ -18,15 +18,18 @@ which classes in each LCC raster are 'forested', either permanent or transient}
 \item{outputLayer}{A character string that matches one of the named elements
 in \code{LCCs}. This will be the classification system returned.}
 
-\item{NAcondition}{A character string of a vectorized logical statement that
-will be parsed within the \code{forestEquivalencies} table.
+\item{NAcondition}{The condition when a pixel is deemed to be \code{NA}.
+Given as a character string of a vectorized logical statement that will be
+within the \code{forestEquivalencies} table.
 It should be a set of conditions with \code{== 0}, i.e., non-forested.
 Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
 where \code{0} is the non-forested pixels based on converting LCCs and
 \code{forestedList} to 1s and 0s.}
 
-\item{NNcondition}{A character string of a vectorized logical statement that
-will be parsed within the \code{forestEquivalencies} table.
+\item{NNcondition}{The 'nearest-neighbour' condition; i.e., the condition when
+a nearest-neighbour search is done to fill in the pixel with forested type.
+Given as a character string of a vectorized logical statement that will be
+parsed within the \code{forestEquivalencies} table.
 It should be a set of conditions with \code{== 0}, i.e., non-forested.
 Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
 where \code{0} is the non-forested pixels based on converting LCCs and
