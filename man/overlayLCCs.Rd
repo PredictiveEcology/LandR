@@ -9,13 +9,14 @@ overlayLCCs(LCCs, forestedList, outputLayer, NAcondition, NNcondition,
   forestEquivalencies = NULL)
 }
 \arguments{
-\item{LCCs}{A named list or named \code{RasterStack} of layers whose content is Land Cover Class}
+\item{LCCs}{A named list or named \code{RasterStack} of layers whose content
+is Land Cover Class.}
 
 \item{forestedList}{A named list of same length and names as \code{LCCs} indicating
 which classes in each LCC raster are 'forested', either permanent or transient}
 
-\item{outputLayer}{A character string that matches one of the named elements in \code{LCCs}.
-This will be the classification system returned.}
+\item{outputLayer}{A character string that matches one of the named elements
+in \code{LCCs}. This will be the classification system returned.}
 
 \item{NAcondition}{A character string of a vectorized logical statement that
 will be parsed within the \code{forestEquivalencies} table.
@@ -25,7 +26,7 @@ where \code{0} is the non-forested pixels based on converting LCCs and
 \code{forestedList} to 1s and 0s.}
 
 \item{NNcondition}{A character string of a vectorized logical statement that
-will be parsed within the "forestEquivalencies" table.
+will be parsed within the \code{forestEquivalencies} table.
 It should be a set of conditions with \code{== 0}, i.e., non-forested.
 Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
 where \code{0} is the non-forested pixels based on converting LCCs and
