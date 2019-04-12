@@ -16,7 +16,7 @@ convertUnwantedLCC(classesToReplace = 34:36, rstLCC, availableERC_by_Sp,
 
 \item{availableERC_by_Sp}{A \code{data.table} or \code{data.frame} with 3 columns:
 \code{speciesCode}, \code{initialEcoregionCode} and \code{pixelIndex}.
-\code{pixelIndex} is the pixel id for each line in the data.table;
+\code{pixelIndex} is the pixel id for each line in the \code{data.table};
 \code{speciesCode} is the species name in the pixel (can have more than one
   species per pixel, so multiple rows per pixel); and,
 \code{initialEcoregionCode} is the unique codes that are "available" to be
@@ -42,8 +42,8 @@ the user to only replace some of the pixels with a given class.}
 }
 \value{
 A \code{data.table} with two columns, \code{pixelIndex} and \code{ecoregionGroup}.
-This represents the new codes to used in the pixelIndex locations. These should have
-no values overlapping with \code{classesToReplace}.
+This represents the new codes to used in the \code{pixelIndex} locations.
+These should have no values overlapping with \code{classesToReplace}.
 }
 \description{
 This will search around the pixels on \code{rstLCC} that have
