@@ -1,3 +1,7 @@
+if (getRversion() >= "3.1.0") {
+  utils::globalVariables(c("ecoregionCode", "NAs"))
+}
+
 #' Overlay different LCC data sources
 #'
 #' @param LCCs A named list or named \code{RasterStack} of rasters whose content is Land Cover Class
@@ -31,6 +35,8 @@
 #'
 #' @author Eliot McIntire
 #' @export
+#' @importFrom data.table as.data.table
+#' @importFrom raster nlayers
 overlayLCCs <- function(LCCs, forestedList, outputLayer,
                         NAcondition, NNcondition, remapCondition,
                         classesToReplace, availableERC_by_Sp,

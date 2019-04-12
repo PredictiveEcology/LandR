@@ -455,7 +455,7 @@ describeCohortData <- function(cohortData) {
 #'
 #' @author Eliot McIntire
 #' @export
-#' @importFrom data.table rbindlist setnames
+#' @importFrom data.table as.data.table is.data.table rbindlist setnames
 #' @importFrom raster raster
 #' @importFrom SpaDES.core paddedFloatToChar
 #' @importFrom SpaDES.tools spread2
