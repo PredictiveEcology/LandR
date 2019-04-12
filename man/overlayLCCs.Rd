@@ -4,7 +4,8 @@
 \alias{overlayLCCs}
 \title{Overlay different LCC data sources}
 \usage{
-overlayLCCs(LCCs, forestedList, outputLayer, NAcombos,
+overlayLCCs(LCCs, forestedList, outputLayer, NAcondition, NNcondition,
+  remapCondition, classesToReplace, availableERC_by_Sp,
   forestEquivalencies = NULL)
 }
 \arguments{
@@ -16,9 +17,29 @@ which classes in each LCC raster are 'forested', either permanent or transient}
 \item{outputLayer}{A character string that matches one of the named elements in \code{LCCs}.
 This will be the classification system returned.}
 
-\item{NAcombos}{A character string that will be parsed within the "forestEquivalencies" table.
-It should be a set of conditions that == 0, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
+\item{NAcondition}{A character string  of a vectorized logical statement that will be
+parsed within the "forestEquivalencies" table.
+It should be a set of conditions with \code{== 0}, i.e., non-forested.
+Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
 where \code{0} is the non-forested pixels based on converting LCCs and forestedList to 1s and 0s.}
+
+\item{NNcondition}{A character string of a vectorized logical statement that will be parsed
+within the "forestEquivalencies" table.
+It should be a set of conditions with \code{== 0}, i.e., non-forested.
+Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
+where \code{0} is the non-forested pixels based on converting LCCs and forestedList to 1s and 0s.}
+
+\item{remapCondition}{Not yet implemented. This would be for a situation where
+2 LCC layers are provided, one has information in a pixel, but not the one
+which is \code{outputLayer}, so this needs a reclassify or remap.}
+
+\item{classesToReplace}{Passed to \code{convertUnwantedLCC}, for the pixels where
+\code{NNcondition} is \code{TRUE}}
+
+\item{availableERC_by_Sp}{Passed to \code{convertUnwantedLCC}, for the pixels where
+\code{NNcondition} is \code{TRUE}. If this is \code{NULL}, then it will be
+created internally with all pixels with:
+\code{data.table(initialEcoregionCode = LCCs[[outputLayer]][])}}
 
 \item{forestEquivalencies}{A data.frame or NULL. If \code{NULL}, this function will
 derive this table automatically from the other arguments. Otherwise, the user must
