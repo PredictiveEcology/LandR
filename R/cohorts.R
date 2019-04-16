@@ -506,9 +506,11 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
       rstUnwantedLCC[] <- NA
       rstUnwantedLCC[gsub(".*_", "", ecoregionGroupVec) %in% classesToReplace] <- 1
       theUnwantedPixels1 <- which(rstUnwantedLCC == 1)
-      theUnwantedPixels1 <- theUnwantedPixels1[theUnwantedPixels1 %in% unique(availableERC_by_Sp$pixelIndex)]
+      theUnwantedPixels1 <- theUnwantedPixels1[theUnwantedPixels1 %in%
+                                                 unique(availableERC_by_Sp$pixelIndex)]
     } else {
-      theUnwantedRows <- gsub(".*_", "", availableERC_by_Sp$initialEcoregionCode) %in% as.character(classesToReplace)
+      theUnwantedRows <- gsub(".*_", "", availableERC_by_Sp$initialEcoregionCode) %in%
+        as.character(classesToReplace)
       theUnwantedPixels <- sort(unique(availableERC_by_Sp[theUnwantedRows, "pixelIndex"])[[1]])
     }
   }
@@ -539,7 +541,6 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 
   currentLenUnwantedPixels <- length(theUnwantedPixels)
   repeatsOnSameUnwanted <- 0
-
 
   while (length(theUnwantedPixels) > 0) {
     out <- spread2(rstLCC, start = theUnwantedPixels, asRaster = FALSE,
@@ -581,8 +582,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
       ## take random sample of available, weighted by abundance
       rowsToKeep <- out6[, list(keep = .resample(.I, 1)), by = c("pixelIndex")]
       out8 <- out6[rowsToKeep$keep]
-      out2 <- out8[, list(newPossLCC = lcc,
-                        pixelIndex)]
+      out2 <- out8[, list(newPossLCC = lcc, pixelIndex)]
       if (hasPreDash) {
         out2[, initialEcoregion := substr(out8[, initialEcoregionCode], 1, numCharEcoregion)]
         out2[, ecoregionGroup := paste0(initialEcoregion, "_",
