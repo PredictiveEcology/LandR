@@ -2,31 +2,63 @@
 % Please edit documentation in R/cohorts.R
 \name{convertUnwantedLCC}
 \alias{convertUnwantedLCC}
-\title{Convert Land Cover Classes to another value in is neighbourhood}
+\title{Convert Land Cover Classes to another value in its neighbourhood}
 \usage{
-convertUnwantedLCC(pixelClassesToReplace = 34:36, rstLCC,
-  ecoregionGroupVec, speciesEcoregion, availableERC_by_Sp)
+convertUnwantedLCC(classesToReplace = 34:36, rstLCC, availableERC_by_Sp,
+  theUnwantedPixels, ecoregionGroupVec, speciesEcoregion,
+  pixelClassesToReplace)
 }
 \arguments{
-\item{pixelClassesToReplace}{Integer vector of classes that are are to be replaced, e.g.,
+\item{classesToReplace}{Integer vector of classes that are are to be replaced, e.g.,
 34, 35, 36 on LCC2005, which are burned young, burned 10yr, and cities}
 
 \item{rstLCC}{LCC raster, e.g., LCC2005}
 
-\item{ecoregionGroupVec}{The vector of ecoregionGroup codes}
+\item{availableERC_by_Sp}{A \code{data.table} or \code{data.frame} with 3 columns:
+\code{speciesCode}, \code{initialEcoregionCode} and \code{pixelIndex}.
+\code{pixelIndex} is the pixel id for each line in the \code{data.table};
+\code{speciesCode} is the species name in the pixel (can have more than one
+  species per pixel, so multiple rows per pixel); and,
+\code{initialEcoregionCode} is the unique codes that are "available" to be
+  used as a replacement for \code{classesToReplace}. \code{initialEcoregionCode}
+  must be a character vector, with one or no "_" used as a separator, with the last
+  component being the LandCoverClass that matches \code{classesToReplace}, e.g.,
+  \code{"242_18"}. If there is no "_" in this code, then the codes must match the
+  \code{classesToReplace} exactly, e.g., \code{"11"}.
+  If \code{pixelIndex} is missing, the function will fill it
+  with \code{seq(ncell(rstLCC))}. If \code{speciesCode} is missing, the function
+  will replace it with a dummy value (\code{"allSpecies"}).}
 
-\item{speciesEcoregion}{TODO: description needed}
+\item{theUnwantedPixels}{An optional vector of pixel IDs that need to be changed.
+If not provided, then pixels to change will be taken from the match between
+\code{availableERC_by_Sp} and \code{classesToReplace}. Supplying this allows
+the user to only replace some of the pixels with a given class.}
 
-\item{availableERC_by_Sp}{TODO: description needed}
+\item{ecoregionGroupVec}{Deprecated. Use \code{availableERC_by_Sp}}
+
+\item{speciesEcoregion}{Deprecated. Use \code{availableERC_by_Sp}}
+
+\item{pixelClassesToReplace}{Deprecated. Use \code{classesToReplace}}
+}
+\value{
+A \code{data.table} with two columns, \code{pixelIndex} and \code{ecoregionGroup}.
+This represents the new codes to used in the \code{pixelIndex} locations.
+These should have no values overlapping with \code{classesToReplace}.
 }
 \description{
 This will search around the pixels on \code{rstLCC} that have
-\code{pixelClassesToReplace}, and search in iteratively increasing
-radii outwards for other Land Cover Classes than \code{pixelClassesToReplace}.
-It will then take the cohorts that were in pixels with \code{pixelClassesToReplace}
+\code{classesToReplace}, and search in iteratively increasing
+radii outwards for other Land Cover Classes than the those indicated in
+\code{classesToReplace}. This will constrain
+It will then take the cohorts that were in pixels with \code{classesToReplace}
 and assign them new values in the output object. This function will
 also check that it must be an \code{ecoregionCode} that already exists in
-\code{cohortData}, i.e., not create new \code{ecoregionCode} values.
+\code{cohortData}, i.e., not create new \code{ecoregionCode} values. See Details.
+}
+\details{
+This function is designed to be used in highly constrained situations, where it is not
+just replacing a Land Cover Class by a neighbouring Land Cover Class. But it can
+be used for the simpler cases of simply replacing a Land Cover Class.
 }
 \author{
 Eliot McIntire
