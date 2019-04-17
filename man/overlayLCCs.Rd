@@ -5,7 +5,7 @@
 \title{Overlay different LCC data sources}
 \usage{
 overlayLCCs(LCCs, forestedList, outputLayer, NAcondition, NNcondition,
-  remapCondition, classesToReplace, availableERC_by_Sp,
+  remapTable = NULL, classesToReplace, availableERC_by_Sp,
   forestEquivalencies = NULL)
 }
 \arguments{
@@ -35,7 +35,7 @@ Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
 where \code{0} is the non-forested pixels based on converting LCCs and
 \code{forestedList} to 1s and 0s.}
 
-\item{remapCondition}{Not yet implemented. This would be for a situation where
+\item{remapTable}{\code{data.table}. This would be for a situation where
 2 LCC layers are provided, one has information in a pixel, but not the one
 which is \code{outputLayer}, so this needs a reclassify or remap.}
 
@@ -57,5 +57,5 @@ Currently not used.}
 Overlay different LCC data sources
 }
 \author{
-Eliot McIntire
+Eliot McIntire and Alex Chubaty
 }
