@@ -141,6 +141,7 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
         dt <- a[dt, on = "pixelIndex"]
         dt[!is.na(ecoregionGroup), ecoregionCode := ecoregionGroup]
         dt[, ecoregionGroup := NULL]
+        setkey(dt, pixelIndex)
       }
     }
 
