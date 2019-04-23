@@ -597,12 +597,12 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
       keepPixels <- unique(out2$pixelIndex)
       theUnwantedPixels <- theUnwantedPixels[!theUnwantedPixels %in% keepPixels]
       out2 <- unique(out2)
-    }
 
-    if (!exists("out3")) {
-      out3 <- out2
-    } else {
-      out3 <- rbindlist(list(out2, out3))
+      if (!exists("out3")) {
+        out3 <- out2
+      } else {
+        out3 <- rbindlist(list(out2, out3))
+      }
     }
   }
 
