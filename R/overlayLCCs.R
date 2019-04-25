@@ -1,5 +1,5 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c("ecoregionCode", "NAs"))
+  utils::globalVariables(c("ecoregionCode", "NAs", "newLCC"))
 }
 
 #' Overlay different LCC data sources
@@ -115,14 +115,14 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
       if (!all(names(LCCs) %in% colnames(remapTable)))
         stop("All LCC names must be columns in remapTable")
 
-      browser()
+browser()
       namesLCCs <- names(LCCs)
       names(namesLCCs) <- namesLCCs
       dt <- as.data.table(lapply(namesLCCs, function(x) LCCs[[x]][]))
       dt[, ecoregionCode := LCCs[[outputLayer]][]]
       dt <- cbind(dt, availableERC_by_Sp)
       dt[, pixelIndex := seq(ncell(LCCs[[outputLayer]]))]
-      dt[, NNcondition := TODO] ## TODO
+      #dt[, NNcondition := ] ## TODO
 
       setkeyv(dt, names(LCCs))
       setkeyv(remapTable, names(LCCs))

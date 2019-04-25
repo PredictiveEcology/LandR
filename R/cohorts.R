@@ -314,7 +314,6 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap) {
 generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
                                 columns = c("ecoregionGroup", "speciesCode",
                                             "age", "B")) {
-
   columnsOrig <- columns
   columns <- columns[columns %in% names(pixelDataTable)]
   columns2 <- paste0(columns, "2")
@@ -356,7 +355,6 @@ speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
   spEco[year == max(year)]
 }
 
-
 .ageRndUpSuccessionTimestep <- function(age, successionTimestep) {
   as.integer(ceiling(as.numeric(age) / successionTimestep) * successionTimestep)
 }
@@ -376,7 +374,6 @@ uniqueCohortDefinition <- c("pixelGroup", "speciesCode", "age", "B")
 #' @export
 #' @rdname uniqueDefinitions
 uniqueSpeciesEcoregionDefinition <- c("speciesCode", "ecoregionGroup")
-
 
 #' Summary for cohortData
 #' @param cohortData A cohortData object
@@ -403,7 +400,6 @@ describeCohortData <- function(cohortData) {
   }
   return(invisible(out))
 }
-
 
 #' Convert Land Cover Classes to another value in its neighbourhood
 #'
