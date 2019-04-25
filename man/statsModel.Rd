@@ -4,18 +4,17 @@
 \alias{statsModel}
 \title{The generic statistical model -- to run lmer or glmer}
 \usage{
-statsModel(form, uniqueEcoregionGroups, .specialData, ...)
+statsModel(modelFn, uniqueEcoregionGroups, .specialData)
 }
 \arguments{
-\item{form}{A quoted formula to test}
+\item{modelFn}{A quoted expression of type \code{package::model(Y ~ X, ...)}, omitting
+the \code{data} argument. E.g. \code{lme4::glmer(Y ~ X + (X|G), family = poisson)}}
 
 \item{uniqueEcoregionGroups}{Unique values of ecoregionGroups.
 This is the basis for the statistics, and can be used to optimize caching,
 e.g. ignore \code{.specialData} in \code{.omitArgs}}
 
 \item{.specialData}{The custom dataset required for the model}
-
-\item{...}{Anything passed to args for the model}
 }
 \description{
 This does a few things including R squared, gets the fitted values.

@@ -88,7 +88,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age") # no Biomass because they all have zero
     cd <- newPixelCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
     newPixelCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = maxPixelGroup,
-                                                      columns = columnsForPG)]#,
+                                                           columns = columnsForPG)]#,
     #successionTimestep = successionTimestep)
 
     # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
@@ -237,7 +237,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   set(newPixelCohortData, NULL, "B", as.integer(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
 
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
-                                     mortality = 0L, aNPPAct = 0L, sumB = 0)]
+                                               mortality = 0L, aNPPAct = 0L, sumB = 0)]
 
   # This removes the duplicated pixels within pixelGroup, i.e., the reason we want pixelGroups
   newCohortData <- unique(newPixelCohortData, by = uniqueCohortDefinition)
@@ -697,7 +697,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   cohortData[ , B := asInteger(mean(totalBiomass) * cover / 100), by = "pixelIndex"]
   message(crayon::blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
   cohortData[ , B := asInteger(ceiling(B / pixelGroupBiomassClass) *
-                                       pixelGroupBiomassClass)]
+                                 pixelGroupBiomassClass)]
   message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
   cohortData[ , totalBiomass := asInteger(totalBiomass)]
 
@@ -756,48 +756,49 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
 #' should be "omitted" via \code{omitArgs}, and \code{uniqueEcoregionGroups}
 #' should not be omitted.
 #'
-#' @param form A quoted formula to test
+#' @param modelFn A quoted expression of type \code{package::model(Y ~ X, ...)}, omitting
+#'   the \code{data} argument. E.g. \code{lme4::glmer(Y ~ X + (X|G), family = poisson)}
 #' @param uniqueEcoregionGroups Unique values of ecoregionGroups.
 #'   This is the basis for the statistics, and can be used to optimize caching,
 #'   e.g. ignore \code{.specialData} in \code{.omitArgs}
 #' @param .specialData The custom dataset required for the model
-#' @param ... Anything passed to args for the model
 #'
 #' @export
 #' @importFrom crayon blue magenta red
 #' @importFrom lme4 glmer lmer
 #' @importFrom MuMIn r.squaredGLMM
 #' @importFrom stats as.formula glm fitted predict
-statsModel <- function(form, uniqueEcoregionGroups, .specialData, ...) {
-  ## check the no of grouping levels
-  form2 <-  paste(deparse(form), collapse = "")
-  groupVar <- sub("\\).*", "", sub(".*\\| ", "", form2))
-  keepGrouping <- NROW(unique(.specialData[, ..groupVar])) >= 2
+statsModel <- function(modelFn, uniqueEcoregionGroups, .specialData) {
+  # check the no of grouping levels
+  modelFn2 <- deparse(modelFn)
+  modelFn2[1] <- paste0(modelFn2[!grepl("family", modelFn2)], collapse = "")
 
-  if (keepGrouping) {
-    if ("family" %in% names(list(...))) {
-      modelFn <- lme4::glmer
-    } else {
-      modelFn <- lme4::lmer
+  if (grepl("\\|", modelFn2[1])) {
+    groupVar <- sub("\\).*", "", sub(".*\\| ", "", modelFn2[1]))
+    keepGrouping <- NROW(unique(.specialData[, ..groupVar])) >= 2
+
+    if (!keepGrouping) {
+      form <- sub(".*?\\(", "", modelFn2[1])
+      form <- sub("(.*\\)).*", "\\1", form)
+      form <- sub("\\+ \\(.*\\|.*\\)", "", form)
+
+      ## change to glm if dropping random effects
+      whereFam <- grepl("family", modelFn2)
+      if (any(whereFam)) {
+        fam <- sub(" ", "", sub("\\).*", "", sub(".*=", "", modelFn2[whereFam])))
+        modelFn <- parse(text = paste0("stats::glm(", form, ", family = ", fam, ")"))
+      } else
+        modelFn <- parse(text = paste0("stats::glm(", form, ")"))
+
+      message(blue("Grouping variable "), red("only has one level. "),
+              blue("Formula changed to\n",
+                   magenta(paste0(format(modelFn, appendLF = FALSE), collapse = ""))))
     }
-  } else
-    modelFn <- stats::glm
-
-  if (!keepGrouping) {
-    form2 <- sub("\\+ \\(.*\\|.*\\)", "", form2)
-    form <- as.formula(form2)
-
-    message(blue("Grouping variable "), red("only has one level. "),
-            blue("Formula changed to\n",
-                 magenta(paste0(format(form, appendLF = FALSE), collapse = ""))))
   }
 
-  mod <- modelFn(
-    formula = eval(form),
-    data = .specialData,
-    ...)
+  mod <- with(.specialData, eval(modelFn))
 
-    list(mod = mod, pred = fitted(mod), rsq = MuMIn::r.squaredGLMM(mod))
+  list(mod = mod, pred = fitted(mod), rsq = MuMIn::r.squaredGLMM(mod))
 }
 
 #' Default columns that define pixel groups
