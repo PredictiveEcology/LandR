@@ -115,7 +115,6 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
       if (!all(names(LCCs) %in% colnames(remapTable)))
         stop("All LCC names must be columns in remapTable")
 
-browser()
       namesLCCs <- names(LCCs)
       names(namesLCCs) <- namesLCCs
       dt <- as.data.table(lapply(namesLCCs, function(x) LCCs[[x]][]))
