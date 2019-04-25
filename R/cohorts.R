@@ -756,7 +756,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
 #' should be "omitted" via \code{omitArgs}, and \code{uniqueEcoregionGroups}
 #' should not be omitted.
 #'
-#' @param form A quoted expression of type \code{package::model(Y ~ X, ...)}, omitting
+#' @param modelFn A quoted expression of type \code{package::model(Y ~ X, ...)}, omitting
 #'   the \code{data} argument. E.g. \code{lme4::glmer(Y ~ X + (X|G), family = poisson)}
 #' @param uniqueEcoregionGroups Unique values of ecoregionGroups.
 #'   This is the basis for the statistics, and can be used to optimize caching,
