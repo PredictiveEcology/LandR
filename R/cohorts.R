@@ -88,7 +88,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age") # no Biomass because they all have zero
     cd <- newPixelCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
     newPixelCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = maxPixelGroup,
-                                                      columns = columnsForPG)]#,
+                                                           columns = columnsForPG)]#,
     #successionTimestep = successionTimestep)
 
     # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
@@ -237,7 +237,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   set(newPixelCohortData, NULL, "B", as.integer(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
 
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
-                                     mortality = 0L, aNPPAct = 0L, sumB = 0)]
+                                               mortality = 0L, aNPPAct = 0L, sumB = 0)]
 
   # This removes the duplicated pixels within pixelGroup, i.e., the reason we want pixelGroups
   newCohortData <- unique(newPixelCohortData, by = uniqueCohortDefinition)
@@ -697,7 +697,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   cohortData[ , B := asInteger(mean(totalBiomass) * cover / 100), by = "pixelIndex"]
   message(crayon::blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
   cohortData[ , B := asInteger(ceiling(B / pixelGroupBiomassClass) *
-                                       pixelGroupBiomassClass)]
+                                 pixelGroupBiomassClass)]
   message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
   cohortData[ , totalBiomass := asInteger(totalBiomass)]
 
