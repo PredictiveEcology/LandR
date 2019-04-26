@@ -1,11 +1,11 @@
-^docs$
 ^_pkgdown\.yml$
-^appveyor\.yml$
-^appveyor_cache\.txt$
+^\.httr-oauth$
 ^\.lintr$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.travis\.yml$
-^LICENSE$
-^\.httr-oauth$
+^appveyor\.yml$
+^appveyor_cache\.txt$
 ^data-raw$
+^docs$
+^LICENSE$
