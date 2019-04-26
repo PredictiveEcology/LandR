@@ -121,7 +121,6 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
       dt[, ecoregionCode := LCCs[[outputLayer]][]]
       dt <- cbind(dt, availableERC_by_Sp)
       dt[, pixelIndex := seq(ncell(LCCs[[outputLayer]]))]
-      #dt[, NNcondition := ] ## TODO
 
       setkeyv(dt, names(LCCs))
       setkeyv(remapTable, names(LCCs))
@@ -140,8 +139,9 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
         dt <- a[dt, on = "pixelIndex"]
         dt[!is.na(ecoregionGroup), ecoregionCode := ecoregionGroup]
         dt[, ecoregionGroup := NULL]
-        setkey(dt, pixelIndex)
       }
+
+      setkey(dt, pixelIndex)
     }
 
     # replace all values in the raster
