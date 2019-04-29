@@ -662,7 +662,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
                                  measure.vars = newCoverColNames,
                                  variable.name = "speciesCode")
   cohortData[, coverOrig := cover]
-  if (length(duplicated(cohortData)) > 0)
+  if (any(duplicated(cohortData)))
     warning("cohortData contains duplicate rows.")
 
   if (getOption("LandR.assertions"))
