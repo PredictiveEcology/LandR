@@ -169,7 +169,7 @@ assertPixelCohortData <- function(pixelCohortData, pixelGroupMap,
     pixelsRegeneratedOnZeros <- sum(uniquePixelsInCohorts == 0)
     allPixelsNotInCohortData <- pixelGroupMap[][-unique(pixelCohortData$pixelIndex)]
     numPixelsNoRegen <- sum(allPixelsNotInCohortData == 0, na.rm = TRUE)
-    tableB <- table(allPixelsNotInCohortData) # 25166
+    tableB <- sum(!is.na(allPixelsNotInCohortData)) # 25166
 
     test2 <- identical(as.integer(pixelsOnMap - tableB), lenUniquePixelsInCohorts)
     test3 <- identical(as.integer(pixelsOnMap - (lenBurnedPixels - pixelsRegeneratedOnZeros)),
