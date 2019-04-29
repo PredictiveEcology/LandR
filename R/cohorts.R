@@ -826,8 +826,8 @@ columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 #' @importFrom raster getValues ncell
 makePixelCohortData <- function(cohortData, pixelGroupMap,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
-  if (!isTRUE("pixelGroup" %in% cohortData)) {
-    stop("cohortData must have either pixelGroup")
+  if (!isTRUE("pixelGroup" %in% names(cohortData))) {
+    stop("cohortData must have pixelGroup")
   }
   if (doAssertion)
     assertCohortData(cohortData, pixelGroupMap)
