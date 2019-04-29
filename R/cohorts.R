@@ -714,7 +714,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
                                                                  initialEcoregionCode, cover)]
     message(blue("Impute missing age values: started", Sys.time()))
     outAge <- Cache(statsModel, modelFn = ageModel,
-                    uniqueEcoregionGroup = unique(cohortDataMissingAgeUnique$initialEcoregionCode),
+                    uniqueEcoregionGroups = unique(cohortDataMissingAgeUnique$initialEcoregionCode),
                     .specialData = cohortDataMissingAgeUnique)
     message(blue("                           completed", Sys.time()))
     print(outAge$rsq)
