@@ -27,7 +27,6 @@ assert1 <- function(cohortData34to36, cohortData,
 }
 
 #' @param columns Vector of column names on which to test for unique cohortData
-#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
 #' @export
 #' @rdname assertions
 assertUniqueCohortData <- function(cohortData, columns,
@@ -45,7 +44,6 @@ assertUniqueCohortData <- function(cohortData, columns,
 #' @param ecoregionMap The \code{ecoregionMap}, a raster of all the unique groupings
 #' @param speciesEcoregion The \code{speciesEcoregion} \code{data.table}
 #' @param minRelativeB TODO: add description
-#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
 #'
 #' @export
 #' @importFrom utils str
@@ -79,7 +77,6 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
 
 #' @param obj A data.frame or data.table-like object
 #' @param colClasses A named vector of column classes, where the names are the column names
-#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
 #'
 #' @export
 #' @rdname assertions
@@ -108,7 +105,7 @@ assertColumns <- function(obj, colClasses,
 #'   can diverge. Default 1.
 #' @param message An optional message to print. This may help identify where this function
 #'   was called.
-#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
+#' @param verbose Controls message output. Defaults to \code{getOption("LandR.verbose")}
 #'
 #' @note
 #' TODO
@@ -116,6 +113,7 @@ assertColumns <- function(obj, colClasses,
 #' @export
 #' @importFrom crayon green
 #' @importFrom stats na.omit
+#' @rdname assertions
 assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1,
                            message = "", doAssertion = getOption("LandR.assertions", TRUE),
                            verbose = getOption("LandR.verbose", TRUE)) {
@@ -155,11 +153,12 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
 #' This is the full pixelCohortData, not the collapsed one
 #'
 #' @param pixelCohortData The full \code{cohortData} \code{data.table}
-#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
-#'
-#' @inheritParams updateCohortData
+#' @param pixelGroupMap Raster layer with pixel values equal to a pixel group
+#'   number that correspondsd exactly to \code{pixelGroup} column in
+#'   \code{cohortData}
 #'
 #' @export
+#' @rdname assertions
 assertPixelCohortData <- function(pixelCohortData, pixelGroupMap,
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
