@@ -6,13 +6,14 @@ if (getRversion() >= "3.1.0") {
 #'
 #' @param cohortData34to36 A \code{cohortData} \code{data.table} with only the
 #'                         pixels what were lcc 34:36
-#'
 #' @param cohortData The full \code{cohortData} \code{data.table}
+#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
 #'
 #' @export
 #' @rdname assertions
-assert1 <- function(cohortData34to36, cohortData) {
-  if (getOption("LandR.assertions")) {
+assert1 <- function(cohortData34to36, cohortData,
+                    doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
     allCodesAre34to36 <- all(grepl(".*34|.*35|.*36",
                                    as.character(cohortData34to36$initialEcoregionCode)))
     if (!allCodesAre34to36)
@@ -26,11 +27,12 @@ assert1 <- function(cohortData34to36, cohortData) {
 }
 
 #' @param columns Vector of column names on which to test for unique cohortData
-#'
+#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
 #' @export
 #' @rdname assertions
-assertUniqueCohortData <- function(cohortData, columns) {
-  if (getOption("LandR.assertions")) {
+assertUniqueCohortData <- function(cohortData, columns,
+                                   doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
     obj <- cohortData[, .N, by = columns]
     whNEQOne <- which(obj$N != 1)
     test1 <- length(whNEQOne) == 0
@@ -43,12 +45,14 @@ assertUniqueCohortData <- function(cohortData, columns) {
 #' @param ecoregionMap The \code{ecoregionMap}, a raster of all the unique groupings
 #' @param speciesEcoregion The \code{speciesEcoregion} \code{data.table}
 #' @param minRelativeB TODO: add description
+#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
 #'
 #' @export
 #' @importFrom utils str
 #' @rdname assertions
-assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB) {
-  if (getOption("LandR.assertions", FALSE)) {
+assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
+                       doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
     erg <- list()
     if (!missing(ecoregionMap))
       erg[[1]] <- sort(na.omit(unique(factorValues2(ecoregionMap, ecoregionMap[],
@@ -75,10 +79,13 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB)
 
 #' @param obj A data.frame or data.table-like object
 #' @param colClasses A named vector of column classes, where the names are the column names
+#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
+#'
 #' @export
 #' @rdname assertions
-assertColumns <- function(obj, colClasses) {
-  if (getOption("LandR.assertions")) {
+assertColumns <- function(obj, colClasses,
+                          doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
     colNames <- names(colClasses)
     test1 <- all(colNames %in% colnames(obj))
     test2 <- all(sapply(seq(NCOL(obj[, colNames, with = FALSE])),
@@ -101,6 +108,7 @@ assertColumns <- function(obj, colClasses) {
 #'   can diverge. Default 1.
 #' @param message An optional message to print. This may help identify where this function
 #'   was called.
+#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
 #'
 #' @note
 #' TODO
@@ -109,8 +117,9 @@ assertColumns <- function(obj, colClasses) {
 #' @importFrom crayon green
 #' @importFrom stats na.omit
 assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1,
-                           message = "", verbose = getOption("LandR.verbose", TRUE)) {
-  if (verbose) {
+                           message = "", doAssertion = getOption("LandR.assertions", TRUE),
+                           verbose = getOption("LandR.verbose", TRUE)) {
+  if (doAssertion) {
     a <- sort(unique(na.omit(pixelGroupMap[])))
     b <- sort(unique(na.omit(cohortData$pixelGroup)))
     ## test1 and test2 can be 1 because there could be pixelGroup of 0,
@@ -123,10 +132,12 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
     test3 <- which(cohortDataN$N != 1)
     if (test1 > maxExpectedNumDiverge || test2 > maxExpectedNumDiverge) {
       if (nchar(message) > 0) message(message)
-      if (test1 > maxExpectedNumDiverge) message("test1 is ", test1,
-                                                 " -- too many pixelGroups on pixelGroupMap")
-      if (test2 > maxExpectedNumDiverge) message("test2 is ", test2,
-                                                 " -- too many pixelGroups in cohortData")
+      if (verbose) {
+        if (test1 > maxExpectedNumDiverge) message("test1 is ", test1,
+                                                   " -- too many pixelGroups on pixelGroupMap")
+        if (test2 > maxExpectedNumDiverge) message("test2 is ", test2,
+                                                   " -- too many pixelGroups in cohortData")
+      }
       stop("The sim$pixelGroupMap and cohortData have unmatching pixelGroup.",
            " They must be matching. Please contact the module developers")
     }
@@ -144,12 +155,14 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
 #' This is the full pixelCohortData, not the collapsed one
 #'
 #' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
 #'
 #' @inheritParams updateCohortData
 #'
 #' @export
-assertPixelCohortData <- function(pixelCohortData, pixelGroupMap) {
-  if (isTRUE(getOption("LandR.assertions"))) {
+assertPixelCohortData <- function(pixelCohortData, pixelGroupMap,
+                                  doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
     uniquePixelsInCohorts <- pixelGroupMap[][unique(pixelCohortData$pixelIndex)]
     pixelsOnMap <- sum(!is.na(pixelGroupMap[]), na.rm = TRUE)
     lenUniquePixelsInCohorts <- length(unique(pixelCohortData$pixelIndex))

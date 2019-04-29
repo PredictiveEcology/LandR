@@ -50,6 +50,7 @@ if (getRversion() >= "3.1.0") {
 #'   In LANDIS-II, this is called "Succession Timestep". This is used here
 #' @param verbose Integer, where increasing number is increasing verbosity. Currently,
 #'    only level 1 exists; but this may change.
+#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
 #'
 #' @return
 #' A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
@@ -65,7 +66,8 @@ if (getRversion() >= "3.1.0") {
 updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
                              speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
                              successionTimestep,
-                             verbose = getOption("LandR.verbose", TRUE)) {
+                             verbose = getOption("LandR.verbose", TRUE),
+                             doAssertion = getOption("LandR.assertions", TRUE)) {
 
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
 
@@ -133,7 +135,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   # update pixelGroupMap
   pixelGroupMap[pixelsToChange$pixelIndex] <- pixelsToChange$pixelGroup
 
-  if (isTRUE(getOption("LandR.assertions"))) {
+  if (doAsserion) {
     if (!isTRUE(all(pixelsToChange$pixelGroup ==
                     pixelGroupMap[][pixelsToChange$pixelIndex])))
       stop("pixelGroupMap and newPixelCohortData$pixelGroupMap don't match in updateCohortData fn")
@@ -151,9 +153,9 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 
   outs <- rmMissingCohorts(cohortData, pixelGroupMap)
 
-  if (isTRUE(getOption("LandR.assertions"))) {
-    assertCohortData(outs$cohortData, outs$pixelGroupMap)
+  assertCohortData(outs$cohortData, outs$pixelGroupMap)
 
+  if (doAssertion) {
     maxPixelGroupFromCohortData <- max(outs$cohortData$pixelGroup)
     maxPixelGroup <- as.integer(maxValue(outs$pixelGroupMap))
     test1 <- (!identical(maxPixelGroup, maxPixelGroupFromCohortData))
@@ -254,6 +256,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 #'   \code{B}, \code{mortality}, \code{aNPPAct}, ond \code{sumB}.
 #' @param pixelGroupMap Raster layer with pixel values equal to a pixel group number
 #'   that correspondsd exactly to ]\code{pixelGroup} column in \code{cohortData}.
+#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
 #'
 #' @return
 #' A \code{list} with 2 \code{data.table} objects, \code{cohortData} and \code{pixelGroupMap},
@@ -263,7 +266,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 #' @importFrom data.table rbindlist set setkey
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
-rmMissingCohorts <- function(cohortData, pixelGroupMap) {
+rmMissingCohorts <- function(cohortData, pixelGroupMap,
+                             doAssertion = getOption("LandR.assertions", TRUE)) {
   pgmValues <- data.table(pixelGroup = getValues(pixelGroupMap),
                           pixelIndex = seq(ncell(pixelGroupMap)))
 
@@ -280,9 +284,7 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap) {
   # REMOVE pixels in pixelGroupMap that are no longer in the cohortData
   pixelGroupMap[pgsStillInPGMGoneFromCD$pixelIndex] <- NA
 
-  if (isTRUE(getOption("LandR.assertions"))) {
-    assertCohortData(cohortData, pixelGroupMap, message = "rmMissingCohorts")
-  }
+  assertCohortData(cohortData, pixelGroupMap, message = "rmMissingCohorts")
 
   if (NROW(unique(cohortData[pixelGroup == 67724]$ecoregionGroup)) > 1) stop()
 
@@ -443,6 +445,7 @@ describeCohortData <- function(cohortData) {
 #'     If \code{pixelIndex} is missing, the function will fill it
 #'     with \code{seq(ncell(rstLCC))}. If \code{speciesCode} is missing, the function
 #'     will replace it with a dummy value (\code{"allSpecies"}).
+#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
 #'
 #' @return
 #' A \code{data.table} with two columns, \code{pixelIndex} and \code{ecoregionGroup}.
@@ -457,7 +460,8 @@ describeCohortData <- function(cohortData) {
 #' @importFrom SpaDES.tools spread2
 convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
                                availableERC_by_Sp, theUnwantedPixels,
-                               ecoregionGroupVec, speciesEcoregion, pixelClassesToReplace) {
+                               ecoregionGroupVec, speciesEcoregion, pixelClassesToReplace,
+                               doAssertion = getOption("LandR.assertions", TRUE)) {
   if (!missing(pixelClassesToReplace))
     stop("pixelClassesToReplace is deprecated. Please use classesToReplace")
   if (!missing(ecoregionGroupVec))
@@ -511,7 +515,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     }
   }
 
-  if (getOption("LandR.assertions")) {
+  if (doAssertion) {
     #  stop("values of 34 and 35 on pixelCohortData and sim$LCC2005 don't match")
   }
   iterations <- 1
@@ -631,15 +635,17 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #'   represent percent cover by species
 #' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
 #'   to establish unique pixelGroups
+#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
 #'
 #' @author Eliot McIntire
 #' @export
 #' @importFrom crayon blue
 #' @importFrom data.table melt setnames
 #' @importFrom reproducible Cache
-makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroupBiomassClass) {
+makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroupBiomassClass,
+                                          doAssertion = getOption("LandR.assertions", TRUE)) {
   ### Create groupings
-  if (isTRUE(getOption("LandR.assertions"))) {
+  if (doAssertion) {
     expectedColNames <- c("age", "logAge", "initialEcoregionCode", "totalBiomass",
                           "lcc", "pixelIndex")
     if (!all(expectedColNames %in% colnames(inputDataTable)))
@@ -665,7 +671,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   if (length(duplicated(cohortData)) > 0)
     warning("cohortData contains duplicate rows.")
 
-  if (getOption("LandR.assertions"))
+  if (doAssertion)
     #describeCohortData(cohortData)
     message(blue("assign B = 0 and age = 0 for pixels where cover = 0, ",
                  "\n  because cover is most reliable dataset"))
