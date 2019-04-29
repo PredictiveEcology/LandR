@@ -135,7 +135,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   # update pixelGroupMap
   pixelGroupMap[pixelsToChange$pixelIndex] <- pixelsToChange$pixelGroup
 
-  if (doAsserion) {
+  if (doAssertion) {
     if (!isTRUE(all(pixelsToChange$pixelGroup ==
                     pixelGroupMap[][pixelsToChange$pixelIndex])))
       stop("pixelGroupMap and newPixelCohortData$pixelGroupMap don't match in updateCohortData fn")
@@ -823,10 +823,7 @@ columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 #' column
 #'
 #' @export
-#' @importFrom data.table
 #' @importFrom raster getValues ncell
-#' @importFrom stats na.omit
-
 makePixelCohortData <- function(cohortData, pixelGroupMap,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   if (!isTRUE("pixelGroup" %in% cohortData)) {
