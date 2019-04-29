@@ -801,3 +801,42 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, .specialData) {
 #'
 #' @export
 columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
+
+
+#' Generate \code{cohortData} table per pixel
+#'
+#' @param cohortData A \code{data.table} with columns:
+#'   \code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
+#'   \code{B}, \code{mortality}, \code{aNPPAct}, ond \code{sumB}.
+#' @param pixelGroupMap Raster layer with pixel values equal to a pixel group number
+#'   that corresponds exactly to ]\code{pixelGroup} column in \code{cohortData}.
+#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
+#'
+#' @return
+#' An expanded \code{cohortData} \code{dat.table} with a new \code{pixelIndex}
+#' column
+#'
+#' @export
+#' @importFrom data.table
+#' @importFrom raster getValues ncell
+#' @importFrom stats na.omit
+
+makePixelCohortData <- function(cohortData, pixelGroupMap,
+                                doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (!isTRUE("pixelGroup" %in% cohortData)) {
+    stop("cohortData must have either pixelGroup")
+  }
+  if (doAssertion)
+    assertCohortData(cohortData, pixelGroupMap)
+
+  pixelGroupTable <- na.omit(data.table(pixelGroup = getValues(pixelGroupMap),
+                                        pixelIndex = 1:ncell(pixelGroupMap)))
+  pixelCohortData <- cohortData[pixelGroupTable, on = "pixelGroup"]
+
+  if (doAssertion)
+    assertPixelCohortData(pixelCohortData, pixelGroupMap)
+
+  pixelCohortData
+}
+
+
