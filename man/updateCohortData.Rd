@@ -7,7 +7,8 @@
 \usage{
 updateCohortData(newPixelCohortData, cohortData, pixelGroupMap, time,
   speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
-  successionTimestep, verbose = getOption("LandR.verbose", TRUE))
+  successionTimestep, verbose = getOption("LandR.verbose", TRUE),
+  doAssertion = getOption("LandR.assertions", TRUE))
 
 .initiateNewCohorts(newPixelCohortData, cohortData, pixelGroupMap, time,
   speciesEcoregion)
@@ -43,6 +44,8 @@ In LANDIS-II, this is called "Succession Timestep". This is used here}
 
 \item{verbose}{Integer, where increasing number is increasing verbosity. Currently,
 only level 1 exists; but this may change.}
+
+\item{doAssertion}{Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}}
 }
 \value{
 A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with

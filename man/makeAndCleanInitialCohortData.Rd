@@ -5,7 +5,8 @@
 \title{Generate initial \code{cohortData} table}
 \usage{
 makeAndCleanInitialCohortData(inputDataTable, sppColumns,
-  pixelGroupBiomassClass)
+  pixelGroupBiomassClass, doAssertion = getOption("LandR.assertions",
+  TRUE))
 }
 \arguments{
 \item{inputDataTable}{A \code{data.table} with columns described above.}
@@ -15,6 +16,8 @@ represent percent cover by species}
 
 \item{pixelGroupBiomassClass}{Round B to the nearest \code{pixelGroupBiomassClass}
 to establish unique pixelGroups}
+
+\item{doAssertion}{Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}}
 }
 \description{
 Takes a single \code{data.table} input, which has the following columns in addition to

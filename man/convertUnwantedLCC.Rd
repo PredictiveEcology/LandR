@@ -6,7 +6,8 @@
 \usage{
 convertUnwantedLCC(classesToReplace = 34:36, rstLCC, availableERC_by_Sp,
   theUnwantedPixels, ecoregionGroupVec, speciesEcoregion,
-  pixelClassesToReplace)
+  pixelClassesToReplace, doAssertion = getOption("LandR.assertions",
+  TRUE))
 }
 \arguments{
 \item{classesToReplace}{Integer vector of classes that are are to be replaced, e.g.,
@@ -39,6 +40,8 @@ the user to only replace some of the pixels with a given class.}
 \item{speciesEcoregion}{Deprecated. Use \code{availableERC_by_Sp}}
 
 \item{pixelClassesToReplace}{Deprecated. Use \code{classesToReplace}}
+
+\item{doAssertion}{Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}}
 }
 \value{
 A \code{data.table} with two columns, \code{pixelIndex} and \code{ecoregionGroup}.

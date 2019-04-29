@@ -5,21 +5,37 @@
 \alias{assertUniqueCohortData}
 \alias{assertERGs}
 \alias{assertColumns}
+\alias{assertCohortData}
+\alias{assertPixelCohortData}
 \title{Assertions}
 \usage{
-assert1(cohortData34to36, cohortData)
+assert1(cohortData34to36, cohortData,
+  doAssertion = getOption("LandR.assertions", TRUE))
 
-assertUniqueCohortData(cohortData, columns)
+assertUniqueCohortData(cohortData, columns,
+  doAssertion = getOption("LandR.assertions", TRUE))
 
-assertERGs(ecoregionMap, cohortData, speciesEcoregion, minRelativeB)
+assertERGs(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
+  doAssertion = getOption("LandR.assertions", TRUE))
 
-assertColumns(obj, colClasses)
+assertColumns(obj, colClasses,
+  doAssertion = getOption("LandR.assertions", TRUE))
+
+assertCohortData(cohortData, pixelGroupMap, sim,
+  maxExpectedNumDiverge = 1, message = "",
+  doAssertion = getOption("LandR.assertions", TRUE),
+  verbose = getOption("LandR.verbose", TRUE))
+
+assertPixelCohortData(pixelCohortData, pixelGroupMap,
+  doAssertion = getOption("LandR.assertions", TRUE))
 }
 \arguments{
 \item{cohortData34to36}{A \code{cohortData} \code{data.table} with only the
 pixels what were lcc 34:36}
 
 \item{cohortData}{The full \code{cohortData} \code{data.table}}
+
+\item{doAssertion}{Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}}
 
 \item{columns}{Vector of column names on which to test for unique cohortData}
 
@@ -32,7 +48,26 @@ pixels what were lcc 34:36}
 \item{obj}{A data.frame or data.table-like object}
 
 \item{colClasses}{A named vector of column classes, where the names are the column names}
+
+\item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group
+number that correspondsd exactly to \code{pixelGroup} column in
+\code{cohortData}}
+
+\item{sim}{If the simList is included, then the browser() call will be more useful}
+
+\item{maxExpectedNumDiverge}{A numeric, length 1, indicating by how many they
+can diverge. Default 1.}
+
+\item{message}{An optional message to print. This may help identify where this function
+was called.}
+
+\item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
+
+\item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
 }
 \description{
-Assertions
+This is the full pixelCohortData, not the collapsed one
+}
+\note{
+TODO
 }
