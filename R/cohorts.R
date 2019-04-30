@@ -876,7 +876,7 @@ makePixelCohortData <- function(cohortData, pixelGroupMap,
 
   pixelGroupTable <- na.omit(data.table(pixelGroup = getValues(pixelGroupMap),
                                         pixelIndex = 1:ncell(pixelGroupMap)))
-  pixelCohortData <- cohortData[pixelGroupTable, on = "pixelGroup"]
+  pixelCohortData <- cohortData[pixelGroupTable, on = "pixelGroup", nomatch = 0]
 
   assertPixelCohortData(pixelCohortData, pixelGroupMap, doAssertion = doAssertion)
 
@@ -906,7 +906,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
   noPixelsXGroup <- data.table(noPixels = tabulate(pixelGroupMap[]),
                                pixelGroup = c(1:maxValue(pixelGroupMap)))
 
-  pixelCohortData <- cohortData[noPixelsXGroup, on = "pixelGroup"]
+  pixelCohortData <- cohortData[noPixelsXGroup, on = "pixelGroup", nomatch = 0]
 
   if (doAssertion) {
     test1 <- length(setdiff(pixelCohortData$pixelGroup, cohortData$pixelGroup)) > 0
