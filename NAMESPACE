@@ -2,6 +2,7 @@
 
 export(.cleanLandWebStudyArea)
 export(CASFRItoSpRasts)
+export(addNoPixel2CohortData)
 export(asInteger)
 export(assert1)
 export(assertCohortData)

@@ -4,7 +4,7 @@ if (getRversion() >= "3.1.0") {
     "ecoregion", "ecoregionGroup", "hasBadAge",
     "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
     "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
-    "newPossLCC", "outBiomass", "pixelIndex", "pixels", "possERC",
+    "newPossLCC", "noPixels", "outBiomass", "pixelIndex", "pixels", "possERC",
     "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
     "temppixelGroup", "toDelete", "totalBiomass",
     "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
@@ -838,6 +838,38 @@ makePixelCohortData <- function(cohortData, pixelGroupMap,
 
   if (doAssertion)
     assertPixelCohortData(pixelCohortData, pixelGroupMap)
+#' Get no. pixels per \code{pixelGroup} and add it to \code{cohortData}
+#'
+#' @param cohortData A \code{data.table} with columns:
+#'   \code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
+#'   \code{B}, \code{mortality}, \code{aNPPAct}, ond \code{sumB}.
+#' @param pixelGroupMap Raster layer with pixel values equal to a pixel group number
+#'   that corresponds exactly to ]\code{pixelGroup} column in \code{cohortData}.
+#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
+#'
+#' @return
+#' An \code{cohortData} \code{dat.table} with a new \code{noPixels}
+#' column
+#'
+#' @export
+#' @importFrom raster maxValue
+#' @importFrom data.table data.table
+addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
+                                  doAssertion = getOption("LandR.assertions", TRUE)) {
+  assertCohortData(cohortData, pixelGroupMap, doAssertion = doAssertion)
+
+  noPixelsXGroup <- data.table(noPixels = tabulate(pixelGroupMap[]),
+                               pixelGroup = c(1:maxValue(pixelGroupMap)))
+
+  pixelCohortData <- cohortData[noPixelsXGroup, on = "pixelGroup"]
+
+  if (doAssertion) {
+    test1 <- length(setdiff(pixelCohortData$pixelGroup, cohortData$pixelGroup)) > 0
+    test2 <- sum(unique(pixelCohortData[, .(pixelGroup, noPixels)])$noPixels) != sum(!is.na(pixelGroupMap[]))
+
+    if (test1 | test2)
+      stop("pixelGroups differ between pixelCohortData/pixelGroupMap and cohortData")
+  }
 
   pixelCohortData
 }
