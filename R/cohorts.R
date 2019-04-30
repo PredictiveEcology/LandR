@@ -729,15 +729,11 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
                                            , .(initialEcoregionCode, speciesCode)]
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[
       cohortData, on = c("initialEcoregionCode", "speciesCode"), nomatch = 0]
-    #ageModel <- quote(lme4::lmer(age ~ B * speciesCode + (1 | initialEcoregionCode) + cover))
-    ageModel <- quote(randomForest::randomForest(x = data.table::setDF(cohortDataMissingAgeUnique[, age := NULL]),
-                                                 y = cohortDataMissingAgeUnique$age,
-                                                 importance = TRUE,
-                                                 proximity = TRUE))
+    ageModel <- quote(lme4::lmer(age ~ B * speciesCode + (1 | initialEcoregionCode) + cover))
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(B, age, speciesCode,
                                                                  initialEcoregionCode, cover)]
     cohortDataMissingAgeUnique <- subsetDT(cohortDataMissingAgeUnique,
-                                           by = c(),
+                                           by = c("initialEcoregionCode", "speciesCode"),
                                            doSubset = doSubset)
     browser()
     message(blue("Impute missing age values: started", Sys.time()))
@@ -855,7 +851,6 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, .specialData) {
 #'
 #' @export
 columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
-
 
 #' Generate \code{cohortData} table per pixel
 #'
