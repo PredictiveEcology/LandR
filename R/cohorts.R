@@ -696,7 +696,8 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
 #' @importFrom randomForest randomForest
 #' @importFrom reproducible Cache
 makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroupBiomassClass,
-                                          doAssertion = getOption("LandR.assertions", TRUE)) {
+                                          doAssertion = getOption("LandR.assertions", TRUE),
+                                          doSubset =  TRUE) {
   ### Create groupings
   if (doAssertion) {
     expectedColNames <- c("age", "logAge", "initialEcoregionCode", "totalBiomass",
@@ -729,9 +730,15 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[
       cohortData, on = c("initialEcoregionCode", "speciesCode"), nomatch = 0]
     #ageModel <- quote(lme4::lmer(age ~ B * speciesCode + (1 | initialEcoregionCode) + cover))
-    ageModel <- quote(randomForest::randomForest(age ~ B + speciesCode + initialEcoregionCode + cover))
+    ageModel <- quote(randomForest::randomForest(x = data.table::setDF(cohortDataMissingAgeUnique[, age := NULL]),
+                                                 y = cohortDataMissingAgeUnique$age,
+                                                 importance = TRUE,
+                                                 proximity = TRUE))
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(B, age, speciesCode,
                                                                  initialEcoregionCode, cover)]
+    cohortDataMissingAgeUnique <- subsetDT(cohortDataMissingAgeUnique,
+                                           by = c(),
+                                           doSubset = doSubset)
     browser()
     message(blue("Impute missing age values: started", Sys.time()))
     outAge <- Cache(statsModel, modelFn = ageModel,
@@ -765,6 +772,29 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   # cohortData[ , coverProp := (cover/100 * (NROW(cohortData) - 1) + 0.5) / NROW(cohortData)]
 
   return(cohortData)
+}
+
+#' Subset a \code{data.table} with random subsampling within \code{by} groups
+#'
+#' @param DT A \code{data.table}
+#' @param by Character vector of column names to use for groups
+#' @param doSubset Logical or numeric indicating the number of subsamples to use
+#'
+#' @export
+subsetDT <- function(DT, by, doSubset = TRUE) {
+  if (!is.null(doSubset)) {
+    if (!isFALSE(doSubset)) {
+      sam <- if (is.numeric(doSubset)) doSubset else 50
+      message("subsampling initial dataset for faster estimation of maxBiomass parameter: ",
+              "using maximum of ", sam, " samples per combination of ecoregionGroup and speciesCode. ",
+              "Change 'doSubset' to a different number if this is not enough")
+      # subset -- add line numbers of those that were sampled
+      a <- DT[, list(lineNum = .I[sample(.N, size = min(.N, sam))]), by = by]
+      # Select only those row numbers from whole dataset
+      DT <- DT[a$lineNum]
+    }
+  }
+  return(DT)
 }
 
 #' The generic statistical model -- to run lmer or glmer
