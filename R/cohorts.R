@@ -745,8 +745,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     print(outAge$rsq)
     cohortDataMissingAge[
       , imputedAge := pmax(0L, asInteger(predict(outAge$mod,
-                                                 newdata = cohortDataMissingAge,
-                                                 allow.new.levels = TRUE)))]
+                                                 newdata = cohortDataMissingAge)))]
     cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
       cohortData, on = c("pixelIndex", "speciesCode")]
     cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = log(imputedAge))]
