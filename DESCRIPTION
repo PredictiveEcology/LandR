@@ -43,6 +43,7 @@ Imports:
     quickPlot,
     raster,
     RColorBrewer,
+    randomForest,
     reproducible,
     sf,
     sp,
