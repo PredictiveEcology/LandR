@@ -619,7 +619,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 
 #' @importFrom crayon blue
 #' @importFrom data.table melt setnames
-createCohortData <- function(inputDataTable, doAssertion = getOption("LandR.assertions", TRUE)) {
+createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
+                             doAssertion = getOption("LandR.assertions", TRUE)) {
   coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
   newCoverColNames <- gsub("cover\\.", "", coverColNames)
   setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
@@ -692,6 +693,7 @@ createCohortData <- function(inputDataTable, doAssertion = getOption("LandR.asse
 #' @export
 #' @importFrom crayon blue
 #' @importFrom data.table melt setnames
+#' @importFrom randomForest randomForest
 #' @importFrom reproducible Cache
 makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroupBiomassClass,
                                           doAssertion = getOption("LandR.assertions", TRUE)) {
@@ -710,7 +712,9 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
            " be because they more NA values than the Land Cover raster")
   }
 
-  cohortData <- Cache(createCohortData, inputDataTable = inputDataTable, doAssertion = doAssertion)
+  cohortData <- Cache(createCohortData, inputDataTable = inputDataTable,
+                      pixelGroupBiomassClass = pixelGroupBiomassClass,
+                      doAssertion = doAssertion)
 
   ######################################################
   # Impute missing ages on poor age dataset
@@ -725,7 +729,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[
       cohortData, on = c("initialEcoregionCode", "speciesCode"), nomatch = 0]
     #ageModel <- quote(lme4::lmer(age ~ B * speciesCode + (1 | initialEcoregionCode) + cover))
-    ageModel <- quote(lme4::lmer(age ~ B * speciesCode + (1 | initialEcoregionCode) + cover))
+    ageModel <- quote(randomForest::randomForest(age ~ B + speciesCode + initialEcoregionCode + cover))
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(B, age, speciesCode,
                                                                  initialEcoregionCode, cover)]
     browser()
