@@ -153,7 +153,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 
   outs <- rmMissingCohorts(cohortData, pixelGroupMap)
 
-  assertCohortData(outs$cohortData, outs$pixelGroupMap)
+  assertCohortData(outs$cohortData, outs$pixelGroupMap,
+                   doAssertion = doAssertion, verbose = verbose)
 
   if (doAssertion) {
     maxPixelGroupFromCohortData <- max(outs$cohortData$pixelGroup)
@@ -284,7 +285,8 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
   # REMOVE pixels in pixelGroupMap that are no longer in the cohortData
   pixelGroupMap[pgsStillInPGMGoneFromCD$pixelIndex] <- NA
 
-  assertCohortData(cohortData, pixelGroupMap, message = "rmMissingCohorts")
+  assertCohortData(cohortData, pixelGroupMap, message = "rmMissingCohorts",
+                   doAssertion = doAssertion)
 
   if (NROW(unique(cohortData[pixelGroup == 67724]$ecoregionGroup)) > 1) stop()
 
@@ -826,18 +828,17 @@ columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 #' @importFrom raster getValues ncell
 makePixelCohortData <- function(cohortData, pixelGroupMap,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
-  if (!isTRUE("pixelGroup" %in% names(cohortData))) {
-    stop("cohortData must have pixelGroup")
-  }
-  if (doAssertion)
-    assertCohortData(cohortData, pixelGroupMap)
+  assertCohortData(cohortData, pixelGroupMap, doAssertion = doAssertion)
 
   pixelGroupTable <- na.omit(data.table(pixelGroup = getValues(pixelGroupMap),
                                         pixelIndex = 1:ncell(pixelGroupMap)))
   pixelCohortData <- cohortData[pixelGroupTable, on = "pixelGroup"]
 
-  if (doAssertion)
-    assertPixelCohortData(pixelCohortData, pixelGroupMap)
+  assertPixelCohortData(pixelCohortData, pixelGroupMap, doAssertion = doAssertion)
+
+  pixelCohortData
+}
+
 #' Get no. pixels per \code{pixelGroup} and add it to \code{cohortData}
 #'
 #' @param cohortData A \code{data.table} with columns:
