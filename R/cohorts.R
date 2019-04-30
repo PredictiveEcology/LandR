@@ -617,6 +617,57 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   out3
 }
 
+#' @importFrom crayon blue
+#' @importFrom data.table melt setnames
+createCohortData <- function(inputDataTable, doAssertion = getOption("LandR.assertions", TRUE)) {
+  coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
+  newCoverColNames <- gsub("cover\\.", "", coverColNames)
+  setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
+  message(blue("Create initial cohortData object, with no pixelGroups yet"))
+  cohortData <- data.table::melt(inputDataTable,
+                                 value.name = "cover",
+                                 measure.vars = newCoverColNames,
+                                 variable.name = "speciesCode")
+  cohortData[, coverOrig := cover]
+  if (any(duplicated(cohortData)))
+    warning("cohortData contains duplicate rows.")
+
+  if (doAssertion)
+    #describeCohortData(cohortData)
+    message(blue("assign B = 0 and age = 0 for pixels where cover = 0, ",
+                 "\n  because cover is most reliable dataset"))
+
+  cohortData[cover == 0, `:=`(age = 0L, logAge = -Inf, B = 0L)]
+  message(blue("assign totalBiomass = 0 if sum(cover) = 0 in a pixel, ",
+               "\n  because cover is most reliable dataset"))
+  cohortData <- cohortData[, sum(cover) == 0, by = "pixelIndex"][V1 == TRUE][
+    cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
+  cohortData[, V1 := NULL]
+
+  ## CRAZY TODO: DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
+  # message(crayon::blue(paste("POSSIBLE ALERT:",
+  #                            "assume deciduous cover is 1/2 the conversion to B as conifer")))
+  # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)]
+  cohortData[ , cover := {
+    sumCover <- sum(cover)
+    if (sumCover > 100) {
+      cover <- asInteger(cover/(sumCover + 0.0001) * 100L)
+    }
+    cover
+  }, by = "pixelIndex"]
+
+  # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
+  message(blue("Divide total B of each pixel by the relative cover of the cohorts"))
+  cohortData[ , B := asInteger(mean(totalBiomass) * cover / 100), by = "pixelIndex"]
+  message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
+  cohortData[ , B := asInteger(ceiling(B / pixelGroupBiomassClass) *
+                                 pixelGroupBiomassClass)]
+  message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
+  cohortData[ , totalBiomass := asInteger(totalBiomass)]
+
+  return(cohortData)
+}
+
 #' Generate initial \code{cohortData} table
 #'
 #' Takes a single \code{data.table} input, which has the following columns in addition to
@@ -659,49 +710,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
            " be because they more NA values than the Land Cover raster")
   }
 
-  coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
-  newCoverColNames <- gsub("cover\\.", "", coverColNames)
-  setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
-  message(crayon::blue("Create initial cohortData object, with no pixelGroups yet"))
-  cohortData <- data.table::melt(inputDataTable,
-                                 value.name = "cover",
-                                 measure.vars = newCoverColNames,
-                                 variable.name = "speciesCode")
-  cohortData[, coverOrig := cover]
-  if (any(duplicated(cohortData)))
-    warning("cohortData contains duplicate rows.")
-
-  if (doAssertion)
-    #describeCohortData(cohortData)
-    message(blue("assign B = 0 and age = 0 for pixels where cover = 0, ",
-                 "\n  because cover is most reliable dataset"))
-  cohortData[cover == 0, `:=`(age = 0L, logAge = -Inf, B = 0L)]
-  message(blue("assign totalBiomass = 0 if sum(cover) = 0 in a pixel, ",
-               "\n  because cover is most reliable dataset"))
-  cohortData <- cohortData[, sum(cover) == 0, by = "pixelIndex"][V1 == TRUE][
-    cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
-  cohortData[, V1 := NULL]
-
-  ## CRAZY TODO: DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
-  # message(crayon::blue(paste("POSSIBLE ALERT:",
-  #                            "assume deciduous cover is 1/2 the conversion to B as conifer")))
-  # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)]
-  cohortData[ , cover := {
-    sumCover <- sum(cover)
-    if (sumCover > 100) {
-      cover <- asInteger(cover/(sumCover + 0.0001) * 100L)
-    }
-    cover
-  }, by = "pixelIndex"]
-
-  # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
-  message(crayon::blue("Divide total B of each pixel by the relative cover of the cohorts"))
-  cohortData[ , B := asInteger(mean(totalBiomass) * cover / 100), by = "pixelIndex"]
-  message(crayon::blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
-  cohortData[ , B := asInteger(ceiling(B / pixelGroupBiomassClass) *
-                                 pixelGroupBiomassClass)]
-  message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
-  cohortData[ , totalBiomass := asInteger(totalBiomass)]
+  cohortData <- Cache(createCohortData, inputDataTable = inputDataTable, doAssertion = doAssertion)
 
   ######################################################
   # Impute missing ages on poor age dataset
@@ -715,17 +724,22 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
                                            , .(initialEcoregionCode, speciesCode)]
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[
       cohortData, on = c("initialEcoregionCode", "speciesCode"), nomatch = 0]
+    #ageModel <- quote(lme4::lmer(age ~ B * speciesCode + (1 | initialEcoregionCode) + cover))
     ageModel <- quote(lme4::lmer(age ~ B * speciesCode + (1 | initialEcoregionCode) + cover))
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(B, age, speciesCode,
                                                                  initialEcoregionCode, cover)]
+    browser()
     message(blue("Impute missing age values: started", Sys.time()))
     outAge <- Cache(statsModel, modelFn = ageModel,
                     uniqueEcoregionGroups = unique(cohortDataMissingAgeUnique$initialEcoregionCode),
-                    .specialData = cohortDataMissingAgeUnique)
+                    .specialData = cohortDataMissingAgeUnique,
+                    omitArgs = ".specialData")
     message(blue("                           completed", Sys.time()))
     print(outAge$rsq)
     cohortDataMissingAge[
-      , imputedAge := pmax(0L, asInteger(predict(outAge$mod, newdata = cohortDataMissingAge)))]
+      , imputedAge := pmax(0L, asInteger(predict(outAge$mod,
+                                                 newdata = cohortDataMissingAge,
+                                                 allow.new.levels = TRUE)))]
     cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
       cohortData, on = c("pixelIndex", "speciesCode")]
     cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = log(imputedAge))]
@@ -746,7 +760,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   # https://stats.stackexchange.com/questions/31300/dealing-with-0-1-values-in-a-beta-regression
   # cohortData[ , coverProp := (cover/100 * (NROW(cohortData) - 1) + 0.5) / NROW(cohortData)]
 
-  cohortData
+  return(cohortData)
 }
 
 #' The generic statistical model -- to run lmer or glmer
