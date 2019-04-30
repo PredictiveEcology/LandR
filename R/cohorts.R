@@ -735,7 +735,6 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     cohortDataMissingAgeUnique <- subsetDT(cohortDataMissingAgeUnique,
                                            by = c("initialEcoregionCode", "speciesCode"),
                                            doSubset = doSubset)
-    browser()
     message(blue("Impute missing age values: started", Sys.time()))
     outAge <- Cache(statsModel, modelFn = ageModel,
                     uniqueEcoregionGroups = unique(cohortDataMissingAgeUnique$initialEcoregionCode),
@@ -743,9 +742,12 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
                     omitArgs = ".specialData")
     message(blue("                           completed", Sys.time()))
     print(outAge$rsq)
+
+    ## allow.new.levels = TRUE because some groups will have only NA for age for all species
     cohortDataMissingAge[
       , imputedAge := pmax(0L, asInteger(predict(outAge$mod,
-                                                 newdata = cohortDataMissingAge)))]
+                                                 newdata = cohortDataMissingAge,
+                                                 allow.new.levels = TRUE)))]
     cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
       cohortData, on = c("pixelIndex", "speciesCode")]
     cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = log(imputedAge))]
