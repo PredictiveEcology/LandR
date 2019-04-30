@@ -118,6 +118,9 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
                            message = "", doAssertion = getOption("LandR.assertions", TRUE),
                            verbose = getOption("LandR.verbose", TRUE)) {
   if (doAssertion) {
+    if (!isTRUE("pixelGroup" %in% names(cohortData))) {
+      stop("cohortData must have pixelGroup")
+    }
     a <- sort(unique(na.omit(pixelGroupMap[])))
     b <- sort(unique(na.omit(cohortData$pixelGroup)))
     ## test1 and test2 can be 1 because there could be pixelGroup of 0,
