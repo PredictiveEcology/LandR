@@ -696,7 +696,6 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
 #' @export
 #' @importFrom crayon blue
 #' @importFrom data.table melt setnames
-#' @importFrom randomForest randomForest
 #' @importFrom reproducible Cache
 makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroupBiomassClass,
                                           doAssertion = getOption("LandR.assertions", TRUE),
