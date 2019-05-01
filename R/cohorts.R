@@ -690,6 +690,7 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
 #' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
 #'   to establish unique pixelGroups
 #' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
+#' @param doSubset Turns on/off subsetting. Defaults to \code{TRUE}.
 #'
 #' @author Eliot McIntire
 #' @export

@@ -6,7 +6,7 @@
 \usage{
 makeAndCleanInitialCohortData(inputDataTable, sppColumns,
   pixelGroupBiomassClass, doAssertion = getOption("LandR.assertions",
-  TRUE))
+  TRUE), doSubset = TRUE)
 }
 \arguments{
 \item{inputDataTable}{A \code{data.table} with columns described above.}
@@ -18,6 +18,8 @@ represent percent cover by species}
 to establish unique pixelGroups}
 
 \item{doAssertion}{Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}}
+
+\item{doSubset}{Turns on/off subsetting. Defaults to \code{TRUE}.}
 }
 \description{
 Takes a single \code{data.table} input, which has the following columns in addition to
