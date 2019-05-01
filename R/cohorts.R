@@ -699,7 +699,7 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
 #' @importFrom reproducible Cache
 makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroupBiomassClass,
                                           doAssertion = getOption("LandR.assertions", TRUE),
-                                          doSubset =  TRUE) {
+                                          doSubset = TRUE) {
   ### Create groupings
   if (doAssertion) {
     expectedColNames <- c("age", "logAge", "initialEcoregionCode", "totalBiomass",
