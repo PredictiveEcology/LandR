@@ -818,34 +818,56 @@ subsetDT <- function(DT, by, doSubset = TRUE) {
 #' @importFrom MuMIn r.squaredGLMM
 #' @importFrom stats as.formula glm fitted predict
 statsModel <- function(modelFn, uniqueEcoregionGroups, .specialData) {
-  # check the no of grouping levels
-  modelFn2 <- deparse(modelFn)
-  modelFn2[1] <- paste0(modelFn2[!grepl("family", modelFn2)], collapse = "")
+  ## convert model call to vector of arguments
+  modelArgs <- as.character(modelFn)
+  names(modelArgs) <- names(modelFn)
 
-  if (grepl("\\|", modelFn2[1])) {
-    groupVar <- sub("\\).*", "", sub(".*\\| ", "", modelFn2[1]))
+  ## function name
+  fun <- modelArgs[[1]]
+
+  ## get formula and check
+  form <- tryCatch(as.formula(modelArgs[2]),
+                   error = function(e)
+                     stop(paste("Could not convert '", modelArgs[2], "'to formula.",
+                                "Check if formula is of type 'Y ~ X'")))
+
+  ## check the no of grouping levels
+  if (grepl("\\|", modelArgs[2])) {
+    groupVar <- sub("\\).*", "", sub(".*\\| ", "",  modelArgs[2]))
     keepGrouping <- NROW(unique(.specialData[, ..groupVar])) >= 2
 
     if (!keepGrouping) {
-      form <- sub(".*?\\(", "", modelFn2[1])
-      form <- sub("(.*\\)).*", "\\1", form)
-      form <- sub("\\+ \\(.*\\|.*\\)", "", form)
+      form <- sub("\\+ \\(.*\\|.*\\)", "", modelArgs[2])
+      form <- as.formula(form)
 
       ## change to glm if dropping random effects
-      whereFam <- grepl("family", modelFn2)
-      if (any(whereFam)) {
-        fam <- sub(" ", "", sub("\\).*", "", sub(".*=", "", modelFn2[whereFam])))
-        modelFn <- parse(text = paste0("stats::glm(", form, ", family = ", fam, ")"))
-      } else
-        modelFn <- parse(text = paste0("stats::glm(", form, ")"))
+      fun <- "stats::glm"
+
+      whereFam <- grep("family", names(modelArgs))
+      modelFn2 <- if (length(whereFam))
+        call(fun, form, family = modelArgs[[whereFam]]) else
+          call(fun, form)
 
       message(blue("Grouping variable "), red("only has one level. "),
               blue("Formula changed to\n",
-                   magenta(paste0(format(modelFn, appendLF = FALSE), collapse = ""))))
+                   magenta(paste0(format(modelFn2, appendLF = FALSE), collapse = ""))))
     }
   }
 
-  mod <- with(.specialData, eval(modelFn))
+  ## get function and check
+  fun <- reproducible:::.extractFunction(fun)
+  if (!is.function(fun))
+    stop(paste0("Can't find the function '", modelArgs[1], "'.",
+                " Is the function name correct and the package installed?"))
+
+  ## prepare arguments, and strip function from list
+  modelArgs <- as.list(modelArgs)
+  modelArgs[[2]] <- form
+  names(modelArgs)[2] <- "formula"
+  modelArgs[[1]] <- NULL
+  modelArgs$data <- quote(.specialData)
+
+  mod <- do.call(fun, modelArgs)
 
   list(mod = mod, pred = fitted(mod), rsq = MuMIn::r.squaredGLMM(mod))
 }
