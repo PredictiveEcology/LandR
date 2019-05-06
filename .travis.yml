@@ -7,29 +7,29 @@ env:
     - CRAN_REPO=https://cran.rstudio.com
 matrix:
   include:
-#  - os: linux
-#    dist: trusty
-#    r: oldrel
-#    addons:
-#      apt:
-#        sources:
-#          - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
-#        packages:
-#          - libgdal-dev
-#          - libgdal1-dev
-#          - libgeos-dev
-#          - libnlopt-dev
-#          - libproj-dev
-#          - libudunits2-dev
-#          - gdal-bin
-#    before_script:
-#      - "export DISPLAY=:99.0"
-#      - "sh -e /etc/init.d/xvfb start"
-#      - sleep 3 # give xvfb some time to start
-#    r_packages:
-#      - rgdal
-#      - rgeos
   - os: linux
+    dist: trusty
+    r: oldrel
+    addons:
+      apt:
+        sources:
+          - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
+        packages:
+          - libgdal-dev
+          - libgdal1-dev
+          - libgeos-dev
+          - libnlopt-dev
+          - libproj-dev
+          - libudunits2-dev
+          - gdal-bin
+    before_script:
+      - "export DISPLAY=:99.0"
+      - "sh -e /etc/init.d/xvfb start"
+      - sleep 3 # give xvfb some time to start
+    r_packages:
+      - rgdal
+      - rgeos
+ - os: linux
     dist: trusty
     r: release
     addons:
