@@ -462,8 +462,8 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   CCstack <- raster::stack(CCs)
   CCstackNames <- names(CCstack)
 
-  assertthat::assert_that(all.equal(raster::minValue(CCstack), rep(0, nlayers(CCstack))))
-  assertthat::assert_that(all.equal(raster::maxValue(CCstack), rep(10, nlayers(CCstack))))
+  assertthat::assert_that(identical(raster::minValue(CCstack), rep(0L, nlayers(CCstack))))
+  assertthat::assert_that(identical(raster::maxValue(CCstack), rep(10L, nlayers(CCstack))))
 
   CCstack[CCstack[] < 0] <- 0  ## turns stack into brick, so need to restack later
   CCstack[CCstack[] > 10] <- 10
