@@ -418,8 +418,9 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
 }
 
 #' @export
+#' @importFrom assertthat assert_that
 #' @importFrom map mapAdd maps
-#' @importFrom raster stack
+#' @importFrom raster maxValue minValue stack
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
                                               url = NULL,
@@ -460,6 +461,10 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   CCs <- maps(ml, layerName = ccs$layerName)
   CCstack <- raster::stack(CCs)
   CCstackNames <- names(CCstack)
+
+  assertthat::assert_that(identical(raster::minValue(CCstack), rep(0L, nlayers(CCstack))))
+  assertthat::assert_that(identical(raster::maxValue(CCstack), rep(10L, nlayers(CCstack))))
+
   CCstack[CCstack[] < 0] <- 0  ## turns stack into brick, so need to restack later
   CCstack[CCstack[] > 10] <- 10
   CCstack <- CCstack * 10 # convert back to percent
