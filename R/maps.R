@@ -171,17 +171,33 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #' @importFrom SpaDES.tools rasterizeReduced
 vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
                                 colors, unitTest = getOption("LandR.assertions", FALSE)) {
-  # shortcohortdata <- setkey(cohortdata, speciesCode)[
-  #   setkey(species[, .(speciesCode, speciesGroup)], speciesCode), nomatch = 0]
-  pixelGroupData <- cohortdata[, list(totalB = sum(B, na.rm = TRUE),
-                                      speciesCode, B), by = pixelGroup]
 
+  # Replacement algorithm to calculate speciesProportion
+  #    -- Eliot May 28, 2019 -- faster than the protected block below
+  # 1. Find length of each pixelGroup -- don't include pixelGroups in "by" that have only 1 cohort: N = 1
+  pixelGroupData <- cohortdata[ , list(N = .N), by = "pixelGroup"]
+  pixelGroupData <- pixelGroupData[cohortdata[, .(pixelGroup, B, speciesCode)], on = "pixelGroup"]
+  set(pixelGroupData, NULL, "totalB", pixelGroupData$B)
+  pixelGroupData[N!=1, totalB := sum(B, na.rm = TRUE), by = "pixelGroup"]
   pixelGroupData <- pixelGroupData[, .(speciesGroupB = sum(B, na.rm = TRUE),
-                                       totalB = mean(totalB, na.rm = TRUE)),
+                                       totalB = totalB[1]),
                                    by = c("pixelGroup", "speciesCode")]
-  pixelGroupData[, speciesProportion := speciesGroupB / totalB]
+  set(pixelGroupData, NULL, "speciesProportion", pixelGroupData$speciesGroupB /pixelGroupData$totalB)
+  # if (FALSE) { # old algorithm
+  #   b1 <- Sys.time()
+  #   pixelGroupData4 <- cohortdata[, list(totalB = sum(B, na.rm = TRUE),
+  #                                       speciesCode, B), by = pixelGroup]
+  #   pixelGroupData4 <- pixelGroupData4[, .(speciesGroupB = sum(B, na.rm = TRUE),
+  #                                        totalB = totalB[1]),
+  #                                    by = c("pixelGroup", "speciesCode")]
+  #   set(pixelGroupData4, NULL, "speciesProportion", pixelGroupData4$speciesGroupB /pixelGroupData4$totalB)
+  #   pixelGroupData4[, speciesProportion := speciesGroupB / totalB]
+  #   b2 <- Sys.time()
+  #   print(b2 - b1)
+  #   all.equal(pixelGroupData4[, .(pixelGroup, speciesCode, totalB)], pixelGroupData[,.(pixelGroup, speciesCode, totalB)])
+  # }
 
-  # created "mixed" class
+  # create "mixed" class #    -- Eliot May 28, 2019 -- faster than previous below
   # 1. anything with >= vegLeadingProportion is "pure"
   # 2. sort on pixelGroup and speciesProportion, reverse so that 1st row of each pixelGroup is the largest
   # 3. Keep only first row in each pixelGroup
