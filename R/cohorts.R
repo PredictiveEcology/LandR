@@ -294,7 +294,6 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
               pixelGroupMap = pixelGroupMap))
 }
 
-
 #' Add the correct \code{pixelGroups} to a \code{pixelDataTable} object
 #'
 #' Generates unique groupings of a data.table object where one or more rows can
@@ -316,8 +315,7 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
 #' @importFrom data.table setkey
 #' @importFrom SpaDES.core paddedFloatToChar
 generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
-                                columns = c("ecoregionGroup", "speciesCode",
-                                            "age", "B")) {
+                                columns = c("ecoregionGroup", "speciesCode", "age", "B")) {
   columnsOrig <- columns
   columns <- columns[columns %in% names(pixelDataTable)]
   columns2 <- paste0(columns, "2")
