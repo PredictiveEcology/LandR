@@ -930,7 +930,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 
   if (doAssertion) {
     test1 <- length(setdiff(pixelCohortData$pixelGroup, cohortData$pixelGroup)) > 0
-    test2 <- sum(unique(pixelCohortData[, .(pixelGroup, noPixels)])$noPixels) != sum(!is.na(pixelGroupMap[]))
+    test2 <- sum(unique(pixelCohortData[, .(pixelGroup, noPixels)])$noPixels) != sum(!is.na(pixelGroupMap[]) & pixelGroupMap[] != 0)  ## 0's have no cohorts.
 
     if (test1 | test2)
       stop("pixelGroups differ between pixelCohortData/pixelGroupMap and cohortData")

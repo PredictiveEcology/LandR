@@ -181,12 +181,33 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
                                    by = c("pixelGroup", "speciesCode")]
   pixelGroupData[, speciesProportion := speciesGroupB / totalB]
 
-  pixelGroupData2 <- pixelGroupData[, list(mixed = all(speciesProportion < vegLeadingProportion),
-                                           leading = speciesCode[which.max(speciesProportion)]),
-                                    by = "pixelGroup"]
-  pixelGroupData2[mixed == TRUE, leading := "Mixed"]
+  # created "mixed" class
+  # 1. anything with >= vegLeadingProportion is "pure"
+  # 2. sort on pixelGroup and speciesProportion, reverse so that 1st row of each pixelGroup is the largest
+  # 3. Keep only first row in each pixelGroup
+  # 4. change column names and convert pure to mixed ==> mixed <- !pure
+  pixelGroupData3 <- pixelGroupData[, list(pure = speciesProportion >= vegLeadingProportion,
+                               speciesCode, pixelGroup, speciesProportion)]
+  setorderv(pixelGroupData3, cols = c("pixelGroup", "speciesProportion"), order = -1L)
+  set(pixelGroupData3, NULL, "speciesProportion", NULL)
+  pixelGroupData3 <- pixelGroupData3[, .SD[1], by = "pixelGroup"]
+  pixelGroupData3[pure == FALSE, speciesCode := "Mixed"]
+  setnames(pixelGroupData3, "speciesCode", "leading")
+  # Change pure to mixed
+  pixelGroupData3[, pure := !pure]
+  setnames(pixelGroupData3, "pure", "mixed")
 
-  vegTypeMap <- rasterizeReduced(pixelGroupData2, pixelGroupMap, "leading", "pixelGroup")
+  # Old algorithm for above, this is ~43 times slower
+  # a2 <- Sys.time()
+  # pixelGroupData2 <- pixelGroupData[, list(mixed = all(speciesProportion < vegLeadingProportion),
+  #                                          leading = speciesCode[which.max(speciesProportion)]),
+  #                                   by = "pixelGroup"]
+  # pixelGroupData2[mixed == TRUE, leading := "Mixed"]
+  # b2 <- Sys.time()
+
+
+
+  vegTypeMap <- rasterizeReduced(pixelGroupData3, pixelGroupMap, "leading", "pixelGroup")
   levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]],
                               colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
                               stringsAsFactors = FALSE)
