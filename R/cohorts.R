@@ -335,35 +335,36 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
   pcd[ , c("pixelGroup") := as.integer(maxPixelGroup) + as.integer(factor(uniqueComboByPixelIndex))]
 
   if (getOption("LandR.assertions")) { # old algorithm
+    # prepare object 1 (pcd) for checking below
     pcd[, ord := 1:.N]
     setorderv(pcd, c("pixelIndex"))
     pcd[, pixelGroup2:=mapvalues(pixelGroup, from = unique(pixelGroup), to = as.character(seq_along(unique(pixelGroup))))]
     setorderv(pcd, "ord")
 
-
-    # pcdOrig <- data.table::copy(pcd)
     pcdOld <- data.table::copy(pcdOrig)
-    # Convert to unique numeric
 
+    # Convert to unique numeric
     pcdOld[ , c(columns2) := lapply(.SD, function(x) {
       a <- as.integer(factor(x))
     }), .SDcols = columns]
 
     # concatenate within rows -- e.g., ecoregionCode_speciesCode_age_biomass or 647_11_Abie_sp_100_2000
-    pcdOld[, uniqueComboByRow :=
-          as.integer(factor(
-            do.call(paste, as.list(.SD))
-          ))
-        ,
-        .SDcols = columns2]
+    pcdOld[, uniqueComboByRow := as.integer(factor( do.call(paste, as.list(.SD)))),
+           .SDcols = columns2]
 
     # concatenate within pixelIndex
-    pcdOld[ , c("uniqueComboByPixelIndex") := paste(uniqueComboByRow, collapse = "__"), by = "pixelIndex"]
-    pcdOld[ , c("pixelGroup") := as.integer(maxPixelGroup) + as.integer(factor(uniqueComboByPixelIndex))]
+    pcdOld[ , c("uniqueComboByPixelIndex") := paste(uniqueComboByRow, collapse = "__"),
+            by = "pixelIndex"]
+    pcdOld[ , c("pixelGroup") := as.integer(maxPixelGroup) +
+              as.integer(factor(uniqueComboByPixelIndex))]
+    # prepare object 2 (pcdOld) for checking below
     pcdOld[, ord := 1:.N]
     setorderv(pcdOld, c("pixelIndex"))
-    pcdOld[, pixelGroup2:=mapvalues(pixelGroup, from = unique(pixelGroup), to = as.character(seq_along(unique(pixelGroup))))]
+    pcdOld[, pixelGroup2:=mapvalues(pixelGroup, from = unique(pixelGroup),
+                                    to = as.character(seq_along(unique(pixelGroup))))]
     setorderv(pcdOld, "ord")
+
+    # The check
     if (!identical(pcdOld$pixelGroup2, pcd$pixelGroup2))
       stop("new generatePixelGroups algorithm failing")
   }
