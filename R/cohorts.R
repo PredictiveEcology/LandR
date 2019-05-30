@@ -80,7 +80,6 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   if (!"age" %in% colnames(newPixelCohortData))
     newPixelCohortData[, age := 1L]
 
-  allNewPixelGroups <- all(zeroOnPixelGroupMap)
   if (all(zeroOnPixelGroupMap)) {
     # Deal with pixels on the map that have no pixelGroup -- these are burned
     # pixels --> the entirely newly regenerated pixels DOes not require a
@@ -332,7 +331,7 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
 
   # concatenate within rows -- e.g., ecoregionCode_speciesCode_age_biomass or 647_11_Abie_sp_100_2000
   pcd[, uniqueComboByRow :=
-        as.integer(factor(do.call(paste, append(list(sep = "_"), as.list(.SD))))),
+        as.integer(factor(do.call(paste, as.list(.SD)))),
       .SDcols = columns2]
 
   # concatenate within pixelIndex
