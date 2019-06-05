@@ -2,7 +2,7 @@
 % Please edit documentation in R/cohorts.R
 \name{addNoPixel2CohortData}
 \alias{addNoPixel2CohortData}
-\title{Get no. pixels per \code{pixelGroup} and add it to \code{cohortData}}
+\title{Get number of pixels per \code{pixelGroup} and add it to \code{cohortData}}
 \usage{
 addNoPixel2CohortData(cohortData, pixelGroupMap,
   doAssertion = getOption("LandR.assertions", TRUE))
@@ -22,5 +22,5 @@ An \code{cohortData} \code{dat.table} with a new \code{noPixels}
 column
 }
 \description{
-Get no. pixels per \code{pixelGroup} and add it to \code{cohortData}
+Get number of pixels per \code{pixelGroup} and add it to \code{cohortData}
 }

@@ -14,5 +14,9 @@ An integer vector of length \code{x}, rounded to zero decimal places
   prior to \code{as.integer}
 }
 \description{
-Simple wrapper around \code{as.integer} to round, rather than truncate, values.
+Simple wrapper to round, rather than truncate, values.
+}
+\note{
+Values ending in .5 will be rounded up, which is reasonable for positive values of \code{x},
+but may not be desired for negative values.
 }

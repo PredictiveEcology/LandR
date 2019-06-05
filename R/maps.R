@@ -1,6 +1,6 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(".", ":=", "B", "HQ", "leading", "LQ", "mixed",
-                           "pixelGroup", "speciesCode", "speciesGroupB",
+  utils::globalVariables(c(".", ":=", "B", "HQ", "leading", "LQ", "mixed", "N",
+                           "pixelGroup", "pure", "speciesCode", "speciesGroupB",
                            "speciesProportion", "SPP", "totalB"))
 }
 
@@ -165,7 +165,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #'
 #' @author Eliot McIntire
 #' @export
-#' @importFrom data.table data.table setkey
+#' @importFrom data.table data.table setkey setorderv
 #' @importFrom pemisc factorValues2
 #' @importFrom raster getValues projection projection<- setValues
 #' @importFrom SpaDES.tools rasterizeReduced

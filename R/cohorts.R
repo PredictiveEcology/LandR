@@ -4,7 +4,7 @@ if (getRversion() >= "3.1.0") {
     "ecoregion", "ecoregionGroup", "hasBadAge",
     "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
     "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
-    "newPossLCC", "noPixels", "outBiomass", "pixelIndex", "pixels", "possERC",
+    "newPossLCC", "noPixels", "ord", "outBiomass", "pixelGroup2", "pixelIndex", "pixels", "possERC",
     "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
     "temppixelGroup", "toDelete", "totalBiomass",
     "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
@@ -311,7 +311,8 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
 #' This should likely be added to the \code{pixelDataTable} object immediately.
 #'
 #' @export
-#' @importFrom data.table setkey
+#' @importFrom data.table setkey setorderv
+#' @importFrom plyr mapvalues
 #' @importFrom SpaDES.core paddedFloatToChar
 generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
                                 columns = c("ecoregionGroup", "speciesCode", "age", "B")) {
@@ -338,7 +339,7 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
     # prepare object 1 (pcd) for checking below
     pcd[, ord := 1:.N]
     setorderv(pcd, c("pixelIndex"))
-    pcd[, pixelGroup2:=mapvalues(pixelGroup, from = unique(pixelGroup), to = as.character(seq_along(unique(pixelGroup))))]
+    pcd[, pixelGroup2 := mapvalues(pixelGroup, from = unique(pixelGroup), to = as.character(seq_along(unique(pixelGroup))))]
     setorderv(pcd, "ord")
 
     pcdOld <- data.table::copy(pcdOrig)
@@ -930,10 +931,10 @@ makePixelCohortData <- function(cohortData, pixelGroupMap,
 
   assertPixelCohortData(pixelCohortData, pixelGroupMap, doAssertion = doAssertion)
 
-  pixelCohortData
+  return(pixelCohortData)
 }
 
-#' Get no. pixels per \code{pixelGroup} and add it to \code{cohortData}
+#' Get number of pixels per \code{pixelGroup} and add it to \code{cohortData}
 #'
 #' @param cohortData A \code{data.table} with columns:
 #'   \code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
@@ -966,7 +967,5 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
       stop("pixelGroups differ between pixelCohortData/pixelGroupMap and cohortData")
   }
 
-  pixelCohortData
+  return(pixelCohortData)
 }
-
-
