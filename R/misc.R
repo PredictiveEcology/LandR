@@ -31,7 +31,7 @@ assignLightProb <- function(sufficientLight, newCohortData) {
 #'   prior to \code{as.integer}
 #'
 #' @export
-#' @example
+#' @examples
 #' x <- seq(-2, 2, 0.25)
 #' data.frame(dbl = x, int = asInteger(x))
 asInteger <- function(x)

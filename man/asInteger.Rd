@@ -20,3 +20,7 @@ Simple wrapper to round, rather than truncate, values.
 Values ending in .5 will be rounded up, which is reasonable for positive values of \code{x},
 but may not be desired for negative values.
 }
+\examples{
+x <- seq(-2, 2, 0.25)
+data.frame(dbl = x, int = asInteger(x))
+}

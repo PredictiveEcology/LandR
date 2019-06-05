@@ -25,12 +25,17 @@ to establish unique pixelGroups}
 Takes a single \code{data.table} input, which has the following columns in addition to
 others that will be labelled with species name, and contain percent cover of each:
 \itemize{
-  \item age
-  \item logAge
-  \item initialEcoregionCode
-  \item totalBiomass
-  \item pixelIndex
-  \item lcc
+  \item \code{pixelIndex} (integer)
+  \item \code{age} (integer)
+  \item \code{logAge} (numeric)
+  \item \code{initialEcoregionCode} (factor)
+  \item \code{totalBiomass} (integer)
+  \item \code{lcc} (integer)
+  \item \code{rasterToMatch} (integer)
+  \item \code{speciesCode} (factor)
+  \item \code{cover} (integer)
+  \item \code{coverOrig} (integer)
+  \item \code{B} (integer)
 }
 }
 \author{
