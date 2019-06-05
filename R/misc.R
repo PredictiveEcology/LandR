@@ -20,11 +20,11 @@ assignLightProb <- function(sufficientLight, newCohortData) {
 
 #' Convert numeric values to rounded integers
 #'
-#' Essentially a wrapper around round, rather than truncate which is what \code{as.integer}
+#' Essentially a wrapper around \code{round}, rather than \code{truncate}, which is what \code{as.integer}
 #' does. Internally, this is simply \code{as.integer(floor(x + 0.5))}.
 #'
-#' @note Values ending in .5 will be rounded up, whether positive or negative, "round up". This
-#' is different than \code{round}.
+#' @note Values ending in \code{.5} will be rounded up, whether positive or negative.
+#' This is different than \code{round}.
 #'
 #' @param x A numeric vector
 #'

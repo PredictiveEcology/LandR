@@ -14,12 +14,12 @@ An integer vector of length \code{x}, rounded to zero decimal places
   prior to \code{as.integer}
 }
 \description{
-Essentially a wrapper around round, rather than truncate which is what \code{as.integer}
+Essentially a wrapper around \code{round}, rather than \code{truncate}, which is what \code{as.integer}
 does. Internally, this is simply \code{as.integer(floor(x + 0.5))}.
 }
 \note{
-Values ending in .5 will be rounded up, whether positive or negative, "round up". This
-is different than \code{round}.
+Values ending in \code{.5} will be rounded up, whether positive or negative.
+This is different than \code{round}.
 }
 \examples{
 x <- seq(-2, 2, 0.25)
