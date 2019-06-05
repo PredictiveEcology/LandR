@@ -182,19 +182,19 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   pixelGroupData <- pixelGroupData[, .(speciesGroupB = sum(B, na.rm = TRUE), totalB = totalB[1]),
                                    by = c("pixelGroup", "speciesCode")]
   set(pixelGroupData, NULL, "speciesProportion", pixelGroupData$speciesGroupB /pixelGroupData$totalB)
-  # if (FALSE) { # old algorithm
-  #   b1 <- Sys.time()
-  #   pixelGroupData4 <- cohortdata[, list(totalB = sum(B, na.rm = TRUE),
-  #                                       speciesCode, B), by = pixelGroup]
-  #   pixelGroupData4 <- pixelGroupData4[, .(speciesGroupB = sum(B, na.rm = TRUE),
-  #                                        totalB = totalB[1]),
-  #                                    by = c("pixelGroup", "speciesCode")]
-  #   set(pixelGroupData4, NULL, "speciesProportion", pixelGroupData4$speciesGroupB /pixelGroupData4$totalB)
-  #   pixelGroupData4[, speciesProportion := speciesGroupB / totalB]
-  #   b2 <- Sys.time()
-  #   print(b2 - b1)
-  #   all.equal(pixelGroupData4[, .(pixelGroup, speciesCode, totalB)], pixelGroupData[,.(pixelGroup, speciesCode, totalB)])
-  # }
+  if (FALSE) { # old algorithm
+    b1 <- Sys.time()
+    pixelGroupData4 <- cohortdata[, list(totalB = sum(B, na.rm = TRUE),
+                                        speciesCode, B), by = pixelGroup]
+    pixelGroupData4 <- pixelGroupData4[, .(speciesGroupB = sum(B, na.rm = TRUE),
+                                         totalB = totalB[1]),
+                                     by = c("pixelGroup", "speciesCode")]
+    set(pixelGroupData4, NULL, "speciesProportion", pixelGroupData4$speciesGroupB /pixelGroupData4$totalB)
+    pixelGroupData4[, speciesProportion := speciesGroupB / totalB]
+    b2 <- Sys.time()
+    print(b2 - b1)
+    all.equal(pixelGroupData4[, .(pixelGroup, speciesCode, totalB)], pixelGroupData[,.(pixelGroup, speciesCode, totalB)])
+  }
 
   # create "mixed" class #    -- Eliot May 28, 2019 -- faster than previous below
   # 1. anything with >= vegLeadingProportion is "pure"
