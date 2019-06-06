@@ -680,7 +680,7 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
   # message(crayon::blue(paste("POSSIBLE ALERT:",
   #                            "assume deciduous cover is 1/2 the conversion to B as conifer")))
   # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)]
-  set(cohortData, NULL, "cover", as.numeric(cohortData$cover))
+  set(cohortData, NULL, "cover", as.numeric(cohortData[["cover"]]))
   cohortData[ , cover := {
     sumCover <- sum(cover)
     if (sumCover > 100) {
@@ -688,18 +688,17 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
     }
     cover
   }, by = "pixelIndex"]
-  set(cohortData, NULL, "cover", asInteger(cohortData$cover))
+  set(cohortData, NULL, "cover", asInteger(cohortData[["cover"]]))
 
   # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
+  set(cohortData, NULL, "B", as.numeric(cohortData[["B"]]))
   message(blue("Divide total B of each pixel by the relative cover of the cohorts"))
   cohortData[ , B := mean(totalBiomass) * cover / 100, by = "pixelIndex"]
   message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
   cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
   message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
   cohortData[ , totalBiomass := asInteger(totalBiomass)]
-
-  if (!is.integer(cohortData[["B"]]))
-    set(cohortData, NULL, "B", asInteger(cohortData[["B"]]))
+  set(cohortData, NULL, "B", asInteger(cohortData[["B"]]))
 
   return(cohortData)
 }
