@@ -223,6 +223,9 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   }
   systimePost2 <- Sys.time()
   if (isTRUE(unitTest)) { # slower -- older, but simpler Eliot June 5, 2019
+    # These algorithm tests should be deleted after a while. See date on prev line
+    if (!exists("oldAlgo")) oldAlgo <<- 0
+    if (!exists("newAlgo")) newAlgo <<- 0
     oldAlgo <<- oldAlgo + (systimePost1 - systimePre1)
     newAlgo <<- newAlgo + (systimePost2 - systimePre2)
 
