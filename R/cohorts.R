@@ -147,8 +147,9 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   # Add new cohorts and rm missing cohorts (i.e., those pixelGroups that are gone)
   ##########################################################
   cohortData <- .initiateNewCohorts(newPixelCohortData, cohortData,
-                                    pixelGroupMap,
-                                    time = time, speciesEcoregion = speciesEcoregion)
+                                    pixelGroupMap, time = time,
+                                    speciesEcoregion = speciesEcoregion,
+                                    successionTimestep = successionTimestep)
 
   outs <- rmMissingCohorts(cohortData, pixelGroupMap)
 
@@ -193,6 +194,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 #' with \code{cohortData}.
 #'
 #' @inheritParams updateCohortData
+#' @param successionTimestep The time between successive seed dispersal events.
 #' @return
 #' \code{.initiateNewCohorts} returns A \code{data.table} with a new,
 #' \code{rbindlist}ed cohortData
@@ -202,7 +204,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 #' @importFrom stats na.omit
 #' @rdname updateCohortData
 .initiateNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
-                                speciesEcoregion) {
+                                speciesEcoregion, successionTimestep) {
   ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum B per ecoregion, join to new cohort data
   namesNCD <- names(newPixelCohortData)
@@ -229,7 +231,23 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   #                                nomatch = 0]
   #newPixelCohortData <- setkey(newPixelCohortData, speciesCode, ecoregionGroup)[specieseco_current, nomatch = 0]
   set(newPixelCohortData, NULL, "age", 1L)  ## set age to 1
-  set(newPixelCohortData, NULL, "sumB", 0L)
+
+  ## Ceres: this was causing new cohorts to be initialized with maxANPP
+  ## instead, calculate total biomass of older cohorts
+  # set(newPixelCohortData, NULL, "sumB", 0L)
+  set(newPixelCohortData, NULL, "sumB", NULL)
+  cohortData[age >= successionTimestep, oldSumB := sum(B, na.rm = TRUE), by = "pixelGroup"]
+  ## test
+  # test <- newPixelCohortData[1, ]
+  # test[, `:=` (pixelGroup = 99999, B = NA)]
+  # newPixelCohortData <- rbind(newPixelCohortData, test)
+  ## end test
+  newPixelCohortData <- unique(cohortData[, .(pixelGroup, oldSumB)],
+                               by = "pixelGroup")[newPixelCohortData, on = "pixelGroup"]
+  set(newPixelCohortData, which(is.na(cohortData$oldSumB)), "oldSumB", 0)   ## faster than [:=]
+  setnames(newPixelCohortData, "oldSumB", "sumB")
+  set(cohortData, NULL, "oldSumB", NULL)
+
   ## set B - if B=0, it's getting maxANPP ???
   if ("B" %in% names(newPixelCohortData))
     newPixelCohortData[, B := NULL]
@@ -239,12 +257,17 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
 
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
-                                               mortality = 0L, aNPPAct = 0L, sumB)]
+                                               mortality = 0L, aNPPAct = 0L)]
 
   # This removes the duplicated pixels within pixelGroup, i.e., the reason we want pixelGroups
-  newCohortData <- unique(newPixelCohortData, by = uniqueCohortDefinition)
+  if (getOption("LandR.assertions")) {
+    if (isTRUE(NROW(unique(newPixelCohortData, by = uniqueCohortDefinition)) != NROW(newPixelCohortData)))
+      stop("Duplicated new cohorts in a pixelGroup. Please debug LandR:::.initiateNewCohorts")
+  }
 
-  cohortData <- rbindlist(list(cohortData, newCohortData), fill = TRUE, use.names = TRUE)
+  cohortData <- rbindlist(list(cohortData, newPixelCohortData), fill = TRUE, use.names = TRUE)
+  cohortData[, sumB := sum(B, na.rm = TRUE), by = "pixelGroup"]  ## recalculate sumB
+
   return(cohortData)
 }
 
