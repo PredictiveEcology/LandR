@@ -239,7 +239,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
 
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
-                                               mortality = 0L, aNPPAct = 0L, sumB = 0)]
+                                               mortality = 0L, aNPPAct = 0L, sumB)]
 
   # This removes the duplicated pixels within pixelGroup, i.e., the reason we want pixelGroups
   newCohortData <- unique(newPixelCohortData, by = uniqueCohortDefinition)
