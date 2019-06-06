@@ -171,17 +171,62 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #' @importFrom SpaDES.tools rasterizeReduced
 vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
                                 colors, unitTest = getOption("LandR.assertions", FALSE)) {
-
+  if (isTRUE(unitTest)) { # slower -- older, but simpler Eliot June 5, 2019
+    # 1. Find length of each pixelGroup -- don't include pixelGroups in "by" that have only 1 cohort: N = 1
+    cd <- copy(cohortdata)
+    pgd1 <- cd[ , list(N = .N), by = "pixelGroup"]
+    pgd1 <- cd[, .(pixelGroup, B, speciesCode)][pgd1, on = "pixelGroup"]
+    set(pgd1, NULL, "totalB", pgd1$B)
+    pgd1[N != 1, totalB := sum(B, na.rm = TRUE), by = "pixelGroup"]
+    pgd1 <- pgd1[, .(speciesGroupB = sum(B, na.rm = TRUE), totalB = totalB[1]),
+                                     by = c("pixelGroup", "speciesCode")]
+    set(pgd1, NULL, "speciesProportion", pgd1$speciesGroupB /pgd1$totalB)
+    setorderv(pgd1, "pixelGroup")
+  }
   # Replacement algorithm to calculate speciesProportion
-  #    -- Eliot May 28, 2019 -- faster than the protected block below
-  # 1. Find length of each pixelGroup -- don't include pixelGroups in "by" that have only 1 cohort: N = 1
+  #  Logic is similar to above --
+  #  1. sort by pixelGroup
+  #  2. calculate N, use this to repeat itself (instead of a join above)
+  #  3. calculate speciesProportion, noting to calculate with by only if N > 1, otherwise
+  #     it is a simpler non-by calculation
+  setkeyv(cohortdata, c("pixelGroup", "speciesCode"))
+  # setorderv(cohortdata, "pixelGroup")
   pixelGroupData <- cohortdata[ , list(N = .N), by = "pixelGroup"]
-  pixelGroupData <- pixelGroupData[cohortdata[, .(pixelGroup, B, speciesCode)], on = "pixelGroup"]
-  set(pixelGroupData, NULL, "totalB", pixelGroupData$B)
-  pixelGroupData[N!=1, totalB := sum(B, na.rm = TRUE), by = "pixelGroup"]
-  pixelGroupData <- pixelGroupData[, .(speciesGroupB = sum(B, na.rm = TRUE), totalB = totalB[1]),
-                                   by = c("pixelGroup", "speciesCode")]
-  set(pixelGroupData, NULL, "speciesProportion", pixelGroupData$speciesGroupB /pixelGroupData$totalB)
+
+  N <- rep.int(pixelGroupData$N, pixelGroupData$N)
+  wh1 <- N == 1
+  set(cohortdata, which(wh1), "totalB", cohortdata$B[wh1])
+  totalBNot1 <- cohortdata[!wh1, list(N = .N, totalB = sum(B, na.rm = TRUE)), by = "pixelGroup"]
+  totalBNot1 <- rep.int(totalBNot1$totalB, totalBNot1$N)
+  set(cohortdata, which(!wh1), "totalB", totalBNot1)
+
+  b <- cohortdata[, list(N = .N), by = c("pixelGroup", "speciesCode")]
+  b <- rep.int(b$N, b$N)
+  GT1 <- (b > 1)
+  pixelGroupData <- list()
+  if (any(GT1)) {
+    pixelGroupData[[1]] <- cohortdata[GT1, .(speciesProportion = sum(B, na.rm = TRUE)/totalB[1]),
+                    by = c("pixelGroup", "speciesCode")]
+  }
+  if (any(!GT1)) {
+    set(cohortdata, which(!GT1), "speciesProportion", cohortdata$B[!GT1]/cohortdata$totalB[!GT1])
+    pixelGroupData[[NROW(pixelGroupData) + 1]] <- cohortdata[!GT1, c("pixelGroup", "speciesCode", "speciesProportion")]
+  }
+  if (length(pixelGroupData) > 1) {
+    pixelGroupData <- rbindlist(pixelGroupData)
+  } else {
+    pixelGroupData <- pixelGroupData[[1]]
+  }
+
+  if (isTRUE(unitTest)) { # slower -- older, but simpler Eliot June 5, 2019
+    whNA <- unique(unlist(sapply(pixelGroupData, function(x) which(is.na(x)))))
+    pgd1 <- pgd1[!pixelGroupData[whNA], on = c("pixelGroup", "speciesCode")]
+    if (!all.equal(pgd1$speciesProportion, pixelGroupData$speciesProportion[-whNA]))
+      stop("Old algorithm in vegMapGenerator is different than new map")
+  }
+  ########################################################v
+  #### Determine "mixed"
+  ########################################################v
   if (FALSE) { # old algorithm
     b1 <- Sys.time()
     pixelGroupData4 <- cohortdata[, list(totalB = sum(B, na.rm = TRUE),
