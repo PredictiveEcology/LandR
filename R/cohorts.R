@@ -227,9 +227,6 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   specieseco_current[, maxB_eco := max(maxB), by = ecoregionGroup]
   newPixelCohortData <- specieseco_current[newPixelCohortData, on = uniqueSpeciesEcoregionDefinition]
   newPixelCohortData <- newPixelCohortData[!is.na(maxB)]
-  # newPixelCohortData <- newPixelCohortData[specieseco_current, on = uniqueSpeciesEcoregionDefinition,
-  #                                nomatch = 0]
-  #newPixelCohortData <- setkey(newPixelCohortData, speciesCode, ecoregionGroup)[specieseco_current, nomatch = 0]
   set(newPixelCohortData, NULL, "age", 1L)  ## set age to 1
 
   ## Ceres: this was causing new cohorts to be initialized with maxANPP
