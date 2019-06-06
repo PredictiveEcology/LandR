@@ -669,7 +669,7 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
     message(blue("assign B = 0 and age = 0 for pixels where cover = 0, ",
                  "\n  because cover is most reliable dataset"))
 
-  cohortData[cover == 0, `:=`(age = 0L, logAge = -Inf, B = 0L)]
+  cohortData[cover == 0, `:=`(age = 0L, logAge = -Inf, B = 0)]
   message(blue("assign totalBiomass = 0 if sum(cover) = 0 in a pixel, ",
                "\n  because cover is most reliable dataset"))
   cohortData <- cohortData[, sum(cover) == 0, by = "pixelIndex"][V1 == TRUE][
@@ -680,13 +680,15 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
   # message(crayon::blue(paste("POSSIBLE ALERT:",
   #                            "assume deciduous cover is 1/2 the conversion to B as conifer")))
   # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)]
+  set(cohortData, NULL, "cover", as.numeric(cohortData$cover))
   cohortData[ , cover := {
     sumCover <- sum(cover)
     if (sumCover > 100) {
-      cover <- asInteger(cover/(sumCover + 0.0001) * 100L)
+      cover <- cover/(sumCover + 0.0001) * 100L
     }
     cover
   }, by = "pixelIndex"]
+  set(cohortData, NULL, "cover", asInteger(cohortData$cover))
 
   # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
   message(blue("Divide total B of each pixel by the relative cover of the cohorts"))
