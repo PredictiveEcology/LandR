@@ -4,7 +4,7 @@ if (getRversion() >= "3.1.0") {
     "ecoregion", "ecoregionGroup", "hasBadAge",
     "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
     "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
-    "newPossLCC", "noPixels", "outBiomass", "pixelIndex", "pixels", "possERC",
+    "newPossLCC", "noPixels", "ord", "outBiomass", "pixelGroup2", "pixelIndex", "pixels", "possERC",
     "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
     "temppixelGroup", "toDelete", "totalBiomass",
     "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
@@ -80,7 +80,6 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   if (!"age" %in% colnames(newPixelCohortData))
     newPixelCohortData[, age := 1L]
 
-  allNewPixelGroups <- all(zeroOnPixelGroupMap)
   if (all(zeroOnPixelGroupMap)) {
     # Deal with pixels on the map that have no pixelGroup -- these are burned
     # pixels --> the entirely newly regenerated pixels DOes not require a
@@ -294,7 +293,6 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
               pixelGroupMap = pixelGroupMap))
 }
 
-
 #' Add the correct \code{pixelGroups} to a \code{pixelDataTable} object
 #'
 #' Generates unique groupings of a data.table object where one or more rows can
@@ -313,11 +311,11 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
 #' This should likely be added to the \code{pixelDataTable} object immediately.
 #'
 #' @export
-#' @importFrom data.table setkey
+#' @importFrom data.table setkey setorderv
+#' @importFrom plyr mapvalues
 #' @importFrom SpaDES.core paddedFloatToChar
 generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
-                                columns = c("ecoregionGroup", "speciesCode",
-                                            "age", "B")) {
+                                columns = c("ecoregionGroup", "speciesCode", "age", "B")) {
   columnsOrig <- columns
   columns <- columns[columns %in% names(pixelDataTable)]
   columns2 <- paste0(columns, "2")
@@ -327,19 +325,50 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
 
   pcd <- pixelDataTable # no copy -- just for simpler name
 
-  # Convert to unique numeric
-  pcd[ , c(columns2) := lapply(.SD, function(x) {
-    a <- as.integer(factor(x))
-  }), .SDcols = columns]
-
+  if (getOption("LandR.assertions")) {
+    pcdOrig <- data.table::copy(pcd)
+  }
   # concatenate within rows -- e.g., ecoregionCode_speciesCode_age_biomass or 647_11_Abie_sp_100_2000
-  pcd[, uniqueComboByRow :=
-        as.integer(factor(do.call(paste, append(list(sep = "_"), as.list(.SD))))),
-      .SDcols = columns2]
+  pcd[, uniqueComboByRow := do.call(paste, as.list(.SD)), .SDcols = columns]
 
   # concatenate within pixelIndex
   pcd[ , c("uniqueComboByPixelIndex") := paste(uniqueComboByRow, collapse = "__"), by = "pixelIndex"]
   pcd[ , c("pixelGroup") := as.integer(maxPixelGroup) + as.integer(factor(uniqueComboByPixelIndex))]
+
+  if (getOption("LandR.assertions")) { # old algorithm
+    # prepare object 1 (pcd) for checking below
+    pcd[, ord := 1:.N]
+    setorderv(pcd, c("pixelIndex"))
+    pcd[, pixelGroup2 := mapvalues(pixelGroup, from = unique(pixelGroup), to = as.character(seq_along(unique(pixelGroup))))]
+    setorderv(pcd, "ord")
+
+    pcdOld <- data.table::copy(pcdOrig)
+
+    # Convert to unique numeric
+    pcdOld[ , c(columns2) := lapply(.SD, function(x) {
+      a <- as.integer(factor(x))
+    }), .SDcols = columns]
+
+    # concatenate within rows -- e.g., ecoregionCode_speciesCode_age_biomass or 647_11_Abie_sp_100_2000
+    pcdOld[, uniqueComboByRow := as.integer(factor( do.call(paste, as.list(.SD)))),
+           .SDcols = columns2]
+
+    # concatenate within pixelIndex
+    pcdOld[ , c("uniqueComboByPixelIndex") := paste(uniqueComboByRow, collapse = "__"),
+            by = "pixelIndex"]
+    pcdOld[ , c("pixelGroup") := as.integer(maxPixelGroup) +
+              as.integer(factor(uniqueComboByPixelIndex))]
+    # prepare object 2 (pcdOld) for checking below
+    pcdOld[, ord := 1:.N]
+    setorderv(pcdOld, c("pixelIndex"))
+    pcdOld[, pixelGroup2:=mapvalues(pixelGroup, from = unique(pixelGroup),
+                                    to = as.character(seq_along(unique(pixelGroup))))]
+    setorderv(pcdOld, "ord")
+
+    # The check
+    if (!identical(pcdOld$pixelGroup2, pcd$pixelGroup2))
+      stop("new generatePixelGroups algorithm failing")
+  }
 
   return(pcd$pixelGroup)
 }
@@ -661,12 +690,14 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
 
   # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
   message(blue("Divide total B of each pixel by the relative cover of the cohorts"))
-  cohortData[ , B := asInteger(mean(totalBiomass) * cover / 100), by = "pixelIndex"]
+  cohortData[ , B := mean(totalBiomass) * cover / 100, by = "pixelIndex"]
   message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
-  cohortData[ , B := asInteger(ceiling(B / pixelGroupBiomassClass) *
-                                 pixelGroupBiomassClass)]
+  cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
   message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
   cohortData[ , totalBiomass := asInteger(totalBiomass)]
+
+  if (!is.integer(cohortData[["B"]]))
+    set(cohortData, NULL, "B", asInteger(cohortData[["B"]]))
 
   return(cohortData)
 }
@@ -676,12 +707,17 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
 #' Takes a single \code{data.table} input, which has the following columns in addition to
 #' others that will be labelled with species name, and contain percent cover of each:
 #' \itemize{
-#'   \item age
-#'   \item logAge
-#'   \item initialEcoregionCode
-#'   \item totalBiomass
-#'   \item pixelIndex
-#'   \item lcc
+#'   \item \code{pixelIndex} (integer)
+#'   \item \code{age} (integer)
+#'   \item \code{logAge} (numeric)
+#'   \item \code{initialEcoregionCode} (factor)
+#'   \item \code{totalBiomass} (integer)
+#'   \item \code{lcc} (integer)
+#'   \item \code{rasterToMatch} (integer)
+#'   \item \code{speciesCode} (factor)
+#'   \item \code{cover} (integer)
+#'   \item \code{coverOrig} (integer)
+#'   \item \code{B} (integer)
 #' }
 #'
 #' @param inputDataTable A \code{data.table} with columns described above.
@@ -763,7 +799,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   message(blue("Set recalculate totalBiomass as sum(B);",
                "many biomasses will have been set to 0 in previous steps"))
   cohortData[cover > 0 & age == 0, B := 0L]
-  cohortData[, totalBiomass := sum(B), by = "pixelIndex"]
+  cohortData[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
 
   # This was unused, but for beta regression, this can allow 0s and 1s without
   #   needing a separate model for zeros and ones
@@ -902,10 +938,10 @@ makePixelCohortData <- function(cohortData, pixelGroupMap,
 
   assertPixelCohortData(pixelCohortData, pixelGroupMap, doAssertion = doAssertion)
 
-  pixelCohortData
+  return(pixelCohortData)
 }
 
-#' Get no. pixels per \code{pixelGroup} and add it to \code{cohortData}
+#' Get number of pixels per \code{pixelGroup} and add it to \code{cohortData}
 #'
 #' @param cohortData A \code{data.table} with columns:
 #'   \code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
@@ -919,8 +955,8 @@ makePixelCohortData <- function(cohortData, pixelGroupMap,
 #' column
 #'
 #' @export
-#' @importFrom raster maxValue
 #' @importFrom data.table data.table
+#' @importFrom raster maxValue
 addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
   assertCohortData(cohortData, pixelGroupMap, doAssertion = doAssertion)
@@ -938,7 +974,5 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
       stop("pixelGroups differ between pixelCohortData/pixelGroupMap and cohortData")
   }
 
-  pixelCohortData
+  return(pixelCohortData)
 }
-
-
