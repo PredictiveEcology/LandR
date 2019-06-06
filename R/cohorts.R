@@ -235,7 +235,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     newPixelCohortData[, B := NULL]
   set(newPixelCohortData, NULL, "B",
       asInteger(pmax(1, newPixelCohortData$maxANPP *
-                        exp(-1.6 * newPixelCohortData$sumB / newPixelCohortData$maxB_eco))))
+                       exp(-1.6 * newPixelCohortData$sumB / newPixelCohortData$maxB_eco))))
   set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
 
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
