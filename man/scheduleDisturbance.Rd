@@ -7,16 +7,18 @@
 scheduleDisturbance(disturbanceLayer, currentYear)
 }
 \arguments{
-\item{disturbanceLayer}{a rasterLayer object}
+\item{disturbanceLayer}{a \code{RasterLayer} object}
 
 \item{currentYear}{time of simulation}
 }
 \value{
-logical vector signifying whether to schedule event
+Logical indicating whether to schedule a disturbance event
 }
 \description{
 Test whether disturbance should be scheduled
 }
 \examples{
-doEvent <- scheduleDisturbance(sim$rstCurrentBurn, time(sim))
+\dontrun{
+  doDisturbance <- scheduleDisturbance(sim$rstCurrentBurn, time(sim))
+}
 }
