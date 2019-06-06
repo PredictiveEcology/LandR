@@ -690,7 +690,7 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
 
   # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
   message(blue("Divide total B of each pixel by the relative cover of the cohorts"))
-  cohortData[ , B := mean(totalBiomass) * cover / 100, by = "pixelIndex"]
+  cohortData[ , B := asInteger(mean(totalBiomass) * cover / 100), by = "pixelIndex"]
   message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
   cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
   message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
