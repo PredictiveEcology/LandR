@@ -228,15 +228,15 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   # newPixelCohortData <- newPixelCohortData[specieseco_current, on = uniqueSpeciesEcoregionDefinition,
   #                                nomatch = 0]
   #newPixelCohortData <- setkey(newPixelCohortData, speciesCode, ecoregionGroup)[specieseco_current, nomatch = 0]
-  set(newPixelCohortData, NULL, "age", 1)  ## set age to 1
-  set(newPixelCohortData, NULL, "sumB", 0)
+  set(newPixelCohortData, NULL, "age", 1L)  ## set age to 1
+  set(newPixelCohortData, NULL, "sumB", 0L)
   ## set B - if B=0, it's getting maxANPP ???
   if ("B" %in% names(newPixelCohortData))
     newPixelCohortData[, B := NULL]
   set(newPixelCohortData, NULL, "B",
-      as.integer(pmax(1, newPixelCohortData$maxANPP *
+      asInteger(pmax(1, newPixelCohortData$maxANPP *
                         exp(-1.6 * newPixelCohortData$sumB / newPixelCohortData$maxB_eco))))
-  set(newPixelCohortData, NULL, "B", as.integer(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
+  set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
 
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
                                                mortality = 0L, aNPPAct = 0L, sumB = 0)]
