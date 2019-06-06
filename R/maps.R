@@ -224,9 +224,10 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
     if (!all.equal(pgd1$speciesProportion, pixelGroupData$speciesProportion[-whNA]))
       stop("Old algorithm in vegMapGenerator is different than new map")
   }
-  ########################################################v
+
+  ########################################################
   #### Determine "mixed"
-  ########################################################v
+  ########################################################
   if (FALSE) { # old algorithm
     b1 <- Sys.time()
     pixelGroupData4 <- cohortdata[, list(totalB = sum(B, na.rm = TRUE),
