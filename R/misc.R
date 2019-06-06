@@ -55,6 +55,7 @@ asInteger <- function(x)
 #' @param currentYear time of simulation
 #'
 #' @return logical vector signifying whether to schedule event
+#' @export
 #' @examples
 #' doEvent <- scheduleDisturbance(sim$rstCurrentBurn, time(sim))
 scheduleDisturbance <- function(disturbanceLayer, currentYear){
