@@ -680,13 +680,15 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
   # message(crayon::blue(paste("POSSIBLE ALERT:",
   #                            "assume deciduous cover is 1/2 the conversion to B as conifer")))
   # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)]
+  set(cohortData, NULL, "cover", as.numeric(cohortData$cover))
   cohortData[ , cover := {
     sumCover <- sum(cover)
     if (sumCover > 100) {
-      cover <- asInteger(cover/(sumCover + 0.0001) * 100L)
+      cover <- cover/(sumCover + 0.0001) * 100L
     }
     cover
   }, by = "pixelIndex"]
+  set(cohortData, NULL, "cover", asInteger(cohortData$cover))
 
   # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
   message(blue("Divide total B of each pixel by the relative cover of the cohorts"))
