@@ -690,7 +690,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' Used internally in \code{overlayStacks}.
 #'
 #' @param sppMerge TODO
-#' @param speciesLayers TODO
+#' @param speciesLayers stack of species layers rasters
 #' @param sppEquiv TODO
 #' @param column TODO
 #' @param dPath destination path TODO

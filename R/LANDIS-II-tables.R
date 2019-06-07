@@ -49,7 +49,7 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
 
 #' @param speciesTable  A raw species traits table
 #'
-#' @param speciesLayers TODO: description needed
+#' @param speciesLayers stack of species layers rasters
 #'
 #' @param sppEquiv TODO: description needed
 #'

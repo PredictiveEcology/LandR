@@ -11,7 +11,7 @@ updateCohortData(newPixelCohortData, cohortData, pixelGroupMap, time,
   doAssertion = getOption("LandR.assertions", TRUE))
 
 .initiateNewCohorts(newPixelCohortData, cohortData, pixelGroupMap, time,
-  speciesEcoregion)
+  speciesEcoregion, successionTimestep)
 }
 \arguments{
 \item{newPixelCohortData}{must be a complete cohortData object with newly
