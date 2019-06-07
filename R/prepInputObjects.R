@@ -95,3 +95,72 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 
   return(pixelTable)
 }
+
+
+#' Make speciesEcoregion using statistically estimated maxB, maxANPP and establishment probabilities
+
+#' @param cohortDataNoBiomass
+#' @param cohortDataShort
+#' @param cohortDataShortNoCover
+#' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
+#' @param speciesEcoregion A \code{speciesEcoregion} table.
+#' @param modelCover statistical model of species presence/absence
+#' @param modelBiomass statistical model of species biomass
+#' @param successionTimestep The time between successive seed dispersal events.
+#' @param currentYear \code{time(sim)}
+#'
+#' #' @return
+#' A \code{speciesEcoregion} table with added columns for parameters
+#'   \code{maxB}, \code{maxANPP} and \code{establishprob}
+#'
+#' @importFrom data.table unique rbindlist
+
+makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDataShortNoCover, species,
+                                 speciesEcoregion, modelCover, modelBiomass, successionTimestep, currentYear) {
+  ## Create speciesEcoregion table
+  joinOn <- c("ecoregionGroup", "speciesCode")
+  speciesEcoregion <- unique(cohortDataNoBiomass, by = joinOn)
+  speciesEcoregion[, c("B", "logAge", "cover") := NULL]
+  species[, speciesCode := as.factor(species)]
+  speciesEcoregion <- species[, .(speciesCode, longevity)][speciesEcoregion, on = "speciesCode"]
+  speciesEcoregion[ , ecoregionGroup := factor(as.character(ecoregionGroup))]
+
+  #################################################
+  ## establishProb
+  establishprobBySuccessionTimestep <- 1 - (1 - modelCover$pred)^successionTimestep
+  cohortDataShort[, establishprob := establishprobBySuccessionTimestep]
+  cohortDataShort <- species[, .(resproutprob, postfireregen, speciesCode)][cohortDataShort, on = "speciesCode"]
+  cohortDataShort[, establishprob := pmax(0, pmin(1, (establishprob * (1 - resproutprob))))]
+
+  cohortDataShort <- rbindlist(list(cohortDataShort, cohortDataShortNoCover),
+                               use.names = TRUE, fill = TRUE)
+  cohortDataShort[is.na(establishprob), establishprob := 0]
+
+  # Join cohortDataShort with establishprob predictions to speciesEcoregion
+  speciesEcoregion <- cohortDataShort[, .(ecoregionGroup, speciesCode, establishprob)][
+    speciesEcoregion, on = joinOn]
+
+  #################################################
+  # maxB
+  # Set age to the age of longevity and cover to 100%
+  speciesEcoregion[, `:=`(logAge = log(longevity), cover = 100)]
+  speciesEcoregion[ , maxB := asInteger(predict(modelBiomass$mod,
+                                                newdata = speciesEcoregion,
+                                                type = "response"))]
+  speciesEcoregion[maxB < 0L, maxB := 0L] # fix negative predictions
+
+  ########################################################################
+  # maxANPP
+  message(blue("Add maxANPP to speciesEcoregion -- currently --> maxB/30"))
+  speciesEcoregion[ , maxANPP := asInteger(maxB / 30)]
+
+  ########################################################################
+  # Clean up unneeded columns
+  speciesEcoregion[ , `:=`(logAge = NULL, cover = NULL, longevity = NULL, #pixelIndex = NULL,
+                           lcc = NULL)]
+
+  speciesEcoregion[ , year := currentYear]
+  return(speciesEcoregion)
+}
+
+
