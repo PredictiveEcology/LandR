@@ -20,7 +20,7 @@ prepSpeciesTable(speciesTable, speciesLayers, sppEquiv = NULL,
 
 \item{speciesTable}{A raw species traits table}
 
-\item{speciesLayers}{TODO: description needed}
+\item{speciesLayers}{stack of species layers rasters}
 
 \item{sppEquiv}{TODO: description needed}
 
