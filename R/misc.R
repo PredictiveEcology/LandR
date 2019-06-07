@@ -52,17 +52,17 @@ asInteger <- function(x)
 #'
 #' @param disturbanceLayer a \code{RasterLayer} object
 #' @param currentYear time of simulation
-#'
-#' @return Logical indicating whether to schedule a disturbance event
-#'
+#' @param disturbanceType the type of disturbance (e.g. Burn, Harvest)
+#' @return logical vector signifying whether to schedule event
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#'   doDisturbance <- scheduleDisturbance(sim$rstCurrentBurn, time(sim))
-#' }
-scheduleDisturbance <- function(disturbanceLayer, currentYear) {
-  if (is.null(disturbanceLayer) || names(disturbanceLayer) != paste0("Year", currentYear)) {
+#' doEvent <- scheduleDisturbance(sim$rstCurrentBurn, time(sim), disturbanceType = "Burn")
+scheduleDisturbance <- function(disturbanceLayer, currentYear, disturbanceType){
+  if (!disturbanceType %in% c("Burn", "Harvest")) {
+    stop("Please ensure disturbance type is either 'Burn' or 'Harvest'")
+  }
+  if (is.null(disturbanceLayer) || names(disturbanceLayer) != paste0(disturbanceType, currentYear)) {
     TRUE
   } else {
     FALSE
