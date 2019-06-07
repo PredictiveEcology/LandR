@@ -5,7 +5,7 @@ if (getRversion() >= "3.1.0") {
     "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
     "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
     "newPossLCC", "noPixels", "ord", "outBiomass", "pixelGroup2", "pixelIndex", "pixels", "possERC",
-    "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
+    "speciesposition", "speciesGroup", "speciesInt", "state", "sumB", "oldSumB",
     "temppixelGroup", "toDelete", "totalBiomass",
     "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
   ))
@@ -194,7 +194,6 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 #' with \code{cohortData}.
 #'
 #' @inheritParams updateCohortData
-#' @param successionTimestep The time between successive seed dispersal events.
 #' @return
 #' \code{.initiateNewCohorts} returns A \code{data.table} with a new,
 #' \code{rbindlist}ed cohortData
