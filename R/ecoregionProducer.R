@@ -98,32 +98,3 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName,
   return(list(ecoregionMap = rstEcoregion,
               ecoregion = ecoregionTable))
 }
-
-
-
-#' Create \code{speciesEcoregion} table
-#'
-#' This function creates a species traits table by ecorrgion code.
-#'
-#' @param cohortData object
-#' @param species a \code{data.table} that has species traits such
-#'   as longevity, shade tolerance, etc.
-
-#' @return
-#' A \code{data.table} with species and their trait values per
-#'   ecoregion in the study area.
-#'
-#' @export
-#' @importFrom data.table data.table
-
-makeSpeciesEcoregion <- function(cohortData, species) {
-  joinOn <- c("ecoregionGroup", "speciesCode")
-  speciesEcoregion <- unique(cohortData, by = joinOn)
-  speciesEcoregion[, c("B", "logAge", "cover") := NULL]
-  speciesEcoregion[lcc %in% unique(cohortData$lcc)] # shouldn't do anything because already correct
-  species[, speciesCode := as.factor(species)]
-  speciesEcoregion <- species[, .(speciesCode, longevity)][speciesEcoregion, on = "speciesCode"]
-  speciesEcoregion[ , ecoregionGroup := factor(as.character(ecoregionGroup))]
-
-  return(speciesEcoregion)
-}
