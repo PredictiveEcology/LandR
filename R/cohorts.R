@@ -5,7 +5,7 @@ if (getRversion() >= "3.1.0") {
     "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
     "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
     "newPossLCC", "noPixels", "ord", "outBiomass", "pixelGroup2", "pixelIndex", "pixels", "possERC",
-    "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
+    "speciesposition", "speciesGroup", "speciesInt", "state", "sumB", "oldSumB",
     "temppixelGroup", "toDelete", "totalBiomass",
     "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
   ))
@@ -147,8 +147,9 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   # Add new cohorts and rm missing cohorts (i.e., those pixelGroups that are gone)
   ##########################################################
   cohortData <- .initiateNewCohorts(newPixelCohortData, cohortData,
-                                    pixelGroupMap,
-                                    time = time, speciesEcoregion = speciesEcoregion)
+                                    pixelGroupMap, time = time,
+                                    speciesEcoregion = speciesEcoregion,
+                                    successionTimestep = successionTimestep)
 
   outs <- rmMissingCohorts(cohortData, pixelGroupMap)
 
@@ -202,7 +203,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 #' @importFrom stats na.omit
 #' @rdname updateCohortData
 .initiateNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
-                                speciesEcoregion) {
+                                speciesEcoregion, successionTimestep) {
   ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum B per ecoregion, join to new cohort data
   namesNCD <- names(newPixelCohortData)
@@ -225,11 +226,24 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   specieseco_current[, maxB_eco := max(maxB), by = ecoregionGroup]
   newPixelCohortData <- specieseco_current[newPixelCohortData, on = uniqueSpeciesEcoregionDefinition]
   newPixelCohortData <- newPixelCohortData[!is.na(maxB)]
-  # newPixelCohortData <- newPixelCohortData[specieseco_current, on = uniqueSpeciesEcoregionDefinition,
-  #                                nomatch = 0]
-  #newPixelCohortData <- setkey(newPixelCohortData, speciesCode, ecoregionGroup)[specieseco_current, nomatch = 0]
   set(newPixelCohortData, NULL, "age", 1L)  ## set age to 1
-  set(newPixelCohortData, NULL, "sumB", 0L)
+
+  ## Ceres: this was causing new cohorts to be initialized with maxANPP
+  ## instead, calculate total biomass of older cohorts
+  # set(newPixelCohortData, NULL, "sumB", 0L)
+  set(newPixelCohortData, NULL, "sumB", NULL)
+  cohortData[age >= successionTimestep, oldSumB := sum(B, na.rm = TRUE), by = "pixelGroup"]
+  ## test
+  # test <- newPixelCohortData[1, ]
+  # test[, `:=` (pixelGroup = 99999, B = NA)]
+  # newPixelCohortData <- rbind(newPixelCohortData, test)
+  ## end test
+  newPixelCohortData <- unique(cohortData[, .(pixelGroup, oldSumB)],
+                               by = "pixelGroup")[newPixelCohortData, on = "pixelGroup"]
+  set(newPixelCohortData, which(is.na(cohortData$oldSumB)), "oldSumB", 0)   ## faster than [:=]
+  setnames(newPixelCohortData, "oldSumB", "sumB")
+  set(cohortData, NULL, "oldSumB", NULL)
+
   ## set B - if B=0, it's getting maxANPP ???
   if ("B" %in% names(newPixelCohortData))
     newPixelCohortData[, B := NULL]
@@ -239,12 +253,17 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
 
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
-                                               mortality = 0L, aNPPAct = 0L, sumB)]
+                                               mortality = 0L, aNPPAct = 0L)]
 
   # This removes the duplicated pixels within pixelGroup, i.e., the reason we want pixelGroups
-  newCohortData <- unique(newPixelCohortData, by = uniqueCohortDefinition)
+  if (getOption("LandR.assertions")) {
+    if (isTRUE(NROW(unique(newPixelCohortData, by = uniqueCohortDefinition)) != NROW(newPixelCohortData)))
+      stop("Duplicated new cohorts in a pixelGroup. Please debug LandR:::.initiateNewCohorts")
+  }
 
-  cohortData <- rbindlist(list(cohortData, newCohortData), fill = TRUE, use.names = TRUE)
+  cohortData <- rbindlist(list(cohortData, newPixelCohortData), fill = TRUE, use.names = TRUE)
+  cohortData[, sumB := sum(B, na.rm = TRUE), by = "pixelGroup"]  ## recalculate sumB
+
   return(cohortData)
 }
 
@@ -669,7 +688,7 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
     message(blue("assign B = 0 and age = 0 for pixels where cover = 0, ",
                  "\n  because cover is most reliable dataset"))
 
-  cohortData[cover == 0, `:=`(age = 0L, logAge = -Inf, B = 0L)]
+  cohortData[cover == 0, `:=`(age = 0L, logAge = -Inf, B = 0)]
   message(blue("assign totalBiomass = 0 if sum(cover) = 0 in a pixel, ",
                "\n  because cover is most reliable dataset"))
   cohortData <- cohortData[, sum(cover) == 0, by = "pixelIndex"][V1 == TRUE][
@@ -680,24 +699,25 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
   # message(crayon::blue(paste("POSSIBLE ALERT:",
   #                            "assume deciduous cover is 1/2 the conversion to B as conifer")))
   # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)]
+  set(cohortData, NULL, "cover", as.numeric(cohortData[["cover"]]))
   cohortData[ , cover := {
     sumCover <- sum(cover)
     if (sumCover > 100) {
-      cover <- asInteger(cover/(sumCover + 0.0001) * 100L)
+      cover <- cover/(sumCover + 0.0001) * 100L
     }
     cover
   }, by = "pixelIndex"]
+  set(cohortData, NULL, "cover", asInteger(cohortData[["cover"]]))
 
   # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
+  set(cohortData, NULL, "B", as.numeric(cohortData[["B"]]))
   message(blue("Divide total B of each pixel by the relative cover of the cohorts"))
   cohortData[ , B := asInteger(mean(totalBiomass) * cover / 100), by = "pixelIndex"]
   message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
   cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
   message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
   cohortData[ , totalBiomass := asInteger(totalBiomass)]
-
-  if (!is.integer(cohortData[["B"]]))
-    set(cohortData, NULL, "B", asInteger(cohortData[["B"]]))
+  set(cohortData, NULL, "B", asInteger(cohortData[["B"]]))
 
   return(cohortData)
 }

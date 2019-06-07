@@ -10,7 +10,7 @@ mergeSppRaster(sppMerge, speciesLayers, sppEquiv, column, suffix, dPath,
 \arguments{
 \item{sppMerge}{TODO}
 
-\item{speciesLayers}{TODO}
+\item{speciesLayers}{stack of species layers rasters}
 
 \item{sppEquiv}{TODO}
 

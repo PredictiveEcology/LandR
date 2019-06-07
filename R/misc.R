@@ -47,3 +47,24 @@ asInteger <- function(x)
 #' @rdname resample
 #' @seealso \code{\link[SpaDES.tools]{resample}}
 .resample <- getFromNamespace("resample", "SpaDES.tools")
+
+#' Test whether disturbance should be scheduled
+#'
+#' @param disturbanceLayer a \code{RasterLayer} object
+#' @param currentYear time of simulation
+#'
+#' @return Logical indicating whether to schedule a disturbance event
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#'   doDisturbance <- scheduleDisturbance(sim$rstCurrentBurn, time(sim))
+#' }
+scheduleDisturbance <- function(disturbanceLayer, currentYear) {
+  if (is.null(disturbanceLayer) || names(disturbanceLayer) != paste0("Year", currentYear)) {
+    TRUE
+  } else {
+    FALSE
+  }
+}
