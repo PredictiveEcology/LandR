@@ -1,5 +1,7 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c())
+  utils::globalVariables(c("resproutprob", "postfireregen", "speciesCode",
+                           "establishprob", "ecoregionGroup", "speciesCode",
+                           "longevity", "maxB", "maxANPP", "cover", "lcc"))
 }
 
 
