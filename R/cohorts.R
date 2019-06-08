@@ -242,7 +242,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 
   newPixelCohortData <- unique(cohortData[, .(pixelGroup, oldSumB)],
                                by = "pixelGroup")[newPixelCohortData, on = "pixelGroup"]
-  set(newPixelCohortData, which(is.na(cohortData$oldSumB)), "oldSumB", 0)   ## faster than [:=]
+  set(newPixelCohortData, which(is.na(newPixelCohortData$oldSumB)), "oldSumB", 0)   ## faster than [:=]
   setnames(newPixelCohortData, "oldSumB", "sumB")
   set(cohortData, NULL, "oldSumB", NULL)
 
