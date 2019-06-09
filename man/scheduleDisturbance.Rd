@@ -20,6 +20,7 @@ Logical indicating whether to schedule a disturbance event
 Test whether disturbance should be scheduled
 }
 \examples{
-doEvent <- scheduleDisturbance(sim$rstCurrentBurn, time(sim), disturbanceType = "Burn")
+\dontrun{
+  doEvent <- scheduleDisturbance(sim$rstCurrentBurn, time(sim), disturbanceType = "Burn")
 }
 }
