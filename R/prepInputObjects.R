@@ -105,20 +105,19 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #' @param cohortDataShort
 #' @param cohortDataShortNoCover
 #' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
-#' @param speciesEcoregion A \code{speciesEcoregion} table.
 #' @param modelCover statistical model of species presence/absence
 #' @param modelBiomass statistical model of species biomass
 #' @param successionTimestep The time between successive seed dispersal events.
 #' @param currentYear \code{time(sim)}
 #'
 #' #' @return
-#' A \code{speciesEcoregion} table with added columns for parameters
+#' A \code{speciesEcoregion} \code{data.table} with added columns for parameters
 #'   \code{maxB}, \code{maxANPP} and \code{establishprob}
 #'
 #' @importFrom data.table unique rbindlist
 
 makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDataShortNoCover, species,
-                                 speciesEcoregion, modelCover, modelBiomass, successionTimestep, currentYear) {
+                                 modelCover, modelBiomass, successionTimestep, currentYear) {
   ## Create speciesEcoregion table
   joinOn <- c("ecoregionGroup", "speciesCode")
   speciesEcoregion <- unique(cohortDataNoBiomass, by = joinOn)
