@@ -4,12 +4,14 @@
 \alias{scheduleDisturbance}
 \title{Test whether disturbance should be scheduled}
 \usage{
-scheduleDisturbance(disturbanceLayer, currentYear)
+scheduleDisturbance(disturbanceLayer, currentYear, disturbanceType)
 }
 \arguments{
 \item{disturbanceLayer}{a \code{RasterLayer} object}
 
 \item{currentYear}{time of simulation}
+
+\item{disturbanceType}{the type of disturbance (e.g. Burn, Harvest)}
 }
 \value{
 Logical indicating whether to schedule a disturbance event
@@ -19,6 +21,6 @@ Test whether disturbance should be scheduled
 }
 \examples{
 \dontrun{
-  doDisturbance <- scheduleDisturbance(sim$rstCurrentBurn, time(sim))
+  doEvent <- scheduleDisturbance(sim$rstCurrentBurn, time(sim), disturbanceType = "Burn")
 }
 }
