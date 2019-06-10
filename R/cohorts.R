@@ -961,7 +961,7 @@ addPixels2CohortData <- function(cohortData, pixelGroupMap,
   return(pixelCohortData)
 }
 
-#' Get number of pixels per \code{pixelGroup} and add it to \code{cohortData}
+#' Add number of pixels per \code{pixelGroup} and add it has a new column to \code{cohortData}
 #'
 #' @param cohortData A \code{data.table} with columns:
 #'   \code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
