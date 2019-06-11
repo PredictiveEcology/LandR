@@ -233,14 +233,16 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   # set(newPixelCohortData, NULL, "sumB", 0L)
   set(newPixelCohortData, NULL, "sumB", NULL)
   cohortData[age >= successionTimestep, oldSumB := sum(B, na.rm = TRUE), by = "pixelGroup"]
+
   ## test
   # test <- newPixelCohortData[1, ]
   # test[, `:=` (pixelGroup = 99999, B = NA)]
   # newPixelCohortData <- rbind(newPixelCohortData, test)
   ## end test
+
   newPixelCohortData <- unique(cohortData[, .(pixelGroup, oldSumB)],
                                by = "pixelGroup")[newPixelCohortData, on = "pixelGroup"]
-  set(newPixelCohortData, which(is.na(cohortData$oldSumB)), "oldSumB", 0)   ## faster than [:=]
+  set(newPixelCohortData, which(is.na(newPixelCohortData$oldSumB)), "oldSumB", 0)   ## faster than [:=]
   setnames(newPixelCohortData, "oldSumB", "sumB")
   set(cohortData, NULL, "oldSumB", NULL)
 
@@ -263,6 +265,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 
   cohortData <- rbindlist(list(cohortData, newPixelCohortData), fill = TRUE, use.names = TRUE)
   cohortData[, sumB := sum(B, na.rm = TRUE), by = "pixelGroup"]  ## recalculate sumB
+  if (!is.integer(cohortData[["sumB"]]))
+    set(cohortData, NULL, "sumB", asInteger(cohortData[["sumB"]]))
 
   return(cohortData)
 }
@@ -712,7 +716,7 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
   # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
   set(cohortData, NULL, "B", as.numeric(cohortData[["B"]]))
   message(blue("Divide total B of each pixel by the relative cover of the cohorts"))
-  cohortData[ , B := asInteger(mean(totalBiomass) * cover / 100), by = "pixelIndex"]
+  cohortData[ , B := mean(totalBiomass) * cover / 100, by = "pixelIndex"]
   message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
   cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
   message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
@@ -948,7 +952,7 @@ columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 #'
 #' @export
 #' @importFrom raster getValues ncell
-makePixelCohortData <- function(cohortData, pixelGroupMap,
+addPixels2CohortData <- function(cohortData, pixelGroupMap,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   assertCohortData(cohortData, pixelGroupMap, doAssertion = doAssertion)
 
@@ -961,7 +965,7 @@ makePixelCohortData <- function(cohortData, pixelGroupMap,
   return(pixelCohortData)
 }
 
-#' Get number of pixels per \code{pixelGroup} and add it to \code{cohortData}
+#' Add number of pixels per \code{pixelGroup} and add it has a new column to \code{cohortData}
 #'
 #' @param cohortData A \code{data.table} with columns:
 #'   \code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
