@@ -53,6 +53,7 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' A \code{data.table} as many rows as non-NA pixels in \code{rasterToMath} and
 #'  the columns containing pixel data from the input raster layers.
 #'
+#' @export
 #' @importFrom pemisc factorValues2
 #' @importFrom crayon blue
 #' @importFrom raster ncell
@@ -114,6 +115,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #' A \code{speciesEcoregion} \code{data.table} with added columns for parameters
 #'   \code{maxB}, \code{maxANPP} and \code{establishprob}
 #'
+#' @export
 #' @importFrom data.table rbindlist
 
 makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDataShortNoCover, species,
