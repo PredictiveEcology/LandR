@@ -114,7 +114,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #' A \code{speciesEcoregion} \code{data.table} with added columns for parameters
 #'   \code{maxB}, \code{maxANPP} and \code{establishprob}
 #'
-#' @importFrom data.table unique rbindlist
+#' @importFrom data.table rbindlist
 
 makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDataShortNoCover, species,
                                  modelCover, modelBiomass, successionTimestep, currentYear) {
