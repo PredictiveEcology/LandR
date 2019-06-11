@@ -9,7 +9,7 @@ if (getRversion() >= "3.1.0") {
 #'
 #' @param speciesLayers stack of species layers rasters
 #' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
-#' @param sppColorVect A named vector of colors to use for plotting. The names must conform with \codes{names(speciesLayers)}
+#' @param sppColorVect A named vector of colors to use for plotting. The names must conform with \code{names(speciesLayers)}
 #'   and should also contain a color for 'Mixed'.
 #'
 #' @return
