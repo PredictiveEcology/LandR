@@ -24,12 +24,12 @@ it's information per pixelID. See \code{ecoregionProducer}}
 \item{LCC2005}{raster of land-cover class}
 
 \item{pixelGroupAgeClass}{When assigning pixelGroup membership, this defines the resolution
-  of ages that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14
-  will be the same
-
-#' @return
+of ages that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14
+will be the same}
+}
+\value{
 A \code{data.table} as many rows as non-NA pixels in \code{rasterToMath} and
- the columns containing pixel data from the input raster layers.}
+ the columns containing pixel data from the input raster layers.
 }
 \description{
 Make pixelTable from biomass, age, land-cover and species cover data

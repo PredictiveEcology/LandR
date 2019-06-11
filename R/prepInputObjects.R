@@ -49,7 +49,7 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #'   of ages that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14
 #'   will be the same
 #'
-#' #' @return
+#' @return
 #' A \code{data.table} as many rows as non-NA pixels in \code{rasterToMath} and
 #'  the columns containing pixel data from the input raster layers.
 #'
@@ -101,7 +101,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 
 
 #' Make speciesEcoregion using statistically estimated maxB, maxANPP and establishment probabilities
-
+#'
 #' @param cohortDataNoBiomass a subset of cohortData
 #' @param cohortDataShort a subset of cohortData
 #' @param cohortDataShortNoCover a subset of cohortData
