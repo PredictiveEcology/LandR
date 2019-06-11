@@ -101,9 +101,9 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 
 #' Make speciesEcoregion using statistically estimated maxB, maxANPP and establishment probabilities
 
-#' @param cohortDataNoBiomass
-#' @param cohortDataShort
-#' @param cohortDataShortNoCover
+#' @param cohortDataNoBiomass a subset of cohortData
+#' @param cohortDataShort a subset of cohortData
+#' @param cohortDataShortNoCover a subset of cohortData
 #' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
 #' @param modelCover statistical model of species presence/absence
 #' @param modelBiomass statistical model of species biomass
