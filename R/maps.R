@@ -171,6 +171,8 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #' @importFrom SpaDES.tools rasterizeReduced
 vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
                                 colors, unitTest = getOption("LandR.assertions", FALSE)) {
+  assert_that(NROW(cohortdata) > 0)
+
   pgdAndSc <- c("pixelGroup", "speciesCode")
   if (isTRUE(unitTest)) { # slower -- older, but simpler Eliot June 5, 2019
     # 1. Find length of each pixelGroup -- don't include pixelGroups in "by" that have only 1 cohort: N = 1
