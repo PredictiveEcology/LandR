@@ -369,6 +369,9 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   sppEquiv <- sppEquiv[, lapply(.SD, as.character)]
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
+  ## remove empty names
+  sppNameVector <- sppNameVector[sppNameVector != ""]
+
   sppMerge <- unique(sppEquiv[[sppEquivCol]][duplicated(sppEquiv[[sppEquivCol]])])
   sppMerge <- sppMerge[nzchar(sppMerge)]
   if ("cachePath" %in% names(dots)) {
