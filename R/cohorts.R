@@ -112,8 +112,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B")
     cd <- cohorts[,c("pixelIndex", columnsForPG), with = FALSE]
-    cohorts[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L,
-                                                columns = columnsForPG)]
+    cohorts[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = columnsForPG)]
 
     # Bring to pixelGroup level -- this will squash the data.table
     allCohortData <- cohorts[ , .(ecoregionGroup = ecoregionGroup[1],
@@ -135,8 +134,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   pixelGroupMap[pixelsToChange$pixelIndex] <- pixelsToChange$pixelGroup
 
   if (doAssertion) {
-    if (!isTRUE(all(pixelsToChange$pixelGroup ==
-                    pixelGroupMap[][pixelsToChange$pixelIndex])))
+    if (!isTRUE(all(pixelsToChange$pixelGroup == pixelGroupMap[][pixelsToChange$pixelIndex])))
       stop("pixelGroupMap and newPixelCohortData$pixelGroupMap don't match in updateCohortData fn")
   }
 
@@ -219,9 +217,9 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   specieseco_current <- setkey(specieseco_current[, .(speciesCode, maxANPP, maxB, ecoregionGroup)],
                                speciesCode, ecoregionGroup)
 
-  # Note that after the following join, some cohorts will be lost due to lack of
-  #  parameters in speciesEcoregion. These need to be modified in pixelGroupMap.
-  # missingNewPixelCohortData <- newPixelCohortData[!specieseco_current, on = uniqueSpeciesEcoregionDefinition]
+  ## Note that after the following join, some cohorts will be lost due to lack of
+  ##  parameters in speciesEcoregion. These need to be modified in pixelGroupMap.
+  #missingNewPixelCohortData <- newPixelCohortData[!specieseco_current, on = uniqueSpeciesEcoregionDefinition]
   specieseco_current <- specieseco_current[!is.na(maxB)]
   specieseco_current[, maxB_eco := max(maxB), by = ecoregionGroup]
   newPixelCohortData <- specieseco_current[newPixelCohortData, on = uniqueSpeciesEcoregionDefinition]
@@ -685,7 +683,7 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
                                  variable.name = "speciesCode")
   cohortData[, coverOrig := cover]
   if (any(duplicated(cohortData)))
-    warning("cohortData contains duplicate rows.")
+    warning("createCohortData: cohortData contains duplicate rows.")
 
   if (doAssertion)
     #describeCohortData(cohortData)
@@ -707,7 +705,7 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
   cohortData[ , cover := {
     sumCover <- sum(cover)
     if (sumCover > 100) {
-      cover <- cover/(sumCover + 0.0001) * 100L
+      cover <- cover / (sumCover + 0.0001) * 100L
     }
     cover
   }, by = "pixelIndex"]
