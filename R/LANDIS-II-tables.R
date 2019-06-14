@@ -62,9 +62,7 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
 prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEquivCol = "LandR") {
 
   if (is.null(sppEquiv))
-    sppEquiv <- data.table(utils::data("sppEquivalencies_CA",
-                                                 package = "LandR",
-                                                 envir = environment()))
+    sppEquiv <- data.table(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
 
   names(speciesTable) <- c(
     "species",
@@ -91,8 +89,7 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
 
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
-  speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv,
-                                                           "LANDIS_traits", multi = TRUE) &
+  speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv, "LANDIS_traits", multi = TRUE) &
                                  Area %in% c("BSW", "BP", "MC")]
 
   speciesTable[, species := equivalentName(speciesTable$species, sppEquiv, sppEquivCol)]
