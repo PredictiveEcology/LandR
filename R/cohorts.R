@@ -111,7 +111,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     cohorts <- rbindlist(list(cdLong, newPixelCohortData), use.names = TRUE, fill = TRUE)
 
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B")
-    cd <- cohorts[,c("pixelIndex", columnsForPG), with = FALSE]
+    cd <- cohorts[, c("pixelIndex", columnsForPG), with = FALSE]
     cohorts[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = columnsForPG)]
 
     # Bring to pixelGroup level -- this will squash the data.table
@@ -126,8 +126,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     newPixelCohortData <- allCohortData[theNewOnes]
 
     # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
-    pixelsToChange <- unique(cohorts[, c("pixelIndex", "pixelGroup")],
-                             by = c("pixelIndex"))
+    pixelsToChange <- unique(cohorts[, c("pixelIndex", "pixelGroup")], by = c("pixelIndex"))
   }
 
   # update pixelGroupMap
@@ -226,7 +225,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   newPixelCohortData <- newPixelCohortData[!is.na(maxB)]
   set(newPixelCohortData, NULL, "age", 1L)  ## set age to 1
 
-  ## Ceres: this was causing new cohorts to be initialized with maxANPP
+  ## Ceres: this was causing new cohorts to be initialized with maxANPP.
   ## instead, calculate total biomass of older cohorts
   # set(newPixelCohortData, NULL, "sumB", 0L)
   set(newPixelCohortData, NULL, "sumB", NULL)
