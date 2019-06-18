@@ -228,7 +228,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   ## Ceres: this was causing new cohorts to be initialized with maxANPP.
   ## instead, calculate total biomass of older cohorts
   # set(newPixelCohortData, NULL, "sumB", 0L)
-  set(newPixelCohortData, NULL, "sumB", NULL)
+  if (!is.null(newPixelCohortData[["sumB"]]))
+    set(newPixelCohortData, NULL, "sumB", NULL)
   cohortData[age >= successionTimestep, oldSumB := sum(B, na.rm = TRUE), by = "pixelGroup"]
 
   ## test
