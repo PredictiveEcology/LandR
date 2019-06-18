@@ -60,11 +60,11 @@ asInteger <- function(x)
 #' \dontrun{
 #'   doEvent <- scheduleDisturbance(sim$rstCurrentBurn, time(sim), disturbanceType = "Burn")
 #' }
-scheduleDisturbance <- function(disturbanceLayer, currentYear, disturbanceType){
-  if (!disturbanceType %in% c("Burn", "Harvest")) {
-    stop("Please ensure disturbance type is either 'Burn' or 'Harvest'")
-  }
-  if (is.null(disturbanceLayer) || names(disturbanceLayer) != paste0(disturbanceType, currentYear)) {
+scheduleDisturbance <- function(disturbanceLayer, currentYear){
+
+  if (is.null(disturbanceLayer) ||
+      is.null(disturbanceLayer@data@attributes$Year) ||
+      disturbanceLayer@data@attributes$Year != currentYear) {
     TRUE
   } else {
     FALSE
