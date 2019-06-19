@@ -696,7 +696,9 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #'
 #' @param sppMerge TODO
 #' @param speciesLayers stack of species layers rasters
-#' @param sppEquiv TODO
+#' @param sppEquiv table with species name equivalencies between the
+#'                           kNN format and the final naming format.
+#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
 #' @param column TODO
 #' @param dPath destination path TODO
 #' @param suffix TODO

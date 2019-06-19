@@ -11,7 +11,9 @@
 #' @param vegLeadingProportion The minimum proportion cover required to consider
 #'                             a species to be the "leading" one. Default 0.8.
 #'
-#' @param sppEquiv a species equivalency table TODO: description needed
+#' @param sppEquiv table with species name equivalencies between the
+#'                           kNN format and the final naming format.
+#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
 #'
 #' @param sppEquivCol the column name to use from \code{sppEquiv}.
 #'
@@ -115,10 +117,10 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 
 #' Create species color vector from a sppEquiv table
 #'
-#' Create species color vector from a sppEquiv table
-#'
-#' @param sppEquiv A species equivalency table, e.g., \code{data("sppEquivalencies_CA")}.
-#' @param sppEquivCol The name of the column to get names from.
+#' @param sppEquiv table with species name equivalencies between the
+#'                           kNN format and the final naming format.
+#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
+#' @param sppEquivCol the column name to use from \code{sppEquiv}.
 #' @param newVals An optional character vector of extra names to use, e.g., "Mixed".
 #' @param palette An RColorBrewer palette, e.g., "Accent".
 #'                Can get RColorBrewer palette names from

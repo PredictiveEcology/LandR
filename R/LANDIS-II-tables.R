@@ -51,9 +51,12 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
 #'
 #' @param speciesLayers stack of species layers rasters
 #'
-#' @param sppEquiv TODO: description needed
+#' @param sppEquiv table with species name equivalencies between the
+#'                           kNN format and the final naming format.
+#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
 #'
-#' @param sppEquivCol TODO: description needed
+#' @param sppEquivCol character string indicating the column in \code{sppEquiv}
+#'                    to use for final species names.
 #'
 #' @return A \code{data.table} with columns ... TODO
 #'

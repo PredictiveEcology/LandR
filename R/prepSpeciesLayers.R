@@ -9,8 +9,10 @@ if (getRversion() >= "3.1.0") {
 #' @param CASFRIRas TODO: description needed
 #' @param attrFile TODO: description needed
 #' @param headerFile TODO: description needed
-#' @param sppEquiv TODO: description needed
-#' @param sppEquivCol TODO: description needed
+#' @param sppEquiv table with species name equivalencies between the
+#'                           kNN format and the final naming format.
+#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
+#' @param sppEquivCol the column name to use from \code{sppEquiv}.
 #' @param type Character string. Either \code{"cover"} or \code{"age"}.
 #'
 #' @return TODO: description needed
@@ -92,8 +94,10 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 #' @param CASFRIRas TODO: description needed
 #' @param CASFRIattrLong TODO: description needed
 #' @param CASFRIdt TODO: description needed
-#' @param sppEquiv TODO: description needed
-#' @param sppEquivCol TODO: description needed
+#' @param sppEquiv table with species name equivalencies between the
+#'                           kNN format and the final naming format.
+#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
+#' @param sppEquivCol the column name to use from \code{sppEquiv}.
 #' @param destinationPath TODO: description needed
 #'
 #' @return TODO: description needed
@@ -187,8 +191,10 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 #' @param url TODO: description needed; if \code{NULL}, the default, use the default source url
 #' @param studyArea TODO: description needed
 #' @param rasterToMatch TODO: description needed
-#' @param sppEquiv TODO: description needed
-#' @param sppEquivCol TODO: description needed
+#' @param sppEquiv table with species name equivalencies between the
+#'                           kNN format and the final naming format.
+#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
+#' @param sppEquivCol the column name to use from \code{sppEquiv}.
 #'
 #' @return TODO: description needed
 #'
@@ -276,8 +282,10 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
 #' TODO: description and title needed
 #'
 #' @param PickellRaster TODO: description needed
-#' @param sppEquiv TODO: description needed
-#' @param sppEquivCol TODO: description needed
+#' @param sppEquiv table with species name equivalencies between the
+#'                           kNN format and the final naming format.
+#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
+#' @param sppEquivCol the column name to use from \code{sppEquiv}.
 #' @param destinationPath TODO: description needed
 #'
 #' @return TODO: description needed
