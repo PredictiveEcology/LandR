@@ -212,6 +212,10 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     }
   }
 
+  if (!is.null(newPixelCohortData[["pixelIndex"]]))
+    set(newPixelCohortData, NULL, "pixelIndex", NULL)
+  newPixelCohortData <- newPixelCohortData[!duplicated(newPixelCohortData), ]
+
   specieseco_current <- speciesEcoregionLatestYear(speciesEcoregion, time)
   specieseco_current <- setkey(specieseco_current[, .(speciesCode, maxANPP, maxB, ecoregionGroup)],
                                speciesCode, ecoregionGroup)
@@ -251,11 +255,9 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
       asInteger(pmax(1, newPixelCohortData$maxANPP *
                        exp(-1.6 * newPixelCohortData$sumB / newPixelCohortData$maxB_eco))))
   set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
+
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
                                                mortality = 0L, aNPPAct = 0L)]
-
-  # This removes the duplicated pixels within pixelGroup, i.e., the reason we want pixelGroups
-  newPixelCohortData <- newPixelCohortData[!duplicated(newPixelCohortData), ]
 
   if (getOption("LandR.assertions")) {
     if (isTRUE(NROW(unique(newPixelCohortData, by = uniqueCohortDefinition)) != NROW(newPixelCohortData)))
