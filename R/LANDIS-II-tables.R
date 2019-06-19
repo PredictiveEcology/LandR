@@ -312,3 +312,85 @@ prepInputsSpeciesEcoregion <- function(url = NULL, dPath, cacheTags = NULL) {
 
   return(speciesEcoregion)
 }
+
+#' Change species table of parameters/traits
+#'
+#' Changes longevity values in the species table according to Burton & Cumming (1995).
+#'   Only the species and values present in Boreal Shield W ('BSW'), Boreal Plians ('BP') and
+#'   Montane Cordillera ('MC') \code{speciesTable$Area} are being changed. All others follow
+#'   minic Cyr and Yan Boulanger's trait values ("https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv).
+#'   Note that BSW and BP areas correspond more closely to the region considered in Table 2
+#'   of Burton & Cumming (1995), while MC will correspond to both tables.
+#'
+#' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
+#'
+#' @param sppEquiv table with species name equivalencies between the
+#'                           kNN format and the final naming format.
+#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
+#'
+#' @param sppEquivCol character string indicating the column in \code{sppEquiv}
+#'                    to use for final species names.
+#'
+#' @return An updated species \code{data.table}
+#'
+#' @export
+#' @importFrom data.table data.table
+#' @rdname speciesTableUpdate
+speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
+  if (is.null(sppEquiv))
+    sppEquiv <- data.table(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
+
+  if (is.null(sppEquivCol))
+    stop("Please provide sppEquivCol")
+
+  names(speciesTable) <- c(
+    "species",
+    "Area",
+    "longevity",
+    "sexualmature",
+    "shadetolerance",
+    "firetolerance",
+    "seeddistance_eff",
+    "seeddistance_max",
+    "resproutprob",
+    "resproutage_min",
+    "resproutage_max",
+    "postfireregen",
+    "leaflongevity",
+    "wooddecayrate",
+    "mortalityshape",
+    "growthcurve",
+    "leafLignin",
+    "hardsoft"
+  )
+
+  ## make temporary table that will have new parameters for Boreal spp.
+  speciesTableShort <- speciesTable[Area %in% c("BSW", "BP", "MC"), .(species, longevity)]
+  speciesTableShort[species == "ABIE.BAL", longevity := 200]
+  speciesTableShort[species == "ABIE.LAS", longevity := 240]
+  speciesTableShort[species == "BETU.PAP", longevity := 140]
+  speciesTableShort[species == "LARI.LAR", longevity := 350]
+  speciesTableShort[species == "LARI.OCC", longevity := 450]
+  speciesTableShort[species == "PICE.ENG", longevity := 460]
+  speciesTableShort[species == "PICE.GLA", longevity := 400]
+  speciesTableShort[species == "PICE.MAR", longevity := 250]
+  speciesTableShort[species == "PINU.BAN", longevity := 150]
+  speciesTableShort[species == "PINU.CON.LAT", longevity := 335]
+  speciesTableShort[species == "PINU.PON", longevity := 575]
+  speciesTableShort[species == "POPU.BAL", longevity := 200]
+  speciesTableShort[species == "POPU.TRE", longevity := 200]
+  speciesTableShort[species == "PSEU.MEN", longevity := 525]   ## only in MC area, corresponding to var. glauca
+  speciesTableShort[species == "THUJ.PLI", longevity := 1500]
+  speciesTableShort[species == "THUJ.HET", longevity := 500]
+  speciesTableShort[species == "THUJ.MER", longevity := 800]
+
+  ## rename and "merge" species by using the minimum value
+  speciesTableShort[, species := equivalentName(speciesTableShort$species, sppEquiv, sppEquivCol)]
+  speciesTableShort <- speciesTableShort[!is.na(species)]
+  speciesTableShort <- speciesTableShort[, min(longevity), by = "species"]
+
+  ## join and replace
+  species <- species[speciesTableShort, on = "species"][,  longevity := V1]
+  return(species)
+  }
+
