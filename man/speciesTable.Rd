@@ -22,9 +22,12 @@ prepSpeciesTable(speciesTable, speciesLayers, sppEquiv = NULL,
 
 \item{speciesLayers}{stack of species layers rasters}
 
-\item{sppEquiv}{TODO: description needed}
+\item{sppEquiv}{table with species name equivalencies between the
+kNN format and the final naming format.
+See \code{data("sppEquivalencies_CA", "LandR")}.}
 
-\item{sppEquivCol}{TODO: description needed}
+\item{sppEquivCol}{character string indicating the column in \code{sppEquiv}
+to use for final species names.}
 }
 \value{
 A \code{data.table} with columns ... TODO

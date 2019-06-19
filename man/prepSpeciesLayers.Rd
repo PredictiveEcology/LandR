@@ -30,9 +30,11 @@ prepSpeciesLayers_ForestInventory(destinationPath, outputPath,
 
 \item{rasterToMatch}{TODO: description needed}
 
-\item{sppEquiv}{TODO: description needed}
+\item{sppEquiv}{table with species name equivalencies between the
+kNN format and the final naming format.
+See \code{data("sppEquivalencies_CA", "LandR")}.}
 
-\item{sppEquivCol}{TODO: description needed}
+\item{sppEquivCol}{the column name to use from \code{sppEquiv}.}
 }
 \value{
 TODO: description needed

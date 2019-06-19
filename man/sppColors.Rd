@@ -7,9 +7,11 @@
 sppColors(sppEquiv, sppEquivCol, newVals = NULL, palette)
 }
 \arguments{
-\item{sppEquiv}{A species equivalency table, e.g., \code{data("sppEquivalencies_CA")}.}
+\item{sppEquiv}{table with species name equivalencies between the
+kNN format and the final naming format.
+See \code{data("sppEquivalencies_CA", "LandR")}.}
 
-\item{sppEquivCol}{The name of the column to get names from.}
+\item{sppEquivCol}{the column name to use from \code{sppEquiv}.}
 
 \item{newVals}{An optional character vector of extra names to use, e.g., "Mixed".}
 

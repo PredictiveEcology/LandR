@@ -4,7 +4,7 @@
 \alias{scheduleDisturbance}
 \title{Test whether disturbance should be scheduled}
 \usage{
-scheduleDisturbance(disturbanceLayer, currentYear, disturbanceType)
+scheduleDisturbance(disturbanceLayer, currentYear)
 }
 \arguments{
 \item{disturbanceLayer}{a \code{RasterLayer} object}

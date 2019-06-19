@@ -16,7 +16,9 @@ If not supplied, will be produced internally by \code{makeVegTypeMap}.}
 \item{vegLeadingProportion}{The minimum proportion cover required to consider
 a species to be the "leading" one. Default 0.8.}
 
-\item{sppEquiv}{a species equivalency table TODO: description needed}
+\item{sppEquiv}{table with species name equivalencies between the
+kNN format and the final naming format.
+See \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.}
 

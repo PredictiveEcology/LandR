@@ -12,7 +12,9 @@ mergeSppRaster(sppMerge, speciesLayers, sppEquiv, column, suffix, dPath,
 
 \item{speciesLayers}{stack of species layers rasters}
 
-\item{sppEquiv}{TODO}
+\item{sppEquiv}{table with species name equivalencies between the
+kNN format and the final naming format.
+See \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{column}{TODO}
 
