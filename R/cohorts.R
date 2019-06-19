@@ -191,9 +191,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 #' with \code{cohortData}.
 #'
 #' @inheritParams updateCohortData
-#' @return
-#' \code{.initiateNewCohorts} returns A \code{data.table} with a new,
-#' \code{rbindlist}ed cohortData
+#' @return A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
 #'
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
