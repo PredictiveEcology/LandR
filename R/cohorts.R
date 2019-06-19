@@ -263,9 +263,9 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   }
 
   cohortData <- rbindlist(list(cohortData, newPixelCohortData), fill = TRUE, use.names = TRUE)
-  cohortData[, sumB := sum(B, na.rm = TRUE), by = "pixelGroup"]  ## recalculate sumB
-  if (!is.integer(cohortData[["sumB"]]))
-    set(cohortData, NULL, "sumB", asInteger(cohortData[["sumB"]]))
+  # cohortData[, sumB := sum(B, na.rm = TRUE), by = "pixelGroup"]  ## recalculate sumB
+  # if (!is.integer(cohortData[["sumB"]]))
+  #   set(cohortData, NULL, "sumB", asInteger(cohortData[["sumB"]]))
 
   return(cohortData)
 }
