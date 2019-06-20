@@ -15,7 +15,6 @@ matrix:
     r_binary_packages:
       - BH
       - RSQlite
-      - archivist
     addons:
       apt:
         sources:
