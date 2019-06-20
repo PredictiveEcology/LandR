@@ -9,9 +9,10 @@ speciesTableUpdate(species, speciesTable, sppEquiv, sppEquivCol)
 \arguments{
 \item{species}{a \code{data.table} that has species traits such as longevity, shade tolerance, etc.}
 
-\item{sppEquiv}{table with species name equivalencies between the
-kNN format and the final naming format.
-See \code{data("sppEquivalencies_CA", "LandR")}.}
+\item{speciesTable}{TODO: DESCRIPTION NEEDED}
+
+\item{sppEquiv}{table with species name equivalencies between the kNN format and the final naming
+format. See \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{sppEquivCol}{character string indicating the column in \code{sppEquiv}
 to use for final species names.}
@@ -21,9 +22,10 @@ An updated species \code{data.table}
 }
 \description{
 Changes longevity values in the species table according to Burton & Cumming (1995).
-  Only the species and values present in Boreal Shield W ('BSW'), Boreal Plians ('BP') and
-  Montane Cordillera ('MC') \code{speciesTable$Area} are being changed. All others follow
-  minic Cyr and Yan Boulanger's trait values ("https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv).
-  Note that BSW and BP areas correspond more closely to the region considered in Table 2
-  of Burton & Cumming (1995), while MC will correspond to both tables.
+Only the species and values present in Boreal Shield West (BSW), Boreal Plains (BP) and
+Montane Cordillera (MC) \code{speciesTable$Area} are being changed.
+All others follow Dominic Cyr and Yan Boulanger's trait values
+(\url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
+Note that BSW and BP areas correspond more closely to the region considered in Table 2 of
+Burton & Cumming (1995), while MC will correspond to both tables.
 }

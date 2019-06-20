@@ -10,8 +10,6 @@ scheduleDisturbance(disturbanceLayer, currentYear)
 \item{disturbanceLayer}{a \code{RasterLayer} object}
 
 \item{currentYear}{time of simulation}
-
-\item{disturbanceType}{the type of disturbance (e.g. Burn, Harvest)}
 }
 \value{
 Logical indicating whether to schedule a disturbance event

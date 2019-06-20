@@ -51,8 +51,7 @@ only level 1 exists; but this may change.}
 A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
 \code{newPixelCohortData} inserted.
 
-\code{.initiateNewCohorts} returns A \code{data.table} with a new,
-\code{rbindlist}ed cohortData
+A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
 }
 \description{
 This is a wrapper for  \code{generatePixelGroups}, \code{initiateNewCohort} and

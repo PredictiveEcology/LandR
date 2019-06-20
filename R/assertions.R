@@ -115,16 +115,15 @@ assertColumns <- function(obj, colClasses,
 #' @importFrom stats na.omit
 #' @rdname assertions
 assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1,
-                           message = "", doAssertion = getOption("LandR.assertions", TRUE),
-                           verbose = getOption("LandR.verbose", TRUE)) {
+                             message = "", doAssertion = getOption("LandR.assertions", TRUE),
+                             verbose = getOption("LandR.verbose", TRUE)) {
   if (doAssertion) {
     if (!isTRUE("pixelGroup" %in% names(cohortData))) {
       stop("cohortData must have pixelGroup")
     }
     a <- sort(unique(na.omit(pixelGroupMap[])))
     b <- sort(unique(na.omit(cohortData$pixelGroup)))
-    ## test1 and test2 can be 1 because there could be pixelGroup of 0,
-    ##   which is OK to not match
+    ## test1 and test2 can be 1 because there could be pixelGroup of 0, which is OK to not match
     test1 <- sum(!a %in% b)
     test2 <- sum(!b %in% a)
 

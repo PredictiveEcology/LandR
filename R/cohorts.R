@@ -191,9 +191,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 #' with \code{cohortData}.
 #'
 #' @inheritParams updateCohortData
-#' @return
-#' \code{.initiateNewCohorts} returns A \code{data.table} with a new,
-#' \code{rbindlist}ed cohortData
+#' @return A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
 #'
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
@@ -211,6 +209,10 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
       stop("newPixelCohortData must have either pixelIndex or pixelGroup")
     }
   }
+
+  if (!is.null(newPixelCohortData[["pixelIndex"]]))
+    set(newPixelCohortData, NULL, "pixelIndex", NULL)
+  newPixelCohortData <- newPixelCohortData[!duplicated(newPixelCohortData), ]
 
   specieseco_current <- speciesEcoregionLatestYear(speciesEcoregion, time)
   specieseco_current <- setkey(specieseco_current[, .(speciesCode, maxANPP, maxB, ecoregionGroup)],
@@ -248,16 +250,15 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
                                                mortality = 0L, aNPPAct = 0L)]
 
-  # This removes the duplicated pixels within pixelGroup, i.e., the reason we want pixelGroups
   if (getOption("LandR.assertions")) {
     if (isTRUE(NROW(unique(newPixelCohortData, by = uniqueCohortDefinition)) != NROW(newPixelCohortData)))
       stop("Duplicated new cohorts in a pixelGroup. Please debug LandR:::.initiateNewCohorts")
   }
 
   cohortData <- rbindlist(list(cohortData, newPixelCohortData), fill = TRUE, use.names = TRUE)
-  cohortData[, sumB := sum(B, na.rm = TRUE), by = "pixelGroup"]  ## recalculate sumB
-  if (!is.integer(cohortData[["sumB"]]))
-    set(cohortData, NULL, "sumB", asInteger(cohortData[["sumB"]]))
+  # cohortData[, sumB := sum(B, na.rm = TRUE), by = "pixelGroup"]  ## recalculate sumB
+  # if (!is.integer(cohortData[["sumB"]]))
+  #   set(cohortData, NULL, "sumB", asInteger(cohortData[["sumB"]]))
 
   return(cohortData)
 }
