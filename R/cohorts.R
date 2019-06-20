@@ -232,19 +232,12 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     set(newPixelCohortData, NULL, "sumB", NULL)
   cohortData[age >= successionTimestep, oldSumB := sum(B, na.rm = TRUE), by = "pixelGroup"]
 
-  ## test
-  # test <- newPixelCohortData[1, ]
-  # test[, `:=` (pixelGroup = 99999, B = NA)]
-  # newPixelCohortData <- rbind(newPixelCohortData, test)
-  ## end test
-
   newPixelCohortData <- unique(cohortData[, .(pixelGroup, oldSumB)],
                                by = "pixelGroup")[newPixelCohortData, on = "pixelGroup"]
   set(newPixelCohortData, which(is.na(newPixelCohortData$oldSumB)), "oldSumB", 0)   ## faster than [:=]
   setnames(newPixelCohortData, "oldSumB", "sumB")
   set(cohortData, NULL, "oldSumB", NULL)
 
-  ## set B - if B=0, it's getting maxANPP ???
   if ("B" %in% names(newPixelCohortData))
     newPixelCohortData[, B := NULL]
   set(newPixelCohortData, NULL, "B",
