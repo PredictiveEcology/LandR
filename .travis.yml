@@ -1,14 +1,14 @@
 sudo: required
 language: r
 cache: packages
-cran: https://cran.rstudio.com/
+cran: https://cloud.r-project.org
 env:
   global:
-    - CRAN_REPO=https://cran.rstudio.com
+    - CRAN_REPO=https://cloud.r-project.org
 matrix:
   include:
   - os: linux
-    dist: trusty
+    dist: xenial
     r: oldrel
     addons:
       apt:
@@ -16,21 +16,23 @@ matrix:
           - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
         packages:
           - libgdal-dev
-          - libgdal1-dev
           - libgeos-dev
+          - libglpk-dev
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
-          - gdal-bin
-    before_script:
-      - "export DISPLAY=:99.0"
-      - "sh -e /etc/init.d/xvfb start"
-      - sleep 3 # give xvfb some time to start
-    r_packages:
-      - rgdal
-      - rgeos
- - os: linux
-    dist: trusty
+    services:
+      - xvfb
+    r_binary_packages:
+      - BH
+      - dplyr
+      - git2r
+      - igraph
+      - raster
+      - RSQlite
+      - stringi
+  - os: linux
+    dist: xenial
     r: release
     addons:
       apt:
@@ -38,57 +40,86 @@ matrix:
           - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
         packages:
           - libgdal-dev
-          - libgdal1-dev
           - libgeos-dev
+          - libglpk-dev
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
-          - gdal-bin
+    services:
+      - xvfb
+    r_binary_packages:
+      - BH
+      - dplyr
+      - git2r
+      - igraph
+      - raster
+      - RSQlite
+      - stringi
     before_script:
-      - "export DISPLAY=:99.0"
-      - "sh -e /etc/init.d/xvfb start"
-      - sleep 3 # give xvfb some time to start
-    r_packages:
-      - covr
-      - devtools
+      - Rscript -e 'install.packages("devtools", type = "source")'
+    after_failure:
+      - cat ./SpaDES.core.Rcheck/tests/test-all.Rout
+    after_success:
+      - travis_wait 15 Rscript -e 'covr::coveralls(type = "all", quiet = FALSE)'
+      - Rscript -e 'lintr::lint_package()'
     r_github_packages:
       - jimhester/lintr
-    after_success:
-      - Rscript -e 'covr::coveralls(type = "all", quiet = FALSE)'
-      - Rscript -e 'lintr::lint_package()'
-    r_packages:
-      - rgdal
-      - rgeos
+      - r-lib/covr
   - os: linux
-    dist: trusty
+    dist: xenial
+    services:
+      - xvfb
     r: devel
+    r_binary_packages:
+      - BH
+      - dplyr
+      - git2r
+      - igraph
+      - raster
+      - RSQlite
+      - stringi
     addons:
       apt:
         sources:
           - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
         packages:
           - libgdal-dev
-          - libgdal1-dev
           - libgeos-dev
+          - libglpk-dev
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
-          - gdal-bin
-    before_script:
-      - "export DISPLAY=:99.0"
-      - "sh -e /etc/init.d/xvfb start"
-      - sleep 3 # give xvfb some time to start
-    r_packages:
-      - devtools
-      - rgdal
-      - rgeos
   - os: osx
     osx_image: xcode9.4
+    addons:
+      homebrew:
+        packages:
+        - glpk
+        - libgit2
+        - llvm
+        update: true
     latex: false
-    r_build_args: '--no-build-vignettes'
-    r_check_args: '--as-cran --ignore-vignettes --no-examples'
+    r_build_args: "--no-build-vignettes"
+    r_check_args: "--as-cran --ignore-vignettes --no-examples"
+    env:
+      - GLPK=true
+    before_install:
+      - Rscript -e 'install.packages(c("digest", "igraph", "rgdal", "rgeos"), type = "source")'
+  - os: osx
+    osx_image: xcode9.4
+    addons:
+      homebrew:
+        packages:
+        - libgit2
+        - llvm
+        update: true
+    latex: false
+    r_build_args: "--no-build-vignettes"
+    r_check_args: "--as-cran --ignore-vignettes --no-examples"
+    env:
+      - GLPK=false
     before_script:
-      - Rscript -e "install.packages(c('rgdal', 'rgeos'), type = 'source')"
+      - Rscript -e 'install.packages(c("digest", "igraph", "rgdal", "rgeos"), type = "source")'
 r_build_args: " "
 r_check_args: "--as-cran"
 warnings_are_errors: true
