@@ -14,6 +14,7 @@ matrix:
     r: oldrel
     r_binary_packages:
       - BH
+      - git2r
     addons:
       apt:
         sources:
@@ -36,6 +37,8 @@ matrix:
       - stringi
       - RSQlite
       - igraph
+      - raster
+      - git2r
     addons:
       apt:
         sources:
@@ -68,6 +71,7 @@ matrix:
       - stringi
       - RSQlite
       - igraph
+      - git2r
     addons:
       apt:
         sources:
