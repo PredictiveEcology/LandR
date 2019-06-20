@@ -146,13 +146,17 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   speciesTableShort[species == "THUJ.HET", longevity := 500]
   speciesTableShort[species == "THUJ.MER", longevity := 800]
 
-  ## rename and "merge" species by using the minimum value
+
+  ## subset, rename and "merge" species by using the minimum value
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
+  sppNameVector <- species$species
+  speciesTableShort <- speciesTableShort[species %in% equivalentName(sppNameVector, sppEquiv, "LANDIS_traits", multi = TRUE)]
   speciesTableShort[, species := equivalentName(speciesTableShort$species, sppEquiv, sppEquivCol)]
-  speciesTableShort <- speciesTableShort[!is.na(species)]
   speciesTableShort <- speciesTableShort[, min(longevity), by = "species"]
 
   ## join and replace
   species <- species[speciesTableShort, on = "species"][, longevity := V1]
+  set(species, NULL, "V1", NULL)
   return(species)
 }
 
