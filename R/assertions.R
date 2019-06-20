@@ -186,3 +186,27 @@ assertPixelCohortData <- function(pixelCohortData, pixelGroupMap,
     }
   }
 }
+
+
+#' Check that each species as a unique label in the 'EN_generic_short' and 'Leading'
+#'   columns of the \code{sppEquiv} table.
+#'
+#'
+#' @param speciesNames A vector of species names for which the labels will be checked
+#' @param sppEquiv table with species name equivalencies between the
+#'                           kNN format and the final naming format.
+#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
+#' @export
+#' @rdname assertions
+assertSpeciesPlotLabels <- function(speciesNames, sppEquiv,
+                                    doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    sppLabelsENshort <- equivalentName(speciesNames,  sppEquiv, "EN_generic_short")
+    sppLabelsLeading <- equivalentName(speciesNames,  sppEquiv, "Leading")
+    if (any(duplicated(sppLabelsENshort) |
+            duplicated(sppLabelsLeading)))
+      stop("2 or more species share the same label under the 'EN_generic_short' or 'Leading' columns of sim$sppEquiv.
+          Please provide unique 'EN_generic_short' and 'Leading' for each species")
+  }
+}
+

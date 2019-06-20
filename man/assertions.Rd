@@ -7,6 +7,7 @@
 \alias{assertColumns}
 \alias{assertCohortData}
 \alias{assertPixelCohortData}
+\alias{assertSpeciesPlotLabels}
 \title{Assertions}
 \usage{
 assert1(cohortData34to36, cohortData,
@@ -27,6 +28,9 @@ assertCohortData(cohortData, pixelGroupMap, sim,
   verbose = getOption("LandR.verbose", TRUE))
 
 assertPixelCohortData(pixelCohortData, pixelGroupMap,
+  doAssertion = getOption("LandR.assertions", TRUE))
+
+assertSpeciesPlotLabels(speciesNames, sppEquiv,
   doAssertion = getOption("LandR.assertions", TRUE))
 }
 \arguments{
@@ -64,6 +68,12 @@ was called.}
 \item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
 
 \item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
+
+\item{speciesNames}{A vector of species names for which the labels will be checked}
+
+\item{sppEquiv}{table with species name equivalencies between the
+kNN format and the final naming format.
+See \code{data("sppEquivalencies_CA", "LandR")}.}
 }
 \description{
 This is the full pixelCohortData, not the collapsed one
