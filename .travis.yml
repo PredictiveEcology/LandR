@@ -34,11 +34,11 @@ matrix:
     r_binary_packages:
       - BH
       - dplyr
-      - stringi
-      - RSQlite
+      - git2r
       - igraph
       - raster
-      - git2r
+      - RSQlite
+      - stringi
     addons:
       apt:
         sources:
@@ -68,10 +68,11 @@ matrix:
     r_binary_packages:
       - BH
       - dplyr
-      - stringi
-      - RSQlite
-      - igraph
       - git2r
+      - igraph
+      - raster
+      - RSQlite
+      - stringi
     addons:
       apt:
         sources:
