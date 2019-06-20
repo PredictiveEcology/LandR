@@ -9,12 +9,7 @@ matrix:
   include:
   - os: linux
     dist: xenial
-    services:
-      - xvfb
     r: oldrel
-    r_binary_packages:
-      - BH
-      - git2r
     addons:
       apt:
         sources:
@@ -26,11 +21,8 @@ matrix:
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
-  - os: linux
-    dist: xenial
     services:
       - xvfb
-    r: release
     r_binary_packages:
       - BH
       - dplyr
@@ -39,6 +31,9 @@ matrix:
       - raster
       - RSQlite
       - stringi
+  - os: linux
+    dist: xenial
+    r: release
     addons:
       apt:
         sources:
@@ -50,6 +45,16 @@ matrix:
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
+    services:
+      - xvfb
+    r_binary_packages:
+      - BH
+      - dplyr
+      - git2r
+      - igraph
+      - raster
+      - RSQlite
+      - stringi
     before_script:
       - Rscript -e 'install.packages("devtools", type = "source")'
     after_failure:
