@@ -31,7 +31,7 @@ matrix:
       - raster
       - RSQlite
     before_install:
-      - Rscript -e 'install.packages(c("ggplot2", "quickPlot"), type = "source")'
+      - Rscript -e 'install.packages(c("ggplot2", "quickPlot", "reproducible"), type = "source")'
   - os: linux
     dist: xenial
     r: release
