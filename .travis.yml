@@ -26,12 +26,13 @@ matrix:
     r_binary_packages:
       - BH
       - dplyr
-      - ggplot2
       - git2r
       - igraph
       - raster
       - RSQlite
       - stringi
+    before_install:
+      - Rscript -e 'if (length(find.package("ggplot2", quiet = TRUE))) remove.packages("ggplot2")'
   - os: linux
     dist: xenial
     r: release
@@ -52,7 +53,6 @@ matrix:
       - BH
       - dplyr
       - git2r
-      - ggplot2
       - igraph
       - raster
       - RSQlite
@@ -87,7 +87,6 @@ matrix:
       - BH
       - dplyr
       - git2r
-      - ggplot2
       - igraph
       - raster
       - RSQlite
