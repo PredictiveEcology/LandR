@@ -31,8 +31,8 @@ matrix:
       - raster
       - RSQlite
       - stringi
-    before_install:
-      - Rscript -e 'if (length(find.package("ggplot2", quiet = TRUE))) remove.packages("ggplot2")'
+    before_script:
+      - Rscript -e 'update.packages(checkBuilt = TRUE, ask = FALSE)'
   - os: linux
     dist: xenial
     r: release
