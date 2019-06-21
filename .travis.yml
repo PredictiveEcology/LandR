@@ -30,9 +30,8 @@ matrix:
       - igraph
       - raster
       - RSQlite
-      - stringi
     before_install:
-      - Rscript -e 'install.packages("ggplot2", type = "source")'
+      - Rscript -e 'install.packages(c("ggplot2", "quickPlot"), type = "source")'
   - os: linux
     dist: xenial
     r: release
