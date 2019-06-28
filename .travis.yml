@@ -25,7 +25,13 @@ matrix:
       - xvfb
     r_binary_packages:
       - BH
+      - dplyr
       - git2r
+      - igraph
+      - raster
+      - RSQlite
+    before_install:
+      - Rscript -e 'install.packages(c("ggplot2", "quickPlot", "reproducible"), type = "source")'
   - os: linux
     dist: xenial
     r: release
@@ -50,29 +56,17 @@ matrix:
       - raster
       - RSQlite
       - stringi
-    before_script:
-      - Rscript -e 'install.packages("devtools", type = "source")'
+    r_github_packages:
+      - jimhester/lintr
+      - r-lib/covr
     after_failure:
       - cat ./SpaDES.core.Rcheck/tests/test-all.Rout
     after_success:
       - travis_wait 15 Rscript -e 'covr::coveralls(type = "all", quiet = FALSE)'
       - Rscript -e 'lintr::lint_package()'
-    r_github_packages:
-      - jimhester/lintr
-      - r-lib/covr
   - os: linux
     dist: xenial
-    services:
-      - xvfb
     r: devel
-    r_binary_packages:
-      - BH
-      - dplyr
-      - git2r
-      - igraph
-      - raster
-      - RSQlite
-      - stringi
     addons:
       apt:
         sources:
@@ -84,6 +78,16 @@ matrix:
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
+    services:
+      - xvfb
+    r_binary_packages:
+      - BH
+      - dplyr
+      - git2r
+      - igraph
+      - raster
+      - RSQlite
+      - stringi
   - os: osx
     osx_image: xcode9.4
     addons:
