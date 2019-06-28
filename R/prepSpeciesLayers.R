@@ -451,14 +451,10 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   CClayerNamesFiles <- paste0(gsub(" ", "", CClayerNames), "1.tif")
   options(map.useParallel = FALSE) ## TODO: pass additional arg to function
   ml <- mapAdd(rasterToMatch, isRasterToMatch = TRUE, layerName = "rasterToMatch",
-               #useSAcrs = TRUE, #poly = TRUE,
-               #      columnNameForLabels = "NSN",
                filename2 = NULL)
 
   ml <- mapAdd(studyArea, map = ml, isStudyArea = TRUE, layerName = "studyArea",
-               useSAcrs = TRUE, #poly = TRUE,
-               #      columnNameForLabels = "NSN",
-               filename2 = NULL)
+               useSAcrs = TRUE, filename2 = NULL)
 
   ml <- mapAdd(map = ml, url = url, layerName = CClayerNames, CC = TRUE,
                destinationPath = destinationPath,
@@ -480,7 +476,8 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
                     ml$LandType[] == 1)   # 1 is cities -- NA it here -- will be filled in with another veg layer if available (e.g. Pickell)
   message("  Setting NA, 1 in LandType to NA in speciesLayers in ForestInventory data")
   aa <- try(CCstack[NA_ids] <- NA, silent = TRUE)
-  if (is(aa, "try-error")) { # not clear why the above line sometimes fails with Error in value[j, ] : incorrect number of dimensions
+  ## unclear why line above sometimes fails: 'Error in value[j, ] : incorrect number of dimensions'
+  if (is(aa, "try-error")) {
     l <- unstack(CCstack)
     CCstack <- lapply(l, function(x) {x[NA_ids] <- NA; x})
   }
