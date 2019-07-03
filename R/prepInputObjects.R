@@ -102,6 +102,8 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 
 #' Make speciesEcoregion using statistically estimated maxB, maxANPP and establishment probabilities
 #'
+#' See Details
+#'
 #' @param cohortDataNoBiomass a subset of cohortData
 #' @param cohortDataShort a subset of cohortData
 #' @param cohortDataShortNoCover a subset of cohortData
@@ -110,6 +112,23 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #' @param modelBiomass statistical model of species biomass
 #' @param successionTimestep The time between successive seed dispersal events.
 #' @param currentYear \code{time(sim)}
+#' @details
+#'
+#' @section establishprob:
+#' This section takes the cover as estimated from the mature tree cover and
+#' partitions it between resprouting and seeds Unfortunately, establishment by
+#' seed is not independent of resprouting, i.e., some pixels would have both
+#' Since we don't know the level of independence, we can't correctly assess how
+#' much to discount the two. If there is resprouting > 0, then this is the
+#' partitioning:
+#' establishprob = f(establishprob + resproutprob + jointEstablishProbResproutProb)
+#' If jointEstablishProbResproutProb is 0, then these are independent events and
+#' the total cover probability can be partitioned easily between seeds and
+#' resprout. This is unlikely ever to be the case. We are picking 50% overlap as
+#' a number that is better than 0 (totally independent probabilities, meaning no
+#' pixel has both seeds and resprout potential) and  100% overlap (totally
+#' dependent probabilities, i.e., every pixel where there is seeds will also be
+#' a pixel with resprouting) This is expressed with the "* 0.5" in the code.
 #'
 #' #' @return
 #' A \code{speciesEcoregion} \code{data.table} with added columns for parameters
@@ -133,7 +152,9 @@ makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDat
   establishprobBySuccessionTimestep <- 1 - (1 - modelCover$pred)^successionTimestep
   cohortDataShort[, establishprob := establishprobBySuccessionTimestep]
   cohortDataShort <- species[, .(resproutprob, postfireregen, speciesCode)][cohortDataShort, on = "speciesCode"]
-  cohortDataShort[, establishprob := pmax(0, pmin(1, (establishprob * (1 - resproutprob))))]
+
+  # Partitioning between seed and resprout. See documentation about the "* 0.5"
+  cohortDataShort[, establishprob := pmax(0, pmin(1, (establishprob * (1 - resproutprob * 0.5))))]
 
   cohortDataShort <- rbindlist(list(cohortDataShort, cohortDataShortNoCover),
                                use.names = TRUE, fill = TRUE)
