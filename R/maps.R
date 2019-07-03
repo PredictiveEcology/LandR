@@ -119,13 +119,12 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
   sumVegPct <- sum(speciesStack) ## TODO: how is the sum >100 ?
 
   if (isTRUE(mixed)) {
-    ## create "mixed" layer, which is given a value slightly higher than any
-    ## other layer. if it is deemed a mixed pixel
-    ## All layers must be below vegLeadingProportion to be called Mixed
-    ##  This check turns stack to binary: 1 if < vegLeadingProportion; 0 if more than.
-    ##  Then, sum should be numLayers of all are below vegLeadingProportion
-    whMixed <- which(sum(speciesStack < (100 * vegLeadingProportion))[] ==
-                       numLayers(speciesStack))
+    ## create "mixed" layer, which is given a value slightly higher than any other layer,
+    ## if it is deemed a mixed pixel.
+    ## All layers must be below vegLeadingProportion to be called Mixed.
+    ## This check turns stack to binary: 1 if < vegLeadingProportion; 0 if more than.
+    ## Then, sum should be numLayers of all are below vegLeadingProportion
+    whMixed <- which(sum(speciesStack < (100 * vegLeadingProportion))[] == numLayers(speciesStack))
     MixedRas <- speciesStack[[1]]
     MixedRas[!is.na(speciesStack[[1]][])] <- 0
     MixedRas[whMixed] <- max(maxValue(speciesStack)) * 1.01

@@ -25,8 +25,8 @@
 #' @author Eilot McIntire
 #' @export
 #' @importFrom data.table data.table setkeyv
-#' @importFrom ggplot2 aes element_blank element_text geom_bar ggplot scale_fill_manual theme
-#' @importFrom ggplot2 guides guide_legend guide_legend scale_x_discrete
+#' @importFrom ggplot2 aes element_blank element_text geom_bar ggplot guide_legend guides
+#' @importFrom ggplot2 scale_fill_manual scale_x_discrete theme
 #' @importFrom pemisc factorValues2
 #' @importFrom quickPlot Plot setColors<-
 #' @importFrom raster factorValues maxValue minValue
@@ -77,7 +77,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   df <- df[!is.na(df$species)]
 
   speciesEN <- equivalentName(df$species, sppEquiv, "EN_generic_short")
-  if (all(na.omit(speciesEN) %in% colorsEN)){
+  if (all(na.omit(speciesEN) %in% colorsEN)) {
     whMixed <- which(df$species == mixedString)
 
     df$species <- speciesEN
@@ -86,7 +86,6 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
       df[whMixed, species := mixedString]
 
     df <- colDT[df, on = "species"] # merge color and species
-
   } else {
     stop("Species names of 'colors' must match those in 'speciesStack'.")
   }
