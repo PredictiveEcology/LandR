@@ -23,12 +23,33 @@ makeSpeciesEcoregion(cohortDataNoBiomass, cohortDataShort,
 
 \item{successionTimestep}{The time between successive seed dispersal events.}
 
-\item{currentYear}{\code{time(sim)}
+\item{currentYear}{\code{time(sim)}}
+}
+\description{
+See Details
+}
+\details{
+
+}
+\section{establishprob}{
+
+This section takes the cover as estimated from the mature tree cover and
+partitions it between resprouting and seeds Unfortunately, establishment by
+seed is not independent of resprouting, i.e., some pixels would have both
+Since we don't know the level of independence, we can't correctly assess how
+much to discount the two. If there is resprouting > 0, then this is the
+partitioning:
+establishprob = f(establishprob + resproutprob + jointEstablishProbResproutProb)
+If jointEstablishProbResproutProb is 0, then these are independent events and
+the total cover probability can be partitioned easily between seeds and
+resprout. This is unlikely ever to be the case. We are picking 50% overlap as
+a number that is better than 0 (totally independent probabilities, meaning no
+pixel has both seeds and resprout potential) and  100% overlap (totally
+dependent probabilities, i.e., every pixel where there is seeds will also be
+a pixel with resprouting) This is expressed with the "* 0.5" in the code.
 
 #' @return
 A \code{speciesEcoregion} \code{data.table} with added columns for parameters
-  \code{maxB}, \code{maxANPP} and \code{establishprob}}
+  \code{maxB}, \code{maxANPP} and \code{establishprob}
 }
-\description{
-Make speciesEcoregion using statistically estimated maxB, maxANPP and establishment probabilities
-}
+
