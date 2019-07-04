@@ -177,13 +177,12 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
     # 1. Find length of each pixelGroup -- don't include pixelGroups in "by" that have only 1 cohort: N = 1
     cd <- copy(cohortdata)
     systimePre1 <- Sys.time()
-    pgd1 <- cd[ , list(N = .N), by = "pixelGroup"]
+    pgd1 <- cd[, list(N = .N), by = "pixelGroup"]
     pgd1 <- cd[, .(pixelGroup, B, speciesCode)][pgd1, on = "pixelGroup"]
     set(pgd1, NULL, "totalB", pgd1$B)
     pgd1[N != 1, totalB := sum(B, na.rm = TRUE), by = "pixelGroup"]
-    pgd1 <- pgd1[, .(speciesGroupB = sum(B, na.rm = TRUE), totalB = totalB[1]),
-                                     by = pgdAndSc]
-    set(pgd1, NULL, "speciesProportion", pgd1$speciesGroupB /pgd1$totalB)
+    pgd1 <- pgd1[, .(speciesGroupB = sum(B, na.rm = TRUE), totalB = totalB[1]), by = pgdAndSc]
+    set(pgd1, NULL, "speciesProportion", pgd1$speciesGroupB / pgd1$totalB)
     systimePost1 <- Sys.time()
     setorderv(pgd1, "pixelGroup")
   }
@@ -196,7 +195,7 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   systimePre2 <- Sys.time()
   setkeyv(cohortdata, pgdAndSc)
   # setorderv(cohortdata, "pixelGroup")
-  pixelGroupData <- cohortdata[ , list(N = .N), by = "pixelGroup"]
+  pixelGroupData <- cohortdata[, list(N = .N), by = "pixelGroup"]
 
   N <- rep.int(pixelGroupData$N, pixelGroupData$N)
   wh1 <- N == 1
@@ -210,12 +209,13 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   GT1 <- (b > 1)
   pixelGroupData <- list()
   if (any(GT1)) {
-    pixelGroupData[[1]] <- cohortdata[GT1, .(speciesProportion = sum(B, na.rm = TRUE)/totalB[1]),
+    pixelGroupData[[1]] <- cohortdata[GT1, .(speciesProportion = sum(B, na.rm = TRUE) / totalB[1]),
                     by = pgdAndSc]
   }
   if (any(!GT1)) {
     set(cohortdata, which(!GT1), "speciesProportion", cohortdata$B[!GT1]/cohortdata$totalB[!GT1])
-    pixelGroupData[[NROW(pixelGroupData) + 1]] <- cohortdata[!GT1, c("pixelGroup", "speciesCode", "speciesProportion")]
+    pixelGroupData[[NROW(pixelGroupData) + 1]] <- cohortdata[!GT1, c("pixelGroup", "speciesCode",
+                                                                     "speciesProportion")]
   }
   if (length(pixelGroupData) > 1) {
     pixelGroupData <- rbindlist(pixelGroupData)
@@ -230,8 +230,8 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
     oldAlgo <<- oldAlgo + (systimePost1 - systimePre1)
     newAlgo <<- newAlgo + (systimePost2 - systimePre2)
 
-    print(paste("new algo", newAlgo))
-    print(paste("old algo", oldAlgo))
+    print(paste("vegTypeMapGenerator: new algo", newAlgo))
+    print(paste("vegTypeMapGenerator: old algo", oldAlgo))
     setorderv(pixelGroupData, pgdAndSc)
     whNA <- unique(unlist(sapply(pixelGroupData, function(x) which(is.na(x)))))
     pgd1 <- pgd1[!pixelGroupData[whNA], on = pgdAndSc]
@@ -252,11 +252,13 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
     pixelGroupData4 <- pixelGroupData4[, .(speciesGroupB = sum(B, na.rm = TRUE),
                                          totalB = totalB[1]),
                                      by = pgdAndSc]
-    set(pixelGroupData4, NULL, "speciesProportion", pixelGroupData4$speciesGroupB /pixelGroupData4$totalB)
+    set(pixelGroupData4, NULL, "speciesProportion", pixelGroupData4$speciesGroupB /
+          pixelGroupData4$totalB)
     pixelGroupData4[, speciesProportion := speciesGroupB / totalB]
     b2 <- Sys.time()
     print(b2 - b1)
-    all.equal(pixelGroupData4[, .(pixelGroup, speciesCode, totalB)], pixelGroupData[,.(pixelGroup, speciesCode, totalB)])
+    all.equal(pixelGroupData4[, .(pixelGroup, speciesCode, totalB)], pixelGroupData[
+      , .(pixelGroup, speciesCode, totalB)])
   }
 
   # create "mixed" class #    -- Eliot May 28, 2019 -- faster than previous below

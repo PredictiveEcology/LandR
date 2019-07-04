@@ -121,9 +121,9 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #' Since we don't know the level of independence, we can't correctly assess how
 #' much to discount the two. If there is resprouting > 0, then this is the
 #' partitioning:
-#' establishprob = f(establishprob + resproutprob + jointEstablishProbResproutProb)
-#' If jointEstablishProbResproutProb is 0, then these are independent events and
-#' the total cover probability can be partitioned easily between seeds and
+#' \code{establishprob = f(establishprob + resproutprob + jointEstablishProbResproutProb)}
+#' If \code{jointEstablishProbResproutProb} is 0, then these are independent events
+#' and the total cover probability can be partitioned easily between seeds and
 #' resprout. This is unlikely ever to be the case. We are picking 50% overlap as
 #' a number that is better than 0 (totally independent probabilities, meaning no
 #' pixel has both seeds and resprout potential) and  100% overlap (totally
@@ -136,7 +136,6 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #'
 #' @export
 #' @importFrom data.table rbindlist
-
 makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDataShortNoCover, species,
                                  modelCover, modelBiomass, successionTimestep, currentYear) {
   ## Create speciesEcoregion table
@@ -180,8 +179,7 @@ makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDat
 
   ########################################################################
   # Clean up unneeded columns
-  speciesEcoregion[ , `:=`(logAge = NULL, cover = NULL, longevity = NULL, #pixelIndex = NULL,
-                           lcc = NULL)]
+  speciesEcoregion[ , `:=`(logAge = NULL, cover = NULL, longevity = NULL,  lcc = NULL)]
 
   speciesEcoregion[ , year := currentYear]
   return(speciesEcoregion)
