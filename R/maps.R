@@ -186,6 +186,7 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
     systimePost1 <- Sys.time()
     setorderv(pgd1, "pixelGroup")
   }
+
   # Replacement algorithm to calculate speciesProportion
   #  Logic is similar to above --
   #  1. sort by pixelGroup
