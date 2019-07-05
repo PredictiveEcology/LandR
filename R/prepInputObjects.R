@@ -102,7 +102,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 
 #' Make speciesEcoregion using statistically estimated maxB, maxANPP and establishment probabilities
 #'
-#' See Details
+#' See Details.
 #'
 #' @param cohortDataNoBiomass a subset of cohortData
 #' @param cohortDataShort a subset of cohortData
@@ -112,7 +112,6 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #' @param modelBiomass statistical model of species biomass
 #' @param successionTimestep The time between successive seed dispersal events.
 #' @param currentYear \code{time(sim)}
-#' @details
 #'
 #' @section establishprob:
 #' This section takes the cover as estimated from the mature tree cover and

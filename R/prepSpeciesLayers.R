@@ -428,7 +428,7 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
 #' @export
 #' @importFrom assertthat assert_that
 #' @importFrom map mapAdd maps
-#' @importFrom raster maxValue minValue stack
+#' @importFrom raster maxValue minValue stack unstack
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
                                               url = NULL,
