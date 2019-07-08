@@ -154,14 +154,16 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 
 #' Generate vegetation type map
 #'
-#' @param cohortdata     A different \code{data.table} of stuff
+#' @template cohortData
+#'
 #' @param pixelGroupMap  A \code{raster}
+#'
 #' @param vegLeadingProportion Numeric between 0-1.
+#'
 #' @param colors A named vector of color codes. The names MUST match the names of species
-#'               in \code{cohortdata$speciesCode}, plus an optional "Mixed" color.
-#' @param doAssertion A logical indicating whether some internal tests should be run to
-#'                    ensure the function is running correctly.
-#'                    Default: \code{getOption("LandR.assertions", TRUE)}.
+#'               in \code{cohortData$speciesCode}, plus an optional "Mixed" color.
+#'
+#' @template doAssertion
 #'
 #' @author Eliot McIntire
 #' @export
@@ -169,7 +171,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #' @importFrom pemisc factorValues2
 #' @importFrom raster getValues projection projection<- setValues
 #' @importFrom SpaDES.tools rasterizeReduced
-vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
+vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
                                 colors,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   assert_that(NROW(cohortdata) > 0)
@@ -177,7 +179,7 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   pgdAndSc <- c("pixelGroup", "speciesCode")
   if (isTRUE(doAssertion)) { # slower -- older, but simpler Eliot June 5, 2019
     # 1. Find length of each pixelGroup -- don't include pixelGroups in "by" that have only 1 cohort: N = 1
-    cd <- copy(cohortdata)
+    cd <- copy(cohortData)
     systimePre1 <- Sys.time()
     pgd1 <- cd[, list(N = .N), by = "pixelGroup"]
     pgd1 <- cd[, .(pixelGroup, B, speciesCode)][pgd1, on = "pixelGroup"]
@@ -196,28 +198,28 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   #  3. calculate speciesProportion, noting to calculate with by only if N > 1, otherwise
   #     it is a simpler non-by calculation
   systimePre2 <- Sys.time()
-  setkeyv(cohortdata, pgdAndSc)
-  # setorderv(cohortdata, "pixelGroup")
-  pixelGroupData <- cohortdata[, list(N = .N), by = "pixelGroup"]
+  setkeyv(cohortData, pgdAndSc)
+  # setorderv(cohortData, "pixelGroup")
+  pixelGroupData <- cohortData[, list(N = .N), by = "pixelGroup"]
 
   N <- rep.int(pixelGroupData$N, pixelGroupData$N)
   wh1 <- N == 1
-  set(cohortdata, which(wh1), "totalB", cohortdata$B[wh1])
-  totalBNot1 <- cohortdata[!wh1, list(N = .N, totalB = sum(B, na.rm = TRUE)), by = "pixelGroup"]
+  set(cohortData, which(wh1), "totalB", cohortData$B[wh1])
+  totalBNot1 <- cohortData[!wh1, list(N = .N, totalB = sum(B, na.rm = TRUE)), by = "pixelGroup"]
   totalBNot1 <- rep.int(totalBNot1$totalB, totalBNot1$N)
-  set(cohortdata, which(!wh1), "totalB", totalBNot1)
+  set(cohortData, which(!wh1), "totalB", totalBNot1)
 
-  b <- cohortdata[, list(N = .N), by = pgdAndSc]
+  b <- cohortData[, list(N = .N), by = pgdAndSc]
   b <- rep.int(b$N, b$N)
   GT1 <- (b > 1)
   pixelGroupData <- list()
   if (any(GT1)) {
-    pixelGroupData[[1]] <- cohortdata[GT1, .(speciesProportion = sum(B, na.rm = TRUE) / totalB[1]),
+    pixelGroupData[[1]] <- cohortData[GT1, .(speciesProportion = sum(B, na.rm = TRUE) / totalB[1]),
                     by = pgdAndSc]
   }
   if (any(!GT1)) {
-    set(cohortdata, which(!GT1), "speciesProportion", cohortdata$B[!GT1]/cohortdata$totalB[!GT1])
-    pixelGroupData[[NROW(pixelGroupData) + 1]] <- cohortdata[!GT1, c("pixelGroup", "speciesCode",
+    set(cohortData, which(!GT1), "speciesProportion", cohortData$B[!GT1]/cohortData$totalB[!GT1])
+    pixelGroupData[[NROW(pixelGroupData) + 1]] <- cohortData[!GT1, c("pixelGroup", "speciesCode",
                                                                      "speciesProportion")]
   }
   if (length(pixelGroupData) > 1) {
@@ -228,13 +230,8 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   systimePost2 <- Sys.time()
   if (isTRUE(doAssertion)) { # slower -- older, but simpler Eliot June 5, 2019
     # These algorithm tests should be deleted after a while. See date on prev line
-    if (!exists("oldAlgo")) oldAlgo <<- 0
-    if (!exists("newAlgo")) newAlgo <<- 0
-    oldAlgo <<- oldAlgo + (systimePost1 - systimePre1)
-    newAlgo <<- newAlgo + (systimePost2 - systimePre2)
-
-    print(paste("vegTypeMapGenerator: new algo", newAlgo))
-    print(paste("vegTypeMapGenerator: old algo", oldAlgo))
+    print(paste("LandR::vegTypeMapGenerator: new algo", systimePost2 - systimePre2))
+    print(paste("LandR::vegTypeMapGenerator: old algo", systimePost1 - systimePre1))
     setorderv(pixelGroupData, pgdAndSc)
     whNA <- unique(unlist(sapply(pixelGroupData, function(x) which(is.na(x)))))
     pgd1 <- pgd1[!pixelGroupData[whNA], on = pgdAndSc]
@@ -250,7 +247,7 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
   ########################################################
   if (FALSE) { # old algorithm
     b1 <- Sys.time()
-    pixelGroupData4 <- cohortdata[, list(totalB = sum(B, na.rm = TRUE),
+    pixelGroupData4 <- cohortData[, list(totalB = sum(B, na.rm = TRUE),
                                         speciesCode, B), by = pixelGroup]
     pixelGroupData4 <- pixelGroupData4[, .(speciesGroupB = sum(B, na.rm = TRUE),
                                          totalB = totalB[1]),

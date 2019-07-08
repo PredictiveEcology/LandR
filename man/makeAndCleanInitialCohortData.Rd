@@ -17,7 +17,9 @@ represent percent cover by species}
 \item{pixelGroupBiomassClass}{Round B to the nearest \code{pixelGroupBiomassClass}
 to establish unique pixelGroups}
 
-\item{doAssertion}{Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}}
+\item{doAssertion}{A logical indicating whether some internal tests should be run to
+ensure the function is running correctly.
+Default: \code{getOption("LandR.assertions", TRUE)}.}
 
 \item{doSubset}{Turns on/off subsetting. Defaults to \code{TRUE}.}
 }

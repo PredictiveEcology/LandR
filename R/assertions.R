@@ -6,8 +6,10 @@ if (getRversion() >= "3.1.0") {
 #'
 #' @param cohortData34to36 A \code{cohortData} \code{data.table} with only the
 #'                         pixels what were lcc 34:36
-#' @param cohortData The full \code{cohortData} \code{data.table}
-#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
+#'
+#' @template cohortData
+#'
+#' @template doAssertion
 #'
 #' @export
 #' @rdname assertions

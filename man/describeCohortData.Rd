@@ -2,13 +2,14 @@
 % Please edit documentation in R/cohorts.R
 \name{describeCohortData}
 \alias{describeCohortData}
-\title{Summary for cohortData}
+\title{Summary for \code{cohortData}}
 \usage{
 describeCohortData(cohortData)
 }
 \arguments{
-\item{cohortData}{A cohortData object}
+\item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
+\code{speciesCode}, \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 }
 \description{
-Summary for cohortData
+Summary for \code{cohortData}
 }

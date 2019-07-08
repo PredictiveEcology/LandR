@@ -4,21 +4,26 @@
 \alias{vegTypeMapGenerator}
 \title{Generate vegetation type map}
 \usage{
-vegTypeMapGenerator(cohortdata, pixelGroupMap, vegLeadingProportion,
-  colors, unitTest = getOption("LandR.assertions", FALSE))
+vegTypeMapGenerator(cohortData, pixelGroupMap, vegLeadingProportion,
+  colors, doAssertion = getOption("LandR.assertions", TRUE), algo = 2)
 }
 \arguments{
-\item{cohortdata}{A different \code{data.table} of stuff}
+\item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
+\code{speciesCode}, \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
 \item{pixelGroupMap}{A \code{raster}}
 
 \item{vegLeadingProportion}{Numeric between 0-1.}
 
 \item{colors}{A named vector of color codes. The names MUST match the names of species
-in \code{cohortdata$speciesCode}, plus an optional "Mixed" color}
+in \code{cohortData$speciesCode}, plus an optional "Mixed" color.}
 
-\item{unitTest}{A logical indicating whether some internal tests should be run to
-ensure the function is running correctly.}
+\item{doAssertion}{A logical indicating whether some internal tests should be run to
+ensure the function is running correctly.
+Default: \code{getOption("LandR.assertions", TRUE)}.}
+
+\item{algo}{Numeric indicating which algorithm to use for internal calculations (either 1 or 2).
+Default 2.}
 }
 \description{
 Generate vegetation type map

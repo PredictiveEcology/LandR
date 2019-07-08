@@ -21,17 +21,14 @@ empty pixels or on alreayd occupied pixels). Columns it must have:
 \code{pixelGroup}, \code{speciesCode}, \code{age}, \code{ecoregionGroup}. The
 remaining 4 (see \code{cohortData}) will be created with \code{0}s}
 
-\item{cohortData}{a \code{data.table} with columns: \code{pixelGroup},
-\code{ecoregionGroup}, \code{speciesCode}, \code{age}, \code{B},
-\code{mortality}, \code{aNPPAct}, and \code{sumB}.}
+\item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
+\code{speciesCode}, \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
 \item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group
-number that correspondsd exactly to \code{pixelGroup} column in
-\code{cohortData}}
+number that correspondsd exactly to \code{pixelGroup} column in \code{cohortData}.}
 
-\item{time}{Current time e.g., time(sim). This is used to extract the correct
-parameters in \code{speciesEcoregion} table if there are different values
-over time}
+\item{time}{Current time e.g., time(sim). This is used to extract the correct parameters in
+\code{speciesEcoregion} table if there are different values over time.}
 
 \item{speciesEcoregion}{A \code{speciesEcoregion} table.}
 
@@ -45,7 +42,9 @@ In LANDIS-II, this is called "Succession Timestep". This is used here}
 \item{verbose}{Integer, where increasing number is increasing verbosity. Currently,
 only level 1 exists; but this may change.}
 
-\item{doAssertion}{Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}}
+\item{doAssertion}{A logical indicating whether some internal tests should be run to
+ensure the function is running correctly.
+Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \value{
 A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with

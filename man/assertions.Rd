@@ -37,9 +37,12 @@ assertSpeciesPlotLabels(speciesNames, sppEquiv,
 \item{cohortData34to36}{A \code{cohortData} \code{data.table} with only the
 pixels what were lcc 34:36}
 
-\item{cohortData}{The full \code{cohortData} \code{data.table}}
+\item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
+\code{speciesCode}, \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
-\item{doAssertion}{Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}}
+\item{doAssertion}{A logical indicating whether some internal tests should be run to
+ensure the function is running correctly.
+Default: \code{getOption("LandR.assertions", TRUE)}.}
 
 \item{columns}{Vector of column names on which to test for unique cohortData}
 
