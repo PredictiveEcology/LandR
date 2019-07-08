@@ -159,8 +159,9 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #' @param vegLeadingProportion Numeric between 0-1.
 #' @param colors A named vector of color codes. The names MUST match the names of species
 #'               in \code{cohortdata$speciesCode}, plus an optional "Mixed" color
-#' @param unitTest A logical indicating whether some internal tests should be run to
+#' @param doAssertion A logical indicating whether some internal tests should be run to
 #'                 ensure the function is running correctly.
+#'                 Defaults to \code{getOption("LandR.assertions")}, or FALSE, if not defined.
 #'
 #' @author Eliot McIntire
 #' @export
@@ -169,11 +170,12 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #' @importFrom raster getValues projection projection<- setValues
 #' @importFrom SpaDES.tools rasterizeReduced
 vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
-                                colors, unitTest = getOption("LandR.assertions", FALSE)) {
+                                colors,
+                                doAssertion = getOption("LandR.assertions", FALSE)) {
   assert_that(NROW(cohortdata) > 0)
 
   pgdAndSc <- c("pixelGroup", "speciesCode")
-  if (isTRUE(unitTest)) { # slower -- older, but simpler Eliot June 5, 2019
+  if (isTRUE(doAssertion)) { # slower -- older, but simpler Eliot June 5, 2019
     # 1. Find length of each pixelGroup -- don't include pixelGroups in "by" that have only 1 cohort: N = 1
     cd <- copy(cohortdata)
     systimePre1 <- Sys.time()
@@ -224,7 +226,7 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
     pixelGroupData <- pixelGroupData[[1]]
   }
   systimePost2 <- Sys.time()
-  if (isTRUE(unitTest)) { # slower -- older, but simpler Eliot June 5, 2019
+  if (isTRUE(doAssertion)) { # slower -- older, but simpler Eliot June 5, 2019
     # These algorithm tests should be deleted after a while. See date on prev line
     if (!exists("oldAlgo")) oldAlgo <<- 0
     if (!exists("newAlgo")) newAlgo <<- 0
@@ -292,7 +294,7 @@ vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
                               stringsAsFactors = FALSE)
   setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
 
-  if (isTRUE(unitTest)) {
+  if (isTRUE(doAssertion)) {
     # TEST THE MAP
     if (sum(!is.na(vegTypeMap[])) < 100)
       ids <- sample(which(!is.na(vegTypeMap[])), sum(!is.na(vegTypeMap[])), replace = FALSE)
