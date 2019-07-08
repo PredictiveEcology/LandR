@@ -46,6 +46,7 @@ if (getRversion() >= "3.1.0") {
 #' @param treedFirePixelTableSinceLastDisp A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
 #'   This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
 #'   to ensure that everything matches correctly.
+#' @param provenanceTable table with pixel-based provenances for reforestation
 #' @param successionTimestep The time between successive seed dispersal events.
 #'   In LANDIS-II, this is called "Succession Timestep". This is used here
 #' @param verbose Integer, where increasing number is increasing verbosity. Currently,
@@ -65,10 +66,10 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom stats na.omit
 updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
                              speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
+                             provenanceTable = NULL,
                              successionTimestep,
                              verbose = getOption("LandR.verbose", TRUE),
                              doAssertion = getOption("LandR.assertions", TRUE)) {
-
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
 
   if (!is.null(treedFirePixelTableSinceLastDisp)) {
@@ -143,11 +144,18 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   ##########################################################
   # Add new cohorts and rm missing cohorts (i.e., those pixelGroups that are gone)
   ##########################################################
-  cohortData <- .initiateNewCohorts(newPixelCohortData, cohortData,
-                                    pixelGroupMap, time = time,
-                                    speciesEcoregion = speciesEcoregion,
-                                    successionTimestep = successionTimestep)
-
+  if (!is.null(provenanceTable)) {
+    cohortData <- plantNewCohorts(newpixelCohortdata, cohortData,
+                                   pixelGroupMap, time = time,
+                                   speciesEcoregion = speciesEcoregion,
+                                   successionTimeSstep = successionTimestep,
+                                   provenanceTable = provenanceTable)
+  } else {
+    cohortData <- .initiateNewCohorts(newPixelCohortData, cohortData,
+                                      pixelGroupMap, time = time,
+                                      speciesEcoregion = speciesEcoregion,
+                                      successionTimestep = successionTimestep)
+  }
   outs <- rmMissingCohorts(cohortData, pixelGroupMap)
 
   assertCohortData(outs$cohortData, outs$pixelGroupMap,

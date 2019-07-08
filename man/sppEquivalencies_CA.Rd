@@ -16,6 +16,8 @@
   \item{EN_generic_full}{Full species common names in English}
   \item{Leading}{Simple common english names used for leading species}
   \item{Notes}{additional notes and information}
+  \item{Boreal}{Species present in the Boreal forests of Canada}
+  \item{Type}{Whether the species is a deciduous or conifer species}
 }}
 \usage{
 sppEquivalencies_CA
