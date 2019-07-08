@@ -5,7 +5,7 @@
 \title{Generate vegetation type map}
 \usage{
 vegTypeMapGenerator(cohortData, pixelGroupMap, vegLeadingProportion,
-  colors, doAssertion = getOption("LandR.assertions", TRUE), algo = 2)
+  colors, doAssertion = getOption("LandR.assertions", TRUE))
 }
 \arguments{
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
@@ -21,9 +21,6 @@ in \code{cohortData$speciesCode}, plus an optional "Mixed" color.}
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
-
-\item{algo}{Numeric indicating which algorithm to use for internal calculations (either 1 or 2).
-Default 2.}
 }
 \description{
 Generate vegetation type map

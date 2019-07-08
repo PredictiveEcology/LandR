@@ -1,7 +1,7 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c(".", ":=", "B", "HQ", "leading", "LQ", "mixed", "N",
                            "pixelGroup", "pure", "speciesCode", "speciesGroupB",
-                           "speciesProportion", "SPP", "totalB", "oldAlgo",  "newAlgo"))
+                           "speciesProportion", "SPP", "totalB"))
 }
 
 #' Define flammability map
@@ -167,79 +167,105 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #'
 #' @author Eliot McIntire
 #' @export
-#' @importFrom data.table data.table setkey setorderv
+#' @importFrom data.table copy data.table setkey setorderv
 #' @importFrom pemisc factorValues2
 #' @importFrom raster getValues projection projection<- setValues
 #' @importFrom SpaDES.tools rasterizeReduced
 vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
                                 colors,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
-  assert_that(NROW(cohortdata) > 0)
+  nrowCohortData <- NROW(cohortData)
+
+  assert_that(nrowCohortData > 0)
+
+  if (isTRUE(doAssertion))
+    message("LandR::vegTypeMapGenerator: NROW(cohortData) == ", nrowCohortData)
+
+  ## use new vs old algorithm based on size of cohortData. new one (2) is faster in most cases.
+  ## enable assertions to view timings for each algorithm before deciding which to use.
+  algo <- ifelse(nrowCohortData > 3.5e6, 1, 2)
 
   pgdAndSc <- c("pixelGroup", "speciesCode")
-  if (isTRUE(doAssertion)) { # slower -- older, but simpler Eliot June 5, 2019
+  if (algo == 1 || isTRUE(doAssertion)) {
+    # slower -- older, but simpler Eliot June 5, 2019
     # 1. Find length of each pixelGroup -- don't include pixelGroups in "by" that have only 1 cohort: N = 1
-    cd <- copy(cohortData)
+    cohortData1 <- copy(cohortData)
     systimePre1 <- Sys.time()
-    pgd1 <- cd[, list(N = .N), by = "pixelGroup"]
-    pgd1 <- cd[, .(pixelGroup, B, speciesCode)][pgd1, on = "pixelGroup"]
-    set(pgd1, NULL, "totalB", pgd1$B)
-    pgd1[N != 1, totalB := sum(B, na.rm = TRUE), by = "pixelGroup"]
-    pgd1 <- pgd1[, .(speciesGroupB = sum(B, na.rm = TRUE), totalB = totalB[1]), by = pgdAndSc]
-    set(pgd1, NULL, "speciesProportion", pgd1$speciesGroupB / pgd1$totalB)
+    pixelGroupData1 <- cohortData1[, list(N = .N), by = "pixelGroup"]
+    pixelGroupData1 <- cohortData1[, .(pixelGroup, B, speciesCode)][pixelGroupData1, on = "pixelGroup"]
+    set(pixelGroupData1, NULL, "totalB", pixelGroupData1$B)
+    pixelGroupData1[N != 1, totalB := sum(B, na.rm = TRUE), by = "pixelGroup"]
+    pixelGroupData1 <- pixelGroupData1[, .(speciesGroupB = sum(B, na.rm = TRUE), totalB = totalB[1]), by = pgdAndSc]
+    set(pixelGroupData1, NULL, "speciesProportion", pixelGroupData1$speciesGroupB / pixelGroupData1$totalB)
     systimePost1 <- Sys.time()
-    setorderv(pgd1, "pixelGroup")
+    setorderv(pixelGroupData1, "pixelGroup")
   }
 
-  # Replacement algorithm to calculate speciesProportion
-  #  Logic is similar to above --
-  #  1. sort by pixelGroup
-  #  2. calculate N, use this to repeat itself (instead of a join above)
-  #  3. calculate speciesProportion, noting to calculate with by only if N > 1, otherwise
-  #     it is a simpler non-by calculation
-  systimePre2 <- Sys.time()
-  setkeyv(cohortData, pgdAndSc)
-  # setorderv(cohortData, "pixelGroup")
-  pixelGroupData <- cohortData[, list(N = .N), by = "pixelGroup"]
+  if (algo == 2 || isTRUE(doAssertion)) {
+    # Replacement algorithm to calculate speciesProportion
+    #  Logic is similar to above --
+    #  1. sort by pixelGroup
+    #  2. calculate N, use this to repeat itself (instead of a join above)
+    #  3. calculate speciesProportion, noting to calculate with by only if N > 1, otherwise
+    #     it is a simpler non-by calculation
+    cohortData2 <- copy(cohortData)
+    systimePre2 <- Sys.time()
+    setkeyv(cohortData2, pgdAndSc)
+    # setorderv(cohortData, "pixelGroup")
+    pixelGroupData2 <- cohortData2[, list(N = .N), by = "pixelGroup"]
 
-  N <- rep.int(pixelGroupData$N, pixelGroupData$N)
-  wh1 <- N == 1
-  set(cohortData, which(wh1), "totalB", cohortData$B[wh1])
-  totalBNot1 <- cohortData[!wh1, list(N = .N, totalB = sum(B, na.rm = TRUE)), by = "pixelGroup"]
-  totalBNot1 <- rep.int(totalBNot1$totalB, totalBNot1$N)
-  set(cohortData, which(!wh1), "totalB", totalBNot1)
+    N <- rep.int(pixelGroupData2$N, pixelGroupData2$N)
+    wh1 <- N == 1
+    set(cohortData2, which(wh1), "totalB", cohortData2$B[wh1])
+    totalBNot1 <- cohortData2[!wh1, list(N = .N, totalB = sum(B, na.rm = TRUE)), by = "pixelGroup"]
+    totalBNot1 <- rep.int(totalBNot1$totalB, totalBNot1$N)
+    set(cohortData2, which(!wh1), "totalB", totalBNot1)
 
-  b <- cohortData[, list(N = .N), by = pgdAndSc]
-  b <- rep.int(b$N, b$N)
-  GT1 <- (b > 1)
-  pixelGroupData <- list()
-  if (any(GT1)) {
-    pixelGroupData[[1]] <- cohortData[GT1, .(speciesProportion = sum(B, na.rm = TRUE) / totalB[1]),
-                    by = pgdAndSc]
+    b <- cohortData2[, list(N = .N), by = pgdAndSc]
+    b <- rep.int(b$N, b$N)
+    GT1 <- (b > 1)
+    pixelGroupData2 <- list()
+    if (any(GT1)) {
+      pixelGroupData2[[1]] <- cohortData2[GT1, .(speciesProportion = sum(B, na.rm = TRUE) / totalB[1]),
+                      by = pgdAndSc]
+    }
+    if (any(!GT1)) {
+      set(cohortData2, which(!GT1), "speciesProportion", cohortData2$B[!GT1] / cohortData2$totalB[!GT1])
+      pixelGroupData2[[NROW(pixelGroupData2) + 1]] <- cohortData2[!GT1, c("pixelGroup", "speciesCode",
+                                                                          "speciesProportion")]
+    }
+    if (length(pixelGroupData2) > 1) {
+      pixelGroupData2 <- rbindlist(pixelGroupData2)
+    } else {
+      pixelGroupData2 <- pixelGroupData2[[1]]
+    }
+    systimePost2 <- Sys.time()
   }
-  if (any(!GT1)) {
-    set(cohortData, which(!GT1), "speciesProportion", cohortData$B[!GT1]/cohortData$totalB[!GT1])
-    pixelGroupData[[NROW(pixelGroupData) + 1]] <- cohortData[!GT1, c("pixelGroup", "speciesCode",
-                                                                     "speciesProportion")]
-  }
-  if (length(pixelGroupData) > 1) {
-    pixelGroupData <- rbindlist(pixelGroupData)
-  } else {
-    pixelGroupData <- pixelGroupData[[1]]
-  }
-  systimePost2 <- Sys.time()
+
   if (isTRUE(doAssertion)) { # slower -- older, but simpler Eliot June 5, 2019
-    # These algorithm tests should be deleted after a while. See date on prev line
-    print(paste("LandR::vegTypeMapGenerator: new algo", systimePost2 - systimePre2))
-    print(paste("LandR::vegTypeMapGenerator: old algo", systimePost1 - systimePre1))
-    setorderv(pixelGroupData, pgdAndSc)
-    whNA <- unique(unlist(sapply(pixelGroupData, function(x) which(is.na(x)))))
-    pgd1 <- pgd1[!pixelGroupData[whNA], on = pgdAndSc]
-    setkeyv(pgd1, pgdAndSc)
-    setkeyv(pixelGroupData, pgdAndSc)
-    aa <- pgd1[pixelGroupData, on = pgdAndSc]
+    # These algorithm tests should be deleted after a while. See date on prev line.
+    if (!exists("oldAlgoVTM")) oldAlgoVTM <<- 0
+    if (!exists("newAlgoVTM")) newAlgoVTM <<- 0
+    oldAlgoVTM <<- oldAlgoVTM + (systimePost1 - systimePre1)
+    newAlgoVTM <<- newAlgoVTM + (systimePost2 - systimePre2)
+    print(paste("LandR::vegTypeMapGenerator: new algo", newAlgoVTM))
+    print(paste("LandR::vegTypeMapGenerator: old algo", oldAlgoVTM))
+    setorderv(pixelGroupData2, pgdAndSc)
+    whNA <- unique(unlist(sapply(pixelGroupData2, function(x) which(is.na(x)))))
+    pixelGroupData1 <- pixelGroupData1[!pixelGroupData2[whNA], on = pgdAndSc]
+    setkeyv(pixelGroupData1, pgdAndSc)
+    setkeyv(pixelGroupData2, pgdAndSc)
+    aa <- pixelGroupData1[pixelGroupData2, on = pgdAndSc]
     if (!isTRUE(all.equal(aa$speciesProportion, aa$i.speciesProportion)))
       stop("Old algorithm in vegMapGenerator is different than new map")
+  }
+
+  if (algo == 1) {
+    cohortData <- cohortData1
+    pixelGroupData <- pixelGroupData1
+  } else if (algo == 2) {
+    cohortData <- cohortData2
+    pixelGroupData <- pixelGroupData2
   }
 
   ########################################################
