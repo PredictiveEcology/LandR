@@ -2,7 +2,7 @@
 % Please edit documentation in R/prepInputObjects.R
 \name{makeSpeciesEcoregion}
 \alias{makeSpeciesEcoregion}
-\title{Make speciesEcoregion using statistically estimated maxB, maxANPP and establishment probabilities}
+\title{Create \code{speciesEcoregion}}
 \usage{
 makeSpeciesEcoregion(cohortDataNoBiomass, cohortDataShort,
   cohortDataShortNoCover, species, modelCover, modelBiomass,
@@ -26,6 +26,10 @@ makeSpeciesEcoregion(cohortDataNoBiomass, cohortDataShort,
 \item{currentYear}{\code{time(sim)}}
 }
 \description{
+Use statistically estimated \code{maxB}, \code{maxANPP} and establishment probabilities
+to generate \code{specieEcoregion} table.
+}
+\details{
 See Details.
 }
 \section{establishprob}{

@@ -1,9 +1,8 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c("resproutprob", "postfireregen", "speciesCode",
-                           "establishprob", "ecoregionGroup", "speciesCode",
-                           "longevity", "maxB", "maxANPP", "cover", "lcc"))
+  utils::globalVariables(c("cover", "ecoregionGroup", "establishprob",
+                           "lcc", "longevity", "maxB", "maxANPP", "postfireregen", 
+                           "resproutprob", "speciesCode"))
 }
-
 
 #' Check if all species in have trait values
 #'
@@ -17,9 +16,8 @@ if (getRversion() >= "3.1.0") {
 #'   containing only the species that have trait values in \code{species}
 #'
 #' @export
-#' @importFrom stats complete.cases
 #' @importFrom crayon blue
-
+#' @importFrom stats complete.cases
 checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
   missTraits <- setdiff(names(speciesLayers), species$species)
   missTraits <- c(missTraits, setdiff(species$species,
@@ -54,11 +52,10 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #'  the columns containing pixel data from the input raster layers.
 #'
 #' @export
-#' @importFrom pemisc factorValues2
-#' @importFrom crayon blue
-#' @importFrom raster ncell
 #' @importFrom data.table data.table
-
+#' @importFrom crayon blue
+#' @importFrom pemisc factorValues2
+#' @importFrom raster ncell
 makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
                            biomassMap, rasterToMatch, LCC2005, pixelGroupAgeClass) {
   message(blue("Round age to nearest P(sim)$pixelGroupAgeClass, which is",
@@ -99,8 +96,10 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
   return(pixelTable)
 }
 
-
-#' Make speciesEcoregion using statistically estimated maxB, maxANPP and establishment probabilities
+#' Create \code{speciesEcoregion}
+#' 
+#' Use statistically estimated \code{maxB}, \code{maxANPP} and establishment probabilities
+#' to generate \code{specieEcoregion} table.
 #'
 #' See Details.
 #'
@@ -183,5 +182,4 @@ makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDat
   speciesEcoregion[ , year := currentYear]
   return(speciesEcoregion)
 }
-
 
