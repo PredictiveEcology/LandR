@@ -158,10 +158,10 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #' @param pixelGroupMap  A \code{raster}
 #' @param vegLeadingProportion Numeric between 0-1.
 #' @param colors A named vector of color codes. The names MUST match the names of species
-#'               in \code{cohortdata$speciesCode}, plus an optional "Mixed" color
+#'               in \code{cohortdata$speciesCode}, plus an optional "Mixed" color.
 #' @param doAssertion A logical indicating whether some internal tests should be run to
-#'                 ensure the function is running correctly.
-#'                 Defaults to \code{getOption("LandR.assertions")}, or FALSE, if not defined.
+#'                    ensure the function is running correctly.
+#'                    Default: \code{getOption("LandR.assertions", TRUE)}.
 #'
 #' @author Eliot McIntire
 #' @export
@@ -171,7 +171,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #' @importFrom SpaDES.tools rasterizeReduced
 vegTypeMapGenerator <- function(cohortdata, pixelGroupMap, vegLeadingProportion,
                                 colors,
-                                doAssertion = getOption("LandR.assertions", FALSE)) {
+                                doAssertion = getOption("LandR.assertions", TRUE)) {
   assert_that(NROW(cohortdata) > 0)
 
   pgdAndSc <- c("pixelGroup", "speciesCode")
