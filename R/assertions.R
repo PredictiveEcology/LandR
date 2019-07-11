@@ -70,7 +70,7 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
       identical(erg[[1]], erg[[x]])))
 
     if (!test3) {
-      print(str(erg, 1))
+      message(str(erg, 1))
       stop("speciesEcoregion, cohortData, and ecoregionMap should all have exactly the same",
            "\n  ecoregionGroups. They do not. This needs to be fixed before proceeding.")
     }

@@ -4,7 +4,11 @@
 \alias{makeVegTypeMap}
 \title{Make a vegetation type map from a stack of species abundances}
 \usage{
+<<<<<<< HEAD:man/LandR-deprecated.Rd
 makeVegTypeMap(speciesStack, vegLeadingProportion, mixed, ...)
+=======
+makeVegTypeMap(speciesStack, vegLeadingProportion, mixedType = 2)
+>>>>>>> mixedStands_NEW:man/makeVegTypeMap.Rd
 }
 \arguments{
 \item{speciesStack}{A \code{RasterStack} of species abundances.
@@ -12,11 +16,17 @@ This must be one \code{RasterLayer} per species.}
 
 \item{vegLeadingProportion}{See vegTypeMapGenerator}
 
+<<<<<<< HEAD:man/LandR-deprecated.Rd
 \item{mixed}{Deprecated. See vegTypeMapGenerator and \code{mixedType}}
 
 \item{...}{Other arguments passed to vegTypeMapGenerator, i.e.,
 \code{vegLeadingProportion}, \code{mixedType}, \code{sppEquiv},
 \code{sppEquivCol}, \code{colors}, \code{pixelGroupColName}, and \code{doAssertion}}
+=======
+\item{mixedType}{An integer defining whether mixed stands are of any kind of species
+admixture (1), or only when deciduous mixed with conifer (2);
+or not to consider mixed stands at all (0). Defaults to 2.}
+>>>>>>> mixedStands_NEW:man/makeVegTypeMap.Rd
 }
 \value{
 A factor raster

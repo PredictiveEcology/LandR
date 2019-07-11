@@ -6,6 +6,7 @@
 \alias{vegTypeMapGenerator.data.table}
 \title{Generate vegetation type map}
 \usage{
+<<<<<<< HEAD
 vegTypeMapGenerator(x, ...)
 
 \method{vegTypeMapGenerator}{RasterStack}(x, ...)
@@ -13,6 +14,10 @@ vegTypeMapGenerator(x, ...)
 \method{vegTypeMapGenerator}{data.table}(x, pixelGroupMap,
   vegLeadingProportion = 0.8, mixedType = 2, sppEquiv = NULL,
   sppEquivCol, colors, pixelGroupColName = "pixelGroup",
+=======
+vegTypeMapGenerator(cohortData, pixelGroupMap, vegLeadingProportion,
+  mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,
+>>>>>>> mixedStands_NEW
   doAssertion = getOption("LandR.assertions", TRUE))
 }
 \arguments{
