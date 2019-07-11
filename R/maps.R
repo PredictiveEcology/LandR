@@ -1,7 +1,7 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(".", ":=", "B", "HQ", "leading", "LQ", "mixed", "N",
-                           "pixelGroup", "pure", "speciesCode", "speciesGroupB",
-                           "speciesProportion", "SPP", "totalB", "totalCover", "Type"))
+  utils::globalVariables(c(".", "..pgdAndScAndLeading", ":=", "B", "HQ", "leading", "LQ", "mixed",
+                           "N", "pixelGroup", "pure", "speciesCode", "speciesGroupB",
+                           "speciesProportion", "SPP", "totalB", "totalcover", "Type"))
 }
 
 #' Define flammability map
@@ -344,8 +344,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
   if (isTRUE(doAssertion)) {
     ## slower -- older, but simpler Eliot June 5, 2019
     ## TODO: these algorithm tests should be deleted after a while. See date on prev line.
-    if (!exists("oldAlgoVTM", envir = LandR:::.pkgEnv)) .pkgEnv$oldAlgoVTM <- 0
-    if (!exists("newAlgoVTM", envir = LandR:::.pkgEnv)) .pkgEnv$newAlgoVTM <- 0
+    if (!exists("oldAlgoVTM", envir = .pkgEnv)) .pkgEnv$oldAlgoVTM <- 0
+    if (!exists("newAlgoVTM", envir = .pkgEnv)) .pkgEnv$newAlgoVTM <- 0
     .pkgEnv$oldAlgoVTM <- .pkgEnv$oldAlgoVTM + (systimePost1 - systimePre1)
     .pkgEnv$newAlgoVTM <- .pkgEnv$newAlgoVTM + (systimePost2 - systimePre2)
     print(paste("LandR::vegTypeMapGenerator: new algo", .pkgEnv$newAlgoVTM))
