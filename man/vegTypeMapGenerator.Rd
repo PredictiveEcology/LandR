@@ -13,10 +13,12 @@ vegTypeMapGenerator(x, ...)
 \method{vegTypeMapGenerator}{data.table}(x, pixelGroupMap,
   vegLeadingProportion = 0.8, mixedType = 2, sppEquiv = NULL,
   sppEquivCol, colors, pixelGroupColName = "pixelGroup",
-  doAssertion = getOption("LandR.assertions", TRUE))
+  doAssertion = getOption("LandR.assertions", TRUE), ...)
 }
 \arguments{
 \item{x}{Either a cohortData object or a speciesCover RasterStack}
+
+\item{...}{Additional arguments.}
 
 \item{pixelGroupMap}{A \code{raster}}
 
@@ -39,6 +41,8 @@ If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
 \item{colors}{A named vector of color codes. The names MUST match the names of species
 in \code{cohortData$speciesCode}, plus an optional "Mixed" color.}
+
+\item{pixelGroupColName}{Name of the column in \code{pixelGroup} to use}
 
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.

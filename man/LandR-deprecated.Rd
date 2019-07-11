@@ -10,9 +10,9 @@ makeVegTypeMap(speciesStack, vegLeadingProportion, mixed, ...)
 \item{speciesStack}{A \code{RasterStack} of species abundances.
 This must be one \code{RasterLayer} per species.}
 
-\item{vegLeadingProportion}{See vegTypeMapGenerator}
+\item{vegLeadingProportion}{See \code{vegTypeMapGenerator}.}
 
-\item{mixed}{Deprecated. See vegTypeMapGenerator and \code{mixedType}}
+\item{mixed}{Deprecated. See \code{mixedType} argument to \code{vegTypeMapGenerator}.}
 
 \item{...}{Other arguments passed to vegTypeMapGenerator, i.e.,
 \code{vegLeadingProportion}, \code{mixedType}, \code{sppEquiv},

@@ -106,8 +106,8 @@ prepInputsLCC <- function(year = 2005,
 #'
 #' @param speciesStack A \code{RasterStack} of species abundances.
 #'                     This must be one \code{RasterLayer} per species.
-#' @param vegLeadingProportion See vegTypeMapGenerator
-#' @param mixed Deprecated. See vegTypeMapGenerator and \code{mixedType}
+#' @param vegLeadingProportion See \code{vegTypeMapGenerator}.
+#' @param mixed Deprecated. See \code{mixedType} argument to \code{vegTypeMapGenerator}.
 #' @param ... Other arguments passed to vegTypeMapGenerator, i.e.,
 #'   \code{vegLeadingProportion}, \code{mixedType}, \code{sppEquiv},
 #'   \code{sppEquivCol}, \code{colors}, \code{pixelGroupColName}, and \code{doAssertion}
@@ -155,7 +155,10 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 #' @param colors A named vector of color codes. The names MUST match the names of species
 #'               in \code{cohortData$speciesCode}, plus an optional "Mixed" color.
 #'
+#' @param pixelGroupColName Name of the column in \code{pixelGroup} to use
 #' @template doAssertion
+#'
+#' @param ... Additional arguments.
 #'
 #' @author Eliot McIntire, Ceres Barros, Alex Chubaty
 #' @export
@@ -229,7 +232,7 @@ vegTypeMapGenerator.RasterStack <- function(x, ...) {
 vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportion = 0.8,
                                            mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,
                                            pixelGroupColName = "pixelGroup",
-                                           doAssertion = getOption("LandR.assertions", TRUE)) {
+                                           doAssertion = getOption("LandR.assertions", TRUE), ...) {
   if (!inRange(vegLeadingProportion, 0, 1))
     stop("vegLeadingProportion must be a proportion")
 
