@@ -5,7 +5,7 @@
 \title{Generate vegetation type map}
 \usage{
 vegTypeMapGenerator(cohortData, pixelGroupMap, vegLeadingProportion,
-  mixedType = 2, sppEquiv, sppEquivCol, colors,
+  mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,
   doAssertion = getOption("LandR.assertions", TRUE))
 }
 \arguments{
@@ -21,15 +21,15 @@ threshold a species needs to pass to be considered "leading".}
 admixture (1), or only when deciduous mixed with conifer (2).
 Defaults to 2.}
 
-\item{sppEquiv}{table with species name equivalencies between the
-kNN format and the final naming format.
-See \code{data("sppEquivalencies_CA", "LandR")}. Only necessary
-if \code{mixedType == 2}. If not provided and \code{mixedType == 2}, will attempt to
-use \code{data("sppEquivalencies_CA", "LandR")}.}
+\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
+See \code{data("sppEquivalencies_CA", "LandR")}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use
+\code{data("sppEquivalencies_CA", "LandR")}.}
 
-\item{sppEquivCol}{the column name to use from \code{sppEquiv}. Only necessary
-if \code{mixedType == 2}. If not provided and \code{mixedType == 2}, will attempt to
-use "Boreal".}
+\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
 \item{colors}{A named vector of color codes. The names MUST match the names of species
 in \code{cohortData$speciesCode}, plus an optional "Mixed" color.}

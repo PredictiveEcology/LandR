@@ -809,7 +809,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
                     .specialData = cohortDataMissingAgeUnique,
                     omitArgs = ".specialData")
     message(blue("                           completed", Sys.time()))
-    print(outAge$rsq)
+    message(outAge$rsq)
 
     ## allow.new.levels = TRUE because some groups will have only NA for age for all species
     cohortDataMissingAge[

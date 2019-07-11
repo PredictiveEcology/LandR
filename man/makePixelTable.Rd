@@ -2,7 +2,7 @@
 % Please edit documentation in R/prepInputObjects.R
 \name{makePixelTable}
 \alias{makePixelTable}
-\title{Make pixelTable from biomass, age, land-cover and species cover data}
+\title{Make \code{pixelTable} from biomass, age, land-cover and species cover data}
 \usage{
 makePixelTable(speciesLayers, species, standAgeMap, ecoregionFiles,
   biomassMap, rasterToMatch, LCC2005, pixelGroupAgeClass)
@@ -32,5 +32,5 @@ A \code{data.table} as many rows as non-NA pixels in \code{rasterToMath} and
  the columns containing pixel data from the input raster layers.
 }
 \description{
-Make pixelTable from biomass, age, land-cover and species cover data
+Make \code{pixelTable} from biomass, age, land-cover and species cover data
 }

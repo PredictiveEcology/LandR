@@ -14,8 +14,9 @@ This must be one \code{RasterLayer} per species.}
 that a species must have to be considered a "pure" stand of that type.
 If no species reaches this proportion, then the pixel will be 'Mixed'.}
 
-\item{mixed}{Logical. If \code{TRUE}, then a mixed pixel value will be identified and given
-(see \code{vegLeadingProportion} argument)}
+\item{mixedType}{An integer defining whether mixed stands are of any kind of species
+admixture (1), or only when deciduous mixed with conifer (2);
+or not to consider mixed stands at all (0). Defaults to 2.}
 }
 \value{
 A factor raster

@@ -289,7 +289,7 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
     setkeyv(pixelGroupData1, pgdAndSc)
     setkeyv(pixelGroupData2, pgdAndSc)
     aa <- pixelGroupData1[pixelGroupData2, on = pgdAndSc]
-    if (!isTRUE(all.equal(aa$speciesProportion, aa$i.speciesProportion)))
+    if (!isTRUE(all.equal(aa[["speciesProportion"]], aa[["i.speciesProportion"]])))
       stop("Old algorithm in vegMapGenerator is different than new map")
   }
 
@@ -318,7 +318,7 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
           pixelGroupData4$totalB)
     pixelGroupData4[, speciesProportion := speciesGroupB / totalB]
     b2 <- Sys.time()
-    print(b2 - b1)
+    mussage(b2 - b1)
     all.equal(pixelGroupData4[, .(pixelGroup, speciesCode, totalB)], pixelGroupData[
       , .(pixelGroup, speciesCode, totalB)])
   }
