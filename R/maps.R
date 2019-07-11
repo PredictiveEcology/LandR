@@ -334,6 +334,14 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
     setnames(pixelGroupData3, "speciesCode", "leading")
     pixelGroupData3[, pure := !pure]
     setnames(pixelGroupData3, "pure", "mixed")
+
+    ## Old algorithm for above, this is ~43 times slower
+    # a2 <- Sys.time()
+    # pixelGroupData2 <- pixelGroupData[, list(mixed = all(speciesProportion < vegLeadingProportion),
+    #                                          leading = speciesCode[which.max(speciesProportion)]),
+    #                                   by = "pixelGroup"]
+    # pixelGroupData2[mixed == TRUE, leading := "Mixed"]
+    # b2 <- Sys.time()
   } else if (mixedType == 2) {
     browser() ## TODO: implement mixedType 2 here
     sppEq <- data.table(sppEquiv[[sppEquivCol]], sppEquiv[["Type"]])
@@ -342,29 +350,21 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
 
     ## TODO: Alex resume here
     setkey(pixelGroupData3, pixelGroup, speciesCode)
-    pixelGroupData3 <- pixelGroupData3[, list(pure = ifelse(Type == "Deciduous" &
-                                                              speciesProportion < vegLeadingProportion &
-                                                              speciesProportion > 1 - vegLeadingProportion, FALSE, NA),
+    pixelGroupData3 <- pixelGroupData3[, list(mixed = ifelse(Type == "Deciduous" &
+                                                               speciesProportion < vegLeadingProportion &
+                                                               speciesProportion > 1 - vegLeadingProportion, TRUE, FALSE), ## FALSE or NA?
                                               speciesCode, pixelGroup, speciesProportion, Type)]
-    pixelGroupData3[speciesProportion >= vegLeadingProportion, pure := TRUE]
+    pixelGroupData3[speciesProportion >= vegLeadingProportion, mixed := FALSE]
     setorderv(pixelGroupData3, cols = c("pixelGroup", "speciesProportion"), order = -1L)
-    #set(pixelGroupData3, NULL, "speciesProportion", NULL)
+    set(pixelGroupData3, NULL, "speciesProportion", NULL)
+    set(pixelGroupData3, NULL, "Type", NULL)
     pixelGroupData3 <- pixelGroupData3[, .SD[1], by = "pixelGroup"] ## sp. w/ highest prop. per pixelGroup
-    pixelGroupData3[pure == FALSE, speciesCode := "Mixed"]
+    pixelGroupData3[mixed == TRUE, speciesCode := "Mixed"]
     setnames(pixelGroupData3, "speciesCode", "leading")
-    pixelGroupData3[, pure := !pure]
-    setnames(pixelGroupData3, "pure", "mixed")
+    set(pixelGroupData3, NULL, "leading", factor(pixelGroupData3[["leading"]])
   } else {
     stop("invalid mixedType! Must be one of '1' or '2'.")
   }
-
-  # Old algorithm for above, this is ~43 times slower
-  # a2 <- Sys.time()
-  # pixelGroupData2 <- pixelGroupData[, list(mixed = all(speciesProportion < vegLeadingProportion),
-  #                                          leading = speciesCode[which.max(speciesProportion)]),
-  #                                   by = "pixelGroup"]
-  # pixelGroupData2[mixed == TRUE, leading := "Mixed"]
-  # b2 <- Sys.time()
 
   vegTypeMap <- rasterizeReduced(pixelGroupData3, pixelGroupMap, "leading", "pixelGroup")
   levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]],
@@ -385,7 +385,7 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
       pgs <- pgs[!dups]
       ids <- ids[!dups]
     }
-    leadingTest <- factorValues2(vegTypeMap, vegTypeMap[ids], att = 2)
+    leadingTest <- factorValues2(vegTypeMap, vegTypeMap[ids], att = 2) ## TODO: adjust tests for mixed type 2
     names(pgs) <- leadingTest
     pgTest <- pixelGroupData[pixelGroup %in% pgs]
     whNA <- unique(unlist(sapply(pgTest, function(x) which(is.na(x)))))
