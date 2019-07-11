@@ -101,11 +101,15 @@ prepInputsLCC <- function(year = 2005,
 #'
 #' @param speciesStack A \code{RasterStack} of species abundances.
 #'                     This must be one \code{RasterLayer} per species.
+#'
 #' @param vegLeadingProportion The threshold as a proportion of the total abundance
 #'        that a species must have to be considered a "pure" stand of that type.
 #'        If no species reaches this proportion, then the pixel will be 'Mixed'.
-#' @param mixed Logical. If \code{TRUE}, then a mixed pixel value will be identified and given
-#'        (see \code{vegLeadingProportion} argument)
+#'
+#' @param mixedType An integer defining whether mixed stands are of any kind of species
+#'                  admixture (1), or only when deciduous mixed with conifer (2);
+#'                  or not to consider mixed stands at all (0). Defaults to 2.
+#'
 #' @return A factor raster
 #'
 #' @export
@@ -165,15 +169,15 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #'                  admixture (1), or only when deciduous mixed with conifer (2).
 #'                  Defaults to 2.
 #'
-#' @param sppEquiv table with species name equivalencies between the
-#'              kNN format and the final naming format.
-#'              See \code{data("sppEquivalencies_CA", "LandR")}. Only necessary
-#'              if \code{mixedType == 2}. If not provided and \code{mixedType == 2}, will attempt to
-#'              use \code{data("sppEquivalencies_CA", "LandR")}.
+#' @param sppEquiv table with species name equivalencies between the kNN and final naming formats.
+#'              See \code{data("sppEquivalencies_CA", "LandR")}.
+#'              Only necessary if \code{mixedType == 2}.
+#'              If not provided and \code{mixedType == 2}, will attempt to use
+#'              \code{data("sppEquivalencies_CA", "LandR")}.
 #'
-#' @param sppEquivCol the column name to use from \code{sppEquiv}. Only necessary
-#'              if \code{mixedType == 2}. If not provided and \code{mixedType == 2}, will attempt to
-#'              use "Boreal".
+#' @param sppEquivCol the column name to use from \code{sppEquiv}.
+#'              Only necessary if \code{mixedType == 2}.
+#'              If not provided and \code{mixedType == 2}, will attempt to use "Boreal".
 #'
 #' @param colors A named vector of color codes. The names MUST match the names of species
 #'               in \code{cohortData$speciesCode}, plus an optional "Mixed" color.
@@ -188,7 +192,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #' @importFrom SpaDES.tools rasterizeReduced
 #' @importFrom utils data
 vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
-                                mixedType = 2, sppEquiv, sppEquivCol, colors,
+                                mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   nrowCohortData <- NROW(cohortData)
 

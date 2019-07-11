@@ -1,6 +1,6 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c("cover", "ecoregionGroup", "establishprob",
-                           "lcc", "longevity", "maxB", "maxANPP", "postfireregen", 
+                           "lcc", "longevity", "maxB", "maxANPP", "postfireregen",
                            "resproutprob", "speciesCode"))
 }
 
@@ -33,7 +33,7 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
   return(list(speciesLayers = speciesLayers, sppColorVect = sppColorVect))
 }
 
-#' Make pixelTable from biomass, age, land-cover and species cover data
+#' Make \code{pixelTable} from biomass, age, land-cover and species cover data
 #'
 #' @param speciesLayers stack of species layers rasters
 #' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
@@ -52,8 +52,8 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #'  the columns containing pixel data from the input raster layers.
 #'
 #' @export
-#' @importFrom data.table data.table
 #' @importFrom crayon blue
+#' @importFrom data.table data.table
 #' @importFrom pemisc factorValues2
 #' @importFrom raster ncell
 makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
@@ -97,7 +97,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 }
 
 #' Create \code{speciesEcoregion}
-#' 
+#'
 #' Use statistically estimated \code{maxB}, \code{maxANPP} and establishment probabilities
 #' to generate \code{specieEcoregion} table.
 #'
