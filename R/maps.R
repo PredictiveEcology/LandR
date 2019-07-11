@@ -173,7 +173,6 @@ vegTypeMapGenerator <- function(x, ...) {
 #' @rdname vegTypeMapGenerator
 vegTypeMapGenerator.RasterStack <- function(x, ...) {
   suppressMessages(pixelTable <- makePixelTable(x))
-  browser()
   suppressMessages(cohortTable <- createCohortData(pixelTable))
   cohortTable <- cohortTable[cover > 0]
   pixelGroupMap <- raster(x)
@@ -447,7 +446,6 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       pixelGroupData3[["leading"]] <- factor(pixelGroupData3[["leading"]])
     }
     vegTypeMap <- raster(pixelGroupMap)
-    pixelGroupData3 <- pixelGroupData3[get(leadingBasedOn) > 0]
     vegTypeMap[pixelGroupData3[["pixelIndex"]]] <- pixelGroupData3[["leading"]]
     levels(vegTypeMap) <- data.frame(ID = seq_along(levels(pixelGroupData3[["leading"]])),
                                      species = levels(pixelGroupData3[["leading"]]))
