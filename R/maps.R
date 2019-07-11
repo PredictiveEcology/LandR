@@ -1,7 +1,7 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c(".", ":=", "B", "HQ", "leading", "LQ", "mixed", "N",
                            "pixelGroup", "pure", "speciesCode", "speciesGroupB",
-                           "speciesProportion", "SPP", "totalB"))
+                           "speciesProportion", "SPP", "totalB", "Type"))
 }
 
 #' Define flammability map
@@ -116,7 +116,7 @@ prepInputsLCC <- function(year = 2005,
 #' @importFrom quickPlot numLayers
 #' @importFrom raster levels maxValue raster
 #' @importFrom SpaDES.tools inRange
-makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
+makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixedType = 2) {
   if (!inRange(vegLeadingProportion, 0, 1))
     stop("vegLeadingProportion must be a proportion")
 
@@ -207,8 +207,8 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
                     "Attempting to use data('sppEquivalencies_CA', 'LandR') and sppEquivCol == 'Boreal'"))
       sppEquiv <- data("sppEquivalencies_CA", "LandR", envir = environment())
       sppEquivCol <- "Boreal"
-      speciesFound <- equivalentName(unique(cohortdata$species), sppEquiv, sppEquivCol)
-      if (length(setdiff(unique(cohortdata$species), speciesFound)))
+      speciesFound <- equivalentName(unique(cohortData$species), sppEquiv, sppEquivCol)
+      if (length(setdiff(unique(cohortData$species), speciesFound)))
         stop(paste("Can't find all species in 'Boreal' columns.",
                    "Please provide the appropriave sppEquivCol."))
     }

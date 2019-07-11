@@ -4,7 +4,7 @@
 \alias{makeVegTypeMap}
 \title{Make a vegetation type map from a stack of species abundances}
 \usage{
-makeVegTypeMap(speciesStack, vegLeadingProportion, mixed = TRUE)
+makeVegTypeMap(speciesStack, vegLeadingProportion, mixedType = 2)
 }
 \arguments{
 \item{speciesStack}{A \code{RasterStack} of species abundances.
