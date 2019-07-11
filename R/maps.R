@@ -348,6 +348,7 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
     names(sppEq) <- c("speciesCode", "Type")
     setkey(pixelGroupData, speciesCode)
     pixelGroupData3 <- merge(pixelGroupData, sppEq[!duplicated(sppEq)], all.x = TRUE)
+    setkey(pixelGroupData, pixelGroup, speciesCode)
 
     ## TODO: Alex resume here
     setkey(pixelGroupData3, pixelGroup, speciesCode)
