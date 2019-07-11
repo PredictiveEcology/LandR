@@ -343,20 +343,19 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
     # pixelGroupData2[mixed == TRUE, leading := "Mixed"]
     # b2 <- Sys.time()
   } else if (mixedType == 2) {
-    browser() ## TODO: implement mixedType 2 here
     sppEq <- data.table(sppEquiv[[sppEquivCol]], sppEquiv[["Type"]])
     names(sppEq) <- c("speciesCode", "Type")
     setkey(pixelGroupData, speciesCode)
     pixelGroupData3 <- merge(pixelGroupData, sppEq[!duplicated(sppEq)], all.x = TRUE)
     setkey(pixelGroupData, pixelGroup, speciesCode)
 
-    ## TODO: Alex resume here
     setkey(pixelGroupData3, pixelGroup, speciesCode)
-    pixelGroupData3 <- pixelGroupData3[, list(mixed = ifelse(Type == "Deciduous" &
-                                                               speciesProportion < vegLeadingProportion &
-                                                               speciesProportion > 1 - vegLeadingProportion, TRUE, FALSE), ## FALSE or NA?
-                                              speciesCode, pixelGroup, speciesProportion, Type)]
-    pixelGroupData3[speciesProportion >= vegLeadingProportion, mixed := FALSE]
+    mixedType2Condition <- quote(Type == "Deciduous" &
+                                   speciesProportion < vegLeadingProportion &
+                                   speciesProportion > 1 - vegLeadingProportion)
+    pixelGroupData3[, mixed := FALSE]
+    pixelGroupData3[eval(mixedType2Condition), mixed := TRUE]
+    pixelGroupData3[, mixed := any(.SD[["mixed"]]), by = "pixelGroup"]
     setorderv(pixelGroupData3, cols = c("pixelGroup", "speciesProportion"), order = -1L)
     set(pixelGroupData3, NULL, "speciesProportion", NULL)
     set(pixelGroupData3, NULL, "Type", NULL)
@@ -387,21 +386,32 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
       pgs <- pgs[!dups]
       ids <- ids[!dups]
     }
-    leadingTest <- factorValues2(vegTypeMap, vegTypeMap[ids], att = 2) ## TODO: adjust tests for mixed type 2
+    leadingTest <- factorValues2(vegTypeMap, vegTypeMap[ids], att = 2)
     names(pgs) <- leadingTest
     pgTest <- pixelGroupData[pixelGroup %in% pgs]
     whNA <- unique(unlist(sapply(pgTest, function(x) which(is.na(x)))))
     whNAPG <- pgTest[whNA]$pixelGroup
     pgs <- pgs[!pgs %in% whNAPG]
     pgTest <- pgTest[!whNA]
-    pgTest2 <- pgTest[, list(mixed = all(speciesProportion < vegLeadingProportion),
-                             leading = speciesCode[which.max(speciesProportion)]),
-                      by = "pixelGroup"]
-    out <- pgTest2[mixed == TRUE, leading := "Mixed"]
-    length(unique(out$pixelGroup))
-    length(pgs %in% unique(pgTest2$pixelGroup))
-    pgs2 <- pgs[pgs %in% unique(pgTest2$pixelGroup)]
-    if (!isTRUE(all(setkey(pgTest2, pixelGroup)$leading == names(pgs)[order(pgs)])))
+    pgTest[, Type := equivalentName(speciesCode, sppEquiv, "Type")]
+    if (mixedType == 1) {
+      pgTest2 <- pgTest[, list(mixed = all(speciesProportion < vegLeadingProportion),
+                               leading = speciesCode[which.max(speciesProportion)]),
+                        by = "pixelGroup"]
+      out <- pgTest2[mixed == TRUE, leading := "Mixed"]
+    } else {
+      pgTest2 <- pgTest[, list(mixed = eval(mixedType2Condition),
+                               leading = speciesCode[which.max(speciesProportion)]),
+                        by = "pixelGroup"]
+      pgTest2[, mixed := any(.SD[["mixed"]]), by = "pixelGroup"]
+      pgTest2[mixed == TRUE, leading := "Mixed"]
+      pgTest2 <- pgTest2[!duplicated(pgTest2)]
+      out <- pgTest2
+    }
+    length(unique(out[["pixelGroup"]]))
+    length(pgs %in% unique(pgTest2[["pixelGroup"]]))
+    pgs2 <- pgs[pgs %in% unique(pgTest2[["pixelGroup"]])]
+    if (!isTRUE(all(setkey(pgTest2, pixelGroup)[["leading"]] == names(pgs)[order(pgs)])))
       stop("The vegTypeMap is incorrect. Please debug LandR::vegTypeMapGenerator")
   }
 
