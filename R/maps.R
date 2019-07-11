@@ -292,9 +292,11 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
   if (algo == 1) {
     cohortData <- cohortData1
     pixelGroupData <- pixelGroupData1
+    rm(pixelGroupData1)
   } else if (algo == 2) {
     cohortData <- cohortData2
     pixelGroupData <- pixelGroupData2
+    rm(pixelGroupData2)
   }
 
   ########################################################
@@ -336,11 +338,10 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
     browser() ## TODO: implement mixedType 2 here
     sppEq <- data.table(sppEquiv[[sppEquivCol]], sppEquiv[["Type"]])
     names(sppEq) <- c("speciesCode", "Type")
-    setkey(sppEq, speciesCode)
-    setkey(pixelGroupData, speciesCode)
     pixelGroupData3 <- merge(pixelGroupData, sppEq[!duplicated(sppEq)], all.x = TRUE)
 
     ## TODO: Alex resume here
+    setkey(pixelGroupData3, pixelGroup, speciesCode)
     pixelGroupData3 <- pixelGroupData3[, list(pure = ifelse(Type == "Deciduous" &
                                                               speciesProportion < vegLeadingProportion &
                                                               speciesProportion > 1 - vegLeadingProportion, FALSE, NA),
