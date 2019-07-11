@@ -1,7 +1,7 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c(".", ":=", "B", "HQ", "leading", "LQ", "mixed", "N",
-                           "pure", "speciesCode", "speciesGroupB",
-                           "speciesProportion", "SPP", "totalB"))
+                           "pixelGroup", "pure", "speciesCode", "speciesGroupB",
+                           "speciesProportion", "SPP", "totalB", "totalCover", "Type"))
 }
 
 #' Define flammability map
@@ -225,7 +225,7 @@ vegTypeMapGenerator.RasterStack <- function(x, ...) {
 }
 
 #' @export
-#' @import SpaDES.tools inRange
+#' @importFrom SpaDES.tools inRange
 #' @rdname vegTypeMapGenerator
 vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportion = 0.8,
                                            mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,
