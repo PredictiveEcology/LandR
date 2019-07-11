@@ -346,6 +346,7 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
     browser() ## TODO: implement mixedType 2 here
     sppEq <- data.table(sppEquiv[[sppEquivCol]], sppEquiv[["Type"]])
     names(sppEq) <- c("speciesCode", "Type")
+    setkey(pixelGroupData, speciesCode)
     pixelGroupData3 <- merge(pixelGroupData, sppEq[!duplicated(sppEq)], all.x = TRUE)
 
     ## TODO: Alex resume here
