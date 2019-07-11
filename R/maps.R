@@ -361,7 +361,7 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
     pixelGroupData3 <- pixelGroupData3[, .SD[1], by = "pixelGroup"] ## sp. w/ highest prop. per pixelGroup
     pixelGroupData3[mixed == TRUE, speciesCode := "Mixed"]
     setnames(pixelGroupData3, "speciesCode", "leading")
-    set(pixelGroupData3, NULL, "leading", factor(pixelGroupData3[["leading"]])
+    set(pixelGroupData3, NULL, "leading", factor(pixelGroupData3[["leading"]]))
   } else {
     stop("invalid mixedType! Must be one of '1' or '2'.")
   }
