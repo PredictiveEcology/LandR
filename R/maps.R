@@ -223,14 +223,15 @@ vegTypeMapGenerator.RasterStack <- function(x, ...) {
 }
 
 #' @export
+#' @import SpaDES.tools inRange
 #' @rdname vegTypeMapGenerator
 vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportion = 0.8,
                                            mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,
                                            pixelGroupColName = "pixelGroup",
                                            doAssertion = getOption("LandR.assertions", TRUE)) {
-
   if (!inRange(vegLeadingProportion, 0, 1))
     stop("vegLeadingProportion must be a proportion")
+
   nrowCohortData <- NROW(x)
 
   leadingBasedOn <- if ("B" %in% colnames(x)) {
@@ -282,20 +283,15 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 
     if (identical(leadingBasedOn, "cover")) {
       pixelGroupData1[N != 1, (totalOfLeadingBasedOn) := sum(cover, na.rm = TRUE), by = pixelGroupColName]
-      pixelGroupData1 <- pixelGroupData1[, list(
-        sum(cover, na.rm = TRUE),
-        totalcover[1]),
-        by = pgdAndSc]
+      pixelGroupData1 <- pixelGroupData1[, list(sum(cover, na.rm = TRUE), totalcover[1]), by = pgdAndSc]
     } else {
       pixelGroupData1[N != 1, (totalOfLeadingBasedOn) := sum(B, na.rm = TRUE), by = pixelGroupColName]
-      pixelGroupData1 <- pixelGroupData1[, list(
-        sum(B, na.rm = TRUE),
-        totalB[1]),
-        by = pgdAndSc]
+      pixelGroupData1 <- pixelGroupData1[, list(sum(B, na.rm = TRUE), totalB[1]), by = pgdAndSc]
     }
     setnames(pixelGroupData1, old = c("V1", "V2"), new = c(speciesOfLeadingBasedOn, totalOfLeadingBasedOn))
 
-    set(pixelGroupData1, NULL, "speciesProportion", pixelGroupData1[[speciesOfLeadingBasedOn]] / pixelGroupData1[[totalOfLeadingBasedOn]])
+    set(pixelGroupData1, NULL, "speciesProportion", pixelGroupData1[[speciesOfLeadingBasedOn]] /
+          pixelGroupData1[[totalOfLeadingBasedOn]])
     systimePost1 <- Sys.time()
 
     setorderv(pixelGroupData1, pixelGroupColName)
@@ -341,37 +337,13 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
         # pixelGroupData2[[NROW(pixelGroupData2) + 1]] <- cohortData2[!GT1, ..cols]
       }
       systimePost2 <- Sys.time()
-
-      # set(cohortData2, which(wh1), "totalB", cohortData2$B[wh1])
-      # totalBNot1 <- cohortData2[!wh1, list(N = .N, totalB = sum(B, na.rm = TRUE)), by = pixelGroupColName]
-      # totalBNot1 <- rep.int(totalBNot1$totalB, totalBNot1$N)
-      # set(cohortData2, which(!wh1), "totalB", totalBNot1)
-      #
-      # b <- cohortData2[, list(N = .N), by = pgdAndSc]
-      # b <- rep.int(b$N, b$N)
-      # GT1 <- (b > 1)
-      # pixelGroupData2 <- list()
-      # if (any(GT1)) {
-      #   pixelGroupData2[[1]] <- cohortData2[GT1, .(speciesProportion = sum(B, na.rm = TRUE) / totalB[1]),
-      #                                       by = pgdAndSc]
-      # } else {
-      #   set(cohortData2, which(!GT1), "speciesProportion", cohortData2$B[!GT1] / cohortData2$totalB[!GT1])
-      #   pixelGroupData2[[NROW(pixelGroupData2) + 1]] <- cohortData2[!GT1, c(pixelGroupColName, "speciesCode",
-      #                                                                       "speciesProportion")]
-      # }
-      # if (length(pixelGroupData2) > 1) {
-      #   pixelGroupData2 <- rbindlist(pixelGroupData2)
-      # } else {
-      #   pixelGroupData2 <- pixelGroupData2[[1]]
-      # }
-      # systimePost2 <- Sys.time()
   }
 
   if (isTRUE(doAssertion)) {
     ## slower -- older, but simpler Eliot June 5, 2019
     ## TODO: these algorithm tests should be deleted after a while. See date on prev line.
-    if (!exists("oldAlgoVTM", envir = LandR:::.pkgEnv)) .pkgEnv$oldAlgoVTM <- 0 ## TODO: store in pkg envir
-    if (!exists("newAlgoVTM", envir = LandR:::.pkgEnv)) .pkgEnv$newAlgoVTM <- 0 ## TODO: store in pkg envir
+    if (!exists("oldAlgoVTM", envir = LandR:::.pkgEnv)) .pkgEnv$oldAlgoVTM <- 0
+    if (!exists("newAlgoVTM", envir = LandR:::.pkgEnv)) .pkgEnv$newAlgoVTM <- 0
     .pkgEnv$oldAlgoVTM <- .pkgEnv$oldAlgoVTM + (systimePost1 - systimePre1)
     .pkgEnv$newAlgoVTM <- .pkgEnv$newAlgoVTM + (systimePost2 - systimePre2)
     print(paste("LandR::vegTypeMapGenerator: new algo", .pkgEnv$newAlgoVTM))
