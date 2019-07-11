@@ -277,12 +277,12 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
   if (isTRUE(doAssertion)) {
     ## slower -- older, but simpler Eliot June 5, 2019
     ## TODO: these algorithm tests should be deleted after a while. See date on prev line.
-    if (!exists("oldAlgoVTM")) oldAlgoVTM <<- 0 ## TODO: store in pkg envir
-    if (!exists("newAlgoVTM")) newAlgoVTM <<- 0 ## TODO: store in pkg envir
-    oldAlgoVTM <<- oldAlgoVTM + (systimePost1 - systimePre1)
-    newAlgoVTM <<- newAlgoVTM + (systimePost2 - systimePre2)
-    print(paste("LandR::vegTypeMapGenerator: new algo", newAlgoVTM))
-    print(paste("LandR::vegTypeMapGenerator: old algo", oldAlgoVTM))
+    if (!exists("oldAlgoVTM")) .pkgEnv$oldAlgoVTM <- 0
+    if (!exists("newAlgoVTM")) .pkgEnv$newAlgoVTM <- 0
+    .pkgEnv$oldAlgoVTM <- .pkgEnv$oldAlgoVTM + (systimePost1 - systimePre1)
+    .pkgEnv$newAlgoVTM <- .pkgEnv$newAlgoVTM + (systimePost2 - systimePre2)
+    message(paste("LandR::vegTypeMapGenerator: new algo", .pkgEnv$newAlgoVTM))
+    message(paste("LandR::vegTypeMapGenerator: old algo", .pkgEnv$oldAlgoVTM))
     setorderv(pixelGroupData2, pgdAndSc)
     whNA <- unique(unlist(sapply(pixelGroupData2, function(x) which(is.na(x)))))
     pixelGroupData1 <- pixelGroupData1[!pixelGroupData2[whNA], on = pgdAndSc]
