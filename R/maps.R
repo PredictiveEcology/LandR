@@ -324,31 +324,35 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
     ## 3. Keep only first row in each pixelGroup
     ## 4. change column names and convert pure to mixed ==> mixed <- !pure
     pixelGroupData3 <- pixelGroupData[, list(pure = speciesProportion >= vegLeadingProportion,
-                                 speciesCode, pixelGroup, speciesProportion)]
+                                             speciesCode, pixelGroup, speciesProportion)]
     setorderv(pixelGroupData3, cols = c("pixelGroup", "speciesProportion"), order = -1L)
     set(pixelGroupData3, NULL, "speciesProportion", NULL)
     pixelGroupData3 <- pixelGroupData3[, .SD[1], by = "pixelGroup"]
     pixelGroupData3[pure == FALSE, speciesCode := "Mixed"]
     setnames(pixelGroupData3, "speciesCode", "leading")
-    # Change pure to mixed
     pixelGroupData3[, pure := !pure]
     setnames(pixelGroupData3, "pure", "mixed")
   } else if (mixedType == 2) {
+    browser() ## TODO: implement mixedType 2 here
     sppEq <- data.table(sppEquiv[[sppEquivCol]], sppEquiv[["Type"]])
     names(sppEq) <- c("speciesCode", "Type")
     setkey(sppEq, speciesCode)
-    browser() ## TODO: implement mixedType 2 here
-    #pixelGroupData3 <- pixelGroupData[sppEq, on = "speciesCode", all.x = TRUE] ##
-    #[, list(pure = speciesProportion >= vegLeadingProportion,
-    #                                         speciesCode, pixelGroup, speciesProportion, type)]
-    #setorderv(pixelGroupData3, cols = c("pixelGroup", "speciesProportion"), order = -1L)
+    setkey(pixelGroupData, speciesCode)
+    pixelGroupData3 <- merge(pixelGroupData, sppEq[!duplicated(sppEq)], all.x = TRUE)
+
+    ## TODO: Alex resume here
+    pixelGroupData3 <- pixelGroupData3[, list(pure = ifelse(Type == "Deciduous" &
+                                                              speciesProportion < vegLeadingProportion &
+                                                              speciesProportion > 1 - vegLeadingProportion, FALSE, NA),
+                                              speciesCode, pixelGroup, speciesProportion, Type)]
+    pixelGroupData3[speciesProportion >= vegLeadingProportion, pure := TRUE]
+    setorderv(pixelGroupData3, cols = c("pixelGroup", "speciesProportion"), order = -1L)
     #set(pixelGroupData3, NULL, "speciesProportion", NULL)
-    #pixelGroupData3 <- pixelGroupData3[, .SD[1], by = "pixelGroup"]
-    #pixelGroupData3[pure == FALSE, speciesCode := "Mixed"]
-    #setnames(pixelGroupData3, "speciesCode", "leading")
-    # Change pure to mixed
-    #pixelGroupData3[, pure := !pure]
-    #setnames(pixelGroupData3, "pure", "mixed")
+    pixelGroupData3 <- pixelGroupData3[, .SD[1], by = "pixelGroup"] ## sp. w/ highest prop. per pixelGroup
+    pixelGroupData3[pure == FALSE, speciesCode := "Mixed"]
+    setnames(pixelGroupData3, "speciesCode", "leading")
+    pixelGroupData3[, pure := !pure]
+    setnames(pixelGroupData3, "pure", "mixed")
   } else {
     stop("invalid mixedType! Must be one of '1' or '2'.")
   }
