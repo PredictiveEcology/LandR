@@ -694,12 +694,22 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
     message(blue("assign B = 0 and age = 0 for pixels where cover = 0, ",
                  "\n  because cover is most reliable dataset"))
 
-  cohortData[cover == 0, `:=`(age = 0L, logAge = -Inf, B = 0)]
-  message(blue("assign totalBiomass = 0 if sum(cover) = 0 in a pixel, ",
-               "\n  because cover is most reliable dataset"))
-  cohortData <- cohortData[, sum(cover) == 0, by = "pixelIndex"][V1 == TRUE][
-    cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
-  cohortData[, V1 := NULL]
+  hasCover0 <- which(cohortData[["cover"]] == 0)
+  cncd <- colnames(cohortData)
+  if (any(c("age", "logAge") %in% cncd)) {
+    set(cohortData, hasCover0, "age", 0L)
+    set(cohortData, hasCover0, "logAge", -Inf)
+  }
+  if (any(c("B", "totalBiomass") %in% cncd)) {
+    set(cohortData, hasCover0, "B", 0)
+    message(blue("assign totalBiomass = 0 if sum(cover) = 0 in a pixel, ",
+                 "\n  because cover is most reliable dataset"))
+    cohortData <- cohortData[, sum(cover) == 0, by = "pixelIndex"][V1 == TRUE][
+      cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
+    cohortData[, V1 := NULL]
+  }
+  # cohortData[cover == 0, `:=`(age = 0L, logAge = -Inf, B = 0)]
+
 
   ## CRAZY TODO: DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
   # message(crayon::blue(paste("POSSIBLE ALERT:",
@@ -715,15 +725,17 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
   }, by = "pixelIndex"]
   set(cohortData, NULL, "cover", asInteger(cohortData[["cover"]]))
 
-  # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
-  set(cohortData, NULL, "B", as.numeric(cohortData[["B"]]))
-  message(blue("Divide total B of each pixel by the relative cover of the cohorts"))
-  cohortData[ , B := mean(totalBiomass) * cover / 100, by = "pixelIndex"]
-  message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
-  cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
-  message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
-  cohortData[ , totalBiomass := asInteger(totalBiomass)]
-  set(cohortData, NULL, "B", asInteger(cohortData[["B"]]))
+  if (any(c("B", "totalBiomass") %in% cncd)) {
+    # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
+    set(cohortData, NULL, "B", as.numeric(cohortData[["B"]]))
+    message(blue("Divide total B of each pixel by the relative cover of the cohorts"))
+    cohortData[ , B := mean(totalBiomass) * cover / 100, by = "pixelIndex"]
+    message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
+    cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
+    message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
+    cohortData[ , totalBiomass := asInteger(totalBiomass)]
+    set(cohortData, NULL, "B", asInteger(cohortData[["B"]]))
+  }
 
   return(cohortData)
 }

@@ -57,28 +57,92 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @importFrom pemisc factorValues2
 #' @importFrom raster ncell
 makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
-                           biomassMap, rasterToMatch, LCC2005, pixelGroupAgeClass) {
+                           biomassMap, rasterToMatch, LCC2005, pixelGroupAgeClass = 1) {
+
+  if (missing(rasterToMatch)) {
+    rasterToMatch <- raster(speciesLayers[[1]])
+    rasterToMatch[] <- 0
+    rasterToMatch[is.na(speciesLayers[[1]])] <- NA
+  }
+
+  # if (missing(standAgeMap)) {
+  #   standAgeMap <- raster(rasterToMatch)
+  #   standAgeMap[] <- 1
+  #   standAgeMap[is.na(rasterToMatch)] <- NA
+  # }
+
+  # if (missing(biomassMap)) {
+  #   biomassMap <- raster(rasterToMatch)
+  #   biomassMap[] <- 1
+  #   biomassMap[is.na(rasterToMatch)] <- NA
+  # }
+
+  # if (missing(LCC2005)) {
+  #   LCC2005 <- raster(rasterToMatch)
+  #   LCC2005[] <- 1
+  #   LCC2005[is.na(rasterToMatch)] <- NA
+  # }
+
+  if (missing(ecoregionFiles)) {
+    ecoregionFiles <- list()
+    ecoregionFiles$ecoregionMap <- raster(rasterToMatch)
+    rtmNotNA <- which(!is.na(rasterToMatch[]))
+    ecoregionFiles$ecoregionMap[rtmNotNA] <- seq_along(rtmNotNA)
+    initialEcoregionCodeVals <- ecoregionFiles$ecoregionMap[]
+  } else {
+    initialEcoregionCodeVals <- factorValues2(
+      ecoregionFiles$ecoregionMap,
+      ecoregionFiles$ecoregionMap[],
+      att = 5)
+  }
+
+  if (missing(species)) {
+    species <- list()
+    species$species <- names(speciesLayers)
+  }
+
   message(blue("Round age to nearest P(sim)$pixelGroupAgeClass, which is",
                pixelGroupAgeClass))
   coverMatrix <- matrix(asInteger(speciesLayers[]),
                         ncol = length(names(speciesLayers)))
   colnames(coverMatrix) <- names(speciesLayers)
 
-  pixelTable <- data.table(age = asInteger(ceiling(asInteger(standAgeMap[]) /
-                                                     pixelGroupAgeClass) * pixelGroupAgeClass),
-                           logAge = log(standAgeMap[]),
-                           initialEcoregionCode = factor(factorValues2(ecoregionFiles$ecoregionMap,
-                                                                       ecoregionFiles$ecoregionMap[],
-                                                                       att = 5)),
-                           totalBiomass = asInteger(biomassMap[] * 100), # change units
+  pixelTable <- data.table(initialEcoregionCode = factor(initialEcoregionCodeVals),
                            cover = coverMatrix,
                            pixelIndex = seq(ncell(rasterToMatch)),
-                           lcc = LCC2005[],
-                           rasterToMatch = rasterToMatch[])
+                           rasterToMatch = rasterToMatch[]
+  )
+  if (!missing(standAgeMap)) {
+    set(pixelTable, NULL, "age", asInteger(ceiling(asInteger(standAgeMap[]) /
+                                                     pixelGroupAgeClass) * pixelGroupAgeClass))
+    set(pixelTable, NULL, "logAge", log(standAgeMap[]))
+  }
 
-  coverColNames <- paste0("cover.", species$species)
+  if (!missing(biomassMap)) {
+    set(pixelTable, NULL, "totalBiomass", asInteger(biomassMap[] * 100) ) # change units)
+  }
+
+  if (!missing(LCC2005)) {
+    set(pixelTable, NULL, "lcc", LCC2005[])
+  }
+
+  #pixelTable <- data.table(#age = asInteger(ceiling(asInteger(standAgeMap[]) /
+                          #                           pixelGroupAgeClass) * pixelGroupAgeClass),
+                          # logAge = log(standAgeMap[]),
+                          # initialEcoregionCode = factor(initialEcoregionCodeVals),
+                          # totalBiomass = asInteger(biomassMap[] * 100), # change units
+                          # cover = coverMatrix,
+                          # pixelIndex = seq(ncell(rasterToMatch)),
+                          # lcc = LCC2005[],
+                          # rasterToMatch = rasterToMatch[])
+
+  # Remove NAs from pixelTable
+  ## 1) If in rasterToMatch
   pixelTable1 <- na.omit(pixelTable, cols = c("rasterToMatch"))
+  ## 2) If in rasterToMatch and initialEcoregionCode
   pixelTable2 <- na.omit(pixelTable, cols = c("rasterToMatch", "initialEcoregionCode"))
+  ## 3) For species that we have traits for (i.e., where species$species exists in the speciesLayers)
+  coverColNames <- paste0("cover.", species$species)
   pixelTable <- na.omit(pixelTable2, cols = c(coverColNames))
 
   if (NROW(pixelTable1) != NROW(pixelTable))

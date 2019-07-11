@@ -1,6 +1,6 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c(".", ":=", "B", "HQ", "leading", "LQ", "mixed", "N",
-                           "pixelGroup", "pure", "speciesCode", "speciesGroupB",
+                           "pure", "speciesCode", "speciesGroupB",
                            "speciesProportion", "SPP", "totalB"))
 }
 
@@ -99,16 +99,18 @@ prepInputsLCC <- function(year = 2005,
 
 #' Make a vegetation type map from a stack of species abundances
 #'
+#' @description
+#' \code{makeVegTypeMap} is a wrapper around \code{vegTypeMapGenerator}
+#' that works from a species stack of percent cover. These do not have
+#' to sum to 100%
+#'
 #' @param speciesStack A \code{RasterStack} of species abundances.
 #'                     This must be one \code{RasterLayer} per species.
-#'
-#' @param vegLeadingProportion The threshold as a proportion of the total abundance
-#'        that a species must have to be considered a "pure" stand of that type.
-#'        If no species reaches this proportion, then the pixel will be 'Mixed'.
-#'
-#' @param mixedType An integer defining whether mixed stands are of any kind of species
-#'                  admixture (1), or only when deciduous mixed with conifer (2);
-#'                  or not to consider mixed stands at all (0). Defaults to 2.
+#' @param vegLeadingProportion See vegTypeMapGenerator
+#' @param mixed Deprecated. See vegTypeMapGenerator and \code{mixedType}
+#' @param ... Other arguments passed to vegTypeMapGenerator, i.e.,
+#'   \code{vegLeadingProportion}, \code{mixedType}, \code{sppEquiv},
+#'   \code{sppEquivCol}, \code{colors}, \code{pixelGroupColName}, and \code{doAssertion}
 #'
 #' @return A factor raster
 #'
@@ -116,45 +118,16 @@ prepInputsLCC <- function(year = 2005,
 #' @importFrom quickPlot numLayers
 #' @importFrom raster levels maxValue raster
 #' @importFrom SpaDES.tools inRange
-makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
-  if (!inRange(vegLeadingProportion, 0, 1))
-    stop("vegLeadingProportion must be a proportion")
+#' @rdname LandR-deprecated
+makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
+  .Deprecated("vegTypeMapGenerator")
 
-  sumVegPct <- sum(speciesStack) ## TODO: how is the sum >100 ?
+  if (isTRUE(mixed)) mixed <- 2
 
-  if (isTRUE(mixed)) {
-    ## create "mixed" layer, which is given a value slightly higher than any other layer,
-    ## if it is deemed a mixed pixel.
-    ## All layers must be below vegLeadingProportion to be called Mixed.
-    ## This check turns stack to binary: 1 if < vegLeadingProportion; 0 if more than.
-    ## Then, sum should be numLayers of all are below vegLeadingProportion
-    whMixed <- which(sum(speciesStack < (100 * vegLeadingProportion))[] == numLayers(speciesStack))
-    MixedRas <- speciesStack[[1]]
-    MixedRas[!is.na(speciesStack[[1]][])] <- 0
-    MixedRas[whMixed] <- max(maxValue(speciesStack)) * 1.01
-
-    speciesStack$Mixed <- MixedRas
-  }
-
-  a <- speciesStack[]
-  nas <- is.na(a[, 1])
-  maxes <- apply(a[!nas, ], 1, function(x) {
-    whMax <- which(x == max(x, na.rm = TRUE))
-    if (length(whMax) > 1) {
-      whMax <- sample(whMax, size = 1)
-    }
-    return(whMax)
-  })
-
-  vegTypeMap <- raster(speciesStack[[1]])
-
-  vegTypeMap[!nas] <- maxes
-
-  layerNames <- names(speciesStack)
-  names(layerNames) <- layerNames
-  levels(vegTypeMap) <- data.frame(ID = seq(layerNames), Species = names(layerNames))
-  vegTypeMap
+  vegTypeMapGenerator(x = speciesStack, vegLeadingProportion = vegLeadingProportion,
+                      mixedType = as.numeric(mixed), ...)
 }
+
 
 #' Generate vegetation type map
 #'
@@ -191,47 +164,141 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed = TRUE) {
 #' @importFrom raster getValues projection projection<- setValues
 #' @importFrom SpaDES.tools rasterizeReduced
 #' @importFrom utils data
-vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
-                                mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,
-                                doAssertion = getOption("LandR.assertions", TRUE)) {
-  nrowCohortData <- NROW(cohortData)
+#' @rdname vegTypeMapGenerator
+vegTypeMapGenerator <- function(x, ...) {
+  UseMethod("vegTypeMapGenerator")
+}
 
+#' @export
+#' @rdname vegTypeMapGenerator
+vegTypeMapGenerator.RasterStack <- function(x, ...) {
+  suppressMessages(pixelTable <- makePixelTable(x))
+  suppressMessages(cohortTable <- createCohortData(pixelTable))
+  pixelGroupMap <- raster(x)
+  pixelGroupMap[pixelTable[["pixelIndex"]]] <- pixelTable[["initialEcoregionCode"]]
+  vegTypeMap <- vegTypeMapGenerator(x = cohortTable,
+                                    pixelGroupMap = pixelGroupMap,
+                                    pixelGroupColName = "initialEcoregionCode",
+                                    ...)
+
+  if (FALSE) { # This is the old version -- Eliot & Alex July 11, 2019
+
+    sumVegPct <- sum(speciesStack) ## TODO: how is the sum >100 ?
+
+    if (isTRUE(mixed)) {
+      ## create "mixed" layer, which is given a value slightly higher than any other layer,
+      ## if it is deemed a mixed pixel.
+      ## All layers must be below vegLeadingProportion to be called Mixed.
+      ## This check turns stack to binary: 1 if < vegLeadingProportion; 0 if more than.
+      ## Then, sum should be numLayers of all are below vegLeadingProportion
+      whMixed <- which(sum(speciesStack < (100 * vegLeadingProportion))[] == numLayers(speciesStack))
+      MixedRas <- speciesStack[[1]]
+      MixedRas[!is.na(speciesStack[[1]][])] <- 0
+      MixedRas[whMixed] <- max(maxValue(speciesStack)) * 1.01
+
+      speciesStack$Mixed <- MixedRas
+    }
+
+    a <- speciesStack[]
+    nas <- is.na(a[, 1])
+    maxes <- apply(a[!nas, ], 1, function(x) {
+      whMax <- which(x == max(x, na.rm = TRUE))
+      if (length(whMax) > 1) {
+        whMax <- sample(whMax, size = 1)
+      }
+      return(whMax)
+    })
+
+    vegTypeMap <- raster(speciesStack[[1]])
+
+    vegTypeMap[!nas] <- maxes
+
+    layerNames <- names(speciesStack)
+    names(layerNames) <- layerNames
+    levels(vegTypeMap) <- data.frame(ID = seq(layerNames), Species = names(layerNames))
+    vegTypeMap
+
+  }
+  return(vegTypeMap)
+}
+
+#' @export
+#' @rdname vegTypeMapGenerator
+vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportion = 0.8,
+                                           mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,
+                                           pixelGroupColName = "pixelGroup",
+                                           doAssertion = getOption("LandR.assertions", TRUE)) {
+
+  if (!inRange(vegLeadingProportion, 0, 1))
+    stop("vegLeadingProportion must be a proportion")
+  nrowCohortData <- NROW(x)
+
+  leadingBasedOn <- if ("B" %in% colnames(x)) {
+    message("Using B to derive leading type")
+    "B"
+  } else if ("cover" %in% colnames(x)) {
+    message("Using cover to derive leading type, as there is no B column")
+    "cover"
+  } else {
+    stop("x must have either B or cover to determine leading species/type")
+  }
   assert_that(nrowCohortData > 0)
 
   if (isTRUE(doAssertion))
-    message("LandR::vegTypeMapGenerator: NROW(cohortData) == ", nrowCohortData)
+    message("LandR::vegTypeMapGenerator: NROW(x) == ", nrowCohortData)
 
   if (mixedType == 2) {
     if (is.null(sppEquiv)) {
-      message(paste("Using mixedType == 2, but no sppEquiv provided.",
-                    "Attempting to use data('sppEquivalencies_CA', 'LandR') and sppEquivCol == 'Boreal'"))
-      sppEquiv <- data("sppEquivalencies_CA", "LandR", envir = environment())
-      sppEquivCol <- "Boreal"
-      speciesFound <- equivalentName(unique(cohortdata$species), sppEquiv, sppEquivCol)
-      if (length(setdiff(unique(cohortdata$species), speciesFound)))
-        stop(paste("Can't find all species in 'Boreal' columns.",
-                   "Please provide the appropriave sppEquivCol."))
+      sppEquiv <- get(data("sppEquivalencies_CA", package = "LandR", envir = environment()),
+                      inherits = FALSE)
+
+      # Find the sppEquivCol that best matches what you have in x
+      sppEquivCol <- names(sort(sapply(sppEquiv, function(xx) sum(xx %in% unique(x$species))),
+                                decreasing = TRUE)[1])
+      message(paste0("Using mixedType == 2, but no sppEquiv provided. ",
+                    "Attempting to use data('sppEquivalencies_CA', 'LandR') ",
+                    "and sppEquivCol == '", sppEquivCol, "'"))
     }
   }
 
-  ## use new vs old algorithm based on size of cohortData. new one (2) is faster in most cases.
+  ## use new vs old algorithm based on size of x. new one (2) is faster in most cases.
   ## enable assertions to view timings for each algorithm before deciding which to use.
   algo <- ifelse(nrowCohortData > 3.5e6, 1, 2)
 
-  pgdAndSc <- c("pixelGroup", "speciesCode")
+  pgdAndSc <- c(pixelGroupColName, "speciesCode")
+  pgdAndScAndLeading <- c(pgdAndSc, leadingBasedOn)
+  totalOfLeadingBasedOn <- paste0("total", leadingBasedOn)
+  speciesOfLeadingBasedOn <- paste0("speciesGroup", leadingBasedOn)
   if (algo == 1 || isTRUE(doAssertion)) {
     # slower -- older, but simpler Eliot June 5, 2019
     # 1. Find length of each pixelGroup -- don't include pixelGroups in "by" that have only 1 cohort: N = 1
-    cohortData1 <- copy(cohortData)
+    cohortData1 <- copy(x)
     systimePre1 <- Sys.time()
-    pixelGroupData1 <- cohortData1[, list(N = .N), by = "pixelGroup"]
-    pixelGroupData1 <- cohortData1[, .(pixelGroup, B, speciesCode)][pixelGroupData1, on = "pixelGroup"]
-    set(pixelGroupData1, NULL, "totalB", pixelGroupData1$B)
-    pixelGroupData1[N != 1, totalB := sum(B, na.rm = TRUE), by = "pixelGroup"]
-    pixelGroupData1 <- pixelGroupData1[, .(speciesGroupB = sum(B, na.rm = TRUE), totalB = totalB[1]), by = pgdAndSc]
-    set(pixelGroupData1, NULL, "speciesProportion", pixelGroupData1$speciesGroupB / pixelGroupData1$totalB)
+    pixelGroupData1 <- cohortData1[, list(N = .N), by = pixelGroupColName]
+
+    # Calculate speciesProportion from cover or B
+    pixelGroupData1 <- cohortData1[, ..pgdAndScAndLeading][pixelGroupData1, on = pixelGroupColName]
+    set(pixelGroupData1, NULL, totalOfLeadingBasedOn, pixelGroupData1[[leadingBasedOn]])
+
+    if (identical(leadingBasedOn, "cover")) {
+      pixelGroupData1[N != 1, (totalOfLeadingBasedOn) := sum(cover, na.rm = TRUE), by = pixelGroupColName]
+      pixelGroupData1 <- pixelGroupData1[, list(
+        sum(cover, na.rm = TRUE),
+        totalcover[1]),
+        by = pgdAndSc]
+    } else {
+      pixelGroupData1[N != 1, (totalOfLeadingBasedOn) := sum(B, na.rm = TRUE), by = pixelGroupColName]
+      pixelGroupData1 <- pixelGroupData1[, list(
+        sum(B, na.rm = TRUE),
+        totalB[1]),
+        by = pgdAndSc]
+    }
+    setnames(pixelGroupData1, old = c("V1", "V2"), new = c(speciesOfLeadingBasedOn, totalOfLeadingBasedOn))
+
+    set(pixelGroupData1, NULL, "speciesProportion", pixelGroupData1[[speciesOfLeadingBasedOn]] / pixelGroupData1[[totalOfLeadingBasedOn]])
     systimePost1 <- Sys.time()
-    setorderv(pixelGroupData1, "pixelGroup")
+
+    setorderv(pixelGroupData1, pixelGroupColName)
   }
 
   if (algo == 2 || isTRUE(doAssertion)) {
@@ -241,50 +308,76 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
     #  2. calculate N, use this to repeat itself (instead of a join above)
     #  3. calculate speciesProportion, noting to calculate with by only if N > 1, otherwise
     #     it is a simpler non-by calculation
-    cohortData2 <- copy(cohortData)
+    cohortData2 <- copy(x)
     systimePre2 <- Sys.time()
     setkeyv(cohortData2, pgdAndSc)
-    # setorderv(cohortData, "pixelGroup")
-    pixelGroupData2 <- cohortData2[, list(N = .N), by = "pixelGroup"]
+    # setorderv(x, pixelGroupColName)
+    pixelGroupData2 <- cohortData2[, list(N = .N), by = pixelGroupColName]
 
     N <- rep.int(pixelGroupData2$N, pixelGroupData2$N)
     wh1 <- N == 1
-    set(cohortData2, which(wh1), "totalB", cohortData2$B[wh1])
-    totalBNot1 <- cohortData2[!wh1, list(N = .N, totalB = sum(B, na.rm = TRUE)), by = "pixelGroup"]
-    totalBNot1 <- rep.int(totalBNot1$totalB, totalBNot1$N)
-    set(cohortData2, which(!wh1), "totalB", totalBNot1)
+      set(cohortData2, which(wh1), totalOfLeadingBasedOn, cohortData2[[leadingBasedOn]][wh1])
+      if (identical(leadingBasedOn, "cover")) {
+        totalBNot1 <- cohortData2[!wh1, list(N = .N, totalcover = sum(cover, na.rm = TRUE)), by = pixelGroupColName]
+      } else {
+        totalBNot1 <- cohortData2[!wh1, list(N = .N, totalB = sum(B, na.rm = TRUE)), by = pixelGroupColName]
+      }
+      totalBNot1 <- rep.int(totalBNot1[[totalOfLeadingBasedOn]], totalBNot1[["N"]])
+      set(cohortData2, which(!wh1), totalOfLeadingBasedOn, totalBNot1)
 
-    b <- cohortData2[, list(N = .N), by = pgdAndSc]
-    b <- rep.int(b$N, b$N)
-    GT1 <- (b > 1)
-    pixelGroupData2 <- list()
-    if (any(GT1)) {
-      pixelGroupData2[[1]] <- cohortData2[GT1, .(speciesProportion = sum(B, na.rm = TRUE) / totalB[1]),
-                      by = pgdAndSc]
-    } else {
-      set(cohortData2, which(!GT1), "speciesProportion", cohortData2$B[!GT1] / cohortData2$totalB[!GT1])
-      pixelGroupData2[[NROW(pixelGroupData2) + 1]] <- cohortData2[!GT1, c("pixelGroup", "speciesCode",
-                                                                          "speciesProportion")]
-    }
-    if (length(pixelGroupData2) > 1) {
-      pixelGroupData2 <- rbindlist(pixelGroupData2)
-    } else {
-      pixelGroupData2 <- pixelGroupData2[[1]]
-    }
-    systimePost2 <- Sys.time()
+      b <- cohortData2[, list(N = .N), by = pgdAndSc]
+      b <- rep.int(b[["N"]], b[["N"]])
+      GT1 <- (b > 1)
+      if (any(GT1)) {
+        pixelGroupData2List <- list()
+        pixelGroupData2List[[1]] <- cohortData2[GT1, .(speciesProportion = sum(B, na.rm = TRUE) / totalB[1]),
+                                            by = pgdAndSc]
+        pixelGroupData2List[[2]] <- cohortData2[!GT1]
+        pixelGroupData2 <- rbindlist(pixelGroupData2List)
+      } else {
+        # cols <- c(pixelGroupColName, "speciesCode", "speciesProportion")
+        set(cohortData2, NULL, "speciesProportion", cohortData2[[leadingBasedOn]] / cohortData2[[totalOfLeadingBasedOn]])
+        pixelGroupData2 <- cohortData2
+        # pixelGroupData2[[NROW(pixelGroupData2) + 1]] <- cohortData2[!GT1, ..cols]
+      }
+      systimePost2 <- Sys.time()
+
+      # set(cohortData2, which(wh1), "totalB", cohortData2$B[wh1])
+      # totalBNot1 <- cohortData2[!wh1, list(N = .N, totalB = sum(B, na.rm = TRUE)), by = pixelGroupColName]
+      # totalBNot1 <- rep.int(totalBNot1$totalB, totalBNot1$N)
+      # set(cohortData2, which(!wh1), "totalB", totalBNot1)
+      #
+      # b <- cohortData2[, list(N = .N), by = pgdAndSc]
+      # b <- rep.int(b$N, b$N)
+      # GT1 <- (b > 1)
+      # pixelGroupData2 <- list()
+      # if (any(GT1)) {
+      #   pixelGroupData2[[1]] <- cohortData2[GT1, .(speciesProportion = sum(B, na.rm = TRUE) / totalB[1]),
+      #                                       by = pgdAndSc]
+      # } else {
+      #   set(cohortData2, which(!GT1), "speciesProportion", cohortData2$B[!GT1] / cohortData2$totalB[!GT1])
+      #   pixelGroupData2[[NROW(pixelGroupData2) + 1]] <- cohortData2[!GT1, c(pixelGroupColName, "speciesCode",
+      #                                                                       "speciesProportion")]
+      # }
+      # if (length(pixelGroupData2) > 1) {
+      #   pixelGroupData2 <- rbindlist(pixelGroupData2)
+      # } else {
+      #   pixelGroupData2 <- pixelGroupData2[[1]]
+      # }
+      # systimePost2 <- Sys.time()
   }
 
   if (isTRUE(doAssertion)) {
     ## slower -- older, but simpler Eliot June 5, 2019
     ## TODO: these algorithm tests should be deleted after a while. See date on prev line.
-    if (!exists("oldAlgoVTM")) oldAlgoVTM <<- 0 ## TODO: store in pkg envir
-    if (!exists("newAlgoVTM")) newAlgoVTM <<- 0 ## TODO: store in pkg envir
-    oldAlgoVTM <<- oldAlgoVTM + (systimePost1 - systimePre1)
-    newAlgoVTM <<- newAlgoVTM + (systimePost2 - systimePre2)
-    print(paste("LandR::vegTypeMapGenerator: new algo", newAlgoVTM))
-    print(paste("LandR::vegTypeMapGenerator: old algo", oldAlgoVTM))
+    if (!exists("oldAlgoVTM", envir = LandR:::.pkgEnv)) .pkgEnv$oldAlgoVTM <- 0 ## TODO: store in pkg envir
+    if (!exists("newAlgoVTM", envir = LandR:::.pkgEnv)) .pkgEnv$newAlgoVTM <- 0 ## TODO: store in pkg envir
+    .pkgEnv$oldAlgoVTM <- .pkgEnv$oldAlgoVTM + (systimePost1 - systimePre1)
+    .pkgEnv$newAlgoVTM <- .pkgEnv$newAlgoVTM + (systimePost2 - systimePre2)
+    print(paste("LandR::vegTypeMapGenerator: new algo", .pkgEnv$newAlgoVTM))
+    print(paste("LandR::vegTypeMapGenerator: old algo", .pkgEnv$oldAlgoVTM))
     setorderv(pixelGroupData2, pgdAndSc)
-    whNA <- unique(unlist(sapply(pixelGroupData2, function(x) which(is.na(x)))))
+    whNA <- unique(unlist(sapply(pixelGroupData2, function(xx) which(is.na(xx)))))
     pixelGroupData1 <- pixelGroupData1[!pixelGroupData2[whNA], on = pgdAndSc]
     setkeyv(pixelGroupData1, pgdAndSc)
     setkeyv(pixelGroupData2, pgdAndSc)
@@ -294,11 +387,11 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
   }
 
   if (algo == 1) {
-    cohortData <- cohortData1
+    x <- cohortData1
     pixelGroupData <- pixelGroupData1
     rm(pixelGroupData1)
   } else if (algo == 2) {
-    cohortData <- cohortData2
+    x <- cohortData2
     pixelGroupData <- pixelGroupData2
     rm(pixelGroupData2)
   }
@@ -309,7 +402,7 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
   if (FALSE) {
     ## old algorithm; keep this code as reference -- it's simpler to follow
     b1 <- Sys.time()
-    pixelGroupData4 <- cohortData[, list(totalB = sum(B, na.rm = TRUE),
+    pixelGroupData4 <- x[, list(totalB = sum(B, na.rm = TRUE),
                                          speciesCode, B), by = pixelGroup]
     pixelGroupData4 <- pixelGroupData4[, .(speciesGroupB = sum(B, na.rm = TRUE),
                                            totalB = totalB[1]),
@@ -331,9 +424,9 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
     ## 4. change column names and convert pure to mixed ==> mixed <- !pure
     pixelGroupData3 <- pixelGroupData[, list(pure = speciesProportion >= vegLeadingProportion,
                                              speciesCode, pixelGroup, speciesProportion)]
-    setorderv(pixelGroupData3, cols = c("pixelGroup", "speciesProportion"), order = -1L)
+    setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
     set(pixelGroupData3, NULL, "speciesProportion", NULL)
-    pixelGroupData3 <- pixelGroupData3[, .SD[1], by = "pixelGroup"]
+    pixelGroupData3 <- pixelGroupData3[, .SD[1], by = pixelGroupColName]
     pixelGroupData3[pure == FALSE, speciesCode := "Mixed"]
     setnames(pixelGroupData3, "speciesCode", "leading")
     pixelGroupData3[, pure := !pure]
@@ -343,27 +436,31 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
     # a2 <- Sys.time()
     # pixelGroupData2 <- pixelGroupData[, list(mixed = all(speciesProportion < vegLeadingProportion),
     #                                          leading = speciesCode[which.max(speciesProportion)]),
-    #                                   by = "pixelGroup"]
+    #                                   by = pixelGroupColName]
     # pixelGroupData2[mixed == TRUE, leading := "Mixed"]
     # b2 <- Sys.time()
   } else if (mixedType == 2) {
+
+    if (!sppEquivCol %in% colnames(sppEquiv))
+      stop(sppEquivCol, " is not in sppEquiv. Please pass an existing sppEquivCol")
     sppEq <- data.table(sppEquiv[[sppEquivCol]], sppEquiv[["Type"]])
+
     names(sppEq) <- c("speciesCode", "Type")
     setkey(pixelGroupData, speciesCode)
     pixelGroupData3 <- merge(pixelGroupData, sppEq[!duplicated(sppEq)], all.x = TRUE)
-    setkey(pixelGroupData, pixelGroup, speciesCode)
+    setkeyv(pixelGroupData, pgdAndSc)
 
-    setkey(pixelGroupData3, pixelGroup, speciesCode)
+    setkeyv(pixelGroupData3, pgdAndSc)
     mixedType2Condition <- quote(Type == "Deciduous" &
                                    speciesProportion < vegLeadingProportion &
                                    speciesProportion > 1 - vegLeadingProportion)
     pixelGroupData3[, mixed := FALSE]
     pixelGroupData3[eval(mixedType2Condition), mixed := TRUE]
-    pixelGroupData3[, mixed := any(.SD[["mixed"]]), by = "pixelGroup"]
-    setorderv(pixelGroupData3, cols = c("pixelGroup", "speciesProportion"), order = -1L)
+    pixelGroupData3[, mixed := any(mixed), by = pixelGroupColName]
+    setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
     set(pixelGroupData3, NULL, "speciesProportion", NULL)
     set(pixelGroupData3, NULL, "Type", NULL)
-    pixelGroupData3 <- pixelGroupData3[, .SD[1], by = "pixelGroup"] ## sp. w/ highest prop. per pixelGroup
+    pixelGroupData3 <- pixelGroupData3[, .SD[1], by = pixelGroupColName] ## sp. w/ highest prop. per pixelGroup
     pixelGroupData3[mixed == TRUE, speciesCode := "Mixed"]
     setnames(pixelGroupData3, "speciesCode", "leading")
     set(pixelGroupData3, NULL, "leading", factor(pixelGroupData3[["leading"]]))
@@ -371,7 +468,25 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
     stop("invalid mixedType! Must be one of '1' or '2'.")
   }
 
-  vegTypeMap <- rasterizeReduced(pixelGroupData3, pixelGroupMap, "leading", "pixelGroup")
+  if (!any(duplicated(pixelGroupData3[[pixelGroupColName]]))) {
+    if (!is.factor(pixelGroupData3[["leading"]])) {
+      pixelGroupData3[["leading"]] <- factor(pixelGroupData3[["leading"]])
+    }
+    vegTypeMap <- raster(pixelGroupMap)
+    pixelGroupData3 <- pixelGroupData3[get(leadingBasedOn) > 0]
+    vegTypeMap[pixelGroupData3[["pixelIndex"]]] <- pixelGroupData3[["leading"]]
+    levels(vegTypeMap) <- data.frame(ID = seq_along(levels(pixelGroupData3[["leading"]])),
+                                     species = levels(pixelGroupData3[["leading"]]))
+  } else {
+    vegTypeMap <- rasterizeReduced(pixelGroupData3, pixelGroupMap, "leading", pixelGroupColName)
+  }
+  if (missing(colors)) {
+    colors <- if (!"Mixed" %in% sppEquiv[[sppEquivCol]])
+      sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
+    else
+      sppColors(sppEquiv, sppEquivCol, palette = "Accent")
+
+  }
   levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]],
                               colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
                               stringsAsFactors = FALSE)
@@ -392,30 +507,30 @@ vegTypeMapGenerator <- function(cohortData, pixelGroupMap, vegLeadingProportion,
     }
     leadingTest <- factorValues2(vegTypeMap, vegTypeMap[ids], att = 2)
     names(pgs) <- leadingTest
-    pgTest <- pixelGroupData[pixelGroup %in% pgs]
-    whNA <- unique(unlist(sapply(pgTest, function(x) which(is.na(x)))))
-    whNAPG <- pgTest[whNA]$pixelGroup
+    pgTest <- pixelGroupData[get(pixelGroupColName) %in% pgs]
+    whNA <- unique(unlist(sapply(pgTest, function(xx) which(is.na(xx)))))
+    whNAPG <- pgTest[whNA][[pixelGroupColName]]
     pgs <- pgs[!pgs %in% whNAPG]
     pgTest <- pgTest[!whNA]
     pgTest[, Type := equivalentName(speciesCode, sppEquiv, "Type")]
     if (mixedType == 1) {
       pgTest2 <- pgTest[, list(mixed = all(speciesProportion < vegLeadingProportion),
                                leading = speciesCode[which.max(speciesProportion)]),
-                        by = "pixelGroup"]
+                        by = pixelGroupColName]
       out <- pgTest2[mixed == TRUE, leading := "Mixed"]
     } else {
       pgTest2 <- pgTest[, list(mixed = eval(mixedType2Condition),
                                leading = speciesCode[which.max(speciesProportion)]),
-                        by = "pixelGroup"]
-      pgTest2[, mixed := any(.SD[["mixed"]]), by = "pixelGroup"]
+                        by = pixelGroupColName]
+      pgTest2[, mixed := any(.SD[["mixed"]]), by = pixelGroupColName]
       pgTest2[mixed == TRUE, leading := "Mixed"]
       pgTest2 <- pgTest2[!duplicated(pgTest2)]
       out <- pgTest2
     }
-    length(unique(out[["pixelGroup"]]))
-    length(pgs %in% unique(pgTest2[["pixelGroup"]]))
-    pgs2 <- pgs[pgs %in% unique(pgTest2[["pixelGroup"]])]
-    if (!isTRUE(all(setkey(pgTest2, pixelGroup)[["leading"]] == names(pgs)[order(pgs)])))
+    length(unique(out[[pixelGroupColName]]))
+    length(pgs %in% unique(pgTest2[[pixelGroupColName]]))
+    pgs2 <- pgs[pgs %in% unique(pgTest2[[pixelGroupColName]])]
+    if (!isTRUE(all(setkeyv(pgTest2, pixelGroupColName)[["leading"]] == names(pgs)[order(pgs)])))
       stop("The vegTypeMap is incorrect. Please debug LandR::vegTypeMapGenerator")
   }
 
@@ -571,7 +686,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                          ),
                          prepInputs, quick = TRUE) # don't need to digest all the "targetFile" and "archives"
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
-  noDataLayers <- sapply(speciesLayers, function(x) if (maxValue(x) < thresh ) FALSE else TRUE)
+  noDataLayers <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh ) FALSE else TRUE)
   if (sum(!noDataLayers) > 0) {
     sppKeep <- capture.output(dput(names(speciesLayers)[noDataLayers]))
     message("removing ", sum(!noDataLayers), " species because they had <",thresh,
@@ -598,7 +713,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 
   # ## remove layers that have less data than thresh (i.e. spp absent in study area)
   # ## count no. of pixels that have biomass
-  # layerData <- Cache(sapply, X = speciesLayers, function(x) sum(x[] > 0, na.rm = TRUE))
+  # layerData <- Cache(sapply, X = speciesLayers, function(xx) sum(xx[] > 0, na.rm = TRUE))
   #
   # ## remove layers that had < thresh pixels with biomass
   # belowThresh <- layerData < thresh
