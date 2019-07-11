@@ -131,7 +131,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 
 #' Generate vegetation type map
 #'
-#' @template cohortData
+#' @param x Either a cohortData object or a speciesCover RasterStack
 #'
 #' @param pixelGroupMap  A \code{raster}
 #'
@@ -173,7 +173,9 @@ vegTypeMapGenerator <- function(x, ...) {
 #' @rdname vegTypeMapGenerator
 vegTypeMapGenerator.RasterStack <- function(x, ...) {
   suppressMessages(pixelTable <- makePixelTable(x))
+  browser()
   suppressMessages(cohortTable <- createCohortData(pixelTable))
+  cohortTable <- cohortTable[cover > 0]
   pixelGroupMap <- raster(x)
   pixelGroupMap[pixelTable[["pixelIndex"]]] <- pixelTable[["initialEcoregionCode"]]
   vegTypeMap <- vegTypeMapGenerator(x = cohortTable,
