@@ -174,15 +174,17 @@ vegTypeMapGenerator <- function(x, ...) {
 
 #' @export
 #' @rdname vegTypeMapGenerator
-vegTypeMapGenerator.RasterStack <- function(x, ...) {
-  suppressMessages(pixelTable <- makePixelTable(x))
-  suppressMessages(cohortTable <- createCohortData(pixelTable))
+#' @template doAssertion
+vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("LandR.doAssertion", TRUE)) {
+  suppressMessages(pixelTable <- makePixelTable(x, printSummary = FALSE, doAssertion = doAssertion))
+  suppressMessages(cohortTable <- createCohortData(pixelTable, rescale = FALSE, doAssertion = doAssertion))
   cohortTable <- cohortTable[cover > 0]
   pixelGroupMap <- raster(x)
   pixelGroupMap[pixelTable[["pixelIndex"]]] <- pixelTable[["initialEcoregionCode"]]
   vegTypeMap <- vegTypeMapGenerator(x = cohortTable,
                                     pixelGroupMap = pixelGroupMap,
                                     pixelGroupColName = "initialEcoregionCode",
+                                    doAssertion = doAssertion,
                                     ...)
 
   if (FALSE) { # This is the old version -- Eliot & Alex July 11, 2019
@@ -423,6 +425,9 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 
     names(sppEq) <- c("speciesCode", "Type")
     setkey(pixelGroupData, speciesCode)
+
+    # don't need all columns now
+    set(pixelGroupData, NULL, c("rasterToMatch", leadingBasedOn, totalOfLeadingBasedOn), NULL)
     pixelGroupData3 <- merge(pixelGroupData, sppEq[!duplicated(sppEq)], all.x = TRUE)
     setkeyv(pixelGroupData, pgdAndSc)
 
@@ -431,8 +436,24 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
                                    speciesProportion < vegLeadingProportion &
                                    speciesProportion > 1 - vegLeadingProportion)
     pixelGroupData3[, mixed := FALSE]
-    pixelGroupData3[eval(mixedType2Condition), mixed := TRUE]
-    pixelGroupData3[, mixed := any(mixed), by = pixelGroupColName]
+
+    if (algo == 2 || isTRUE(doAssertion)) {
+      b <- pixelGroupData3[, list(N = .N), by = pixelGroupColName]
+      b <- rep.int(b[["N"]], b[["N"]])
+      GT1 <- b > 1
+
+
+      pgd3GT1 <- pixelGroupData3[GT1]
+      pgd3NGT1 <- pixelGroupData3[!GT1]
+
+      pgd3GT1[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColName]
+      pgd3GT1[, mixed := any(mixed), by = pixelGroupColName]
+      pixelGroupData3 <- rbindlist(list(pgd3NGT1, pgd3GT1))
+    } else {
+      pixelGroupData3[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColName]
+      pixelGroupData3[, mixed := any(mixed), by = pixelGroupColName]
+    }
+
     setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
     set(pixelGroupData3, NULL, "speciesProportion", NULL)
     set(pixelGroupData3, NULL, "Type", NULL)

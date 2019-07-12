@@ -9,7 +9,8 @@ addNoPixel2CohortData(cohortData, pixelGroupMap,
 }
 \arguments{
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
-\code{speciesCode}, \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
+\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
+and \code{sumB}.}
 
 \item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group number
 that corresponds exactly to ]\code{pixelGroup} column in \code{cohortData}.}

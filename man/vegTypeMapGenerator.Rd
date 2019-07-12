@@ -8,7 +8,8 @@
 \usage{
 vegTypeMapGenerator(x, ...)
 
-\method{vegTypeMapGenerator}{RasterStack}(x, ...)
+\method{vegTypeMapGenerator}{RasterStack}(x, ...,
+  doAssertion = getOption("LandR.doAssertion", TRUE))
 
 \method{vegTypeMapGenerator}{data.table}(x, pixelGroupMap,
   vegLeadingProportion = 0.8, mixedType = 2, sppEquiv = NULL,
@@ -16,9 +17,13 @@ vegTypeMapGenerator(x, ...)
   doAssertion = getOption("LandR.assertions", TRUE), ...)
 }
 \arguments{
-\item{x}{Either a cohortData object or a speciesCover RasterStack}
+\item{x}{Either a \code{cohortData} object or a \code{speciesCover} \code{RasterStack}}
 
 \item{...}{Additional arguments.}
+
+\item{doAssertion}{A logical indicating whether some internal tests should be run to
+ensure the function is running correctly.
+Default: \code{getOption("LandR.assertions", TRUE)}.}
 
 \item{pixelGroupMap}{A \code{raster}}
 

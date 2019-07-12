@@ -22,7 +22,8 @@ empty pixels or on alreayd occupied pixels). Columns it must have:
 remaining 4 (see \code{cohortData}) will be created with \code{0}s}
 
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
-\code{speciesCode}, \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
+\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
+and \code{sumB}.}
 
 \item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group
 number that correspondsd exactly to \code{pixelGroup} column in \code{cohortData}.}

@@ -46,6 +46,9 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @param pixelGroupAgeClass When assigning pixelGroup membership, this defines the resolution
 #'   of ages that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14
 #'   will be the same
+#' @param printSummary Logical. If \code{TRUE}, the default, a print out of the
+#'   \code{summary(pixelTable)} will occur.
+#' @template doAssertion
 #'
 #' @return
 #' A \code{data.table} as many rows as non-NA pixels in \code{rasterToMath} and
@@ -57,31 +60,15 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @importFrom pemisc factorValues2
 #' @importFrom raster ncell
 makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
-                           biomassMap, rasterToMatch, LCC2005, pixelGroupAgeClass = 1) {
+                           biomassMap, rasterToMatch, LCC2005, pixelGroupAgeClass = 1,
+                           printSummary = TRUE,
+                           doAssertion = getOption("LandR.assertions", TRUE)) {
 
   if (missing(rasterToMatch)) {
     rasterToMatch <- raster(speciesLayers[[1]])
     rasterToMatch[] <- 0
     rasterToMatch[is.na(speciesLayers[[1]])] <- NA
   }
-
-  # if (missing(standAgeMap)) {
-  #   standAgeMap <- raster(rasterToMatch)
-  #   standAgeMap[] <- 1
-  #   standAgeMap[is.na(rasterToMatch)] <- NA
-  # }
-
-  # if (missing(biomassMap)) {
-  #   biomassMap <- raster(rasterToMatch)
-  #   biomassMap[] <- 1
-  #   biomassMap[is.na(rasterToMatch)] <- NA
-  # }
-
-  # if (missing(LCC2005)) {
-  #   LCC2005 <- raster(rasterToMatch)
-  #   LCC2005[] <- 1
-  #   LCC2005[is.na(rasterToMatch)] <- NA
-  # }
 
   if (missing(ecoregionFiles)) {
     ecoregionFiles <- list()
@@ -101,13 +88,18 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
     species$species <- names(speciesLayers)
   }
 
-  message(blue("Round age to nearest P(sim)$pixelGroupAgeClass, which is",
+  message(blue("Round age to nearest pixelGroupAgeClass, which is",
                pixelGroupAgeClass))
   coverMatrix <- matrix(asInteger(speciesLayers[]),
                         ncol = length(names(speciesLayers)))
   colnames(coverMatrix) <- names(speciesLayers)
 
-  pixelTable <- data.table(initialEcoregionCode = factor(initialEcoregionCodeVals),
+  # faster to use as.factor, which is fine for a numeric.
+  iec <- if (is.numeric(initialEcoregionCodeVals))
+    as.factor(initialEcoregionCodeVals)
+  else
+    factor(initialEcoregionCodeVals)
+  pixelTable <- data.table(initialEcoregionCode = iec,
                            cover = coverMatrix,
                            pixelIndex = seq(ncell(rasterToMatch)),
                            rasterToMatch = rasterToMatch[]
@@ -155,7 +147,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 
   message(blue("rm NAs, leaving", magenta(NROW(pixelTable)), "pixels with data"))
   message(blue("This is the summary of the input data for age, ecoregionGroup, biomass, speciesLayers:"))
-  print(summary(pixelTable))
+  if (isTRUE(printSummary)) message(summary(pixelTable))
 
   return(pixelTable)
 }

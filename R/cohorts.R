@@ -674,9 +674,15 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 }
 
 #' @importFrom crayon blue
+#' @export
+#' @rdname makeAndCleanInitialCohortData
+#' @template doAssertion
 #' @importFrom data.table melt setnames
+#' @param rescale Logical. If \code{TRUE}, the default, cover for each species will be rescaled
+#'   so all cover in pixelGroup or pixel sums to 100.
 createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
-                             doAssertion = getOption("LandR.assertions", TRUE)) {
+                             doAssertion = getOption("LandR.assertions", TRUE),
+                             rescale = TRUE) {
   coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
   newCoverColNames <- gsub("cover\\.", "", coverColNames)
   setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
@@ -686,8 +692,9 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
                                  measure.vars = newCoverColNames,
                                  variable.name = "speciesCode")
   cohortData[, coverOrig := cover]
-  if (any(duplicated(cohortData)))
-    warning("createCohortData: cohortData contains duplicate rows.")
+  if (isTRUE(doAssertion))
+    if (any(duplicated(cohortData)))
+      warning("createCohortData: cohortData contains duplicate rows.")
 
   if (doAssertion)
     #describeCohortData(cohortData)
@@ -716,13 +723,15 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
   #                            "assume deciduous cover is 1/2 the conversion to B as conifer")))
   # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)]
   set(cohortData, NULL, "cover", as.numeric(cohortData[["cover"]]))
-  cohortData[ , cover := {
-    sumCover <- sum(cover)
-    if (sumCover > 100) {
-      cover <- cover / (sumCover + 0.0001) * 100L
-    }
-    cover
-  }, by = "pixelIndex"]
+  if (isTRUE(rescale))
+    cohortData[ , cover := {
+      sumCover <- sum(cover)
+      if (sumCover > 100) {
+        cover <- cover / (sumCover + 0.0001) * 100L
+      }
+      cover
+    }, by = "pixelIndex"]
+
   set(cohortData, NULL, "cover", asInteger(cohortData[["cover"]]))
 
   if (any(c("B", "totalBiomass") %in% cncd)) {
@@ -772,6 +781,7 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
 #'
 #' @author Eliot McIntire
 #' @export
+#' @rdname makeAndCleanInitialCohortData
 #' @importFrom crayon blue
 #' @importFrom data.table melt setnames
 #' @importFrom reproducible Cache
