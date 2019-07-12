@@ -448,13 +448,16 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     if (!is.factor(pixelGroupData3[["leading"]])) {
       pixelGroupData3[["leading"]] <- factor(pixelGroupData3[["leading"]])
     }
+
     vegTypeMap <- raster(pixelGroupMap)
+
     vegTypeMap[pixelGroupData3[["pixelIndex"]]] <- pixelGroupData3[["leading"]]
     levels(vegTypeMap) <- data.frame(ID = seq_along(levels(pixelGroupData3[["leading"]])),
                                      species = levels(pixelGroupData3[["leading"]]))
   } else {
     vegTypeMap <- rasterizeReduced(pixelGroupData3, pixelGroupMap, "leading", pixelGroupColName)
   }
+
   if (missing(colors)) {
     colors <- if (!"Mixed" %in% sppEquiv[[sppEquivCol]])
       sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
@@ -462,6 +465,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       sppColors(sppEquiv, sppEquivCol, palette = "Accent")
 
   }
+
   levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]],
                               colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
                               stringsAsFactors = FALSE)
