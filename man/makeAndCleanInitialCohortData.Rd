@@ -29,10 +29,6 @@ so all cover in pixelGroup or pixel sums to 100.}
 represent percent cover by species}
 
 \item{doSubset}{Turns on/off subsetting. Defaults to \code{TRUE}.}
-
-\item{doAssertion}{A logical indicating whether some internal tests should be run to
-ensure the function is running correctly.
-Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \description{
 Takes a single \code{data.table} input, which has the following columns in addition to

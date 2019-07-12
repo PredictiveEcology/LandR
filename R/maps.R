@@ -156,6 +156,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 #'               in \code{cohortData$speciesCode}, plus an optional "Mixed" color.
 #'
 #' @param pixelGroupColName Name of the column in \code{pixelGroup} to use
+#'
 #' @template doAssertion
 #'
 #' @param ... Additional arguments.
@@ -174,7 +175,6 @@ vegTypeMapGenerator <- function(x, ...) {
 
 #' @export
 #' @rdname vegTypeMapGenerator
-#' @template doAssertion
 vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("LandR.doAssertion", TRUE)) {
   suppressMessages(pixelTable <- makePixelTable(x, printSummary = FALSE, doAssertion = doAssertion))
   suppressMessages(cohortTable <- createCohortData(pixelTable, rescale = FALSE, doAssertion = doAssertion))

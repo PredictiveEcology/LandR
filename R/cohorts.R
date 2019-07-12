@@ -604,7 +604,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     out <- out[initialPixels != pixels] # rm pixels which are same as initialPixels --> these are known wrong
     iterations <- iterations + 1
     out[, lcc := rstLCC[][pixels]]
-    out[lcc %in% c(classesToReplace), lcc:=NA]
+    out[lcc %in% c(classesToReplace), lcc := NA]
     out <- na.omit(out)
     out5 <- availableERC_by_Sp[out[, state := NULL], allow.cartesian = TRUE,
                                on = c("pixelIndex" = "initialPixels"), nomatch = NA] # join the availableERC_by_Sp which has initialEcoregionCode
@@ -673,13 +673,13 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   out3
 }
 
-#' @importFrom crayon blue
-#' @export
-#' @rdname makeAndCleanInitialCohortData
-#' @template doAssertion
-#' @importFrom data.table melt setnames
 #' @param rescale Logical. If \code{TRUE}, the default, cover for each species will be rescaled
 #'   so all cover in pixelGroup or pixel sums to 100.
+#'
+#' @export
+#' @importFrom crayon blue
+#' @importFrom data.table melt setnames
+#' @rdname makeAndCleanInitialCohortData
 createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
                              doAssertion = getOption("LandR.assertions", TRUE),
                              rescale = TRUE) {

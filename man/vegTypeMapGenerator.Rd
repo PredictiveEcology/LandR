@@ -48,10 +48,6 @@ If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 in \code{cohortData$speciesCode}, plus an optional "Mixed" color.}
 
 \item{pixelGroupColName}{Name of the column in \code{pixelGroup} to use}
-
-\item{doAssertion}{A logical indicating whether some internal tests should be run to
-ensure the function is running correctly.
-Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \description{
 Generate vegetation type map
