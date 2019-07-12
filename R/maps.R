@@ -330,16 +330,16 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       GT1 <- (b > 1)
       if (any(GT1)) {
         pixelGroupData2List <- list()
-        pixelGroupData2List[[1]] <- cohortData2[GT1, .(speciesProportion = sum(B, na.rm = TRUE) / totalB[1]),
-                                            by = pgdAndSc]
-        pixelGroupData2List[[2]] <- cohortData2[!GT1]
-        pixelGroupData2 <- rbindlist(pixelGroupData2List)
+        cohortData2[GT1, speciesProportion := sum(B, na.rm = TRUE) / totalB[1], by = pgdAndSc]
+        cohortData2[!GT1, speciesProportion := B / totalB]
+        #pixelGroupData2List[[2]] <- cohortData2[!GT1]
+        #pixelGroupData2 <- rbindlist(pixelGroupData2List)
       } else {
         # cols <- c(pixelGroupColName, "speciesCode", "speciesProportion")
         set(cohortData2, NULL, "speciesProportion", cohortData2[[leadingBasedOn]] / cohortData2[[totalOfLeadingBasedOn]])
-        pixelGroupData2 <- cohortData2
         # pixelGroupData2[[NROW(pixelGroupData2) + 1]] <- cohortData2[!GT1, ..cols]
       }
+      pixelGroupData2 <- cohortData2
       systimePost2 <- Sys.time()
   }
 
@@ -444,7 +444,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     stop("invalid mixedType! Must be one of '1' or '2'.")
   }
 
-  if (!any(duplicated(pixelGroupData3[[pixelGroupColName]]))) {
+  if ("pixelIndex" %in% colnames(pixelGroupData3)) { #(!any(duplicated(pixelGroupData3[[pixelGroupColName]]))) {
     if (!is.factor(pixelGroupData3[["leading"]])) {
       pixelGroupData3[["leading"]] <- factor(pixelGroupData3[["leading"]])
     }
