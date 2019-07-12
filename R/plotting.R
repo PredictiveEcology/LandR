@@ -53,7 +53,14 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 
   if (is.null(vtm)) {
     if (!is.null(speciesStack))
-      vtm <- Cache(makeVegTypeMap, speciesStack, vegLeadingProportion, mixed = TRUE)
+      vtm <- Cache(vegTypeMapGenerator,
+                   x = speciesStack,
+                   vegLeadingProportion = vegLeadingProportion,
+                   mixedType = 2,
+                   sppEquiv = sppEquiv,
+                   sppEquivCol = sppEquivCol,
+                   colors = colors,
+                   doAssertion = getOption("LandR.assertions", TRUE))
     else
       stop("plotVTM requires either a speciesStack of percent cover or a",
            " vegetation type map (vtm).")
@@ -62,7 +69,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   ## the ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   facLevels <- raster::levels(vtm)[[1]]
-  vtmTypes <- as.character(factorValues2(vtm, facLevels$ID, att = "Species"))
+  vtmTypes <- as.character(factorValues2(vtm, facLevels$ID, att = "species"))
   vtmCols <- colors[match(vtmTypes, names(colors))]
   whMixed <- which(vtmTypes == "Mixed")
 

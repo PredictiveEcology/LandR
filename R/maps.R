@@ -131,7 +131,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 
 #' Generate vegetation type map
 #'
-#' @param x Either a cohortData object or a speciesCover RasterStack
+#' @param x Either a \code{cohortData} object or a \code{speciesCover} \code{RasterStack}
 #'
 #' @param pixelGroupMap  A \code{raster}
 #'
@@ -416,9 +416,9 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     # pixelGroupData2[mixed == TRUE, leading := "Mixed"]
     # b2 <- Sys.time()
   } else if (mixedType == 2) {
-
     if (!sppEquivCol %in% colnames(sppEquiv))
       stop(sppEquivCol, " is not in sppEquiv. Please pass an existing sppEquivCol")
+
     sppEq <- data.table(sppEquiv[[sppEquivCol]], sppEquiv[["Type"]])
 
     names(sppEq) <- c("speciesCode", "Type")
