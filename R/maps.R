@@ -448,27 +448,29 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     if (!is.factor(pixelGroupData3[["leading"]])) {
       pixelGroupData3[["leading"]] <- factor(pixelGroupData3[["leading"]])
     }
+
     vegTypeMap <- raster(pixelGroupMap)
+
     vegTypeMap[pixelGroupData3[["pixelIndex"]]] <- pixelGroupData3[["leading"]]
     levels(vegTypeMap) <- data.frame(ID = seq_along(levels(pixelGroupData3[["leading"]])),
                                      species = levels(pixelGroupData3[["leading"]]))
   } else {
     vegTypeMap <- rasterizeReduced(pixelGroupData3, pixelGroupMap, "leading", pixelGroupColName)
   }
+
   if (missing(colors)) {
     colors <- if (!"Mixed" %in% sppEquiv[[sppEquivCol]])
       sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
     else
       sppColors(sppEquiv, sppEquivCol, palette = "Accent")
-
   }
+
   levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]],
                               colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
                               stringsAsFactors = FALSE)
   setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
 
   if (isTRUE(doAssertion)) {
-    # TEST THE MAP
     if (sum(!is.na(vegTypeMap[])) < 100)
       ids <- sample(which(!is.na(vegTypeMap[])), sum(!is.na(vegTypeMap[])), replace = FALSE)
     else
@@ -493,15 +495,16 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
                                leading = speciesCode[which.max(speciesProportion)]),
                         by = pixelGroupColName]
       out <- pgTest2[mixed == TRUE, leading := "Mixed"]
-    } else {
+    } else if (mixedType == 2) {
       pgTest2 <- pgTest[, list(mixed = eval(mixedType2Condition),
                                leading = speciesCode[which.max(speciesProportion)]),
                         by = pixelGroupColName]
-      pgTest2[, mixed := any(.SD[["mixed"]]), by = pixelGroupColName]
+      pgTest2[, mixed := any(mixed), by = pixelGroupColName]
       pgTest2[mixed == TRUE, leading := "Mixed"]
       pgTest2 <- pgTest2[!duplicated(pgTest2)]
       out <- pgTest2
-    }
+    } ## TODO: make sure mixedType = 0 works!! currently not implemented
+
     length(unique(out[[pixelGroupColName]]))
     length(pgs %in% unique(pgTest2[[pixelGroupColName]]))
     pgs2 <- pgs[pgs %in% unique(pgTest2[[pixelGroupColName]])]
