@@ -16,7 +16,7 @@ vegTypeMapGenerator(x, ...)
   doAssertion = getOption("LandR.assertions", TRUE), ...)
 }
 \arguments{
-\item{x}{Either a cohortData object or a speciesCover RasterStack}
+\item{x}{Either a \code{cohortData} object or a \code{speciesCover} \code{RasterStack}}
 
 \item{...}{Additional arguments.}
 
