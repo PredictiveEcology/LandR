@@ -427,7 +427,9 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     setkey(pixelGroupData, speciesCode)
 
     # don't need all columns now
-    set(pixelGroupData, NULL, c("rasterToMatch", leadingBasedOn, totalOfLeadingBasedOn), NULL)
+    colsToDelete <- c("rasterToMatch", leadingBasedOn, totalOfLeadingBasedOn)
+    colsToDelete <- colsToDelete[colsToDelete %in% colnames(pixelGroupData)]
+    set(pixelGroupData, NULL, colsToDelete, NULL)
     pixelGroupData3 <- merge(pixelGroupData, sppEq[!duplicated(sppEq)], all.x = TRUE)
     setkeyv(pixelGroupData, pgdAndSc)
 
