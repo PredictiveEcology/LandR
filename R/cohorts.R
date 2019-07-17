@@ -145,7 +145,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   # Add new cohorts and rm missing cohorts (i.e., those pixelGroups that are gone)
   ##########################################################
   if (!is.null(provenanceTable)) {
-    cohortData <- plantNewCohorts(newpixelCohortdata, cohortData,
+    cohortData <- plantNewCohorts(newpixelCohortData, cohortData,
                                    pixelGroupMap, time = time,
                                    speciesEcoregion = speciesEcoregion,
                                    successionTimestep = successionTimestep,
@@ -1004,6 +1004,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 
 #' Create new cohorts based on provenance table with unique \code{pixelGroup} and add to \code{cohortData}
 #'
+#' @param newPixelCohortData the cohorts that were harvested
 #' @param cohortData A \code{data.table} with columns:
 #'   \code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
 #'   \code{B}, \code{mortality}, \code{aNPPAct}, ond \code{sumB}.

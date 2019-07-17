@@ -8,6 +8,8 @@ plantNewCohorts(newPixelCohortData, cohortData, pixelGroupMap, time,
   provenanceTable, speciesEcoregion, successionTimestep)
 }
 \arguments{
+\item{newPixelCohortData}{the cohorts that were harvested}
+
 \item{cohortData}{A \code{data.table} with columns:
 \code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
 \code{B}, \code{mortality}, \code{aNPPAct}, ond \code{sumB}.}
