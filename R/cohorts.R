@@ -148,7 +148,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     cohortData <- plantNewCohorts(newpixelCohortdata, cohortData,
                                    pixelGroupMap, time = time,
                                    speciesEcoregion = speciesEcoregion,
-                                   successionTimeSstep = successionTimestep,
+                                   successionTimestep = successionTimestep,
                                    provenanceTable = provenanceTable)
   } else {
     cohortData <- .initiateNewCohorts(newPixelCohortData, cohortData,
@@ -1013,7 +1013,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #' @param provenanceTable A data.table with three columns: Location, Provenance, and speciesCode.
 #'   new cohorts are initiated at the Location speciesEcoregion from the corresponding
 #'   speciesEcoregion listed in the Provenance column
-#' @param successionTimeStep successionTimeStep used in sim
+#' @param successionTimestep successionTimestep used in sim
 #'
 #' @return A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
 #'

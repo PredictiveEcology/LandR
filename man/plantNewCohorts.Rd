@@ -21,7 +21,7 @@ that corresponds exactly to ]\code{pixelGroup} column in \code{cohortData}.}
 new cohorts are initiated at the Location speciesEcoregion from the corresponding
 speciesEcoregion listed in the Provenance column}
 
-\item{successionTimeStep}{successionTimeStep used in sim}
+\item{successionTimestep}{successionTimestep used in sim}
 }
 \value{
 A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
