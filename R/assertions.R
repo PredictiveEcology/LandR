@@ -6,8 +6,10 @@ if (getRversion() >= "3.1.0") {
 #'
 #' @param cohortData34to36 A \code{cohortData} \code{data.table} with only the
 #'                         pixels what were lcc 34:36
-#' @param cohortData The full \code{cohortData} \code{data.table}
-#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
+#'
+#' @template cohortData
+#'
+#' @template doAssertion
 #'
 #' @export
 #' @rdname assertions
@@ -68,7 +70,7 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
       identical(erg[[1]], erg[[x]])))
 
     if (!test3) {
-      print(str(erg, 1))
+      message(str(erg, 1))
       stop("speciesEcoregion, cohortData, and ecoregionMap should all have exactly the same",
            "\n  ecoregionGroups. They do not. This needs to be fixed before proceeding.")
     }
