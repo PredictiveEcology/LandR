@@ -41,7 +41,9 @@ the user to only replace some of the pixels with a given class.}
 
 \item{pixelClassesToReplace}{Deprecated. Use \code{classesToReplace}}
 
-\item{doAssertion}{Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}}
+\item{doAssertion}{A logical indicating whether some internal tests should be run to
+ensure the function is running correctly.
+Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \value{
 A \code{data.table} with two columns, \code{pixelIndex} and \code{ecoregionGroup}.

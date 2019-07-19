@@ -2,10 +2,12 @@
 % Please edit documentation in R/prepInputObjects.R
 \name{makePixelTable}
 \alias{makePixelTable}
-\title{Make pixelTable from biomass, age, land-cover and species cover data}
+\title{Make \code{pixelTable} from biomass, age, land-cover and species cover data}
 \usage{
 makePixelTable(speciesLayers, species, standAgeMap, ecoregionFiles,
-  biomassMap, rasterToMatch, LCC2005, pixelGroupAgeClass)
+  biomassMap, rasterToMatch, LCC2005, pixelGroupAgeClass = 1,
+  printSummary = TRUE, doAssertion = getOption("LandR.assertions",
+  TRUE))
 }
 \arguments{
 \item{speciesLayers}{stack of species layers rasters}
@@ -26,11 +28,18 @@ it's information per pixelID. See \code{ecoregionProducer}}
 \item{pixelGroupAgeClass}{When assigning pixelGroup membership, this defines the resolution
 of ages that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14
 will be the same}
+
+\item{printSummary}{Logical. If \code{TRUE}, the default, a print out of the
+\code{summary(pixelTable)} will occur.}
+
+\item{doAssertion}{A logical indicating whether some internal tests should be run to
+ensure the function is running correctly.
+Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \value{
 A \code{data.table} as many rows as non-NA pixels in \code{rasterToMath} and
  the columns containing pixel data from the input raster layers.
 }
 \description{
-Make pixelTable from biomass, age, land-cover and species cover data
+Make \code{pixelTable} from biomass, age, land-cover and species cover data
 }

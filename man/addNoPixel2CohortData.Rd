@@ -8,14 +8,16 @@ addNoPixel2CohortData(cohortData, pixelGroupMap,
   doAssertion = getOption("LandR.assertions", TRUE))
 }
 \arguments{
-\item{cohortData}{A \code{data.table} with columns:
-\code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
-\code{B}, \code{mortality}, \code{aNPPAct}, ond \code{sumB}.}
+\item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
+\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
+and \code{sumB}.}
 
 \item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group number
 that corresponds exactly to ]\code{pixelGroup} column in \code{cohortData}.}
 
-\item{doAssertion}{Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}}
+\item{doAssertion}{A logical indicating whether some internal tests should be run to
+ensure the function is running correctly.
+Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \value{
 An \code{cohortData} \code{dat.table} with a new \code{noPixels}

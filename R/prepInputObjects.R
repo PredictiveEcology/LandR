@@ -1,9 +1,8 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c("resproutprob", "postfireregen", "speciesCode",
-                           "establishprob", "ecoregionGroup", "speciesCode",
-                           "longevity", "maxB", "maxANPP", "cover", "lcc"))
+  utils::globalVariables(c("cover", "ecoregionGroup", "establishprob",
+                           "lcc", "longevity", "maxB", "maxANPP", "postfireregen",
+                           "resproutprob", "speciesCode"))
 }
-
 
 #' Check if all species in have trait values
 #'
@@ -17,9 +16,8 @@ if (getRversion() >= "3.1.0") {
 #'   containing only the species that have trait values in \code{species}
 #'
 #' @export
-#' @importFrom stats complete.cases
 #' @importFrom crayon blue
-
+#' @importFrom stats complete.cases
 checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
   missTraits <- setdiff(names(speciesLayers), species$species)
   missTraits <- c(missTraits, setdiff(species$species,
@@ -35,7 +33,7 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
   return(list(speciesLayers = speciesLayers, sppColorVect = sppColorVect))
 }
 
-#' Make pixelTable from biomass, age, land-cover and species cover data
+#' Make \code{pixelTable} from biomass, age, land-cover and species cover data
 #'
 #' @param speciesLayers stack of species layers rasters
 #' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
@@ -48,40 +46,95 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @param pixelGroupAgeClass When assigning pixelGroup membership, this defines the resolution
 #'   of ages that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14
 #'   will be the same
+#' @param printSummary Logical. If \code{TRUE}, the default, a print out of the
+#'   \code{summary(pixelTable)} will occur.
+#' @template doAssertion
 #'
 #' @return
 #' A \code{data.table} as many rows as non-NA pixels in \code{rasterToMath} and
 #'  the columns containing pixel data from the input raster layers.
 #'
 #' @export
-#' @importFrom pemisc factorValues2
 #' @importFrom crayon blue
-#' @importFrom raster ncell
 #' @importFrom data.table data.table
-
+#' @importFrom pemisc factorValues2
+#' @importFrom raster ncell
 makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
-                           biomassMap, rasterToMatch, LCC2005, pixelGroupAgeClass) {
-  message(blue("Round age to nearest P(sim)$pixelGroupAgeClass, which is",
+                           biomassMap, rasterToMatch, LCC2005, pixelGroupAgeClass = 1,
+                           printSummary = TRUE,
+                           doAssertion = getOption("LandR.assertions", TRUE)) {
+
+  if (missing(rasterToMatch)) {
+    rasterToMatch <- raster(speciesLayers[[1]])
+    rasterToMatch[] <- 0
+    rasterToMatch[is.na(speciesLayers[[1]])] <- NA
+  }
+
+  if (missing(ecoregionFiles)) {
+    ecoregionFiles <- list()
+    ecoregionFiles$ecoregionMap <- raster(rasterToMatch)
+    rtmNotNA <- which(!is.na(rasterToMatch[]))
+    ecoregionFiles$ecoregionMap[rtmNotNA] <- seq_along(rtmNotNA)
+    initialEcoregionCodeVals <- ecoregionFiles$ecoregionMap[]
+  } else {
+    initialEcoregionCodeVals <- factorValues2(
+      ecoregionFiles$ecoregionMap,
+      ecoregionFiles$ecoregionMap[],
+      att = 5)
+  }
+
+  if (missing(species)) {
+    species <- list()
+    species$species <- names(speciesLayers)
+  }
+
+  message(blue("Round age to nearest pixelGroupAgeClass, which is",
                pixelGroupAgeClass))
   coverMatrix <- matrix(asInteger(speciesLayers[]),
                         ncol = length(names(speciesLayers)))
   colnames(coverMatrix) <- names(speciesLayers)
 
-  pixelTable <- data.table(age = asInteger(ceiling(asInteger(standAgeMap[]) /
-                                                     pixelGroupAgeClass) * pixelGroupAgeClass),
-                           logAge = log(standAgeMap[]),
-                           initialEcoregionCode = factor(factorValues2(ecoregionFiles$ecoregionMap,
-                                                                       ecoregionFiles$ecoregionMap[],
-                                                                       att = 5)),
-                           totalBiomass = asInteger(biomassMap[] * 100), # change units
+  # faster to use as.factor, which is fine for a numeric.
+  iec <- if (is.numeric(initialEcoregionCodeVals))
+    as.factor(initialEcoregionCodeVals)
+  else
+    factor(initialEcoregionCodeVals)
+  pixelTable <- data.table(initialEcoregionCode = iec,
                            cover = coverMatrix,
                            pixelIndex = seq(ncell(rasterToMatch)),
-                           lcc = LCC2005[],
-                           rasterToMatch = rasterToMatch[])
+                           rasterToMatch = rasterToMatch[]
+  )
+  if (!missing(standAgeMap)) {
+    set(pixelTable, NULL, "age", asInteger(ceiling(asInteger(standAgeMap[]) /
+                                                     pixelGroupAgeClass) * pixelGroupAgeClass))
+    set(pixelTable, NULL, "logAge", log(standAgeMap[]))
+  }
 
-  coverColNames <- paste0("cover.", species$species)
+  if (!missing(biomassMap)) {
+    set(pixelTable, NULL, "totalBiomass", asInteger(biomassMap[] * 100) ) # change units)
+  }
+
+  if (!missing(LCC2005)) {
+    set(pixelTable, NULL, "lcc", LCC2005[])
+  }
+
+  #pixelTable <- data.table(#age = asInteger(ceiling(asInteger(standAgeMap[]) /
+                          #                           pixelGroupAgeClass) * pixelGroupAgeClass),
+                          # logAge = log(standAgeMap[]),
+                          # initialEcoregionCode = factor(initialEcoregionCodeVals),
+                          # totalBiomass = asInteger(biomassMap[] * 100), # change units
+                          # cover = coverMatrix,
+                          # pixelIndex = seq(ncell(rasterToMatch)),
+                          # lcc = LCC2005[],
+                          # rasterToMatch = rasterToMatch[])
+
+  # Remove NAs from pixelTable
+  ## 1) If in rasterToMatch
   pixelTable1 <- na.omit(pixelTable, cols = c("rasterToMatch"))
+  ## 2) If in rasterToMatch and initialEcoregionCode
   pixelTable2 <- na.omit(pixelTable, cols = c("rasterToMatch", "initialEcoregionCode"))
+  ## 3) For species that we have traits for (i.e., where species$species exists in the speciesLayers)
+  coverColNames <- paste0("cover.", species$species)
   pixelTable <- na.omit(pixelTable2, cols = c(coverColNames))
 
   if (NROW(pixelTable1) != NROW(pixelTable))
@@ -94,13 +147,17 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 
   message(blue("rm NAs, leaving", magenta(NROW(pixelTable)), "pixels with data"))
   message(blue("This is the summary of the input data for age, ecoregionGroup, biomass, speciesLayers:"))
-  print(summary(pixelTable))
+  if (isTRUE(printSummary)) message(summary(pixelTable))
 
   return(pixelTable)
 }
 
-
-#' Make speciesEcoregion using statistically estimated maxB, maxANPP and establishment probabilities
+#' Create \code{speciesEcoregion}
+#'
+#' Use statistically estimated \code{maxB}, \code{maxANPP} and establishment probabilities
+#' to generate \code{specieEcoregion} table.
+#'
+#' See Details.
 #'
 #' @param cohortDataNoBiomass a subset of cohortData
 #' @param cohortDataShort a subset of cohortData
@@ -111,13 +168,28 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #' @param successionTimestep The time between successive seed dispersal events.
 #' @param currentYear \code{time(sim)}
 #'
+#' @section establishprob:
+#' This section takes the cover as estimated from the mature tree cover and
+#' partitions it between resprouting and seeds Unfortunately, establishment by
+#' seed is not independent of resprouting, i.e., some pixels would have both
+#' Since we don't know the level of independence, we can't correctly assess how
+#' much to discount the two. If there is resprouting > 0, then this is the
+#' partitioning:
+#' \code{establishprob = f(establishprob + resproutprob + jointEstablishProbResproutProb)}
+#' If \code{jointEstablishProbResproutProb} is 0, then these are independent events
+#' and the total cover probability can be partitioned easily between seeds and
+#' resprout. This is unlikely ever to be the case. We are picking 50% overlap as
+#' a number that is better than 0 (totally independent probabilities, meaning no
+#' pixel has both seeds and resprout potential) and  100% overlap (totally
+#' dependent probabilities, i.e., every pixel where there is seeds will also be
+#' a pixel with resprouting) This is expressed with the "* 0.5" in the code.
+#'
 #' #' @return
 #' A \code{speciesEcoregion} \code{data.table} with added columns for parameters
 #'   \code{maxB}, \code{maxANPP} and \code{establishprob}
 #'
 #' @export
 #' @importFrom data.table rbindlist
-
 makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDataShortNoCover, species,
                                  modelCover, modelBiomass, successionTimestep, currentYear) {
   ## Create speciesEcoregion table
@@ -133,7 +205,9 @@ makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDat
   establishprobBySuccessionTimestep <- 1 - (1 - modelCover$pred)^successionTimestep
   cohortDataShort[, establishprob := establishprobBySuccessionTimestep]
   cohortDataShort <- species[, .(resproutprob, postfireregen, speciesCode)][cohortDataShort, on = "speciesCode"]
-  cohortDataShort[, establishprob := pmax(0, pmin(1, (establishprob * (1 - resproutprob))))]
+
+  # Partitioning between seed and resprout. See documentation about the "* 0.5"
+  cohortDataShort[, establishprob := pmax(0, pmin(1, (establishprob * (1 - resproutprob * 0.5))))]
 
   cohortDataShort <- rbindlist(list(cohortDataShort, cohortDataShortNoCover),
                                use.names = TRUE, fill = TRUE)
@@ -159,11 +233,9 @@ makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDat
 
   ########################################################################
   # Clean up unneeded columns
-  speciesEcoregion[ , `:=`(logAge = NULL, cover = NULL, longevity = NULL, #pixelIndex = NULL,
-                           lcc = NULL)]
+  speciesEcoregion[ , `:=`(logAge = NULL, cover = NULL, longevity = NULL,  lcc = NULL)]
 
   speciesEcoregion[ , year := currentYear]
   return(speciesEcoregion)
 }
-
 
