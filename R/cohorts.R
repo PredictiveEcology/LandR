@@ -33,24 +33,28 @@ if (getRversion() >= "3.1.0") {
 #' empty pixels or on alreayd occupied pixels). Columns it must have:
 #' \code{pixelGroup}, \code{speciesCode}, \code{age}, \code{ecoregionGroup}. The
 #' remaining 4 (see \code{cohortData}) will be created with \code{0}s
-#' @param cohortData a \code{data.table} with columns: \code{pixelGroup},
-#'   \code{ecoregionGroup}, \code{speciesCode}, \code{age}, \code{B},
-#'   \code{mortality}, \code{aNPPAct}, and \code{sumB}.
+#'
+#' @template cohortData
+#'
 #' @param pixelGroupMap Raster layer with pixel values equal to a pixel group
-#'   number that correspondsd exactly to \code{pixelGroup} column in
-#'   \code{cohortData}
-#' @param time Current time e.g., time(sim). This is used to extract the correct
-#'   parameters in \code{speciesEcoregion} table if there are different values
-#'   over time
+#'   number that correspondsd exactly to \code{pixelGroup} column in \code{cohortData}.
+#'
+#' @param time Current time e.g., time(sim). This is used to extract the correct parameters in
+#'   \code{speciesEcoregion} table if there are different values over time.
+#'
 #' @param speciesEcoregion A \code{speciesEcoregion} table.
+#'
 #' @param treedFirePixelTableSinceLastDisp A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
 #'   This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
 #'   to ensure that everything matches correctly.
+#'
 #' @param successionTimestep The time between successive seed dispersal events.
 #'   In LANDIS-II, this is called "Succession Timestep". This is used here
+#'
 #' @param verbose Integer, where increasing number is increasing verbosity. Currently,
 #'    only level 1 exists; but this may change.
-#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
+#'
+#' @template doAssertion
 #'
 #' @return
 #' A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
@@ -265,13 +269,12 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 
 #' Remove missing cohorts from cohortData based on pixelGroupMap
 #'
+#' @template cohortData
 #'
-#' @param cohortData A \code{data.table} with columns:
-#'   \code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
-#'   \code{B}, \code{mortality}, \code{aNPPAct}, ond \code{sumB}.
 #' @param pixelGroupMap Raster layer with pixel values equal to a pixel group number
 #'   that correspondsd exactly to ]\code{pixelGroup} column in \code{cohortData}.
-#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
+#'
+#' @template doAssertion
 #'
 #' @return
 #' A \code{list} with 2 \code{data.table} objects, \code{cohortData} and \code{pixelGroupMap},
@@ -423,8 +426,10 @@ uniqueCohortDefinition <- c("pixelGroup", "speciesCode", "age", "B")
 #' @rdname uniqueDefinitions
 uniqueSpeciesEcoregionDefinition <- c("speciesCode", "ecoregionGroup")
 
-#' Summary for cohortData
-#' @param cohortData A cohortData object
+#' Summary for \code{cohortData}
+#'
+#' @template cohortData
+#'
 #' @export
 describeCohortData <- function(cohortData) {
   vals <- c("B", "totalBiomass", "age", "cover")
@@ -466,15 +471,19 @@ describeCohortData <- function(cohortData) {
 #' be used for the simpler cases of simply replacing a Land Cover Class.
 #'
 #' @param pixelClassesToReplace Deprecated. Use \code{classesToReplace}
+#'
 #' @param classesToReplace Integer vector of classes that are are to be replaced, e.g.,
 #'      34, 35, 36 on LCC2005, which are burned young, burned 10yr, and cities
 #'
 #' @param rstLCC LCC raster, e.g., LCC2005
+#'
 #' @param theUnwantedPixels An optional vector of pixel IDs that need to be changed.
 #'   If not provided, then pixels to change will be taken from the match between
 #'   \code{availableERC_by_Sp} and \code{classesToReplace}. Supplying this allows
 #'   the user to only replace some of the pixels with a given class.
+#'
 #' @param ecoregionGroupVec Deprecated. Use \code{availableERC_by_Sp}
+#'
 #' @param speciesEcoregion Deprecated. Use \code{availableERC_by_Sp}
 #'
 #' @param availableERC_by_Sp A \code{data.table} or \code{data.frame} with 3 columns:
@@ -491,7 +500,8 @@ describeCohortData <- function(cohortData) {
 #'     If \code{pixelIndex} is missing, the function will fill it
 #'     with \code{seq(ncell(rstLCC))}. If \code{speciesCode} is missing, the function
 #'     will replace it with a dummy value (\code{"allSpecies"}).
-#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
+#'
+#' @template doAssertion
 #'
 #' @return
 #' A \code{data.table} with two columns, \code{pixelIndex} and \code{ecoregionGroup}.
@@ -594,7 +604,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     out <- out[initialPixels != pixels] # rm pixels which are same as initialPixels --> these are known wrong
     iterations <- iterations + 1
     out[, lcc := rstLCC[][pixels]]
-    out[lcc %in% c(classesToReplace), lcc:=NA]
+    out[lcc %in% c(classesToReplace), lcc := NA]
     out <- na.omit(out)
     out5 <- availableERC_by_Sp[out[, state := NULL], allow.cartesian = TRUE,
                                on = c("pixelIndex" = "initialPixels"), nomatch = NA] # join the availableERC_by_Sp which has initialEcoregionCode
@@ -663,10 +673,16 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   out3
 }
 
+#' @param rescale Logical. If \code{TRUE}, the default, cover for each species will be rescaled
+#'   so all cover in pixelGroup or pixel sums to 100.
+#'
+#' @export
 #' @importFrom crayon blue
 #' @importFrom data.table melt setnames
+#' @rdname makeAndCleanInitialCohortData
 createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
-                             doAssertion = getOption("LandR.assertions", TRUE)) {
+                             doAssertion = getOption("LandR.assertions", TRUE),
+                             rescale = TRUE) {
   coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
   newCoverColNames <- gsub("cover\\.", "", coverColNames)
   setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
@@ -676,44 +692,59 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
                                  measure.vars = newCoverColNames,
                                  variable.name = "speciesCode")
   cohortData[, coverOrig := cover]
-  if (any(duplicated(cohortData)))
-    warning("createCohortData: cohortData contains duplicate rows.")
+  if (isTRUE(doAssertion))
+    if (any(duplicated(cohortData)))
+      warning("createCohortData: cohortData contains duplicate rows.")
 
   if (doAssertion)
     #describeCohortData(cohortData)
     message(blue("assign B = 0 and age = 0 for pixels where cover = 0, ",
                  "\n  because cover is most reliable dataset"))
 
-  cohortData[cover == 0, `:=`(age = 0L, logAge = -Inf, B = 0)]
-  message(blue("assign totalBiomass = 0 if sum(cover) = 0 in a pixel, ",
-               "\n  because cover is most reliable dataset"))
-  cohortData <- cohortData[, sum(cover) == 0, by = "pixelIndex"][V1 == TRUE][
-    cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
-  cohortData[, V1 := NULL]
+  hasCover0 <- which(cohortData[["cover"]] == 0)
+  cncd <- colnames(cohortData)
+  if (any(c("age", "logAge") %in% cncd)) {
+    set(cohortData, hasCover0, "age", 0L)
+    set(cohortData, hasCover0, "logAge", -Inf)
+  }
+  if (any(c("B", "totalBiomass") %in% cncd)) {
+    set(cohortData, hasCover0, "B", 0)
+    message(blue("assign totalBiomass = 0 if sum(cover) = 0 in a pixel, ",
+                 "\n  because cover is most reliable dataset"))
+    cohortData <- cohortData[, sum(cover) == 0, by = "pixelIndex"][V1 == TRUE][
+      cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
+    cohortData[, V1 := NULL]
+  }
+  # cohortData[cover == 0, `:=`(age = 0L, logAge = -Inf, B = 0)]
+
 
   ## CRAZY TODO: DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
   # message(crayon::blue(paste("POSSIBLE ALERT:",
   #                            "assume deciduous cover is 1/2 the conversion to B as conifer")))
   # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)]
   set(cohortData, NULL, "cover", as.numeric(cohortData[["cover"]]))
-  cohortData[ , cover := {
-    sumCover <- sum(cover)
-    if (sumCover > 100) {
-      cover <- cover / (sumCover + 0.0001) * 100L
-    }
-    cover
-  }, by = "pixelIndex"]
+  if (isTRUE(rescale))
+    cohortData[ , cover := {
+      sumCover <- sum(cover)
+      if (sumCover > 100) {
+        cover <- cover / (sumCover + 0.0001) * 100L
+      }
+      cover
+    }, by = "pixelIndex"]
+
   set(cohortData, NULL, "cover", asInteger(cohortData[["cover"]]))
 
-  # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
-  set(cohortData, NULL, "B", as.numeric(cohortData[["B"]]))
-  message(blue("Divide total B of each pixel by the relative cover of the cohorts"))
-  cohortData[ , B := mean(totalBiomass) * cover / 100, by = "pixelIndex"]
-  message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
-  cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
-  message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
-  cohortData[ , totalBiomass := asInteger(totalBiomass)]
-  set(cohortData, NULL, "B", asInteger(cohortData[["B"]]))
+  if (any(c("B", "totalBiomass") %in% cncd)) {
+    # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
+    set(cohortData, NULL, "B", as.numeric(cohortData[["B"]]))
+    message(blue("Divide total B of each pixel by the relative cover of the cohorts"))
+    cohortData[ , B := mean(totalBiomass) * cover / 100, by = "pixelIndex"]
+    message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
+    cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
+    message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
+    cohortData[ , totalBiomass := asInteger(totalBiomass)]
+    set(cohortData, NULL, "B", asInteger(cohortData[["B"]]))
+  }
 
   return(cohortData)
 }
@@ -737,15 +768,20 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
 #' }
 #'
 #' @param inputDataTable A \code{data.table} with columns described above.
+#'
 #' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
 #'   represent percent cover by species
+#'
 #' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
 #'   to establish unique pixelGroups
-#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
+#'
+#' @template doAssertion
+#'
 #' @param doSubset Turns on/off subsetting. Defaults to \code{TRUE}.
 #'
 #' @author Eliot McIntire
 #' @export
+#' @rdname makeAndCleanInitialCohortData
 #' @importFrom crayon blue
 #' @importFrom data.table melt setnames
 #' @importFrom reproducible Cache
@@ -795,7 +831,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
                     .specialData = cohortDataMissingAgeUnique,
                     omitArgs = ".specialData")
     message(blue("                           completed", Sys.time()))
-    print(outAge$rsq)
+    message(outAge$rsq)
 
     ## allow.new.levels = TRUE because some groups will have only NA for age for all species
     cohortDataMissingAge[
@@ -929,14 +965,14 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, .specialData) {
 #' @export
 columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 
-#' Generate \code{cohortData} table per pixel
+#' Generate \code{cohortData} table per pixel:
 #'
-#' @param cohortData A \code{data.table} with columns:
-#'   \code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
-#'   \code{B}, \code{mortality}, \code{aNPPAct}, ond \code{sumB}.
+#' @template cohortData
+#'
 #' @param pixelGroupMap Raster layer with pixel values equal to a pixel group number
 #'   that corresponds exactly to ]\code{pixelGroup} column in \code{cohortData}.
-#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
+#'
+#' @template doAssertion
 #'
 #' @return
 #' An expanded \code{cohortData} \code{dat.table} with a new \code{pixelIndex}
@@ -944,7 +980,6 @@ columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 #'
 #' @export
 #' @importFrom raster getValues ncell
-
 addPixels2CohortData <- function(cohortData, pixelGroupMap,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   assertCohortData(cohortData, pixelGroupMap, doAssertion = doAssertion)
@@ -960,12 +995,12 @@ addPixels2CohortData <- function(cohortData, pixelGroupMap,
 
 #' Add number of pixels per \code{pixelGroup} and add it has a new column to \code{cohortData}
 #'
-#' @param cohortData A \code{data.table} with columns:
-#'   \code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
-#'   \code{B}, \code{mortality}, \code{aNPPAct}, ond \code{sumB}.
+#' @template cohortData
+#'
 #' @param pixelGroupMap Raster layer with pixel values equal to a pixel group number
 #'   that corresponds exactly to ]\code{pixelGroup} column in \code{cohortData}.
-#' @param doAssertion Turns on/off assertion. Defaults to \code{getOption("LandR.assertions")}
+#'
+#' @template doAssertion
 #'
 #' @return
 #' An \code{cohortData} \code{dat.table} with a new \code{noPixels}
@@ -985,7 +1020,8 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 
   if (doAssertion) {
     test1 <- length(setdiff(pixelCohortData$pixelGroup, cohortData$pixelGroup)) > 0
-    test2 <- sum(unique(pixelCohortData[, .(pixelGroup, noPixels)])$noPixels) != sum(!is.na(pixelGroupMap[]) & pixelGroupMap[] != 0)  ## 0's have no cohorts.
+    test2 <- sum(unique(pixelCohortData[, .(pixelGroup, noPixels)])$noPixels) !=
+      sum(!is.na(pixelGroupMap[]) & pixelGroupMap[] != 0)  ## 0's have no cohorts.
 
     if (test1 | test2)
       stop("pixelGroups differ between pixelCohortData/pixelGroupMap and cohortData")
