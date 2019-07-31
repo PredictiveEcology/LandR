@@ -68,7 +68,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   ## the ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   facLevels <- raster::levels(vtm)[[1]]
-  vtmTypes <- as.character(factorValues2(vtm, facLevels$ID, att = "species"))
+  vtmTypes <- as.character(factorValues2(vtm, facLevels$ID, att = 2)) ## 'species', 'Species', 'VALUE'
   vtmCols <- colors[match(vtmTypes, names(colors))]
   whMixed <- which(vtmTypes == "Mixed")
 
@@ -78,7 +78,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   facLevels$Species <- vtmTypes #nolint
 
   ## plot initial types bar chart
-  facVals <- factorValues2(vtm, vtm[], att = "Species", na.rm = TRUE)
+  facVals <- factorValues2(vtm, vtm[], att = 2, na.rm = TRUE) ## 'species', 'Species', 'VALUE'
   df <- data.table(species = as.character(facVals), stringsAsFactors = FALSE)
   df <- df[!is.na(df$species)]
 
