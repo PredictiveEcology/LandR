@@ -478,6 +478,11 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     levels(vegTypeMap) <- data.frame(ID = seq_along(levels(pixelGroupData3[["leading"]])),
                                      species = levels(pixelGroupData3[["leading"]]))
   } else {
+    if (is.factor(pixelGroupData3[["initialEcoregionCode"]])) {
+      f <- pixelGroupData3[["initialEcoregionCode"]]
+      pixelGroupData3[["initialEcoregionCode"]] <- as.numeric(levels(f))[f]
+    }
+
     vegTypeMap <- rasterizeReduced(pixelGroupData3, pixelGroupMap, "leading", pixelGroupColName)
   }
 
