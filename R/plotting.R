@@ -34,7 +34,6 @@
 #' @importFrom stats na.omit
 plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
                     sppEquiv, sppEquivCol, colors, title = "Leading vegetation types") {
-
   colorsEN <- equivalentName(names(colors), sppEquiv, "EN_generic_short")
   colDT <- data.table(cols = colors, species = colorsEN,
                       speciesOrig = names(colors),
