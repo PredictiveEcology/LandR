@@ -20,8 +20,7 @@ ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \value{
-An expanded \code{cohortData} \code{dat.table} with a new \code{pixelIndex}
-column
+An expanded \code{cohortData} \code{data.table} with a new \code{pixelIndex} column.
 }
 \description{
 Generate \code{cohortData} table per pixel:

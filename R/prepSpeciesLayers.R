@@ -400,7 +400,6 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
                                       studyArea, rasterToMatch,
                                       sppEquiv,
                                       sppEquivCol) {
-
   if (is.null(url))
     url <- "https://drive.google.com/open?id=1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
 

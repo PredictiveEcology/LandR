@@ -128,7 +128,6 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
                       mixedType = as.numeric(mixed), ...)
 }
 
-
 #' Generate vegetation type map
 #'
 #' @param x Either a \code{cohortData} object or a \code{speciesCover} \code{RasterStack}

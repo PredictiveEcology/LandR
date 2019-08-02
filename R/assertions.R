@@ -102,11 +102,15 @@ assertColumns <- function(obj, colClasses,
 #' A test that \code{pixelGroupMap} and \code{cohortData} match
 #'
 #' @inheritParams updateCohortData
+#'
 #' @param sim If the simList is included, then the browser() call will be more useful
+#'
 #' @param maxExpectedNumDiverge A numeric, length 1, indicating by how many they
 #'   can diverge. Default 1.
+#'
 #' @param message An optional message to print. This may help identify where this function
 #'   was called.
+#'
 #' @param verbose Controls message output. Defaults to \code{getOption("LandR.verbose")}
 #'
 #' @note

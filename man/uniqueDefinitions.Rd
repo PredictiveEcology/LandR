@@ -15,7 +15,7 @@ uniqueSpeciesEcoregionDefinition
 If 2 pixels have identical values in all of these columns, then they are the
 same \code{pixelGroup}
 
-If 2 pixels have identical values in all of these columns, then they are the
-same \code{pixelGroup}
+If two pixels have identical values in all of these columns, then they are the
+same \code{pixelGroup}.
 }
 \keyword{datasets}
