@@ -406,6 +406,7 @@ speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
   spEco[year == max(year)]
 }
 
+#' @keywords internal
 .ageRndUpSuccessionTimestep <- function(age, successionTimestep) {
   as.integer(ceiling(as.numeric(age) / successionTimestep) * successionTimestep)
 }
@@ -414,14 +415,16 @@ speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
 #'
 #' If 2 pixels have identical values in all of these columns, then they are the
 #' same \code{pixelGroup}
+#'
 #' @export
 #' @rdname uniqueDefinitions
 uniqueCohortDefinition <- c("pixelGroup", "speciesCode", "age", "B")
 
 #' The columns in a cohortData that define "unique"
 #'
-#' If 2 pixels have identical values in all of these columns, then they are the
-#' same \code{pixelGroup}
+#' If two pixels have identical values in all of these columns, then they are the
+#' same \code{pixelGroup}.
+#'
 #' @export
 #' @rdname uniqueDefinitions
 uniqueSpeciesEcoregionDefinition <- c("speciesCode", "ecoregionGroup")
@@ -440,14 +443,15 @@ describeCohortData <- function(cohortData) {
   message(magenta("Pixels with non-NA cover:, ", cohortData[!is.na(cover), length(unique(pixelIndex))]))
 }
 
+#' @keywords internal
 .cohortMessages <- function(cohortData, val) {
   out <- list()
   if (val %in% colnames(cohortData)) {
     pixelsNA <- NROW(cohortData[is.na(get(val)), unique("pixelIndex"), with = FALSE])
     message(magenta("Pixels with missing", val, ":", format(pixelsNA, big.mark = ",")))
-    pixelsZero <- NROW(cohortData[, all(get(val) == 0), by = "pixelIndex"][get("V1") ==TRUE])
+    pixelsZero <- NROW(cohortData[, all(get(val) == 0), by = "pixelIndex"][get("V1") == TRUE])
     message(magenta("Pixels with all(",val," == 0): ", format(pixelsZero, big.mark = ",")))
-    pixelsBiomassNonZero <- NROW(cohortData[, any(get(val) > 0), by = "pixelIndex"][get("V1") ==TRUE])
+    pixelsBiomassNonZero <- NROW(cohortData[, any(get(val) > 0), by = "pixelIndex"][get("V1") == TRUE])
     message(magenta("Pixels with all(",val," > 0): ", format(pixelsBiomassNonZero, big.mark = ",")))
     out <- list(pixelsNA = pixelsNA, pixelsZero = pixelsZero, pixelsBiomassNonZero = pixelsBiomassNonZero)
   }
@@ -975,8 +979,7 @@ columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 #' @template doAssertion
 #'
 #' @return
-#' An expanded \code{cohortData} \code{dat.table} with a new \code{pixelIndex}
-#' column
+#' An expanded \code{cohortData} \code{data.table} with a new \code{pixelIndex} column.
 #'
 #' @export
 #' @importFrom raster getValues ncell
