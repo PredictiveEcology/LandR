@@ -680,11 +680,12 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @param rescale Logical. If \code{TRUE}, the default, cover for each species will be rescaled
 #'   so all cover in pixelGroup or pixel sums to 100.
 #'
-#' @export
 #' @importFrom crayon blue
 #' @importFrom data.table melt setnames
 #' @rdname makeAndCleanInitialCohortData
-createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
+#' @keywords internal
+
+.createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
                              doAssertion = getOption("LandR.assertions", TRUE),
                              rescale = TRUE) {
   coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
@@ -698,7 +699,7 @@ createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
   cohortData[, coverOrig := cover]
   if (isTRUE(doAssertion))
     if (any(duplicated(cohortData)))
-      warning("createCohortData: cohortData contains duplicate rows.")
+      warning(".createCohortData: cohortData contains duplicate rows.")
 
   if (doAssertion)
     #describeCohortData(cohortData)
@@ -807,7 +808,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
            " be because they more NA values than the Land Cover raster")
   }
 
-  cohortData <- Cache(createCohortData, inputDataTable = inputDataTable,
+  cohortData <- Cache(.createCohortData, inputDataTable = inputDataTable,
                       pixelGroupBiomassClass = pixelGroupBiomassClass,
                       doAssertion = doAssertion)
 
