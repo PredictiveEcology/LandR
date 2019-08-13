@@ -39,9 +39,9 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
 #' @param standAgeMap raster of stand age
 #' @param ecoregionFiles A list with two objects: the \code{ecoregionMap} and a table summarizing
-#'   it's information per pixelID. See \code{ecoregionProducer}
+#'   its information per pixelID. See \code{ecoregionProducer}
 #' @param biomassMap raster of total stand biomass
-#' @param rasterToMatch raster mask of study area
+#' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used throughout the simulation)
 #' @param LCC2005 raster of land-cover class
 #' @param pixelGroupAgeClass When assigning pixelGroup membership, this defines the resolution
 #'   of ages that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14

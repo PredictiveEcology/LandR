@@ -190,7 +190,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 #' @param outputPath TODO: description needed
 #' @param url TODO: description needed; if \code{NULL}, the default, use the default source url
 #' @param studyArea TODO: description needed
-#' @param rasterToMatch TODO: description needed
+#' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used throughout the simulation)
 #' @param sppEquiv table with species name equivalencies between the
 #'                           kNN format and the final naming format.
 #'                           See \code{data("sppEquivalencies_CA", "LandR")}.

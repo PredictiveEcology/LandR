@@ -42,7 +42,7 @@ if (getRversion() >= "3.1.0") {
 #' @param time Current time e.g., time(sim). This is used to extract the correct parameters in
 #'   \code{speciesEcoregion} table if there are different values over time.
 #'
-#' @param speciesEcoregion A \code{speciesEcoregion} table.
+#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
 #'
 #' @param treedFirePixelTableSinceLastDisp A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
 #'   This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
@@ -677,6 +677,9 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   out3
 }
 
+
+#' Generate template \code{cohortData} table
+#'
 #' @param rescale Logical. If \code{TRUE}, the default, cover for each species will be rescaled
 #'   so all cover in pixelGroup or pixel sums to 100.
 #'
