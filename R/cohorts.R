@@ -1036,3 +1036,67 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 
   return(pixelCohortData)
 }
+
+
+#' Make the \code{cohortData} table, while modifying the temporary
+#' \code{pixelCohortData} that will be used to prepare other files.
+#'
+#' Takes a \code{pixelCohortData} table (see \code{makeAndCleanInitialCohortData}),
+#'   the \code{speciesEcoregion} list and returns a modified \code{pixelCohortData} and
+#'   the \code{cohortData} table to be used in the simulation. The function mainly
+#'   removes unnecessary columns from \code{pixelCohortData}, subsets pixels with biomass > 0,
+#'   generates pixelGroups, and adds ecoregionGroup and totalBiomass columns to \code{pixelCohortData}.
+#'   \code{cohortData} is then created by subsetting unique combinations of "pixelGroup" and
+#'   whatever columsn are listed in \code{columnsForPixelGroups}. The resulting \code{cohortData} table
+#'   has the follwing columns:
+#' \itemize{
+#'   \item \code{speciesCode} (factor)
+#'   \item \code{ecoregionGroup} (factor)
+#'   \item \code{pixelGroup} (integer)
+#'   \item \code{age} (integer)
+#'   \item \code{B} (integer)
+#' }
+#'
+#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#' @param columnsForPixelGroups Default columns that define pixel groups
+#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
+#'
+#'#' @return
+#' A list with a modified \code{pixelCohortData} and \code{cohortData} data.tables.
+#'
+#' @export
+#' @importFrom data.table melt setnames set
+#'
+makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesEcoregion) {
+  ## make ecoregioGroup a factor (again) and remove unnecessary cols.
+  # refactor because the "_34" and "_35" ones are still levels
+  pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
+  cols <- intersect(c("logAge", "coverOrig", "totalBiomass",
+                      "initialEcoregionCode", "cover", "lcc"),
+                    names(pixelCohortData))
+  set(pixelCohortData, j = cols, value = NULL)
+
+  ## select pixels with biomass and generate pixel groups
+  pixelCohortData <- pixelCohortData[B > 0]
+  cd <- pixelCohortData[, .SD, .SDcols = c("pixelIndex", columnsForPixelGroups)]
+  pixelCohortData[, pixelGroup := Cache(generatePixelGroups, cd, maxPixelGroup = 0,
+                                        columns = columnsForPixelGroups)]
+
+  ########################################################################
+  ## rebuild ecoregion, ecoregionMap objects -- some initial ecoregions disappeared (e.g., 34, 35, 36)
+  ## rebuild biomassMap object -- biomasses have been adjusted
+  ecoregionsWeHaveParametersFor <- levels(speciesEcoregion$ecoregionGroup)
+
+  pixelCohortData <- pixelCohortData[ecoregionGroup %in% ecoregionsWeHaveParametersFor] # keep only ones we have params for
+  pixelCohortData[ , ecoregionGroup := factor(as.character(ecoregionGroup))]
+  pixelCohortData[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
+
+  cohortData <- unique(pixelCohortData, by = c("pixelGroup", columnsFoSrPixelGroups))
+  cohortData[ , `:=`(pixelIndex = NULL)]
+
+  assertUniqueCohortData(cohortData, c("pixelGroup", "ecoregionGroup", "speciesCode"))
+  return(list(cohortData = cohortData, pixelCohortData = pixelCohortData))
+}
+
+
+
