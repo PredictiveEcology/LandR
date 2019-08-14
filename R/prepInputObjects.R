@@ -1,7 +1,7 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c("cover", "ecoregionGroup", "establishprob",
                            "lcc", "longevity", "maxB", "maxANPP", "postfireregen",
-                           "resproutprob", "speciesCode"))
+                           "resproutprob", "speciesCode", "ecoregionGroup"))
 }
 
 #' Check if all species in have trait values
@@ -239,3 +239,79 @@ makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDat
   return(speciesEcoregion)
 }
 
+#' Makes \code{biomassMap}
+#'
+#' This is a function that creates the \code{biomassMap} raster used  for
+#'   simulations in LBMR, using estimated data based on \code{rawBiomassMap}
+#'   contained in \code{pixelCohortData}
+#'
+#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used
+#'     throughout the simulation)
+#'
+#' @return
+#' The \code{biomassMap}, a raster of total stand biomass per pixel
+#'
+#' @export
+#' @importFrom raster raster
+
+makeBiomassMap <-  function(pixelCohortData, rasterToMatch) {
+  pixelData <- unique(pixelCohortData, by = "pixelIndex")
+  pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
+
+  biomassMap <- raster(rasterToMatch)
+  biomassMap[pixelData$pixelIndex] <- pixelData$totalBiomass
+
+  return(biomassMap)
+}
+
+#' Makes \code{minRelativeB}
+#'
+#' This is a function that creates the \code{minRelativeB} table used  for
+#'   simulations in LBMR. It contains expert-based values for minimum relative
+#'   biomass of each shade tolerance class (the minimum relative biomass a cohort
+#'   with a given shade tolerance should have to be able to germinate),
+#'  in each unique ecoregion group. In this function, all ecoregion groups have
+#'  the same values.
+#'
+#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#'
+#' @return
+#' a data.frame of min relative biomass values per ecoregion group.
+#'
+#' @export
+
+makeMinRelativeB <- function(pixelCohortData) {
+  pixelData <- unique(pixelCohortData, by = "pixelIndex")
+  pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
+
+  minRelativeB <- data.frame(ecoregionGroup = levels(pixelData$ecoregionGroup),
+                             X1 = 0.2, X2 = 0.4, X3 = 0.5,
+                             X4 = 0.7, X5 = 0.9)
+
+  return(minRelativeB)
+}
+
+#' Makes \code{makePixelGroupMap} raster
+#'
+#' This is a function that creates the \code{makePixelGroupMap} raster containing
+#'   pixelGroups in \code{pixelCohortData}.
+#'
+#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used
+#'     throughout the simulation)
+#'
+#' @return a raster with pixel groups
+#'
+#' @export
+#' @importFrom raster raster
+#'
+makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
+  pixelData <- unique(pixelCohortData, by = "pixelIndex")
+  pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
+
+  pixelGroupMap <- raster(rasterToMatch)
+  pixelGroupMap[pixelData$pixelIndex] <- as.integer(pixelData$pixelGroup)
+
+  return(pixelGroupMap)
+}
