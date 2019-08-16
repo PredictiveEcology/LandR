@@ -42,7 +42,7 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #'   its information per pixelID. See \code{ecoregionProducer}
 #' @param biomassMap raster of total stand biomass
 #' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used throughout the simulation)
-#' @param LCC2005 raster of land-cover class
+#' @param rstLCC raster of land-cover class
 #' @param pixelGroupAgeClass When assigning pixelGroup membership, this defines the resolution
 #'   of ages that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14
 #'   will be the same
@@ -60,7 +60,7 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @importFrom pemisc factorValues2
 #' @importFrom raster ncell
 makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
-                           biomassMap, rasterToMatch, LCC2005, pixelGroupAgeClass = 1,
+                           biomassMap, rasterToMatch, rstLCC, pixelGroupAgeClass = 1,
                            printSummary = TRUE,
                            doAssertion = getOption("LandR.assertions", TRUE)) {
 
@@ -114,8 +114,8 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
     set(pixelTable, NULL, "totalBiomass", asInteger(biomassMap[] * 100) ) # change units)
   }
 
-  if (!missing(LCC2005)) {
-    set(pixelTable, NULL, "lcc", LCC2005[])
+  if (!missing(rstLCC)) {
+    set(pixelTable, NULL, "lcc", rstLCC[])
   }
 
   #pixelTable <- data.table(#age = asInteger(ceiling(asInteger(standAgeMap[]) /
@@ -125,7 +125,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
                           # totalBiomass = asInteger(biomassMap[] * 100), # change units
                           # cover = coverMatrix,
                           # pixelIndex = seq(ncell(rasterToMatch)),
-                          # lcc = LCC2005[],
+                          # lcc = rstLCC[],
                           # rasterToMatch = rasterToMatch[])
 
   # Remove NAs from pixelTable
