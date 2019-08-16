@@ -114,7 +114,7 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName,
 #' @export
 #' @importFrom data.table data.table
 
-makeEcoregionDT <- function(pixelCohortData) {
+makeEcoregionDT <- function(pixelCohortData, speciesEcoregion) {
   ## make a table of available ecoregions
   ecoregion <- data.table(active = "yes",
                           ecoregionGroup = factor(as.character(unique(pixelCohortData$ecoregionGroup))))
