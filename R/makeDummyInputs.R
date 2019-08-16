@@ -68,7 +68,7 @@ makeDummyRawBiomassMap <- function(rasterToMatch) {
 #' @importFrom raster setValues
 
 makeDummyStandAgeMap <- function(rawBiomassMap) {
-  standAgeMap <- setValues(rawBiomassMap, asInteger(rescale(getValues(biomassMap), c(1, 300))))
+  standAgeMap <- setValues(rawBiomassMap, asInteger(rescale(getValues(rawBiomassMap), c(1, 300))))
   return(standAgeMap)
 }
 
