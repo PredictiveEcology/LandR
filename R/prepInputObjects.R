@@ -249,8 +249,7 @@ makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDat
 #' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used
 #'     throughout the simulation)
 #'
-#' @return
-#' The \code{biomassMap}, a raster of total stand biomass per pixel
+#' @return The \code{biomassMap}, a raster of total stand biomass per pixel
 #'
 #' @export
 #' @importFrom raster raster
@@ -276,8 +275,7 @@ makeBiomassMap <-  function(pixelCohortData, rasterToMatch) {
 #'
 #' @param pixelCohortData The full \code{cohortData} \code{data.table}
 #'
-#' @return
-#' a data.frame of min relative biomass values per ecoregion group.
+#' @return a data.frame of min relative biomass values per ecoregion group.
 #'
 #' @export
 

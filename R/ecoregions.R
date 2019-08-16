@@ -107,6 +107,7 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName,
 #'   \code{pixelCohortData}
 #'
 #' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
 #'
 #' @return
 #' A data.table with ecoregion codes and their active status per pixelID
