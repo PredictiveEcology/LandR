@@ -1091,7 +1091,7 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   pixelCohortData[ , ecoregionGroup := factor(as.character(ecoregionGroup))]
   pixelCohortData[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
 
-  cohortData <- unique(pixelCohortData, by = c("pixelGroup", columnsFoSrPixelGroups))
+  cohortData <- unique(pixelCohortData, by = c("pixelGroup", columnsForPixelGroups))
   cohortData[ , `:=`(pixelIndex = NULL)]
 
   assertUniqueCohortData(cohortData, c("pixelGroup", "ecoregionGroup", "speciesCode"))
