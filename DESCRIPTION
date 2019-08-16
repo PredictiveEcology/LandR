@@ -46,6 +46,7 @@ Imports:
     raster,
     RColorBrewer,
     reproducible,
+    scales,
     sf,
     sp,
     SpaDES.core,

@@ -17,11 +17,11 @@ makePixelTable(speciesLayers, species, standAgeMap, ecoregionFiles,
 \item{standAgeMap}{raster of stand age}
 
 \item{ecoregionFiles}{A list with two objects: the \code{ecoregionMap} and a table summarizing
-it's information per pixelID. See \code{ecoregionProducer}}
+its information per pixelID. See \code{ecoregionProducer}}
 
 \item{biomassMap}{raster of total stand biomass}
 
-\item{rasterToMatch}{raster mask of study area}
+\item{rasterToMatch}{a \code{rasterToMatch} (e.g. the one used throughout the simulation)}
 
 \item{LCC2005}{raster of land-cover class}
 
