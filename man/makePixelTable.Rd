@@ -5,25 +5,25 @@
 \title{Make \code{pixelTable} from biomass, age, land-cover and species cover data}
 \usage{
 makePixelTable(speciesLayers, species, standAgeMap, ecoregionFiles,
-  biomassMap, rasterToMatch, LCC2005, pixelGroupAgeClass = 1,
+  biomassMap, rasterToMatch, rstLCC, pixelGroupAgeClass = 1,
   printSummary = TRUE, doAssertion = getOption("LandR.assertions",
   TRUE))
 }
 \arguments{
 \item{speciesLayers}{stack of species layers rasters}
 
-\item{species}{a \code{data.table} that has species traits such as longevity, shade tolerance, etc.}
+\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
 
 \item{standAgeMap}{raster of stand age}
 
 \item{ecoregionFiles}{A list with two objects: the \code{ecoregionMap} and a table summarizing
-it's information per pixelID. See \code{ecoregionProducer}}
+its information per \code{pixelID.} See \code{ecoregionProducer}.}
 
 \item{biomassMap}{raster of total stand biomass}
 
-\item{rasterToMatch}{raster mask of study area}
+\item{rasterToMatch}{a \code{rasterToMatch} (e.g., the one used throughout the simulation)}
 
-\item{LCC2005}{raster of land-cover class}
+\item{rstLCC}{raster of land-cover class}
 
 \item{pixelGroupAgeClass}{When assigning pixelGroup membership, this defines the resolution
 of ages that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14

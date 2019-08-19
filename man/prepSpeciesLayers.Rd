@@ -28,7 +28,7 @@ prepSpeciesLayers_ForestInventory(destinationPath, outputPath,
 
 \item{studyArea}{TODO: description needed}
 
-\item{rasterToMatch}{TODO: description needed}
+\item{rasterToMatch}{a \code{rasterToMatch} (e.g. the one used throughout the simulation)}
 
 \item{sppEquiv}{table with species name equivalencies between the
 kNN format and the final naming format.
