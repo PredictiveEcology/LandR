@@ -16,17 +16,18 @@ makeCohortDataFiles(pixelCohortData, columnsForPixelGroups,
 \item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values
 
 #' @return
-A list with a modified \code{pixelCohortData} and \code{cohortData} data.tables.}
+A list with a modified \code{pixelCohortData} and \code{cohortData} \code{data.table}s.}
 }
 \description{
 Takes a \code{pixelCohortData} table (see \code{makeAndCleanInitialCohortData}),
   the \code{speciesEcoregion} list and returns a modified \code{pixelCohortData} and
-  the \code{cohortData} table to be used in the simulation. The function mainly
-  removes unnecessary columns from \code{pixelCohortData}, subsets pixels with biomass > 0,
-  generates pixelGroups, and adds ecoregionGroup and totalBiomass columns to \code{pixelCohortData}.
-  \code{cohortData} is then created by subsetting unique combinations of "pixelGroup" and
-  whatever columsn are listed in \code{columnsForPixelGroups}. The resulting \code{cohortData} table
-  has the follwing columns:
+  the \code{cohortData} tables to be used in the simulation.
+  This function mainly removes unnecessary columns from \code{pixelCohortData},
+  subsets pixels with \code{biomass > 0}, generates \code{pixelGroups},
+  and adds \code{ecoregionGroup} and \code{totalBiomass} columns to \code{pixelCohortData}.
+  \code{cohortData} is then created by subsetting unique combinations of \code{pixelGroup} and
+  whatever columsn are listed in \code{columnsForPixelGroups}.
+  The resulting \code{cohortData} table has the follwing columns:
 \itemize{
   \item \code{speciesCode} (factor)
   \item \code{ecoregionGroup} (factor)

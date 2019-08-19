@@ -12,16 +12,16 @@ makePixelTable(speciesLayers, species, standAgeMap, ecoregionFiles,
 \arguments{
 \item{speciesLayers}{stack of species layers rasters}
 
-\item{species}{a \code{data.table} that has species traits such as longevity, shade tolerance, etc.}
+\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
 
 \item{standAgeMap}{raster of stand age}
 
 \item{ecoregionFiles}{A list with two objects: the \code{ecoregionMap} and a table summarizing
-its information per pixelID. See \code{ecoregionProducer}}
+its information per \code{pixelID.} See \code{ecoregionProducer}.}
 
 \item{biomassMap}{raster of total stand biomass}
 
-\item{rasterToMatch}{a \code{rasterToMatch} (e.g. the one used throughout the simulation)}
+\item{rasterToMatch}{a \code{rasterToMatch} (e.g., the one used throughout the simulation)}
 
 \item{rstLCC}{raster of land-cover class}
 

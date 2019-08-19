@@ -2,21 +2,20 @@
 % Please edit documentation in R/prepInputObjects.R
 \name{makeBiomassMap}
 \alias{makeBiomassMap}
-\title{Makes \code{biomassMap}}
+\title{Create \code{biomassMap}}
 \usage{
 makeBiomassMap(pixelCohortData, rasterToMatch)
 }
 \arguments{
 \item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
 
-\item{rasterToMatch}{a \code{rasterToMatch} (e.g. the one used
-throughout the simulation)}
+\item{rasterToMatch}{a \code{rasterToMatch} (e.g. the one used throughout the simulation)}
 }
 \value{
-The \code{biomassMap}, a raster of total stand biomass per pixel
+The \code{biomassMap}, a raster of total stand biomass per pixel.
 }
 \description{
 This is a function that creates the \code{biomassMap} raster used  for
   simulations in LBMR, using estimated data based on \code{rawBiomassMap}
-  contained in \code{pixelCohortData}
+  contained in \code{pixelCohortData}.
 }

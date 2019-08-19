@@ -2,20 +2,18 @@
 % Please edit documentation in R/prepInputObjects.R
 \name{makePixelGroupMap}
 \alias{makePixelGroupMap}
-\title{Makes \code{makePixelGroupMap} raster}
+\title{Create \code{makePixelGroupMap}}
 \usage{
 makePixelGroupMap(pixelCohortData, rasterToMatch)
 }
 \arguments{
 \item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
 
-\item{rasterToMatch}{a \code{rasterToMatch} (e.g. the one used
-throughout the simulation)}
+\item{rasterToMatch}{a \code{rasterToMatch} (e.g. the one used throughout the simulation)}
 }
 \value{
 a raster with pixel groups
 }
 \description{
-This is a function that creates the \code{makePixelGroupMap} raster containing
-  pixelGroups in \code{pixelCohortData}.
+Create the \code{makePixelGroupMap} raster containing \code{pixelGroups} in \code{pixelCohortData}.
 }

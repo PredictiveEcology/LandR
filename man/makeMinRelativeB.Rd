@@ -2,7 +2,7 @@
 % Please edit documentation in R/prepInputObjects.R
 \name{makeMinRelativeB}
 \alias{makeMinRelativeB}
-\title{Makes \code{minRelativeB}}
+\title{Create \code{minRelativeB} table}
 \usage{
 makeMinRelativeB(pixelCohortData)
 }
@@ -13,10 +13,8 @@ makeMinRelativeB(pixelCohortData)
 a data.frame of min relative biomass values per ecoregion group.
 }
 \description{
-This is a function that creates the \code{minRelativeB} table used  for
-  simulations in LBMR. It contains expert-based values for minimum relative
-  biomass of each shade tolerance class (the minimum relative biomass a cohort
-  with a given shade tolerance should have to be able to germinate),
- in each unique ecoregion group. In this function, all ecoregion groups have
- the same values.
+The table contains expert-based values for minimum relative biomass of each shade tolerance
+class (the minimum relative biomass a cohort with a given shade tolerance should have to be able
+to germinate), in each unique ecoregion group.
+All ecoregion groups currently have the same values.
 }

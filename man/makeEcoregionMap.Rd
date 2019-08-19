@@ -8,15 +8,15 @@ makeEcoregionMap(ecoregionFiles, pixelCohortData)
 }
 \arguments{
 \item{ecoregionFiles}{A list with two objects: the \code{ecoregionMap} and a table summarizing
-it's information per pixelID}
+its information per \code{pixelID}.}
 
-\item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
+\item{pixelCohortData}{The full \code{cohortData} \code{data.table}.}
 }
 \value{
-A raster with ecoregion codes
+A raster with ecoregion codes.
 }
 \description{
-This function creates a raster of ecoregion codes per pixel.
-  Unlike \code{ecoregionProducer}, this function fills the raster
-  with pixel information contained in \code{pixelCohortData}
+Creates a raster of ecoregion codes per pixel.
+Unlike \code{ecoregionProducer}, this fills the raster with pixel information contained in
+\code{pixelCohortData}.
 }

@@ -677,7 +677,6 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   out3
 }
 
-
 #' Generate template \code{cohortData} table
 #'
 #' @param rescale Logical. If \code{TRUE}, the default, cover for each species will be rescaled
@@ -685,12 +684,10 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #'
 #' @importFrom crayon blue
 #' @importFrom data.table melt setnames
-#' @rdname makeAndCleanInitialCohortData
 #' @keywords internal
-
+#' @rdname makeAndCleanInitialCohortData
 .createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
-                             doAssertion = getOption("LandR.assertions", TRUE),
-                             rescale = TRUE) {
+                              doAssertion = getOption("LandR.assertions", TRUE), rescale = TRUE) {
   coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
   newCoverColNames <- gsub("cover\\.", "", coverColNames)
   setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
@@ -1043,12 +1040,13 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #'
 #' Takes a \code{pixelCohortData} table (see \code{makeAndCleanInitialCohortData}),
 #'   the \code{speciesEcoregion} list and returns a modified \code{pixelCohortData} and
-#'   the \code{cohortData} table to be used in the simulation. The function mainly
-#'   removes unnecessary columns from \code{pixelCohortData}, subsets pixels with biomass > 0,
-#'   generates pixelGroups, and adds ecoregionGroup and totalBiomass columns to \code{pixelCohortData}.
-#'   \code{cohortData} is then created by subsetting unique combinations of "pixelGroup" and
-#'   whatever columsn are listed in \code{columnsForPixelGroups}. The resulting \code{cohortData} table
-#'   has the follwing columns:
+#'   the \code{cohortData} tables to be used in the simulation.
+#'   This function mainly removes unnecessary columns from \code{pixelCohortData},
+#'   subsets pixels with \code{biomass > 0}, generates \code{pixelGroups},
+#'   and adds \code{ecoregionGroup} and \code{totalBiomass} columns to \code{pixelCohortData}.
+#'   \code{cohortData} is then created by subsetting unique combinations of \code{pixelGroup} and
+#'   whatever columsn are listed in \code{columnsForPixelGroups}.
+#'   The resulting \code{cohortData} table has the follwing columns:
 #' \itemize{
 #'   \item \code{speciesCode} (factor)
 #'   \item \code{ecoregionGroup} (factor)
@@ -1062,11 +1060,11 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
 #'
 #'#' @return
-#' A list with a modified \code{pixelCohortData} and \code{cohortData} data.tables.
+#' A list with a modified \code{pixelCohortData} and \code{cohortData} \code{data.table}s.
 #'
 #' @export
 #' @importFrom data.table melt setnames set
-#'
+#' @importFrom reproducible Cache
 makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesEcoregion) {
   ## make ecoregioGroup a factor (again) and remove unnecessary cols.
   # refactor because the "_34" and "_35" ones are still levels
@@ -1097,6 +1095,3 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   assertUniqueCohortData(cohortData, c("pixelGroup", "ecoregionGroup", "speciesCode"))
   return(list(cohortData = cohortData, pixelCohortData = pixelCohortData))
 }
-
-
-
