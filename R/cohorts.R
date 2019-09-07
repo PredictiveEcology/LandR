@@ -89,7 +89,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     # pixels --> the entirely newly regenerated pixels DOes not require a
     # re-pixelGroupMaping  -- can just add to existing pixelGroup values
     if (verbose > 0)
-      message(crayon::green("  Regenerating only open pixels (e.g., likely resprouting & serotiny only)"))
+      message(crayon::green("  Regenerating only burnt pixels (i.e. resprouting & serotiny, in addition to surviving cohorts)"))
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age") # no Biomass because they all have zero
     cd <- newPixelCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
     newPixelCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = maxPixelGroup,
@@ -104,7 +104,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     #   and some occupied pixels getting infilling. This requires a wholesale
     #   re-pixelGroup
     if (verbose > 0)
-      message(crayon::green("  Regenerating open and pixels with B (likely after seed dispersal)"))
+      message(crayon::green("  Regenerating open and pixels with B (likely after seed dispersal, or partial mortality following disturbance)"))
 
     allNewPixelGroups <- FALSE
 
@@ -119,6 +119,9 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     cohorts[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = columnsForPG)]
 
     # Bring to pixelGroup level -- this will squash the data.table
+    if (is.null(cohorts[["sumB"]])) {
+      cohorts[, sumB := sum(B, na.rm = TRUE), by = pixelGroup]
+    }
     allCohortData <- cohorts[ , .(ecoregionGroup = ecoregionGroup[1],
                                   mortality = mortality[1],
                                   aNPPAct = aNPPAct[1],
@@ -214,9 +217,10 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     }
   }
 
+  ## simplifying to pixelGroup again
   if (!is.null(newPixelCohortData[["pixelIndex"]]))
     set(newPixelCohortData, NULL, "pixelIndex", NULL)
-  newPixelCohortData <- newPixelCohortData[!duplicated(newPixelCohortData), ]
+  newPixelCohortData <- newPixelCohortData[!duplicated(newPixelCohortData), ]   ## faster than unique
 
   specieseco_current <- speciesEcoregionLatestYear(speciesEcoregion, time)
   specieseco_current <- setkey(specieseco_current[, .(speciesCode, maxANPP, maxB, ecoregionGroup)],
@@ -229,6 +233,9 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   specieseco_current[, maxB_eco := max(maxB), by = ecoregionGroup]
   newPixelCohortData <- specieseco_current[newPixelCohortData, on = uniqueSpeciesEcoregionDefinition]
   newPixelCohortData <- newPixelCohortData[!is.na(maxB)]
+
+  if (any(newPixelCohortData$age > 1))
+    stop("newPixelCohortData should only have new cohorts aged 1")
   set(newPixelCohortData, NULL, "age", 1L)  ## set age to 1
 
   ## Ceres: this was causing new cohorts to be initialized with maxANPP.
