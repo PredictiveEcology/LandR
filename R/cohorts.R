@@ -86,7 +86,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 
   if (all(zeroOnPixelGroupMap)) {
     # Deal with pixels on the map that have no pixelGroup -- these are burned
-    # pixels --> the entirely newly regenerated pixels DOes not require a
+    # pixels --> the entirely newly regenerated pixels do not require a
     # re-pixelGroupMaping  -- can just add to existing pixelGroup values
     if (verbose > 0)
       message(crayon::green("  Regenerating only burnt pixels (i.e. resprouting & serotiny, in addition to surviving cohorts)"))
@@ -105,8 +105,6 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     #   re-pixelGroup
     if (verbose > 0)
       message(crayon::green("  Regenerating open and pixels with B (likely after seed dispersal, or partial mortality following disturbance)"))
-
-    allNewPixelGroups <- FALSE
 
     pixelIndex <- which(pixelGroupMap[] %in% cohortData$pixelGroup)
     cohortDataPixelIndex <- data.table(pixelIndex = pixelIndex,
