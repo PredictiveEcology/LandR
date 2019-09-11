@@ -161,13 +161,13 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   ## additional tweaks to species trait values
 
   # decrease shade tolerance
-  speciesTable[species == "Abie_sp", shadetolerance := 3]     # original default 4
-  speciesTable[species == "Pice_gla", shadetolerance := 2]    # original default 3
-  speciesTable[species == "Pice_mar", shadetolerance := 3]    # original default 4
-  speciesTable[species == "Pinu_ban", shadetolerance := 1]    # original default 1
-  speciesTable[species == "Pinu_con", shadetolerance := 1]    # original default 1
-  speciesTable[species == "Pinu_sp", shadetolerance := 1]     # original default 1
-  speciesTable[species == "Popu_sp", shadetolerance := 1]     # original default 1
+  species[species == "Abie_sp", shadetolerance := 3]     # original default 4
+  species[species == "Pice_gla", shadetolerance := 2]    # original default 3
+  species[species == "Pice_mar", shadetolerance := 3]    # original default 4
+  species[species == "Pinu_ban", shadetolerance := 1]    # original default 1
+  species[species == "Pinu_con", shadetolerance := 1]    # original default 1
+  species[species == "Pinu_sp", shadetolerance := 1]     # original default 1
+  species[species == "Popu_sp", shadetolerance := 1]     # original default 1
 
   return(species)
 }
