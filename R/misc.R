@@ -4,10 +4,11 @@ if (getRversion() >= "3.1.0") {
 
 #' Assign light probability
 #'
-#' @param sufficientLight TODO: description needed
-#' @param newCohortData  TODO: description needed
+#' @param sufficientLight a data.table containing probability of establishment, given a site's light conditions (X0-X5) for
+#'    each level of a species shade tolerance (1-5)
+#' @param newCohortData  a modified version of /code{cohortData} that contains new cohorts.
 #'
-#' @return  TODO: description needed
+#' @return  /code{newCohortData} with a lightProb column
 #'
 #' @export
 assignLightProb <- function(sufficientLight, newCohortData) {
