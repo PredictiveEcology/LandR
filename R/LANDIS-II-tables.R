@@ -157,6 +157,18 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   ## join and replace
   species <- species[speciesTableShort, on = "species"][, longevity := V1]
   set(species, NULL, "V1", NULL)
+
+  ## additional tweaks to species trait values
+
+  # decrease shade tolerance
+  speciesTable[species == "Abie_sp", shadetolerance := 3]     # original default 4
+  speciesTable[species == "Pice_gla", shadetolerance := 2]    # original default 3
+  speciesTable[species == "Pice_mar", shadetolerance := 3]    # original default 4
+  speciesTable[species == "Pinu_ban", shadetolerance := 1]    # original default 1
+  speciesTable[species == "Pinu_con", shadetolerance := 1]    # original default 1
+  speciesTable[species == "Pinu_sp", shadetolerance := 1]     # original default 1
+  speciesTable[species == "Popu_sp", shadetolerance := 1]     # original default 1
+
   return(species)
 }
 
