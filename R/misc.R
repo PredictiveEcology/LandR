@@ -1,5 +1,7 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(".", ":=", "lightProb", "shadetolerance", "siteShade", "year"))
+  utils::globalVariables(c(".", ":=", "lightProb", "shadetolerance", "siteShade", "year",
+                           "resproutage_min", "resproutage_max", "type", "numberOfRegen",
+                           "sexualmature"))
 }
 
 #' Assign light probability
@@ -92,6 +94,9 @@ scheduleDisturbance <- function(disturbanceLayer, currentYear) {
 #'    /code{serotinyPixel} a vector of pixels where serotiny was activated;
 #'    /code{postFireRegenSummary} the updated postFireRegenSummary, if /code{calibrate = TRUE}
 #'
+#' @importFrom stats runif
+#' @importFrom fpCompare %>>%
+#' @importFrom fpCompare %<<%
 #' @export
 #'
 
@@ -134,7 +139,7 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
     ## the get survival probs and subset survivors with runif
     serotinyPixelCohortData <- serotinyPixelCohortData[species[, .(speciesCode, shadetolerance)],
                                                        nomatch = 0, on = "speciesCode"]
-    # serotinyPixelCohortData[, siteShade := 0]
+    # serotinyPixelCohortData[, siteShade := 0]   ## this is no longer done here to accoutn for PM
     # serotinyPixelCohortData <- setkey(serotinyPixelCohortData, speciesCode)[species[,.(speciesCode, shadetolerance)],
     #                                                     nomatch = 0][, siteShade := 0]
     serotinyPixelCohortData <- assignLightProb(sufficientLight = sufficientLight,
@@ -193,10 +198,10 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
 #'    "aNPPAct", and "sumB" removed and "pixelIndex" added.
 #' @param postFireRegenSummary a data.table summarizing for which species serotiny/resprouting were
 #'    activated and in how many pixels, for each year. Only necessary if /code{calibrate = TRUE}.
+#' @param serotinyPixel a vector of pixels where serotiny was activated;
 #' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
 #' @param sufficientLight a data.table containing probability of establishment, given a site's light conditions (X0-X5) for
 #'    each level of a species shade tolerance (1-5)
-#' @param speciesEcoregion a \code{data.table} with \code{speciesEcoregion} values
 #' @param currentTime integer. The current simulation time obtained with /code{time(sim)}
 #' @param treedFirePixelTableSinceLastDisp a vector of pixels that burnt and were forested in the previous time step.
 #' @param calibrate logical. Determines whether to output /code{postFirePixelCohortData}. Defaults to FALSE
@@ -254,7 +259,7 @@ doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
     ## the get survival probs and subset survivors with runif
     resproutingPixelCohortData <- resproutingPixelCohortData[species[, .(speciesCode, shadetolerance)],
                                                              nomatch = 0, on = "speciesCode"]
-    # resproutingPixelCohortData[,siteShade := 0]
+    # resproutingPixelCohortData[,siteShade := 0]    ## no longer part of resprouting
     # resproutingPixelCohortData <- setkey(resproutingPixelCohortData, speciesCode)[species[,.(speciesCode, shadetolerance)],
     #                                                     nomatch = 0][, siteShade := 0]
     resproutingPixelCohortData <- assignLightProb(sufficientLight = sufficientLight,
@@ -268,7 +273,7 @@ doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
 
     # remove all columns that were used temporarily here
     if (NROW(resproutingPixelCohortData)) {
-      resproutingPixelCohortData <- resproutingPixelCohortData[,.(pixelGroup, ecoregionGroup, speciesCode, pixelIndex)]#
+      resproutingPixelCohortData <- resproutingPixelCohortData[,.(pixelGroup, ecoregionGroup, speciesCode, pixelIndex)]
       resproutingPixelCohortData[, type := "resprouting"]
       if (calibrate) {
         resproutRegenSummary <- resproutingPixelCohortData[,.(numberOfRegen = length(pixelIndex)), by = speciesCode]
