@@ -6,7 +6,7 @@
 \usage{
 doResprouting(burnedPixelCohortData, postFirePixelCohortData,
   postFireRegenSummary = NULL, serotinyPixel,
-  treedFirePixelTableSinceLastDisp, currentTime, species, sufficientLight,
+  treedFirePixelTableSinceLastDisp, simuTime, species, sufficientLight,
   calibrate = FALSE)
 }
 \arguments{
@@ -23,7 +23,7 @@ activated and in how many pixels, for each year. Only necessary if /code{calibra
 
 \item{treedFirePixelTableSinceLastDisp}{a vector of pixels that burnt and were forested in the previous time step.}
 
-\item{currentTime}{integer. The current simulation time obtained with /code{time(sim)}}
+\item{simuTime}{integer. The current simulation time obtained with /code{time(sim)}}
 
 \item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
 
