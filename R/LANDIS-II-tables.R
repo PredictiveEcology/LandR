@@ -127,7 +127,7 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   names(speciesTable) <- .speciesTableColNames
 
   ## make temporary table that will have new parameters for Boreal spp.
-  speciesTableShort <- speciesTable[Area %in% c("BSW", "BP", "MC"), .(species, longevity)]
+  speciesTableShort <- speciesTable[Area %in% c("BSW", "BP", "MC"), .(species, longevity, shadetolerance)]
   speciesTableShort[species == "ABIE.BAL", c('longevity', 'shadetolerance') := .(200, 3)] #default 150, 5
   speciesTableShort[species == "ABIE.LAS", c('longevity', 'shadetolerance') := .(240, 3)] #default 250, 4
   speciesTableShort[species == "BETU.PAP", longevity := 140] #default 150
@@ -152,12 +152,10 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   speciesTableShort <- speciesTableShort[species %in% equivalentName(sppNameVector, sppEquiv,
                                                                      "LANDIS_traits", multi = TRUE)]
   speciesTableShort[, species := equivalentName(speciesTableShort$species, sppEquiv, sppEquivCol)]
-  speciesTableShort <- speciesTableShort[, min(longevity), by = "species"]
+  speciesTableShort <- speciesTableShort[, .(longevity = min(longevity), shadetolerance = min(shadetolerance)), by = "species"]
 
   ## join and replace
-  species <- species[speciesTableShort, on = "species"][, longevity := V1]
-  set(species, NULL, "V1", NULL)
-
+  species <- species[, c("longevity", "shadetolerance") := .(speciesTableShort[, longevity], speciesTableShort[, shadetolerance])]
 
   return(species)
 }
