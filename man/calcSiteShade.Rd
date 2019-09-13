@@ -7,7 +7,7 @@
 calcSiteShade(time, cohortData, speciesEcoregion, minRelativeB)
 }
 \arguments{
-\item{time}{integer. The current simulation time obtained with /code{time(sim)}}
+\item{time}{integer. The current simulation time obtained with \code{time(sim)}}
 
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
 \code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},

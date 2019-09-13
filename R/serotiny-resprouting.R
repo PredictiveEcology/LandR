@@ -16,7 +16,7 @@ if (getRversion() >= "3.1.0") {
 #' @param sufficientLight a data.table containing probability of establishment, given a site's light conditions (X0-X5) for
 #'    each level of a species shade tolerance (1-5)
 #' @param speciesEcoregion a \code{data.table} with \code{speciesEcoregion} values
-#' @param simuTime integer. The current simulation time obtained with /code{time(sim)}
+#' @param simuTime integer. The current simulation time obtained with \code{time(sim)}
 #' @param treedFirePixelTableSinceLastDisp a vector of pixels that burnt and were forested in the previous time step.
 #' @param calibrate logical. Determines whether to output /code{postFirePixelCohortData}. Defaults to FALSE
 #'
@@ -132,7 +132,7 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
 #' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
 #' @param sufficientLight a data.table containing probability of establishment, given a site's light conditions (X0-X5) for
 #'    each level of a species shade tolerance (1-5)
-#' @param simuTime integer. The current simulation time obtained with /code{time(sim)}
+#' @param simuTime integer. The current simulation time obtained with \code{time(sim)}
 #' @param treedFirePixelTableSinceLastDisp a vector of pixels that burnt and were forested in the previous time step.
 #' @param calibrate logical. Determines whether to output /code{postFirePixelCohortData}. Defaults to FALSE
 #'

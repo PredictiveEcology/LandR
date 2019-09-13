@@ -5,7 +5,7 @@ if (getRversion() >= "3.1.0") {
 
 #' Calculate site shade
 #'
-#' @param time integer. The current simulation time obtained with /code{time(sim)}
+#' @param time integer. The current simulation time obtained with \code{time(sim)}
 #' @param cohortData A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
 #'   \code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
 #'   and \code{sumB}.

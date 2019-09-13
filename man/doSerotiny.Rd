@@ -26,7 +26,7 @@ each level of a species shade tolerance (1-5)}
 
 \item{speciesEcoregion}{a \code{data.table} with \code{speciesEcoregion} values}
 
-\item{simuTime}{integer. The current simulation time obtained with /code{time(sim)}}
+\item{simuTime}{integer. The current simulation time obtained with \code{time(sim)}}
 
 \item{treedFirePixelTableSinceLastDisp}{a vector of pixels that burnt and were forested in the previous time step.}
 
