@@ -127,24 +127,24 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   names(speciesTable) <- .speciesTableColNames
 
   ## make temporary table that will have new parameters for Boreal spp.
-  speciesTableShort <- speciesTable[Area %in% c("BSW", "BP", "MC"), .(species, longevity)]
-  speciesTableShort[species == "ABIE.BAL", longevity := 200]
-  speciesTableShort[species == "ABIE.LAS", longevity := 240]
-  speciesTableShort[species == "BETU.PAP", longevity := 140]
-  speciesTableShort[species == "LARI.LAR", longevity := 350]
-  speciesTableShort[species == "LARI.OCC", longevity := 450]
-  speciesTableShort[species == "PICE.ENG", longevity := 460]
-  speciesTableShort[species == "PICE.GLA", longevity := 400]
-  speciesTableShort[species == "PICE.MAR", longevity := 250]
+  speciesTableShort <- speciesTable[Area %in% c("BSW", "BP", "MC"), .(species, longevity, shadetolerance)]
+  speciesTableShort[species == "ABIE.BAL", c('longevity', 'shadetolerance') := .(200, 3)] #default 150, 5
+  speciesTableShort[species == "ABIE.LAS", c('longevity', 'shadetolerance') := .(240, 3)] #default 250, 4
+  speciesTableShort[species == "BETU.PAP", longevity := 140] #default 150
+  speciesTableShort[species == "LARI.LAR", longevity := 350] #default 150
+  speciesTableShort[species == "LARI.OCC", longevity := 450] #default 900!
+  speciesTableShort[species == "PICE.ENG", c('longevity', 'shadetolerance') := .(460, 3)] #default 450, 4
+  speciesTableShort[species == "PICE.GLA", c('longevity', 'shadetolerance') := .(400, 2)] #default 250, 3
+  speciesTableShort[species == "PICE.MAR", c('longevity', 'shadetolerance') := .(250, 3)] #default 200, 4
   speciesTableShort[species == "PINU.BAN", longevity := 150]
-  speciesTableShort[species == "PINU.CON.LAT", longevity := 335]
-  speciesTableShort[species == "PINU.PON", longevity := 575]
-  speciesTableShort[species == "POPU.BAL", longevity := 200]
-  speciesTableShort[species == "POPU.TRE", longevity := 200]
-  speciesTableShort[species == "PSEU.MEN", longevity := 525] ## only in MC area, corresponding to var. glauca
-  speciesTableShort[species == "THUJ.PLI", longevity := 1500]
-  speciesTableShort[species == "THUJ.HET", longevity := 500]
-  speciesTableShort[species == "THUJ.MER", longevity := 800]
+  speciesTableShort[species == "PINU.CON.LAT", longevity := 335] #default 300
+  speciesTableShort[species == "PINU.PON", longevity := 575] #default 500
+  speciesTableShort[species == "POPU.BAL", longevity := 200] #default 130
+  speciesTableShort[species == "POPU.TRE", longevity := 200] #default 150
+  speciesTableShort[species == "PSEU.MEN", longevity := 525] ## default 600, only in MC area, corresponding to var. glauca
+  speciesTableShort[species == "THUJ.PLI", longevity := 1500] ##default 700, 1500 may be incorrect for MC
+  speciesTableShort[species == "TSUG.HET", c('longevity', 'shadetolerance') := .(500, 4)] #default 475, 5
+  speciesTableShort[species == "TSUG.MER", c('longevity', 'shadetolerance') := .(800, 3)] #default 700, 4
 
   ## subset, rename and "merge" species by using the minimum value
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
@@ -152,11 +152,11 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   speciesTableShort <- speciesTableShort[species %in% equivalentName(sppNameVector, sppEquiv,
                                                                      "LANDIS_traits", multi = TRUE)]
   speciesTableShort[, species := equivalentName(speciesTableShort$species, sppEquiv, sppEquivCol)]
-  speciesTableShort <- speciesTableShort[, min(longevity), by = "species"]
+  speciesTableShort <- speciesTableShort[, .(longevity = min(longevity), shadetolerance = min(shadetolerance)), by = "species"]
 
   ## join and replace
-  species <- species[speciesTableShort, on = "species"][, longevity := V1]
-  set(species, NULL, "V1", NULL)
+  species <- species[, c("longevity", "shadetolerance") := .(speciesTableShort[, longevity], speciesTableShort[, shadetolerance])]
+
   return(species)
 }
 
