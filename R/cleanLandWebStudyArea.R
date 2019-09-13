@@ -50,6 +50,7 @@ polygonClean <- function(poly, fn = NULL, type = NULL, ...) {
       if (length(na.omit(pmatch(c("ANC", "BlueRidge", "DMI", "Edson", "FMANWT",
                                   "LandWeb", "LP",
                                   "Manning", "Mercer", "MillarWestern", "Mistik", "MPB",
+                                  "provAB", "provNWT", "provSK",
                                   "Sundre", "testing", "Tolko", "tolko",
                                   "Vanderwell", "WestFraser", "WeyCo"), type))))
         fn <- .cleanLandWebStudyArea
