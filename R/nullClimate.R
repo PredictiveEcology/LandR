@@ -2,18 +2,8 @@
 #'
 #' @param ... additional arguments that are passed to LandR.CS
 #' @return NULL in place of a model object
-#'
+#' @importFrom data.table data.table
 #' @export
 calculateClimateEffect <- function(...) {
-  return(NULL)
-}
-
-#' \code{assignClimateEffect}
-#'
-#' @param ... additional arguments that are passed to LandR.CS
-#' @return null (zero) estimate of growth due to climate
-#'
-#' @export
-assignClimateEffect <- function(...) {
-  return(0)
+  data.table('mortPred' = 100, 'growthPred' = 100)
 }
