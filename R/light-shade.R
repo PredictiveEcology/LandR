@@ -18,7 +18,7 @@ if (getRversion() >= "3.1.0") {
 #'
 #' @export
 #' @importFrom data.table data.table set setkey
-#'
+
 calcSiteShade <- compiler::cmpfun(function(time, cohortData, speciesEcoregion, minRelativeB) {
   # the siteshade was calculated based on the code:
   # https://github.com/LANDIS-II-Foundation/Extensions-Succession/blob/master/biomass-succession/trunk/src/PlugIn.cs
