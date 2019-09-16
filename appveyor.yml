@@ -27,7 +27,6 @@ environment:
 
   matrix:
   - R_VERSION: devel
-    PKGTYPE: source
 
   - R_VERSION: release
 

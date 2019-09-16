@@ -7,9 +7,10 @@ if (getRversion() >= "3.1.0") {
 #' Check if all species in have trait values
 #'
 #' @param speciesLayers stack of species layers rasters
-#' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
-#' @param sppColorVect A named vector of colors to use for plotting. The names must conform with \code{names(speciesLayers)}
-#'   and should also contain a color for 'Mixed'.
+#' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
+#' @param sppColorVect A named vector of colors to use for plotting.
+#'                     The names must conform with \code{names(speciesLayers)} and should also
+#'                     contain a color for 'Mixed'.
 #'
 #' @return
 #' A \code{list} with the \code{speciesLayers} and \code{sppColorVect}
@@ -36,13 +37,13 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' Make \code{pixelTable} from biomass, age, land-cover and species cover data
 #'
 #' @param speciesLayers stack of species layers rasters
-#' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
+#' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
 #' @param standAgeMap raster of stand age
 #' @param ecoregionFiles A list with two objects: the \code{ecoregionMap} and a table summarizing
-#'   it's information per pixelID. See \code{ecoregionProducer}
+#'   its information per \code{pixelID.} See \code{ecoregionProducer}.
 #' @param biomassMap raster of total stand biomass
-#' @param rasterToMatch raster mask of study area
-#' @param LCC2005 raster of land-cover class
+#' @param rasterToMatch a \code{rasterToMatch} (e.g., the one used throughout the simulation)
+#' @param rstLCC raster of land-cover class
 #' @param pixelGroupAgeClass When assigning pixelGroup membership, this defines the resolution
 #'   of ages that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14
 #'   will be the same
@@ -60,10 +61,9 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @importFrom pemisc factorValues2
 #' @importFrom raster ncell
 makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
-                           biomassMap, rasterToMatch, LCC2005, pixelGroupAgeClass = 1,
+                           biomassMap, rasterToMatch, rstLCC, pixelGroupAgeClass = 1,
                            printSummary = TRUE,
                            doAssertion = getOption("LandR.assertions", TRUE)) {
-
   if (missing(rasterToMatch)) {
     rasterToMatch <- raster(speciesLayers[[1]])
     rasterToMatch[] <- 0
@@ -114,8 +114,8 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
     set(pixelTable, NULL, "totalBiomass", asInteger(biomassMap[] * 100) ) # change units)
   }
 
-  if (!missing(LCC2005)) {
-    set(pixelTable, NULL, "lcc", LCC2005[])
+  if (!missing(rstLCC)) {
+    set(pixelTable, NULL, "lcc", rstLCC[])
   }
 
   #pixelTable <- data.table(#age = asInteger(ceiling(asInteger(standAgeMap[]) /
@@ -125,7 +125,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
                           # totalBiomass = asInteger(biomassMap[] * 100), # change units
                           # cover = coverMatrix,
                           # pixelIndex = seq(ncell(rasterToMatch)),
-                          # lcc = LCC2005[],
+                          # lcc = rstLCC[],
                           # rasterToMatch = rasterToMatch[])
 
   # Remove NAs from pixelTable
@@ -190,8 +190,8 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #'
 #' @export
 #' @importFrom data.table rbindlist
-makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDataShortNoCover, species,
-                                 modelCover, modelBiomass, successionTimestep, currentYear) {
+makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDataShortNoCover,
+                                 species, modelCover, modelBiomass, successionTimestep, currentYear) {
   ## Create speciesEcoregion table
   joinOn <- c("ecoregionGroup", "speciesCode")
   speciesEcoregion <- unique(cohortDataNoBiomass, by = joinOn)
@@ -204,7 +204,8 @@ makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDat
   ## establishProb
   establishprobBySuccessionTimestep <- 1 - (1 - modelCover$pred)^successionTimestep
   cohortDataShort[, establishprob := establishprobBySuccessionTimestep]
-  cohortDataShort <- species[, .(resproutprob, postfireregen, speciesCode)][cohortDataShort, on = "speciesCode"]
+  cohortDataShort <- species[, .(resproutprob, postfireregen, speciesCode)][cohortDataShort,
+                                                                            on = "speciesCode"]
 
   # Partitioning between seed and resprout. See documentation about the "* 0.5"
   cohortDataShort[, establishprob := pmax(0, pmin(1, (establishprob * (1 - resproutprob * 0.5))))]
@@ -239,3 +240,69 @@ makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDat
   return(speciesEcoregion)
 }
 
+#' Create \code{biomassMap}
+#'
+#' This is a function that creates the \code{biomassMap} raster used  for
+#'   simulations in LBMR, using estimated data based on \code{rawBiomassMap}
+#'   contained in \code{pixelCohortData}.
+#'
+#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used throughout the simulation)
+#'
+#' @return The \code{biomassMap}, a raster of total stand biomass per pixel.
+#'
+#' @export
+#' @importFrom raster raster
+makeBiomassMap <-  function(pixelCohortData, rasterToMatch) {
+  pixelData <- unique(pixelCohortData, by = "pixelIndex")
+  pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
+
+  biomassMap <- raster(rasterToMatch)
+  biomassMap[pixelData$pixelIndex] <- pixelData$totalBiomass
+
+  return(biomassMap)
+}
+
+#' Create \code{minRelativeB} table
+#'
+#' The table contains expert-based values for minimum relative biomass of each shade tolerance
+#' class (the minimum relative biomass a cohort with a given shade tolerance should have to be able
+#' to germinate), in each unique ecoregion group.
+#' All ecoregion groups currently have the same values.
+#'
+#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#'
+#' @return a data.frame of min relative biomass values per ecoregion group.
+#'
+#' @export
+makeMinRelativeB <- function(pixelCohortData) {
+  pixelData <- unique(pixelCohortData, by = "pixelIndex")
+  pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
+
+  minRelativeB <- data.frame(ecoregionGroup = levels(pixelData$ecoregionGroup),
+                             X1 = 0.2, X2 = 0.4, X3 = 0.5,
+                             X4 = 0.7, X5 = 0.9)
+
+  return(minRelativeB)
+}
+
+#' Create \code{makePixelGroupMap}
+#'
+#' Create the \code{makePixelGroupMap} raster containing \code{pixelGroups} in \code{pixelCohortData}.
+#'
+#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used throughout the simulation)
+#'
+#' @return a raster with pixel groups
+#'
+#' @export
+#' @importFrom raster raster
+makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
+  pixelData <- unique(pixelCohortData, by = "pixelIndex")
+  pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
+
+  pixelGroupMap <- raster(rasterToMatch)
+  pixelGroupMap[pixelData$pixelIndex] <- as.integer(pixelData$pixelGroup)
+
+  return(pixelGroupMap)
+}

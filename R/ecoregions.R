@@ -1,7 +1,5 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(
-    "mapcode"
-  ))
+  utils::globalVariables(c("active", "ecoregion", "ecoregionGroup", "ID", "mapcode"))
 }
 
 #' Make \code{ecoregionMap} and \code{ecoregion} table
@@ -29,7 +27,6 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom raster getValues levels raster
 #' @importFrom sf st_as_sf
 #' @importFrom SpaDES.core paddedFloatToChar
-
 ecoregionProducer <- function(ecoregionMaps, ecoregionName,
                               ecoregionActiveStatus, rasterToMatch) {
   # change the coordinate reference for all spatialpolygons
@@ -78,13 +75,12 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName,
       ecoregion = ecoregionFactorLevels[!is.na(ecoregionFactorLevels)]
     )
     message("ecoregionProducer mapvalues: ", Sys.time())
-    # rstEcoregion[] <- plyr::mapvalues(rstEcoregion[], from = ecoregionTable$ecoregion, to = ecoregionTable$mapcode)
+    # rstEcoregion[] <- plyr::mapvalues(rstEcoregion[], from = ecoregionTable$ecoregion,
+    #                                   to = ecoregionTable$mapcode)
     ecoregionActiveStatus[, ecoregion := as.factor(ecoregion)]
     ecoregionTable <- ecoregionTable[!is.na(mapcode), ][, ecoregion := as.character(ecoregion)]
     message("ecoregionProducer dplyr_leftjoin: ", Sys.time())
-    ecoregionTable <- dplyr::left_join(ecoregionTable,
-                                       ecoregionActiveStatus,
-                                       by = "ecoregion") %>%
+    ecoregionTable <- dplyr::left_join(ecoregionTable, ecoregionActiveStatus, by = "ecoregion") %>%
       data.table()
     ecoregionTable[is.na(active), active := "no"]
 
@@ -95,6 +91,60 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName,
   message("ecoregionProducer mapvalues: ", Sys.time())
   ecoregionTable <- ecoregionTable[,.(active = "yes", mapcode, ecoregion)]
 
-  return(list(ecoregionMap = rstEcoregion,
-              ecoregion = ecoregionTable))
+  return(list(ecoregionMap = rstEcoregion, ecoregion = ecoregionTable))
+}
+
+#' Make the \code{ecoregion} table
+#'
+#' This function creates a table containing pixel-wise ecoregion codes and whether they
+#'   are "active" (have biomass > 0) or not for simulation. Unlike \code{ecoregionProducer},
+#'   this function creates the \code{ecoregion} table from pixel information contained in
+#'   \code{pixelCohortData}
+#'
+#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
+#'
+#' @return
+#' A data.table with ecoregion codes and their active status per pixelID
+#'
+#' @export
+#' @importFrom data.table data.table
+makeEcoregionDT <- function(pixelCohortData, speciesEcoregion) {
+  ## make a table of available ecoregions
+  ecoregion <- data.table(
+    active = "yes",
+    ecoregionGroup = factor(as.character(unique(pixelCohortData$ecoregionGroup)))
+  )
+  # Some ecoregions have NO BIOMASS -- so they are not active
+  ecoregion[!ecoregionGroup %in% unique(speciesEcoregion$ecoregionGroup), active := "no"]
+
+  return(ecoregion)
+}
+
+#' Make the \code{ecoregionMap} raster
+#'
+#' Creates a raster of ecoregion codes per pixel.
+#' Unlike \code{ecoregionProducer}, this fills the raster with pixel information contained in
+#' \code{pixelCohortData}.
+#'
+#' @param pixelCohortData The full \code{cohortData} \code{data.table}.
+#' @param ecoregionFiles A list with two objects: the \code{ecoregionMap} and a table summarizing
+#'   its information per \code{pixelID}.
+#'
+#' @return A raster with ecoregion codes.
+#'
+#' @export
+#' @importFrom data.table data.table
+#' @importFrom raster levels raster
+makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
+  pixelData <- unique(pixelCohortData, by = "pixelIndex")
+  pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
+
+  ecoregionMap <-  raster(ecoregionFiles$ecoregionMap)
+  ecoregionMap[pixelData$pixelIndex] <- as.integer(pixelData$ecoregionGroup)
+  levels(ecoregionMap) <- data.frame(ID = seq(levels(pixelData$ecoregionGroup)),
+                                     ecoregion = gsub("_.*", "", levels(pixelData$ecoregionGroup)),
+                                     ecoregionGroup = levels(pixelData$ecoregionGroup),
+                                     stringsAsFactors = TRUE)
+  return(ecoregionMap)
 }

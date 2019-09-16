@@ -44,7 +44,7 @@ assertUniqueCohortData <- function(cohortData, columns,
 }
 
 #' @param ecoregionMap The \code{ecoregionMap}, a raster of all the unique groupings
-#' @param speciesEcoregion The \code{speciesEcoregion} \code{data.table}
+#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
 #' @param minRelativeB TODO: add description
 #'
 #' @export

@@ -9,10 +9,11 @@ checkSpeciesTraits(speciesLayers, species, sppColorVect)
 \arguments{
 \item{speciesLayers}{stack of species layers rasters}
 
-\item{species}{a \code{data.table} that has species traits such as longevity, shade tolerance, etc.}
+\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
 
-\item{sppColorVect}{A named vector of colors to use for plotting. The names must conform with \code{names(speciesLayers)}
-and should also contain a color for 'Mixed'.}
+\item{sppColorVect}{A named vector of colors to use for plotting.
+The names must conform with \code{names(speciesLayers)} and should also
+contain a color for 'Mixed'.}
 }
 \value{
 A \code{list} with the \code{speciesLayers} and \code{sppColorVect}
