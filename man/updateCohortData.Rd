@@ -17,8 +17,8 @@ updateCohortData(newPixelCohortData, cohortData, pixelGroupMap, time,
 \item{newPixelCohortData}{must be a complete cohortData object with newly
 created cohorts. They do not have to have \code{pixelGroup} values yet; they
 can be overlapping with \code{cohortData}, (i.e., they can be regenerated on
-empty pixels or on alreayd occupied pixels). Columns it must have:
-\code{pixelGroup}, \code{speciesCode}, \code{age}, \code{ecoregionGroup}. The
+empty pixels or on already occupied pixels). Columns it must have:
+ \code{pixelIndex}, \code{speciesCode}, \code{ecoregionGroup}. The
 remaining 4 (see \code{cohortData}) will be created with \code{0}s}
 
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
