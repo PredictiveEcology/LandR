@@ -4,6 +4,8 @@ if (getRversion() >= "3.1.0") {
 
 #' Assertions
 #'
+#' Assert that ecoregionCodes that were replaced, were correctly identified
+#'
 #' @param cohortData34to36 A \code{cohortData} \code{data.table} with only the
 #'                         pixels what were lcc 34:36
 #'
@@ -13,7 +15,7 @@ if (getRversion() >= "3.1.0") {
 #'
 #' @export
 #' @rdname assertions
-assert1 <- function(cohortData34to36, cohortData,
+assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote,
                     doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     allCodesAre34to36 <- all(grepl(".*34|.*35|.*36",
@@ -21,10 +23,21 @@ assert1 <- function(cohortData34to36, cohortData,
     if (!allCodesAre34to36)
       stop("lcc classes were mismanaged; contact developers: code 234")
 
+    ## do they match the codes found for areas with biomass?
+    ## if not, is this because the non-matching codes had no biomass to start with?
     onlyExistingCodes <- all(unique(cohortData34to36$ecoregionGroup) %in%
-                               unique(cohortData$initialEcoregionCode))
-    if (!onlyExistingCodes)
-      stop("There are some ecoregionCodes created post replacement of 34 and 35")
+                               unique(cohortData[eval(rmZeroBiomassQuote), initialEcoregionCode]))
+    if (!onlyExistingCodes) {
+      temp1 <- unique(cohortData34to36$ecoregionGroup)
+      temp2 <- unique(cohortData[eval(rmZeroBiomassQuote), initialEcoregionCode])
+      nonMatching <- setdiff(temp1, temp2)
+
+      ## was there any biomass/species data in these pixels?
+      nonMatchingB <- sum(cohortData[initialEcoregionCode == nonMatching, B], na.rm = TRUE)
+
+      if (nonMatchingB)
+        stop("There are some ecoregionCodes created post replacement of 34 and 35")
+    }
   }
 }
 
