@@ -10,7 +10,7 @@ calculateClimateEffect(...)
 \item{...}{additional arguments that are passed to LandR.CS}
 }
 \value{
-1 as a climate multiplier
+NULL in place of a model object
 }
 \description{
 \code{calculateClimateEffect}

@@ -10,7 +10,7 @@
 \alias{assertSpeciesPlotLabels}
 \title{Assertions}
 \usage{
-assert1(cohortData34to36, cohortData,
+assert1(cohortData34to36, cohortData, rmZeroBiomassQuote,
   doAssertion = getOption("LandR.assertions", TRUE))
 
 assertUniqueCohortData(cohortData, columns,
@@ -40,6 +40,9 @@ pixels what were lcc 34:36}
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
 \code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
 and \code{sumB}.}
+
+\item{rmZeroBiomassQuote}{An expression to evaluate, in the form of \code{quote(B>0)},
+used to select cohorts with biomass.}
 
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.
@@ -80,6 +83,8 @@ kNN format and the final naming format.
 See \code{data("sppEquivalencies_CA", "LandR")}.}
 }
 \description{
+Assert that ecoregionCodes that were replaced, were correctly identified
+
 This is the full pixelCohortData, not the collapsed one
 }
 \note{
