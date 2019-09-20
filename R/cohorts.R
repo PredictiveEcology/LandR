@@ -149,7 +149,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   # Add new cohorts and rm missing cohorts (i.e., those pixelGroups that are gone)
   ##########################################################
   if (!is.null(provenanceTable)) {
-    cohortData <- plantNewCohorts(newpixelCohortData, cohortData,
+    cohortData <- plantNewCohorts(newPixelCohortData, cohortData,
                                    pixelGroupMap, time = time,
                                    speciesEcoregion = speciesEcoregion,
                                    successionTimestep = successionTimestep,
