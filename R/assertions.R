@@ -230,3 +230,47 @@ assertSpeciesPlotLabels <- function(speciesNames, sppEquiv,
   }
 }
 
+
+#' Assertions
+#'
+#' Assert that the difference between fire severity and species fire tolerances
+#'  ranges between -4 and 4.
+#'
+#' @param burnedPixelCohortData An expanded \code{cohortData} \code{data.table} with pixel-level
+#'   cohort information on burnt pixels and columns:
+#'   \code{severity} - fire severity in taht pixel calculated based on fire behaviour properties
+#'   \code{firetolerance} - species-level fire tolerance
+#'   \code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}
+#'
+#' @template doAssertion
+#'
+#' @export
+#' @rdname assertions
+assertFireToleranceDif <- function(burnedPixelCohortData,
+                    doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    test1 <- TRUE
+    test2 <- TRUE
+    if (min(burnedPixelCohortData$severityToleranceDif, na.rm = TRUE) < -4 |
+        max(burnedPixelCohortData$severityToleranceDif, na.rm = TRUE) > 4) {
+      if (min(burnedPixelCohortData$firetolerance, na.rm = TRUE) < 1 |
+          min(burnedPixelCohortData$firetolerance, na.rm = TRUE) < 5 )
+        test1 <- FALSE
+      if (min(burnedPixelCohortData$severity, na.rm = TRUE) < 1 |
+          min(burnedPixelCohortData$severity, na.rm = TRUE) < 5 )
+        test2 <- FALSE
+    }
+    if (!test1)
+      stop("The difference between severity and species fire tolerance must be [-4,4].
+           Fire tolerance has values outside of [1,5], please check your
+           species traits table ('species')")
+    if (!test2)
+      stop("The difference between severity and species fire tolerance must be [-4,4].
+           Severity has values outside of [1,5], please debug Biomass_regenerationPM")
+    if (!test1 & !test2)
+      stop("The difference between severity and species fire tolerance must be [-4,4].
+           Severity and fire tolerances have values outside of [1,5], please debug
+           Biomass_regenerationPM and check your species traits table ('species')")
+
+  }
+}
