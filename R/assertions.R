@@ -42,6 +42,10 @@ assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote,
   }
 }
 
+#' Assertions
+#'
+#' Assert that cohortData has unique lines when subsetting for a given set of columns
+#'
 #' @param columns Vector of column names on which to test for unique cohortData
 #' @export
 #' @rdname assertions
@@ -57,6 +61,10 @@ assertUniqueCohortData <- function(cohortData, columns,
   }
 }
 
+#' Assertions
+#'
+#' Assert that ecoregionGroups match across different objects
+#'
 #' @param ecoregionMap The \code{ecoregionMap}, a raster of all the unique groupings
 #' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
 #' @param minRelativeB TODO: add description
@@ -91,6 +99,10 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
   }
 }
 
+#' Assertions
+#'
+#' Assert that an object contains a particular set of columns
+#'
 #' @param obj A data.frame or data.table-like object
 #' @param colClasses A named vector of column classes, where the names are the column names
 #'
@@ -113,6 +125,8 @@ assertColumns <- function(obj, colClasses,
   }
 }
 
+#' Assertions
+#'
 #' A test that \code{pixelGroupMap} and \code{cohortData} match
 #'
 #' @inheritParams updateCohortData
@@ -170,6 +184,8 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
   }
 }
 
+#' Assertions
+#'
 #' A test that \code{pixelGroupMap} and \code{pixelCohortData} match \code{pixelIndex}
 #'
 #' This is the full pixelCohortData, not the collapsed one
@@ -207,7 +223,8 @@ assertPixelCohortData <- function(pixelCohortData, pixelGroupMap,
   }
 }
 
-
+#' Assertions
+#'
 #' Check that each species as a unique label in the 'EN_generic_short' and 'Leading'
 #'   columns of the \code{sppEquiv} table.
 #'
