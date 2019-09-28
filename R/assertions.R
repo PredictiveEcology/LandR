@@ -264,7 +264,7 @@ assertSpeciesPlotLabels <- function(speciesNames, sppEquiv,
 #' @export
 #' @rdname assertions
 assertFireToleranceDif <- function(burnedPixelCohortData,
-                    doAssertion = getOption("LandR.assertions", TRUE)) {
+                                   doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     test1 <- TRUE
     test2 <- TRUE
