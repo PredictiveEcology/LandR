@@ -249,8 +249,6 @@ assertSpeciesPlotLabels <- function(speciesNames, sppEquiv,
 #'   \code{firetolerance} - species-level fire tolerance
 #'   \code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}
 #'
-#' @template doAssertion
-#'
 #' @export
 #' @rdname assertions
 assertFireToleranceDif <- function(burnedPixelCohortData,

@@ -91,10 +91,6 @@ cohort information on burnt pixels and columns:
 \code{severity} - fire severity in taht pixel calculated based on fire behaviour properties
 \code{firetolerance} - species-level fire tolerance
 \code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}}
-
-\item{doAssertion}{A logical indicating whether some internal tests should be run to
-ensure the function is running correctly.
-Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \description{
 Assert that ecoregionCodes that were replaced, were correctly identified
