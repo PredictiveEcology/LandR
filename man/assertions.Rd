@@ -8,6 +8,7 @@
 \alias{assertCohortData}
 \alias{assertPixelCohortData}
 \alias{assertSpeciesPlotLabels}
+\alias{assertFireToleranceDif}
 \title{Assertions}
 \usage{
 assert1(cohortData34to36, cohortData, rmZeroBiomassQuote,
@@ -31,6 +32,9 @@ assertPixelCohortData(pixelCohortData, pixelGroupMap,
   doAssertion = getOption("LandR.assertions", TRUE))
 
 assertSpeciesPlotLabels(speciesNames, sppEquiv,
+  doAssertion = getOption("LandR.assertions", TRUE))
+
+assertFireToleranceDif(burnedPixelCohortData,
   doAssertion = getOption("LandR.assertions", TRUE))
 }
 \arguments{
@@ -81,6 +85,12 @@ was called.}
 \item{sppEquiv}{table with species name equivalencies between the
 kNN format and the final naming format.
 See \code{data("sppEquivalencies_CA", "LandR")}.}
+
+\item{burnedPixelCohortData}{An expanded \code{cohortData} \code{data.table} with pixel-level
+cohort information on burnt pixels and columns:
+\code{severity} - fire severity in taht pixel calculated based on fire behaviour properties
+\code{firetolerance} - species-level fire tolerance
+\code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}}
 }
 \description{
 Assert that ecoregionCodes that were replaced, were correctly identified

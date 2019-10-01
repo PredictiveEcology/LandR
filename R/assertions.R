@@ -42,6 +42,8 @@ assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote,
   }
 }
 
+#' Assert that cohortData has unique lines when subsetting for a given set of columns
+#'
 #' @param columns Vector of column names on which to test for unique cohortData
 #' @export
 #' @rdname assertions
@@ -57,6 +59,9 @@ assertUniqueCohortData <- function(cohortData, columns,
   }
 }
 
+
+#' Assert that ecoregionGroups match across different objects
+#'
 #' @param ecoregionMap The \code{ecoregionMap}, a raster of all the unique groupings
 #' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
 #' @param minRelativeB TODO: add description
@@ -91,6 +96,9 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
   }
 }
 
+
+#' Assert that an object contains a particular set of columns
+#'
 #' @param obj A data.frame or data.table-like object
 #' @param colClasses A named vector of column classes, where the names are the column names
 #'
@@ -170,6 +178,7 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
   }
 }
 
+
 #' A test that \code{pixelGroupMap} and \code{pixelCohortData} match \code{pixelIndex}
 #'
 #' This is the full pixelCohortData, not the collapsed one
@@ -230,3 +239,43 @@ assertSpeciesPlotLabels <- function(speciesNames, sppEquiv,
   }
 }
 
+
+#' Assert that the difference between fire severity and species fire tolerances
+#'  ranges between -4 and 4.
+#'
+#' @param burnedPixelCohortData An expanded \code{cohortData} \code{data.table} with pixel-level
+#'   cohort information on burnt pixels and columns:
+#'   \code{severity} - fire severity in taht pixel calculated based on fire behaviour properties
+#'   \code{firetolerance} - species-level fire tolerance
+#'   \code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}
+#'
+#' @export
+#' @rdname assertions
+assertFireToleranceDif <- function(burnedPixelCohortData,
+                                   doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    test1 <- TRUE
+    test2 <- TRUE
+    if (min(burnedPixelCohortData$severityToleranceDif, na.rm = TRUE) < -4 |
+        max(burnedPixelCohortData$severityToleranceDif, na.rm = TRUE) > 4) {
+      if (min(burnedPixelCohortData$firetolerance, na.rm = TRUE) < 1 |
+          min(burnedPixelCohortData$firetolerance, na.rm = TRUE) < 5 )
+        test1 <- FALSE
+      if (min(burnedPixelCohortData$severity, na.rm = TRUE) < 1 |
+          min(burnedPixelCohortData$severity, na.rm = TRUE) < 5 )
+        test2 <- FALSE
+    }
+    if (!test1)
+      stop("The difference between severity and species fire tolerance must be [-4,4].
+           Fire tolerance has values outside of [1,5], please check your
+           species traits table ('species')")
+    if (!test2)
+      stop("The difference between severity and species fire tolerance must be [-4,4].
+           Severity has values outside of [1,5], please debug Biomass_regenerationPM")
+    if (!test1 & !test2)
+      stop("The difference between severity and species fire tolerance must be [-4,4].
+           Severity and fire tolerances have values outside of [1,5], please debug
+           Biomass_regenerationPM and check your species traits table ('species')")
+
+  }
+}
