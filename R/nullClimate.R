@@ -4,6 +4,8 @@
 #' @return NULL in place of a model object
 #' @importFrom data.table data.table
 #' @export
-calculateClimateEffect <- function(...) {
-  data.table('mortPred' = 100, 'growthPred' = 100)
+calculateClimateEffect <- function(cohortData, ...) {
+  predObj <- unique(cohortData[, .(pixelGroup, age, speciesCode)])
+  predObj[, `:=`(mortPred = 100, growthPred = 100)]
+  return(predObj)
 }
