@@ -1002,7 +1002,8 @@ addPixels2CohortData <- function(cohortData, pixelGroupMap,
 
   pixelGroupTable <- na.omit(data.table(pixelGroup = getValues(pixelGroupMap),
                                         pixelIndex = 1:ncell(pixelGroupMap)))
-  pixelCohortData <- cohortData[pixelGroupTable, on = "pixelGroup", nomatch = 0]
+  pixelCohortData <- cohortData[pixelGroupTable, on = "pixelGroup",
+                                nomatch = 0, allow.cartesian = TRUE]
 
   assertPixelCohortData(pixelCohortData, pixelGroupMap, doAssertion = doAssertion)
 
