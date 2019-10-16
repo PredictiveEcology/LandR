@@ -314,6 +314,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     setkeyv(cohortData2, pgdAndSc)
     # setorderv(x, pixelGroupColName)
     pixelGroupData2 <- cohortData2[, list(N = .N), by = pixelGroupColName]
+    cohortData2 <- cohortData2[, ..pgdAndScAndLeading]
 
     N <- rep.int(pixelGroupData2$N, pixelGroupData2$N)
     wh1 <- N == 1
