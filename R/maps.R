@@ -778,32 +778,39 @@ sumRastersBySpecies <- function(speciesLayers, layersToSum, filenameToSave, newL
 #' @importFrom raster ncell res stack
 overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffix = "overlay",
                           destinationPath) {
-  ## check if HQ resolution > LQ resolutions
-  hqLarger <- ncell(lowQualityStack) * prod(res(lowQualityStack)) <
-    ncell(highQualityStack) * prod(res(highQualityStack))
+  ## check if there are any layers/values in the lowQualityStack
+  ## if not return the HQ one
+  if (class(lowQualityStack) != "RasterStack" &
+      all(is.na(getValues(lowQualityStack)))) {
+    highQualityStack
+  } else {
+    ## check if HQ resolution > LQ resolutions
+    hqLarger <- ncell(lowQualityStack) * prod(res(lowQualityStack)) <
+      ncell(highQualityStack) * prod(res(highQualityStack))
 
-  ## make table of species layers in HQ and LQ
-  dt1 <- data.table(SPP = layerNames(highQualityStack), HQ = layerNames(highQualityStack))
-  dt2 <- data.table(SPP = layerNames(lowQualityStack), LQ = layerNames(lowQualityStack))
-  setkey(dt1, SPP); setkey(dt2, SPP)
-  dtj <- merge(dt1, dt2, all = TRUE)
-  dtj[, c("HQ", "LQ") := list(!is.na(HQ), !is.na(LQ))]
+    ## make table of species layers in HQ and LQ
+    dt1 <- data.table(SPP = layerNames(highQualityStack), HQ = layerNames(highQualityStack))
+    dt2 <- data.table(SPP = layerNames(lowQualityStack), LQ = layerNames(lowQualityStack))
+    setkey(dt1, SPP); setkey(dt2, SPP)
+    dtj <- merge(dt1, dt2, all = TRUE)
+    dtj[, c("HQ", "LQ") := list(!is.na(HQ), !is.na(LQ))]
 
-  ## check which layers have species info in HQ and LQ
-  #dtj[, HQ := any(!is.na(highQualityStack[[SPP]][])), by = 1:nrow(dtj)] #nolint
-  #dtj[, LQ := any(!is.na(lowQualityStack[[SPP]][])), by = 1:nrow(dtj)] #nolint
+    ## check which layers have species info in HQ and LQ
+    #dtj[, HQ := any(!is.na(highQualityStack[[SPP]][])), by = 1:nrow(dtj)] #nolint
+    #dtj[, LQ := any(!is.na(lowQualityStack[[SPP]][])), by = 1:nrow(dtj)] #nolint
 
-  stackRas <- list()
-  for (x in seq(nrow(dtj))) {
-    stackRas[[x]] <- dtj[x, .overlay(SPP, HQ, LQ, hqLarger = hqLarger,
-                                     highQualityStack = highQualityStack,
-                                     lowQualityStack = lowQualityStack,
-                                     outputFilenameSuffix = outputFilenameSuffix,
-                                     destinationPath = destinationPath)]
+    stackRas <- list()
+    for (x in seq(nrow(dtj))) {
+      stackRas[[x]] <- dtj[x, .overlay(SPP, HQ, LQ, hqLarger = hqLarger,
+                                       highQualityStack = highQualityStack,
+                                       lowQualityStack = lowQualityStack,
+                                       outputFilenameSuffix = outputFilenameSuffix,
+                                       destinationPath = destinationPath)]
+    }
+    names(stackRas) <- dtj$SPP
+
+    stack(stackRas)
   }
-  names(stackRas) <- dtj$SPP
-
-  stack(stackRas)
 }
 
 #' Overlaying function
