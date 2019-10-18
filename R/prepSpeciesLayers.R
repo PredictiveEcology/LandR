@@ -205,7 +205,7 @@ prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
                                      url = NULL,
                                      studyArea, rasterToMatch,
                                      sppEquiv,
-                                     sppEquivCol) {
+                                     sppEquivCol, ...) {
   if (is.null(url))
     url <- "https://drive.google.com/file/d/1y0ofr2H0c_IEMIpx19xf3_VTBheY0C9h/view?usp=sharing"
 
@@ -261,7 +261,8 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
                                   url = NULL,
                                   studyArea, rasterToMatch,
                                   sppEquiv,
-                                  sppEquivCol) {
+                                  sppEquivCol,
+                                  thresh = 10, ...) {
   if (is.null(url))
     url <- "http://tree.pfc.forestry.ca/kNN-Species.tar"
 
@@ -272,7 +273,7 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
     sppEquiv = sppEquiv,
     knnNamesCol = "KNN",
     sppEquivCol = sppEquivCol,
-    thresh = 10,
+    thresh = thresh,
     url = url,
     userTags = c("speciesLayers", "KNN"))
 }
@@ -399,7 +400,7 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
                                       url = NULL,
                                       studyArea, rasterToMatch,
                                       sppEquiv,
-                                      sppEquivCol) {
+                                      sppEquivCol, ...) {
   if (is.null(url))
     url <- "https://drive.google.com/open?id=1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
 
@@ -433,7 +434,7 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
                                               url = NULL,
                                               studyArea, rasterToMatch,
                                               sppEquiv,
-                                              sppEquivCol) {
+                                              sppEquivCol, ...) {
   if (is.null(url))
     url <- "https://drive.google.com/file/d/1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1/view?usp=sharing"
 
