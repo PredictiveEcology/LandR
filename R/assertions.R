@@ -279,3 +279,29 @@ assertFireToleranceDif <- function(burnedPixelCohortData,
 
   }
 }
+
+
+#' Assert that species layers exist with species cover in the study area
+#'
+#' @param speciesLayers A \code{RasterStack} or \code{RasterLayer} that
+#'   should contain species cover data in the study area
+#'
+#' @export
+#' @rdname assertions
+
+assertSpeciesLayers <- function(speciesLayers, thresh,
+                                doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    ## covert to list
+    if (class(speciesLayers) == "RasterStack")
+      speciesLayers <- as.list(speciesLayers) else
+        speciesLayers <- list(speciesLayers)
+
+    test1 <- sapply(speciesLayers, FUN = function(x)
+      all(is.na(getValues(x))))
+
+    if (all(test1))
+      stop("no pixels found were found with species % cover >=", thresh,
+           ". Try lowering the threshold.")
+  }
+}
