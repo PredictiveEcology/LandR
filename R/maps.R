@@ -694,11 +694,18 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
   noDataLayers <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh ) FALSE else TRUE)
   if (sum(!noDataLayers) > 0) {
-    sppKeep <- capture.output(dput(names(speciesLayers)[noDataLayers]))
-    message("removing ", sum(!noDataLayers), " species because they had <",thresh,
-            " % cover in the study area",
-            "\n  These species are retained (and could be further culled manually, if desired):\n  ",
-            sppKeep)
+    sppKeep <- names(speciesLayers)[noDataLayers]
+    if (length(sppKeep)) {
+      message("removing ", sum(!noDataLayers), " species because they had <",thresh,
+              " % cover in the study area",
+              "\n  These species are retained (and could be further culled manually, if desired):\n  ",
+              paste(sppKeep, collapse = " "))
+    } else {
+      message("no pixels for ", paste(names(noDataLayers), collapse = " "),
+              " were found with >=", thresh, " % cover in the study area.",
+              "\n  No species layers were retained. Try lowering the threshold",
+              " to retain species with low % cover")
+    }
   }
   speciesLayers <- speciesLayers[noDataLayers]
   if (!is.null(sppMerge)) {
@@ -729,7 +736,9 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   # }
   #
   ## return stack and updated species names vector
-  stack(speciesLayers)
+  if (length(speciesLayers))
+    stack(speciesLayers) else
+      raster()
 }
 
 #' Function to sum rasters of species layers
