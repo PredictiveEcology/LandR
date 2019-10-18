@@ -292,13 +292,16 @@ assertFireToleranceDif <- function(burnedPixelCohortData,
 assertSpeciesLayers <- function(speciesLayers, thresh,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    ## covert to list
-    if (class(speciesLayers) == "RasterStack")
-      speciesLayers <- as.list(speciesLayers) else
-        speciesLayers <- list(speciesLayers)
+    ## covert to list if not a stack
+    if (class(speciesLayers) != "RasterStack") {
+      speciesLayers <- list(speciesLayers)
 
-    test1 <- sapply(speciesLayers, FUN = function(x)
-      all(is.na(getValues(x))))
+      test1 <- sapply(speciesLayers, FUN = function(x)
+        all(is.na(getValues(x))))
+    } else {
+      test1 <- sapply(1:nlayers(speciesLayers), FUN = function(x)
+        all(is.na(getValues(speciesLayers[[x]]))))
+    }
 
     if (all(test1))
       stop("no pixels found were found with species % cover >=", thresh,
