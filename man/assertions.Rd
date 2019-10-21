@@ -9,6 +9,7 @@
 \alias{assertPixelCohortData}
 \alias{assertSpeciesPlotLabels}
 \alias{assertFireToleranceDif}
+\alias{assertSpeciesLayers}
 \title{Assertions}
 \usage{
 assert1(cohortData34to36, cohortData, rmZeroBiomassQuote,
@@ -35,6 +36,9 @@ assertSpeciesPlotLabels(speciesNames, sppEquiv,
   doAssertion = getOption("LandR.assertions", TRUE))
 
 assertFireToleranceDif(burnedPixelCohortData,
+  doAssertion = getOption("LandR.assertions", TRUE))
+
+assertSpeciesLayers(speciesLayers, thresh,
   doAssertion = getOption("LandR.assertions", TRUE))
 }
 \arguments{
@@ -91,6 +95,13 @@ cohort information on burnt pixels and columns:
 \code{severity} - fire severity in taht pixel calculated based on fire behaviour properties
 \code{firetolerance} - species-level fire tolerance
 \code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}}
+
+\item{speciesLayers}{A \code{RasterStack} or \code{RasterLayer} that
+should contain species cover data in the study area}
+
+\item{thresh}{the minimum number of pixels where the species must have
+\code{biomass > 0} to be considered present in the study area.
+Defaults to 1.}
 }
 \description{
 Assert that ecoregionCodes that were replaced, were correctly identified

@@ -8,16 +8,16 @@
 \title{Prepare species layers}
 \usage{
 prepSpeciesLayers_CASFRI(destinationPath, outputPath, url = NULL,
-  studyArea, rasterToMatch, sppEquiv, sppEquivCol)
+  studyArea, rasterToMatch, sppEquiv, sppEquivCol, ...)
 
 prepSpeciesLayers_KNN(destinationPath, outputPath, url = NULL, studyArea,
-  rasterToMatch, sppEquiv, sppEquivCol)
+  rasterToMatch, sppEquiv, sppEquivCol, thresh = 10, ...)
 
 prepSpeciesLayers_Pickell(destinationPath, outputPath, url = NULL,
-  studyArea, rasterToMatch, sppEquiv, sppEquivCol)
+  studyArea, rasterToMatch, sppEquiv, sppEquivCol, ...)
 
 prepSpeciesLayers_ForestInventory(destinationPath, outputPath,
-  url = NULL, studyArea, rasterToMatch, sppEquiv, sppEquivCol)
+  url = NULL, studyArea, rasterToMatch, sppEquiv, sppEquivCol, ...)
 }
 \arguments{
 \item{destinationPath}{TODO: description needed}
