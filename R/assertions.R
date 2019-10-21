@@ -285,6 +285,9 @@ assertFireToleranceDif <- function(burnedPixelCohortData,
 #'
 #' @param speciesLayers A \code{RasterStack} or \code{RasterLayer} that
 #'   should contain species cover data in the study area
+#' @param thresh the minimum number of pixels where the species must have
+#'   \code{biomass > 0} to be considered present in the study area.
+#'   Defaults to 1.
 #'
 #' @export
 #' @rdname assertions
