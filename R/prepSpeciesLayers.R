@@ -195,11 +195,41 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 #'                           kNN format and the final naming format.
 #'                           See \code{data("sppEquivalencies_CA", "LandR")}.
 #' @param sppEquivCol the column name to use from \code{sppEquiv}.
+#' @param thresh threshold % cover used to defined the species as "present"
+#'                           in the study area. If at least one pixel has
+#'                           cover >= \code{thresh} , the species is considered
+#'                           "present". Otherswise the raster is excluded from the output.
+#'                           Defaults to 10.
+#' @param ... other arguments, used for compatibility with other
+#'                          \code{prepSpeciesLayers} functions
 #'
 #' @return TODO: description needed
 #'
 #' @export
 #' @importFrom reproducible asPath Cache prepInputs
+#' @rdname prepSpeciesLayers
+prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
+                                  url = NULL,
+                                  studyArea, rasterToMatch,
+                                  sppEquiv,
+                                  sppEquivCol,
+                                  thresh = 10, ...) {
+  if (is.null(url))
+    url <- "http://tree.pfc.forestry.ca/kNN-Species.tar"
+
+  loadkNNSpeciesLayers(
+    dPath = destinationPath,
+    rasterToMatch = rasterToMatch,
+    studyArea = studyArea,
+    sppEquiv = sppEquiv,
+    knnNamesCol = "KNN",
+    sppEquivCol = sppEquivCol,
+    thresh = thresh,
+    url = url,
+    userTags = c("speciesLayers", "KNN"))
+}
+
+#' @export
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
                                      url = NULL,
@@ -257,26 +287,96 @@ prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
 
 #' @export
 #' @rdname prepSpeciesLayers
-prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
-                                  url = NULL,
-                                  studyArea, rasterToMatch,
-                                  sppEquiv,
-                                  sppEquivCol,
-                                  thresh = 10, ...) {
+prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
+                                      url = NULL,
+                                      studyArea, rasterToMatch,
+                                      sppEquiv,
+                                      sppEquivCol, ...) {
   if (is.null(url))
-    url <- "http://tree.pfc.forestry.ca/kNN-Species.tar"
+    url <- "https://drive.google.com/open?id=1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
 
-  loadkNNSpeciesLayers(
-    dPath = destinationPath,
-    rasterToMatch = rasterToMatch,
-    studyArea = studyArea,
-    sppEquiv = sppEquiv,
-    knnNamesCol = "KNN",
-    sppEquivCol = sppEquivCol,
-    thresh = thresh,
-    url = url,
-    userTags = c("speciesLayers", "KNN"))
+  speciesLayers <- Cache(prepInputs,
+                         targetFile = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.dat"),
+                         url = url,
+                         archive = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.zip"),
+                         alsoExtract = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.hdr"),
+                         destinationPath = destinationPath,
+                         fun = "raster::raster",
+                         studyArea = studyArea,
+                         rasterToMatch = rasterToMatch,
+                         method = "bilinear", ## ignore warning re: ngb (#5)
+                         datatype = "INT2U",
+                         filename2 = NULL,
+                         overwrite = TRUE,
+                         userTags = c("speciesLayers", "KNN", "Pickell", "stable"))
+
+  makePickellStack(PickellRaster = speciesLayers,
+                   sppEquiv = sppEquiv,
+                   sppEquivCol = sppEquivCol,
+                   destinationPath = destinationPath)
 }
+
+#' @export
+#' @importFrom assertthat assert_that
+#' @importFrom map mapAdd maps
+#' @importFrom raster maxValue minValue stack unstack
+#' @rdname prepSpeciesLayers
+prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
+                                              url = NULL,
+                                              studyArea, rasterToMatch,
+                                              sppEquiv,
+                                              sppEquivCol, ...) {
+  if (is.null(url))
+    url <- "https://drive.google.com/file/d/1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1/view?usp=sharing"
+
+  # The ones we want
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
+
+  # Take this from the sppEquiv table; user cannot supply manually
+  sppNameVector <- unique(sppEquiv[[sppEquivCol]])
+  names(sppNameVector) <- sppNameVector
+
+  # This includes LandType because it will use that at the bottom of this function to
+  #  remove NAs
+  CClayerNames <- c("Pine", "Black Spruce", "Deciduous", "Fir", "White Spruce", "LandType")
+  CClayerNamesFiles <- paste0(gsub(" ", "", CClayerNames), "1.tif")
+  options(map.useParallel = FALSE) ## TODO: pass additional arg to function
+  ml <- mapAdd(rasterToMatch, isRasterToMatch = TRUE, layerName = "rasterToMatch",
+               filename2 = NULL)
+
+  ml <- mapAdd(studyArea, map = ml, isStudyArea = TRUE, layerName = "studyArea",
+               useSAcrs = TRUE, filename2 = NULL)
+
+  ml <- mapAdd(map = ml, url = url, layerName = CClayerNames, CC = TRUE,
+               destinationPath = destinationPath,
+               targetFile = CClayerNamesFiles, filename2 = NULL,
+               alsoExtract = "similar", leaflet = FALSE, method = "ngb")
+
+  ccs <- ml@metadata[CC == TRUE & !(layerName == "LandType"), ]
+  CCs <- maps(ml, layerName = ccs$layerName)
+  CCstack <- raster::stack(CCs)
+  CCstackNames <- names(CCstack)
+
+  assertthat::assert_that(all(raster::minValue(CCstack) >= 0))
+  assertthat::assert_that(all(raster::maxValue(CCstack) <= 10))
+
+  CCstack[CCstack[] < 0] <- 0  ## turns stack into brick, so need to restack later
+  CCstack[CCstack[] > 10] <- 10
+  CCstack <- CCstack * 10 # convert back to percent
+  NA_ids <- which(is.na(ml$LandType[]) |  # outside of studyArea polygon
+                    ml$LandType[] == 1)   # 1 is cities -- NA it here -- will be filled in with another veg layer if available (e.g. Pickell)
+  message("  Setting NA, 1 in LandType to NA in speciesLayers in ForestInventory data")
+  aa <- try(CCstack[NA_ids] <- NA, silent = TRUE)
+  ## unclear why line above sometimes fails: 'Error in value[j, ] : incorrect number of dimensions'
+  if (is(aa, "try-error")) {
+    l <- unstack(CCstack)
+    CCstack <- lapply(l, function(x) {x[NA_ids] <- NA; x})
+  }
+  names(CCstack) <- equivalentName(CCstackNames, sppEquiv, sppEquivCol)
+
+  stack(CCstack)
+}
+
 
 #' makePickellStack
 #'
@@ -392,96 +492,4 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
 
   ## species in Pickell's data
   raster::stack(spRasts)
-}
-
-#' @export
-#' @rdname prepSpeciesLayers
-prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
-                                      url = NULL,
-                                      studyArea, rasterToMatch,
-                                      sppEquiv,
-                                      sppEquivCol, ...) {
-  if (is.null(url))
-    url <- "https://drive.google.com/open?id=1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
-
-  speciesLayers <- Cache(prepInputs,
-                         targetFile = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.dat"),
-                         url = url,
-                         archive = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.zip"),
-                         alsoExtract = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.hdr"),
-                         destinationPath = destinationPath,
-                         fun = "raster::raster",
-                         studyArea = studyArea,
-                         rasterToMatch = rasterToMatch,
-                         method = "bilinear", ## ignore warning re: ngb (#5)
-                         datatype = "INT2U",
-                         filename2 = NULL,
-                         overwrite = TRUE,
-                         userTags = c("speciesLayers", "KNN", "Pickell", "stable"))
-
-  makePickellStack(PickellRaster = speciesLayers,
-                   sppEquiv = sppEquiv,
-                   sppEquivCol = sppEquivCol,
-                   destinationPath = destinationPath)
-}
-
-#' @export
-#' @importFrom assertthat assert_that
-#' @importFrom map mapAdd maps
-#' @importFrom raster maxValue minValue stack unstack
-#' @rdname prepSpeciesLayers
-prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
-                                              url = NULL,
-                                              studyArea, rasterToMatch,
-                                              sppEquiv,
-                                              sppEquivCol, ...) {
-  if (is.null(url))
-    url <- "https://drive.google.com/file/d/1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1/view?usp=sharing"
-
-  # The ones we want
-  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
-
-  # Take this from the sppEquiv table; user cannot supply manually
-  sppNameVector <- unique(sppEquiv[[sppEquivCol]])
-  names(sppNameVector) <- sppNameVector
-
-  # This includes LandType because it will use that at the bottom of this function to
-  #  remove NAs
-  CClayerNames <- c("Pine", "Black Spruce", "Deciduous", "Fir", "White Spruce", "LandType")
-  CClayerNamesFiles <- paste0(gsub(" ", "", CClayerNames), "1.tif")
-  options(map.useParallel = FALSE) ## TODO: pass additional arg to function
-  ml <- mapAdd(rasterToMatch, isRasterToMatch = TRUE, layerName = "rasterToMatch",
-               filename2 = NULL)
-
-  ml <- mapAdd(studyArea, map = ml, isStudyArea = TRUE, layerName = "studyArea",
-               useSAcrs = TRUE, filename2 = NULL)
-
-  ml <- mapAdd(map = ml, url = url, layerName = CClayerNames, CC = TRUE,
-               destinationPath = destinationPath,
-               targetFile = CClayerNamesFiles, filename2 = NULL,
-               alsoExtract = "similar", leaflet = FALSE, method = "ngb")
-
-  ccs <- ml@metadata[CC == TRUE & !(layerName == "LandType"), ]
-  CCs <- maps(ml, layerName = ccs$layerName)
-  CCstack <- raster::stack(CCs)
-  CCstackNames <- names(CCstack)
-
-  assertthat::assert_that(all(raster::minValue(CCstack) >= 0))
-  assertthat::assert_that(all(raster::maxValue(CCstack) <= 10))
-
-  CCstack[CCstack[] < 0] <- 0  ## turns stack into brick, so need to restack later
-  CCstack[CCstack[] > 10] <- 10
-  CCstack <- CCstack * 10 # convert back to percent
-  NA_ids <- which(is.na(ml$LandType[]) |  # outside of studyArea polygon
-                    ml$LandType[] == 1)   # 1 is cities -- NA it here -- will be filled in with another veg layer if available (e.g. Pickell)
-  message("  Setting NA, 1 in LandType to NA in speciesLayers in ForestInventory data")
-  aa <- try(CCstack[NA_ids] <- NA, silent = TRUE)
-  ## unclear why line above sometimes fails: 'Error in value[j, ] : incorrect number of dimensions'
-  if (is(aa, "try-error")) {
-    l <- unstack(CCstack)
-    CCstack <- lapply(l, function(x) {x[NA_ids] <- NA; x})
-  }
-  names(CCstack) <- equivalentName(CCstackNames, sppEquiv, sppEquivCol)
-
-  stack(CCstack)
 }
