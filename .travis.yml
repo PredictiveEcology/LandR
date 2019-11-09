@@ -32,7 +32,6 @@ matrix:
       - RSQlite
     before_script:
       - Rscript -e 'install.packages("devtools", type = "source")'
-      - Rscript -e 'devtools::install_github("PredictiveEcology/reproducible@development", dependencies = FALSE)'
       - Rscript -e 'devtools::install_github("PredictiveEcology/map@development")'
       - Rscript -e 'devtools::install_github("PredictiveEcology/pemisc@development")'
       - Rscript -e 'devtools::install_github("PredictiveEcology/SpaDES.core@development", dependencies = FALSE)'
@@ -66,12 +65,13 @@ matrix:
       - stringi
     before_script:
       - Rscript -e 'install.packages("devtools", type = "source")'
-      - Rscript -e 'devtools::install_github("PredictiveEcology/reproducible@development", dependencies = FALSE)'
       - Rscript -e 'devtools::install_github("PredictiveEcology/map@development")'
       - Rscript -e 'devtools::install_github("PredictiveEcology/pemisc@development")'
       - Rscript -e 'devtools::install_github("PredictiveEcology/SpaDES.core@development", dependencies = FALSE)'
       - Rscript -e 'devtools::install_github("PredictiveEcology/SpaDES.tools@development", dependencies = FALSE)'
       - Rscript -e 'devtools::install_github("rforge/mumin/pkg")'
+    before_install:
+      - Rscript -e 'install.packages(c("ggplot2", "quickPlot", "reproducible"), type = "source")'
     r_github_packages:
       - jimhester/lintr
       - r-lib/covr
@@ -106,12 +106,13 @@ matrix:
       - stringi
     before_script:
       - Rscript -e 'install.packages("devtools", type = "source")'
-      - Rscript -e 'devtools::install_github("PredictiveEcology/reproducible@development", dependencies = FALSE)'
       - Rscript -e 'devtools::install_github("PredictiveEcology/map@development")'
       - Rscript -e 'devtools::install_github("PredictiveEcology/pemisc@development")'
       - Rscript -e 'devtools::install_github("PredictiveEcology/SpaDES.core@development", dependencies = FALSE)'
       - Rscript -e 'devtools::install_github("PredictiveEcology/SpaDES.tools@development", dependencies = FALSE)'
       - Rscript -e 'devtools::install_github("rforge/mumin/pkg")'
+    before_install:
+      - Rscript -e 'install.packages(c("ggplot2", "quickPlot", "reproducible"), type = "source")'
   - os: osx
     osx_image: xcode9.4
     addons:
