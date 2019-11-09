@@ -59,13 +59,6 @@ Suggests:
     roxygen2,
     rmarkdown,
     testthat
-Remotes:
-    PredictiveEcology/map@development,
-    PredictiveEcology/pemisc@development,
-    PredictiveEcology/reproducible@development,
-    PredictiveEcology/SpaDES.core@development,
-    PredictiveEcology/SpaDES.tools@development,
-    rforge/mumin/pkg
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
