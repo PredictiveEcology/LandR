@@ -65,7 +65,7 @@ matrix:
       - Rscript -e 'devtools::install_github("PredictiveEcology/map@development", dependencies = TRUE)'
       - Rscript -e 'devtools::install_github("PredictiveEcology/pemisc@development", dependencies = TRUE)'
     before_install:
-      - Rscript -e 'install.packages(c("ggplot2", "quickPlot", "reproducible", "SpaDES.core"), type = "source")'
+      - Rscript -e 'install.packages(c("ggplot2", "quickPlot", "reproducible", "rgdal", "rgeos", "SpaDES.core"), type = "source")'
     r_github_packages:
       - jimhester/lintr
       - r-lib/covr
@@ -103,7 +103,7 @@ matrix:
       - Rscript -e 'devtools::install_github("PredictiveEcology/map@development", dependencies = TRUE)'
       - Rscript -e 'devtools::install_github("PredictiveEcology/pemisc@development", dependencies = TRUE)'
     before_install:
-      - Rscript -e 'install.packages(c("ggplot2", "quickPlot", "reproducible", "SpaDES.core"), type = "source")'
+      - Rscript -e 'install.packages(c("ggplot2", "quickPlot", "reproducible", "rgdal", "rgeos", "SpaDES.core"), type = "source")'
   - os: osx
     osx_image: xcode9.4
     addons:
