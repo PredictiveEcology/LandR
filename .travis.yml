@@ -34,9 +34,6 @@ matrix:
       - Rscript -e 'install.packages("devtools", type = "source")'
       - Rscript -e 'devtools::install_github("PredictiveEcology/map@development", dependencies = TRUE)'
       - Rscript -e 'devtools::install_github("PredictiveEcology/pemisc@development", dependencies = TRUE)'
-      - Rscript -e 'devtools::install_github("PredictiveEcology/SpaDES.core@development", dependencies = FALSE)'
-      - Rscript -e 'devtools::install_github("PredictiveEcology/SpaDES.tools@development", dependencies = FALSE)'
-      - Rscript -e 'devtools::install_github("rforge/mumin/pkg")'
     before_install:
       - Rscript -e 'install.packages(c("ggplot2", "quickPlot", "reproducible", "SpaDES.core"), type = "source")'
   - os: linux
@@ -67,16 +64,13 @@ matrix:
       - Rscript -e 'install.packages("devtools", type = "source")'
       - Rscript -e 'devtools::install_github("PredictiveEcology/map@development", dependencies = TRUE)'
       - Rscript -e 'devtools::install_github("PredictiveEcology/pemisc@development", dependencies = TRUE)'
-      - Rscript -e 'devtools::install_github("PredictiveEcology/SpaDES.core@development", dependencies = FALSE)'
-      - Rscript -e 'devtools::install_github("PredictiveEcology/SpaDES.tools@development", dependencies = FALSE)'
-      - Rscript -e 'devtools::install_github("rforge/mumin/pkg")'
     before_install:
       - Rscript -e 'install.packages(c("ggplot2", "quickPlot", "reproducible", "SpaDES.core"), type = "source")'
     r_github_packages:
       - jimhester/lintr
       - r-lib/covr
     after_failure:
-      - cat ./SpaDES.core.Rcheck/tests/test-all.Rout
+      - cat ./LandR.Rcheck/tests/test-all.Rout
     after_success:
       - travis_wait 15 Rscript -e 'covr::coveralls(type = "all", quiet = FALSE)'
       - Rscript -e 'lintr::lint_package()'
@@ -108,9 +102,6 @@ matrix:
       - Rscript -e 'install.packages("devtools", type = "source")'
       - Rscript -e 'devtools::install_github("PredictiveEcology/map@development", dependencies = TRUE)'
       - Rscript -e 'devtools::install_github("PredictiveEcology/pemisc@development", dependencies = TRUE)'
-      - Rscript -e 'devtools::install_github("PredictiveEcology/SpaDES.core@development", dependencies = FALSE)'
-      - Rscript -e 'devtools::install_github("PredictiveEcology/SpaDES.tools@development", dependencies = FALSE)'
-      - Rscript -e 'devtools::install_github("rforge/mumin/pkg")'
     before_install:
       - Rscript -e 'install.packages(c("ggplot2", "quickPlot", "reproducible", "SpaDES.core"), type = "source")'
   - os: osx
