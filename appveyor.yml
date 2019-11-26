@@ -37,6 +37,8 @@ clone_depth: 5
 
 build_script:
   - Rscript -e "install.packages(c('igraph', 'RCurl'), repos = 'https://cran.rstudio.com')"
+  - travis-tool.sh install_github PredictiveEcology/map@development
+  - travis-tool.sh install_github PredictiveEcology/pemisc@development
   - travis-tool.sh install_deps
 
 test_script:
