@@ -724,17 +724,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                          sppEquiv, column = sppEquivCol)
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
 
-  # ## remove layers that have less data than thresh (i.e. spp absent in study area)
-  # ## count no. of pixels that have biomass
-  # layerData <- Cache(sapply, X = speciesLayers, function(xx) sum(xx[] > 0, na.rm = TRUE))
-  #
-  # ## remove layers that had < thresh pixels with biomass
-  # belowThresh <- layerData < thresh
-  # if (any(belowThresh)) {
-  #   message(names(belowThresh)[belowThresh], " was removed because it had no data")
-  #   speciesLayers[belowThresh] <- NULL
-  # }
-  #
+
   ## return stack and updated species names vector
   if (length(speciesLayers))
     stack(speciesLayers) else
