@@ -643,8 +643,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   if (any(!kNNnames %in% allSpp)) {
     warning(paste0("Can't find ", sppNameVector[!kNNnames %in% allSpp], " in kNN database.\n",
                    "Will use remaining matching species, but check if this is correct."))
-    kNNnames <- kNNnames[kNNnames %in% allSpp]
     sppNameVector <- sppNameVector[kNNnames %in% allSpp]
+    kNNnames <- kNNnames[kNNnames %in% allSpp]
   }
 
   ## define suffix to append to file names
