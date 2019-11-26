@@ -4,8 +4,14 @@
 \alias{loadCASFRI}
 \title{Load CASFRI data}
 \usage{
-loadCASFRI(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
-  type = c("cover", "age"))
+loadCASFRI(
+  CASFRIRas,
+  attrFile,
+  headerFile,
+  sppEquiv,
+  sppEquivCol,
+  type = c("cover", "age")
+)
 }
 \arguments{
 \item{CASFRIRas}{TODO: description needed}

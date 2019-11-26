@@ -4,10 +4,16 @@
 \alias{convertUnwantedLCC}
 \title{Convert Land Cover Classes to another value in its neighbourhood}
 \usage{
-convertUnwantedLCC(classesToReplace = 34:36, rstLCC, availableERC_by_Sp,
-  theUnwantedPixels, ecoregionGroupVec, speciesEcoregion,
-  pixelClassesToReplace, doAssertion = getOption("LandR.assertions",
-  TRUE))
+convertUnwantedLCC(
+  classesToReplace = 34:36,
+  rstLCC,
+  availableERC_by_Sp,
+  theUnwantedPixels,
+  ecoregionGroupVec,
+  speciesEcoregion,
+  pixelClassesToReplace,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 }
 \arguments{
 \item{classesToReplace}{Integer vector of classes that are are to be replaced, e.g.,

@@ -7,8 +7,12 @@
 \usage{
 getSpeciesTable(url = NULL, dPath = tempdir(), cacheTags = NULL)
 
-prepSpeciesTable(speciesTable, speciesLayers, sppEquiv = NULL,
-  sppEquivCol = "LandR")
+prepSpeciesTable(
+  speciesTable,
+  speciesLayers,
+  sppEquiv = NULL,
+  sppEquivCol = "LandR"
+)
 }
 \arguments{
 \item{url}{If NULL (the default), uses one from D. Cyr's LANDIS-II files:

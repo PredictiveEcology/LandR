@@ -4,8 +4,11 @@
 \alias{rmMissingCohorts}
 \title{Remove missing cohorts from cohortData based on pixelGroupMap}
 \usage{
-rmMissingCohorts(cohortData, pixelGroupMap,
-  doAssertion = getOption("LandR.assertions", TRUE))
+rmMissingCohorts(
+  cohortData,
+  pixelGroupMap,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 }
 \arguments{
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},

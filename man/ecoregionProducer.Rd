@@ -4,8 +4,12 @@
 \alias{ecoregionProducer}
 \title{Make \code{ecoregionMap} and \code{ecoregion} table}
 \usage{
-ecoregionProducer(ecoregionMaps, ecoregionName, ecoregionActiveStatus,
-  rasterToMatch)
+ecoregionProducer(
+  ecoregionMaps,
+  ecoregionName,
+  ecoregionActiveStatus,
+  rasterToMatch
+)
 }
 \arguments{
 \item{ecoregionMaps}{a \code{list} with two rasters, one with eco-regions (e.g. eco-districts)

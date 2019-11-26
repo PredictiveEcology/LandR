@@ -4,10 +4,18 @@
 \alias{makePixelTable}
 \title{Make \code{pixelTable} from biomass, age, land-cover and species cover data}
 \usage{
-makePixelTable(speciesLayers, species, standAgeMap, ecoregionFiles,
-  biomassMap, rasterToMatch, rstLCC, pixelGroupAgeClass = 1,
-  printSummary = TRUE, doAssertion = getOption("LandR.assertions",
-  TRUE))
+makePixelTable(
+  speciesLayers,
+  species,
+  standAgeMap,
+  ecoregionFiles,
+  biomassMap,
+  rasterToMatch,
+  rstLCC,
+  pixelGroupAgeClass = 1,
+  printSummary = TRUE,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 }
 \arguments{
 \item{speciesLayers}{stack of species layers rasters}

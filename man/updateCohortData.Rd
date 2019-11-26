@@ -5,14 +5,27 @@
 \alias{.initiateNewCohorts}
 \title{Add cohorts to \code{cohortData} and \code{pixelGroupMap}}
 \usage{
-updateCohortData(newPixelCohortData, cohortData, pixelGroupMap, time,
-  speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
-  provenanceTable = NULL, successionTimestep,
+updateCohortData(
+  newPixelCohortData,
+  cohortData,
+  pixelGroupMap,
+  time,
+  speciesEcoregion,
+  treedFirePixelTableSinceLastDisp = NULL,
+  provenanceTable = NULL,
+  successionTimestep,
   verbose = getOption("LandR.verbose", TRUE),
-  doAssertion = getOption("LandR.assertions", TRUE))
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 
-.initiateNewCohorts(newPixelCohortData, cohortData, pixelGroupMap, time,
-  speciesEcoregion, successionTimestep)
+.initiateNewCohorts(
+  newPixelCohortData,
+  cohortData,
+  pixelGroupMap,
+  time,
+  speciesEcoregion,
+  successionTimestep
+)
 }
 \arguments{
 \item{newPixelCohortData}{must be a complete cohortData object with newly

@@ -5,8 +5,7 @@
 \title{Make the \code{cohortData} table, while modifying the temporary
 \code{pixelCohortData} that will be used to prepare other files.}
 \usage{
-makeCohortDataFiles(pixelCohortData, columnsForPixelGroups,
-  speciesEcoregion)
+makeCohortDataFiles(pixelCohortData, columnsForPixelGroups, speciesEcoregion)
 }
 \arguments{
 \item{pixelCohortData}{The full \code{cohortData} \code{data.table}}

@@ -4,8 +4,11 @@
 \alias{addPixels2CohortData}
 \title{Generate \code{cohortData} table per pixel:}
 \usage{
-addPixels2CohortData(cohortData, pixelGroupMap,
-  doAssertion = getOption("LandR.assertions", TRUE))
+addPixels2CohortData(
+  cohortData,
+  pixelGroupMap,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 }
 \arguments{
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},

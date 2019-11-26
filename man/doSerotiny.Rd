@@ -4,10 +4,17 @@
 \alias{doSerotiny}
 \title{Activate serotiny after a (fire) disturbance}
 \usage{
-doSerotiny(burnedPixelCohortData, postFirePixelCohortData,
-  postFireRegenSummary = NULL, species, sufficientLight,
-  speciesEcoregion, simuTime, treedFirePixelTableSinceLastDisp,
-  calibrate = FALSE)
+doSerotiny(
+  burnedPixelCohortData,
+  postFirePixelCohortData,
+  postFireRegenSummary = NULL,
+  species,
+  sufficientLight,
+  speciesEcoregion,
+  simuTime,
+  treedFirePixelTableSinceLastDisp,
+  calibrate = FALSE
+)
 }
 \arguments{
 \item{burnedPixelCohortData}{A /code{cohortData} table expanded to pixelIndex containing the only the cohorts in
