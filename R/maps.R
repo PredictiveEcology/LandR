@@ -641,7 +641,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 
   ## same as above
   if (any(!kNNnames %in% allSpp)) {
-    warning(paste0("Can't find ", sppNameVector[is.na(kNNnames)], " in kNN database.\n",
+    warning(paste0("Can't find ", sppNameVector[!kNNnames %in% allSpp], " in kNN database.\n",
                    "Will use remaining matching species, but check if this is correct."))
     kNNnames <- kNNnames[kNNnames %in% allSpp]
     sppNameVector <- sppNameVector[kNNnames %in% allSpp]
