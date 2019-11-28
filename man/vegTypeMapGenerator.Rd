@@ -8,13 +8,20 @@
 \usage{
 vegTypeMapGenerator(x, ...)
 
-\method{vegTypeMapGenerator}{RasterStack}(x, ...,
-  doAssertion = getOption("LandR.doAssertion", TRUE))
+\method{vegTypeMapGenerator}{RasterStack}(x, ..., doAssertion = getOption("LandR.doAssertion", TRUE))
 
-\method{vegTypeMapGenerator}{data.table}(x, pixelGroupMap,
-  vegLeadingProportion = 0.8, mixedType = 2, sppEquiv = NULL,
-  sppEquivCol, colors, pixelGroupColName = "pixelGroup",
-  doAssertion = getOption("LandR.assertions", TRUE), ...)
+\method{vegTypeMapGenerator}{data.table}(
+  x,
+  pixelGroupMap,
+  vegLeadingProportion = 0.8,
+  mixedType = 2,
+  sppEquiv = NULL,
+  sppEquivCol,
+  colors,
+  pixelGroupColName = "pixelGroup",
+  doAssertion = getOption("LandR.assertions", TRUE),
+  ...
+)
 }
 \arguments{
 \item{x}{Either a \code{cohortData} object or a \code{speciesCover} \code{RasterStack}}

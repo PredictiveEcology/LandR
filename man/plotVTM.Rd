@@ -4,8 +4,15 @@
 \alias{plotVTM}
 \title{Summary plots of leading vegetation types}
 \usage{
-plotVTM(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
-  sppEquiv, sppEquivCol, colors, title = "Leading vegetation types")
+plotVTM(
+  speciesStack = NULL,
+  vtm = NULL,
+  vegLeadingProportion = 0.8,
+  sppEquiv,
+  sppEquivCol,
+  colors,
+  title = "Leading vegetation types"
+)
 }
 \arguments{
 \item{speciesStack}{A \code{RasterStack} of percent-cover-by-species layers.}

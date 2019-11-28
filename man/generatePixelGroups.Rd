@@ -4,8 +4,11 @@
 \alias{generatePixelGroups}
 \title{Add the correct \code{pixelGroups} to a \code{pixelDataTable} object}
 \usage{
-generatePixelGroups(pixelDataTable, maxPixelGroup,
-  columns = c("ecoregionGroup", "speciesCode", "age", "B"))
+generatePixelGroups(
+  pixelDataTable,
+  maxPixelGroup,
+  columns = c("ecoregionGroup", "speciesCode", "age", "B")
+)
 }
 \arguments{
 \item{pixelDataTable}{A \code{data.table} with column-based descriptions. This data.table

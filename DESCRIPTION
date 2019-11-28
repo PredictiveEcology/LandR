@@ -45,6 +45,7 @@ Imports:
     quickPlot,
     raster,
     RColorBrewer,
+    RCurl,
     reproducible,
     scales,
     sf,
@@ -53,7 +54,8 @@ Imports:
     SpaDES.tools (>= 0.3.1.9000),
     stats,
     tools,
-    utils
+    utils,
+    XML
 Suggests:
     knitr,
     roxygen2,
@@ -66,4 +68,4 @@ VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.0

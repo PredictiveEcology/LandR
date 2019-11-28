@@ -12,34 +12,65 @@
 \alias{assertSpeciesLayers}
 \title{Assertions}
 \usage{
-assert1(cohortData34to36, cohortData, rmZeroBiomassQuote,
-  doAssertion = getOption("LandR.assertions", TRUE))
+assert1(
+  cohortData34to36,
+  cohortData,
+  rmZeroBiomassQuote,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 
-assertUniqueCohortData(cohortData, columns,
-  doAssertion = getOption("LandR.assertions", TRUE))
+assertUniqueCohortData(
+  cohortData,
+  columns,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 
-assertERGs(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
-  doAssertion = getOption("LandR.assertions", TRUE))
+assertERGs(
+  ecoregionMap,
+  cohortData,
+  speciesEcoregion,
+  minRelativeB,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 
-assertColumns(obj, colClasses,
-  doAssertion = getOption("LandR.assertions", TRUE))
+assertColumns(
+  obj,
+  colClasses,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 
-assertCohortData(cohortData, pixelGroupMap, sim,
-  maxExpectedNumDiverge = 1, message = "",
+assertCohortData(
+  cohortData,
+  pixelGroupMap,
+  sim,
+  maxExpectedNumDiverge = 1,
+  message = "",
   doAssertion = getOption("LandR.assertions", TRUE),
-  verbose = getOption("LandR.verbose", TRUE))
+  verbose = getOption("LandR.verbose", TRUE)
+)
 
-assertPixelCohortData(pixelCohortData, pixelGroupMap,
-  doAssertion = getOption("LandR.assertions", TRUE))
+assertPixelCohortData(
+  pixelCohortData,
+  pixelGroupMap,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 
-assertSpeciesPlotLabels(speciesNames, sppEquiv,
-  doAssertion = getOption("LandR.assertions", TRUE))
+assertSpeciesPlotLabels(
+  speciesNames,
+  sppEquiv,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 
-assertFireToleranceDif(burnedPixelCohortData,
-  doAssertion = getOption("LandR.assertions", TRUE))
+assertFireToleranceDif(
+  burnedPixelCohortData,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 
-assertSpeciesLayers(speciesLayers, thresh,
-  doAssertion = getOption("LandR.assertions", TRUE))
+assertSpeciesLayers(
+  speciesLayers,
+  thresh,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 }
 \arguments{
 \item{cohortData34to36}{A \code{cohortData} \code{data.table} with only the

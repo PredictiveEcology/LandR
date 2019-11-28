@@ -4,8 +4,11 @@
 \alias{addNoPixel2CohortData}
 \title{Add number of pixels per \code{pixelGroup} and add it has a new column to \code{cohortData}}
 \usage{
-addNoPixel2CohortData(cohortData, pixelGroupMap,
-  doAssertion = getOption("LandR.assertions", TRUE))
+addNoPixel2CohortData(
+  cohortData,
+  pixelGroupMap,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 }
 \arguments{
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},

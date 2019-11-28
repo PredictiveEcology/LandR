@@ -4,8 +4,7 @@
 \alias{sumRastersBySpecies}
 \title{Function to sum rasters of species layers}
 \usage{
-sumRastersBySpecies(speciesLayers, layersToSum, filenameToSave,
-  newLayerName)
+sumRastersBySpecies(speciesLayers, layersToSum, filenameToSave, newLayerName)
 }
 \arguments{
 \item{speciesLayers}{stack of species layers rasters}

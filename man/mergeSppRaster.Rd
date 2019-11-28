@@ -4,8 +4,7 @@
 \alias{mergeSppRaster}
 \title{Merge species percent-cover rasters}
 \usage{
-mergeSppRaster(sppMerge, speciesLayers, sppEquiv, column, suffix, dPath,
-  ...)
+mergeSppRaster(sppMerge, speciesLayers, sppEquiv, column, suffix, dPath, ...)
 }
 \arguments{
 \item{sppMerge}{TODO}

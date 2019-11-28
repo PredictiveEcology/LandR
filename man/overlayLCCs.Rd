@@ -4,9 +4,17 @@
 \alias{overlayLCCs}
 \title{Overlay different LCC data sources}
 \usage{
-overlayLCCs(LCCs, forestedList, outputLayer, NAcondition, NNcondition,
-  remapTable = NULL, classesToReplace, availableERC_by_Sp,
-  forestEquivalencies = NULL)
+overlayLCCs(
+  LCCs,
+  forestedList,
+  outputLayer,
+  NAcondition,
+  NNcondition,
+  remapTable = NULL,
+  classesToReplace,
+  availableERC_by_Sp,
+  forestEquivalencies = NULL
+)
 }
 \arguments{
 \item{LCCs}{A named list or named \code{RasterStack} of layers whose content

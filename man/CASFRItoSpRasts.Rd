@@ -4,8 +4,14 @@
 \alias{CASFRItoSpRasts}
 \title{CASFRItoSpRasts}
 \usage{
-CASFRItoSpRasts(CASFRIRas, CASFRIattrLong, CASFRIdt, sppEquiv, sppEquivCol,
-  destinationPath)
+CASFRItoSpRasts(
+  CASFRIRas,
+  CASFRIattrLong,
+  CASFRIdt,
+  sppEquiv,
+  sppEquivCol,
+  destinationPath
+)
 }
 \arguments{
 \item{CASFRIRas}{TODO: description needed}

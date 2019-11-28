@@ -4,9 +4,16 @@
 \alias{makeSpeciesEcoregion}
 \title{Create \code{speciesEcoregion}}
 \usage{
-makeSpeciesEcoregion(cohortDataNoBiomass, cohortDataShort,
-  cohortDataShortNoCover, species, modelCover, modelBiomass,
-  successionTimestep, currentYear)
+makeSpeciesEcoregion(
+  cohortDataNoBiomass,
+  cohortDataShort,
+  cohortDataShortNoCover,
+  species,
+  modelCover,
+  modelBiomass,
+  successionTimestep,
+  currentYear
+)
 }
 \arguments{
 \item{cohortDataNoBiomass}{a subset of cohortData}

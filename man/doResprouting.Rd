@@ -4,10 +4,17 @@
 \alias{doResprouting}
 \title{Activate resprouting after a (fire) disturbance}
 \usage{
-doResprouting(burnedPixelCohortData, postFirePixelCohortData,
-  postFireRegenSummary = NULL, serotinyPixel,
-  treedFirePixelTableSinceLastDisp, simuTime, species, sufficientLight,
-  calibrate = FALSE)
+doResprouting(
+  burnedPixelCohortData,
+  postFirePixelCohortData,
+  postFireRegenSummary = NULL,
+  serotinyPixel,
+  treedFirePixelTableSinceLastDisp,
+  simuTime,
+  species,
+  sufficientLight,
+  calibrate = FALSE
+)
 }
 \arguments{
 \item{burnedPixelCohortData}{A /code{cohortData} table expanded to pixelIndex containing the only the cohorts in

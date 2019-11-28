@@ -5,12 +5,20 @@
 \alias{makeAndCleanInitialCohortData}
 \title{Generate template \code{cohortData} table}
 \usage{
-.createCohortData(inputDataTable, pixelGroupBiomassClass,
-  doAssertion = getOption("LandR.assertions", TRUE), rescale = TRUE)
+.createCohortData(
+  inputDataTable,
+  pixelGroupBiomassClass,
+  doAssertion = getOption("LandR.assertions", TRUE),
+  rescale = TRUE
+)
 
-makeAndCleanInitialCohortData(inputDataTable, sppColumns,
-  pixelGroupBiomassClass, doAssertion = getOption("LandR.assertions",
-  TRUE), doSubset = TRUE)
+makeAndCleanInitialCohortData(
+  inputDataTable,
+  sppColumns,
+  pixelGroupBiomassClass,
+  doAssertion = getOption("LandR.assertions", TRUE),
+  doSubset = TRUE
+)
 }
 \arguments{
 \item{inputDataTable}{A \code{data.table} with columns described above.}

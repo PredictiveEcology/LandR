@@ -7,17 +7,50 @@
 \alias{prepSpeciesLayers_ForestInventory}
 \title{Prepare species layers}
 \usage{
-prepSpeciesLayers_KNN(destinationPath, outputPath, url = NULL, studyArea,
-  rasterToMatch, sppEquiv, sppEquivCol, thresh = 10, ...)
+prepSpeciesLayers_KNN(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  thresh = 10,
+  ...
+)
 
-prepSpeciesLayers_CASFRI(destinationPath, outputPath, url = NULL,
-  studyArea, rasterToMatch, sppEquiv, sppEquivCol, ...)
+prepSpeciesLayers_CASFRI(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  ...
+)
 
-prepSpeciesLayers_Pickell(destinationPath, outputPath, url = NULL,
-  studyArea, rasterToMatch, sppEquiv, sppEquivCol, ...)
+prepSpeciesLayers_Pickell(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  ...
+)
 
-prepSpeciesLayers_ForestInventory(destinationPath, outputPath,
-  url = NULL, studyArea, rasterToMatch, sppEquiv, sppEquivCol, ...)
+prepSpeciesLayers_ForestInventory(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  ...
+)
 }
 \arguments{
 \item{destinationPath}{TODO: description needed}

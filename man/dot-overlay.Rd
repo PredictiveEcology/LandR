@@ -4,8 +4,16 @@
 \alias{.overlay}
 \title{Overlaying function}
 \usage{
-.overlay(SPP, HQ, LQ, hqLarger, highQualityStack, lowQualityStack,
-  outputFilenameSuffix = "overlay", destinationPath)
+.overlay(
+  SPP,
+  HQ,
+  LQ,
+  hqLarger,
+  highQualityStack,
+  lowQualityStack,
+  outputFilenameSuffix = "overlay",
+  destinationPath
+)
 }
 \arguments{
 \item{SPP}{\code{data.table} column of species layer name}
