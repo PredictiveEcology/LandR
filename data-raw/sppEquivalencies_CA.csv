@@ -7,7 +7,7 @@ abielasi,ABIE.LAS,Abie_sp,Abie_Las,Abie lasi,Abies lasiocarpa,Fir,Fir,Fir leadin
 ,,Abie_mag,,Abie magn,Abies magnifica var shastensis,,,,,,Conifer,
 ,,Abie_pic,,Abie pice,,Fir-Sp,Fir-Spruce,Fir-Spruce mix,Abies pice in CASFRI is a Spruce-balsam fir or Balsam fir-spruce mix,,Conifer,
 ,,Abie_pro,,Abie proc,Abies procera,,,,,,Conifer,
-,ABIE.ALL,Abie_sp,Abie_Spp,Abie spp,Abies spp.,Fir,Fir,Fir leading,,,Conifer,subalpine fir
+,,Abie_sp,Abie_Spp,Abie spp,Abies spp.,Fir,Fir,Fir leading,,,Conifer,subalpine fir
 ,,Acer_cir,Acer_Cir,Acer circ,Acer circinatum,,,,,,Deciduous,vine maple
 ,,Acer_fre,,Acer free,Acer X freemanii,,,,,,Deciduous,
 ,,Acer_gla,,Acer glab,Acer glabrum,,,,,,Deciduous,
@@ -117,7 +117,7 @@ pinubank,PINU.BAN,Pinu_ban,Pinu_Ban,Pinu bank,Pinus banksiana,Jk pine,Jack pine,
 ,,Pinu_rad,,Pinu radi,Pinus radiata,Pine,Pine,Pine leading,,,Conifer,
 pinuresi,PINU.RES,Pinu_res,Pinu_Res,Pinu resi,Pinus resinosa,Rd pine,Red pine,Red pine leading,,Pinu_Res,Conifer,
 ,,Pinu_rig,Pinu_Rig,Pinu rigi,Pinus rigida,Pine,Pine,Pine leading,,,Conifer,
-,PINU.ALL,Pinu_sp,Pinu_Spp,Pinu spp,Pinus spp.,Pine,Pine,Pine leading,,Pinu_Spp,Conifer,
+,,Pinu_sp,Pinu_Spp,Pinu spp,Pinus spp.,Pine,Pine,Pine leading,,Pinu_Spp,Conifer,
 pinustro,PINU.STR,Pinu_str,Pinu_Str,Pinu stro,Pinus strobus,Pine,Pine,Pine leading,,,Conifer,white pine
 ,,Pinu_syl,Pinu_Syl,Pinu sylv,Pinus sylvestris,Pine,Pine,Pine leading,,,Conifer,
 ,,Plan_occ,Plat_Occ,Plan occi,Platanus occidentalis,,,,,,Deciduous,
@@ -145,7 +145,7 @@ pseumenz,PSEU.MEN,Pseu_men,Pseu_Men,Pseu menz,Pseudotsuga menziesii,,,,,,Conifer
 ,,Pyru_com,,Pyru comm,Pyrus communis,,,,,,Deciduous,
 ,,Quer_alb,Quer_Alb,Quer alba,Quercus alba,,,,,,Deciduous,white oak
 ,,Quer_bic,Quer_Bic,Quer bico,Quercus bicolor,,,,,,Deciduous,
-querelli,QUER.ELL,Quer_ell,,,,,,,,,Deciduous,
+querelli,,Quer_ell,,,,,,,,,Deciduous,
 ,,Quer_gar,Quer_Gar,Quer garr,Quercus garryana,,,,,,Deciduous,
 ,,Quer_mac,Quer_Mac,Quer macr,Quercus macrocarpa,,,,,,Deciduous,bur oak
 ,,Quer_mue,,Quer mueh,Quercus muehlenbergii,,,,,,Deciduous,
@@ -173,10 +173,10 @@ querrubr,QUER.RUB,Quer_rub,Quer_Rub,Quer rubr,Quercus rubra,,,,,,Deciduous,
 ,,Sorb_dec,Sorb_Dec,,,,,,,,Deciduous,
 ,,Sorb_sp,Sorb_Spp,,,,,,,,Deciduous,
 ,,Taxu_bre,,Taxu brev,Taxus brevifolia,,,,,,Conifer,
-thujocci,THUJ.OCC,Thuj_occ,Thuj_Occ,Thuj occi,Thuja occidentalis,,,,,,Conifer,
+thujocci,,Thuj_occ,Thuj_Occ,Thuj occi,Thuja occidentalis,,,,,,Conifer,
 thujplic,THUJ.PLI,Thuj_pli,Thuj_Pli,Thuj plic,Thuja plicata,,,,,,Conifer,western redcedar
 ,THUJ.SPP.ALL,Thuj_sp,Thuj_Spp,,,,,,,,Conifer,
-tiliamer,TILI.AME,Tili_ame,Tili_Ame,Tili amer,Tilia americana,,,,,,Deciduous,
+tiliamer,,Tili_ame,Tili_Ame,Tili amer,Tilia americana,,,,,,Deciduous,
 ,,Tili_cor,,Tili cord,Tilia cordata,,,,,,Deciduous,
 ,,Tili_pla,,Tili plat,Tilia platyphyllos,,,,,,Deciduous,
 tsugcana,TSUG.CAN,Tsug_can,Tsug_Can,Tsug cana,Tsuga canadensis,Ea hemlock,Eastern hemlock,Eastern hemlock leading,,Tsug_Can,Conifer,
