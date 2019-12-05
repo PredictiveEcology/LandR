@@ -3,7 +3,7 @@
 \name{getSpeciesTable}
 \alias{getSpeciesTable}
 \alias{prepSpeciesTable}
-\title{Download and prepare a species traits table for use with LBMR module}
+\title{Download and prepare a species traits table for use with L\code{Biomass_core} module}
 \usage{
 getSpeciesTable(url = NULL, dPath = tempdir(), cacheTags = NULL)
 
@@ -26,12 +26,15 @@ prepSpeciesTable(
 
 \item{speciesLayers}{stack of species layers rasters}
 
-\item{sppEquiv}{table with species name equivalencies between the
-kNN format and the final naming format.
-See \code{data("sppEquivalencies_CA", "LandR")}.}
+\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
+See \code{data("sppEquivalencies_CA", "LandR")}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use
+\code{data("sppEquivalencies_CA", "LandR")}.}
 
-\item{sppEquivCol}{character string indicating the column in \code{sppEquiv}
-to use for final species names.}
+\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 }
 \value{
 A \code{data.table} with columns ... TODO

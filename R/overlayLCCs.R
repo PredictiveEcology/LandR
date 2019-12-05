@@ -16,7 +16,7 @@ if (getRversion() >= "3.1.0") {
 #'   It should be a set of conditions with \code{== 0}, i.e., non-forested.
 #'   Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
 #'   where \code{0} is the non-forested pixels based on converting LCCs and
-#'   \code{forestedList} to 1s and 0s.
+#'   \code{forestedList} to \code{1} and \code{0}.
 #' @param NNcondition The 'nearest-neighbour' condition; i.e., the condition when
 #'   a nearest-neighbour search is done to fill in the pixel with forested type.
 #'   Given as a character string of a vectorized logical statement that will be
@@ -24,7 +24,7 @@ if (getRversion() >= "3.1.0") {
 #'   It should be a set of conditions with \code{== 0}, i.e., non-forested.
 #'   Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
 #'   where \code{0} is the non-forested pixels based on converting LCCs and
-#'   \code{forestedList} to 1s and 0s.
+#'   \code{forestedList} to \code{1} and \code{0}.
 #' @param remapTable \code{data.table}. This would be for a situation where
 #'   2 LCC layers are provided, one has information in a pixel, but not the one
 #'   which is \code{outputLayer}, so this needs a reclassify or remap.

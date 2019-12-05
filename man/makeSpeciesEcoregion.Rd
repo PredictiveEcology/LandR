@@ -16,13 +16,13 @@ makeSpeciesEcoregion(
 )
 }
 \arguments{
-\item{cohortDataNoBiomass}{a subset of cohortData}
+\item{cohortDataNoBiomass}{a subset of \code{cohortData}}
 
-\item{cohortDataShort}{a subset of cohortData}
+\item{cohortDataShort}{a subset of \code{cohortData}}
 
-\item{cohortDataShortNoCover}{a subset of cohortData}
+\item{cohortDataShortNoCover}{a subset of \code{cohortData}}
 
-\item{species}{a \code{data.table} that has species traits such as longevity, shade tolerance, etc.}
+\item{species}{a \code{data.table} of species traits, e.g., longevity, shade tolerance, etc.}
 
 \item{modelCover}{statistical model of species presence/absence}
 
@@ -39,7 +39,7 @@ to generate \code{specieEcoregion} table.
 \details{
 See Details.
 }
-\section{establishprob}{
+\section{\code{establishprob}}{
 
 This section takes the cover as estimated from the mature tree cover and
 partitions it between resprouting and seeds Unfortunately, establishment by

@@ -2,27 +2,30 @@
 % Please edit documentation in R/plotting.R
 \name{sppColors}
 \alias{sppColors}
-\title{Create species color vector from a sppEquiv table}
+\title{Create species colour vector from a \code{sppEquiv} table}
 \usage{
 sppColors(sppEquiv, sppEquivCol, newVals = NULL, palette)
 }
 \arguments{
-\item{sppEquiv}{table with species name equivalencies between the
-kNN format and the final naming format.
-See \code{data("sppEquivalencies_CA", "LandR")}.}
+\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
+See \code{data("sppEquivalencies_CA", "LandR")}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use
+\code{data("sppEquivalencies_CA", "LandR")}.}
 
-\item{sppEquivCol}{the column name to use from \code{sppEquiv}.}
+\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
 \item{newVals}{An optional character vector of extra names to use, e.g., "Mixed".}
 
-\item{palette}{An RColorBrewer palette, e.g., "Accent".
-Can get RColorBrewer palette names from
-\code{rownames(RColorBrewer::brewer.pal.info)}.}
+\item{palette}{An \pkg{RColorBrewer} palette, e.g., "Accent".
+Can get \pkg{RColorBrewer} palette names from \code{rownames(RColorBrewer::brewer.pal.info)}.}
 }
 \value{
-A named vector of color codes, where the names are the species names
+A named vector of colour codes, where the names are the species names
 plus any extra names passed with \code{newVals}.
 }
 \description{
-Create species color vector from a sppEquiv table
+Create species colour vector from a \code{sppEquiv} table
 }

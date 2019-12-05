@@ -40,7 +40,7 @@ The remaining 4 (see \code{cohortData}) will be created with \code{0}s.}
 and \code{sumB}.}
 
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
-number that correspondsd exactly to \code{pixelGroup} column in \code{cohortData}.}
+number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
 \item{time}{Current time e.g., time(sim). This is used to extract the correct parameters in
 \code{speciesEcoregion} table if there are different values over time.}
@@ -70,11 +70,10 @@ A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
 A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
 }
 \description{
-This is a wrapper for  \code{generatePixelGroups}, \code{initiateNewCohort} and
-updates to \code{pixelGroupMap} via assignment to new \code{pixelIndex}
-values in \code{newPixelCohortData}. By running these all together,
-there is less chance that they will diverge. There are some checks
-internally for consistency.
+This is a wrapper for  \code{generatePixelGroups}, \code{initiateNewCohort} and updates to
+\code{pixelGroupMap} via assignment to new \code{pixelIndex} values in \code{newPixelCohortData}.
+By running these all together, there is less chance that they will diverge.
+There are some checks internally for consistency.
 
 Calculate new values for \code{B}, add \code{age}, then \code{rbindlist} this
 with \code{cohortData}.
@@ -82,9 +81,9 @@ with \code{cohortData}.
 \details{
 Does the following:
 \enumerate{
-  \item add new cohort data into \code{cohortdata};
-  \item assign initial B and age for new cohort;
-  \item assign the new pixelgroup to the pixels that have new cohort;
-  \item update the pixelgroup map.
+  \item add new cohort data into \code{cohortData};
+  \item assign initial \code{B} and \code{age} for new cohort;
+  \item assign the new \code{pixelGroup} to the pixels that have new cohort;
+  \item update the \code{pixelGroup} map.
 }
 }

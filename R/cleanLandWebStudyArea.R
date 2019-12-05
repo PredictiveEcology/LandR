@@ -35,7 +35,7 @@
 #' @param poly A polygon object, or a character string identifying the shapefile
 #'             path to load, and clean.
 #' @param fn   A function identifying the type of cleaning to do.
-#' @param type If fn is not known, an character string can be specified to
+#' @param type If \code{fn} is not known, an character string can be specified to
 #'             identify which \code{fn} to use.
 #'             This MUST be a known type for this function.
 #' @param ...  Passed to \code{fn}

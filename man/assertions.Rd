@@ -74,7 +74,7 @@ assertSpeciesLayers(
 }
 \arguments{
 \item{cohortData34to36}{A \code{cohortData} \code{data.table} with only the
-pixels what were lcc 34:36}
+pixels what were LCC 34:36}
 
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
 \code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
@@ -87,7 +87,7 @@ used to select cohorts with biomass.}
 ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
 
-\item{columns}{Vector of column names on which to test for unique cohortData}
+\item{columns}{Vector of column names on which to test for unique \code{cohortData}}
 
 \item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique groupings}
 
@@ -100,9 +100,9 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 \item{colClasses}{A named vector of column classes, where the names are the column names}
 
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
-number that correspondsd exactly to \code{pixelGroup} column in \code{cohortData}.}
+number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
-\item{sim}{If the simList is included, then the browser() call will be more useful}
+\item{sim}{If the \code{simList} is included, then the \code{browser()} call will be more useful.}
 
 \item{maxExpectedNumDiverge}{A numeric, length 1, indicating by how many they
 can diverge. Default 1.}
@@ -116,15 +116,17 @@ was called.}
 
 \item{speciesNames}{A vector of species names for which the labels will be checked}
 
-\item{sppEquiv}{table with species name equivalencies between the
-kNN format and the final naming format.
-See \code{data("sppEquivalencies_CA", "LandR")}.}
+\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
+See \code{data("sppEquivalencies_CA", "LandR")}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use
+\code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{burnedPixelCohortData}{An expanded \code{cohortData} \code{data.table} with pixel-level
 cohort information on burnt pixels and columns:
-\code{severity} - fire severity in taht pixel calculated based on fire behaviour properties
-\code{firetolerance} - species-level fire tolerance
-\code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}}
+\code{severity} - fire severity in that pixel calculated based on fire behaviour properties;
+\code{firetolerance} - species-level fire tolerance;
+\code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}.}
 
 \item{speciesLayers}{A \code{RasterStack} or \code{RasterLayer} that
 should contain species cover data in the study area}
@@ -134,7 +136,7 @@ should contain species cover data in the study area}
 Defaults to 1.}
 }
 \description{
-Assert that ecoregionCodes that were replaced, were correctly identified
+Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
 
 This is the full \code{pixelCohortData}, not the collapsed one.
 }

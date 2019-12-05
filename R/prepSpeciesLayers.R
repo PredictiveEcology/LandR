@@ -9,10 +9,8 @@ if (getRversion() >= "3.1.0") {
 #' @param CASFRIRas TODO: description needed
 #' @param attrFile TODO: description needed
 #' @param headerFile TODO: description needed
-#' @param sppEquiv table with species name equivalencies between the
-#'                           kNN format and the final naming format.
-#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
-#' @param sppEquivCol the column name to use from \code{sppEquiv}.
+#' @template sppEquiv
+#' @template sppEquivCol
 #' @param type Character string. Either \code{"cover"} or \code{"age"}.
 #'
 #' @return TODO: description needed
@@ -87,17 +85,15 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
     CASFRIdt = CASFRIdt))
 }
 
-#' CASFRItoSpRasts
+#' \code{CASFRItoSpRasts}
 #'
 #' TODO: description and title needed
 #'
 #' @param CASFRIRas TODO: description needed
 #' @param CASFRIattrLong TODO: description needed
 #' @param CASFRIdt TODO: description needed
-#' @param sppEquiv table with species name equivalencies between the
-#'                           kNN format and the final naming format.
-#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
-#' @param sppEquivCol the column name to use from \code{sppEquiv}.
+#' @template sppEquiv
+#' @template sppEquivCol
 #' @param destinationPath TODO: description needed
 #'
 #' @return TODO: description needed
@@ -191,17 +187,12 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 #' @param url TODO: description needed; if \code{NULL}, the default, use the default source url
 #' @param studyArea TODO: description needed
 #' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used throughout the simulation)
-#' @param sppEquiv table with species name equivalencies between the
-#'                           kNN format and the final naming format.
-#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
-#' @param sppEquivCol the column name to use from \code{sppEquiv}.
-#' @param thresh threshold % cover used to defined the species as "present"
-#'                           in the study area. If at least one pixel has
-#'                           cover >= \code{thresh} , the species is considered
-#'                           "present". Otherswise the raster is excluded from the output.
-#'                           Defaults to 10.
-#' @param ... other arguments, used for compatibility with other
-#'                          \code{prepSpeciesLayers} functions
+#' @template sppEquiv
+#' @template sppEquivCol
+#' @param thresh threshold \% cover used to defined the species as "present" in the study area.
+#'    If at least one pixel has \code{cover >= thresh} , the species is considered "present".
+#'    Otherwise the raster is excluded from the output. Defaults to 10.
+#' @param ... other arguments, used for compatibility with other \code{prepSpeciesLayers} functions.
 #'
 #' @return TODO: description needed
 #'
@@ -378,15 +369,13 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
 }
 
 
-#' makePickellStack
+#' \code{makePickellStack}
 #'
 #' TODO: description and title needed
 #'
 #' @param PickellRaster TODO: description needed
-#' @param sppEquiv table with species name equivalencies between the
-#'                           kNN format and the final naming format.
-#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
-#' @param sppEquivCol the column name to use from \code{sppEquiv}.
+#' @template sppEquiv
+#' @template sppEquivCol
 #' @param destinationPath TODO: description needed
 #'
 #' @return TODO: description needed

@@ -16,6 +16,6 @@ The \code{biomassMap}, a raster of total stand biomass per pixel.
 }
 \description{
 This is a function that creates the \code{biomassMap} raster used  for
-  simulations in LBMR, using estimated data based on \code{rawBiomassMap}
+  simulations in \code{Biomass_core} module, using estimated data based on \code{rawBiomassMap}
   contained in \code{pixelCohortData}.
 }

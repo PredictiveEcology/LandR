@@ -25,8 +25,8 @@ Takes a \code{pixelCohortData} table (see \code{makeAndCleanInitialCohortData}),
   subsets pixels with \code{biomass > 0}, generates \code{pixelGroups},
   and adds \code{ecoregionGroup} and \code{totalBiomass} columns to \code{pixelCohortData}.
   \code{cohortData} is then created by subsetting unique combinations of \code{pixelGroup} and
-  whatever columsn are listed in \code{columnsForPixelGroups}.
-  The resulting \code{cohortData} table has the follwing columns:
+  whatever columns are listed in \code{columnsForPixelGroups}.
+  The resulting \code{cohortData} table has the following columns:
 \itemize{
   \item \code{speciesCode} (factor)
   \item \code{ecoregionGroup} (factor)

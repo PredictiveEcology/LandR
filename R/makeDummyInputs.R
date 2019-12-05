@@ -25,7 +25,7 @@ makeDummyEcoregionMap <- function(rasterToMatch) {
 
 #' @details
 #' \code{rawBiomassMap} is a raster of "raw" total stand biomass per pixel,
-#'      with values between 100 and 20000 g/m2
+#'      with values between 100 and 20000 g/m^2.
 #'
 #' @export
 #' @importFrom raster mask setValues getValues
@@ -75,8 +75,8 @@ makeDummyRstLCC <- function(rasterToMatch) {
 #' @details
 #' \code{ecoregionFiles} uses dummy versions of \code{ecoregionMap} and \code{rstLCC}
 #' to create a list with two objects: the \code{ecoregionMap} and a table summarizing its
-#' information per pixelID. See \code{ecoregionProducer}.
-#' It uses \code{ecoregionProducer} internally.
+#' information per \code{pixelID}.
+#' See \code{ecoregionProducer} (it uses \code{ecoregionProducer} internally).
 #'
 #' @param ecoregionMap a raster of all the unique groupings.
 #' @param rstLCC a raster land-cover class per pixel,

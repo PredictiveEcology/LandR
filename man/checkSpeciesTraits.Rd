@@ -11,9 +11,9 @@ checkSpeciesTraits(speciesLayers, species, sppColorVect)
 
 \item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
 
-\item{sppColorVect}{A named vector of colors to use for plotting.
+\item{sppColorVect}{A named vector of colours to use for plotting.
 The names must conform with \code{names(speciesLayers)} and should also
-contain a color for 'Mixed'.}
+contain a colour for 'Mixed'.}
 }
 \value{
 A \code{list} with the \code{speciesLayers} and \code{sppColorVect}

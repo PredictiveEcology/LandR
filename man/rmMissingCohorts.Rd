@@ -2,7 +2,7 @@
 % Please edit documentation in R/cohorts.R
 \name{rmMissingCohorts}
 \alias{rmMissingCohorts}
-\title{Remove missing cohorts from cohortData based on pixelGroupMap}
+\title{Remove missing cohorts from \code{cohortData} based on \code{pixelGroupMap}}
 \usage{
 rmMissingCohorts(
   cohortData,
@@ -16,7 +16,7 @@ rmMissingCohorts(
 and \code{sumB}.}
 
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
-number that correspondsd exactly to \code{pixelGroup} column in \code{cohortData}.}
+number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.
@@ -24,8 +24,8 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \value{
 A \code{list} with 2 \code{data.table} objects, \code{cohortData} and \code{pixelGroupMap},
-each updated based on missing pixelGroups in the other.
+each updated based on missing \code{pixelGroups} in the other.
 }
 \description{
-Remove missing cohorts from cohortData based on pixelGroupMap
+Remove missing cohorts from \code{cohortData} based on \code{pixelGroupMap}
 }

@@ -60,6 +60,7 @@ Suggests:
     knitr,
     roxygen2,
     rmarkdown,
+    spelling,
     testthat
 Encoding: UTF-8
 Language: en-CA

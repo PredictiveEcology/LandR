@@ -8,9 +8,9 @@ if (getRversion() >= "3.1.0") {
 #'
 #' @param speciesLayers stack of species layers rasters
 #' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
-#' @param sppColorVect A named vector of colors to use for plotting.
+#' @param sppColorVect A named vector of colours to use for plotting.
 #'                     The names must conform with \code{names(speciesLayers)} and should also
-#'                     contain a color for 'Mixed'.
+#'                     contain a colour for 'Mixed'.
 #'
 #' @return
 #' A \code{list} with the \code{speciesLayers} and \code{sppColorVect}
@@ -44,8 +44,8 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @param biomassMap raster of total stand biomass
 #' @param rasterToMatch a \code{rasterToMatch} (e.g., the one used throughout the simulation)
 #' @param rstLCC raster of land-cover class
-#' @param pixelGroupAgeClass When assigning pixelGroup membership, this defines the resolution
-#'   of ages that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14
+#' @param pixelGroupAgeClass When assigning \code{pixelGroup} membership, this defines the resolution
+#'   of ages that will be considered 'the same \code{pixelGroup}', e.g., if it is 10, then 6 and 14
 #'   will be the same
 #' @param printSummary Logical. If \code{TRUE}, the default, a print out of the
 #'   \code{summary(pixelTable)} will occur.
@@ -159,16 +159,16 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #'
 #' See Details.
 #'
-#' @param cohortDataNoBiomass a subset of cohortData
-#' @param cohortDataShort a subset of cohortData
-#' @param cohortDataShortNoCover a subset of cohortData
-#' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
+#' @param cohortDataNoBiomass a subset of \code{cohortData}
+#' @param cohortDataShort a subset of \code{cohortData}
+#' @param cohortDataShortNoCover a subset of \code{cohortData}
+#' @param species a \code{data.table} of species traits, e.g., longevity, shade tolerance, etc.
 #' @param modelCover statistical model of species presence/absence
 #' @param modelBiomass statistical model of species biomass
 #' @param successionTimestep The time between successive seed dispersal events.
 #' @param currentYear \code{time(sim)}
 #'
-#' @section establishprob:
+#' @section \code{establishprob}:
 #' This section takes the cover as estimated from the mature tree cover and
 #' partitions it between resprouting and seeds Unfortunately, establishment by
 #' seed is not independent of resprouting, i.e., some pixels would have both
@@ -245,7 +245,7 @@ makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDat
 #' Create \code{biomassMap}
 #'
 #' This is a function that creates the \code{biomassMap} raster used  for
-#'   simulations in LBMR, using estimated data based on \code{rawBiomassMap}
+#'   simulations in \code{Biomass_core} module, using estimated data based on \code{rawBiomassMap}
 #'   contained in \code{pixelCohortData}.
 #'
 #' @param pixelCohortData The full \code{cohortData} \code{data.table}

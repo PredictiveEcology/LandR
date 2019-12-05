@@ -38,7 +38,7 @@ Create dummy inputs for test simulations
 \code{ecoregionMap}is a raster of all the unique groupings.
 
 \code{rawBiomassMap} is a raster of "raw" total stand biomass per pixel,
-     with values between 100 and 20000 g/m2
+     with values between 100 and 20000 g/m^2.
 
 \code{standAgeMap} is a raster of stand age per pixel (where biomass exists)
      with values between 1 and 300 years.
@@ -48,6 +48,6 @@ Create dummy inputs for test simulations
 
 \code{ecoregionFiles} uses dummy versions of \code{ecoregionMap} and \code{rstLCC}
 to create a list with two objects: the \code{ecoregionMap} and a table summarizing its
-information per pixelID. See \code{ecoregionProducer}.
-It uses \code{ecoregionProducer} internally.
+information per \code{pixelID}.
+See \code{ecoregionProducer} (it uses \code{ecoregionProducer} internally).
 }

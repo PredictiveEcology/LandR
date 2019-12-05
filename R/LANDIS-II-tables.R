@@ -12,7 +12,7 @@ landisIIrepo <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/"
                       "Extensions-Succession/master/biomass-succession-archive/",
                       "trunk/tests/v6.0-2.0/")
 
-#' Download and prepare a species traits table for use with LBMR module
+#' Download and prepare a species traits table for use with L\code{Biomass_core} module
 #'
 #' TODO: add detailed description
 #'
@@ -60,12 +60,9 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
 #'
 #' @param speciesLayers stack of species layers rasters
 #'
-#' @param sppEquiv table with species name equivalencies between the
-#'                           kNN format and the final naming format.
-#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
+#' @template sppEquiv
 #'
-#' @param sppEquivCol character string indicating the column in \code{sppEquiv}
-#'                    to use for final species names.
+#' @template sppEquivCol
 #'
 #' @return A \code{data.table} with columns ... TODO
 #'
@@ -106,11 +103,9 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
 #'
 #' @param speciesTable TODO: DESCRIPTION NEEDED
 #'
-#' @param sppEquiv table with species name equivalencies between the kNN format and the final naming
-#'                 format. See \code{data("sppEquivalencies_CA", "LandR")}.
+#' @template sppEquiv
 #'
-#' @param sppEquivCol character string indicating the column in \code{sppEquiv}
-#'                    to use for final species names.
+#' @template sppEquivCol
 #'
 #' @return An updated species \code{data.table}
 #'
@@ -160,7 +155,7 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   return(species)
 }
 
-#' Download and prepare a species traits table for use with \code{LBMR} module
+#' Download and prepare a species traits table for use with \code{Biomass_core} module
 #'
 #' TODO: add detailed description
 #'

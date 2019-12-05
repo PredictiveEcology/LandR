@@ -14,7 +14,7 @@ Models are implemented as `SpaDES` modules.
 ### Current release
 
 [![Build Status](https://travis-ci.org/PredictiveEcology/LandR.svg?branch=master)](https://travis-ci.org/PredictiveEcology/LandR)
-[![Appveyor Build status](https://ci.appveyor.com/api/projects/status/2fxqhgk6miv2fytd/branch/master?svg=true)](https://ci.appveyor.com/project/achubaty/LandR/branch/master)
+[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/2fxqhgk6miv2fytd/branch/master?svg=true)](https://ci.appveyor.com/project/achubaty/LandR/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/PredictiveEcology/LandR/badge.svg?branch=master)](https://coveralls.io/github/PredictiveEcology/LandR?branch=master)
 
 **Install from CRAN:**
@@ -34,7 +34,7 @@ install_github("PredictiveEcology/LandR", dependencies = TRUE)
 ### Development version
 
 [![Build Status](https://travis-ci.org/PredictiveEcology/LandR.svg?branch=development)](https://travis-ci.org/PredictiveEcology/LandR)
-[![Appveyor Build status](https://ci.appveyor.com/api/projects/status/2fxqhgk6miv2fytd/branch/development?svg=true)](https://ci.appveyor.com/project/achubaty/LandR/branch/development)
+[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/2fxqhgk6miv2fytd/branch/development?svg=true)](https://ci.appveyor.com/project/achubaty/LandR/branch/development)
 [![Coverage Status](https://coveralls.io/repos/github/PredictiveEcology/LandR/badge.svg?branch=development)](https://coveralls.io/github/PredictiveEcology/LandR?branch=development)
 
 **Install from GitHub:**

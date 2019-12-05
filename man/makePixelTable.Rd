@@ -33,8 +33,8 @@ its information per \code{pixelID.} See \code{ecoregionProducer}.}
 
 \item{rstLCC}{raster of land-cover class}
 
-\item{pixelGroupAgeClass}{When assigning pixelGroup membership, this defines the resolution
-of ages that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14
+\item{pixelGroupAgeClass}{When assigning \code{pixelGroup} membership, this defines the resolution
+of ages that will be considered 'the same \code{pixelGroup}', e.g., if it is 10, then 6 and 14
 will be the same}
 
 \item{printSummary}{Logical. If \code{TRUE}, the default, a print out of the

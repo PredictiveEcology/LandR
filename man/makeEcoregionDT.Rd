@@ -12,7 +12,7 @@ makeEcoregionDT(pixelCohortData, speciesEcoregion)
 \item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values}
 }
 \value{
-A data.table with ecoregion codes and their active status per pixelID
+A \code{data.table} with ecoregion codes and their active status per \code{pixelID}.
 }
 \description{
 This function creates a table containing pixel-wise ecoregion codes and whether they

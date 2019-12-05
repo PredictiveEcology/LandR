@@ -11,9 +11,11 @@ mergeSppRaster(sppMerge, speciesLayers, sppEquiv, column, suffix, dPath, ...)
 
 \item{speciesLayers}{stack of species layers rasters}
 
-\item{sppEquiv}{table with species name equivalencies between the
-kNN format and the final naming format.
-See \code{data("sppEquivalencies_CA", "LandR")}.}
+\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
+See \code{data("sppEquivalencies_CA", "LandR")}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use
+\code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{column}{TODO}
 
@@ -21,7 +23,7 @@ See \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{dPath}{destination path TODO}
 
-\item{...}{Additonal arguments TODO}
+\item{...}{Additional arguments TODO}
 }
 \description{
 Used internally in \code{overlayStacks}.

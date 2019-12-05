@@ -12,7 +12,7 @@ path to load, and clean.}
 
 \item{fn}{A function identifying the type of cleaning to do.}
 
-\item{type}{If fn is not known, an character string can be specified to
+\item{type}{If \code{fn} is not known, an character string can be specified to
 identify which \code{fn} to use.
 This MUST be a known type for this function.}
 
