@@ -30,10 +30,7 @@ if (getRversion() >= "3.1.0") {
 #' @template newPixelCohortData
 #' @template cohortData
 #' @template pixelGroupMap
-#'
-#' @param time Current time e.g., time(sim). This is used to extract the correct parameters in
-#'   \code{speciesEcoregion} table if there are different values over time.
-#'
+#' @template currentTime
 #' @template speciesEcoregion
 #'
 #' @param treedFirePixelTableSinceLastDisp A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
@@ -59,7 +56,7 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom raster getValues
 #' @importFrom SpaDES.core paddedFloatToChar
 #' @importFrom stats na.omit
-updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
+updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                              speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
                              provenanceTable = NULL,
                              successionTimestep,
@@ -142,13 +139,13 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   ##########################################################
   if (!is.null(provenanceTable)) {
     cohortData <- plantNewCohorts(newPixelCohortData, cohortData,
-                                  pixelGroupMap, time = time,
+                                  pixelGroupMap, currentTime = currentTime,
                                   speciesEcoregion = speciesEcoregion,
                                   successionTimestep = successionTimestep,
                                   provenanceTable = provenanceTable)
   } else {
     cohortData <- .initiateNewCohorts(newPixelCohortData, cohortData,
-                                      pixelGroupMap, time = time,
+                                      pixelGroupMap, currentTime = currentTime,
                                       speciesEcoregion = speciesEcoregion,
                                       successionTimestep = successionTimestep)
   }
@@ -203,7 +200,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
 #' @rdname updateCohortData
-.initiateNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
+.initiateNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                                 speciesEcoregion, successionTimestep) {
   ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum B per ecoregion, join to new cohort data
@@ -221,7 +218,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     set(newPixelCohortData, NULL, "pixelIndex", NULL)
   newPixelCohortData <- newPixelCohortData[!duplicated(newPixelCohortData), ]   ## faster than unique
 
-  specieseco_current <- speciesEcoregionLatestYear(speciesEcoregion, time)
+  specieseco_current <- speciesEcoregionLatestYear(speciesEcoregion, currentTime)
   specieseco_current <- setkey(specieseco_current[, .(speciesCode, maxANPP, maxB, ecoregionGroup)],
                                speciesCode, ecoregionGroup)
 
@@ -1113,7 +1110,7 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
 #' @export
-plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
+plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                             provenanceTable, speciesEcoregion, successionTimestep) {
 
   ## get spp "productivity traits" per ecoregion/present year
@@ -1131,7 +1128,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
     set(newPixelCohortData, NULL, "pixelIndex", NULL)
   newPixelCohortData <- newPixelCohortData[!duplicated(newPixelCohortData), ]
 
-  specieseco_current <- speciesEcoregionLatestYear(speciesEcoregion, time)
+  specieseco_current <- speciesEcoregionLatestYear(speciesEcoregion, currentTime)
   specieseco_current <- setkey(specieseco_current[, .(speciesCode, maxANPP, maxB, ecoregionGroup)],
                                speciesCode, ecoregionGroup)
 
