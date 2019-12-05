@@ -27,15 +27,8 @@ if (getRversion() >= "3.1.0") {
 #'   \item update the pixelgroup map.
 #' }
 #'
-#' @param newPixelCohortData must be a complete cohortData object with newly
-#' created cohorts. They do not have to have \code{pixelGroup} values yet; they
-#' can be overlapping with \code{cohortData}, (i.e., they can be regenerated on
-#' empty pixels or on already occupied pixels). Columns it must have:
-#'  \code{pixelIndex}, \code{speciesCode}, \code{ecoregionGroup}. The
-#' remaining 4 (see \code{cohortData}) will be created with \code{0}s
-#'
+#' @template newPixelCohortData
 #' @template cohortData
-#'
 #' @template pixelGroupMap
 #'
 #' @param time Current time e.g., time(sim). This is used to extract the correct parameters in
@@ -201,8 +194,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 #' Calculate new values for \code{B}, add \code{age}, then \code{rbindlist} this
 #' with \code{cohortData}.
 #'
-#' @param newPixelCohortData
-#'
+#' @template newPixelCohortData
 #' @template cohortData
 #'
 #' @return A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}

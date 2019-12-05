@@ -28,7 +28,12 @@ updateCohortData(
 )
 }
 \arguments{
-\item{newPixelCohortData}{}
+\item{newPixelCohortData}{must be a complete \code{cohortData} object with newly created
+cohorts. They do not have to have \code{pixelGroup} values yet;
+they can be overlapping with \code{cohortData}, (i.e., they can be regenerated on empty
+pixels or on already occupied pixels).
+Must contain the columns: \code{pixelIndex}, \code{speciesCode}, \code{ecoregionGroup}.
+The remaining 4 (see \code{cohortData}) will be created with \code{0}s.}
 
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
 \code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
