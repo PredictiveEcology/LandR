@@ -17,23 +17,26 @@ plantNewCohorts(
 \arguments{
 \item{newPixelCohortData}{the cohorts that were harvested}
 
-\item{cohortData}{A \code{data.table} with columns:
-\code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
-\code{B}, \code{mortality}, \code{aNPPAct}, ond \code{sumB}.}
+\item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
+\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
+and \code{sumB}.}
 
-\item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group number
-that corresponds exactly to ]\code{pixelGroup} column in \code{cohortData}.}
+\item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
+number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
-\item{time}{time of sim}
+\item{time}{simulation time `# TODO: use currentTime`}
 
-\item{provenanceTable}{A data.table with three columns: Location, Provenance, and speciesCode.
-new cohorts are initiated at the Location speciesEcoregion from the corresponding
-speciesEcoregion listed in the Provenance column}
+\item{provenanceTable}{A \code{data.table} with three columns:
+\code{Location}, \code{Provenance}, and \code{speciesCode}.
+New cohorts are initiated at the \code{Location} \code{speciesEcoregion} from the corresponding
+\code{speciesEcoregion} listed in the \code{Provenance} column}
 
-\item{successionTimestep}{successionTimestep used in sim}
+\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
+
+\item{successionTimestep}{succession timestep used in the simulation}
 }
 \value{
-A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
+A \code{data.table} with a new \code{cohortData}
 }
 \description{
 Create new cohorts based on provenance table with unique \code{pixelGroup} and add to \code{cohortData}

@@ -9,7 +9,7 @@ makeEcoregionDT(pixelCohortData, speciesEcoregion)
 \arguments{
 \item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values}
+\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
 }
 \value{
 A \code{data.table} with ecoregion codes and their active status per \code{pixelID}.

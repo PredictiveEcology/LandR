@@ -13,7 +13,7 @@ calcSiteShade(time, cohortData, speciesEcoregion, minRelativeB)
 \code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
 and \code{sumB}.}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values}
+\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
 
 \item{minRelativeB}{a \code{data.frame} with  the cut points to classify stand shadiness.}
 }

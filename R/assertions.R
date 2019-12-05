@@ -63,7 +63,7 @@ assertUniqueCohortData <- function(cohortData, columns,
 #' Assert that \code{ecoregionGroups} match across different objects
 #'
 #' @param ecoregionMap The \code{ecoregionMap}, a raster of all the unique groupings
-#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
+#' @template speciesEcoregion
 #' @param minRelativeB TODO: add description
 #'
 #' @export

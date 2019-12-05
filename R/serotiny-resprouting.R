@@ -13,7 +13,7 @@ if (getRversion() >= "3.1.0") {
 #'     Only necessary if \code{calibrate = TRUE}.
 #' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
 #' @template sufficientLight
-#' @param speciesEcoregion a \code{data.table} with \code{speciesEcoregion} values
+#' @template speciesEcoregion
 #' @param simuTime integer. The current simulation time obtained with \code{time(sim)}
 #' @param treedFirePixelTableSinceLastDisp a vector of pixels that burnt and were forested
 #'     in the previous time step.

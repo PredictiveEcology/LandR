@@ -4,7 +4,8 @@ if (getRversion() >= "3.1.0") {
     "ecoregion", "ecoregionGroup", "hasBadAge",
     "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
     "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
-    "newPossLCC", "noPixels", "ord", "outBiomass", "pixelGroup2", "pixelIndex", "pixels", "possERC",
+    "newPossLCC", "noPixels", "ord", "outBiomass", "oldEcoregionGroup",
+    "pixelGroup2", "pixelIndex", "pixels", "possERC",
     "speciesposition", "speciesGroup", "speciesInt", "state", "sumB", "oldSumB",
     "temppixelGroup", "toDelete", "totalBiomass",
     "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
@@ -33,7 +34,7 @@ if (getRversion() >= "3.1.0") {
 #' @param time Current time e.g., time(sim). This is used to extract the correct parameters in
 #'   \code{speciesEcoregion} table if there are different values over time.
 #'
-#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
+#' @template speciesEcoregion
 #'
 #' @param treedFirePixelTableSinceLastDisp A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
 #'   This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
@@ -398,7 +399,8 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
 
 #' Pull out the values from \code{speciesEcoregion} table for current time
 #'
-#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
+#' @template speciesEcoregion
+#'
 #' @param currentTime The current time e.g., \code{time(sim)}
 #'
 #' @return
@@ -1054,9 +1056,9 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #'
 #' @param pixelCohortData The full \code{cohortData} \code{data.table}
 #' @param columnsForPixelGroups Default columns that define pixel groups
-#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
+#' @template speciesEcoregion
 #'
-#'#' @return
+#' @return
 #' A list with a modified \code{pixelCohortData} and \code{cohortData} \code{data.table}s.
 #'
 #' @export
@@ -1096,18 +1098,17 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 #' Create new cohorts based on provenance table with unique \code{pixelGroup} and add to \code{cohortData}
 #'
 #' @param newPixelCohortData the cohorts that were harvested
-#' @param cohortData A \code{data.table} with columns:
-#'   \code{pixelGroup}, \code{ecoregionGroup}, \code{speciesCode}, \code{age},
-#'   \code{B}, \code{mortality}, \code{aNPPAct}, ond \code{sumB}.
-#' @param pixelGroupMap Raster layer with pixel values equal to a pixel group number
-#'   that corresponds exactly to ]\code{pixelGroup} column in \code{cohortData}.
-#' @param time time of sim
-#' @param provenanceTable A data.table with three columns: Location, Provenance, and speciesCode.
-#'   new cohorts are initiated at the Location speciesEcoregion from the corresponding
-#'   speciesEcoregion listed in the Provenance column
-#' @param successionTimestep successionTimestep used in sim
+#' @template cohortData
+#' @template pixelGroupMap
+#' @param time simulation time
+#' @param provenanceTable A \code{data.table} with three columns:
+#'   \code{Location}, \code{Provenance}, and \code{speciesCode}.
+#'   New cohorts are initiated at the \code{Location} \code{speciesEcoregion} from the corresponding
+#'   \code{speciesEcoregion} listed in the \code{Provenance} column
+#' @template speciesEcoregion
+#' @param successionTimestep succession timestep used in the simulation
 #'
-#' @return A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
+#' @return A \code{data.table} with a new \code{cohortData}
 #'
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
@@ -1141,13 +1142,19 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
   specieseco_current <- specieseco_current[!is.na(maxB)]
   specieseco_current[, maxB_eco := max(maxB), by = ecoregionGroup]
   browser()
-  #Start provenance Table join
-  provenanceSelection <- specieseco_current[provenanceTable, on = c("speciesCode" = "speciesCode", 'ecoregionGroup' = 'Provenance')]
-  #Rename ecoregionGroup and get rid of old column so no collision
+  # Start provenance Table join
+  provenanceSelection <- specieseco_current[provenanceTable,
+                                            on = c(speciesCode = "speciesCode",
+                                                   ecoregionGroup = "Provenance")]
+
+  # Rename ecoregionGroup and get rid of old column so no collision
   newPixelCohortData[, oldEcoregionGroup := ecoregionGroup]
   newPixelCohortData[, ecoregionGroup := NULL]
-  newPixelCohortData <- provenanceSelection[newPixelCohortData, on = c(Location = "oldEcoregionGroup", speciesCode = 'speciesCode')]
-  #new cohorts now have the geographically correct ecoregionGroup in location, but the provenance of ecoregionGroup.
+  newPixelCohortData <- provenanceSelection[newPixelCohortData,
+                                            on = c(Location = "oldEcoregionGroup",
+                                                   speciesCode = 'speciesCode')]
+  # new cohorts now have the geographically correct ecoregionGroup in location,
+  # but the provenance of ecoregionGroup.
 
   newPixelCohortData <- newPixelCohortData[!is.na(maxB)]
   set(newPixelCohortData, NULL, "age", 1L)  ## set age to 1
@@ -1161,7 +1168,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
 
   newPixelCohortData <- unique(cohortData[, .(pixelGroup, oldSumB)],
                                by = "pixelGroup")[newPixelCohortData, on = "pixelGroup"]
-  set(newPixelCohortData, which(is.na(newPixelCohortData$oldSumB)), "oldSumB", 0)   ## faster than [:=]
+  set(newPixelCohortData, which(is.na(newPixelCohortData$oldSumB)), "oldSumB", 0) # faster than [:=]
   setnames(newPixelCohortData, "oldSumB", "sumB")
   set(cohortData, NULL, "oldSumB", NULL)
 

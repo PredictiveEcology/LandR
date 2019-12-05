@@ -91,7 +91,7 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 
 \item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique groupings}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values}
+\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
 
 \item{minRelativeB}{TODO: add description}
 
