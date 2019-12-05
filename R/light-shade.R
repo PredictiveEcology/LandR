@@ -10,11 +10,11 @@ if (getRversion() >= "3.1.0") {
 #'   \code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
 #'   and \code{sumB}.
 #' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
-#' @param minRelativeB a \code{data.frame} with  the cut points to classify stand shadeness.
+#' @param minRelativeB a \code{data.frame} with  the cut points to classify stand shadiness.
 #'
 #' @seealso  \code{\link{makeMinRelativeB}}
 #'
-#' @return \code{cohortData} table with a siteShade column
+#' @return \code{cohortData} table with a \code{siteShade} column
 #'
 #' @export
 #' @importFrom data.table data.table set setkey

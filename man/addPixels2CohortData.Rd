@@ -16,7 +16,7 @@ addPixels2CohortData(
 and \code{sumB}.}
 
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
-number that correspondsd exactly to \code{pixelGroup} column in \code{cohortData}.}
+number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.

@@ -63,20 +63,21 @@ prepSpeciesLayers_ForestInventory(
 
 \item{rasterToMatch}{a \code{rasterToMatch} (e.g. the one used throughout the simulation)}
 
-\item{sppEquiv}{table with species name equivalencies between the
-kNN format and the final naming format.
-See \code{data("sppEquivalencies_CA", "LandR")}.}
+\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
+See \code{data("sppEquivalencies_CA", "LandR")}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use
+\code{data("sppEquivalencies_CA", "LandR")}.}
 
-\item{sppEquivCol}{the column name to use from \code{sppEquiv}.}
+\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
-\item{thresh}{threshold % cover used to defined the species as "present"
-in the study area. If at least one pixel has
-cover >= \code{thresh} , the species is considered
-"present". Otherswise the raster is excluded from the output.
-Defaults to 10.}
+\item{thresh}{threshold \% cover used to defined the species as "present" in the study area.
+If at least one pixel has \code{cover >= thresh} , the species is considered "present".
+Otherwise the raster is excluded from the output. Defaults to 10.}
 
-\item{...}{other arguments, used for compatibility with other
-\code{prepSpeciesLayers} functions}
+\item{...}{other arguments, used for compatibility with other \code{prepSpeciesLayers} functions.}
 }
 \value{
 TODO: description needed

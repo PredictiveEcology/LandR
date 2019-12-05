@@ -14,7 +14,7 @@ This must be one \code{RasterLayer} per species.}
 
 \item{mixed}{Deprecated. See \code{mixedType} argument to \code{vegTypeMapGenerator}.}
 
-\item{...}{Other arguments passed to vegTypeMapGenerator, i.e.,
+\item{...}{Other arguments passed to \code{vegTypeMapGenerator}, i.e.,
 \code{vegLeadingProportion}, \code{mixedType}, \code{sppEquiv},
 \code{sppEquivCol}, \code{colors}, \code{pixelGroupColName}, and \code{doAssertion}}
 }

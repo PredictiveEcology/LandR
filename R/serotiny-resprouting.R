@@ -6,30 +6,28 @@ if (getRversion() >= "3.1.0") {
 
 #' Activate serotiny after a (fire) disturbance
 #'
-#' @param burnedPixelCohortData A /code{cohortData} table expanded to pixelIndex containing the only the cohorts in
-#'    the pixels that were affected by the disturbance
-#' @param postFirePixelCohortData  an empty /code{cohortData}-like table with columns "age", "B", "mortality",
-#'    "aNPPAct", and "sumB" removed and "pixelIndex" added.
-#' @param postFireRegenSummary a data.table summarizing for which species serotiny/resprouting were
-#'    activated and in how many pixels, for each year. Only necessary if /code{calibrate = TRUE}.
+#' @template burnedPixelCohortData
+#' @template postFirePixelCohortData
+#' @param postFireRegenSummary a \code{data.table} summarizing for which species
+#'     serotiny/resprouting were activated and in how many pixels, for each year.
+#'     Only necessary if \code{calibrate = TRUE}.
 #' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
-#' @param sufficientLight a data.table containing probability of establishment, given a site's light conditions (X0-X5) for
-#'    each level of a species shade tolerance (1-5)
+#' @template sufficientLight
 #' @param speciesEcoregion a \code{data.table} with \code{speciesEcoregion} values
 #' @param simuTime integer. The current simulation time obtained with \code{time(sim)}
-#' @param treedFirePixelTableSinceLastDisp a vector of pixels that burnt and were forested in the previous time step.
-#' @param calibrate logical. Determines whether to output /code{postFirePixelCohortData}. Defaults to FALSE
+#' @param treedFirePixelTableSinceLastDisp a vector of pixels that burnt and were forested
+#'     in the previous time step.
+#' @param calibrate logical. Determines whether to output \code{postFirePixelCohortData}.
+#'     Defaults to \code{FALSE}.
 #'
-#' @return  A list of objects. /code{postFirePixelCohortData}, a data.table with the cohorts that will undergo serotiny;
-#'    /code{serotinyPixel} a vector of pixels where serotiny was activated;
-#'    /code{postFireRegenSummary} the updated postFireRegenSummary, if /code{calibrate = TRUE}
+#' @return  A list of objects:
+#'     \code{postFirePixelCohortData}, a \code{data.table} with the cohorts that undergo serotiny;
+#'     \code{serotinyPixel}, a vector of pixels where serotiny was activated;
+#'     \code{postFireRegenSummary}, the updated \code{postFireRegenSummary}, if \code{calibrate = TRUE}.
 #'
-#' @importFrom stats runif
-#' @importFrom fpCompare %>>%
-#' @importFrom fpCompare %<<%
 #' @export
-#'
-
+#' @importFrom fpCompare %>>% %<<%
+#' @importFrom stats runif
 doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
                        postFireRegenSummary = NULL, species, sufficientLight,
                        speciesEcoregion, simuTime, treedFirePixelTableSinceLastDisp,
@@ -122,25 +120,23 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
 
 #' Activate resprouting after a (fire) disturbance
 #'
-#' @param burnedPixelCohortData A /code{cohortData} table expanded to pixelIndex containing the only the cohorts in
-#'    the pixels that were affected by the disturbance
-#' @param postFirePixelCohortData  an empty /code{cohortData}-like table with columns "age", "B", "mortality",
-#'    "aNPPAct", and "sumB" removed and "pixelIndex" added.
+#' @template burnedPixelCohortData
+#' @template postFirePixelCohortData
 #' @param postFireRegenSummary a data.table summarizing for which species serotiny/resprouting were
-#'    activated and in how many pixels, for each year. Only necessary if /code{calibrate = TRUE}.
+#'    activated and in how many pixels, for each year. Only necessary if \code{calibrate = TRUE}.
 #' @param serotinyPixel a vector of pixels where serotiny was activated;
 #' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
-#' @param sufficientLight a data.table containing probability of establishment, given a site's light conditions (X0-X5) for
-#'    each level of a species shade tolerance (1-5)
+#' @template sufficientLight
 #' @param simuTime integer. The current simulation time obtained with \code{time(sim)}
 #' @param treedFirePixelTableSinceLastDisp a vector of pixels that burnt and were forested in the previous time step.
-#' @param calibrate logical. Determines whether to output /code{postFirePixelCohortData}. Defaults to FALSE
+#' @param calibrate logical. Determines whether to output \code{postFirePixelCohortData}. Defaults to FALSE
 #'
-#' @return  A list of objects. /code{postFirePixelCohortData}, a data.table with the cohorts that will undergo serotiny;
-#'    /code{serotinyResproutSuccessPixels} a vector of pixels where serotiny and resprouting were activated;
-#'    /code{postFireRegenSummary} the updated postFireRegenSummary, if /code{calibrate = TRUE}
+#' @return  A list of objects:
+#'     \code{postFirePixelCohortData}, a \code{data.table} with the cohorts that undergo serotiny;
+#'     \code{serotinyPixel}, a vector of pixels where serotiny was activated;
+#'     \code{postFireRegenSummary}, the updated \code{postFireRegenSummary}, if \code{calibrate = TRUE}.
+#'
 #' @export
-
 doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
                           postFireRegenSummary = NULL, serotinyPixel,
                           treedFirePixelTableSinceLastDisp, simuTime,

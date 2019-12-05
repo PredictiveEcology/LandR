@@ -2,7 +2,7 @@
 % Please edit documentation in R/maps.R
 \name{prepInputsLCC}
 \alias{prepInputsLCC}
-\title{Simple prepInputs for LCC2005 or LCC2010}
+\title{Simple \code{prepInputs} for LCC2005 or LCC2010 data}
 \usage{
 prepInputsLCC(
   year = 2005,
@@ -46,5 +46,5 @@ a character string, it will use this as its file name. See
 \item{...}{Passed to raster::crop}
 }
 \description{
-A wrapper around prepInputs for the Canadian Land Cover Classification product(s)
+A wrapper around \code{prepInputs} for the Canadian Land Cover Classification product(s).
 }

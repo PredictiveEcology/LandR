@@ -33,9 +33,9 @@ ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
 
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
-number that correspondsd exactly to \code{pixelGroup} column in \code{cohortData}.}
+number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
-\item{vegLeadingProportion}{Numeric between 0-1, determing the relative biomass
+\item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
 threshold a species needs to pass to be considered "leading".}
 
 \item{mixedType}{An integer defining whether mixed stands are of any kind of species
@@ -52,8 +52,8 @@ If not provided and \code{mixedType == 2}, will attempt to use
 Only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
-\item{colors}{A named vector of color codes. The names MUST match the names of species
-in \code{cohortData$speciesCode}, plus an optional "Mixed" color.}
+\item{colors}{A named vector of colour codes. The names MUST match the names of species
+in \code{cohortData$speciesCode}, plus an optional "Mixed" colour.}
 
 \item{pixelGroupColName}{Name of the column in \code{pixelGroup} to use.}
 }

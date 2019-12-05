@@ -4,10 +4,10 @@ if (getRversion() >= "3.1.0") {
 
 #' Assertions
 #'
-#' Assert that ecoregionCodes that were replaced, were correctly identified
+#' Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
 #'
 #' @param cohortData34to36 A \code{cohortData} \code{data.table} with only the
-#'                         pixels what were lcc 34:36
+#'                         pixels what were LCC 34:36
 #' @param rmZeroBiomassQuote  An expression to evaluate, in the form of \code{quote(B>0)},
 #'    used to select cohorts with biomass.
 #'
@@ -42,9 +42,10 @@ assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote,
   }
 }
 
-#' Assert that cohortData has unique lines when subsetting for a given set of columns
+#' Assert that \code{cohortData} has unique lines when subsetting for a given set of columns
 #'
-#' @param columns Vector of column names on which to test for unique cohortData
+#' @param columns Vector of column names on which to test for unique \code{cohortData}
+#'
 #' @export
 #' @rdname assertions
 assertUniqueCohortData <- function(cohortData, columns,
@@ -59,8 +60,7 @@ assertUniqueCohortData <- function(cohortData, columns,
   }
 }
 
-
-#' Assert that ecoregionGroups match across different objects
+#' Assert that \code{ecoregionGroups} match across different objects
 #'
 #' @param ecoregionMap The \code{ecoregionMap}, a raster of all the unique groupings
 #' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
@@ -127,7 +127,7 @@ assertColumns <- function(obj, colClasses,
 #'
 #' @template pixelGroupMap
 #'
-#' @param sim If the simList is included, then the browser() call will be more useful
+#' @param sim If the \code{simList} is included, then the \code{browser()} call will be more useful.
 #'
 #' @param maxExpectedNumDiverge A numeric, length 1, indicating by how many they
 #'   can diverge. Default 1.
@@ -180,15 +180,12 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
   }
 }
 
-
 #' A test that \code{pixelGroupMap} and \code{pixelCohortData} match \code{pixelIndex}
 #'
 #' This is the full \code{pixelCohortData}, not the collapsed one.
 #'
 #' @param pixelCohortData The full \code{cohortData} \code{data.table}
 #' @template pixelGroupMap
-#' @template doAssertion
-
 #'
 #' @export
 #' @rdname assertions
@@ -218,15 +215,12 @@ assertPixelCohortData <- function(pixelCohortData, pixelGroupMap,
   }
 }
 
-
 #' Check that each species as a unique label in the 'EN_generic_short' and 'Leading'
 #'   columns of the \code{sppEquiv} table.
 #'
-#'
 #' @param speciesNames A vector of species names for which the labels will be checked
-#' @param sppEquiv table with species name equivalencies between the
-#'                           kNN format and the final naming format.
-#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
+#' @template sppEquiv
+#'
 #' @export
 #' @rdname assertions
 assertSpeciesPlotLabels <- function(speciesNames, sppEquiv,
@@ -241,15 +235,10 @@ assertSpeciesPlotLabels <- function(speciesNames, sppEquiv,
   }
 }
 
-
 #' Assert that the difference between fire severity and species fire tolerances
 #'  ranges between -4 and 4.
 #'
-#' @param burnedPixelCohortData An expanded \code{cohortData} \code{data.table} with pixel-level
-#'   cohort information on burnt pixels and columns:
-#'   \code{severity} - fire severity in taht pixel calculated based on fire behaviour properties
-#'   \code{firetolerance} - species-level fire tolerance
-#'   \code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}
+#' @template burnedPixelCohortData
 #'
 #' @export
 #' @rdname assertions
@@ -278,7 +267,6 @@ assertFireToleranceDif <- function(burnedPixelCohortData,
       stop("The difference between severity and species fire tolerance must be [-4,4].
            Severity and fire tolerances have values outside of [1,5], please debug
            Biomass_regenerationPM and check your species traits table ('species')")
-
   }
 }
 
@@ -293,7 +281,6 @@ assertFireToleranceDif <- function(burnedPixelCohortData,
 #'
 #' @export
 #' @rdname assertions
-
 assertSpeciesLayers <- function(speciesLayers, thresh,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {

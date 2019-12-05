@@ -4,22 +4,22 @@ if (getRversion() >= "3.1.0") {
 
 #' Make \code{ecoregionMap} and \code{ecoregion} table
 #'
-#' This function combines an eco-region map and a land cover map (e.g. eco-districts and LCC)
+#' This function combines an ecoregion map and a land cover map (e.g. ecodistricts and LCC)
 #' and creates a map and table of containing their combined values and pixel IDs.
 #' Used internally in LandR modules to prepare maps for to make \code{cohortData}.
 #'
-#' @param ecoregionMaps a \code{list} with two rasters, one with eco-regions (e.g. eco-districts)
+#' @param ecoregionMaps a \code{list} with two rasters, one with ecoregions (e.g. ecodistricts)
 #' and another with land cover (e.g. LCC)
-#' @param ecoregionName the name describing the type of eco-regions in first map
-#' (e.g. "ecoDistrict")
-#' @param ecoregionActiveStatus A two column \code{data.table} detailing with eco-regions
+#' @param ecoregionName the name describing the type of ecoregions in first map
+#' (e.g. \code{"ecoDistrict"})
+#' @param ecoregionActiveStatus A two column \code{data.table} detailing with ecoregions
 #' are to be considered active for the simulations. Columns should be named 'active'
 #' (with 'yes' or 'no' values) and 'ecoregion'.
 #' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used throughout the simulation)
 #'
 #' @return
 #' A list with two objects: the \code{ecoregionMap} and a table summarizing
-#' it's information per pixelID
+#' its information per \code{pixelID}
 #'
 #' @export
 #' @importFrom data.table as.data.table data.table
@@ -105,7 +105,7 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName,
 #' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
 #'
 #' @return
-#' A data.table with ecoregion codes and their active status per pixelID
+#' A \code{data.table} with ecoregion codes and their active status per \code{pixelID}.
 #'
 #' @export
 #' @importFrom data.table data.table

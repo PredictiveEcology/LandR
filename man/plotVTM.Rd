@@ -23,11 +23,15 @@ If not supplied, will be produced internally by \code{makeVegTypeMap}.}
 \item{vegLeadingProportion}{The minimum proportion cover required to consider
 a species to be the "leading" one. Default 0.8.}
 
-\item{sppEquiv}{table with species name equivalencies between the
-kNN format and the final naming format.
-See \code{data("sppEquivalencies_CA", "LandR")}.}
+\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
+See \code{data("sppEquivalencies_CA", "LandR")}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use
+\code{data("sppEquivalencies_CA", "LandR")}.}
 
-\item{sppEquivCol}{the column name to use from \code{sppEquiv}.}
+\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
 \item{colors}{Named vector of colour codes, named using species names. NOTE:
 plot order will follow this order.}
@@ -39,5 +43,5 @@ Create raster of leading vegetation types and \code{Plot} a bar chart summary
 and a vegetation type map. NOTE: plot order will follow \code{colors} order.
 }
 \author{
-Eilot McIntire
+Eliot McIntire
 }

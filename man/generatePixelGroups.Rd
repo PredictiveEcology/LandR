@@ -11,22 +11,22 @@ generatePixelGroups(
 )
 }
 \arguments{
-\item{pixelDataTable}{A \code{data.table} with column-based descriptions. This data.table
-must have a column called \code{"pixelIndex"}, which allows for multiple rows to be associated
+\item{pixelDataTable}{A \code{data.table} with column-based descriptions.
+Must have a column called \code{pixelIndex}, which allows for multiple rows to be associated
 with a single pixel.}
 
-\item{maxPixelGroup}{A length 1 numeric/integer indicating the current maximum pixelGroup value;
-the pixelGroup numbers returned from this function will start at \code{maxPixelGroup} + 1}
+\item{maxPixelGroup}{A length 1 numeric indicating the current maximum \code{pixelGroup} value;
+the \code{pixelGroup} numbers returned will start at \code{maxPixelGroup + 1}.}
 
 \item{columns}{A character vector of column names to use as part of the generation of unique
 combinations of features. Default is \code{c("ecoregionGroup", "speciesCode", "age", "B")}}
 }
 \value{
-Returns a vector of pixelGroup in the original order of the input \code{pixelDataTable}.
+Returns a vector of \code{pixelGroup} in the original order of the input \code{pixelDataTable}.
 This should likely be added to the \code{pixelDataTable} object immediately.
 }
 \description{
-Generates unique groupings of a data.table object where one or more rows can
+Generates unique groupings of a \code{data.table} object where one or more rows can
 all belong to the same \code{pixelIndex}. Pixel groups will be identical pixels based
-  on unique combinations of \code{columns}.
+on unique combinations of \code{columns}.
 }

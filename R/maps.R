@@ -47,9 +47,9 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
   rstFlammable
 }
 
-#' Simple prepInputs for LCC2005 or LCC2010
+#' Simple \code{prepInputs} for LCC2005 or LCC2010 data
 #'
-#' A wrapper around prepInputs for the Canadian Land Cover Classification product(s)
+#' A wrapper around \code{prepInputs} for the Canadian Land Cover Classification product(s).
 #'
 #' @inheritParams reproducible::cropInputs
 #' @inheritParams reproducible::postProcess
@@ -108,7 +108,7 @@ prepInputsLCC <- function(year = 2005,
 #'                     This must be one \code{RasterLayer} per species.
 #' @param vegLeadingProportion See \code{vegTypeMapGenerator}.
 #' @param mixed Deprecated. See \code{mixedType} argument to \code{vegTypeMapGenerator}.
-#' @param ... Other arguments passed to vegTypeMapGenerator, i.e.,
+#' @param ... Other arguments passed to \code{vegTypeMapGenerator}, i.e.,
 #'   \code{vegLeadingProportion}, \code{mixedType}, \code{sppEquiv},
 #'   \code{sppEquivCol}, \code{colors}, \code{pixelGroupColName}, and \code{doAssertion}
 #'
@@ -134,25 +134,19 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 #'
 #' @template pixelGroupMap
 #'
-#' @param vegLeadingProportion Numeric between 0-1, determing the relative biomass
+#' @param vegLeadingProportion Numeric between 0-1, determining the relative biomass
 #'               threshold a species needs to pass to be considered "leading".
 #'
 #' @param mixedType An integer defining whether mixed stands are of any kind of species
 #'                  admixture (1), or only when deciduous mixed with conifer (2).
 #'                  Defaults to 2.
 #'
-#' @param sppEquiv table with species name equivalencies between the kNN and final naming formats.
-#'              See \code{data("sppEquivalencies_CA", "LandR")}.
-#'              Only necessary if \code{mixedType == 2}.
-#'              If not provided and \code{mixedType == 2}, will attempt to use
-#'              \code{data("sppEquivalencies_CA", "LandR")}.
+#' @template sppEquiv
 #'
-#' @param sppEquivCol the column name to use from \code{sppEquiv}.
-#'              Only necessary if \code{mixedType == 2}.
-#'              If not provided and \code{mixedType == 2}, will attempt to use "Boreal".
+#' @template sppEquivCol
 #'
-#' @param colors A named vector of color codes. The names MUST match the names of species
-#'               in \code{cohortData$speciesCode}, plus an optional "Mixed" color.
+#' @param colors A named vector of colour codes. The names MUST match the names of species
+#'               in \code{cohortData$speciesCode}, plus an optional "Mixed" colour.
 #'
 #' @param pixelGroupColName Name of the column in \code{pixelGroup} to use.
 #'
@@ -553,16 +547,13 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #'
 #' @param studyArea passed to \code{\link[reproducible]{prepInputs}}
 #'
-#' @param sppEquiv table with species name equivalencies between the
-#'                           kNN format and the final naming format.
-#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
+#' @template sppEquiv
 #'
 #' @param knnNamesCol character string indicating the column in \code{sppEquiv}
 #'                    containing kNN species names.
 #'                    Default \code{"KNN"} for when \code{sppEquivalencies_CA} is used.
 #'
-#' @param sppEquivCol character string indicating the column in \code{sppEquiv}
-#'                    to use for final species names.
+#' @template sppEquivCol
 #'
 #' @param thresh the minimum number of pixels where the species must have
 #'               \code{biomass > 0} to be considered present in the study area.
@@ -570,7 +561,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #'
 #' @param url the source url for the data, passed to \code{\link[reproducible]{prepInputs}}
 #'
-#' @param ... Additonal arguments passed to \code{\link[reproducible]{Cache}}
+#' @param ... Additional arguments passed to \code{\link[reproducible]{Cache}}
 #'            and \code{\link{equivalentName}}.
 #'
 #' @return A raster stack of percent cover layers by species.
@@ -733,8 +724,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 
 #' Load kNN species layers from online data repository
 #'
-#' Downloands the 2011 kNN species cover layers from the Canadian Forestry Service,
-#' National Invetory System, for validation.
+#' Downloads the 2011 kNN species cover layers from the Canadian Forestry Service,
+#' National Inventory System, for validation.
 #'
 #' @param dPath path to the data directory
 #'
@@ -742,16 +733,13 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 #'
 #' @param studyArea passed to \code{\link[reproducible]{prepInputs}}
 #'
-#' @param sppEquiv table with species name equivalencies between the
-#'                           kNN format and the final naming format.
-#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
+#' @template sppEquiv
 #'
 #' @param knnNamesCol character string indicating the column in \code{sppEquiv}
 #'                    containing kNN species names.
 #'                    Default \code{"KNN"} for when \code{sppEquivalencies_CA} is used.
 #'
-#' @param sppEquivCol character string indicating the column in \code{sppEquiv}
-#'                    to use for final species names.
+#' @template sppEquivCol
 #'
 #' @param thresh the minimum number of pixels where the species must have
 #'               \code{biomass > 0} to be considered present in the study area.
@@ -759,7 +747,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 #'
 #' @param url the source url for the data, passed to \code{\link[reproducible]{prepInputs}}
 #'
-#' @param ... Additonal arguments passed to \code{\link[reproducible]{Cache}}
+#' @param ... Additional arguments passed to \code{\link[reproducible]{Cache}}
 #'            and \code{\link{equivalentName}}.
 #'
 #' @return A raster stack of percent cover layers by species.
@@ -996,8 +984,8 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #'
 #' @inheritParams overlayStacks
 #' @param SPP \code{data.table} column of species layer name
-#' @param HQ \code{data.table} column of whether SPP is present in HQ layers
-#' @param LQ \code{data.table} column of whether SPP is present in LQ layers
+#' @param HQ \code{data.table} column of whether \code{SPP} is present in HQ layers
+#' @param LQ \code{data.table} column of whether \code{SPP} is present in LQ layers
 #'
 #' @importFrom gdalUtils gdalwarp
 #' @importFrom raster compareRaster crs extent filename res projectExtent raster
@@ -1105,13 +1093,11 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #'
 #' @param sppMerge TODO
 #' @param speciesLayers stack of species layers rasters
-#' @param sppEquiv table with species name equivalencies between the
-#'                           kNN format and the final naming format.
-#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
+#' @template sppEquiv
 #' @param column TODO
 #' @param dPath destination path TODO
 #' @param suffix TODO
-#' @param ... Additonal arguments TODO
+#' @param ... Additional arguments TODO
 #'
 #' @importFrom raster calc stack writeRaster
 #' @importFrom reproducible .suffix prepInputs
@@ -1148,12 +1134,11 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
   return(speciesLayers)
 }
 
-#' Fasterize polygons using \code{fasterize}
+#' Rasterize polygons using \code{fasterize}
 #'
 #' @param sp a shapefile to rasterize
 #' @param raster the template raster to use
-#' @param fieldName the field to use for the rasterizing (will be ignored if the
-#'                  shapefile has no fields)
+#' @param fieldName the field to use (will be ignored if the shapefile has no fields)
 #'
 #' @return TODO: is it a \code{RasterLayer}?
 #'

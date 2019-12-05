@@ -7,13 +7,13 @@
 assignLightProb(sufficientLight, newCohortData)
 }
 \arguments{
-\item{sufficientLight}{a data.table containing probability of establishment, given a site's light conditions (X0-X5) for
-each level of a species shade tolerance (1-5)}
+\item{sufficientLight}{a \code{data.table} containing probability of establishment, given a
+site's light conditions (\code{X0}-\code{X5}) for each level of a specie's shade tolerance (1-5).}
 
-\item{newCohortData}{a modified version of /code{cohortData} that contains new cohorts.}
+\item{newCohortData}{a modified version of \code{cohortData} that contains new cohorts.}
 }
 \value{
-/code{newCohortData} with a lightProb column
+\code{newCohortData} with a \code{lightProb} column
 }
 \description{
 Assign light probability

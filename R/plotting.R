@@ -11,18 +11,16 @@
 #' @param vegLeadingProportion The minimum proportion cover required to consider
 #'                             a species to be the "leading" one. Default 0.8.
 #'
-#' @param sppEquiv table with species name equivalencies between the
-#'                           kNN format and the final naming format.
-#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
+#' @template sppEquiv
 #'
-#' @param sppEquivCol the column name to use from \code{sppEquiv}.
+#' @template sppEquivCol
 #'
 #' @param colors Named vector of colour codes, named using species names. NOTE:
 #'               plot order will follow this order.
 #'
 #' @param title The title to use for the generated plots.
 #'
-#' @author Eilot McIntire
+#' @author Eliot McIntire
 #' @export
 #' @importFrom data.table data.table setkeyv
 #' @importFrom ggplot2 aes element_blank element_text geom_bar ggplot guide_legend guides
@@ -120,18 +118,16 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   Plot(vtm, title = title)
 }
 
-#' Create species color vector from a sppEquiv table
+#' Create species colour vector from a \code{sppEquiv} table
 #'
-#' @param sppEquiv table with species name equivalencies between the
-#'                           kNN format and the final naming format.
-#'                           See \code{data("sppEquivalencies_CA", "LandR")}.
-#' @param sppEquivCol the column name to use from \code{sppEquiv}.
+#' @template sppEquiv
+#'
+#' @template sppEquivCol
 #' @param newVals An optional character vector of extra names to use, e.g., "Mixed".
-#' @param palette An RColorBrewer palette, e.g., "Accent".
-#'                Can get RColorBrewer palette names from
-#'                \code{rownames(RColorBrewer::brewer.pal.info)}.
+#' @param palette An \pkg{RColorBrewer} palette, e.g., "Accent".
+#'     Can get \pkg{RColorBrewer} palette names from \code{rownames(RColorBrewer::brewer.pal.info)}.
 #'
-#' @return A named vector of color codes, where the names are the species names
+#' @return A named vector of colour codes, where the names are the species names
 #' plus any extra names passed with \code{newVals}.
 #'
 #' @export

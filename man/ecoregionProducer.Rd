@@ -12,13 +12,13 @@ ecoregionProducer(
 )
 }
 \arguments{
-\item{ecoregionMaps}{a \code{list} with two rasters, one with eco-regions (e.g. eco-districts)
+\item{ecoregionMaps}{a \code{list} with two rasters, one with ecoregions (e.g. ecodistricts)
 and another with land cover (e.g. LCC)}
 
-\item{ecoregionName}{the name describing the type of eco-regions in first map
-(e.g. "ecoDistrict")}
+\item{ecoregionName}{the name describing the type of ecoregions in first map
+(e.g. \code{"ecoDistrict"})}
 
-\item{ecoregionActiveStatus}{A two column \code{data.table} detailing with eco-regions
+\item{ecoregionActiveStatus}{A two column \code{data.table} detailing with ecoregions
 are to be considered active for the simulations. Columns should be named 'active'
 (with 'yes' or 'no' values) and 'ecoregion'.}
 
@@ -26,10 +26,10 @@ are to be considered active for the simulations. Columns should be named 'active
 }
 \value{
 A list with two objects: the \code{ecoregionMap} and a table summarizing
-it's information per pixelID
+its information per \code{pixelID}
 }
 \description{
-This function combines an eco-region map and a land cover map (e.g. eco-districts and LCC)
+This function combines an ecoregion map and a land cover map (e.g. ecodistricts and LCC)
 and creates a map and table of containing their combined values and pixel IDs.
 Used internally in LandR modules to prepare maps for to make \code{cohortData}.
 }

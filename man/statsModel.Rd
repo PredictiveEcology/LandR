@@ -2,7 +2,7 @@
 % Please edit documentation in R/cohorts.R
 \name{statsModel}
 \alias{statsModel}
-\title{The generic statistical model -- to run lmer or glmer}
+\title{The generic statistical model to run (\code{lmer} or \code{glmer})}
 \usage{
 statsModel(modelFn, uniqueEcoregionGroups, .specialData)
 }
@@ -10,17 +10,16 @@ statsModel(modelFn, uniqueEcoregionGroups, .specialData)
 \item{modelFn}{A quoted expression of type \code{package::model(Y ~ X, ...)}, omitting
 the \code{data} argument. E.g. \code{lme4::glmer(Y ~ X + (X|G), family = poisson)}}
 
-\item{uniqueEcoregionGroups}{Unique values of ecoregionGroups.
+\item{uniqueEcoregionGroups}{Unique values of \code{ecoregionGroups}.
 This is the basis for the statistics, and can be used to optimize caching,
-e.g. ignore \code{.specialData} in \code{.omitArgs}}
+e.g. ignore \code{.specialData} in \code{.omitArgs}.}
 
-\item{.specialData}{The custom dataset required for the model}
+\item{.specialData}{The custom dataset required for the model.}
 }
 \description{
 This does a few things including R squared, gets the fitted values.
-It appears that running the models "asis" without this wrapper
-does not work with \code{Cache}. The return of the model in
-a list solves this problem. For Caching, the \code{.specialData}
-should be "omitted" via \code{omitArgs}, and \code{uniqueEcoregionGroups}
-should not be omitted.
+It appears that running the models "as is" without this wrapper does not work with \code{Cache}.
+The return of the model in a list solves this problem.
+For Caching, the \code{.specialData} should be "omitted" via \code{omitArgs}, and
+\code{uniqueEcoregionGroups} should not be omitted.
 }

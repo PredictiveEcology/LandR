@@ -2,7 +2,7 @@
 % Please edit documentation in R/cohorts.R
 \name{convertUnwantedLCC}
 \alias{convertUnwantedLCC}
-\title{Convert Land Cover Classes to another value in its neighbourhood}
+\title{Convert Land Cover Classes (LCC) to another value in its neighbourhood}
 \usage{
 convertUnwantedLCC(
   classesToReplace = 34:36,
@@ -16,8 +16,8 @@ convertUnwantedLCC(
 )
 }
 \arguments{
-\item{classesToReplace}{Integer vector of classes that are are to be replaced, e.g.,
-34, 35, 36 on LCC2005, which are burned young, burned 10yr, and cities}
+\item{classesToReplace}{Integer vector of classes that are are to be replaced,
+e.g., 34, 35, 36 on LCC2005, which are burned young, burned 10 year, and cities.}
 
 \item{rstLCC}{LCC raster, e.g., LCC2005}
 
@@ -29,7 +29,7 @@ convertUnwantedLCC(
 \code{initialEcoregionCode} is the unique codes that are "available" to be
   used as a replacement for \code{classesToReplace}. \code{initialEcoregionCode}
   must be a character vector, with one or no "_" used as a separator, with the last
-  component being the LandCoverClass that matches \code{classesToReplace}, e.g.,
+  component being the Land Cover Class that matches \code{classesToReplace}, e.g.,
   \code{"242_18"}. If there is no "_" in this code, then the codes must match the
   \code{classesToReplace} exactly, e.g., \code{"11"}.
   If \code{pixelIndex} is missing, the function will fill it

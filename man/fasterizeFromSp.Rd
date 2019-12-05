@@ -2,7 +2,7 @@
 % Please edit documentation in R/maps.R
 \name{fasterizeFromSp}
 \alias{fasterizeFromSp}
-\title{Fasterize polygons using \code{fasterize}}
+\title{Rasterize polygons using \code{fasterize}}
 \usage{
 fasterizeFromSp(sp, raster, fieldName)
 }
@@ -11,12 +11,11 @@ fasterizeFromSp(sp, raster, fieldName)
 
 \item{raster}{the template raster to use}
 
-\item{fieldName}{the field to use for the rasterizing (will be ignored if the
-shapefile has no fields)}
+\item{fieldName}{the field to use (will be ignored if the shapefile has no fields)}
 }
 \value{
 TODO: is it a \code{RasterLayer}?
 }
 \description{
-Fasterize polygons using \code{fasterize}
+Rasterize polygons using \code{fasterize}
 }

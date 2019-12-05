@@ -9,7 +9,7 @@
   \item{LANDIS_test}{species names from LANDIS-II test parameter table}
   \item{LANDIS_traits}{species names from LANDIS-II traits parameter table}
   \item{LandR}{species names from LandR modules}
-  \item{KNN}{species names from Knn datasets}
+  \item{KNN}{species names from kNN datasets}
   \item{CASFRI}{species names from CASFRI database}
   \item{Latin_full}{accepted species latin names as in \url{http://theplantlist.org}}
   \item{EN_generic_short}{Short version of species' common names in English}
@@ -43,6 +43,6 @@ Presently only containing Canadian native tree species, with name equivalencies 
 Remaining columns have been filled with some other useful ways to name species (e.g., for plotting).
 
 This table is currently used as the default equivalencies table in LandR SpaDES modules,
-but can also serve as a template to custumize species names equivalencies by the user.
+but can also serve as a template to customize species names equivalencies by the user.
 }
 \keyword{datasets}

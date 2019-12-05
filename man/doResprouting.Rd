@@ -17,14 +17,18 @@ doResprouting(
 )
 }
 \arguments{
-\item{burnedPixelCohortData}{A /code{cohortData} table expanded to pixelIndex containing the only the cohorts in
-the pixels that were affected by the disturbance}
+\item{burnedPixelCohortData}{An expanded \code{cohortData} \code{data.table} with pixel-level
+cohort information on burnt pixels and columns:
+\code{severity} - fire severity in that pixel calculated based on fire behaviour properties;
+\code{firetolerance} - species-level fire tolerance;
+\code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}.}
 
-\item{postFirePixelCohortData}{an empty /code{cohortData}-like table with columns "age", "B", "mortality",
-"aNPPAct", and "sumB" removed and "pixelIndex" added.}
+\item{postFirePixelCohortData}{an empty \code{cohortData}-like table with columns:
+\code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB} removed;
+and \code{pixelIndex} added.}
 
 \item{postFireRegenSummary}{a data.table summarizing for which species serotiny/resprouting were
-activated and in how many pixels, for each year. Only necessary if /code{calibrate = TRUE}.}
+activated and in how many pixels, for each year. Only necessary if \code{calibrate = TRUE}.}
 
 \item{serotinyPixel}{a vector of pixels where serotiny was activated;}
 
@@ -34,15 +38,17 @@ activated and in how many pixels, for each year. Only necessary if /code{calibra
 
 \item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
 
-\item{sufficientLight}{a data.table containing probability of establishment, given a site's light conditions (X0-X5) for
-each level of a species shade tolerance (1-5)}
+\item{sufficientLight}{a \code{data.table} containing probability of establishment,
+given a site's light conditions (\code{X0}-\code{X5}) for each level of a species shade
+tolerance (\code{1}-\code{5}).}
 
-\item{calibrate}{logical. Determines whether to output /code{postFirePixelCohortData}. Defaults to FALSE}
+\item{calibrate}{logical. Determines whether to output \code{postFirePixelCohortData}. Defaults to FALSE}
 }
 \value{
-A list of objects. /code{postFirePixelCohortData}, a data.table with the cohorts that will undergo serotiny;
-   /code{serotinyResproutSuccessPixels} a vector of pixels where serotiny and resprouting were activated;
-   /code{postFireRegenSummary} the updated postFireRegenSummary, if /code{calibrate = TRUE}
+A list of objects:
+    \code{postFirePixelCohortData}, a \code{data.table} with the cohorts that undergo serotiny;
+    \code{serotinyPixel}, a vector of pixels where serotiny was activated;
+    \code{postFireRegenSummary}, the updated \code{postFireRegenSummary}, if \code{calibrate = TRUE}.
 }
 \description{
 Activate resprouting after a (fire) disturbance

@@ -15,10 +15,10 @@ and \code{sumB}.}
 
 \item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values}
 
-\item{minRelativeB}{a \code{data.frame} with  the cut points to classify stand shadeness.}
+\item{minRelativeB}{a \code{data.frame} with  the cut points to classify stand shadiness.}
 }
 \value{
-\code{cohortData} table with a siteShade column
+\code{cohortData} table with a \code{siteShade} column
 }
 \description{
 Calculate site shade
