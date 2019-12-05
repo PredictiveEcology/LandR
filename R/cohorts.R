@@ -1141,7 +1141,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
   #missingNewPixelCohortData <- newPixelCohortData[!specieseco_current, on = uniqueSpeciesEcoregionDefinition]
   specieseco_current <- specieseco_current[!is.na(maxB)]
   specieseco_current[, maxB_eco := max(maxB), by = ecoregionGroup]
-  browser()
+
   # Start provenance Table join
   provenanceSelection <- specieseco_current[provenanceTable,
                                             on = c(speciesCode = "speciesCode",
