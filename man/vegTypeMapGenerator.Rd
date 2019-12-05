@@ -32,7 +32,8 @@ vegTypeMapGenerator(x, ...)
 ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
 
-\item{pixelGroupMap}{A \code{raster}}
+\item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
+number that correspondsd exactly to \code{pixelGroup} column in \code{cohortData}.}
 
 \item{vegLeadingProportion}{Numeric between 0-1, determing the relative biomass
 threshold a species needs to pass to be considered "leading".}
@@ -54,7 +55,7 @@ If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 \item{colors}{A named vector of color codes. The names MUST match the names of species
 in \code{cohortData$speciesCode}, plus an optional "Mixed" color.}
 
-\item{pixelGroupColName}{Name of the column in \code{pixelGroup} to use}
+\item{pixelGroupColName}{Name of the column in \code{pixelGroup} to use.}
 }
 \description{
 Generate vegetation type map

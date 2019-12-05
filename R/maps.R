@@ -132,7 +132,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 #'
 #' @param x Either a \code{cohortData} object or a \code{speciesCover} \code{RasterStack}
 #'
-#' @param pixelGroupMap  A \code{raster}
+#' @template pixelGroupMap
 #'
 #' @param vegLeadingProportion Numeric between 0-1, determing the relative biomass
 #'               threshold a species needs to pass to be considered "leading".
@@ -154,7 +154,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 #' @param colors A named vector of color codes. The names MUST match the names of species
 #'               in \code{cohortData$speciesCode}, plus an optional "Mixed" color.
 #'
-#' @param pixelGroupColName Name of the column in \code{pixelGroup} to use
+#' @param pixelGroupColName Name of the column in \code{pixelGroup} to use.
 #'
 #' @template doAssertion
 #'

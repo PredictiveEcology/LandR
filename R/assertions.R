@@ -123,7 +123,9 @@ assertColumns <- function(obj, colClasses,
 
 #' A test that \code{pixelGroupMap} and \code{cohortData} match
 #'
-#' @inheritParams updateCohortData
+#' @template cohortData
+#'
+#' @template pixelGroupMap
 #'
 #' @param sim If the simList is included, then the browser() call will be more useful
 #'
@@ -181,12 +183,12 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
 
 #' A test that \code{pixelGroupMap} and \code{pixelCohortData} match \code{pixelIndex}
 #'
-#' This is the full pixelCohortData, not the collapsed one
+#' This is the full \code{pixelCohortData}, not the collapsed one.
 #'
 #' @param pixelCohortData The full \code{cohortData} \code{data.table}
-#' @param pixelGroupMap Raster layer with pixel values equal to a pixel group
-#'   number that correspondsd exactly to \code{pixelGroup} column in
-#'   \code{cohortData}
+#' @template pixelGroupMap
+#' @template doAssertion
+
 #'
 #' @export
 #' @rdname assertions

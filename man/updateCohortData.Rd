@@ -28,18 +28,13 @@ updateCohortData(
 )
 }
 \arguments{
-\item{newPixelCohortData}{must be a complete cohortData object with newly
-created cohorts. They do not have to have \code{pixelGroup} values yet; they
-can be overlapping with \code{cohortData}, (i.e., they can be regenerated on
-empty pixels or on already occupied pixels). Columns it must have:
- \code{pixelIndex}, \code{speciesCode}, \code{ecoregionGroup}. The
-remaining 4 (see \code{cohortData}) will be created with \code{0}s}
+\item{newPixelCohortData}{}
 
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
 \code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
 and \code{sumB}.}
 
-\item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group
+\item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
 number that correspondsd exactly to \code{pixelGroup} column in \code{cohortData}.}
 
 \item{time}{Current time e.g., time(sim). This is used to extract the correct parameters in

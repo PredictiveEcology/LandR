@@ -99,9 +99,8 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 
 \item{colClasses}{A named vector of column classes, where the names are the column names}
 
-\item{pixelGroupMap}{Raster layer with pixel values equal to a pixel group
-number that correspondsd exactly to \code{pixelGroup} column in
-\code{cohortData}}
+\item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
+number that correspondsd exactly to \code{pixelGroup} column in \code{cohortData}.}
 
 \item{sim}{If the simList is included, then the browser() call will be more useful}
 
@@ -137,7 +136,7 @@ Defaults to 1.}
 \description{
 Assert that ecoregionCodes that were replaced, were correctly identified
 
-This is the full pixelCohortData, not the collapsed one
+This is the full \code{pixelCohortData}, not the collapsed one.
 }
 \note{
 TODO

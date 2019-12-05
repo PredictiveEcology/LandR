@@ -36,8 +36,7 @@ if (getRversion() >= "3.1.0") {
 #'
 #' @template cohortData
 #'
-#' @param pixelGroupMap Raster layer with pixel values equal to a pixel group
-#'   number that correspondsd exactly to \code{pixelGroup} column in \code{cohortData}.
+#' @template pixelGroupMap
 #'
 #' @param time Current time e.g., time(sim). This is used to extract the correct parameters in
 #'   \code{speciesEcoregion} table if there are different values over time.
@@ -202,7 +201,10 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 #' Calculate new values for \code{B}, add \code{age}, then \code{rbindlist} this
 #' with \code{cohortData}.
 #'
-#' @inheritParams updateCohortData
+#' @param newPixelCohortData
+#'
+#' @template cohortData
+#'
 #' @return A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
 #'
 #' @importFrom data.table copy rbindlist set setkey
@@ -283,8 +285,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 #'
 #' @template cohortData
 #'
-#' @param pixelGroupMap Raster layer with pixel values equal to a pixel group number
-#'   that correspondsd exactly to ]\code{pixelGroup} column in \code{cohortData}.
+#' @template pixelGroupMap
 #'
 #' @template doAssertion
 #'
@@ -986,8 +987,7 @@ columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 #'
 #' @template cohortData
 #'
-#' @param pixelGroupMap Raster layer with pixel values equal to a pixel group number
-#'   that corresponds exactly to ]\code{pixelGroup} column in \code{cohortData}.
+#' @template pixelGroupMap
 #'
 #' @template doAssertion
 #'
@@ -1014,8 +1014,7 @@ addPixels2CohortData <- function(cohortData, pixelGroupMap,
 #'
 #' @template cohortData
 #'
-#' @param pixelGroupMap Raster layer with pixel values equal to a pixel group number
-#'   that corresponds exactly to ]\code{pixelGroup} column in \code{cohortData}.
+#' @template pixelGroupMap
 #'
 #' @template doAssertion
 #'
