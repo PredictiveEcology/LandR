@@ -184,7 +184,7 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
 #'
 #' This is the full \code{pixelCohortData}, not the collapsed one.
 #'
-#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#' @template pixelCohortData
 #' @template pixelGroupMap
 #'
 #' @export

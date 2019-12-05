@@ -24,8 +24,6 @@ and \code{sumB}.}
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
 number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
-\item{time}{simulation time `# TODO: use currentTime`}
-
 \item{provenanceTable}{A \code{data.table} with three columns:
 \code{Location}, \code{Provenance}, and \code{speciesCode}.
 New cohorts are initiated at the \code{Location} \code{speciesEcoregion} from the corresponding
@@ -34,6 +32,8 @@ New cohorts are initiated at the \code{Location} \code{speciesEcoregion} from th
 \item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
 
 \item{successionTimestep}{succession timestep used in the simulation}
+
+\item{currentTime}{The current simulation time e.g., \code{time(sim)}.}
 }
 \value{
 A \code{data.table} with a new \code{cohortData}

@@ -22,7 +22,8 @@ and another with land cover (e.g. LCC)}
 are to be considered active for the simulations. Columns should be named 'active'
 (with 'yes' or 'no' values) and 'ecoregion'.}
 
-\item{rasterToMatch}{a \code{rasterToMatch} (e.g. the one used throughout the simulation)}
+\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).}
 }
 \value{
 A list with two objects: the \code{ecoregionMap} and a table summarizing

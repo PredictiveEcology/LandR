@@ -10,7 +10,7 @@ makeEcoregionMap(ecoregionFiles, pixelCohortData)
 \item{ecoregionFiles}{A list with two objects: the \code{ecoregionMap} and a table summarizing
 its information per \code{pixelID}.}
 
-\item{pixelCohortData}{The full \code{cohortData} \code{data.table}.}
+\item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
 }
 \value{
 A raster with ecoregion codes.

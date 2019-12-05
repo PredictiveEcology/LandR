@@ -400,8 +400,7 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
 #' Pull out the values from \code{speciesEcoregion} table for current time
 #'
 #' @template speciesEcoregion
-#'
-#' @param currentTime The current time e.g., \code{time(sim)}
+#' @template currentTime
 #'
 #' @return
 #' The \code{speciesEcoregion} input object, but with data from only one year, the year
@@ -1054,7 +1053,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #'   \item \code{B} (integer)
 #' }
 #'
-#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#' @template pixelCohortData
 #' @param columnsForPixelGroups Default columns that define pixel groups
 #' @template speciesEcoregion
 #'
@@ -1085,11 +1084,11 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   ecoregionsWeHaveParametersFor <- levels(speciesEcoregion$ecoregionGroup)
 
   pixelCohortData <- pixelCohortData[ecoregionGroup %in% ecoregionsWeHaveParametersFor] # keep only ones we have params for
-  pixelCohortData[ , ecoregionGroup := factor(as.character(ecoregionGroup))]
+  pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
   pixelCohortData[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
 
   cohortData <- unique(pixelCohortData, by = c("pixelGroup", columnsForPixelGroups))
-  cohortData[ , `:=`(pixelIndex = NULL)]
+  cohortData[, `:=`(pixelIndex = NULL)]
 
   assertUniqueCohortData(cohortData, c("pixelGroup", "ecoregionGroup", "speciesCode"))
   return(list(cohortData = cohortData, pixelCohortData = pixelCohortData))
@@ -1100,7 +1099,7 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 #' @param newPixelCohortData the cohorts that were harvested
 #' @template cohortData
 #' @template pixelGroupMap
-#' @param time simulation time
+#' @template currentTime
 #' @param provenanceTable A \code{data.table} with three columns:
 #'   \code{Location}, \code{Provenance}, and \code{speciesCode}.
 #'   New cohorts are initiated at the \code{Location} \code{speciesEcoregion} from the corresponding

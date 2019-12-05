@@ -4,10 +4,9 @@ if (getRversion() >= "3.1.0") {
 
 #' Create dummy inputs for test simulations
 #'
-#' @details
 #' \code{ecoregionMap}is a raster of all the unique groupings.
 #'
-#' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used throughout the simulation)
+#' @template rasterToMatch
 #'
 #' @return a \code{RasterLayer} object or, in the case of \code{makeDummyEcoregionFiles}, a list.
 #'

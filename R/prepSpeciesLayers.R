@@ -186,7 +186,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 #' @param outputPath TODO: description needed
 #' @param url TODO: description needed; if \code{NULL}, the default, use the default source url
 #' @param studyArea TODO: description needed
-#' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used throughout the simulation)
+#' @template rasterToMatch
 #' @template sppEquiv
 #' @template sppEquivCol
 #' @param thresh threshold \% cover used to defined the species as "present" in the study area.
