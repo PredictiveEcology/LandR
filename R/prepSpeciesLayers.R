@@ -127,8 +127,8 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 
   ## All NA_Sp species codes should be in CASFRI spp list
   if (length(NA_Sp))
-    warning(cat("Not all selected species are in loadedCASFRI. Check if this is correct:\n",
-                paste(paste0(keepSpecies$CASFRI[NA_Sp], collapse = ", "), "absent\n")))
+    warning("Not all selected species are in loadedCASFRI. Check if this is correct:\n",
+            paste(paste0(keepSpecies$CASFRI[NA_Sp], collapse = ", "), "absent\n"))
 
   ## empty rasters for NA_sp
   for (sp in NA_Sp) {

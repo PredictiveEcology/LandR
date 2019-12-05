@@ -346,8 +346,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     if (!exists("newAlgoVTM", envir = .pkgEnv)) .pkgEnv$newAlgoVTM <- 0
     .pkgEnv$oldAlgoVTM <- .pkgEnv$oldAlgoVTM + (systimePost1 - systimePre1)
     .pkgEnv$newAlgoVTM <- .pkgEnv$newAlgoVTM + (systimePost2 - systimePre2)
-    print(paste("LandR::vegTypeMapGenerator: new algo", .pkgEnv$newAlgoVTM))
-    print(paste("LandR::vegTypeMapGenerator: old algo", .pkgEnv$oldAlgoVTM))
+    message("LandR::vegTypeMapGenerator: new algo ", .pkgEnv$newAlgoVTM)
+    message("LandR::vegTypeMapGenerator: old algo ", .pkgEnv$oldAlgoVTM)
     setorderv(pixelGroupData2, pgdAndSc)
     whNA <- unique(unlist(sapply(pixelGroupData2, function(xx) which(is.na(xx)))))
     pixelGroupData1 <- pixelGroupData1[!pixelGroupData2[whNA], on = pgdAndSc]
