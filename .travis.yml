@@ -15,6 +15,7 @@ matrix:
         sources:
           - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
         packages:
+          - hunspell-en-ca
           - libgdal1-dev
           - libgeos-dev
           - libglpk-dev
@@ -44,6 +45,7 @@ matrix:
         sources:
           - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
         packages:
+          - hunspell-en-ca
           - libgdal1-dev
           - libgeos-dev
           - libglpk-dev
@@ -82,6 +84,7 @@ matrix:
         sources:
           - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
         packages:
+          - hunspell-en-ca
           - libgdal1-dev
           - libgeos-dev
           - libglpk-dev
