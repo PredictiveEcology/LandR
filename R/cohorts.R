@@ -774,7 +774,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @param inputDataTable A \code{data.table} with columns described above.
 #'
 #' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
-#'   represent percent cover by species.
+#'   represent percent cover by species, rescaled to sum up to 100%.
 #'
 #' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
 #'   to establish unique \code{pixelGroups}.
