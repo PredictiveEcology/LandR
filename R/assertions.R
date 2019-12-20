@@ -63,7 +63,7 @@ assertUniqueCohortData <- function(cohortData, columns,
 #' Assert that \code{ecoregionGroups} match across different objects
 #'
 #' @param ecoregionMap The \code{ecoregionMap}, a raster of all the unique groupings
-#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
+#' @template speciesEcoregion
 #' @param minRelativeB TODO: add description
 #'
 #' @export
@@ -184,7 +184,7 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
 #'
 #' This is the full \code{pixelCohortData}, not the collapsed one.
 #'
-#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#' @template pixelCohortData
 #' @template pixelGroupMap
 #'
 #' @export

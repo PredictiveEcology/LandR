@@ -37,7 +37,7 @@ Only necessary if \code{calibrate = TRUE}.}
 given a site's light conditions (\code{X0}-\code{X5}) for each level of a species shade
 tolerance (\code{1}-\code{5}).}
 
-\item{speciesEcoregion}{a \code{data.table} with \code{speciesEcoregion} values}
+\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
 
 \item{simuTime}{integer. The current simulation time obtained with \code{time(sim)}}
 

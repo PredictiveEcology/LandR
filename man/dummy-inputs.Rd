@@ -19,7 +19,8 @@ makeDummyRstLCC(rasterToMatch)
 makeDummyEcoregionFiles(ecoregionMap, rstLCC, rasterToMatch)
 }
 \arguments{
-\item{rasterToMatch}{a \code{rasterToMatch} (e.g. the one used throughout the simulation)}
+\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).}
 
 \item{rawBiomassMap}{a \code{rawBiomassMap} (e.g. the one used
 throughout the simulation)}
@@ -32,11 +33,9 @@ throughout the simulation)}
 a \code{RasterLayer} object or, in the case of \code{makeDummyEcoregionFiles}, a list.
 }
 \description{
-Create dummy inputs for test simulations
+\code{ecoregionMap}is a raster of all the unique groupings.
 }
 \details{
-\code{ecoregionMap}is a raster of all the unique groupings.
-
 \code{rawBiomassMap} is a raster of "raw" total stand biomass per pixel,
      with values between 100 and 20000 g/m^2.
 

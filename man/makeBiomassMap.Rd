@@ -9,13 +9,14 @@ makeBiomassMap(pixelCohortData, rasterToMatch)
 \arguments{
 \item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
 
-\item{rasterToMatch}{a \code{rasterToMatch} (e.g. the one used throughout the simulation)}
+\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).}
 }
 \value{
 The \code{biomassMap}, a raster of total stand biomass per pixel.
 }
 \description{
-This is a function that creates the \code{biomassMap} raster used  for
-  simulations in \code{Biomass_core} module, using estimated data based on \code{rawBiomassMap}
-  contained in \code{pixelCohortData}.
+This is a function that creates the \code{biomassMap} raster used  for simulations in
+\code{Biomass_core} module, using estimated data based on \code{rawBiomassMap} contained in
+\code{pixelCohortData}.
 }

@@ -543,9 +543,9 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #'
 #' @param dPath path to the data directory
 #'
-#' @param rasterToMatch passed to \code{\link[reproducible]{prepInputs}}
+#' @template rasterToMatch
 #'
-#' @param studyArea passed to \code{\link[reproducible]{prepInputs}}
+#' @template studyArea
 #'
 #' @template sppEquiv
 #'
@@ -729,9 +729,9 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 #'
 #' @param dPath path to the data directory
 #'
-#' @param rasterToMatch passed to \code{\link[reproducible]{prepInputs}}
+#' @template rasterToMatch
 #'
-#' @param studyArea passed to \code{\link[reproducible]{prepInputs}}
+#' @template studyArea
 #'
 #' @template sppEquiv
 #'
