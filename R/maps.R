@@ -672,22 +672,22 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                          ),
                          prepInputs, quick = TRUE) # don't need to digest all the "targetFile"
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
-  noDataLayers <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh ) FALSE else TRUE)
-  if (sum(!noDataLayers) > 0) {
-    sppKeep <- names(speciesLayers)[noDataLayers]
+  layersWdata <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh) FALSE else TRUE)
+  if (sum(!layersWdata) > 0) {
+    sppKeep <- names(speciesLayers)[layersWdata]
     if (length(sppKeep)) {
-      message("removing ", sum(!noDataLayers), " species because they had <",thresh,
+      message("removing ", sum(!layersWdata), " species because they had <",thresh,
               " % cover in the study area",
               "\n  These species are retained (and could be further culled manually, if desired):\n  ",
               paste(sppKeep, collapse = " "))
     } else {
-      message("no pixels for ", paste(names(noDataLayers), collapse = " "),
+      message("no pixels for ", paste(names(layersWdata), collapse = " "),
               " were found with >=", thresh, " % cover in the study area.",
               "\n  No species layers were retained. Try lowering the threshold",
               " to retain species with low % cover")
     }
   }
-  speciesLayers <- speciesLayers[noDataLayers]
+  speciesLayers <- speciesLayers[layersWdata]
   if (!is.null(sppMerge)) {
     if (length(sppMerge) > 0)
       speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
@@ -703,7 +703,6 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   nameChangesNonMerged <- equivalentName(names(speciesLayers)[nameChangeNA],
                                          sppEquiv, column = sppEquivCol)
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
-
 
   ## return stack and updated species names vector
   if (length(speciesLayers))
@@ -854,22 +853,22 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   }
 
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
-  noDataLayers <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh) FALSE else TRUE)
-  if (sum(!noDataLayers) > 0) {
-    sppKeep <- names(speciesLayers)[noDataLayers]
+  layersWdata <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh) FALSE else TRUE)
+  if (sum(!layersWdata) > 0) {
+    sppKeep <- names(speciesLayers)[layersWdata]
     if (length(sppKeep)) {
-      message("removing ", sum(!noDataLayers), " species because they had <",thresh,
+      message("removing ", sum(!layersWdata), " species because they had <",thresh,
               " % cover in the study area",
               "\n  These species are retained (and could be further culled manually, if desired):\n  ",
               paste(sppKeep, collapse = " "))
     } else {
-      message("no pixels for ", paste(names(noDataLayers), collapse = " "),
+      message("no pixels for ", paste(names(layersWdata), collapse = " "),
               " were found with >=", thresh, " % cover in the study area.",
               "\n  No species layers were retained. Try lowering the threshold",
               " to retain species with low % cover")
     }
   }
-  speciesLayers <- speciesLayers[noDataLayers]
+  speciesLayers <- speciesLayers[layersWdata]
   if (!is.null(sppMerge)) {
     if (length(sppMerge) > 0)
       speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
