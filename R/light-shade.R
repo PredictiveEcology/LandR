@@ -5,11 +5,9 @@ if (getRversion() >= "3.1.0") {
 
 #' Calculate site shade
 #'
-#' @param time integer. The current simulation time obtained with \code{time(sim)}
-#' @param cohortData A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
-#'   \code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
-#'   and \code{sumB}.
-#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
+#' @template currentTime
+#' @template cohortData
+#' @template speciesEcoregion
 #' @param minRelativeB a \code{data.frame} with  the cut points to classify stand shadiness.
 #'
 #' @seealso  \code{\link{makeMinRelativeB}}
@@ -18,8 +16,7 @@ if (getRversion() >= "3.1.0") {
 #'
 #' @export
 #' @importFrom data.table data.table set setkey
-
-calcSiteShade <- compiler::cmpfun(function(time, cohortData, speciesEcoregion, minRelativeB) {
+calcSiteShade <- compiler::cmpfun(function(currentTime, cohortData, speciesEcoregion, minRelativeB) {
   # the siteshade was calculated based on the code:
   # https://github.com/LANDIS-II-Foundation/Extensions-Succession/blob/master/biomass-succession/trunk/src/PlugIn.cs
   if (nrow(cohortData[age > 5,]) > 0) {
@@ -36,7 +33,7 @@ calcSiteShade <- compiler::cmpfun(function(time, cohortData, speciesEcoregion, m
         , ':='(prevMortality = 0, sumB = 0)]
   }
   #bAM <- data.table(speciesEcoregion)[year <= time(sim) & (year > (time(sim)-P(sim)$successionTimestep))]
-  bAM <- speciesEcoregionLatestYear(speciesEcoregion, time)
+  bAM <- speciesEcoregionLatestYear(speciesEcoregion, currentTime)
   bAM <- na.omit(bAM) # remove ecoregion-species groups with no maxB or maxANPP
   bAM <- bAM[, .(maxMaxB = max(maxB, na.rm = TRUE)), by = ecoregionGroup]
   setkey(bAM, ecoregionGroup)

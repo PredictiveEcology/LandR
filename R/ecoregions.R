@@ -15,7 +15,7 @@ if (getRversion() >= "3.1.0") {
 #' @param ecoregionActiveStatus A two column \code{data.table} detailing with ecoregions
 #' are to be considered active for the simulations. Columns should be named 'active'
 #' (with 'yes' or 'no' values) and 'ecoregion'.
-#' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used throughout the simulation)
+#' @template rasterToMatch
 #'
 #' @return
 #' A list with two objects: the \code{ecoregionMap} and a table summarizing
@@ -101,8 +101,8 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName,
 #'   this function creates the \code{ecoregion} table from pixel information contained in
 #'   \code{pixelCohortData}
 #'
-#' @param pixelCohortData The full \code{cohortData} \code{data.table}
-#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
+#' @template pixelCohortData
+#' @template speciesEcoregion
 #'
 #' @return
 #' A \code{data.table} with ecoregion codes and their active status per \code{pixelID}.
@@ -127,7 +127,7 @@ makeEcoregionDT <- function(pixelCohortData, speciesEcoregion) {
 #' Unlike \code{ecoregionProducer}, this fills the raster with pixel information contained in
 #' \code{pixelCohortData}.
 #'
-#' @param pixelCohortData The full \code{cohortData} \code{data.table}.
+#' @template pixelCohortData
 #' @param ecoregionFiles A list with two objects: the \code{ecoregionMap} and a table summarizing
 #'   its information per \code{pixelID}.
 #'

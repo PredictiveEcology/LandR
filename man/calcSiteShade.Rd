@@ -4,16 +4,16 @@
 \alias{calcSiteShade}
 \title{Calculate site shade}
 \usage{
-calcSiteShade(time, cohortData, speciesEcoregion, minRelativeB)
+calcSiteShade(currentTime, cohortData, speciesEcoregion, minRelativeB)
 }
 \arguments{
-\item{time}{integer. The current simulation time obtained with \code{time(sim)}}
+\item{currentTime}{The current simulation time e.g., \code{time(sim)}.}
 
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
 \code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
 and \code{sumB}.}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values}
+\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
 
 \item{minRelativeB}{a \code{data.frame} with  the cut points to classify stand shadiness.}
 }

@@ -12,10 +12,10 @@ makeCohortDataFiles(pixelCohortData, columnsForPixelGroups, speciesEcoregion)
 
 \item{columnsForPixelGroups}{Default columns that define pixel groups}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values
-
-#' @return
-A list with a modified \code{pixelCohortData} and \code{cohortData} \code{data.table}s.}
+\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
+}
+\value{
+A list with a modified \code{pixelCohortData} and \code{cohortData} \code{data.table}s.
 }
 \description{
 Takes a \code{pixelCohortData} table (see \code{makeAndCleanInitialCohortData}),
