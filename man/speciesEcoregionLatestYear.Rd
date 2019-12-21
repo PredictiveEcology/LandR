@@ -7,9 +7,9 @@
 speciesEcoregionLatestYear(speciesEcoregion, currentTime)
 }
 \arguments{
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values}
+\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
 
-\item{currentTime}{The current time e.g., \code{time(sim)}}
+\item{currentTime}{The current simulation time e.g., \code{time(sim)}.}
 }
 \value{
 The \code{speciesEcoregion} input object, but with data from only one year, the year

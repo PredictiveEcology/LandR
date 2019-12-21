@@ -42,7 +42,7 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @param ecoregionFiles A list with two objects: the \code{ecoregionMap} and a table summarizing
 #'   its information per \code{pixelID.} See \code{ecoregionProducer}.
 #' @param biomassMap raster of total stand biomass
-#' @param rasterToMatch a \code{rasterToMatch} (e.g., the one used throughout the simulation)
+#' @template rasterToMatch
 #' @param rstLCC raster of land-cover class
 #' @param pixelGroupAgeClass When assigning \code{pixelGroup} membership, this defines the resolution
 #'   of ages that will be considered 'the same \code{pixelGroup}', e.g., if it is 10, then 6 and 14
@@ -244,12 +244,12 @@ makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDat
 
 #' Create \code{biomassMap}
 #'
-#' This is a function that creates the \code{biomassMap} raster used  for
-#'   simulations in \code{Biomass_core} module, using estimated data based on \code{rawBiomassMap}
-#'   contained in \code{pixelCohortData}.
+#' This is a function that creates the \code{biomassMap} raster used  for simulations in
+#' \code{Biomass_core} module, using estimated data based on \code{rawBiomassMap} contained in
+#' \code{pixelCohortData}.
 #'
-#' @param pixelCohortData The full \code{cohortData} \code{data.table}
-#' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used throughout the simulation)
+#' @template pixelCohortData
+#' @template rasterToMatch
 #'
 #' @return The \code{biomassMap}, a raster of total stand biomass per pixel.
 #'
@@ -272,7 +272,7 @@ makeBiomassMap <-  function(pixelCohortData, rasterToMatch) {
 #' to germinate), in each unique ecoregion group.
 #' All ecoregion groups currently have the same values.
 #'
-#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#' @template pixelCohortData
 #'
 #' @return a data.frame of min relative biomass values per ecoregion group.
 #'
@@ -292,8 +292,8 @@ makeMinRelativeB <- function(pixelCohortData) {
 #'
 #' Create the \code{makePixelGroupMap} raster containing \code{pixelGroups} in \code{pixelCohortData}.
 #'
-#' @param pixelCohortData The full \code{cohortData} \code{data.table}
-#' @param rasterToMatch a \code{rasterToMatch} (e.g. the one used throughout the simulation)
+#' @template pixelCohortData
+#' @template rasterToMatch
 #'
 #' @return a raster with pixel groups
 #'

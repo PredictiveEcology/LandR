@@ -9,7 +9,7 @@ updateCohortData(
   newPixelCohortData,
   cohortData,
   pixelGroupMap,
-  time,
+  currentTime,
   speciesEcoregion,
   treedFirePixelTableSinceLastDisp = NULL,
   provenanceTable = NULL,
@@ -22,7 +22,7 @@ updateCohortData(
   newPixelCohortData,
   cohortData,
   pixelGroupMap,
-  time,
+  currentTime,
   speciesEcoregion,
   successionTimestep
 )
@@ -42,10 +42,9 @@ and \code{sumB}.}
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
 number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
-\item{time}{Current time e.g., time(sim). This is used to extract the correct parameters in
-\code{speciesEcoregion} table if there are different values over time.}
+\item{currentTime}{The current simulation time e.g., \code{time(sim)}.}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values}
+\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
 
 \item{treedFirePixelTableSinceLastDisp}{A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
 This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}

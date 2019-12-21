@@ -4,7 +4,8 @@ if (getRversion() >= "3.1.0") {
     "ecoregion", "ecoregionGroup", "hasBadAge",
     "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
     "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
-    "newPossLCC", "noPixels", "ord", "outBiomass", "pixelGroup2", "pixelIndex", "pixels", "possERC",
+    "newPossLCC", "noPixels", "ord", "outBiomass", "oldEcoregionGroup",
+    "pixelGroup2", "pixelIndex", "pixels", "possERC",
     "speciesposition", "speciesGroup", "speciesInt", "state", "sumB", "oldSumB",
     "temppixelGroup", "toDelete", "totalBiomass",
     "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
@@ -29,11 +30,8 @@ if (getRversion() >= "3.1.0") {
 #' @template newPixelCohortData
 #' @template cohortData
 #' @template pixelGroupMap
-#'
-#' @param time Current time e.g., time(sim). This is used to extract the correct parameters in
-#'   \code{speciesEcoregion} table if there are different values over time.
-#'
-#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
+#' @template currentTime
+#' @template speciesEcoregion
 #'
 #' @param treedFirePixelTableSinceLastDisp A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
 #'   This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
@@ -58,7 +56,7 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom raster getValues
 #' @importFrom SpaDES.core paddedFloatToChar
 #' @importFrom stats na.omit
-updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
+updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                              speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
                              provenanceTable = NULL,
                              successionTimestep,
@@ -141,13 +139,13 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
   ##########################################################
   if (!is.null(provenanceTable)) {
     cohortData <- plantNewCohorts(newPixelCohortData, cohortData,
-                                   pixelGroupMap, time = time,
-                                   speciesEcoregion = speciesEcoregion,
-                                   successionTimestep = successionTimestep,
-                                   provenanceTable = provenanceTable)
+                                  pixelGroupMap, currentTime = currentTime,
+                                  speciesEcoregion = speciesEcoregion,
+                                  successionTimestep = successionTimestep,
+                                  provenanceTable = provenanceTable)
   } else {
     cohortData <- .initiateNewCohorts(newPixelCohortData, cohortData,
-                                      pixelGroupMap, time = time,
+                                      pixelGroupMap, currentTime = currentTime,
                                       speciesEcoregion = speciesEcoregion,
                                       successionTimestep = successionTimestep)
   }
@@ -202,7 +200,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
 #' @rdname updateCohortData
-.initiateNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, time,
+.initiateNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                                 speciesEcoregion, successionTimestep) {
   ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum B per ecoregion, join to new cohort data
@@ -220,7 +218,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, time
     set(newPixelCohortData, NULL, "pixelIndex", NULL)
   newPixelCohortData <- newPixelCohortData[!duplicated(newPixelCohortData), ]   ## faster than unique
 
-  specieseco_current <- speciesEcoregionLatestYear(speciesEcoregion, time)
+  specieseco_current <- speciesEcoregionLatestYear(speciesEcoregion, currentTime)
   specieseco_current <- setkey(specieseco_current[, .(speciesCode, maxANPP, maxB, ecoregionGroup)],
                                speciesCode, ecoregionGroup)
 
@@ -398,8 +396,8 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
 
 #' Pull out the values from \code{speciesEcoregion} table for current time
 #'
-#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
-#' @param currentTime The current time e.g., \code{time(sim)}
+#' @template speciesEcoregion
+#' @template currentTime
 #'
 #' @return
 #' The \code{speciesEcoregion} input object, but with data from only one year, the year
@@ -1052,11 +1050,11 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #'   \item \code{B} (integer)
 #' }
 #'
-#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#' @template pixelCohortData
 #' @param columnsForPixelGroups Default columns that define pixel groups
-#' @param speciesEcoregion A \code{data.table} with \code{speciesEcoregion} values
+#' @template speciesEcoregion
 #'
-#'#' @return
+#' @return
 #' A list with a modified \code{pixelCohortData} and \code{cohortData} \code{data.table}s.
 #'
 #' @export
@@ -1083,12 +1081,112 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   ecoregionsWeHaveParametersFor <- levels(speciesEcoregion$ecoregionGroup)
 
   pixelCohortData <- pixelCohortData[ecoregionGroup %in% ecoregionsWeHaveParametersFor] # keep only ones we have params for
-  pixelCohortData[ , ecoregionGroup := factor(as.character(ecoregionGroup))]
+  pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
   pixelCohortData[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
 
   cohortData <- unique(pixelCohortData, by = c("pixelGroup", columnsForPixelGroups))
-  cohortData[ , `:=`(pixelIndex = NULL)]
+  cohortData[, `:=`(pixelIndex = NULL)]
 
   assertUniqueCohortData(cohortData, c("pixelGroup", "ecoregionGroup", "speciesCode"))
   return(list(cohortData = cohortData, pixelCohortData = pixelCohortData))
+}
+
+#' Create new cohorts based on provenance table with unique \code{pixelGroup} and add to \code{cohortData}
+#'
+#' @param newPixelCohortData the cohorts that were harvested
+#' @template cohortData
+#' @template pixelGroupMap
+#' @template currentTime
+#' @param provenanceTable A \code{data.table} with three columns:
+#'   \code{Location}, \code{Provenance}, and \code{speciesCode}.
+#'   New cohorts are initiated at the \code{Location} \code{speciesEcoregion} from the corresponding
+#'   \code{speciesEcoregion} listed in the \code{Provenance} column
+#' @template speciesEcoregion
+#' @param successionTimestep succession timestep used in the simulation
+#'
+#' @return A \code{data.table} with a new \code{cohortData}
+#'
+#' @importFrom data.table copy rbindlist set setkey
+#' @importFrom raster getValues
+#' @importFrom stats na.omit
+#' @export
+plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
+                            provenanceTable, speciesEcoregion, successionTimestep) {
+
+  ## get spp "productivity traits" per ecoregion/present year
+  ## calculate maximum B per ecoregion, join to new cohort data
+  namesNCD <- names(newPixelCohortData)
+  if (!isTRUE("pixelGroup" %in% namesNCD)) {
+    if (isTRUE("pixelIndex" %in% namesNCD)) {
+      newPixelCohortData[, pixelGroup := getValues(pixelGroupMap)[pixelIndex]]
+    } else {
+      stop("newPixelCohortData must have either pixelIndex or pixelGroup")
+    }
+  }
+
+  if (!is.null(newPixelCohortData[["pixelIndex"]]))
+    set(newPixelCohortData, NULL, "pixelIndex", NULL)
+  newPixelCohortData <- newPixelCohortData[!duplicated(newPixelCohortData), ]
+
+  specieseco_current <- speciesEcoregionLatestYear(speciesEcoregion, currentTime)
+  specieseco_current <- setkey(specieseco_current[, .(speciesCode, maxANPP, maxB, ecoregionGroup)],
+                               speciesCode, ecoregionGroup)
+
+  ## Note that after the following join, some cohorts will be lost due to lack of
+  ##  parameters in speciesEcoregion. These need to be modified in pixelGroupMap.
+  #missingNewPixelCohortData <- newPixelCohortData[!specieseco_current, on = uniqueSpeciesEcoregionDefinition]
+  specieseco_current <- specieseco_current[!is.na(maxB)]
+  specieseco_current[, maxB_eco := max(maxB), by = ecoregionGroup]
+
+  # Start provenance Table join
+  provenanceSelection <- specieseco_current[provenanceTable,
+                                            on = c(speciesCode = "speciesCode",
+                                                   ecoregionGroup = "Provenance")]
+
+  # Rename ecoregionGroup and get rid of old column so no collision
+  newPixelCohortData[, oldEcoregionGroup := ecoregionGroup]
+  newPixelCohortData[, ecoregionGroup := NULL]
+  newPixelCohortData <- provenanceSelection[newPixelCohortData,
+                                            on = c(Location = "oldEcoregionGroup",
+                                                   speciesCode = 'speciesCode')]
+  # new cohorts now have the geographically correct ecoregionGroup in location,
+  # but the provenance of ecoregionGroup.
+
+  newPixelCohortData <- newPixelCohortData[!is.na(maxB)]
+  set(newPixelCohortData, NULL, "age", 1L)  ## set age to 1
+
+  ## Ceres: this was causing new cohorts to be initialized with maxANPP.
+  ## instead, calculate total biomass of older cohorts
+  # set(newPixelCohortData, NULL, "sumB", 0L)
+  if (!is.null(newPixelCohortData[["sumB"]]))
+    set(newPixelCohortData, NULL, "sumB", NULL)
+  cohortData[age >= successionTimestep, oldSumB := sum(B, na.rm = TRUE), by = "pixelGroup"]
+
+  newPixelCohortData <- unique(cohortData[, .(pixelGroup, oldSumB)],
+                               by = "pixelGroup")[newPixelCohortData, on = "pixelGroup"]
+  set(newPixelCohortData, which(is.na(newPixelCohortData$oldSumB)), "oldSumB", 0) # faster than [:=]
+  setnames(newPixelCohortData, "oldSumB", "sumB")
+  set(cohortData, NULL, "oldSumB", NULL)
+
+  if ("B" %in% names(newPixelCohortData))
+    newPixelCohortData[, B := NULL]
+  set(newPixelCohortData, NULL, "B",
+      asInteger(pmax(1, newPixelCohortData$maxANPP *
+                       exp(-1.6 * newPixelCohortData$sumB / newPixelCohortData$maxB_eco))))
+  set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
+
+  newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
+                                               mortality = 0L, aNPPAct = 0L)]
+
+  if (getOption("LandR.assertions")) {
+    if (isTRUE(NROW(unique(newPixelCohortData, by = uniqueCohortDefinition)) != NROW(newPixelCohortData)))
+      stop("Duplicated new cohorts in a pixelGroup. Please debug LandR:::.initiateNewCohorts")
+  }
+
+  cohortData <- rbindlist(list(cohortData, newPixelCohortData), fill = TRUE, use.names = TRUE)
+  # cohortData[, sumB := sum(B, na.rm = TRUE), by = "pixelGroup"]  ## recalculate sumB
+  # if (!is.integer(cohortData[["sumB"]]))
+  #   set(cohortData, NULL, "sumB", asInteger(cohortData[["sumB"]]))
+
+  return(cohortData)
 }

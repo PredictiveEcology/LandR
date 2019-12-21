@@ -19,9 +19,11 @@ loadkNNSpeciesLayersValidation(
 \arguments{
 \item{dPath}{path to the data directory}
 
-\item{rasterToMatch}{passed to \code{\link[reproducible]{prepInputs}}}
+\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).}
 
-\item{studyArea}{passed to \code{\link[reproducible]{prepInputs}}}
+\item{studyArea}{A \code{SpatialPolygons*} object used as the principle study region,
+passed to \code{\link[reproducible]{prepInputs}}.}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
