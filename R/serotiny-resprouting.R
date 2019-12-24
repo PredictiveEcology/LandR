@@ -14,7 +14,7 @@ if (getRversion() >= "3.1.0") {
 #' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
 #' @template sufficientLight
 #' @template speciesEcoregion
-#' @param simuTime integer. The current simulation time obtained with \code{time(sim)}
+#' @param currentTime integer. The current simulation time obtained with \code{time(sim)}
 #' @param treedFirePixelTableSinceLastDisp a vector of pixels that burnt and were forested
 #'     in the previous time step.
 #' @param calibrate logical. Determines whether to output \code{postFirePixelCohortData}.
@@ -30,7 +30,7 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom stats runif
 doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
                        postFireRegenSummary = NULL, species, sufficientLight,
-                       speciesEcoregion, simuTime, treedFirePixelTableSinceLastDisp,
+                       speciesEcoregion, currentTime, treedFirePixelTableSinceLastDisp,
                        calibrate = FALSE) {
   ## checks
   if (calibrate & is.null(postFireRegenSummary)) {
@@ -76,7 +76,7 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
     set(serotinyPixelCohortData, NULL, c("shadetolerance", "siteShade", "lightProb"), NULL)   ## clean table again
 
     ## get establishment probs and subset species that establish with runif
-    specieseco_current <- speciesEcoregion[year <= round(simuTime)]
+    specieseco_current <- speciesEcoregion[year <= round(currentTime)]
     specieseco_current <- specieseco_current[year == max(specieseco_current$year),
                                              .(ecoregionGroup, speciesCode, establishprob)]
     serotinyPixelCohortData <- serotinyPixelCohortData[specieseco_current, on = c("ecoregionGroup", "speciesCode"), nomatch = 0]
@@ -92,7 +92,7 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
       serotinyPixelCohortData[, type := "serotiny"]
       if (calibrate) {
         serotinyRegenSummary <- serotinyPixelCohortData[,.(numberOfRegen = length(pixelIndex)), by = speciesCode]
-        serotinyRegenSummary <- serotinyRegenSummary[,.(year = simuTime, regenMode = "Serotiny",
+        serotinyRegenSummary <- serotinyRegenSummary[,.(year = currentTime, regenMode = "Serotiny",
                                                         speciesCode, numberOfRegen)]
         serotinyRegenSummary <- setkey(serotinyRegenSummary, speciesCode)[species[,.(species, speciesCode)],
                                                                           nomatch = 0]
@@ -127,7 +127,7 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
 #' @param serotinyPixel a vector of pixels where serotiny was activated;
 #' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
 #' @template sufficientLight
-#' @param simuTime integer. The current simulation time obtained with \code{time(sim)}
+#' @param currentTime integer. The current simulation time obtained with \code{time(sim)}
 #' @param treedFirePixelTableSinceLastDisp a vector of pixels that burnt and were forested in the previous time step.
 #' @param calibrate logical. Determines whether to output \code{postFirePixelCohortData}. Defaults to FALSE
 #'
@@ -139,7 +139,7 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
 #' @export
 doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
                           postFireRegenSummary = NULL, serotinyPixel,
-                          treedFirePixelTableSinceLastDisp, simuTime,
+                          treedFirePixelTableSinceLastDisp, currentTime,
                           species, sufficientLight, calibrate = FALSE) {
   ## checks
   if (calibrate & is.null(postFireRegenSummary)) {
@@ -203,7 +203,7 @@ doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
       resproutingPixelCohortData[, type := "resprouting"]
       if (calibrate) {
         resproutRegenSummary <- resproutingPixelCohortData[,.(numberOfRegen = length(pixelIndex)), by = speciesCode]
-        resproutRegenSummary <- resproutRegenSummary[,.(year = simuTime, regenMode = "Resprout",
+        resproutRegenSummary <- resproutRegenSummary[,.(year = currentTime, regenMode = "Resprout",
                                                         speciesCode, numberOfRegen)]
         resproutRegenSummary <- setkey(resproutRegenSummary, speciesCode)[species[,.(species, speciesCode)],
                                                                           nomatch = 0]
