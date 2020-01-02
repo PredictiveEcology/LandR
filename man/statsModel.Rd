@@ -4,7 +4,7 @@
 \alias{statsModel}
 \title{The generic statistical model to run (\code{lmer} or \code{glmer})}
 \usage{
-statsModel(modelFn, uniqueEcoregionGroups, .specialData)
+statsModel(modelFn, uniqueEcoregionGroups, sumResponse, .specialData)
 }
 \arguments{
 \item{modelFn}{A quoted expression of type \code{package::model(Y ~ X, ...)}, omitting
@@ -13,6 +13,10 @@ the \code{data} argument. E.g. \code{lme4::glmer(Y ~ X + (X|G), family = poisson
 \item{uniqueEcoregionGroups}{Unique values of \code{ecoregionGroups}.
 This is the basis for the statistics, and can be used to optimize caching,
 e.g. ignore \code{.specialData} in \code{.omitArgs}.}
+
+\item{sumResponse}{a sum of all the response variable values
+Also to be used to optimize caching, e.g. ignore \code{.specialData}
+in \code{.omitArgs}.}
 
 \item{.specialData}{The custom dataset required for the model.}
 }

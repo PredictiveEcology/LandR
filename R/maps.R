@@ -572,6 +572,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @importFrom reproducible Cache .prefix preProcess basename2
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
+#' @importFrom RCurl getURL
+#' @importFrom XML getHTMLLinks
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   dots <- list(...)
@@ -590,16 +592,14 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
     cachePath <- getOption("reproducible.cachePath")
   }
 
-  ## get .tar file first - no extraction
-  outPreProcess <- preProcess(targetFile = file.path(dPath, "kNN-Species.tar"),
-                              archive = file.path(dPath, "kNN-Species.tar"),
-                              url = url, destinationPath = dPath)
-
+  ## get all files in url folder
+  fileURLs <- getURL(url,
+                     dirlistonly = TRUE)
+  fileNames <- getHTMLLinks(fileURLs)
   ## get all kNN species - names only
-  allSpp <- untar(tarfile = outPreProcess$targetFilePath, list = TRUE)
+  allSpp <- grep("2001_kNN_Species_.*\\.tif$", fileNames,value = TRUE)
   allSpp <- allSpp %>%
-    grep(".zip", ., value = TRUE) %>%
-    sub("_v0.zip", "", .) %>%
+    sub("_v1.tif", "", .) %>%
     sub(".*Species_", "", .)
 
   ## get all species layers from .tar
@@ -646,19 +646,9 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   }
   suffix <- paste0("_", suffix)
 
-  ## select which archives/targetFiles to extract -- because there was "multi" above, need unique here
-  targetFiles <- paste0("NFI_MODIS250m_kNN_Species_", unique(kNNnames), "_v0.tif")
-  # this sorting is necessary because split fn call below will sort
-  #   regardless, so this will ensure archive and targetFiles are same
-  targetFiles <- sort(targetFiles)
-  names(targetFiles) <- targetFiles
-  archives <- cbind(archive1 = file.path(dPath, "kNN-Species.tar"),
-                    archive2 = file.path(dPath, paste0("NFI_MODIS250m_kNN_Species_", kNNnames, "_v0.zip")))
-  archives <- split(archives, archives[, "archive2"])
-
-  if (!all(reproducible::basename2(file_path_sans_ext(names(archives))) == file_path_sans_ext(targetFiles)))
-    stop("Something is wrong. File a bug report re: loadkNNSpeciesLayers and archive ordering.")
-
+  ## select which targetFiles to extract
+  targetFiles <- grep(paste(kNNnames, ".*\\.tif$", sep = "", collapse = "|"),
+                      fileNames, value = TRUE)
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
 
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
@@ -669,10 +659,9 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   }
   speciesLayers <- Cache(Map,
                          targetFile = asPath(targetFiles),
-                         archive = lapply(archives, asPath),
                          filename2 = postProcessedFilenames,
-                         MoreArgs = list(url = url,
-                                         destinationPath = asPath(dPath),
+                         url = paste0(url, targetFiles),
+                         MoreArgs = list(destinationPath = asPath(dPath),
                                          fun = "raster::raster",
                                          studyArea = studyArea,
                                          rasterToMatch = rasterToMatch,
@@ -681,24 +670,24 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                          overwrite = TRUE,
                                          userTags = dots$userTags
                          ),
-                         prepInputs, quick = TRUE) # don't need to digest all the "targetFile" and "archives"
+                         prepInputs, quick = TRUE) # don't need to digest all the "targetFile"
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
-  noDataLayers <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh ) FALSE else TRUE)
-  if (sum(!noDataLayers) > 0) {
-    sppKeep <- names(speciesLayers)[noDataLayers]
+  layersWdata <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh) FALSE else TRUE)
+  if (sum(!layersWdata) > 0) {
+    sppKeep <- names(speciesLayers)[layersWdata]
     if (length(sppKeep)) {
-      message("removing ", sum(!noDataLayers), " species because they had <",thresh,
+      message("removing ", sum(!layersWdata), " species because they had <",thresh,
               " % cover in the study area",
               "\n  These species are retained (and could be further culled manually, if desired):\n  ",
               paste(sppKeep, collapse = " "))
     } else {
-      message("no pixels for ", paste(names(noDataLayers), collapse = " "),
+      message("no pixels for ", paste(names(layersWdata), collapse = " "),
               " were found with >=", thresh, " % cover in the study area.",
               "\n  No species layers were retained. Try lowering the threshold",
               " to retain species with low % cover")
     }
   }
-  speciesLayers <- speciesLayers[noDataLayers]
+  speciesLayers <- speciesLayers[layersWdata]
   if (!is.null(sppMerge)) {
     if (length(sppMerge) > 0)
       speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
@@ -714,7 +703,6 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   nameChangesNonMerged <- equivalentName(names(speciesLayers)[nameChangeNA],
                                          sppEquiv, column = sppEquivCol)
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
-
 
   ## return stack and updated species names vector
   if (length(speciesLayers))
@@ -865,22 +853,22 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   }
 
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
-  noDataLayers <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh) FALSE else TRUE)
-  if (sum(!noDataLayers) > 0) {
-    sppKeep <- names(speciesLayers)[noDataLayers]
+  layersWdata <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh) FALSE else TRUE)
+  if (sum(!layersWdata) > 0) {
+    sppKeep <- names(speciesLayers)[layersWdata]
     if (length(sppKeep)) {
-      message("removing ", sum(!noDataLayers), " species because they had <",thresh,
+      message("removing ", sum(!layersWdata), " species because they had <",thresh,
               " % cover in the study area",
               "\n  These species are retained (and could be further culled manually, if desired):\n  ",
               paste(sppKeep, collapse = " "))
     } else {
-      message("no pixels for ", paste(names(noDataLayers), collapse = " "),
+      message("no pixels for ", paste(names(layersWdata), collapse = " "),
               " were found with >=", thresh, " % cover in the study area.",
               "\n  No species layers were retained. Try lowering the threshold",
               " to retain species with low % cover")
     }
   }
-  speciesLayers <- speciesLayers[noDataLayers]
+  speciesLayers <- speciesLayers[layersWdata]
   if (!is.null(sppMerge)) {
     if (length(sppMerge) > 0)
       speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,

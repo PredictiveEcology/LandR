@@ -206,7 +206,8 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
                                   sppEquivCol,
                                   thresh = 10, ...) {
   if (is.null(url))
-    url <- "http://tree.pfc.forestry.ca/kNN-Species.tar"
+    url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                  "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/")
 
   loadkNNSpeciesLayers(
     dPath = destinationPath,

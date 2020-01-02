@@ -772,7 +772,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @param inputDataTable A \code{data.table} with columns described above.
 #'
 #' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
-#'   represent percent cover by species.
+#'   represent percent cover by species, rescaled to sum up to 100%.
 #'
 #' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
 #'   to establish unique \code{pixelGroups}.
@@ -899,6 +899,9 @@ subsetDT <- function(DT, by, doSubset = TRUE) {
 #' @param uniqueEcoregionGroups Unique values of \code{ecoregionGroups}.
 #'   This is the basis for the statistics, and can be used to optimize caching,
 #'   e.g. ignore \code{.specialData} in \code{.omitArgs}.
+#' @param sumResponse a sum of all the response variable values
+#'   Also to be used to optimize caching, e.g. ignore \code{.specialData}
+#'   in \code{.omitArgs}.
 #' @param .specialData The custom dataset required for the model.
 #'
 #' @export
@@ -906,7 +909,7 @@ subsetDT <- function(DT, by, doSubset = TRUE) {
 #' @importFrom lme4 glmer lmer
 #' @importFrom MuMIn r.squaredGLMM
 #' @importFrom stats as.formula glm fitted predict
-statsModel <- function(modelFn, uniqueEcoregionGroups, .specialData) {
+statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData) {
   ## convert model call to vector of arguments
   modelArgs <- as.character(modelFn)
   names(modelArgs) <- names(modelFn)

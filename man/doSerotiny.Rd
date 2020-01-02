@@ -11,7 +11,7 @@ doSerotiny(
   species,
   sufficientLight,
   speciesEcoregion,
-  simuTime,
+  currentTime,
   treedFirePixelTableSinceLastDisp,
   calibrate = FALSE
 )
@@ -39,7 +39,7 @@ tolerance (\code{1}-\code{5}).}
 
 \item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
 
-\item{simuTime}{integer. The current simulation time obtained with \code{time(sim)}}
+\item{currentTime}{integer. The current simulation time obtained with \code{time(sim)}}
 
 \item{treedFirePixelTableSinceLastDisp}{a vector of pixels that burnt and were forested
 in the previous time step.}
