@@ -34,13 +34,15 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 so all cover in \code{pixelGroup} or pixel sums to 100.}
 
 \item{sppColumns}{A vector of the names of the columns in \code{inputDataTable} that
-represent percent cover by species.}
+represent percent cover by species, rescaled to sum up to 100\%.}
 
 \item{doSubset}{Turns on/off subsetting. Defaults to \code{TRUE}.}
 }
 \description{
+Internal function used by \code{makeAndCleanInitialCohortData}
+
 Takes a single \code{data.table} input, which has the following columns in addition to
-others that will be labelled with species name, and contain percent cover of each:
+   others that will be labelled with species name, and contain percent cover of each:
 \itemize{
   \item \code{pixelIndex} (integer)
   \item \code{age} (integer)

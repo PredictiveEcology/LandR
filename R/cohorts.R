@@ -676,6 +676,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 
 #' Generate template \code{cohortData} table
 #'
+#' Internal function used by \code{makeAndCleanInitialCohortData}
+#'
 #' @param inputDataTable A \code{data.table} with columns described above.
 #' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
 #'   to establish unique \code{pixelGroups}.
@@ -687,6 +689,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @importFrom data.table melt setnames
 #' @keywords internal
 #' @rdname makeAndCleanInitialCohortData
+
 .createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
                               doAssertion = getOption("LandR.assertions", TRUE), rescale = TRUE) {
   coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
@@ -758,7 +761,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' Generate initial \code{cohortData} table
 #'
 #' Takes a single \code{data.table} input, which has the following columns in addition to
-#' others that will be labelled with species name, and contain percent cover of each:
+#'    others that will be labelled with species name, and contain percent cover of each:
 #' \itemize{
 #'   \item \code{pixelIndex} (integer)
 #'   \item \code{age} (integer)
@@ -773,16 +776,12 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #'   \item \code{B} (integer)
 #' }
 #'
+#' @template doAssertion
 #' @param inputDataTable A \code{data.table} with columns described above.
-#'
 #' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
-#'   represent percent cover by species, rescaled to sum up to 100%.
-#'
+#'   represent percent cover by species, rescaled to sum up to 100\%.
 #' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
 #'   to establish unique \code{pixelGroups}.
-#'
-#' @template doAssertion
-#'
 #' @param doSubset Turns on/off subsetting. Defaults to \code{TRUE}.
 #'
 #' @author Eliot McIntire
@@ -791,6 +790,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @importFrom data.table melt setnames
 #' @importFrom reproducible Cache
 #' @rdname makeAndCleanInitialCohortData
+
 makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroupBiomassClass,
                                           doAssertion = getOption("LandR.assertions", TRUE),
                                           doSubset = TRUE) {
