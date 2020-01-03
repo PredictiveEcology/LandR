@@ -4,9 +4,9 @@ if (getRversion() >= "3.1.0") {
     "ecoregion", "ecoregionGroup", "hasBadAge",
     "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
     "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
-    "newPossLCC", "noPixels", "ord", "outBiomass", "oldEcoregionGroup",
+    "newPossLCC", "noPixels", "oldSumB", "ord", "outBiomass", "oldEcoregionGroup",
     "pixelGroup2", "pixelIndex", "pixels", "possERC",
-    "speciesposition", "speciesGroup", "speciesInt", "state", "sumB", "oldSumB",
+    "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
     "temppixelGroup", "toDelete", "totalBiomass",
     "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
   ))
@@ -676,13 +676,21 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 
 #' Generate template \code{cohortData} table
 #'
+#' Internal function used by \code{\link{makeAndCleanInitialCohortData}}.
+#'
+#' @param inputDataTable A \code{data.table} with columns described above.
+#'
+#' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
+#'   to establish unique \code{pixelGroups}.
+#'
+#' @template doAssertion
+#'
 #' @param rescale Logical. If \code{TRUE}, the default, cover for each species will be rescaled
 #'   so all cover in \code{pixelGroup} or pixel sums to 100.
 #'
 #' @importFrom crayon blue
 #' @importFrom data.table melt setnames
 #' @keywords internal
-#' @rdname makeAndCleanInitialCohortData
 .createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
                               doAssertion = getOption("LandR.assertions", TRUE), rescale = TRUE) {
   coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
@@ -700,8 +708,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 
   if (doAssertion)
     #describeCohortData(cohortData)
-    message(blue("assign B = 0 and age = 0 for pixels where cover = 0, ",
-                 "\n  because cover is most reliable dataset"))
+    message(blue("assign B = 0 and age = 0 for pixels where cover = 0,\n",
+                 "because cover is most reliable dataset"))
 
   hasCover0 <- which(cohortData[["cover"]] == 0)
   cncd <- colnames(cohortData)
@@ -718,7 +726,6 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     cohortData[, V1 := NULL]
   }
   # cohortData[cover == 0, `:=`(age = 0L, logAge = -Inf, B = 0)]
-
 
   ## CRAZY TODO: DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
   # message(crayon::blue(paste("POSSIBLE ALERT:",
@@ -754,7 +761,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' Generate initial \code{cohortData} table
 #'
 #' Takes a single \code{data.table} input, which has the following columns in addition to
-#' others that will be labelled with species name, and contain percent cover of each:
+#'    others that will be labelled with species name, and contain percent cover of each:
 #' \itemize{
 #'   \item \code{pixelIndex} (integer)
 #'   \item \code{age} (integer)
@@ -772,7 +779,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @param inputDataTable A \code{data.table} with columns described above.
 #'
 #' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
-#'   represent percent cover by species, rescaled to sum up to 100%.
+#'   represent percent cover by species, rescaled to sum up to 100\%.
 #'
 #' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
 #'   to establish unique \code{pixelGroups}.

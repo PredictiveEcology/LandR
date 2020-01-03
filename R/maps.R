@@ -593,11 +593,10 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   }
 
   ## get all files in url folder
-  fileURLs <- getURL(url,
-                     dirlistonly = TRUE)
+  fileURLs <- getURL(url, dirlistonly = TRUE)
   fileNames <- getHTMLLinks(fileURLs)
   ## get all kNN species - names only
-  allSpp <- grep("2001_kNN_Species_.*\\.tif$", fileNames,value = TRUE)
+  allSpp <- grep("2001_kNN_Species_.*\\.tif$", fileNames, value = TRUE)
   allSpp <- allSpp %>%
     sub("_v1.tif", "", .) %>%
     sub(".*Species_", "", .)
@@ -608,10 +607,10 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
       sppNameVector <- allSpp
 
   ## Make sure spp names are compatible with kNN names
-  kNNnames <- as.character(equivalentName(sppNameVector, sppEquiv,
-                                          column = knnNamesCol, multi = TRUE))
-  sppNameVector <- as.character(equivalentName(sppNameVector, sppEquiv,
-                                               column = sppEquivCol, multi = TRUE))
+  kNNnames <- as.character(equivalentName(sppNameVector, sppEquiv, column = knnNamesCol,
+                                          multi = TRUE))
+  sppNameVector <- as.character(equivalentName(sppNameVector, sppEquiv, column = sppEquivCol,
+                                               multi = TRUE))
 
   ## if there are NA's, that means some species can't be found in kNN data base
   if (any(is.na(kNNnames))) {
@@ -653,9 +652,10 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
   if (length(kNNnames) > 15) {
-    message("This looks like a lot of species; did you mean to pass only a subset of this to sppEquiv?",
-            "\n  You can use the list above to choose species, then select only those rows ",
-            "\n  in sppEquiv before passing here")
+    message("This looks like a lot of species;",
+            " did you mean to pass only a subset of this to sppEquiv?\n",
+            " You can use the list above to choose species, then select only those rows",
+            " in sppEquiv before passing here.")
   }
   speciesLayers <- Cache(Map,
                          targetFile = asPath(targetFiles),
@@ -743,12 +743,11 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 #' @export
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
+#' @importFrom RCurl getURL
 #' @importFrom reproducible Cache .prefix preProcess basename2
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
-#' @importFrom RCurl getURL
 #' @importFrom XML getHTMLLinks
-
 loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                            knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   dots <- list(...)
@@ -858,13 +857,13 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
     sppKeep <- names(speciesLayers)[layersWdata]
     if (length(sppKeep)) {
       message("removing ", sum(!layersWdata), " species because they had <",thresh,
-              " % cover in the study area",
-              "\n  These species are retained (and could be further culled manually, if desired):\n  ",
+              " % cover in the study area.\n",
+              " These species are retained (and could be further culled manually, if desired):\n  ",
               paste(sppKeep, collapse = " "))
     } else {
       message("no pixels for ", paste(names(layersWdata), collapse = " "),
-              " were found with >=", thresh, " % cover in the study area.",
-              "\n  No species layers were retained. Try lowering the threshold",
+              " were found with >=", thresh, " % cover in the study area.\n",
+              "No species layers were retained. Try lowering the threshold",
               " to retain species with low % cover")
     }
   }
