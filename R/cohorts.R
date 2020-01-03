@@ -78,7 +78,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
     # pixels --> the entirely newly regenerated pixels do not require a
     # re-pixelGroupMaping  -- can just add to existing pixelGroup values
     if (verbose > 0)
-      message(crayon::green("  Regenerating only burnt pixels (i.e. resprouting & serotiny, in addition to surviving cohorts)"))
+      message(crayon::green("  Regenerating only disturbed pixels (i.e. resprouting & serotiny, in addition to surviving cohorts)"))
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age") # no Biomass because they all have zero
     cd <- newPixelCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
     newPixelCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = maxPixelGroup,
@@ -1129,67 +1129,71 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, curre
 
   if (!is.null(newPixelCohortData[["pixelIndex"]]))
     set(newPixelCohortData, NULL, "pixelIndex", NULL)
+
+  #remove duplicate pixel groups that were harvested
   newPixelCohortData <- newPixelCohortData[!duplicated(newPixelCohortData), ]
 
+  #This needs to be recalculated if we allow A.M. - can't summarize by ecoregionGroup
   specieseco_current <- speciesEcoregionLatestYear(speciesEcoregion, currentTime)
   specieseco_current <- setkey(specieseco_current[, .(speciesCode, maxANPP, maxB, ecoregionGroup)],
                                speciesCode, ecoregionGroup)
 
-  ## Note that after the following join, some cohorts will be lost due to lack of
-  ##  parameters in speciesEcoregion. These need to be modified in pixelGroupMap.
-  #missingNewPixelCohortData <- newPixelCohortData[!specieseco_current, on = uniqueSpeciesEcoregionDefinition]
   specieseco_current <- specieseco_current[!is.na(maxB)]
   specieseco_current[, maxB_eco := max(maxB), by = ecoregionGroup]
 
   # Start provenance Table join
-  provenanceSelection <- specieseco_current[provenanceTable,
-                                            on = c(speciesCode = "speciesCode",
-                                                   ecoregionGroup = "Provenance")]
-
+  provenanceSelection <- provenanceTable[specieseco_current,
+                                         on = c("speciesCode", Provenance = 'ecoregionGroup'),]
+  #NAs in Location mean that provenance is not planted anywhere, so na.rm
+  # provenanceSelection <- na.rm(provenanceSelection)
+  #We may need to track pixelGroups that aren't planted
   # Rename ecoregionGroup and get rid of old column so no collision
-  newPixelCohortData[, oldEcoregionGroup := ecoregionGroup]
+  newPixelCohortData$oldEcoregionGroup <- newPixelCohortData$ecoregionGroup #don't pass by reference
   newPixelCohortData[, ecoregionGroup := NULL]
+
+  #if a location/provenance isn't specified, it won't be planted
+  provenanceSelection <- provenanceSelection[!is.na(Location)]
+
   newPixelCohortData <- provenanceSelection[newPixelCohortData,
-                                            on = c(Location = "oldEcoregionGroup",
-                                                   speciesCode = 'speciesCode')]
-  # new cohorts now have the geographically correct ecoregionGroup in location,
-  # but the provenance of ecoregionGroup.
+                                            on = c('Location' = "oldEcoregionGroup",
+                                                   'speciesCode')]
 
+  newPixelCohortData <- newPixelCohortData[!is.na(Provenance),]
+  #PGs may not be entirely unique if some species are removed.
+  #e.g. if pg1 = birch and pine, pg = pine, and only pine is planted, both will be identical.
+  # new cohorts now have the geographically correct ecoregionGroup in 'Location',
+  # but the MaxB and maxANPP of Provenance.
+
+  #Plant trees
   newPixelCohortData <- newPixelCohortData[!is.na(maxB)]
-  set(newPixelCohortData, NULL, "age", 1L)  ## set age to 1
+  newPixelCohortData[B == 0, age := 2]  ## set age to 3 for planted seedlings
 
-  ## Ceres: this was causing new cohorts to be initialized with maxANPP.
-  ## instead, calculate total biomass of older cohorts
-  # set(newPixelCohortData, NULL, "sumB", 0L)
   if (!is.null(newPixelCohortData[["sumB"]]))
     set(newPixelCohortData, NULL, "sumB", NULL)
   cohortData[age >= successionTimestep, oldSumB := sum(B, na.rm = TRUE), by = "pixelGroup"]
 
   newPixelCohortData <- unique(cohortData[, .(pixelGroup, oldSumB)],
                                by = "pixelGroup")[newPixelCohortData, on = "pixelGroup"]
-  set(newPixelCohortData, which(is.na(newPixelCohortData$oldSumB)), "oldSumB", 0) # faster than [:=]
-  setnames(newPixelCohortData, "oldSumB", "sumB")
-  set(cohortData, NULL, "oldSumB", NULL)
 
-  if ("B" %in% names(newPixelCohortData))
-    newPixelCohortData[, B := NULL]
-  set(newPixelCohortData, NULL, "B",
-      asInteger(pmax(1, newPixelCohortData$maxANPP *
-                       exp(-1.6 * newPixelCohortData$sumB / newPixelCohortData$maxB_eco))))
-  set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
+  #removes same-species same-age duplicates. Thus pixel becomes cohort
+  newPixelCohortData <- newPixelCohortData[!duplicated(newPixelCohortData[, .(speciesCode, age, pixelGroup, B)])]
 
+  newPixelCohortData[B == 0, B := asInteger(2 * maxANPP)]
+
+  newPixelCohortData[, ecoregionGroup := Provenance]
+
+  #Here we subset cohortData instead of setting added columns to NULL. However, as these are 'new' cohorts, this is okay
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
                                                mortality = 0L, aNPPAct = 0L)]
 
   if (getOption("LandR.assertions")) {
     if (isTRUE(NROW(unique(newPixelCohortData, by = uniqueCohortDefinition)) != NROW(newPixelCohortData)))
-      stop("Duplicated new cohorts in a pixelGroup. Please debug LandR:::.initiateNewCohorts")
+      stop("Duplicated new cohorts in a pixelGroup. Please debug LandR:::.plantNewCohorts")
+    #in this situation, it may be caused by not replanting all species. Not sure if this will come up.
   }
 
+
   cohortData <- rbindlist(list(cohortData, newPixelCohortData), fill = TRUE, use.names = TRUE)
-  # cohortData[, sumB := sum(B, na.rm = TRUE), by = "pixelGroup"]  ## recalculate sumB
-  # if (!is.integer(cohortData[["sumB"]]))
-  #   set(cohortData, NULL, "sumB", asInteger(cohortData[["sumB"]]))
 
   return(cohortData)
 }
