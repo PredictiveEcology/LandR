@@ -25,6 +25,6 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 so all cover in \code{pixelGroup} or pixel sums to 100.}
 }
 \description{
-Internal function used by \code{makeAndCleanInitialCohortData}
+Internal function used by \code{\link{makeAndCleanInitialCohortData}}.
 }
 \keyword{internal}
