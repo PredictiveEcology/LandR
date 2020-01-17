@@ -676,9 +676,9 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   if (sum(!layersWdata) > 0) {
     sppKeep <- names(speciesLayers)[layersWdata]
     if (length(sppKeep)) {
-      message("removing ", sum(!layersWdata), " species because they had <",thresh,
-              " % cover in the study area",
-              "\n  These species are retained (and could be further culled manually, if desired):\n  ",
+      message("removing ", sum(!layersWdata), " species because they had <", thresh,
+              " % cover in the study area\n",
+              "  These species are retained (and could be further culled manually, if desired):\n",
               paste(sppKeep, collapse = " "))
     } else {
       message("no pixels for ", paste(names(layersWdata), collapse = " "),
