@@ -88,17 +88,16 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
     species$species <- names(speciesLayers)
   }
 
-  message(blue("Round age to nearest pixelGroupAgeClass, which is",
-               pixelGroupAgeClass))
-  coverMatrix <- matrix(asInteger(speciesLayers[]),
-                        ncol = length(names(speciesLayers)))
+  message(blue("Round age to nearest pixelGroupAgeClass, which is", pixelGroupAgeClass))
+  coverMatrix <- matrix(asInteger(speciesLayers[]), ncol = length(names(speciesLayers)))
   colnames(coverMatrix) <- names(speciesLayers)
 
   # faster to use as.factor, which is fine for a numeric.
-  iec <- if (is.numeric(initialEcoregionCodeVals))
+  iec <- if (is.numeric(initialEcoregionCodeVals)) {
     as.factor(initialEcoregionCodeVals)
-  else
+  } else {
     factor(initialEcoregionCodeVals)
+  }
   pixelTable <- data.table(initialEcoregionCode = iec,
                            cover = coverMatrix,
                            pixelIndex = seq(ncell(rasterToMatch)),
@@ -139,9 +138,9 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 
   if (NROW(pixelTable1) != NROW(pixelTable))
     warning("Setting pixels to NA where there is NA in sim$speciesLayers'. Vegetation succession",
-            "\n  parameters will only be calculated where there is data for species cover.",
+            " parameters will only be calculated where there is data for species cover.",
             "\n  Check if sim$rasterToMatch shoudn't also only have data where there is cover data,",
-            "\n  as this may affect other modules.")
+            " as this may affect other modules.")
   if (NROW(pixelTable2) != NROW(pixelTable))
     warning("Setting pixels to NA where there is NA in dummy 'ecoregionMap'")
 
