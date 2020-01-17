@@ -78,7 +78,7 @@ prepInputsLCC <- function(year = 2005,
         url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/",
                       "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
                       "CanadaLandcover2010.zip")
-        filename <- asPath("CAN_NALCMS_LC_30m_LAEA_mmu12_urb05_CAL.tif")
+        filename <- asPath("CAN_LC_2010_CAL.tif")
         archive <- asPath("CanadaLandcover2010.zip")
       } else {
         stop("Other LCC covers don't exist yet.")
@@ -676,9 +676,9 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   if (sum(!layersWdata) > 0) {
     sppKeep <- names(speciesLayers)[layersWdata]
     if (length(sppKeep)) {
-      message("removing ", sum(!layersWdata), " species because they had <",thresh,
-              " % cover in the study area",
-              "\n  These species are retained (and could be further culled manually, if desired):\n  ",
+      message("removing ", sum(!layersWdata), " species because they had <", thresh,
+              " % cover in the study area\n",
+              "  These species are retained (and could be further culled manually, if desired):\n",
               paste(sppKeep, collapse = " "))
     } else {
       message("no pixels for ", paste(names(layersWdata), collapse = " "),

@@ -34,7 +34,7 @@ assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote,
       nonMatching <- setdiff(temp1, temp2)
 
       ## was there any biomass/species data in these pixels?
-      nonMatchingB <- sum(cohortData[initialEcoregionCode == nonMatching, B], na.rm = TRUE)
+      nonMatchingB <- sum(cohortData[initialEcoregionCode %in% nonMatching, B], na.rm = TRUE)
 
       if (nonMatchingB)
         stop("There are some ecoregionCodes created post replacement of 34 and 35")
