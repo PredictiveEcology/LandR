@@ -62,7 +62,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
                              successionTimestep,
                              verbose = getOption("LandR.verbose", TRUE),
                              doAssertion = getOption("LandR.assertions", TRUE)) {
-  browser()
+
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
 
   if (!is.null(treedFirePixelTableSinceLastDisp)) {
