@@ -1135,9 +1135,8 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
   newCohortData[B == 0, age := 2]  ## set age to 3 for planted seedlings
   #note - for species with high maxANPP (e.g. birch at 5%), they will be initiated with 10% of the biomass of a full stand
   #this is absurd and a problem with this model
-  if (!is.null(newCohortData[["sumB"]]))
-    set(newCohortData, NULL, "sumB", NULL)
-  cohortData[age >= successionTimestep, oldSumB := sum(B, na.rm = TRUE), by = "pixelGroup"]
+  # set(newCohortData, NULL, "sumB", NULL)
+  # cohortData[age >= successionTimestep, sumB := sum(B, na.rm = TRUE), by = "pixelGroup"]
 
   newCohortData[B == 0, B := asInteger(2 * maxANPP)]
 
@@ -1235,7 +1234,7 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
 
     #NA in provenance means this area would not be planted with this species
     newPixelCohortData <- temp[!is.na(Provenance),]
-
+    rm(temp)
 
     newPixelCohortData[, ecoregionGroup := Provenance]
     #ensure the trees that are planted (ie Provenance) become the ecoregionGroup
@@ -1256,17 +1255,10 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
     setkey(newPixelCohortData, speciesCode, ecoregionGroup)
     newPixelCohortData <- specieseco_current[newPixelCohortData]
 
-    if (nrow(newPixelCohortData) != nrow(na.omit(newPixelCohortData))) {
-      print.data.frame(unique(newPixelCohortData[!na.omit(newPixelCohortData),
-                                                 .(speciesCode, maxB, ecoregionGroup)]))
-      stop("NAs in maxB of new cohorts. modify provenance table to remove the above combinations")
-    }
-
-
-
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B", 'maxB', 'maxANPP')
 
     cd <- newPixelCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
+
     newPixelCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = maxPixelGroup,
                                                            columns = columnsForPG)]
 
