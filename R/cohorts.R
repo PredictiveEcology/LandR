@@ -1132,12 +1132,8 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
   newCohortData <- newPixelCohortData[!duplicates]
 
   #Plant trees
-  newCohortData[B == 0, age := 2]  ## set age to 3 for planted seedlings
-  #note - for species with high maxANPP (e.g. birch at 5%), they will be initiated with 10% of the biomass of a full stand
-  #this is absurd and a problem with this model
-  # set(newCohortData, NULL, "sumB", NULL)
-  # cohortData[age >= successionTimestep, sumB := sum(B, na.rm = TRUE), by = "pixelGroup"]
-
+  newCohortData[B == 0, age := 2]
+  #Give the planted trees 2 * maxANPP - newly regenerating cohorts receive 1x maxANPP. 2x seems overkill
   newCohortData[B == 0, B := asInteger(2 * maxANPP)]
 
   #Here we subset cohortData instead of setting added columns to NULL. However, as these are 'new' cohorts, this is okay
