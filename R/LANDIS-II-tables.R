@@ -60,6 +60,8 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
 #'
 #' @param speciesLayers stack of species layers rasters
 #'
+#' @inheritParams loadkNNSpeciesLayers
+#'
 #' @template sppEquiv
 #'
 #' @template sppEquivCol
@@ -68,7 +70,8 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
 #'
 #' @export
 #' @rdname speciesTable
-prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEquivCol = "LandR") {
+prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEquivCol = "LandR",
+                             sppNameVector = NULL) {
   if (is.null(sppEquiv))
     sppEquiv <- data.table(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
 
@@ -77,7 +80,9 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
   speciesTable[, growthcurve := as.numeric(growthcurve)]
 
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
-  sppNameVector <- unique(sppEquiv[[sppEquivCol]])
+  if (is.null(sppNameVector))
+    sppNameVector <- unique(sppEquiv[[sppEquivCol]])
+
   speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv, "LANDIS_traits", multi = TRUE) &
                                  Area %in% c("BSW", "BP", "MC")]
 
@@ -102,6 +107,7 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
 #' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
 #'
 #' @param speciesTable TODO: DESCRIPTION NEEDED
+#' @inheritParams loadkNNSpeciesLayers
 #'
 #' @template sppEquiv
 #'
@@ -112,7 +118,7 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
 #' @export
 #' @importFrom data.table data.table
 #' @rdname speciesTableUpdate
-speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
+speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol, sppNameVector = NULL) {
   if (is.null(sppEquiv))
     sppEquiv <- data.table(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
 
@@ -143,7 +149,12 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
 
   ## subset, rename and "merge" species by using the minimum value
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
-  sppNameVector <- species$species
+  if (is.null(species$species)) {
+    if (is.null(sppNameVector))
+      sppNameVector <- unique(sppEquiv[[sppEquivCol]])
+  } else {
+    sppNameVector <- species$species
+  }
   speciesTableShort <- speciesTableShort[species %in% equivalentName(sppNameVector, sppEquiv,
                                                                      "LANDIS_traits", multi = TRUE)]
   speciesTableShort[, species := equivalentName(speciesTableShort$species, sppEquiv, sppEquivCol)]

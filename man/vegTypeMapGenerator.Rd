@@ -49,8 +49,8 @@ If not provided and \code{mixedType == 2}, will attempt to use
 \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.
-Only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
+If not supplied, it will attempt to use "Boreal", if it exists,
+otherwise it will use the first column in \code{sppEquiv}}
 
 \item{colors}{A named vector of colour codes. The names MUST match the names of species
 in \code{cohortData$speciesCode}, plus an optional "Mixed" colour.}

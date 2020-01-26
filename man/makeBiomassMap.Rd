@@ -9,7 +9,7 @@ makeBiomassMap(pixelCohortData, rasterToMatch)
 \arguments{
 \item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
+\item{rasterToMatch}{A \code{RasterLayer} object to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
 }
 \value{

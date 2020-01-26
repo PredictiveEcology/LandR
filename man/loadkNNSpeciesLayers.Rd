@@ -5,39 +5,41 @@
 \title{Load kNN species layers from online data repository}
 \usage{
 loadkNNSpeciesLayers(
-  dPath,
+  dPath = tempdir(),
   rasterToMatch,
   studyArea,
-  sppEquiv,
+  sppEquiv = LandR::sppEquivalencies_CA,
+  sppNameVector = NULL,
   knnNamesCol = "KNN",
-  sppEquivCol,
+  sppEquivCol = "Boreal",
   thresh = 1,
-  url,
+ 
+    url = "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/",
   ...
 )
 }
 \arguments{
 \item{dPath}{path to the data directory}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{Defaults to a random place in central Alberta, Canada with
+metadata same as KNN layers (res 250m, proj)}
 
-\item{studyArea}{A \code{SpatialPolygons*} object used as the principle study region,
-passed to \code{\link[reproducible]{prepInputs}}.}
+\item{studyArea}{A \code{SpatialPolygons} object. Defaults to a random area in Central Alberta}
 
-\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
-See \code{data("sppEquivalencies_CA", "LandR")}.
-Only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use
-\code{data("sppEquivalencies_CA", "LandR")}.}
+\item{sppEquiv}{Default is LandR::sppEquivalencies_CA}
+
+\item{sppNameVector}{An option character vector of species names
+(as provided in one column of \code{sppEquiv}) that
+can be a subset of all the species in the \code{sppEquivCol} (or any one column
+in \code{sppEquiv})}
 
 \item{knnNamesCol}{character string indicating the column in \code{sppEquiv}
 containing kNN species names.
 Default \code{"KNN"} for when \code{sppEquivalencies_CA} is used.}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.
-Only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
+If not supplied, it will attempt to use "Boreal", if it exists,
+otherwise it will use the first column in \code{sppEquiv}}
 
 \item{thresh}{the minimum number of pixels where the species must have
 \code{biomass > 0} to be considered present in the study area.

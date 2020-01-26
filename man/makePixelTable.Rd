@@ -29,7 +29,7 @@ its information per \code{pixelID.} See \code{ecoregionProducer}.}
 
 \item{biomassMap}{raster of total stand biomass}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
+\item{rasterToMatch}{A \code{RasterLayer} object to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
 
 \item{rstLCC}{raster of land-cover class}

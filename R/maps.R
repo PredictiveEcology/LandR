@@ -543,17 +543,23 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #'
 #' @param dPath path to the data directory
 #'
-#' @template rasterToMatch
+#' @param rasterToMatch Defaults to a random place in central Alberta, Canada with
+#'   metadata same as KNN layers (res 250m, proj)
 #'
-#' @template studyArea
+#' @param studyArea A \code{SpatialPolygons} object. Defaults to a random area in Central Alberta
 #'
-#' @template sppEquiv
+#' @param sppEquiv Default is LandR::sppEquivalencies_CA
 #'
 #' @param knnNamesCol character string indicating the column in \code{sppEquiv}
 #'                    containing kNN species names.
 #'                    Default \code{"KNN"} for when \code{sppEquivalencies_CA} is used.
 #'
 #' @template sppEquivCol
+#'
+#' @param sppNameVector An option character vector of species names
+#'   (as provided in one column of \code{sppEquiv}) that
+#'   can be a subset of all the species in the \code{sppEquivCol} (or any one column
+#'   in \code{sppEquiv})
 #'
 #' @param thresh the minimum number of pixels where the species must have
 #'               \code{biomass > 0} to be considered present in the study area.
@@ -574,13 +580,25 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @importFrom utils capture.output untar
 #' @importFrom RCurl getURL
 #' @importFrom XML getHTMLLinks
-loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
-                                 knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
+loadkNNSpeciesLayers <- function(dPath = tempdir(), rasterToMatch, studyArea,
+                                 sppEquiv = LandR::sppEquivalencies_CA,
+                                 sppNameVector = NULL,
+                                 knnNamesCol = "KNN", sppEquivCol = "Boreal", thresh = 1,
+                                 url = "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/", ...) {
   dots <- list(...)
 
   sppEquiv <- sppEquiv[, lapply(.SD, as.character)]
+  if (!sppEquivCol %in% names(sppEquiv)) {
+    if ("Boreal" %in% names(sppEquiv)) {
+      sppEquivCol <- "Boreal"
+    } else {
+      sppEquivCol <- names(sppEquiv)[1]
+    }
+    message(sppEquivCol, " is not a column in ", sppEquiv, "; Using ", sppEquivCol)
+  }
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
-  sppNameVector <- unique(sppEquiv[[sppEquivCol]])
+  if (is.null(sppNameVector))
+    sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   ## remove empty names
   sppNameVector <- sppNameVector[sppNameVector != ""]
 
@@ -638,6 +656,27 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   }
 
   ## define suffix to append to file names
+  rtmMissing <- missing(rasterToMatch)
+  saMissing <- missing(studyArea)
+  crsDefault <- "+proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+  if (rtmMissing && saMissing) {
+    studyArea <- randomStudyArea(size = 1e8)
+    studyArea <- sp::spTransform(studyArea, CRSobj = sp::CRS(crsDefault))
+    saMissing <- FALSE
+  }
+  if (rtmMissing) {
+    res <- 250
+    xmin <- floor(xmin(studyArea) / res) * res
+    xmax <- ceiling(xmax(studyArea) / res) * res
+    ymin <- floor(ymin(studyArea) / res) * res
+    ymax <- ceiling(ymax(studyArea) / res) * res
+    r1 <- raster(extent(xmin, xmax, ymin, ymax), res = res)
+    crs(r1) <- crsDefault
+    rasterToMatch <- fasterize(st_as_sf(studyArea), r1)
+  }
+  if (saMissing) {
+    studyArea <- raster::rasterToPolygons(rasterToMatch, dissolve = TRUE)
+  }
   suffix <- if (basename(cachePath) == "cache") {
     paste0(as.character(ncell(rasterToMatch)), "px")
   } else {

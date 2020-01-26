@@ -19,7 +19,7 @@ loadkNNSpeciesLayersValidation(
 \arguments{
 \item{dPath}{path to the data directory}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
+\item{rasterToMatch}{A \code{RasterLayer} object to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
 
 \item{studyArea}{A \code{SpatialPolygons*} object used as the principle study region,
@@ -36,8 +36,8 @@ containing kNN species names.
 Default \code{"KNN"} for when \code{sppEquivalencies_CA} is used.}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.
-Only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
+If not supplied, it will attempt to use "Boreal", if it exists,
+otherwise it will use the first column in \code{sppEquiv}}
 
 \item{thresh}{the minimum number of pixels where the species must have
 \code{biomass > 0} to be considered present in the study area.
