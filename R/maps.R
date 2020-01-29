@@ -332,7 +332,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
         #pixelGroupData2 <- rbindlist(pixelGroupData2List)
       } else {
         # cols <- c(pixelGroupColName, "speciesCode", "speciesProportion")
-        set(cohortData2, NULL, "speciesProportion", cohortData2[[leadingBasedOn]] / cohortData2[[totalOfLeadingBasedOn]])
+        set(cohortData2, NULL, "speciesProportion", cohortData2[[leadingBasedOn]] /
+              cohortData2[[totalOfLeadingBasedOn]])
         # pixelGroupData2[[NROW(pixelGroupData2) + 1]] <- cohortData2[!GT1, ..cols]
       }
       pixelGroupData2 <- cohortData2
