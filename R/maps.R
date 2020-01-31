@@ -181,7 +181,6 @@ vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("Lan
                                     ...)
 
   if (FALSE) { # This is the old version -- Eliot & Alex July 11, 2019
-
     sumVegPct <- sum(speciesStack) ## TODO: how is the sum >100 ?
 
     if (isTRUE(mixed)) {
@@ -256,8 +255,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       sppEquivCol <- names(sort(sapply(sppEquiv, function(xx) sum(xx %in% unique(x$species))),
                                 decreasing = TRUE)[1])
       message(paste0("Using mixedType == 2, but no sppEquiv provided. ",
-                    "Attempting to use data('sppEquivalencies_CA', 'LandR') ",
-                    "and sppEquivCol == '", sppEquivCol, "'"))
+                     "Attempting to use data('sppEquivalencies_CA', 'LandR') ",
+                     "and sppEquivCol == '", sppEquivCol, "'"))
     }
   }
 
