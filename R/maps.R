@@ -28,7 +28,7 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
     stop("Need a classified land cover map. Currently only accepts 'LCC2005'")
   }
   if (!is.integer(LandCoverClassifiedMap[]))
-    stop("LandCoverCLassifiedMap must be an integer")
+    stop("LandCoverClassifiedMap must be an integer")
   if (is.null(nonFlammClasses))
     stop("Need nonFlammClasses, which are the classes that cannot burn in",
          "the LandCoverClassifiedMap")
