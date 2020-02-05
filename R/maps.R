@@ -68,9 +68,9 @@ prepInputsLCC <- function(year = 2005,
   dots <- list(...)
   if (is.null(dots$url)) {
     if (identical(as.integer(year), 2005L)) {
-      # url <- paste0("ftp://ftp.ccrs.nrcan.gc.ca/ad/NLCCLandCover/",
-      #               "LandcoverCanada2005_250m/LandCoverOfCanada2005_V1_4.zip")
-      url <- "https://drive.google.com/file/d/1g9jr0VrQxqxGjZ4ckF6ZkSMP-zuYzHQC/view?usp=sharing"
+      #url <- "https://drive.google.com/file/d/1g9jr0VrQxqxGjZ4ckF6ZkSMP-zuYzHQC/view?usp=sharing"
+      url <- paste0("ftp://ftp.ccrs.nrcan.gc.ca/ad/NLCCLandCover/",
+                    "LandcoverCanada2005_250m/LandCoverOfCanada2005_V1_4.zip")
       filename <- asPath("LCC2005_V1_4a.tif")
       archive <- asPath("LandCoverOfCanada2005_V1_4.zip")
     } else {
