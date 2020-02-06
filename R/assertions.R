@@ -312,7 +312,6 @@ assertSpeciesLayers <- function(speciesLayers, thresh,
 assertRstLCChange <- function(rstLCChange, rasterToMatch,
                               doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    browser()
     ## check conformity with RTM
     if (!compareRaster(rstLCChange,
                        rasterToMatch, stopiffalse = FALSE)) {
