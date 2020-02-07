@@ -300,3 +300,29 @@ assertSpeciesLayers <- function(speciesLayers, thresh,
            ". Try lowering the threshold.")
   }
 }
+
+#' Assert that \code{rstLCChange} is a mask-type raster layer and matches
+#' rasterToMatch
+#'
+#' @param rstLCChange a raster layer indicating pixels were land-use change occurred as 1s
+#' @template rasterToMatch
+#'
+#' @export
+#' @rdname assertions
+assertRstLCChange <- function(rstLCChange, rasterToMatch,
+                              doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    ## check conformity with RTM
+    if (!compareRaster(rstLCChange,
+                       rasterToMatch, stopiffalse = FALSE)) {
+      stop("'rstLCChange' and 'rasterToMatch' differ in
+         their properties. Please check")
+    }
+
+    ## check if it's a maks
+    temp <- setdiff(getValues(rstLCChange), c(1, NA))
+    if (length(temp))
+      stop("rstLCChange should be a 'mask', with 1s in disturbed pixels and NAs everywhere else")
+
+  }
+}

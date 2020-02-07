@@ -10,6 +10,7 @@
 \alias{assertSpeciesPlotLabels}
 \alias{assertFireToleranceDif}
 \alias{assertSpeciesLayers}
+\alias{assertRstLCChange}
 \title{Assertions}
 \usage{
 assert1(
@@ -69,6 +70,12 @@ assertFireToleranceDif(
 assertSpeciesLayers(
   speciesLayers,
   thresh,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertRstLCChange(
+  rstLCChange,
+  rasterToMatch,
   doAssertion = getOption("LandR.assertions", TRUE)
 )
 }
@@ -134,6 +141,11 @@ should contain species cover data in the study area}
 \item{thresh}{the minimum number of pixels where the species must have
 \code{biomass > 0} to be considered present in the study area.
 Defaults to 1.}
+
+\item{rstLCChange}{a raster layer indicating pixels were land-use change occurred as 1s}
+
+\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).}
 }
 \description{
 Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
