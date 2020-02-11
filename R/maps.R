@@ -28,7 +28,7 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
     stop("Need a classified land cover map. Currently only accepts 'LCC2005'")
   }
   if (!is.integer(LandCoverClassifiedMap[]))
-    stop("LandCoverCLassifiedMap must be an integer")
+    stop("LandCoverClassifiedMap must be an integer")
   if (is.null(nonFlammClasses))
     stop("Need nonFlammClasses, which are the classes that cannot burn in",
          "the LandCoverClassifiedMap")
@@ -68,9 +68,9 @@ prepInputsLCC <- function(year = 2005,
   dots <- list(...)
   if (is.null(dots$url)) {
     if (identical(as.integer(year), 2005L)) {
-      # url <- paste0("ftp://ftp.ccrs.nrcan.gc.ca/ad/NLCCLandCover/",
-      #               "LandcoverCanada2005_250m/LandCoverOfCanada2005_V1_4.zip")
-      url <- "https://drive.google.com/file/d/1g9jr0VrQxqxGjZ4ckF6ZkSMP-zuYzHQC/view?usp=sharing"
+      #url <- "https://drive.google.com/file/d/1g9jr0VrQxqxGjZ4ckF6ZkSMP-zuYzHQC/view?usp=sharing"
+      url <- paste0("ftp://ftp.ccrs.nrcan.gc.ca/ad/NLCCLandCover/",
+                    "LandcoverCanada2005_250m/LandCoverOfCanada2005_V1_4.zip")
       filename <- asPath("LCC2005_V1_4a.tif")
       archive <- asPath("LandCoverOfCanada2005_V1_4.zip")
     } else {
@@ -181,7 +181,6 @@ vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("Lan
                                     ...)
 
   if (FALSE) { # This is the old version -- Eliot & Alex July 11, 2019
-
     sumVegPct <- sum(speciesStack) ## TODO: how is the sum >100 ?
 
     if (isTRUE(mixed)) {
@@ -256,8 +255,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       sppEquivCol <- names(sort(sapply(sppEquiv, function(xx) sum(xx %in% unique(x$species))),
                                 decreasing = TRUE)[1])
       message(paste0("Using mixedType == 2, but no sppEquiv provided. ",
-                    "Attempting to use data('sppEquivalencies_CA', 'LandR') ",
-                    "and sppEquivCol == '", sppEquivCol, "'"))
+                     "Attempting to use data('sppEquivalencies_CA', 'LandR') ",
+                     "and sppEquivCol == '", sppEquivCol, "'"))
     }
   }
 
@@ -332,7 +331,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
         #pixelGroupData2 <- rbindlist(pixelGroupData2List)
       } else {
         # cols <- c(pixelGroupColName, "speciesCode", "speciesProportion")
-        set(cohortData2, NULL, "speciesProportion", cohortData2[[leadingBasedOn]] / cohortData2[[totalOfLeadingBasedOn]])
+        set(cohortData2, NULL, "speciesProportion", cohortData2[[leadingBasedOn]] /
+              cohortData2[[totalOfLeadingBasedOn]])
         # pixelGroupData2[[NROW(pixelGroupData2) + 1]] <- cohortData2[!GT1, ..cols]
       }
       pixelGroupData2 <- cohortData2

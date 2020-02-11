@@ -595,6 +595,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   repeatsOnSameUnwanted <- 0
 
   while (length(theUnwantedPixels) > 0) {
+    message("Converting unwanted LCCs: ", length(theUnwantedPixels), " pixels remaining.")
     out <- spread2(rstLCC, start = theUnwantedPixels, asRaster = FALSE,
                    iterations = iterations, allowOverlap = TRUE, spreadProb = 1)
     out <- out[initialPixels != pixels] # rm pixels which are same as initialPixels --> these are known wrong
