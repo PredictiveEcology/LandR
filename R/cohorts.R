@@ -1222,20 +1222,13 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
     #Must do new pixelGroupMapping
     #Must join with provenanceTable first! This will resolve issues with duplicate pixelGroups
 
-    newPixelCohortData[, 'Location' := ecoregionGroup]
-    setkey(newPixelCohortData, Location, speciesCode)
-    setkey(provenanceTable, Location, speciesCode)
+    setkey(newPixelCohortData, ecoregionGroup, speciesCode)
+    setkey(provenanceTable, ecoregionGroup, speciesCode)
 
-    temp <- provenanceTable[newPixelCohortData]
+    newPixelCohortData <- provenanceTable[newPixelCohortData] %>%
+      .[!is.na(Provenance)]
 
     #NA in provenance means this area would not be planted with this species
-    newPixelCohortData <- temp[!is.na(Provenance),]
-    rm(temp)
-
-    newPixelCohortData[, ecoregionGroup := Provenance]
-    #ensure the trees that are planted (ie Provenance) become the ecoregionGroup
-
-    newPixelCohortData[, c('Provenance', 'Location') := NULL] #Location can also be removed.
 
     #Remove all redundant age 0 species. These were created by multiple same-species cohorts
     duplicates <- duplicated(newPixelCohortData[, .(speciesCode, ecoregionGroup, pixelIndex, age)])
@@ -1251,7 +1244,7 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
     setkey(newPixelCohortData, speciesCode, ecoregionGroup)
     newPixelCohortData <- specieseco_current[newPixelCohortData]
 
-    columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B", 'maxB', 'maxANPP')
+    columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B", 'maxB', 'maxANPP', 'Provenance')
 
     cd <- newPixelCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
 
@@ -1275,7 +1268,6 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B")
     cd <- cohorts[, c("pixelIndex", columnsForPG), with = FALSE]
 
-    browser()#be very sure of this
     cohorts[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = columnsForPG)]
 
     # Bring to pixelGroup level -- this will squash the data.table
