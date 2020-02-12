@@ -93,8 +93,8 @@ lariocci,LARI.OCC,Lari_occ,Lari_Occ,Lari occi,Larix occidentalis,We larch,Wester
 ,,Pice_abi,Pice_Abi,Pice abie,Picea abies,,,,,,Conifer,,
 ,,Pice_sp,Pice_Eng_Gla,Pice hybr,Picea engelmannii x glauca,En Spruce,Engelmann's spruce,Engelmann's spruce leading,Pice hybr is not on the manual CASFRI list but appears in database,Pice_Eng_Gla,Conifer,spruce,Sxw
 ,,Pice_sp,Pice_Eng_Gla,Pice engx,Picea engelmannii x glauca,En Spruce,Engelmann's spruce,Engelmann's spruce leading,,Pice_Eng_Gla,Conifer,spruce,Sxw
-piceengl,PICE.ENG,Pice_eng,Pice_Eng,Pice enge,Picea engelmannii,En Spruce,Engelmann's spruce,Engelmann's spruce leading,,Pice_Eng,Conifer,engelmann spruce,Se
-piceglau,PICE.GLA,Pice_gla,Pice_Gla,Pice glau,Picea glauca,Wh Spruce,White.Spruce,White spruce leading,,Pice_Gla,Conifer,white spruce,Sw
+piceengl,PICE.ENG,Pice_eng,Pice_Eng,Pice enge,Picea engelmannii,En Spruce,Engelmann's spruce,Engelmann's spruce leading,,Pice_Eng,Conifer,engelmann spruce,Sx
+piceglau,PICE.GLA,Pice_gla,Pice_Gla,Pice glau,Picea glauca,Wh Spruce,White.Spruce,White spruce leading,,Pice_Gla,Conifer,white spruce,Sx
 ,,Pice_koy,,Pice koya,Picea koyamai,,,,,,Conifer,,
 ,,Pice_lut,,Pice lutx,Picea x lutzii,,,,,,Conifer,,
 picemari,PICE.MAR,Pice_mar,Pice_Mar,Pice mari,Picea mariana,Bl Spruce,Black.Spruce,Black spruce leading,,Pice_Mar,Conifer,black spruce,Sb
