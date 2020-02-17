@@ -139,7 +139,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
   if (NROW(pixelTable1) != NROW(pixelTable))
     warning("Setting pixels to NA where there is NA in sim$speciesLayers'. Vegetation succession",
             " parameters will only be calculated where there is data for species cover.",
-            "\n  Check if sim$rasterToMatch shoudn't also only have data where there is cover data,",
+            "\n  Check if rasterToMatch shoudn't also only have data where there is cover data,",
             " as this may affect other modules.")
   if (NROW(pixelTable2) != NROW(pixelTable))
     warning("Setting pixels to NA where there is NA in dummy 'ecoregionMap'")
