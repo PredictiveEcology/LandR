@@ -752,6 +752,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
 
     message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
+    cohortData[cover > 0 & age == 0, B := 0L]
     cohortData[ , totalBiomass := asInteger(totalBiomass)]
     set(cohortData, NULL, "B", asInteger(cohortData[["B"]]))
   }
