@@ -77,7 +77,7 @@ fraxamer,FRAX.AME,Frax_ame,Frax_Ame,Frax amer,Fraxinus americana,Am ash,American
 ,,Lari_dec,,Lari deci,Larix decidua,,,,,,Conifer,
 ,,Lari_kae,Lari_Kae,Lari kaem,Larix kaempferi,,,,,,Conifer,
 larilari,LARI.LAR,Lari_lar,Lari_Lar,Lari lari,Larix laricina,Tamarack,Tamarack,Tamarack leading,,Lari_Lar,Conifer,tamarack larch
-,,Lari_lya,Lari_Lya,Lari lyal,Larix lyallii,Alp larch,Alpine larch,Alpine larch leading,,Lari_Lya,Conifer,alpine larch
+larilyal,,Lari_lya,Lari_Lya,Lari lyal,Larix lyallii,Alp larch,Alpine larch,Alpine larch leading,,Lari_Lya,Conifer,alpine larch
 lariocci,LARI.OCC,Lari_occ,Lari_Occ,Lari occi,Larix occidentalis,We larch,Western larch,Western larch leading,,Lari_Occ,Conifer,western larch
 ,,Lari_sib,,Lari sibi,Larix sibitica,,,,,,Conifer,
 ,,Lari_sp,Lari_Spp,Lari spp,Larix spp.,Larch,Larch,Larch leading,,Lari_Spp,Conifer,
@@ -104,16 +104,16 @@ picesitc,PICE.SIT,Pice_sit,Pice_Sit,Pice sitc,Picea sitchensis,,,,,,Conifer,
 ,,Pice_sit,,Pice sitx,Picea sitchensis x ?,,,,,,Conifer,
 ,,Pice_sp,Pice_Spp,Pice spp,Picea spp.,Spruce,Spruce,Spruce leading,,Pice_Spp,Conifer,spruce
 ,,Pice_sp,,Pice sppx,Picea spp x,,,,,,Conifer,spruce
-,,Pinu_alb,Pinu_Alb,Pinu albi,Pinus albicaulis,Wh pine,Whitebark pine,Whitebark pine leading,,Pinu_Alb,Conifer,
+pinualbi,,Pinu_alb,Pinu_Alb,Pinu albi,Pinus albicaulis,Wh pine,Whitebark pine,Whitebark pine leading,,Pinu_Alb,Conifer,
 pinubank,PINU.BAN,Pinu_ban,Pinu_Ban,Pinu bank,Pinus banksiana,Jk pine,Jack pine,Jack pine leading,,Pinu_Ban,Conifer,jack pine
-,PINU.CON.CON,Pinu_con,Pinu_Con,Pinu conc,Pinus contorta var. contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,,Pinu_Con,Conifer,lodgepole pine
+pinuconcon,PINU.CON.CON,Pinu_con,Pinu_Con,Pinu conc,Pinus contorta var. contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,,Pinu_Con,Conifer,lodgepole pine
 ,PINU.CON.LAT,Pinu_con,Pinu_Con_Lat,Pinu cont,Pinus contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,Pinus contorta latifolia is a synonym of var. latifolia,Pinu_Con_Lat,Conifer,lodgepole pine
-,,Pinu_fle,Pinu_Fle,Pinu flex,Pinus flexilis,Pine,Pine,Pine leading,,,Conifer,
+pinuflex,,Pinu_fle,Pinu_Fle,Pinu flex,Pinus flexilis,Pine,Pine,Pine leading,,,Conifer,
 ,,Pinu_lam,,Pinu lamb,Pinus lambertiana,Pine,Pine,Pine leading,,,Conifer,
 ,,Pinu_mon,Pinu_Mon,Pinu mont,Pinus monticola,Ww pine,Western white pine,Western white pine leading,,Pinu_Mon,Conifer,
 ,,Pinu_mur,,Pinu murx,Pinus x murraybanksiana,Pine,Pine,Pine leading,,,Conifer,
 ,,Pinu_nig,,Pinu nigr,Pinus nigra,Pine,Pine,Pine leading,,,Conifer,
-,,Pinu_pon,Pinu_Pon,Pinu pond,Pinus ponderosa,Pine,Pine,Pine leading,,,Conifer,ponderosa pine
+pinupon,,Pinu_pon,Pinu_Pon,Pinu pond,Pinus ponderosa,Pine,Pine,Pine leading,,,Conifer,ponderosa pine
 ,,Pinu_rad,,Pinu radi,Pinus radiata,Pine,Pine,Pine leading,,,Conifer,
 pinuresi,PINU.RES,Pinu_res,Pinu_Res,Pinu resi,Pinus resinosa,Rd pine,Red pine,Red pine leading,,Pinu_Res,Conifer,
 ,,Pinu_rig,Pinu_Rig,Pinu rigi,Pinus rigida,Pine,Pine,Pine leading,,,Conifer,
@@ -126,7 +126,7 @@ popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamifera v. balsamifera
 ,,Popu_bal,Popu_Tri,Popu balt,Populus trichocarpa,Bl cottonwood,Black cottonwood,Black cottonwood leading,Populus balsamifera trichocarpa is a synonym of Populus trichocarpa,Popu_Tri,Deciduous,balsam poplar
 ,,Popu_can,,Popu cana,Populus X canadensis,,,,,,Deciduous,
 ,,Popu_del,Popu_Del,Popu delo,Populus deltoides v. occidentalis,,,,,,Deciduous,eastern cotttonwood
-,,Popu_del,Popu_Del,Popu delt,Populus deltoides,,,,,,Deciduous,eastern cotttonwood
+popudelt,,Popu_del,Popu_Del,Popu delt,Populus deltoides,,,,,,Deciduous,eastern cotttonwood
 ,,Popu_del,Popu_Del,Popu delx,Populus deltoides,,,,,,Deciduous,eastern cotttonwood
 ,,Popu_gra,Popu_Gra,Popu gran,Populus grandidentata,Wh poplar,White poplar,White poplar leading,,Popu_Gra,Deciduous,
 ,,Popu_nig,,Popu nigr,Populus nigra,,,,,,Deciduous,
