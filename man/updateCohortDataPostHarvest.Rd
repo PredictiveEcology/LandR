@@ -44,7 +44,7 @@ to ensure that everything matches correctly.}
 In LANDIS-II, this is called "Succession Timestep". This is used here}
 
 \item{provenanceTable}{A \code{data.table} with three columns:
-New cohorts are initiated at the \code{Location} \code{speciesEcoregion} from the
+New cohorts are initiated at the \code{ecoregionGroup} \code{speciesEcoregion} from the
 corresponding \code{speciesEcoregion} listed in the \code{Provenance} column}
 
 \item{verbose}{Integer, where increasing number is increasing verbosity. Currently,

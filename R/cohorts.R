@@ -1114,6 +1114,7 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
                             currentTime, successionTimestep) {
 
+  browser()
    ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum B per ecoregion, join to new cohort data
   namesNCD <- names(newPixelCohortData)
@@ -1181,7 +1182,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 #' @param successionTimestep The time between successive seed dispersal events.
 #'   In LANDIS-II, this is called "Succession Timestep". This is used here
 #' @param provenanceTable A \code{data.table} with three columns:
-#' New cohorts are initiated at the \code{Location} \code{speciesEcoregion} from the
+#' New cohorts are initiated at the \code{ecoregionGroup} \code{speciesEcoregion} from the
 #' corresponding \code{speciesEcoregion} listed in the \code{Provenance} column
 #'
 #' @param verbose Integer, where increasing number is increasing verbosity. Currently,
@@ -1219,15 +1220,14 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
   #Can't lose the biomass of non-zero (non harvested) trees
 
   if (all(zeroOnPixelGroupMap)) {
-    # Deal with pixels on the map that have no pixelGroup -- these are burned
-    #Must do new pixelGroupMapping
-    #Must join with provenanceTable first! This will resolve issues with duplicate pixelGroups
+    #non-zeroes indicate partial harvest - this is not yet operational
 
     setkey(newPixelCohortData, ecoregionGroup, speciesCode)
     setkey(provenanceTable, ecoregionGroup, speciesCode)
+    browser()
+    newPixelCohortData <- newPixelCohortData[provenanceTable]
 
-    newPixelCohortData <- provenanceTable[newPixelCohortData] %>%
-      .[!is.na(Provenance)]
+    #ecoregionGroup should remain the same, Provenance will be a newly added column
 
     #NA in provenance means this area would not be planted with this species
 
@@ -1243,8 +1243,10 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
     specieseco_current[, maxB_eco := max(maxB), by = ecoregionGroup]
 
     setkey(newPixelCohortData, speciesCode, ecoregionGroup)
+    browser() #check that newPixelCohortData looks correct
     newPixelCohortData <- specieseco_current[newPixelCohortData]
 
+    #Perhaps this needs to be parameterized, if Provenance is not a desired column?
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B", 'maxB', 'maxANPP', 'Provenance')
 
     cd <- newPixelCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
@@ -1286,7 +1288,6 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
     newPixelCohortData <- allCohortData[theNewOnes]
 
     # Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
-    #This is likely wrong behavior
     pixelsToChange <- unique(cohorts[, c("pixelIndex", "pixelGroup")], by = c("pixelIndex"))
   }
 
