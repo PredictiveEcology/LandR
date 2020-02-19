@@ -726,7 +726,6 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
       cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
     cohortData[, V1 := NULL]
   }
-  # cohortData[cover == 0, `:=`(age = 0L, logAge = -Inf, B = 0)]
 
   ## CRAZY TODO: DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
   # message(crayon::blue(paste("POSSIBLE ALERT:",
@@ -751,7 +750,9 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     cohortData[ , B := mean(totalBiomass) * cover / 100, by = "pixelIndex"]
     message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
     cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
+
     message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
+    cohortData[cover > 0 & age == 0, B := 0L]
     cohortData[ , totalBiomass := asInteger(totalBiomass)]
     set(cohortData, NULL, "B", asInteger(cohortData[["B"]]))
   }
