@@ -8,18 +8,18 @@ abielasi,ABIE.LAS,Abie_sp,Abie_Las,Abie lasi,Abies lasiocarpa,Fir,Fir,Fir leadin
 ,,Abie_pic,,Abie pice,,Fir-Sp,Fir-Spruce,Fir-Spruce mix,Abies pice in CASFRI is a Spruce-balsam fir or Balsam fir-spruce mix,,Conifer,,
 ,,Abie_pro,,Abie proc,Abies procera,,,,,,Conifer,,
 ,,Abie_sp,Abie_Spp,Abie spp,Abies spp.,Fir,Fir,Fir leading,,,Conifer,subalpine fir,
-,,Acer_cir,Acer_Cir,Acer circ,Acer circinatum,,Vine Maple,,,,Deciduous,vine maple,Mv
+,,Acer_cir,Acer_Cir,Acer circ,Acer circinatum,,,,,,Deciduous,vine maple,Mv
 ,,Acer_fre,,Acer free,Acer X freemanii,,,,,,Deciduous,,
-,,Acer_gla,,Acer glab,Acer glabrum,,Rocky mountain Maple,,,,Deciduous,,
-acermacr,ACER.MAC,Acer_mac,Acer_Mac,Acer macr,Acer macrophyllum,,Bigleaf Maple,,,,Deciduous,,Mb
+,,Acer_gla,,Acer glab,Acer glabrum,,,,,,Deciduous,,
+acermacr,ACER.MAC,Acer_mac,Acer_Mac,Acer macr,Acer macrophyllum,,,,,,Deciduous,,Mb
 ,,Acer_neg,Acer_Neg,Acer negu,Acer negundo,Bx maple,Boxelder maple,Boselder maple leading,,Acer_Neg,Deciduous,manitoba maple,
 ,,Acer_nig,,Acer nigr,Acer nigrum,,,,,,Deciduous,,
 ,,Acer_pen,Acer_Pen,Acer pens,Acer pensylvanicum,St maple,Striped maple,Striped maple leading,,Acer_Pen,Deciduous,,
 ,,Acer_pla,,Acer plat,Acer platanoides,,,,,,Deciduous,,
 ,,Acer_pse,,Acer pseu,Acer pseudoplatanus,,,,,,Deciduous,,
-acerrubr,ACER.RUB,Acer_rub,Acer_Rub,Acer rubr,Acer rubrum,,Red Maple,,,,Deciduous,,
-,,,Acer_Sac,Acer sacc,Acer saccharinum,,,,,,Deciduous,silver maple,
-acersacc,ACER.SAH,Acer_sah,Acer_Sah,Acer sach,Acer saccharum,Sg maple,Sugar maple,Sugar maple leading,"LANDIS_test and LANDIS_traits codes don't match, but have been checked to both refer to Acer saccharum",Acer_Sah,Deciduous,sugar maple,
+acerrubr,ACER.RUB,Acer_rub,Acer_Rub,Acer rubr,Acer rubrum,,,,,,Deciduous,,
+,,,Acer_Sac,Acer sacc,Acer saccharinum,,,,,,Deciduous,,
+acersacc,ACER.SAH,Acer_sah,Acer_Sah,Acer sach,Acer saccharum,Sg maple,Sugar maple,Sugar maple leading,"LANDIS_test and LANDIS_traits codes don't match, but have been checked to both refer to Acer saccharum",Acer_Sah,Deciduous,,
 ,,Acer_spi,Acer_Spi,Acer spic,Acer spicatum,Mt maple,Mountain maple,Mountain maple leading,,Acer_Spi,Deciduous,mountain maple,
 ,,Acer_sp,Acer_Spp,Acer spp,Acer spp.,Maple,Maple,Maple leading,,Acer_Spp,Deciduous,,
 ,,Aesc_hip,,Aesc hipp,Aesculus hippocastanum,,,,,,Deciduous,,
@@ -77,7 +77,7 @@ fraxamer,FRAX.AME,Frax_ame,Frax_Ame,Frax amer,Fraxinus americana,Am ash,American
 ,,Lari_dec,,Lari deci,Larix decidua,,,,,,Conifer,,
 ,,Lari_kae,Lari_Kae,Lari kaem,Larix kaempferi,,,,,,Conifer,,
 larilari,LARI.LAR,Lari_lar,Lari_Lar,Lari lari,Larix laricina,Tamarack,Tamarack,Tamarack leading,,Lari_Lar,Conifer,tamarack larch,Lt
-,,Lari_lya,Lari_Lya,Lari lyal,Larix lyallii,Alp larch,Alpine larch,Alpine larch leading,,Lari_Lya,Conifer,alpine larch,La
+larilyal,,Lari_lya,Lari_Lya,Lari lyal,Larix lyallii,Alp larch,Alpine larch,Alpine larch leading,,Lari_Lya,Conifer,alpine larch,La
 lariocci,LARI.OCC,Lari_occ,Lari_Occ,Lari occi,Larix occidentalis,We larch,Western larch,Western larch leading,,Lari_Occ,Conifer,western larch,Lw
 ,,Lari_sib,,Lari sibi,Larix sibitica,,,,,,Conifer,,
 ,,Lari_sp,Lari_Spp,Lari spp,Larix spp.,Larch,Larch,Larch leading,,Lari_Spp,Conifer,,
@@ -100,20 +100,20 @@ piceglau,PICE.GLA,Pice_gla,Pice_Gla,Pice glau,Picea glauca,Wh Spruce,White.Spruc
 picemari,PICE.MAR,Pice_mar,Pice_Mar,Pice mari,Picea mariana,Bl Spruce,Black.Spruce,Black spruce leading,,Pice_Mar,Conifer,black spruce,Sb
 ,,Pice_pun,,Pice pung,Picea pungens,,,,,,Conifer,,
 picerube,PICE.RUB,Pice_rub,Pice_Rub,Pice rube,Picea rubens,,,,,,Conifer,,
-picesitc,PICE.SIT,Pice_sit,Pice_Sit,Pice sitc,Picea sitchensis,,Sitka spruce,,,,Conifer,sitka spruce,Ss
+picesitc,PICE.SIT,Pice_sit,Pice_Sit,Pice sitc,Picea sitchensis,,,,,,Conifer,,Ss
 ,,Pice_sit,,Pice sitx,Picea sitchensis x ?,,,,,,Conifer,,
 ,,Pice_sp,Pice_Spp,Pice spp,Picea spp.,Spruce,Spruce,Spruce leading,,Pice_Spp,Conifer,spruce,
 ,,Pice_sp,,Pice sppx,Picea spp x,,,,,,Conifer,spruce,
-,,Pinu_alb,Pinu_Alb,Pinu albi,Pinus albicaulis,Wh pine,Whitebark pine,Whitebark pine leading,,Pinu_Alb,Conifer,whitebark pine,Pa
+pinualbi,,Pinu_alb,Pinu_Alb,Pinu albi,Pinus albicaulis,Wh pine,Whitebark pine,Whitebark pine leading,,Pinu_Alb,Conifer,,Pa
 pinubank,PINU.BAN,Pinu_ban,Pinu_Ban,Pinu bank,Pinus banksiana,Jk pine,Jack pine,Jack pine leading,,Pinu_Ban,Conifer,jack pine,Pj
-,PINU.CON.CON,Pinu_con,Pinu_Con,Pinu conc,Pinus contorta var. contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,,Pinu_Con,Conifer,lodgepole pine,Plc
+pinuconcon,PINU.CON.CON,Pinu_con,Pinu_Con,Pinu conc,Pinus contorta var. contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,,Pinu_Con,Conifer,lodgepole pine,Plc
 ,PINU.CON.LAT,Pinu_con,Pinu_Con_Lat,Pinu cont,Pinus contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,Pinus contorta latifolia is a synonym of var. latifolia,Pinu_Con_Lat,Conifer,lodgepole pine,Pli
-,,Pinu_fle,Pinu_Fle,Pinu flex,Pinus flexilis,Pine,Pine,Pine leading,,,Conifer,,Pf
+pinuflex,,Pinu_fle,Pinu_Fle,Pinu flex,Pinus flexilis,Pine,Pine,Pine leading,,,Conifer,,Pf
 ,,Pinu_lam,,Pinu lamb,Pinus lambertiana,Pine,Pine,Pine leading,,,Conifer,,
 ,,Pinu_mon,Pinu_Mon,Pinu mont,Pinus monticola,Ww pine,Western white pine,Western white pine leading,,Pinu_Mon,Conifer,,Pxj
 ,,Pinu_mur,,Pinu murx,Pinus x murraybanksiana,Pine,Pine,Pine leading,,,Conifer,,
 ,,Pinu_nig,,Pinu nigr,Pinus nigra,Pine,Pine,Pine leading,,,Conifer,,
-,,Pinu_pon,Pinu_Pon,Pinu pond,Pinus ponderosa,Pine,Pine,Pine leading,,,Conifer,ponderosa pine,Py
+pinupon,,Pinu_pon,Pinu_Pon,Pinu pond,Pinus ponderosa,Pine,Pine,Pine leading,,,Conifer,ponderosa pine,Py
 ,,Pinu_rad,,Pinu radi,Pinus radiata,Pine,Pine,Pine leading,,,Conifer,,
 pinuresi,PINU.RES,Pinu_res,Pinu_Res,Pinu resi,Pinus resinosa,Rd pine,Red pine,Red pine leading,,Pinu_Res,Conifer,,
 ,,Pinu_rig,Pinu_Rig,Pinu rigi,Pinus rigida,Pine,Pine,Pine leading,,,Conifer,,
@@ -126,7 +126,7 @@ popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamifera v. balsamifera
 ,,Popu_bal,Popu_Tri,Popu balt,Populus trichocarpa,Bl cottonwood,Black cottonwood,Black cottonwood leading,Populus balsamifera trichocarpa is a synonym of Populus trichocarpa,Popu_Tri,Deciduous,balsam poplar,Act
 ,,Popu_can,,Popu cana,Populus X canadensis,,,,,,Deciduous,,
 ,,Popu_del,Popu_Del,Popu delo,Populus deltoides v. occidentalis,,,,,,Deciduous,eastern cotttonwood,
-,,Popu_del,Popu_Del,Popu delt,Populus deltoides,,,,,,Deciduous,eastern cotttonwood,
+popudelt,,Popu_del,Popu_Del,Popu delt,Populus deltoides,,,,,,Deciduous,eastern cotttonwood,
 ,,Popu_del,Popu_Del,Popu delx,Populus deltoides,,,,,,Deciduous,eastern cotttonwood,
 ,,Popu_gra,Popu_Gra,Popu gran,Populus grandidentata,Wh poplar,White poplar,White poplar leading,,Popu_Gra,Deciduous,,
 ,,Popu_nig,,Popu nigr,Populus nigra,,,,,,Deciduous,,
@@ -159,12 +159,12 @@ querrubr,QUER.RUB,Quer_rub,Quer_Rub,Quer rubr,Quercus rubra,,,,,,Deciduous,,
 ,,Robi_pse,Robi_Pse,Robi pseu,Robinia pseudoacacia,,,,,,Deciduous,,
 ,,Robi_sp,,Robi spp,Robinia spp.,,,,,,Deciduous,,
 ,,Sali_amy,,Sali amyg,Salix amygdaloides,,,,,,Deciduous,,
-,,Sali_beb,Sali_Beb,Sali bebb,Salix bebbiana,,Bebb's willow,,,,Deciduous,,Wb
-,,Sali_dis,,Sali disc,Salix discolor,,pussy willow,,,,Deciduous,,Wd
-,,Sali_luc,,Sali luci,Salix lucida,,Pacific willow,,,,Deciduous,,Wp
+,,Sali_beb,Sali_Beb,Sali bebb,Salix bebbiana,,,,,,Deciduous,,Wb
+,,Sali_dis,,Sali disc,Salix discolor,,,,,,Deciduous,,Wd
+,,Sali_luc,,Sali luci,Salix lucida,,,,,,Deciduous,,Wp
 ,,Sali_nig,Sali_Nig,Sali nigr,Salix nigra,,,,,,Deciduous,,
-,,Sali_sco,,Sali scou,Salix scouleriana,,scoulers willow,,,,Deciduous,,Ws
-,,Sali_sit,,Sali sitc,Salix sitchensis,,Sitka willow,,,,Deciduous,,Wt
+,,Sali_sco,,Sali scou,Salix scouleriana,,,,,,Deciduous,scoulers willow,Ws
+,,Sali_sit,,Sali sitc,Salix sitchensis,,,,,,Deciduous,,Wt
 ,,Sali_sp,Sali_Spp,Sali spp,Salix spp.,,,,,,Deciduous,willow,
 ,,Sass_alb,Sass_Alb,Sass albi,Sassafras albidum,,,,,,Deciduous,,
 ,,Sequ_gig,,Sequ giga,Sequoadendron giganteum,,,,,,Conifer,,
@@ -172,9 +172,9 @@ querrubr,QUER.RUB,Quer_rub,Quer_Rub,Quer rubr,Quercus rubra,,,,,,Deciduous,,
 ,,Sorb_auc,Sorb_Ame,Sorb aucu,Sorbus aucuparia,,,,Sorbus aucuparia is a synonym of Sorbus americana,,Deciduous,,
 ,,Sorb_dec,Sorb_Dec,,,,,,,,Deciduous,,
 ,,Sorb_sp,Sorb_Spp,,,,,,,,Deciduous,,
-,,Taxu_bre,,Taxu brev,Taxus brevifolia,,Western yew,,,,Conifer,,Tw
+,,Taxu_bre,,Taxu brev,Taxus brevifolia,,,,,,Conifer,,Tw
 thujocci,,Thuj_occ,Thuj_Occ,Thuj occi,Thuja occidentalis,,,,,,Conifer,,
-thujplic,THUJ.PLI,Thuj_pli,Thuj_Pli,Thuj plic,Thuja plicata,,western redcedar,,,,Conifer,western redcedar,Cw
+thujplic,THUJ.PLI,Thuj_pli,Thuj_Pli,Thuj plic,Thuja plicata,,,,,,Conifer,western redcedar,Cw
 ,THUJ.SPP.ALL,Thuj_sp,Thuj_Spp,,,,,,,,Conifer,,
 tiliamer,,Tili_ame,Tili_Ame,Tili amer,Tilia americana,,,,,,Deciduous,,
 ,,Tili_cor,,Tili cord,Tilia cordata,,,,,,Deciduous,,
