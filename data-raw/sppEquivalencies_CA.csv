@@ -1,198 +1,198 @@
-LANDIS_test,LANDIS_traits,LandR,KNN,CASFRI,Latin_full,EN_generic_short,EN_generic_full,Leading,Notes,Boreal,Type,PSP
-abieamab,ABIE.AMA,Abie_ama,Abie_Ama,Abie amab,Abies amabilis,,,,,,Conifer,amabilis fir
-abiebals,ABIE.BAL,Abie_bal,Abie_Bal,Abie bals,Abies balsamea,Ba Fir,Balsam Fir,Balsam fir leading,,Abie_Bal,Conifer,balsam fir
-,,Abie_con,,Abie conc,Abies concolor,,,,,,Conifer,
-abiegran,ABIE.GRA,Abie_gra,Abie_Gra,Abie gran,Abies grandis,,,,,,Conifer,grand fir
-abielasi,ABIE.LAS,Abie_sp,Abie_Las,Abie lasi,Abies lasiocarpa,Fir,Fir,Fir leading,,Abie_Las,Conifer,subalpine fir
-,,Abie_mag,,Abie magn,Abies magnifica var shastensis,,,,,,Conifer,
-,,Abie_pic,,Abie pice,,Fir-Sp,Fir-Spruce,Fir-Spruce mix,Abies pice in CASFRI is a Spruce-balsam fir or Balsam fir-spruce mix,,Conifer,
-,,Abie_pro,,Abie proc,Abies procera,,,,,,Conifer,
-,,Abie_sp,Abie_Spp,Abie spp,Abies spp.,Fir,Fir,Fir leading,,,Conifer,subalpine fir
-,,Acer_cir,Acer_Cir,Acer circ,Acer circinatum,,,,,,Deciduous,vine maple
-,,Acer_fre,,Acer free,Acer X freemanii,,,,,,Deciduous,
-,,Acer_gla,,Acer glab,Acer glabrum,,,,,,Deciduous,
-acermacr,ACER.MAC,Acer_mac,Acer_Mac,Acer macr,Acer macrophyllum,,,,,,Deciduous,
-,,Acer_neg,Acer_Neg,Acer negu,Acer negundo,Bx maple,Boxelder maple,Boselder maple leading,,Acer_Neg,Deciduous,manitoba maple
-,,Acer_nig,,Acer nigr,Acer nigrum,,,,,,Deciduous,
-,,Acer_pen,Acer_Pen,Acer pens,Acer pensylvanicum,St maple,Striped maple,Striped maple leading,,Acer_Pen,Deciduous,
-,,Acer_pla,,Acer plat,Acer platanoides,,,,,,Deciduous,
-,,Acer_pse,,Acer pseu,Acer pseudoplatanus,,,,,,Deciduous,
-acerrubr,ACER.RUB,Acer_rub,Acer_Rub,Acer rubr,Acer rubrum,,,,,,Deciduous,
-,,,Acer_Sac,Acer sacc,Acer saccharinum,,,,,,Deciduous,
-acersacc,ACER.SAH,Acer_sah,Acer_Sah,Acer sach,Acer saccharum,Sg maple,Sugar maple,Sugar maple leading,"LANDIS_test and LANDIS_traits codes don't match, but have been checked to both refer to Acer saccharum",Acer_Sah,Deciduous,
-,,Acer_spi,Acer_Spi,Acer spic,Acer spicatum,Mt maple,Mountain maple,Mountain maple leading,,Acer_Spi,Deciduous,mountain maple
-,,Acer_sp,Acer_Spp,Acer spp,Acer spp.,Maple,Maple,Maple leading,,Acer_Spp,Deciduous,
-,,Aesc_hip,,Aesc hipp,Aesculus hippocastanum,,,,,,Deciduous,
-,,Alnu_inc,Alnu_Inc_Rug,Alnu inca,Alnus incana,,,,,,Deciduous,gray alder
-,,Alnu_inc,Alnu_Inc_Ten,Alnu inca,,,,,,,Deciduous,gray alder
-,,Alnu_inc,Alnu_Inc,Alnu inca,,,,,,,Deciduous,gray alder
-alnurubr,ALNU.RUB,Alnu_rub,Alnu_Rub,Alnu rubr,Alnus rubra,,,,,,Deciduous,red alder
-,,Alnu_sp,Alnu_Spp,Alnu spp,Alnus spp,Alder,Alder,Alder leading,,Alnu_Spp,Deciduous,alder
-,,Alnu_vir,,Alnu viri,Alnus viridis,,,,,,Deciduous,sitka alder
-,,Arbu_men,Arbu_Men,Arbu menz,Arbutus menziesii,,,,,,Deciduous,
-,,Asim_tri,Asim_Tri,Asim tril,Asimina triloba,,,,,,Deciduous,
-,BETU.ALL,Betu_sp,Betu_All,Betu alle,Betula alleghaniensis,Sw birch,Swamp birch,Swamp birch leading,,Betu_All,Deciduous,birch
-,,Betu_len,,Betu lent,Betula lenta,,,,,,Deciduous,
-,,Betu_man,,Betu mand,Betula mandschurica var japonica,,,,,,Deciduous,
-,,Betu_neo,,Betu neoa,Betula neoalaskana,,,,,,Deciduous,
-,,Betu_occ,,Betu occi,Betula occidentalis,,,,,,Deciduous,
-betupapy,BETU.PAP,Betu_pap,Betu_Pap,Betu papy,Betula papyrifera,Pa birch,Paper birch,Paper birch leading,,Betu_Pap,Deciduous,white birch
-,,Betu_pen,,Betu pend,Betula pendula,,,,,,Deciduous,
-,,Betu_pop,Betu_Pop,Betu popu,Betula populifolia,Gr birch,Gray birch,Gray birch leading,,Betu_Pop,Deciduous,
-,,Betu_pub,,Betu pube,Betula pubescens,,,,,,Deciduous,
-,BETU.ALL,Betu_sp,Betu_Spp,Betu spp,Betula spp.,Birch,Birch,Birch leading,,Betu_Spp,Deciduous,birch
-,,Betu_win,,Betu winx,Betula x winteri,,,,,,Deciduous,
-,,Calc_dec,,Calc decu,Calocedrus decurrens,,,,,,Conifer,
-,,Carp_car,Carp_Car,Carp caro,Carpinus caroliniana,,,,,,Deciduous,
-,,Cary_cor,Cary_Cor,Cary cord,Carya cordiformis,,,,,,Deciduous,
-,,Cary_gla,,Cary glab,Carya glabra,,,,,,Deciduous,
-,,Cary_lac,,Cary laci,Carya laciniosa,,,,,,Deciduous,
-,,Cary_ora,,Cary orav,Carya orava,,,,,,Deciduous,
-,,Cary_sp,,Cary spp,Carya spp.,,,,,,Deciduous,
-,,Cary_tom,,Cary tome,Carya tomentosa,,,,,,Deciduous,
-,,Cast_den,Cast_Den,Cast dent,Castanea dentata,,,,,,Deciduous,
-,,Cata_spe,,Cata spec,Catalpa speciosa,,,,,,Deciduous,
-,,Celt_occ,,Celt occi,Celtis occidentalis,,,,,,Deciduous,
-,,Cerc_can,,Cerci cana,Cercis canadensis,,,,,,Deciduous,
-,,Cham_law,,Cham laws,Chamaecyparis lawsoniana,,,,,,Conifer,
-chamnoot,CHAM.NOO,Cham_noo,Cham_Noo,Cham noot,Chamaecyparis nootkatensis,,,,,,Conifer,
-,,Corn_nut,,Corn nutt,Cornus nuttallii,,,,,,Deciduous,
-,,Crat_sp,Crat_Spp,Crat spp,Crataegus spp,,,,,,Deciduous,
-fagugran,FAGU.GRA,Fagu_gra,Fagu_Gra,Fagu gran,Fagus grandifolia,Am beech,American beech,American beech leading,,Fagu_Gra,Deciduous,
-fraxamer,FRAX.AME,Frax_ame,Frax_Ame,Frax amer,Fraxinus americana,Am ash,American ash,American ash leading,,Frax_Ame,Deciduous,red ash
-,,Frax_lat,,Frax lati,Fraxinus latifolia,,,,,,Deciduous,
-,,Frax_nig,Frax_Nig,Frax nigr,Fraxinus nigra,Bl ash,Black ash,Black ash leading,,Frax_Nig,Deciduous,
-,,Frax_pen,Frax_Pen_Sub,Frax penn,Fraxinus pennsylvanica,,,,Fraxinus pennsylvanica subintegerrima is a synonym,,Deciduous,green ash
-,,Frax_pen,Frax_Pen,Frax penn,Fraxinus pennsylvanica,,,,,,Deciduous,green ash
-,,Frax_pro,,Frax prof,Fraxinus profunda,,,,,,Deciduous,
-,,Frax_qua,,Frax quad,Fraxinus quadrangulata,,,,,,Deciduous,
-,,Frax_sp,Frax_Spp,Frax spp,Fraxinus spp.,Ash,Ash,Ash leading,,Frax_Spp,Deciduous,
-,,Gled_tri,Gled_Tri,Gled tria,Gleditsia triacanthos,,,,,,Deciduous,
-,,Gymn_dio,,Gymn dioi,Gymnocladus dioicus,,,,,,Deciduous,
-,,Hana_vir,,Hana virg,Hamamelis virginiana,,,,,,Deciduous,
-,,Jugl_cin,Jugl_Cin,Jugl cine,Juglans cinerea,,,,,,Deciduous,
-,,Jugl_nig,Jugl_Nig,Jugl nigr,Juglans nigra,,,,,,Deciduous,
-,,Thuj_jun,Juni_Vir,Thuj juni,Juniperus virginiana,,,,Not clear why CASFRI name doesn't match,,Conifer,
-,,Juni_sco,,Juni scop,Juniperus scopulorum,,,,,,Conifer,
-,,Lari_dec,,Lari deci,Larix decidua,,,,,,Conifer,
-,,Lari_kae,Lari_Kae,Lari kaem,Larix kaempferi,,,,,,Conifer,
-larilari,LARI.LAR,Lari_lar,Lari_Lar,Lari lari,Larix laricina,Tamarack,Tamarack,Tamarack leading,,Lari_Lar,Conifer,tamarack larch
-larilyal,,Lari_lya,Lari_Lya,Lari lyal,Larix lyallii,Alp larch,Alpine larch,Alpine larch leading,,Lari_Lya,Conifer,alpine larch
-lariocci,LARI.OCC,Lari_occ,Lari_Occ,Lari occi,Larix occidentalis,We larch,Western larch,Western larch leading,,Lari_Occ,Conifer,western larch
-,,Lari_sib,,Lari sibi,Larix sibitica,,,,,,Conifer,
-,,Lari_sp,Lari_Spp,Lari spp,Larix spp.,Larch,Larch,Larch leading,,Lari_Spp,Conifer,
-,,Lari_sp,,Lari x mar,Larix x marschlinsii,,,,,,Conifer,
-,,Liri_tul,,Liri tuli,Liriodendron tulipifera,,,,,,Deciduous,
-,,Magn_acu,,Magn acum,Magnolia acuminata,,,,,,Deciduous,
-,,Malu_fus,Malu_Fus,Malu fusc,Malus fusca,,,,,,Deciduous,
-,,Malu_pum,,Malu pumi,Malus pumila,,,,,,Deciduous,
-,,Malu_sp,Malu_Spp,,,,,,,,Deciduous,
-,,Moru_rub,,Moru rubr,Morus rubra,,,,,,Deciduous,
-,,Nyss_syl,,Nyss sylv,Nyssa sylvatica,,,,,,Deciduous,
-,,Ostr_vir,Ostr_Vir,Ostr virg,Ostrya virginiana,,,,,,Deciduous,
-,,Pice_abi,Pice_Abi,Pice abie,Picea abies,,,,,,Conifer,
-,,Pice_sp,Pice_Eng_Gla,Pice hybr,Picea engelmannii x glauca,En Spruce,Engelmann's spruce,Engelmann's spruce leading,Pice hybr is not on the manual CASFRI list but appears in database,Pice_Eng_Gla,Conifer,spruce
-,,Pice_sp,Pice_Eng_Gla,Pice engx,Picea engelmannii x glauca,En Spruce,Engelmann's spruce,Engelmann's spruce leading,,Pice_Eng_Gla,Conifer,spruce
-piceengl,PICE.ENG,Pice_eng,Pice_Eng,Pice enge,Picea engelmannii,En Spruce,Engelmann's spruce,Engelmann's spruce leading,,Pice_Eng,Conifer,engelmann spruce
-piceglau,PICE.GLA,Pice_gla,Pice_Gla,Pice glau,Picea glauca,Wh Spruce,White.Spruce,White spruce leading,,Pice_Gla,Conifer,white spruce
-,,Pice_koy,,Pice koya,Picea koyamai,,,,,,Conifer,
-,,Pice_lut,,Pice lutx,Picea x lutzii,,,,,,Conifer,
-picemari,PICE.MAR,Pice_mar,Pice_Mar,Pice mari,Picea mariana,Bl Spruce,Black.Spruce,Black spruce leading,,Pice_Mar,Conifer,black spruce
-,,Pice_pun,,Pice pung,Picea pungens,,,,,,Conifer,
-picerube,PICE.RUB,Pice_rub,Pice_Rub,Pice rube,Picea rubens,,,,,,Conifer,
-picesitc,PICE.SIT,Pice_sit,Pice_Sit,Pice sitc,Picea sitchensis,,,,,,Conifer,
-,,Pice_sit,,Pice sitx,Picea sitchensis x ?,,,,,,Conifer,
-,,Pice_sp,Pice_Spp,Pice spp,Picea spp.,Spruce,Spruce,Spruce leading,,Pice_Spp,Conifer,spruce
-,,Pice_sp,,Pice sppx,Picea spp x,,,,,,Conifer,spruce
-pinualbi,,Pinu_alb,Pinu_Alb,Pinu albi,Pinus albicaulis,Wh pine,Whitebark pine,Whitebark pine leading,,Pinu_Alb,Conifer,
-pinubank,PINU.BAN,Pinu_ban,Pinu_Ban,Pinu bank,Pinus banksiana,Jk pine,Jack pine,Jack pine leading,,Pinu_Ban,Conifer,jack pine
-pinuconcon,PINU.CON.CON,Pinu_con,Pinu_Con,Pinu conc,Pinus contorta var. contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,,Pinu_Con,Conifer,lodgepole pine
-,PINU.CON.LAT,Pinu_con,Pinu_Con_Lat,Pinu cont,Pinus contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,Pinus contorta latifolia is a synonym of var. latifolia,Pinu_Con_Lat,Conifer,lodgepole pine
-pinuflex,,Pinu_fle,Pinu_Fle,Pinu flex,Pinus flexilis,Pine,Pine,Pine leading,,,Conifer,
-,,Pinu_lam,,Pinu lamb,Pinus lambertiana,Pine,Pine,Pine leading,,,Conifer,
-,,Pinu_mon,Pinu_Mon,Pinu mont,Pinus monticola,Ww pine,Western white pine,Western white pine leading,,Pinu_Mon,Conifer,
-,,Pinu_mur,,Pinu murx,Pinus x murraybanksiana,Pine,Pine,Pine leading,,,Conifer,
-,,Pinu_nig,,Pinu nigr,Pinus nigra,Pine,Pine,Pine leading,,,Conifer,
-pinupon,,Pinu_pon,Pinu_Pon,Pinu pond,Pinus ponderosa,Pine,Pine,Pine leading,,,Conifer,ponderosa pine
-,,Pinu_rad,,Pinu radi,Pinus radiata,Pine,Pine,Pine leading,,,Conifer,
-pinuresi,PINU.RES,Pinu_res,Pinu_Res,Pinu resi,Pinus resinosa,Rd pine,Red pine,Red pine leading,,Pinu_Res,Conifer,
-,,Pinu_rig,Pinu_Rig,Pinu rigi,Pinus rigida,Pine,Pine,Pine leading,,,Conifer,
-,,Pinu_sp,Pinu_Spp,Pinu spp,Pinus spp.,Pine,Pine,Pine leading,,Pinu_Spp,Conifer,
-pinustro,PINU.STR,Pinu_str,Pinu_Str,Pinu stro,Pinus strobus,Pine,Pine,Pine leading,,,Conifer,white pine
-,,Pinu_syl,Pinu_Syl,Pinu sylv,Pinus sylvestris,Pine,Pine,Pine leading,,,Conifer,
-,,Plan_occ,Plat_Occ,Plan occi,Platanus occidentalis,,,,,,Deciduous,
-,,Popu_ang,,Popu angu,Populus angustifolia,,,,,,Deciduous,
-popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamifera v. balsamifera,Ba poplar,Balsam poplar,Balsam poplar leading,,Popu_Bal,Deciduous,balsam poplar
-,,Popu_bal,Popu_Tri,Popu balt,Populus trichocarpa,Bl cottonwood,Black cottonwood,Black cottonwood leading,Populus balsamifera trichocarpa is a synonym of Populus trichocarpa,Popu_Tri,Deciduous,balsam poplar
-,,Popu_can,,Popu cana,Populus X canadensis,,,,,,Deciduous,
-,,Popu_del,Popu_Del,Popu delo,Populus deltoides v. occidentalis,,,,,,Deciduous,eastern cotttonwood
-popudelt,,Popu_del,Popu_Del,Popu delt,Populus deltoides,,,,,,Deciduous,eastern cotttonwood
-,,Popu_del,Popu_Del,Popu delx,Populus deltoides,,,,,,Deciduous,eastern cotttonwood
-,,Popu_gra,Popu_Gra,Popu gran,Populus grandidentata,Wh poplar,White poplar,White poplar leading,,Popu_Gra,Deciduous,
-,,Popu_nig,,Popu nigr,Populus nigra,,,,,,Deciduous,
-,,Popu_sp,Popu_Spp,Popu spp,Populus spp.,Poplar,Poplar,Poplar leading,,Popu_Spp,Deciduous,trembling aspen
-poputrem,POPU.TRE,Popu_tre,Popu_Tre,Popu trem,Populus tremuloides,Tr aspen,Trembling poplar,Trembling aspen leading,,Popu_Tre,Deciduous,trembling aspen
-,,Prun_avi,,Prun aviu,Prunus avium,,,,,,Deciduous,
-,,Prun_cer,,Prun cera,Prunus cerasus,,,,,,Deciduous,
-,,Prun_ema,,Prun emar,Prunus emarginata,,,,,,Deciduous,
-,,Prun_pen,Prun_Pen,Prun pens,Prunus pensylvanica,,,,,,Deciduous,
-,,Prun_ser,Prun_Ser,Prun sero,Prunus serotina,,,,,,Deciduous,
-,,Prun_sp,,Prun spp,Prunus spp.,,,,,,Deciduous,
-,,Prun_vir,Prun_Vir,Prun virg,Prunus virginiana,,,,,,Deciduous,
-pseumenz,PSEU.MEN,Pseu_men,Pseu_Men_Gla,Pseu meng,Pseudotsuga menziesii var. glauca,,,,,,Conifer,douglas-fir
-pseumenz,PSEU.MEN,Pseu_men,Pseu_Men_Men,Pseu menm,Pseudotsuga menziesii var. menziesii,,,,,,Conifer,douglas-fir
-pseumenz,PSEU.MEN,Pseu_men,Pseu_Men,Pseu menz,Pseudotsuga menziesii,,,,,,Conifer,douglas-fir
-,,Pyru_com,,Pyru comm,Pyrus communis,,,,,,Deciduous,
-,,Quer_alb,Quer_Alb,Quer alba,Quercus alba,,,,,,Deciduous,white oak
-,,Quer_bic,Quer_Bic,Quer bico,Quercus bicolor,,,,,,Deciduous,
-querelli,,Quer_ell,,,,,,,,,Deciduous,
-,,Quer_gar,Quer_Gar,Quer garr,Quercus garryana,,,,,,Deciduous,
-,,Quer_mac,Quer_Mac,Quer macr,Quercus macrocarpa,,,,,,Deciduous,bur oak
-,,Quer_mue,,Quer mueh,Quercus muehlenbergii,,,,,,Deciduous,
-,,Quer_pal,,Quer palu,Quercus palustris,,,,,,Deciduous,
-,,Quer_rob,,Quer robu,Quercus robur,,,,,,Deciduous,
-querrubr,QUER.RUB,Quer_rub,Quer_Rub,Quer rubr,Quercus rubra,,,,,,Deciduous,
-,,Quer_shu,,Quer shum,Quercus shumardii,,,,,,Deciduous,
-,,Quer_sp,,Quer spp,Quercus spp.,,,,,,Deciduous,
-,,Quer_vel,,Quer velu,Quercus velutina (nigra),,,,,,Deciduous,
-,,Rham_pur,,Rham purs,Rhamnus purshianus,,,,,,Deciduous,
-,,Robi_pse,Robi_Pse,Robi pseu,Robinia pseudoacacia,,,,,,Deciduous,
-,,Robi_sp,,Robi spp,Robinia spp.,,,,,,Deciduous,
-,,Sali_amy,,Sali amyg,Salix amygdaloides,,,,,,Deciduous,
-,,Sali_beb,Sali_Beb,Sali bebb,Salix bebbiana,,,,,,Deciduous,
-,,Sali_dis,,Sali disc,Salix discolor,,,,,,Deciduous,
-,,Sali_luc,,Sali luci,Salix lucida,,,,,,Deciduous,
-,,Sali_nig,Sali_Nig,Sali nigr,Salix nigra,,,,,,Deciduous,
-,,Sali_sco,,Sali scou,Salix scouleriana,,,,,,Deciduous,scoulers willow
-,,Sali_sit,,Sali sitc,Salix sitchensis,,,,,,Deciduous,
-,,Sali_sp,Sali_Spp,Sali spp,Salix spp.,,,,,,Deciduous,willow
-,,Sass_alb,Sass_Alb,Sass albi,Sassafras albidum,,,,,,Deciduous,
-,,Sequ_gig,,Sequ giga,Sequoadendron giganteum,,,,,,Conifer,
-,,Sequ_sem,,Sequ semp,Sequoia sempervirens,,,,,,Conifer,
-,,Sorb_auc,Sorb_Ame,Sorb aucu,Sorbus aucuparia,,,,Sorbus aucuparia is a synonym of Sorbus americana,,Deciduous,
-,,Sorb_dec,Sorb_Dec,,,,,,,,Deciduous,
-,,Sorb_sp,Sorb_Spp,,,,,,,,Deciduous,
-,,Taxu_bre,,Taxu brev,Taxus brevifolia,,,,,,Conifer,
-thujocci,,Thuj_occ,Thuj_Occ,Thuj occi,Thuja occidentalis,,,,,,Conifer,
-thujplic,THUJ.PLI,Thuj_pli,Thuj_Pli,Thuj plic,Thuja plicata,,,,,,Conifer,western redcedar
-,THUJ.SPP.ALL,Thuj_sp,Thuj_Spp,,,,,,,,Conifer,
-tiliamer,,Tili_ame,Tili_Ame,Tili amer,Tilia americana,,,,,,Deciduous,
-,,Tili_cor,,Tili cord,Tilia cordata,,,,,,Deciduous,
-,,Tili_pla,,Tili plat,Tilia platyphyllos,,,,,,Deciduous,
-tsugcana,TSUG.CAN,Tsug_can,Tsug_Can,Tsug cana,Tsuga canadensis,Ea hemlock,Eastern hemlock,Eastern hemlock leading,,Tsug_Can,Conifer,
-tsughete,TSUG.HET,Tsug_het,Tsug_Het,Tsug hete,Tsuga heterophylla,,,,,,Conifer,western hemlock
-,,Tsug_mer,Tsug_Mer_Het,Tsug merx,Tsuga mertensiana,,,,,,Conifer,mountain hemlock
-tsugmert,TSUG.MER,Tsug_mer,Tsug_Mer,Tsug mert,Tsuga mertensiana x heterophylla,,,,,,Conifer,mountain hemlock
-,,Tsug_sp,Tsug_Spp,Tsug spp,Tsuga spp.,Hemlock,Hemlock,Hemlock leading,,Tsug_Spp,Conifer,
-,,Ulmu_ame,Ulmu_Ame,Ulmu amer,Ulmus americana,,,,,,Deciduous,
-,,Ulmu_pum,Ulmu_Rub,Ulmu pumi,Ulmus pumila,,,,,,Deciduous,
-,,Ulmu_rub,Ulmu_Spp,Ulmu rubr,Ulmus rubra,,,,,,Deciduous,
-,,Ulmu_sp,Ulmu_Tho,Ulmu spp,Ulmus spp.,,,,,,Deciduous,
-,,,,Ulmu thom,Ulmus thomasii,,,,,,Deciduous,
-,,,Generic_BroadLeaf_Spp,Hard unkn,,Decid,Deciduous,Deciduous leading,,,Deciduous,
-,,,Generic_NeedleLeaf_Spp,Soft unkn,,Conif,Coniferous,Coniferous leading,,,Conifer,
-,,,,Nonc hard,,Decid,Deciduous,Deciduous leading,,,Deciduous,
-,,,,Hard tole,,,,,,,,
-,,,,Hard into,,,,,,,,
-,,,,Mois hard,,,,,,,,
-,,,,Uncl spp,,,,,,,,
+LANDIS_test,LANDIS_traits,LandR,KNN,CASFRI,Latin_full,EN_generic_short,EN_generic_full,Leading,Notes,Boreal,Type,PSP,BC_Forestry
+abieamab,ABIE.AMA,Abie_ama,Abie_Ama,Abie amab,Abies amabilis,,,,,,Conifer,amabilis fir,Ba
+abiebals,ABIE.BAL,Abie_bal,Abie_Bal,Abie bals,Abies balsamea,Ba Fir,Balsam Fir,Balsam fir leading,,Abie_Bal,Conifer,balsam fir,Bb
+,,Abie_con,,Abie conc,Abies concolor,,,,,,Conifer,,
+abiegran,ABIE.GRA,Abie_gra,Abie_Gra,Abie gran,Abies grandis,,,,,,Conifer,grand fir,Bg
+abielasi,ABIE.LAS,Abie_sp,Abie_Las,Abie lasi,Abies lasiocarpa,Fir,Fir,Fir leading,,Abie_Las,Conifer,subalpine fir,Bl
+,,Abie_mag,,Abie magn,Abies magnifica var shastensis,,,,,,Conifer,,
+,,Abie_pic,,Abie pice,,Fir-Sp,Fir-Spruce,Fir-Spruce mix,Abies pice in CASFRI is a Spruce-balsam fir or Balsam fir-spruce mix,,Conifer,,
+,,Abie_pro,,Abie proc,Abies procera,,,,,,Conifer,,
+,,Abie_sp,Abie_Spp,Abie spp,Abies spp.,Fir,Fir,Fir leading,,,Conifer,subalpine fir,
+,,Acer_cir,Acer_Cir,Acer circ,Acer circinatum,,,,,,Deciduous,vine maple,Mv
+,,Acer_fre,,Acer free,Acer X freemanii,,,,,,Deciduous,,
+,,Acer_gla,,Acer glab,Acer glabrum,,,,,,Deciduous,,
+acermacr,ACER.MAC,Acer_mac,Acer_Mac,Acer macr,Acer macrophyllum,,,,,,Deciduous,,Mb
+,,Acer_neg,Acer_Neg,Acer negu,Acer negundo,Bx maple,Boxelder maple,Boselder maple leading,,Acer_Neg,Deciduous,manitoba maple,
+,,Acer_nig,,Acer nigr,Acer nigrum,,,,,,Deciduous,,
+,,Acer_pen,Acer_Pen,Acer pens,Acer pensylvanicum,St maple,Striped maple,Striped maple leading,,Acer_Pen,Deciduous,,
+,,Acer_pla,,Acer plat,Acer platanoides,,,,,,Deciduous,,
+,,Acer_pse,,Acer pseu,Acer pseudoplatanus,,,,,,Deciduous,,
+acerrubr,ACER.RUB,Acer_rub,Acer_Rub,Acer rubr,Acer rubrum,,,,,,Deciduous,,
+,,,Acer_Sac,Acer sacc,Acer saccharinum,,,,,,Deciduous,,
+acersacc,ACER.SAH,Acer_sah,Acer_Sah,Acer sach,Acer saccharum,Sg maple,Sugar maple,Sugar maple leading,"LANDIS_test and LANDIS_traits codes don't match, but have been checked to both refer to Acer saccharum",Acer_Sah,Deciduous,,
+,,Acer_spi,Acer_Spi,Acer spic,Acer spicatum,Mt maple,Mountain maple,Mountain maple leading,,Acer_Spi,Deciduous,mountain maple,
+,,Acer_sp,Acer_Spp,Acer spp,Acer spp.,Maple,Maple,Maple leading,,Acer_Spp,Deciduous,,
+,,Aesc_hip,,Aesc hipp,Aesculus hippocastanum,,,,,,Deciduous,,
+,,Alnu_inc,Alnu_Inc_Rug,Alnu inca,Alnus incana,,,,,,Deciduous,gray alder,
+,,Alnu_inc,Alnu_Inc_Ten,Alnu inca,,,,,,,Deciduous,gray alder,
+,,Alnu_inc,Alnu_Inc,Alnu inca,,,,,,,Deciduous,gray alder,
+alnurubr,ALNU.RUB,Alnu_rub,Alnu_Rub,Alnu rubr,Alnus rubra,,,,,,Deciduous,red alder,Dr
+,,Alnu_sp,Alnu_Spp,Alnu spp,Alnus spp,Alder,Alder,Alder leading,,Alnu_Spp,Deciduous,alder,
+,,Alnu_vir,,Alnu viri,Alnus viridis,,,,,,Deciduous,sitka alder,
+,,Arbu_men,Arbu_Men,Arbu menz,Arbutus menziesii,,,,,,Deciduous,,Ra
+,,Asim_tri,Asim_Tri,Asim tril,Asimina triloba,,,,,,Deciduous,,
+,BETU.ALL,Betu_sp,Betu_All,Betu alle,Betula alleghaniensis,Sw birch,Swamp birch,Swamp birch leading,,Betu_All,Deciduous,birch,
+,,Betu_len,,Betu lent,Betula lenta,,,,,,Deciduous,,
+,,Betu_man,,Betu mand,Betula mandschurica var japonica,,,,,,Deciduous,,
+,,Betu_neo,,Betu neoa,Betula neoalaskana,,,,,,Deciduous,,Ea
+,,Betu_occ,,Betu occi,Betula occidentalis,,,,,,Deciduous,,Ew
+betupapy,BETU.PAP,Betu_pap,Betu_Pap,Betu papy,Betula papyrifera,Pa birch,Paper birch,Paper birch leading,,Betu_Pap,Deciduous,white birch,Ep
+,,Betu_pen,,Betu pend,Betula pendula,,,,,,Deciduous,,
+,,Betu_pop,Betu_Pop,Betu popu,Betula populifolia,Gr birch,Gray birch,Gray birch leading,,Betu_Pop,Deciduous,,
+,,Betu_pub,,Betu pube,Betula pubescens,,,,,,Deciduous,,
+,BETU.ALL,Betu_sp,Betu_Spp,Betu spp,Betula spp.,Birch,Birch,Birch leading,,Betu_Spp,Deciduous,birch,
+,,Betu_win,,Betu winx,Betula x winteri,,,,,,Deciduous,,Exp
+,,Calc_dec,,Calc decu,Calocedrus decurrens,,,,,,Conifer,,
+,,Carp_car,Carp_Car,Carp caro,Carpinus caroliniana,,,,,,Deciduous,,
+,,Cary_cor,Cary_Cor,Cary cord,Carya cordiformis,,,,,,Deciduous,,
+,,Cary_gla,,Cary glab,Carya glabra,,,,,,Deciduous,,
+,,Cary_lac,,Cary laci,Carya laciniosa,,,,,,Deciduous,,
+,,Cary_ora,,Cary orav,Carya orava,,,,,,Deciduous,,
+,,Cary_sp,,Cary spp,Carya spp.,,,,,,Deciduous,,
+,,Cary_tom,,Cary tome,Carya tomentosa,,,,,,Deciduous,,
+,,Cast_den,Cast_Den,Cast dent,Castanea dentata,,,,,,Deciduous,,
+,,Cata_spe,,Cata spec,Catalpa speciosa,,,,,,Deciduous,,
+,,Celt_occ,,Celt occi,Celtis occidentalis,,,,,,Deciduous,,
+,,Cerc_can,,Cerci cana,Cercis canadensis,,,,,,Deciduous,,
+,,Cham_law,,Cham laws,Chamaecyparis lawsoniana,,,,,,Conifer,,
+chamnoot,CHAM.NOO,Cham_noo,Cham_Noo,Cham noot,Chamaecyparis nootkatensis,,,,,,Conifer,,
+,,Corn_nut,,Corn nutt,Cornus nuttallii,,,,,,Deciduous,,
+,,Crat_sp,Crat_Spp,Crat spp,Crataegus spp,,,,,,Deciduous,,
+fagugran,FAGU.GRA,Fagu_gra,Fagu_Gra,Fagu gran,Fagus grandifolia,Am beech,American beech,American beech leading,,Fagu_Gra,Deciduous,,
+fraxamer,FRAX.AME,Frax_ame,Frax_Ame,Frax amer,Fraxinus americana,Am ash,American ash,American ash leading,,Frax_Ame,Deciduous,red ash,
+,,Frax_lat,,Frax lati,Fraxinus latifolia,,,,,,Deciduous,,
+,,Frax_nig,Frax_Nig,Frax nigr,Fraxinus nigra,Bl ash,Black ash,Black ash leading,,Frax_Nig,Deciduous,,
+,,Frax_pen,Frax_Pen_Sub,Frax penn,Fraxinus pennsylvanica,,,,Fraxinus pennsylvanica subintegerrima is a synonym,,Deciduous,green ash,
+,,Frax_pen,Frax_Pen,Frax penn,Fraxinus pennsylvanica,,,,,,Deciduous,green ash,
+,,Frax_pro,,Frax prof,Fraxinus profunda,,,,,,Deciduous,,
+,,Frax_qua,,Frax quad,Fraxinus quadrangulata,,,,,,Deciduous,,
+,,Frax_sp,Frax_Spp,Frax spp,Fraxinus spp.,Ash,Ash,Ash leading,,Frax_Spp,Deciduous,,
+,,Gled_tri,Gled_Tri,Gled tria,Gleditsia triacanthos,,,,,,Deciduous,,
+,,Gymn_dio,,Gymn dioi,Gymnocladus dioicus,,,,,,Deciduous,,
+,,Hana_vir,,Hana virg,Hamamelis virginiana,,,,,,Deciduous,,
+,,Jugl_cin,Jugl_Cin,Jugl cine,Juglans cinerea,,,,,,Deciduous,,
+,,Jugl_nig,Jugl_Nig,Jugl nigr,Juglans nigra,,,,,,Deciduous,,
+,,Thuj_jun,Juni_Vir,Thuj juni,Juniperus virginiana,,,,Not clear why CASFRI name doesn't match,,Conifer,,
+,,Juni_sco,,Juni scop,Juniperus scopulorum,,,,,,Conifer,,
+,,Lari_dec,,Lari deci,Larix decidua,,,,,,Conifer,,
+,,Lari_kae,Lari_Kae,Lari kaem,Larix kaempferi,,,,,,Conifer,,
+larilari,LARI.LAR,Lari_lar,Lari_Lar,Lari lari,Larix laricina,Tamarack,Tamarack,Tamarack leading,,Lari_Lar,Conifer,tamarack larch,Lt
+larilyal,,Lari_lya,Lari_Lya,Lari lyal,Larix lyallii,Alp larch,Alpine larch,Alpine larch leading,,Lari_Lya,Conifer,alpine larch,La
+lariocci,LARI.OCC,Lari_occ,Lari_Occ,Lari occi,Larix occidentalis,We larch,Western larch,Western larch leading,,Lari_Occ,Conifer,western larch,Lw
+,,Lari_sib,,Lari sibi,Larix sibitica,,,,,,Conifer,,
+,,Lari_sp,Lari_Spp,Lari spp,Larix spp.,Larch,Larch,Larch leading,,Lari_Spp,Conifer,,
+,,Lari_sp,,Lari x mar,Larix x marschlinsii,,,,,,Conifer,,
+,,Liri_tul,,Liri tuli,Liriodendron tulipifera,,,,,,Deciduous,,
+,,Magn_acu,,Magn acum,Magnolia acuminata,,,,,,Deciduous,,
+,,Malu_fus,Malu_Fus,Malu fusc,Malus fusca,,,,,,Deciduous,,
+,,Malu_pum,,Malu pumi,Malus pumila,,,,,,Deciduous,,
+,,Malu_sp,Malu_Spp,,,,,,,,Deciduous,,
+,,Moru_rub,,Moru rubr,Morus rubra,,,,,,Deciduous,,
+,,Nyss_syl,,Nyss sylv,Nyssa sylvatica,,,,,,Deciduous,,
+,,Ostr_vir,Ostr_Vir,Ostr virg,Ostrya virginiana,,,,,,Deciduous,,
+,,Pice_abi,Pice_Abi,Pice abie,Picea abies,,,,,,Conifer,,
+,,Pice_sp,Pice_Eng_Gla,Pice hybr,Picea engelmannii x glauca,En Spruce,Engelmann's spruce,Engelmann's spruce leading,Pice hybr is not on the manual CASFRI list but appears in database,Pice_Eng_Gla,Conifer,spruce,Sxw
+,,Pice_sp,Pice_Eng_Gla,Pice engx,Picea engelmannii x glauca,En Spruce,Engelmann's spruce,Engelmann's spruce leading,,Pice_Eng_Gla,Conifer,spruce,Sxw
+piceengl,PICE.ENG,Pice_eng,Pice_Eng,Pice enge,Picea engelmannii,En Spruce,Engelmann's spruce,Engelmann's spruce leading,,Pice_Eng,Conifer,engelmann spruce,Sx
+piceglau,PICE.GLA,Pice_gla,Pice_Gla,Pice glau,Picea glauca,Wh Spruce,White.Spruce,White spruce leading,,Pice_Gla,Conifer,white spruce,Sx
+,,Pice_koy,,Pice koya,Picea koyamai,,,,,,Conifer,,
+,,Pice_lut,,Pice lutx,Picea x lutzii,,,,,,Conifer,,
+picemari,PICE.MAR,Pice_mar,Pice_Mar,Pice mari,Picea mariana,Bl Spruce,Black.Spruce,Black spruce leading,,Pice_Mar,Conifer,black spruce,Sb
+,,Pice_pun,,Pice pung,Picea pungens,,,,,,Conifer,,
+picerube,PICE.RUB,Pice_rub,Pice_Rub,Pice rube,Picea rubens,,,,,,Conifer,,
+picesitc,PICE.SIT,Pice_sit,Pice_Sit,Pice sitc,Picea sitchensis,,,,,,Conifer,,Ss
+,,Pice_sit,,Pice sitx,Picea sitchensis x ?,,,,,,Conifer,,
+,,Pice_sp,Pice_Spp,Pice spp,Picea spp.,Spruce,Spruce,Spruce leading,,Pice_Spp,Conifer,spruce,
+,,Pice_sp,,Pice sppx,Picea spp x,,,,,,Conifer,spruce,
+pinualbi,,Pinu_alb,Pinu_Alb,Pinu albi,Pinus albicaulis,Wh pine,Whitebark pine,Whitebark pine leading,,Pinu_Alb,Conifer,,Pa
+pinubank,PINU.BAN,Pinu_ban,Pinu_Ban,Pinu bank,Pinus banksiana,Jk pine,Jack pine,Jack pine leading,,Pinu_Ban,Conifer,jack pine,Pj
+pinuconcon,PINU.CON.CON,Pinu_con,Pinu_Con,Pinu conc,Pinus contorta var. contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,,Pinu_Con,Conifer,lodgepole pine,Plc
+,PINU.CON.LAT,Pinu_con,Pinu_Con_Lat,Pinu cont,Pinus contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,Pinus contorta latifolia is a synonym of var. latifolia,Pinu_Con_Lat,Conifer,lodgepole pine,Pli
+pinuflex,,Pinu_fle,Pinu_Fle,Pinu flex,Pinus flexilis,Pine,Pine,Pine leading,,,Conifer,,Pf
+,,Pinu_lam,,Pinu lamb,Pinus lambertiana,Pine,Pine,Pine leading,,,Conifer,,
+,,Pinu_mon,Pinu_Mon,Pinu mont,Pinus monticola,Ww pine,Western white pine,Western white pine leading,,Pinu_Mon,Conifer,,Pxj
+,,Pinu_mur,,Pinu murx,Pinus x murraybanksiana,Pine,Pine,Pine leading,,,Conifer,,
+,,Pinu_nig,,Pinu nigr,Pinus nigra,Pine,Pine,Pine leading,,,Conifer,,
+pinupon,,Pinu_pon,Pinu_Pon,Pinu pond,Pinus ponderosa,Pine,Pine,Pine leading,,,Conifer,ponderosa pine,Py
+,,Pinu_rad,,Pinu radi,Pinus radiata,Pine,Pine,Pine leading,,,Conifer,,
+pinuresi,PINU.RES,Pinu_res,Pinu_Res,Pinu resi,Pinus resinosa,Rd pine,Red pine,Red pine leading,,Pinu_Res,Conifer,,
+,,Pinu_rig,Pinu_Rig,Pinu rigi,Pinus rigida,Pine,Pine,Pine leading,,,Conifer,,
+,,Pinu_sp,Pinu_Spp,Pinu spp,Pinus spp.,Pine,Pine,Pine leading,,Pinu_Spp,Conifer,,
+pinustro,PINU.STR,Pinu_str,Pinu_Str,Pinu stro,Pinus strobus,Pine,Pine,Pine leading,,,Conifer,white pine,
+,,Pinu_syl,Pinu_Syl,Pinu sylv,Pinus sylvestris,Pine,Pine,Pine leading,,,Conifer,,
+,,Plan_occ,Plat_Occ,Plan occi,Platanus occidentalis,,,,,,Deciduous,,
+,,Popu_ang,,Popu angu,Populus angustifolia,,,,,,Deciduous,,
+popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamifera v. balsamifera,Ba poplar,Balsam poplar,Balsam poplar leading,,Popu_Bal,Deciduous,balsam poplar,Acb
+,,Popu_bal,Popu_Tri,Popu balt,Populus trichocarpa,Bl cottonwood,Black cottonwood,Black cottonwood leading,Populus balsamifera trichocarpa is a synonym of Populus trichocarpa,Popu_Tri,Deciduous,balsam poplar,Act
+,,Popu_can,,Popu cana,Populus X canadensis,,,,,,Deciduous,,
+,,Popu_del,Popu_Del,Popu delo,Populus deltoides v. occidentalis,,,,,,Deciduous,eastern cotttonwood,
+popudelt,,Popu_del,Popu_Del,Popu delt,Populus deltoides,,,,,,Deciduous,eastern cotttonwood,
+,,Popu_del,Popu_Del,Popu delx,Populus deltoides,,,,,,Deciduous,eastern cotttonwood,
+,,Popu_gra,Popu_Gra,Popu gran,Populus grandidentata,Wh poplar,White poplar,White poplar leading,,Popu_Gra,Deciduous,,
+,,Popu_nig,,Popu nigr,Populus nigra,,,,,,Deciduous,,
+,,Popu_sp,Popu_Spp,Popu spp,Populus spp.,Poplar,Poplar,Poplar leading,,Popu_Spp,Deciduous,trembling aspen,Ac
+poputrem,POPU.TRE,Popu_tre,Popu_Tre,Popu trem,Populus tremuloides,Tr aspen,Trembling poplar,Trembling aspen leading,,Popu_Tre,Deciduous,trembling aspen,At
+,,Prun_avi,,Prun aviu,Prunus avium,,,,,,Deciduous,,
+,,Prun_cer,,Prun cera,Prunus cerasus,,,,,,Deciduous,,
+,,Prun_ema,,Prun emar,Prunus emarginata,,,,,,Deciduous,,
+,,Prun_pen,Prun_Pen,Prun pens,Prunus pensylvanica,,,,,,Deciduous,,
+,,Prun_ser,Prun_Ser,Prun sero,Prunus serotina,,,,,,Deciduous,,
+,,Prun_sp,,Prun spp,Prunus spp.,,,,,,Deciduous,,
+,,Prun_vir,Prun_Vir,Prun virg,Prunus virginiana,,,,,,Deciduous,,
+pseumenz,PSEU.MEN,Pseu_men,Pseu_Men_Gla,Pseu meng,Pseudotsuga menziesii var. glauca,,,,,,Conifer,douglas-fir,Fdi
+pseumenz,PSEU.MEN,Pseu_men,Pseu_Men_Men,Pseu menm,Pseudotsuga menziesii var. menziesii,,,,,,Conifer,douglas-fir,Fdc
+pseumenz,PSEU.MEN,Pseu_men,Pseu_Men,Pseu menz,Pseudotsuga menziesii,,,,,,Conifer,douglas-fir,Fd
+,,Pyru_com,,Pyru comm,Pyrus communis,,,,,,Deciduous,,
+,,Quer_alb,Quer_Alb,Quer alba,Quercus alba,,,,,,Deciduous,white oak,
+,,Quer_bic,Quer_Bic,Quer bico,Quercus bicolor,,,,,,Deciduous,,
+querelli,,Quer_ell,,,,,,,,,Deciduous,,
+,,Quer_gar,Quer_Gar,Quer garr,Quercus garryana,,,,,,Deciduous,,
+,,Quer_mac,Quer_Mac,Quer macr,Quercus macrocarpa,,,,,,Deciduous,bur oak,
+,,Quer_mue,,Quer mueh,Quercus muehlenbergii,,,,,,Deciduous,,
+,,Quer_pal,,Quer palu,Quercus palustris,,,,,,Deciduous,,
+,,Quer_rob,,Quer robu,Quercus robur,,,,,,Deciduous,,
+querrubr,QUER.RUB,Quer_rub,Quer_Rub,Quer rubr,Quercus rubra,,,,,,Deciduous,,
+,,Quer_shu,,Quer shum,Quercus shumardii,,,,,,Deciduous,,
+,,Quer_sp,,Quer spp,Quercus spp.,,,,,,Deciduous,,
+,,Quer_vel,,Quer velu,Quercus velutina (nigra),,,,,,Deciduous,,
+,,Rham_pur,,Rham purs,Rhamnus purshianus,,,,,,Deciduous,,
+,,Robi_pse,Robi_Pse,Robi pseu,Robinia pseudoacacia,,,,,,Deciduous,,
+,,Robi_sp,,Robi spp,Robinia spp.,,,,,,Deciduous,,
+,,Sali_amy,,Sali amyg,Salix amygdaloides,,,,,,Deciduous,,
+,,Sali_beb,Sali_Beb,Sali bebb,Salix bebbiana,,,,,,Deciduous,,Wb
+,,Sali_dis,,Sali disc,Salix discolor,,,,,,Deciduous,,Wd
+,,Sali_luc,,Sali luci,Salix lucida,,,,,,Deciduous,,Wp
+,,Sali_nig,Sali_Nig,Sali nigr,Salix nigra,,,,,,Deciduous,,
+,,Sali_sco,,Sali scou,Salix scouleriana,,,,,,Deciduous,scoulers willow,Ws
+,,Sali_sit,,Sali sitc,Salix sitchensis,,,,,,Deciduous,,Wt
+,,Sali_sp,Sali_Spp,Sali spp,Salix spp.,,,,,,Deciduous,willow,
+,,Sass_alb,Sass_Alb,Sass albi,Sassafras albidum,,,,,,Deciduous,,
+,,Sequ_gig,,Sequ giga,Sequoadendron giganteum,,,,,,Conifer,,
+,,Sequ_sem,,Sequ semp,Sequoia sempervirens,,,,,,Conifer,,
+,,Sorb_auc,Sorb_Ame,Sorb aucu,Sorbus aucuparia,,,,Sorbus aucuparia is a synonym of Sorbus americana,,Deciduous,,
+,,Sorb_dec,Sorb_Dec,,,,,,,,Deciduous,,
+,,Sorb_sp,Sorb_Spp,,,,,,,,Deciduous,,
+,,Taxu_bre,,Taxu brev,Taxus brevifolia,,,,,,Conifer,,Tw
+thujocci,,Thuj_occ,Thuj_Occ,Thuj occi,Thuja occidentalis,,,,,,Conifer,,
+thujplic,THUJ.PLI,Thuj_pli,Thuj_Pli,Thuj plic,Thuja plicata,,,,,,Conifer,western redcedar,Cw
+,THUJ.SPP.ALL,Thuj_sp,Thuj_Spp,,,,,,,,Conifer,,
+tiliamer,,Tili_ame,Tili_Ame,Tili amer,Tilia americana,,,,,,Deciduous,,
+,,Tili_cor,,Tili cord,Tilia cordata,,,,,,Deciduous,,
+,,Tili_pla,,Tili plat,Tilia platyphyllos,,,,,,Deciduous,,
+tsugcana,TSUG.CAN,Tsug_can,Tsug_Can,Tsug cana,Tsuga canadensis,Ea hemlock,Eastern hemlock,Eastern hemlock leading,,Tsug_Can,Conifer,,
+tsughete,TSUG.HET,Tsug_het,Tsug_Het,Tsug hete,Tsuga heterophylla,,,,,,Conifer,western hemlock,Hw
+,,Tsug_mer,Tsug_Mer_Het,Tsug merx,Tsuga mertensiana,,,,,,Conifer,mountain hemlock,Hm
+tsugmert,TSUG.MER,Tsug_mer,Tsug_Mer,Tsug mert,Tsuga mertensiana x heterophylla,,,,,,Conifer,mountain hemlock,Hxm
+,,Tsug_sp,Tsug_Spp,Tsug spp,Tsuga spp.,Hemlock,Hemlock,Hemlock leading,,Tsug_Spp,Conifer,,
+,,Ulmu_ame,Ulmu_Ame,Ulmu amer,Ulmus americana,,,,,,Deciduous,,
+,,Ulmu_pum,Ulmu_Rub,Ulmu pumi,Ulmus pumila,,,,,,Deciduous,,
+,,Ulmu_rub,Ulmu_Spp,Ulmu rubr,Ulmus rubra,,,,,,Deciduous,,
+,,Ulmu_sp,Ulmu_Tho,Ulmu spp,Ulmus spp.,,,,,,Deciduous,,
+,,,,Ulmu thom,Ulmus thomasii,,,,,,Deciduous,,
+,,,Generic_BroadLeaf_Spp,Hard unkn,,Decid,Deciduous,Deciduous leading,,,Deciduous,,
+,,,Generic_NeedleLeaf_Spp,Soft unkn,,Conif,Coniferous,Coniferous leading,,,Conifer,,
+,,,,Nonc hard,,Decid,Deciduous,Deciduous leading,,,Deciduous,,
+,,,,Hard tole,,,,,,,,,
+,,,,Hard into,,,,,,,,,
+,,,,Mois hard,,,,,,,,,
+,,,,Uncl spp,,,,,,,,,
