@@ -66,7 +66,10 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
 
   if (!is.null(treedFirePixelTableSinceLastDisp)) {
-    pixelGroupMap[treedFirePixelTableSinceLastDisp$pixelIndex] <- 0L
+    ## only set to 0 the pixels that became empty (have no survivors)
+    emptyPix <- setdiff(treedFirePixelTableSinceLastDisp$pixelIndex,
+                        newPixelCohortData[type == "survivor", pixelIndex])
+    pixelGroupMap[emptyPix] <- 0L
   }
   relevantPixels <- pixelGroupMap[][newPixelCohortData$pixelIndex]
   zeroOnPixelGroupMap <- relevantPixels == 0
@@ -79,7 +82,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
     # pixels --> the entirely newly regenerated pixels do not require a
     # re-pixelGroupMaping  -- can just add to existing pixelGroup values
     if (verbose > 0)
-      message(crayon::green("  Regenerating only disturbed pixels (i.e. resprouting & serotiny, in addition to surviving cohorts)"))
+      message(crayon::green("  Regenerating only burnt pixels with no survivors (i.e. resprouting & serotiny)"))
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age") # no Biomass because they all have zero
     cd <- newPixelCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
     newPixelCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = maxPixelGroup,
@@ -987,7 +990,7 @@ columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 #' @export
 #' @importFrom raster getValues ncell
 addPixels2CohortData <- function(cohortData, pixelGroupMap,
-                                doAssertion = getOption("LandR.assertions", TRUE)) {
+                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   assertCohortData(cohortData, pixelGroupMap, doAssertion = doAssertion)
 
   pixelGroupTable <- na.omit(data.table(pixelGroup = getValues(pixelGroupMap),
