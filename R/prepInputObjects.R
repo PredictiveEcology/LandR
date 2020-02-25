@@ -146,7 +146,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 
   message(blue("rm NAs, leaving", magenta(NROW(pixelTable)), "pixels with data"))
   message(blue("This is the summary of the input data for age, ecoregionGroup, biomass, speciesLayers:"))
-  if (isTRUE(printSummary)) message(summary(pixelTable))
+  if (isTRUE(printSummary)) print(summary(pixelTable))
 
   return(pixelTable)
 }
