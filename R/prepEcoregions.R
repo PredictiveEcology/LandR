@@ -14,8 +14,9 @@
 #' @importFrom data.table as.data.table data.table
 #' @importFrom fasterize fasterize
 #' @importFrom raster getValues levels raster
-#' @importFrom sf st_as_sf
 #' @importFrom reproducible Cache fixErrors
+#' @importFrom SpaDES.core paddedFloatToChar
+#' @importFrom sf st_as_sf
 #' @export
 prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerField = NULL,
                            rasterToMatchLarge, rstLCCAdj, pixelsToRm, cacheTags) {
@@ -40,7 +41,7 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
       rm(ecoDT)
     }
     ecoregionRst <- fasterize::fasterize(ecoregionMapSF, raster = rasterToMatchLarge,
-                                         field = 'ecoregionLayerField')
+                                         field = "ecoregionLayerField")
     rm(ecoregionLayer)
     if (is.factor(ecoregionMapSF$ecoregionLayerField)) {
       appendEcoregionFactor <- TRUE
