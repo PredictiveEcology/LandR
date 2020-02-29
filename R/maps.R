@@ -92,7 +92,7 @@ prepInputsLCC <- function(year = 2005,
         destinationPath = asPath(destinationPath),
         studyArea = studyArea,
         rasterToMatch = rasterToMatch,
-        method = "bilinear",
+        method = "ngb",
         datatype = "INT2U",
         filename2 = filename2, ...)
 }
