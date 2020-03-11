@@ -201,8 +201,12 @@ makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDat
 
   #################################################
   ## establishProb
-  predictedCoverVals <- predict(modelCover$mod, newdata = cohortDataShort,
+  predictedCoverVals <- if (is(modelCover, "numeric")) {
+    modelCover
+  } else {
+    predict(modelCover$mod, newdata = cohortDataShort,
                                 type = "response")
+  }
   establishprobBySuccessionTimestep <- 1 - (1 - predictedCoverVals)^successionTimestep
   cohortDataShort[, establishprob := establishprobBySuccessionTimestep]
   cohortDataShort <- species[, .(resproutprob, postfireregen, speciesCode)][cohortDataShort,
