@@ -61,7 +61,7 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @importFrom pemisc factorValues2
 #' @importFrom raster ncell
 makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
-                           biomassMap, rasterToMatch, rstLCC, pixelGroupAgeClass = 1,
+                           biomassMap, rasterToMatch, rstLCC, #pixelGroupAgeClass = 1,
                            printSummary = TRUE,
                            doAssertion = getOption("LandR.assertions", TRUE)) {
   if (missing(rasterToMatch)) {
@@ -88,7 +88,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
     species$species <- names(speciesLayers)
   }
 
-  message(blue("Round age to nearest pixelGroupAgeClass, which is", pixelGroupAgeClass))
+  # message(blue("Round age to nearest pixelGroupAgeClass, which is", pixelGroupAgeClass))
   coverMatrix <- matrix(asInteger(speciesLayers[]), ncol = length(names(speciesLayers)))
   colnames(coverMatrix) <- names(speciesLayers)
 
@@ -104,8 +104,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
                            rasterToMatch = rasterToMatch[]
   )
   if (!missing(standAgeMap)) {
-    set(pixelTable, NULL, "age", asInteger(ceiling(asInteger(standAgeMap[]) /
-                                                     pixelGroupAgeClass) * pixelGroupAgeClass))
+    set(pixelTable, NULL, "age", asInteger(standAgeMap[]))
     set(pixelTable, NULL, "logAge", log(standAgeMap[]))
   }
 

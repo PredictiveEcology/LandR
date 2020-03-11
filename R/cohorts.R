@@ -795,6 +795,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @importFrom reproducible Cache
 #' @rdname makeAndCleanInitialCohortData
 makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroupBiomassClass,
+                                          pixelGroupAgeClass = 1,
                                           doAssertion = getOption("LandR.assertions", TRUE),
                                           doSubset = TRUE) {
   ### Create groupings
@@ -840,17 +841,25 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
                     .specialData = cohortDataMissingAgeUnique,
                     omitArgs = ".specialData")
     message(blue("                           completed", Sys.time()))
-    message(outAge$rsq)
+
+    # paste with capture.output keeps table structure intact
+    message(paste0(capture.output(outAge$rsq), collapse = "\n"))
 
     ## allow.new.levels = TRUE because some groups will have only NA for age for all species
     cohortDataMissingAge[
       , imputedAge := pmax(0L, asInteger(predict(outAge$mod,
                                                  newdata = cohortDataMissingAge,
                                                  allow.new.levels = TRUE)))]
+
     cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
       cohortData, on = c("pixelIndex", "speciesCode")]
     cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = log(imputedAge))]
     cohortData[, `:=`(imputedAge = NULL)]
+
+    # Round ages to nearest pixelGroupAgeClass
+    set(cohortData, NULL, "age", asInteger(cohortData$age / pixelGroupAgeClass) *
+          as.integer(pixelGroupAgeClass))
+
   }
   cohortData[, `:=`(hasBadAge = NULL)]
 
