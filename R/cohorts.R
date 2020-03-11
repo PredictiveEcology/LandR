@@ -82,7 +82,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
     # pixels --> the entirely newly regenerated pixels do not require a
     # re-pixelGroupMaping  -- can just add to existing pixelGroup values
     if (verbose > 0)
-      message(crayon::green("  Regenerating only disturbed pixels (i.e. resprouting & serotiny, in addition to surviving cohorts)"))
+      message(crayon::green("  Regenerating only burnt pixels with no survivors (i.e. resprouting & serotiny)"))
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age") # no Biomass because they all have zero
     cd <- newPixelCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
     newPixelCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = maxPixelGroup,

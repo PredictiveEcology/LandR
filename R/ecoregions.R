@@ -1,5 +1,6 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c("active", "ecoregion", "ecoregionGroup", "ID", "mapcode"))
+  utils::globalVariables(c("active", "ecoregion", "ecoregionGroup", "ID", "mapcode",
+                           "landcover", "ecoregion_lcc"))
 }
 
 #' Make \code{ecoregionMap} and \code{ecoregion} table
@@ -25,7 +26,6 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom sf st_as_sf
 #' @importFrom SpaDES.core paddedFloatToChar
 ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch) {
-
   # change the coordinate reference for all spatialpolygons
   message("ecoregionProducer 1: ", Sys.time())
   #ecoregionMapInStudy <- raster::intersect(ecoregionMapFull, fixErrors(aggregate(studyArea)))
