@@ -1089,7 +1089,7 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   set(pixelCohortData, j = cols, value = NULL)
 
   ## select pixels with biomass and generate pixel groups
-  pixelCohortData <- pixelCohortData[B > 0]
+  pixelCohortData <- pixelCohortData[B >= 0]
   cd <- pixelCohortData[, .SD, .SDcols = c("pixelIndex", columnsForPixelGroups)]
   pixelCohortData[, pixelGroup := Cache(generatePixelGroups, cd, maxPixelGroup = 0,
                                         columns = columnsForPixelGroups)]
