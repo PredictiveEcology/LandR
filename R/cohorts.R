@@ -856,11 +856,11 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = log(imputedAge))]
     cohortData[, `:=`(imputedAge = NULL)]
 
-    # Round ages to nearest pixelGroupAgeClass
-    set(cohortData, NULL, "age", asInteger(cohortData$age / pixelGroupAgeClass) *
-          as.integer(pixelGroupAgeClass))
-
   }
+  # Round ages to nearest pixelGroupAgeClass
+  set(cohortData, NULL, "age", asInteger(cohortData$age / pixelGroupAgeClass) *
+        as.integer(pixelGroupAgeClass))
+
   cohortData[, `:=`(hasBadAge = NULL)]
 
   #######################################################
