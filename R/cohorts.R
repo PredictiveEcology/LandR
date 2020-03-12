@@ -679,9 +679,6 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #'
 #' @param inputDataTable A \code{data.table} with columns described above.
 #'
-#' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
-#'   to establish unique \code{pixelGroups}.
-#'
 #' @template doAssertion
 #'
 #' @param rescale Logical. If \code{TRUE}, the default, cover for each species will be rescaled
@@ -690,7 +687,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @importFrom crayon blue
 #' @importFrom data.table melt setnames
 #' @keywords internal
-.createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
+.createCohortData <- function(inputDataTable, # pixelGroupBiomassClass,
                               doAssertion = getOption("LandR.assertions", TRUE), rescale = TRUE) {
   coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
   newCoverColNames <- gsub("cover\\.", "", coverColNames)
@@ -746,8 +743,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     set(cohortData, NULL, "B", as.numeric(cohortData[["B"]]))
     message(blue("Divide total B of each pixel by the relative cover of the cohorts"))
     cohortData[ , B := mean(totalBiomass) * cover / 100, by = "pixelIndex"]
-    message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
-    cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
+    # message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
+    # cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
 
     message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
     cohortData[cover > 0 & age == 0, B := 0L]
@@ -781,9 +778,6 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
 #'   represent percent cover by species, rescaled to sum up to 100\%.
 #'
-#' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
-#'   to establish unique \code{pixelGroups}.
-#'
 #' @template doAssertion
 #'
 #' @param doSubset Turns on/off subsetting. Defaults to \code{TRUE}.
@@ -794,8 +788,9 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @importFrom data.table melt setnames
 #' @importFrom reproducible Cache
 #' @rdname makeAndCleanInitialCohortData
-makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroupBiomassClass,
-                                          pixelGroupAgeClass = 1,
+makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
+                                          #pixelGroupBiomassClass,
+                                          #pixelGroupAgeClass = 1,
                                           doAssertion = getOption("LandR.assertions", TRUE),
                                           doSubset = TRUE) {
   ### Create groupings
@@ -814,7 +809,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   }
 
   cohortData <- Cache(.createCohortData, inputDataTable = inputDataTable,
-                      pixelGroupBiomassClass = pixelGroupBiomassClass,
+                      # pixelGroupBiomassClass = pixelGroupBiomassClass,
                       doAssertion = doAssertion)
 
   ######################################################
@@ -857,9 +852,9 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
     cohortData[, `:=`(imputedAge = NULL)]
 
   }
-  # Round ages to nearest pixelGroupAgeClass
-  set(cohortData, NULL, "age", asInteger(cohortData$age / pixelGroupAgeClass) *
-        as.integer(pixelGroupAgeClass))
+  # # Round ages to nearest pixelGroupAgeClass
+  # set(cohortData, NULL, "age", asInteger(cohortData$age / pixelGroupAgeClass) *
+  #       as.integer(pixelGroupAgeClass))
 
   cohortData[, `:=`(hasBadAge = NULL)]
 
@@ -1071,6 +1066,11 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #'
 #' @template pixelCohortData
 #' @param columnsForPixelGroups Default columns that define pixel groups
+#' @param pixelGroupAgeClass Integer. When assigning pixelGroup membership, this defines the resolution of ages
+#'   that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14 will be the same
+#' @param pixelGroupBiomassClass Integer. When assigning pixelGroup membership, this defines
+#'   the resolution of biomass that will be considered 'the same pixelGroup', e.g., if it is
+#'   100, then 5160 and 5240 will be the same
 #' @template speciesEcoregion
 #'
 #' @return
@@ -1079,7 +1079,8 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #' @export
 #' @importFrom data.table melt setnames set
 #' @importFrom reproducible Cache
-makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesEcoregion) {
+makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesEcoregion,
+                                pixelGroupBiomassClass, pixelGroupAgeClass) {
   ## make ecoregioGroup a factor (again) and remove unnecessary cols.
   # refactor because the "_34" and "_35" ones are still levels
   pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
@@ -1087,6 +1088,15 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
                       "initialEcoregionCode", "cover", "lcc"),
                     names(pixelCohortData))
   set(pixelCohortData, j = cols, value = NULL)
+
+  # Round ages to nearest pixelGroupAgeClass
+  set(pixelCohortData, NULL, "age",
+      asInteger(pixelCohortData$age / pixelGroupAgeClass) *
+        as.integer(pixelGroupAgeClass))
+
+  # Round Biomass to nearest pixelGroupBiomassClass
+  message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
+  pixelCohortData[ , B := asInteger(B / pixelGroupBiomassClass) * as.integer(pixelGroupBiomassClass)]
 
   ## select pixels with biomass and generate pixel groups
   pixelCohortData <- pixelCohortData[B >= 0]

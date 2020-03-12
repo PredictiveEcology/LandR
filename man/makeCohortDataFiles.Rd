@@ -5,7 +5,13 @@
 \title{Make the \code{cohortData} table, while modifying the temporary
 \code{pixelCohortData} that will be used to prepare other files.}
 \usage{
-makeCohortDataFiles(pixelCohortData, columnsForPixelGroups, speciesEcoregion)
+makeCohortDataFiles(
+  pixelCohortData,
+  columnsForPixelGroups,
+  speciesEcoregion,
+  pixelGroupBiomassClass,
+  pixelGroupAgeClass
+)
 }
 \arguments{
 \item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
@@ -13,6 +19,13 @@ makeCohortDataFiles(pixelCohortData, columnsForPixelGroups, speciesEcoregion)
 \item{columnsForPixelGroups}{Default columns that define pixel groups}
 
 \item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
+
+\item{pixelGroupBiomassClass}{Integer. When assigning pixelGroup membership, this defines
+the resolution of biomass that will be considered 'the same pixelGroup', e.g., if it is
+100, then 5160 and 5240 will be the same}
+
+\item{pixelGroupAgeClass}{Integer. When assigning pixelGroup membership, this defines the resolution of ages
+that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14 will be the same}
 }
 \value{
 A list with a modified \code{pixelCohortData} and \code{cohortData} \code{data.table}s.
