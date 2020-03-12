@@ -970,6 +970,12 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
   modelArgs[[1]] <- NULL
   modelArgs$data <- quote(.specialData)
 
+  isChar <- unlist(lapply(modelArgs, is.character))
+  if (any(isChar))
+    modelArgs[isChar] <- lapply(modelArgs[isChar], function(yyy) {
+      eval(parse(text = yyy))
+    })
+
   mod <- do.call(fun, modelArgs)
 
   list(mod = mod, pred = fitted(mod), rsq = MuMIn::r.squaredGLMM(mod))
