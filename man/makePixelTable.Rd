@@ -39,10 +39,6 @@ raster operations (i.e., the one used throughout the simulation).}
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
-
-\item{pixelGroupAgeClass}{When assigning \code{pixelGroup} membership, this defines the resolution
-of ages that will be considered 'the same \code{pixelGroup}', e.g., if it is 10, then 6 and 14
-will be the same}
 }
 \value{
 A \code{data.table} as many rows as non-NA pixels in \code{rasterToMath} and

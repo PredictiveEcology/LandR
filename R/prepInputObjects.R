@@ -44,9 +44,6 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @param biomassMap raster of total stand biomass
 #' @template rasterToMatch
 #' @param rstLCC raster of land-cover class
-#' @param pixelGroupAgeClass When assigning \code{pixelGroup} membership, this defines the resolution
-#'   of ages that will be considered 'the same \code{pixelGroup}', e.g., if it is 10, then 6 and 14
-#'   will be the same
 #' @param printSummary Logical. If \code{TRUE}, the default, a print out of the
 #'   \code{summary(pixelTable)} will occur.
 #' @template doAssertion
