@@ -929,7 +929,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
 #' @param DT A \code{data.table}
 #' @param by Character vector of column names to use for groups
 #' @param doSubset Logical or numeric indicating the number of subsamples to use
-#' @param indices Logical. If \codeP{TRUE}, this will return vector of row indices only. Defaults
+#' @param indices Logical. If \code{TRUE}, this will return vector of row indices only. Defaults
 #'   to \code{FALSE}, i.e., return the subsampled \code{data.table}
 #'
 #' @export
