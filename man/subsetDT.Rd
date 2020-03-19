@@ -4,7 +4,7 @@
 \alias{subsetDT}
 \title{Subset a \code{data.table} with random subsampling within \code{by} groups}
 \usage{
-subsetDT(DT, by, doSubset = TRUE)
+subsetDT(DT, by, doSubset = TRUE, indices = FALSE)
 }
 \arguments{
 \item{DT}{A \code{data.table}}
@@ -12,7 +12,15 @@ subsetDT(DT, by, doSubset = TRUE)
 \item{by}{Character vector of column names to use for groups}
 
 \item{doSubset}{Logical or numeric indicating the number of subsamples to use}
+
+\item{indices}{Logical. If \codeP{TRUE}, this will return vector of row indices only. Defaults
+to \code{FALSE}, i.e., return the subsampled \code{data.table}}
 }
 \description{
 Subset a \code{data.table} with random subsampling within \code{by} groups
+}
+\examples{
+library(data.table)
+dt <- data.table(Lett = sample(LETTERS, replace = TRUE, size = 1000), Nums = 1:100)
+dt1 <- subsetDT(dt, by = "Lett", doSubset = 3)
 }

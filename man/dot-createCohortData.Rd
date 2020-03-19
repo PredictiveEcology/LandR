@@ -7,7 +7,8 @@
 .createCohortData(
   inputDataTable,
   doAssertion = getOption("LandR.assertions", TRUE),
-  rescale = TRUE
+  rescale = TRUE,
+  minCoverThreshold = 5
 )
 }
 \arguments{
