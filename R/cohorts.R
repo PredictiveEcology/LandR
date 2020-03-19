@@ -697,17 +697,23 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   message(green("-- Begin reconsiling data inconsistencies"))
 
   inputDataTable[, totalCover := rowSums(.SD), .SDcols = newCoverColNames]
-  message(green("  -- Removing all pixels with totalCover <= minCoverThreshold"))
-  inputDataTable <- inputDataTable[totalCover > minCoverThreshold]
+  whEnoughCover <- inputDataTable$totalCover > minCoverThreshold
+  message(green("  -- Removing all pixels with totalCover <= minCoverThreshold (affects",
+                sum(!whEnoughCover),
+                "of", NROW(inputDataTable),"pixels)"))
+  message(green("     --> resulting in", sum(whEnoughCover), "pixels)"))
+  inputDataTable <- inputDataTable[whEnoughCover]
 
   whAgeEqZero <- which(inputDataTable$age == 0)
   message(green("  -- Setting TotalBiomass in pixel to 0 where age == 0 (affects", length(whAgeEqZero),
                 "of", NROW(inputDataTable),"pixels)"))
+  message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
   inputDataTable[whAgeEqZero, `:=`(totalBiomass = 0)]
 
   whTotalBEqZero <- which(inputDataTable$totalBiomass == 0)
   message(green("  -- Setting age in pixel to 0 where totalBiomass == 0 (affects", length(whTotalBEqZero),
                 "of", NROW(inputDataTable),"pixels)"))
+  message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
   inputDataTable[whTotalBEqZero, `:=`(age = 0)]
 
   cohortData <- data.table::melt(inputDataTable,
@@ -721,6 +727,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
                 "of", NROW(cohortData), "cohorts"))
   message(green("     --> resulting in", length(whCoverGTMinCover), "cohorts)"))
   cohortData <- cohortData[whCoverGTMinCover]
+  message(green("     --> resulting in", length(unique(cohortData$pixelIndex)), "pixels)"))
 
   cohortData[, coverOrig := cover]
   if (isTRUE(doAssertion))
@@ -847,7 +854,6 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
            " be because they more NA values than the Land Cover raster")
   }
 
-  browser()
   cohortData <- Cache(.createCohortData, inputDataTable = inputDataTable,
                       # pixelGroupBiomassClass = pixelGroupBiomassClass,
                       minCoverThreshold = minCoverThreshold,
@@ -876,7 +882,6 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[!is.na(cohortDataMissingAgeUnique$age)]
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(totalBiomass, age, speciesCode,
                                                                  initialEcoregionCode, cover)]
-    browser()
     cohortDataMissingAgeUnique <- subsetDT(cohortDataMissingAgeUnique,
                                            by = c("initialEcoregionCode", "speciesCode"),
                                            doSubset = doSubset)

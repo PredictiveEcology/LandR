@@ -61,6 +61,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
                            biomassMap, rasterToMatch, rstLCC, #pixelGroupAgeClass = 1,
                            printSummary = TRUE,
                            doAssertion = getOption("LandR.assertions", TRUE)) {
+  browser()
   if (missing(rasterToMatch)) {
     rasterToMatch <- raster(speciesLayers[[1]])
     rasterToMatch[] <- 0
