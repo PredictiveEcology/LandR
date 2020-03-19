@@ -259,7 +259,8 @@ makeBiomassMap <-  function(pixelCohortData, rasterToMatch) {
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
   biomassMap <- raster(rasterToMatch)
-  biomassMap[pixelData$pixelIndex] <- pixelData$totalBiomass
+  # suppress this message call no non-missing arguments to min; returning Inf min(x@data@values, na.rm = TRUE)
+  suppressWarnings(biomassMap[pixelData$pixelIndex] <- pixelData$totalBiomass)
 
   return(biomassMap)
 }
@@ -303,7 +304,9 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
   pixelGroupMap <- raster(rasterToMatch)
-  pixelGroupMap[pixelData$pixelIndex] <- as.integer(pixelData$pixelGroup)
+
+  # suppress this message call no non-missing arguments to min; returning Inf min(x@data@values, na.rm = TRUE)
+  suppressWarnings(pixelGroupMap[pixelData$pixelIndex] <- as.integer(pixelData$pixelGroup))
 
   return(pixelGroupMap)
 }

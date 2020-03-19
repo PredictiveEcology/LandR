@@ -117,7 +117,9 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
   ecoregionMap <-  raster(ecoregionFiles$ecoregionMap)
-  ecoregionMap[pixelData$pixelIndex] <- as.integer(pixelData$ecoregionGroup)
+
+  # suppress this message call no non-missing arguments to min; returning Inf min(x@data@values, na.rm = TRUE)
+  suppressWarnings(ecoregionMap[pixelData$pixelIndex] <- as.integer(pixelData$ecoregionGroup))
   levels(ecoregionMap) <- data.frame(ID = seq(levels(pixelData$ecoregionGroup)),
                                      ecoregion = gsub("_.*", "", levels(pixelData$ecoregionGroup)),
                                      ecoregionGroup = levels(pixelData$ecoregionGroup),
