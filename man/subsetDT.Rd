@@ -13,7 +13,7 @@ subsetDT(DT, by, doSubset = TRUE, indices = FALSE)
 
 \item{doSubset}{Logical or numeric indicating the number of subsamples to use}
 
-\item{indices}{Logical. If \codeP{TRUE}, this will return vector of row indices only. Defaults
+\item{indices}{Logical. If \code{TRUE}, this will return vector of row indices only. Defaults
 to \code{FALSE}, i.e., return the subsampled \code{data.table}}
 }
 \description{
