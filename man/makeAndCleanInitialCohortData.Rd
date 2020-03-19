@@ -7,6 +7,9 @@
 makeAndCleanInitialCohortData(
   inputDataTable,
   sppColumns,
+  imputeBadAgeModel = quote(lme4::lmer(age ~ B * speciesCode + cover * speciesCode + (1
+    | initialEcoregionCode))),
+  minCoverThreshold,
   doAssertion = getOption("LandR.assertions", TRUE),
   doSubset = TRUE
 )
