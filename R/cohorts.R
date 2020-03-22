@@ -1159,6 +1159,10 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #' @param pixelGroupBiomassClass Integer. When assigning pixelGroup membership, this defines
 #'   the resolution of biomass that will be considered 'the same pixelGroup', e.g., if it is
 #'   100, then 5160 and 5240 will be the same
+#' @param minAgeForGrouping Minimum age for regrouping. This may be because there is a source of
+#'   ages for young stands/trees that is very reliable, such as a fire database. Ages below this
+#'   will not be grouped together. Defaults to -1, meaning treat all ages equally. If this is related to
+#'   known ages from a high quality database, then use age of the oldest trees in that database.
 #' @template speciesEcoregion
 #'
 #' @return
@@ -1168,7 +1172,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #' @importFrom data.table melt setnames set
 #' @importFrom reproducible Cache
 makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesEcoregion,
-                                pixelGroupBiomassClass, pixelGroupAgeClass) {
+                                pixelGroupBiomassClass, pixelGroupAgeClass, minAgeForGrouping = 0) {
   ## make ecoregioGroup a factor (again) and remove unnecessary cols.
   # refactor because the "_34" and "_35" ones are still levels
   pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
@@ -1178,9 +1182,9 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   set(pixelCohortData, j = cols, value = NULL)
 
   # Round ages to nearest pixelGroupAgeClass
-  set(pixelCohortData, NULL, "age",
-      asInteger(pixelCohortData$age / pixelGroupAgeClass) *
-        as.integer(pixelGroupAgeClass))
+  pixelCohortData[age > minAgeForGrouping,
+                  age := asInteger(age / pixelGroupAgeClass) *
+                    as.integer(pixelGroupAgeClass)]
 
   # Round Biomass to nearest pixelGroupBiomassClass
   message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
