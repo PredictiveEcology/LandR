@@ -4,7 +4,8 @@
 \name{sppEquivalencies_CA}
 \alias{sppEquivalencies_CA}
 \title{Table of species name equivalencies for Canadian trees}
-\format{A \code{data.frame} with 271 rows and 10 variables:
+\format{
+A \code{data.frame} with 271 rows and 10 variables:
 \describe{
   \item{LANDIS_test}{species names from LANDIS-II test parameter table}
   \item{LANDIS_traits}{species names from LANDIS-II traits parameter table}
@@ -18,7 +19,8 @@
   \item{Notes}{additional notes and information}
   \item{Boreal}{Species present in the Boreal forests of Canada}
   \item{Type}{Whether the species is a deciduous or conifer species}
-}}
+}
+}
 \usage{
 sppEquivalencies_CA
 }

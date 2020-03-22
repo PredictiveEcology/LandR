@@ -1164,16 +1164,19 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #'   ages for young stands/trees that is very reliable, such as a fire database. Ages below this
 #'   will not be grouped together. Defaults to -1, meaning treat all ages equally. If this is related to
 #'   known ages from a high quality database, then use age of the oldest trees in that database.
+#' @pixelFateDT A data.table of pixelFateDT; if none provided, it will make an empty one.
+#'
 #' @template speciesEcoregion
 #'
 #' @return
-#' A list with a modified \code{pixelCohortData} and \code{cohortData} \code{data.table}s.
+#' A list with a modified \code{pixelCohortData}, \code{cohortData}, and \code{pixelFateDT} \code{data.table}s
 #'
 #' @export
 #' @importFrom data.table melt setnames set
 #' @importFrom reproducible Cache
 makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesEcoregion,
-                                pixelGroupBiomassClass, pixelGroupAgeClass, minAgeForGrouping = 0) {
+                                pixelGroupBiomassClass, pixelGroupAgeClass, minAgeForGrouping = 0,
+                                pixelFateDT) {
   ## make ecoregioGroup a factor (again) and remove unnecessary cols.
   # refactor because the "_34" and "_35" ones are still levels
   pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
@@ -1182,6 +1185,7 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
                     names(pixelCohortData))
   set(pixelCohortData, j = cols, value = NULL)
 
+
   # Round ages to nearest pixelGroupAgeClass
   pixelCohortData[age > minAgeForGrouping,
                   age := asInteger(age / pixelGroupAgeClass) *
@@ -1189,17 +1193,31 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 
   # Round Biomass to nearest pixelGroupBiomassClass
   message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
-  pixelCohortData[ , B := asInteger(B / pixelGroupBiomassClass) * as.integer(pixelGroupBiomassClass)]
+  pixelCohortData[#age > minAgeForGrouping,
+                  , B := asInteger(B / pixelGroupBiomassClass) * as.integer(pixelGroupBiomassClass)]
 
-  # Set B to 0 if age is 0
-  whAgeZero <- which(pixelCohortData$age == 0)
-  if (length(whAgeZero)) {
-    message(green("    -- There were", length(whAgeZero), "pixels with age = 0; forcing B to zero"))
-    pixelCohortData[whAgeZero, B := 0L]
-  }
+  # Remove B == 0 cohorts after young removals
+  message(green("  -- Removing cohorts with B = 0 and age > 0 -- these were likely poor predictions from updateYoungBiomasses"))
+  whBEqZeroAgeGT0 <- which(pixelCohortData$B == 0 & pixelCohortData$age > 0)
+  pixelCohortData2 <- pixelCohortData[-whBEqZeroAgeGT0]
+
+  lostPixels <- setdiff(pixelCohortData$pixelIndex, pixelCohortData2$pixelIndex)
+  message(green("     affected", length(whBEqZeroAgeGT0), "cohorts, in", length(lostPixels), "pixels;"))
+  lenUniquePix <- length(unique(pixelCohortData2$pixelIndex))
+  message(green("     leaving", lenUniquePix, "pixels"))
+  pixelFateDT <- pixelFate(pixelFateDT, fate = "Biomass = 0, after updating young cohort B",
+                           length(lostPixels), runningPixelTotal = lenUniquePix)
+
+  pixelCohortData <- pixelCohortData2
+  # # Set B to 0 if age is 0
+  # whAgeZero <- which(pixelCohortData$age == 0)
+  # if (length(whAgeZero)) {
+  #   message(green("    -- There were", length(whAgeZero), "pixels with age = 0; forcing B to zero"))
+  #   pixelCohortData[whAgeZero, B := 0L]
+  # }
 
   ## select pixels with biomass and generate pixel groups
-  pixelCohortData <- pixelCohortData[B >= 0]
+  #pixelCohortData <- pixelCohortData[B >= 0]
 
   ########################################################################
   ## rebuild ecoregion, ecoregionMap objects -- some initial ecoregions disappeared (e.g., 34, 35, 36)
@@ -1227,8 +1245,11 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   cohortData <- unique(pixelCohortData, by = c("pixelGroup", columnsForPixelGroups))
   cohortData[, `:=`(pixelIndex = NULL)]
 
+  pixelFateDT <- pixelFate(pixelFateDT, "removing ecoregionGroups without enough data to est. maxBiomass",
+                           tail(pixelFateDT$runningPixelTotal, 1) - NROW(unique(pixelCohortData$pixelIndex)))
+
   assertUniqueCohortData(cohortData, c("pixelGroup", "ecoregionGroup", "speciesCode"))
-  return(list(cohortData = cohortData, pixelCohortData = pixelCohortData))
+  return(list(cohortData = cohortData, pixelCohortData = pixelCohortData, pixelFateDT = pixelFateDT))
 }
 
 #' Create new cohorts based on provenance table with unique \code{pixelGroup} and add to \code{cohortData}
@@ -1479,3 +1500,29 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
   return(list(cohortData = outs$cohortData,
               pixelGroupMap = outs$pixelGroupMap))
 }
+
+#' Create or amend data to a pixelFateDT object
+#'
+#' @param pixelFateDT A pixelFateDT data.table (has 3 columns, fate, pixelsRemoted, and
+#'   runningPixelTotal)
+#' @param fate A character string (length 1) describing in words the change
+#' @param pixelsRemoved A numeric indicating how many pixels were removed due to the
+#'   \code{fate}
+#' @param runningPixelTotal an optional numeric with new, running total. If not supplied,
+#'   it will be calculated from the last row of pixelFateDT runningTotal minus the
+#'   \code{pixelsRemoved}
+#' @export
+#' @return
+#' A pixelFateDT object, updated with one extra row.
+pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
+                      runningPixelTotal = NA_integer_) {
+  if (missing(pixelFateDT))
+    pixelFateDT <- data.table(fate = character(), pixelsRemoved = integer(), runningPixelTotal = integer())
+  if (is.na(runningPixelTotal))
+    runningPixelTotal <- tail(pixelFateDT$runningPixelTotal,1) - pixelsRemoved
+  pixelFateDT <- rbindlist(list(pixelFateDT, data.table(fate = fate, pixelsRemoved = pixelsRemoved,
+                                                        runningPixelTotal = runningPixelTotal)))
+  pixelFateDT
+
+}
+
