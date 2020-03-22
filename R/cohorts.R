@@ -831,6 +831,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @importFrom crayon blue green
 #' @importFrom data.table melt setnames
 #' @importFrom reproducible Cache
+#' @importFrom pemisc termsInData messageDF
 #' @rdname makeAndCleanInitialCohortData
 makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
                                           #pixelGroupBiomassClass,
