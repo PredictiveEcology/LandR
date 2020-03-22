@@ -5,11 +5,7 @@
 \alias{uniqueCohortDefinition}
 \alias{uniqueSpeciesEcoregionDefinition}
 \title{The columns in a \code{cohortData} that define "unique"}
-\format{
-An object of class \code{character} of length 4.
-
-An object of class \code{character} of length 2.
-}
+\format{An object of class \code{character} of length 4.}
 \usage{
 uniqueCohortDefinition
 
