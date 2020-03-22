@@ -1191,6 +1191,13 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
   pixelCohortData[ , B := asInteger(B / pixelGroupBiomassClass) * as.integer(pixelGroupBiomassClass)]
 
+  # Set B to 0 if age is 0
+  whAgeZero <- which(pixelCohortData$age == 0)
+  if (length(whAgeZero)) {
+    message(green("    -- There were", length(whAgeZero), "pixels with age = 0; forcing B to zero"))
+    pixelCohortData[whAgeZero, B := 0L]
+  }
+
   ## select pixels with biomass and generate pixel groups
   pixelCohortData <- pixelCohortData[B >= 0]
 
