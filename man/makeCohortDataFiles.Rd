@@ -11,7 +11,8 @@ makeCohortDataFiles(
   speciesEcoregion,
   pixelGroupBiomassClass,
   pixelGroupAgeClass,
-  minAgeForGrouping = 0
+  minAgeForGrouping = 0,
+  pixelFateDT
 )
 }
 \arguments{
@@ -34,7 +35,7 @@ will not be grouped together. Defaults to -1, meaning treat all ages equally. If
 known ages from a high quality database, then use age of the oldest trees in that database.}
 }
 \value{
-A list with a modified \code{pixelCohortData} and \code{cohortData} \code{data.table}s.
+A list with a modified \code{pixelCohortData}, \code{cohortData}, and \code{pixelFateDT} \code{data.table}s
 }
 \description{
 Takes a \code{pixelCohortData} table (see \code{makeAndCleanInitialCohortData}),
