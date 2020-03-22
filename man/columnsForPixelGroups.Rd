@@ -4,9 +4,7 @@
 \name{columnsForPixelGroups}
 \alias{columnsForPixelGroups}
 \title{Default columns that define pixel groups}
-\format{
-An object of class \code{character} of length 4.
-}
+\format{An object of class \code{character} of length 4.}
 \usage{
 columnsForPixelGroups
 }
