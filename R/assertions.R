@@ -326,3 +326,29 @@ assertRstLCChange <- function(rstLCChange, rasterToMatch,
 
   }
 }
+
+
+#' Assert that the cohortData speciesEcoregion have matching clases
+#'
+#' Specifically, whether all combinations of ecoregionGroup and speciesCode are in both objects, no more
+#' no less.
+#'
+#' @param cohortData A cohortData object
+#' @param speciesEcoregion A speciesEcoregion object
+#' @export
+assertSpeciesEcoregionCohortDataMatch <- function(cohortData, speciesEcoregion,
+                                                   doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    a <- setdiff(unique(paste(speciesEcoregion$ecoregionGroup, speciesEcoregion$speciesCode)),
+                 unique(paste(cohortData$ecoregionGroup, cohortData$speciesCode)))
+
+    if (length(a) > 0)
+      stop("speciesEcoregion has ecoregionGroup x speciesCode values that are not in cohortData",
+           paste(a, collapse = ", "))
+    b <- setdiff(unique(paste(cohortData$ecoregionGroup, cohortData$speciesCode)),
+                 unique(paste(speciesEcoregion$ecoregionGroup, speciesEcoregion$speciesCode)))
+    if (length(b) > 0)
+      stop("cohortData has ecoregionGroup x speciesCode values that are not in speciesEcoregion",
+           paste(b, collapse = ", "))
+  }
+}
