@@ -1209,7 +1209,7 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   message(green("     affected", length(whBEqZeroAgeGT0), "cohorts, in", length(lostPixels), "pixels;"))
   lenUniquePix <- length(unique(pixelCohortData2$pixelIndex))
   message(green("     leaving", lenUniquePix, "pixels"))
-  pixelFateDT <- pixelFate(pixelFateDT, fate = "Biomass = 0, after updating young cohort B",
+  pixelFateDT <- pixelFate(pixelFateDT, fate = "rm pixels with Biomass == 0, after updating young cohort B",
                            length(lostPixels), runningPixelTotal = lenUniquePix)
 
   pixelCohortData <- pixelCohortData2
