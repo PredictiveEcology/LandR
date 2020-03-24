@@ -618,6 +618,10 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     out7 <- out5[availableERG2, on = c("speciesCode", "possERC" = "initialEcoregionCode"), nomatch = NA]
     out6 <- na.omit(out7)
 
+    # These ones are missing at least something in the new possERC
+    possERCToRm <- out5[!availableERG2, on = c("speciesCode", "possERC" = "initialEcoregionCode")]
+    out6 <- out6[!possERC %in% unique(possERCToRm$possERC)]
+
     # sanity check -- don't let an infinite loop
     if (currentLenUnwantedPixels == length(theUnwantedPixels)) {
       repeatsOnSameUnwanted <- repeatsOnSameUnwanted + 1
