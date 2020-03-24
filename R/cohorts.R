@@ -1238,12 +1238,13 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   message(blue(paste(sort(unique(pixelCohortData[!ecoregionGroup %in% ecoregionsWeHaveParametersFor]$ecoregionGroup)), collapse = ", ")))
   pixelCohortData <- pixelCohortData[ecoregionGroup %in% ecoregionsWeHaveParametersFor] # keep only ones we have params for
 
+  # Lost some ecoregionGroups -- refactor
+  pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
+
   cd <- pixelCohortData[, .SD, .SDcols = c("pixelIndex", columnsForPixelGroups)]
   pixelCohortData[, pixelGroup := Cache(generatePixelGroups, cd, maxPixelGroup = 0,
                                         columns = columnsForPixelGroups)]
 
-  # Lost some ecoregionGroups -- refactor
-  pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
   pixelCohortData[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
 
   cohortData <- unique(pixelCohortData, by = c("pixelGroup", columnsForPixelGroups))
