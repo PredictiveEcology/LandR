@@ -343,12 +343,12 @@ assertSpeciesEcoregionCohortDataMatch <- function(cohortData, speciesEcoregion,
                  unique(paste(cohortData$ecoregionGroup, cohortData$speciesCode)))
 
     if (length(a) > 0)
-      stop("speciesEcoregion has ecoregionGroup x speciesCode values that are not in cohortData",
+      stop("speciesEcoregion has ecoregionGroup x speciesCode values that are not in cohortData: ",
            paste(a, collapse = ", "))
     b <- setdiff(unique(paste(cohortData$ecoregionGroup, cohortData$speciesCode)),
                  unique(paste(speciesEcoregion$ecoregionGroup, speciesEcoregion$speciesCode)))
     if (length(b) > 0)
-      stop("cohortData has ecoregionGroup x speciesCode values that are not in speciesEcoregion",
+      stop("cohortData has ecoregionGroup x speciesCode values that are not in speciesEcoregion: ",
            paste(b, collapse = ", "))
   }
 }
