@@ -154,7 +154,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #'
 #' See Details.
 #'
-#' @param cohortDataNoBiomass a subset of \code{cohortData}
+#' @param cohortDataBiomass a subset of \code{cohortData}
 #' @param cohortDataShort a subset of \code{cohortData}
 #' @param cohortDataShortNoCover a subset of \code{cohortData}
 #' @param species a \code{data.table} of species traits, e.g., longevity, shade tolerance, etc.
@@ -185,11 +185,11 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #'
 #' @export
 #' @importFrom data.table rbindlist
-makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDataShortNoCover,
+makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataShortNoCover,
                                  species, modelCover, modelBiomass, successionTimestep, currentYear) {
   ## Create speciesEcoregion table
   joinOn <- c("ecoregionGroup", "speciesCode")
-  speciesEcoregion <- unique(cohortDataNoBiomass, by = joinOn)
+  speciesEcoregion <- unique(cohortDataBiomass, by = joinOn)
   speciesEcoregion[, c("B", "logAge", "cover") := NULL]
   species[, speciesCode := as.factor(species)]
   speciesEcoregion <- species[, .(speciesCode, longevity)][speciesEcoregion, on = "speciesCode"]
