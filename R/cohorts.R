@@ -1178,6 +1178,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #' @export
 #' @importFrom data.table melt setnames set
 #' @importFrom reproducible Cache
+#' @importFrom dplyr anti_join
 makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesEcoregion,
                                 pixelGroupBiomassClass, pixelGroupAgeClass, minAgeForGrouping = 0,
                                 pixelFateDT) {
@@ -1226,17 +1227,24 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   ########################################################################
   ## rebuild ecoregion, ecoregionMap objects -- some initial ecoregions disappeared (e.g., 34, 35, 36)
   ## rebuild biomassMap object -- biomasses have been adjusted
-  ## There will be some ecoregionGroups for which we only had age = 0 and B = 0
+  ## There will be some speciesCode * ecoregionGroups combinations for which we only had age = 0 and B = 0
   if (is.factor(speciesEcoregion$ecoregionGroup)) {
-    ecoregionsWeHaveParametersFor <- levels(speciesEcoregion$ecoregionGroup)
+    ## we need to check available params for speciesXecoregionGroup combos, this will be achieved with a
+    # ecoregionsWeHaveParametersFor <- levels(speciesEcoregion$ecoregionGroup)
   } else {
     stop("speciesEcoregion$ecoregionGroup is supposed to be a factor; please go back in this",
          "module and correct this.")
   }
 
-  message(blue("Removing some pixels because their ecoregionGroup has no age or B data to estimate ecoregion traits:"))
-  message(blue(paste(sort(unique(pixelCohortData[!ecoregionGroup %in% ecoregionsWeHaveParametersFor]$ecoregionGroup)), collapse = ", ")))
-  pixelCohortData <- pixelCohortData[ecoregionGroup %in% ecoregionsWeHaveParametersFor] # keep only ones we have params for
+  message(blue("Removing some pixels because their species * ecoregionGroup combination has no age or B data to estimate ecoregion traits:"))
+  # message(blue(paste(sort(unique(pixelCohortData[!ecoregionGroup %in% ecoregionsWeHaveParametersFor]$ecoregionGroup)), collapse = ", ")))
+  cols <- c("speciesCode", "ecoregionGroup")
+  out <- lapply(capture.output(unique(suppressWarnings(   ## suppress warnings about factor
+    anti_join(pixelCohortData[,..cols], speciesEcoregion[, ..cols])
+    ))), function(x) message(blue(x)))
+
+  # pixelCohortData <- pixelCohortData[ecoregionGroup %in% ecoregionsWeHaveParametersFor] # keep only ones we have params for
+  pixelCohortData <- speciesEcoregion[, ..cols][pixelCohortData, on = cols, nomatch = 0]
 
   # Lost some ecoregionGroups -- refactor
   pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
