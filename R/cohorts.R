@@ -1168,7 +1168,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #'   ages for young stands/trees that is very reliable, such as a fire database. Ages below this
 #'   will not be grouped together. Defaults to -1, meaning treat all ages equally. If this is related to
 #'   known ages from a high quality database, then use age of the oldest trees in that database.
-#' @pixelFateDT A data.table of pixelFateDT; if none provided, it will make an empty one.
+#' @param pixelFateDT A data.table of pixelFateDT; if none provided, it will make an empty one.
 #'
 #' @template speciesEcoregion
 #'
@@ -1178,7 +1178,6 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #' @export
 #' @importFrom data.table melt setnames set
 #' @importFrom reproducible Cache
-#' @importFrom dplyr anti_join
 makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesEcoregion,
                                 pixelGroupBiomassClass, pixelGroupAgeClass, minAgeForGrouping = 0,
                                 pixelFateDT) {
@@ -1239,9 +1238,12 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   message(blue("Removing some pixels because their species * ecoregionGroup combination has no age or B data to estimate ecoregion traits:"))
   # message(blue(paste(sort(unique(pixelCohortData[!ecoregionGroup %in% ecoregionsWeHaveParametersFor]$ecoregionGroup)), collapse = ", ")))
   cols <- c("speciesCode", "ecoregionGroup")
-  out <- lapply(capture.output(unique(suppressWarnings(   ## suppress warnings about factor
-    anti_join(pixelCohortData[,..cols], speciesEcoregion[, ..cols])
-    ))), function(x) message(blue(x)))
+  # out <- lapply(capture.output(unique(suppressWarnings(   ## suppress warnings about factor
+  #   anti_join(pixelCohortData[,..cols], speciesEcoregion[, ..cols])
+  #   ))), function(x) message(blue(x)))
+  messageDF(
+    colour = "blue",
+    unique(pixelCohortData[,..cols][!speciesEcoregion[, ..cols], on = c("speciesCode", "ecoregionGroup")]))
 
   # pixelCohortData <- pixelCohortData[ecoregionGroup %in% ecoregionsWeHaveParametersFor] # keep only ones we have params for
   pixelCohortData <- speciesEcoregion[, ..cols][pixelCohortData, on = cols, nomatch = 0]
