@@ -33,6 +33,8 @@ that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14 
 ages for young stands/trees that is very reliable, such as a fire database. Ages below this
 will not be grouped together. Defaults to -1, meaning treat all ages equally. If this is related to
 known ages from a high quality database, then use age of the oldest trees in that database.}
+
+\item{pixelFateDT}{A data.table of pixelFateDT; if none provided, it will make an empty one.}
 }
 \value{
 A list with a modified \code{pixelCohortData}, \code{cohortData}, and \code{pixelFateDT} \code{data.table}s

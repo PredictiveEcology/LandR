@@ -5,7 +5,7 @@
 \title{Create \code{speciesEcoregion}}
 \usage{
 makeSpeciesEcoregion(
-  cohortDataNoBiomass,
+  cohortDataBiomass,
   cohortDataShort,
   cohortDataShortNoCover,
   species,
@@ -16,7 +16,7 @@ makeSpeciesEcoregion(
 )
 }
 \arguments{
-\item{cohortDataNoBiomass}{a subset of \code{cohortData}}
+\item{cohortDataBiomass}{a subset of \code{cohortData}}
 
 \item{cohortDataShort}{a subset of \code{cohortData}}
 
