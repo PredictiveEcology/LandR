@@ -83,12 +83,14 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
     if (!missing(minRelativeB))
       erg[[4]] <- sort(unique(minRelativeB$ecoregionGroup))
 
+    ## first test will detect differences in both factor levels and values
     lens <- sapply(erg, function(x) length(x) > 1)
     erg <- erg[lens]
     # test3 <- all(sapply(seq(erg)[-1], function(x)
       # identical(erg[[1]], erg[[x]])))
     test3 <- all(outer(erg, erg, FUN = Vectorize(identical)))
 
+    ## second test only detects differences in values
     erg <- lapply(erg, as.character)
     # test4 <- all(sapply(seq(erg)[-1], function(x)
     #   identical(erg[[1]], erg[[x]])))
@@ -100,6 +102,7 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
            "\n  ecoregionGroups. They do not. This needs to be fixed before proceeding.")
     }
 
+    ## only necessary to check this one if the first doesn't fail.
     if (!test3) {
       message(str(erg, 1))
       stop("speciesEcoregion, cohortData, and ecoregionMap should all have exactly the same",
