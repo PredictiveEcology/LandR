@@ -83,16 +83,27 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
     if (!missing(minRelativeB))
       erg[[4]] <- sort(unique(minRelativeB$ecoregionGroup))
 
-    erg <- lapply(erg, as.character)
     lens <- sapply(erg, function(x) length(x) > 1)
     erg <- erg[lens]
-    test3 <- all(sapply(seq(erg)[-1], function(x)
-      identical(erg[[1]], erg[[x]])))
+    # test3 <- all(sapply(seq(erg)[-1], function(x)
+      # identical(erg[[1]], erg[[x]])))
+    test3 <- all(outer(erg, erg, FUN = Vectorize(identical)))
+
+    erg <- lapply(erg, as.character)
+    # test4 <- all(sapply(seq(erg)[-1], function(x)
+    #   identical(erg[[1]], erg[[x]])))
+    test4 <- all(outer(erg, erg, FUN = Vectorize(identical)))
+
+    if (!test4) {
+      message(str(erg, 1))
+      stop("speciesEcoregion, cohortData, and ecoregionMap should all have exactly the same",
+           "\n  ecoregionGroups. They do not. This needs to be fixed before proceeding.")
+    }
 
     if (!test3) {
       message(str(erg, 1))
       stop("speciesEcoregion, cohortData, and ecoregionMap should all have exactly the same",
-           "\n  ecoregionGroups. They do not. This needs to be fixed before proceeding.")
+           "\n  ecoregionGroup levels. They do not. This needs to be fixed before proceeding.")
     }
   }
 }
