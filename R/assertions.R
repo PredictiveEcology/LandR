@@ -83,6 +83,7 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
     if (!missing(minRelativeB))
       erg[[4]] <- sort(unique(minRelativeB$ecoregionGroup))
 
+    erg <- lapply(erg, as.character)
     lens <- sapply(erg, function(x) length(x) > 1)
     erg <- erg[lens]
     test3 <- all(sapply(seq(erg)[-1], function(x)
