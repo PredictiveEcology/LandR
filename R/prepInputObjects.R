@@ -44,9 +44,6 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @param biomassMap raster of total stand biomass
 #' @template rasterToMatch
 #' @param rstLCC raster of land-cover class
-#' @param pixelGroupAgeClass When assigning \code{pixelGroup} membership, this defines the resolution
-#'   of ages that will be considered 'the same \code{pixelGroup}', e.g., if it is 10, then 6 and 14
-#'   will be the same
 #' @param printSummary Logical. If \code{TRUE}, the default, a print out of the
 #'   \code{summary(pixelTable)} will occur.
 #' @template doAssertion
@@ -61,7 +58,7 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @importFrom pemisc factorValues2
 #' @importFrom raster ncell
 makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
-                           biomassMap, rasterToMatch, rstLCC, pixelGroupAgeClass = 1,
+                           biomassMap, rasterToMatch, rstLCC, #pixelGroupAgeClass = 1,
                            printSummary = TRUE,
                            doAssertion = getOption("LandR.assertions", TRUE)) {
   if (missing(rasterToMatch)) {
@@ -88,7 +85,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
     species$species <- names(speciesLayers)
   }
 
-  message(blue("Round age to nearest pixelGroupAgeClass, which is", pixelGroupAgeClass))
+  # message(blue("Round age to nearest pixelGroupAgeClass, which is", pixelGroupAgeClass))
   coverMatrix <- matrix(asInteger(speciesLayers[]), ncol = length(names(speciesLayers)))
   colnames(coverMatrix) <- names(speciesLayers)
 
@@ -104,8 +101,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
                            rasterToMatch = rasterToMatch[]
   )
   if (!missing(standAgeMap)) {
-    set(pixelTable, NULL, "age", asInteger(ceiling(asInteger(standAgeMap[]) /
-                                                     pixelGroupAgeClass) * pixelGroupAgeClass))
+    set(pixelTable, NULL, "age", asInteger(standAgeMap[]))
     set(pixelTable, NULL, "logAge", log(standAgeMap[]))
   }
 
@@ -158,7 +154,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #'
 #' See Details.
 #'
-#' @param cohortDataNoBiomass a subset of \code{cohortData}
+#' @param cohortDataBiomass a subset of \code{cohortData}
 #' @param cohortDataShort a subset of \code{cohortData}
 #' @param cohortDataShortNoCover a subset of \code{cohortData}
 #' @param species a \code{data.table} of species traits, e.g., longevity, shade tolerance, etc.
@@ -189,11 +185,11 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #'
 #' @export
 #' @importFrom data.table rbindlist
-makeSpeciesEcoregion <- function(cohortDataNoBiomass, cohortDataShort, cohortDataShortNoCover,
+makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataShortNoCover,
                                  species, modelCover, modelBiomass, successionTimestep, currentYear) {
   ## Create speciesEcoregion table
   joinOn <- c("ecoregionGroup", "speciesCode")
-  speciesEcoregion <- unique(cohortDataNoBiomass, by = joinOn)
+  speciesEcoregion <- unique(cohortDataBiomass, by = joinOn)
   speciesEcoregion[, c("B", "logAge", "cover") := NULL]
   species[, speciesCode := as.factor(species)]
   speciesEcoregion <- species[, .(speciesCode, longevity)][speciesEcoregion, on = "speciesCode"]
@@ -263,7 +259,8 @@ makeBiomassMap <-  function(pixelCohortData, rasterToMatch) {
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
   biomassMap <- raster(rasterToMatch)
-  biomassMap[pixelData$pixelIndex] <- pixelData$totalBiomass
+  # suppress this message call no non-missing arguments to min; returning Inf min(x@data@values, na.rm = TRUE)
+  suppressWarnings(biomassMap[pixelData$pixelIndex] <- pixelData$totalBiomass)
 
   return(biomassMap)
 }
@@ -307,7 +304,9 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
   pixelGroupMap <- raster(rasterToMatch)
-  pixelGroupMap[pixelData$pixelIndex] <- as.integer(pixelData$pixelGroup)
+
+  # suppress this message call no non-missing arguments to min; returning Inf min(x@data@values, na.rm = TRUE)
+  suppressWarnings(pixelGroupMap[pixelData$pixelIndex] <- as.integer(pixelData$pixelGroup))
 
   return(pixelGroupMap)
 }

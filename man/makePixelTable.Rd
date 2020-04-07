@@ -12,7 +12,6 @@ makePixelTable(
   biomassMap,
   rasterToMatch,
   rstLCC,
-  pixelGroupAgeClass = 1,
   printSummary = TRUE,
   doAssertion = getOption("LandR.assertions", TRUE)
 )
@@ -33,10 +32,6 @@ its information per \code{pixelID.} See \code{ecoregionProducer}.}
 raster operations (i.e., the one used throughout the simulation).}
 
 \item{rstLCC}{raster of land-cover class}
-
-\item{pixelGroupAgeClass}{When assigning \code{pixelGroup} membership, this defines the resolution
-of ages that will be considered 'the same \code{pixelGroup}', e.g., if it is 10, then 6 and 14
-will be the same}
 
 \item{printSummary}{Logical. If \code{TRUE}, the default, a print out of the
 \code{summary(pixelTable)} will occur.}

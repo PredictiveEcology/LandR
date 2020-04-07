@@ -7,7 +7,9 @@
 makeAndCleanInitialCohortData(
   inputDataTable,
   sppColumns,
-  pixelGroupBiomassClass,
+  imputeBadAgeModel = quote(lme4::lmer(age ~ B * speciesCode + cover * speciesCode + (1
+    | initialEcoregionCode))),
+  minCoverThreshold,
   doAssertion = getOption("LandR.assertions", TRUE),
   doSubset = TRUE
 )
@@ -17,9 +19,6 @@ makeAndCleanInitialCohortData(
 
 \item{sppColumns}{A vector of the names of the columns in \code{inputDataTable} that
 represent percent cover by species, rescaled to sum up to 100\%.}
-
-\item{pixelGroupBiomassClass}{Round B to the nearest \code{pixelGroupBiomassClass}
-to establish unique \code{pixelGroups}.}
 
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.

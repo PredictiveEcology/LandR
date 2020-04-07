@@ -618,6 +618,10 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     out7 <- out5[availableERG2, on = c("speciesCode", "possERC" = "initialEcoregionCode"), nomatch = NA]
     out6 <- na.omit(out7)
 
+    # These ones are missing at least something in the new possERC
+    possERCToRm <- out5[!availableERG2, on = c("speciesCode", "possERC" = "initialEcoregionCode")]
+    out6 <- out6[!possERC %in% unique(possERCToRm$possERC)]
+
     # sanity check -- don't let an infinite loop
     if (currentLenUnwantedPixels == length(theUnwantedPixels)) {
       repeatsOnSameUnwanted <- repeatsOnSameUnwanted + 1
@@ -679,9 +683,6 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #'
 #' @param inputDataTable A \code{data.table} with columns described above.
 #'
-#' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
-#'   to establish unique \code{pixelGroups}.
-#'
 #' @template doAssertion
 #'
 #' @param rescale Logical. If \code{TRUE}, the default, cover for each species will be rescaled
@@ -690,71 +691,115 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @importFrom crayon blue
 #' @importFrom data.table melt setnames
 #' @keywords internal
-.createCohortData <- function(inputDataTable, pixelGroupBiomassClass,
-                              doAssertion = getOption("LandR.assertions", TRUE), rescale = TRUE) {
+.createCohortData <- function(inputDataTable, # pixelGroupBiomassClass,
+                              doAssertion = getOption("LandR.assertions", TRUE), rescale = TRUE,
+                              minCoverThreshold = 5) {
   coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
   newCoverColNames <- gsub("cover\\.", "", coverColNames)
   setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
   message(blue("Create initial cohortData object, with no pixelGroups yet"))
+  message(green("-- Begin reconsiling data inconsistencies"))
+
+  inputDataTable[, totalCover := rowSums(.SD), .SDcols = newCoverColNames]
+  whEnoughCover <- inputDataTable$totalCover > minCoverThreshold
+  message(green("  -- Removing all pixels with totalCover <= minCoverThreshold (affects",
+                sum(!whEnoughCover),
+                "of", NROW(inputDataTable),"pixels)"))
+  message(green("     --> resulting in", sum(whEnoughCover), "pixels)"))
+  inputDataTable <- inputDataTable[whEnoughCover]
+
+  whAgeEqZero <- which(inputDataTable$age == 0)
+  message(green("  -- Setting TotalBiomass in pixel to 0 where age == 0 (affects", length(whAgeEqZero),
+                "of", NROW(inputDataTable),"pixels)"))
+  message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
+  inputDataTable[whAgeEqZero, `:=`(totalBiomass = 0)]
+
+  whTotalBEqZero <- which(inputDataTable$totalBiomass == 0)
+  message(green("  -- Setting age in pixel to 0 where totalBiomass == 0 (affects", length(whTotalBEqZero),
+                "of", NROW(inputDataTable),"pixels)"))
+  message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
+  inputDataTable[whTotalBEqZero, `:=`(age = 0)]
+
   cohortData <- data.table::melt(inputDataTable,
                                  value.name = "cover",
                                  measure.vars = newCoverColNames,
                                  variable.name = "speciesCode")
+
+  # Remove all cover <= minCoverThreshold
+  whCoverGTMinCover <- which(cohortData$cover > minCoverThreshold)
+  message(green("  -- Removing all cohorts with cover <= minCoverThreshold (affects", NROW(cohortData) - length(whCoverGTMinCover),
+                "of", NROW(cohortData), "cohorts"))
+  message(green("     --> resulting in", length(whCoverGTMinCover), "cohorts)"))
+  cohortData <- cohortData[whCoverGTMinCover]
+  message(green("     --> resulting in", length(unique(cohortData$pixelIndex)), "pixels)"))
+
   cohortData[, coverOrig := cover]
   if (isTRUE(doAssertion))
     if (any(duplicated(cohortData)))
       warning(".createCohortData: cohortData contains duplicate rows.")
 
-  if (doAssertion)
-    #describeCohortData(cohortData)
-    message(blue("assign B = 0 and age = 0 for pixels where cover = 0,\n",
-                 "because cover is most reliable dataset"))
+  #if (doAssertion)
+  #describeCohortData(cohortData)
+  #message(green("  -- Assign B = 0 and age = 0 for pixels where cover = 0,\n",
+  #             "because cover is most reliable dataset"))
 
-  hasCover0 <- which(cohortData[["cover"]] == 0)
+  # hasCover0 <- which(cohortData[["cover"]] == 0)
   cncd <- colnames(cohortData)
-  if (any(c("age", "logAge") %in% cncd)) {
-    set(cohortData, hasCover0, "age", 0L)
-    set(cohortData, hasCover0, "logAge", -Inf)
-  }
+  # if (any(c("age", "logAge") %in% cncd)) {
+  #   set(cohortData, hasCover0, "age", 0L)
+  #   set(cohortData, hasCover0, "logAge", -Inf)
+  # }
   if (any(c("B", "totalBiomass") %in% cncd)) {
-    set(cohortData, hasCover0, "B", 0)
-    message(blue("assign totalBiomass = 0 if sum(cover) = 0 in a pixel, ",
-                 "\n  because cover is most reliable dataset"))
-    cohortData <- cohortData[, sum(cover) == 0, by = "pixelIndex"][V1 == TRUE][
-      cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
-    cohortData[, V1 := NULL]
+    #set(cohortData, hasCover0, "B", 0)
+    #message(green("  -- Assign totalBiomass = 0 if sum(cover) = 0 in a pixel, ",
+    #             "  because cover is most reliable dataset"))
+    #cohortData <- cohortData[, sum(cover) == 0, by = "pixelIndex"][V1 == TRUE][
+    #  cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
+    #cohortData[, V1 := NULL]
   }
 
   ## CRAZY TODO: DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
-  # message(crayon::blue(paste("POSSIBLE ALERT:",
+  # message(crayon::green(paste("POSSIBLE ALERT:",
   #                            "assume deciduous cover is 1/2 the conversion to B as conifer")))
   # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)]
+
+  # Change temporarily to numeric for following calculation
   set(cohortData, NULL, "cover", as.numeric(cohortData[["cover"]]))
-  if (isTRUE(rescale))
-    cohortData[ , cover := {
-      sumCover <- sum(cover)
-      if (sumCover > 100) {
-        cover <- cover / (sumCover + 0.0001) * 100L
-      }
-      cover
-    }, by = "pixelIndex"]
-
-  set(cohortData, NULL, "cover", asInteger(cohortData[["cover"]]))
-
-  if (any(c("B", "totalBiomass") %in% cncd)) {
-    # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
-    set(cohortData, NULL, "B", as.numeric(cohortData[["B"]]))
-    message(blue("Divide total B of each pixel by the relative cover of the cohorts"))
-    cohortData[ , B := mean(totalBiomass) * cover / 100, by = "pixelIndex"]
-    message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
-    cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
-
-    message(blue("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
-    cohortData[cover > 0 & age == 0, B := 0L]
-    cohortData[ , totalBiomass := asInteger(totalBiomass)]
-    set(cohortData, NULL, "B", asInteger(cohortData[["B"]]))
+  if (isTRUE(rescale)) {
+    cohortData[, totalCover:=sum(cover), by = "pixelIndex"]
+    cohortData[, cover := cover/totalCover*100]
   }
 
+    # cohortData[ , cover := {
+    #   sumCover <- sum(cover)
+    #   if (sumCover > 100) {
+    #     cover <- cover / (sumCover + 0.0001) * 100L
+    #   }
+    #   cover
+    # }, by = "pixelIndex"]
+
+  # set(cohortData, NULL, "cover", asInteger(cohortData[["cover"]]))
+
+  if (FALSE) {
+    if (any(c("B", "totalBiomass") %in% cncd)) {
+      # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
+      #set(cohortData, NULL, "B", as.numeric(cohortData[["B"]]))
+      set(cohortData, NULL, "B", cohortData[["totalBiomass"]] * cohortData[["cover"]] / 100)
+      message(green("  -- Divide total B of each pixel by the relative cover of the cohorts"))
+
+      #cohortData[ , B := mean(totalBiomass) * cover / 100, by = "pixelIndex"]
+      # message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
+      # cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
+
+      message(green("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
+      cohortData[cover > 0 & age == 0, B := 0L]
+      cohortData[ , totalBiomass := asInteger(totalBiomass)]
+      set(cohortData, NULL, "B", asInteger(cohortData[["B"]]))
+    }
+  }
+
+  # clean up
+  set(cohortData, NULL, c("totalCover", "coverOrig"), NULL)
   return(cohortData)
 }
 
@@ -781,20 +826,22 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
 #'   represent percent cover by species, rescaled to sum up to 100\%.
 #'
-#' @param pixelGroupBiomassClass Round B to the nearest \code{pixelGroupBiomassClass}
-#'   to establish unique \code{pixelGroups}.
-#'
 #' @template doAssertion
 #'
 #' @param doSubset Turns on/off subsetting. Defaults to \code{TRUE}.
 #'
 #' @author Eliot McIntire
 #' @export
-#' @importFrom crayon blue
+#' @importFrom crayon blue green
 #' @importFrom data.table melt setnames
 #' @importFrom reproducible Cache
+#' @importFrom pemisc termsInData messageDF
 #' @rdname makeAndCleanInitialCohortData
-makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroupBiomassClass,
+makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
+                                          #pixelGroupBiomassClass,
+                                          #pixelGroupAgeClass = 1,
+                                          imputeBadAgeModel = quote(lme4::lmer(age ~ B * speciesCode + cover * speciesCode + (1 | initialEcoregionCode))),
+                                          minCoverThreshold,
                                           doAssertion = getOption("LandR.assertions", TRUE),
                                           doSubset = TRUE) {
   ### Create groupings
@@ -813,14 +860,23 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
   }
 
   cohortData <- Cache(.createCohortData, inputDataTable = inputDataTable,
-                      pixelGroupBiomassClass = pixelGroupBiomassClass,
+                      # pixelGroupBiomassClass = pixelGroupBiomassClass,
+                      minCoverThreshold = minCoverThreshold,
                       doAssertion = doAssertion)
 
   ######################################################
   # Impute missing ages on poor age dataset
   ######################################################
-  cohortDataMissingAge <- cohortData[, hasBadAge := all(age == 0 & cover > 0) |
-                                       any(is.na(age)), by = "pixelIndex"][hasBadAge == TRUE]
+  # Cases:
+  #  All species cover = 0 yet totalB > 0
+
+  cohortDataMissingAge <- cohortData[, hasBadAge :=
+                                       #(age == 0 & cover > 0)#| # ok because cover can be >0 with biomass = 0
+                                       (age > 0 & cover == 0) |
+                                       is.na(age) #|
+                                       #(B > 0 & age == 0) |
+                                       #(B == 0 & age > 0)
+  ][hasBadAge == TRUE]#, by = "pixelIndex"]
 
   if (NROW(cohortDataMissingAge) > 0) {
     cohortDataMissingAgeUnique <- unique(cohortDataMissingAge,
@@ -828,39 +884,64 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
                                            , .(initialEcoregionCode, speciesCode)]
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[
       cohortData, on = c("initialEcoregionCode", "speciesCode"), nomatch = 0]
-    ageModel <- quote(lme4::lmer(age ~ B * speciesCode + (1 | initialEcoregionCode) + cover))
-    cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(B, age, speciesCode,
+    cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[!is.na(cohortDataMissingAgeUnique$age)]
+    cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(totalBiomass, age, speciesCode,
                                                                  initialEcoregionCode, cover)]
+    zeros <- sapply(cohortDataMissingAgeUnique, function(x) sum(x==0))
+    if (sum(zeros)) {
+      hasZeros <- zeros[zeros > 0]
+      message(" ", paste(names(hasZeros), collapse = ", "), " had ",
+              paste(hasZeros, collapse = ", "), " zeros, respectively")
+      warning(" These are being removing them from dataset. If this is not desired; please fix")
+      # terms <- strsplit(gsub(" ", "", as.character(imputeBadAgeModel)), split = "[[:punct:]]+")[[2]][-1] # remove response
+      # terms <- unique(terms)
+      # terms <- terms[terms %in% colnames(cohortDataMissingAgeUnique)]
+      terms <- termsInData(imputeBadAgeModel, cohortDataMissingAgeUnique)
+      lapply(terms, function(x) {
+        cohortDataMissingAgeUnique <<- cohortDataMissingAgeUnique[get(x) != 0]
+      })
+
+    }
     cohortDataMissingAgeUnique <- subsetDT(cohortDataMissingAgeUnique,
                                            by = c("initialEcoregionCode", "speciesCode"),
                                            doSubset = doSubset)
     message(blue("Impute missing age values: started", Sys.time()))
-    outAge <- Cache(statsModel, modelFn = ageModel,
-                    uniqueEcoregionGroups = unique(cohortDataMissingAgeUnique$initialEcoregionCode),
+
+    outAge <- Cache(statsModel, modelFn = imputeBadAgeModel,
+                    uniqueEcoregionGroups =
+                      .sortDotsUnderscoreFirst(as.character(unique(cohortDataMissingAgeUnique$initialEcoregionCode))),
                     .specialData = cohortDataMissingAgeUnique,
                     omitArgs = ".specialData")
     message(blue("                           completed", Sys.time()))
-    message(outAge$rsq)
+
+    # paste with capture.output keeps table structure intact
+    messageDF(outAge$rsq, 3, "blue")
 
     ## allow.new.levels = TRUE because some groups will have only NA for age for all species
     cohortDataMissingAge[
       , imputedAge := pmax(0L, asInteger(predict(outAge$mod,
                                                  newdata = cohortDataMissingAge,
                                                  allow.new.levels = TRUE)))]
+
     cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
       cohortData, on = c("pixelIndex", "speciesCode")]
     cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = log(imputedAge))]
     cohortData[, `:=`(imputedAge = NULL)]
+
   }
+  # # Round ages to nearest pixelGroupAgeClass
+  # set(cohortData, NULL, "age", asInteger(cohortData$age / pixelGroupAgeClass) *
+  #       as.integer(pixelGroupAgeClass))
+
   cohortData[, `:=`(hasBadAge = NULL)]
 
-  #######################################################
-  # set B to zero if age is zero because B is lowest quality dataset
-  #######################################################
-  message(blue("Set recalculate totalBiomass as sum(B);",
-               "many biomasses will have been set to 0 in previous steps"))
-  cohortData[cover > 0 & age == 0, B := 0L]
-  cohortData[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
+  # #######################################################
+  # # set B to zero if age is zero because B is lowest quality dataset
+  # #######################################################
+  # message(blue("Set recalculate totalBiomass as sum(B);",
+  #              "many biomasses will have been set to 0 in previous steps"))
+  # cohortData[cover > 0 & age == 0, B := 0L]
+  # cohortData[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
 
   # This was unused, but for beta regression, this can allow 0s and 1s without
   #   needing a separate model for zeros and ones
@@ -875,9 +956,15 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns, pixelGroup
 #' @param DT A \code{data.table}
 #' @param by Character vector of column names to use for groups
 #' @param doSubset Logical or numeric indicating the number of subsamples to use
+#' @param indices Logical. If \code{TRUE}, this will return vector of row indices only. Defaults
+#'   to \code{FALSE}, i.e., return the subsampled \code{data.table}
 #'
 #' @export
-subsetDT <- function(DT, by, doSubset = TRUE) {
+#' @examples
+#' library(data.table)
+#' dt <- data.table(Lett = sample(LETTERS, replace = TRUE, size = 1000), Nums = 1:100)
+#' dt1 <- subsetDT(dt, by = "Lett", doSubset = 3)
+subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
   if (!is.null(doSubset)) {
     if (!isFALSE(doSubset)) {
       sam <- if (is.numeric(doSubset)) doSubset else 50
@@ -887,7 +974,11 @@ subsetDT <- function(DT, by, doSubset = TRUE) {
       # subset -- add line numbers of those that were sampled
       a <- DT[, list(lineNum = .I[sample(.N, size = min(.N, sam))]), by = by]
       # Select only those row numbers from whole dataset
-      DT <- DT[a$lineNum]
+      if (isFALSE(indices)) {
+        DT <- DT[a$lineNum]
+      } else {
+        DT <- a$lineNum
+      }
     }
   }
   return(DT)
@@ -965,6 +1056,12 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
   names(modelArgs)[2] <- "formula"
   modelArgs[[1]] <- NULL
   modelArgs$data <- quote(.specialData)
+
+  isChar <- unlist(lapply(modelArgs, is.character))
+  if (any(isChar))
+    modelArgs[isChar] <- lapply(modelArgs[isChar], function(yyy) {
+      eval(parse(text = yyy))
+    })
 
   mod <- do.call(fun, modelArgs)
 
@@ -1062,15 +1159,28 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #'
 #' @template pixelCohortData
 #' @param columnsForPixelGroups Default columns that define pixel groups
+#' @param pixelGroupAgeClass Integer. When assigning pixelGroup membership, this defines the resolution of ages
+#'   that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14 will be the same
+#' @param pixelGroupBiomassClass Integer. When assigning pixelGroup membership, this defines
+#'   the resolution of biomass that will be considered 'the same pixelGroup', e.g., if it is
+#'   100, then 5160 and 5240 will be the same
+#' @param minAgeForGrouping Minimum age for regrouping. This may be because there is a source of
+#'   ages for young stands/trees that is very reliable, such as a fire database. Ages below this
+#'   will not be grouped together. Defaults to -1, meaning treat all ages equally. If this is related to
+#'   known ages from a high quality database, then use age of the oldest trees in that database.
+#' @param pixelFateDT A data.table of pixelFateDT; if none provided, it will make an empty one.
+#'
 #' @template speciesEcoregion
 #'
 #' @return
-#' A list with a modified \code{pixelCohortData} and \code{cohortData} \code{data.table}s.
+#' A list with a modified \code{pixelCohortData}, \code{cohortData}, and \code{pixelFateDT} \code{data.table}s
 #'
 #' @export
 #' @importFrom data.table melt setnames set
 #' @importFrom reproducible Cache
-makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesEcoregion) {
+makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesEcoregion,
+                                pixelGroupBiomassClass, pixelGroupAgeClass, minAgeForGrouping = 0,
+                                pixelFateDT) {
   ## make ecoregioGroup a factor (again) and remove unnecessary cols.
   # refactor because the "_34" and "_35" ones are still levels
   pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
@@ -1079,26 +1189,80 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
                     names(pixelCohortData))
   set(pixelCohortData, j = cols, value = NULL)
 
+
+  # Round ages to nearest pixelGroupAgeClass
+  pixelCohortData[age > minAgeForGrouping,
+                  age := asInteger(age / pixelGroupAgeClass) *
+                    as.integer(pixelGroupAgeClass)]
+
+  # Round Biomass to nearest pixelGroupBiomassClass
+  message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
+  pixelCohortData[#age > minAgeForGrouping,
+                  , B := asInteger(B / pixelGroupBiomassClass) * as.integer(pixelGroupBiomassClass)]
+
+  # Remove B == 0 cohorts after young removals
+  message(green("  -- Removing cohorts with B = 0 and age > 0 -- these were likely poor predictions from updateYoungBiomasses"))
+  whBEqZeroAgeGT0 <- which(pixelCohortData$B == 0 & pixelCohortData$age > 0)
+  pixelCohortData2 <- pixelCohortData[-whBEqZeroAgeGT0]
+
+  lostPixels <- setdiff(pixelCohortData$pixelIndex, pixelCohortData2$pixelIndex)
+  message(green("     affected", length(whBEqZeroAgeGT0), "cohorts, in", length(lostPixels), "pixels;"))
+  lenUniquePix <- length(unique(pixelCohortData2$pixelIndex))
+  message(green("     leaving", lenUniquePix, "pixels"))
+  pixelFateDT <- pixelFate(pixelFateDT, fate = "rm pixels with Biomass == 0, after updating young cohort B",
+                           length(lostPixels), runningPixelTotal = lenUniquePix)
+
+  pixelCohortData <- pixelCohortData2
+  # # Set B to 0 if age is 0
+  # whAgeZero <- which(pixelCohortData$age == 0)
+  # if (length(whAgeZero)) {
+  #   message(green("    -- There were", length(whAgeZero), "pixels with age = 0; forcing B to zero"))
+  #   pixelCohortData[whAgeZero, B := 0L]
+  # }
+
   ## select pixels with biomass and generate pixel groups
-  pixelCohortData <- pixelCohortData[B > 0]
-  cd <- pixelCohortData[, .SD, .SDcols = c("pixelIndex", columnsForPixelGroups)]
-  pixelCohortData[, pixelGroup := Cache(generatePixelGroups, cd, maxPixelGroup = 0,
-                                        columns = columnsForPixelGroups)]
+  #pixelCohortData <- pixelCohortData[B >= 0]
 
   ########################################################################
   ## rebuild ecoregion, ecoregionMap objects -- some initial ecoregions disappeared (e.g., 34, 35, 36)
   ## rebuild biomassMap object -- biomasses have been adjusted
-  ecoregionsWeHaveParametersFor <- levels(speciesEcoregion$ecoregionGroup)
+  ## There will be some speciesCode * ecoregionGroups combinations for which we only had age = 0 and B = 0
+  if (is.factor(speciesEcoregion$ecoregionGroup)) {
+    ## we need to check available params for speciesXecoregionGroup combos, this will be achieved with a
+    # ecoregionsWeHaveParametersFor <- levels(speciesEcoregion$ecoregionGroup)
+  } else {
+    stop("speciesEcoregion$ecoregionGroup is supposed to be a factor; please go back in this",
+         "module and correct this.")
+  }
 
-  pixelCohortData <- pixelCohortData[ecoregionGroup %in% ecoregionsWeHaveParametersFor] # keep only ones we have params for
+  message(blue("Removing some pixels because their species * ecoregionGroup combination has no age or B data to estimate ecoregion traits:"))
+  # message(blue(paste(sort(unique(pixelCohortData[!ecoregionGroup %in% ecoregionsWeHaveParametersFor]$ecoregionGroup)), collapse = ", ")))
+  cols <- c("speciesCode", "ecoregionGroup")
+  messageDF(
+    colour = "blue",
+    pixelCohortData[!speciesEcoregion, on = cols][, ..cols][, list(numPixelsRemoved = .N), by = cols], # anti-join
+  )
+
+  # pixelCohortData <- pixelCohortData[ecoregionGroup %in% ecoregionsWeHaveParametersFor] # keep only ones we have params for
+  pixelCohortData <- speciesEcoregion[, ..cols][pixelCohortData, on = cols, nomatch = 0]
+
+  # Lost some ecoregionGroups -- refactor
   pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
+
+  cd <- pixelCohortData[, .SD, .SDcols = c("pixelIndex", columnsForPixelGroups)]
+  pixelCohortData[, pixelGroup := Cache(generatePixelGroups, cd, maxPixelGroup = 0,
+                                        columns = columnsForPixelGroups)]
+
   pixelCohortData[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
 
   cohortData <- unique(pixelCohortData, by = c("pixelGroup", columnsForPixelGroups))
   cohortData[, `:=`(pixelIndex = NULL)]
 
+  pixelFateDT <- pixelFate(pixelFateDT, "removing ecoregionGroups without enough data to est. maxBiomass",
+                           tail(pixelFateDT$runningPixelTotal, 1) - NROW(unique(pixelCohortData$pixelIndex)))
+
   assertUniqueCohortData(cohortData, c("pixelGroup", "ecoregionGroup", "speciesCode"))
-  return(list(cohortData = cohortData, pixelCohortData = pixelCohortData))
+  return(list(cohortData = cohortData, pixelCohortData = pixelCohortData, pixelFateDT = pixelFateDT))
 }
 
 #' Create new cohorts based on provenance table with unique \code{pixelGroup} and add to \code{cohortData}
@@ -1349,3 +1513,29 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
   return(list(cohortData = outs$cohortData,
               pixelGroupMap = outs$pixelGroupMap))
 }
+
+#' Create or amend data to a pixelFateDT object
+#'
+#' @param pixelFateDT A pixelFateDT data.table (has 3 columns, fate, pixelsRemoted, and
+#'   runningPixelTotal)
+#' @param fate A character string (length 1) describing in words the change
+#' @param pixelsRemoved A numeric indicating how many pixels were removed due to the
+#'   \code{fate}
+#' @param runningPixelTotal an optional numeric with new, running total. If not supplied,
+#'   it will be calculated from the last row of pixelFateDT runningTotal minus the
+#'   \code{pixelsRemoved}
+#' @export
+#' @return
+#' A pixelFateDT object, updated with one extra row.
+pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
+                      runningPixelTotal = NA_integer_) {
+  if (missing(pixelFateDT))
+    pixelFateDT <- data.table(fate = character(), pixelsRemoved = integer(), runningPixelTotal = integer())
+  if (is.na(runningPixelTotal))
+    runningPixelTotal <- tail(pixelFateDT$runningPixelTotal,1) - pixelsRemoved
+  pixelFateDT <- rbindlist(list(pixelFateDT, data.table(fate = fate, pixelsRemoved = pixelsRemoved,
+                                                        runningPixelTotal = runningPixelTotal)))
+  pixelFateDT
+
+}
+
