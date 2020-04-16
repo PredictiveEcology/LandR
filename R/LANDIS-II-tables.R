@@ -12,7 +12,7 @@ landisIIrepo <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/"
                       "Extensions-Succession/master/biomass-succession-archive/",
                       "trunk/tests/v6.0-2.0/")
 
-#' Download and prepare a species traits table for use with L\code{Biomass_core} module
+#' Download and prepare a species traits table for use with \code{Biomass_core} module
 #'
 #' TODO: add detailed description
 #'
