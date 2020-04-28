@@ -2,7 +2,7 @@
 % Please edit documentation in R/prepEcoregions.R
 \name{prepEcoregions}
 \alias{prepEcoregions}
-\title{Prepare egoregions objects}
+\title{Prepare ecoregions objects}
 \usage{
 prepEcoregions(
   ecoregionRst = NULL,
@@ -15,19 +15,19 @@ prepEcoregions(
 )
 }
 \arguments{
-\item{ecoregionRst}{an optional raster object that could be passed to sim, representing ecoregions}
+\item{ecoregionRst}{an optional raster object that could be passed to \code{sim}, representing ecoregions}
 
 \item{ecoregionLayer}{a spatial polygons object representing ecoregions}
 
-\item{ecoregionLayerField}{the field in ecoregionLayer that represents ecoregions - optional}
+\item{ecoregionLayerField}{optional. The field in \code{ecoregionLayer} that represents ecoregions.}
 
-\item{rasterToMatchLarge}{the rasterToMatchLarge object from sim}
+\item{rasterToMatchLarge}{the \code{rasterToMatchLarge} object from \code{sim}}
 
-\item{rstLCCAdj}{raster layer representing landcover adjusted for non-forest classes}
+\item{rstLCCAdj}{\code{RasterLayer} representing land cover adjusted for non-forest classes}
 
 \item{pixelsToRm}{a vector of pixels to remove}
 
-\item{cacheTags}{UserTags to pass to cache}
+\item{cacheTags}{\code{UserTags} to pass to cache}
 }
 \description{
 DESCRIPTION NEEDED

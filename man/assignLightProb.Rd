@@ -13,7 +13,7 @@ site's light conditions (\code{X0}-\code{X5}) for each level of a species' shade
 \item{newCohortData}{a modified version of \code{cohortData} that contains new cohorts.}
 
 \item{interpolate}{Logical. Activates interpolation of probabilities of establishment between
-any two values of shade tolerance in the sufficient light table, allowing species shade tolarance
+any two values of shade tolerance in the sufficient light table, allowing species shade tolerance
 trait values to take any decimal value between 1 and 5 (inclusively). If false, species shade tolerances
 can only take integer values between 1 and 5  (inclusively).}
 }

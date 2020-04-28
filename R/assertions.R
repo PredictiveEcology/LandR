@@ -343,14 +343,14 @@ assertRstLCChange <- function(rstLCChange, rasterToMatch,
 }
 
 
-#' Assert that the cohortData speciesEcoregion have matching clases
+#' Assert that the \code{cohortData} \code{speciesEcoregion} have matching classes
 #'
-#' Specifically, whether all combinations of ecoregionGroup and speciesCode are in both objects, no more
-#' no less.
+#' Specifically, whether all combinations of \code{ecoregionGroup} and \code{speciesCode} are in
+#' both objects, no more no less.
 #'
-#' @param cohortData A cohortData object
+#' @param cohortData A \code{cohortData} object
 #'
-#' @param speciesEcoregion A speciesEcoregion object
+#' @param speciesEcoregion A \code{speciesEcoregion} object
 #'
 #' @template doAssertion
 #'
