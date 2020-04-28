@@ -698,7 +698,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   newCoverColNames <- gsub("cover\\.", "", coverColNames)
   setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
   message(blue("Create initial cohortData object, with no pixelGroups yet"))
-  message(green("-- Begin reconsiling data inconsistencies"))
+  message(green("-- Begin reconciling data inconsistencies"))
 
   inputDataTable[, totalCover := rowSums(.SD), .SDcols = newCoverColNames]
   whEnoughCover <- inputDataTable$totalCover > minCoverThreshold
