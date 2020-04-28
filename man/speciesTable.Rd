@@ -3,7 +3,7 @@
 \name{getSpeciesTable}
 \alias{getSpeciesTable}
 \alias{prepSpeciesTable}
-\title{Download and prepare a species traits table for use with L\code{Biomass_core} module}
+\title{Download and prepare a species traits table for use with \code{Biomass_core} module}
 \usage{
 getSpeciesTable(url = NULL, dPath = tempdir(), cacheTags = NULL)
 
