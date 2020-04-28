@@ -826,6 +826,10 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
 #'   represent percent cover by species, rescaled to sum up to 100\%.
 #'
+#' @param imputeBadAgeModel DESCRIPTION NEEDED
+#'
+#' @param minCoverThreshold DESCRIPTION NEEDED
+#'
 #' @template doAssertion
 #'
 #' @param doSubset Turns on/off subsetting. Defaults to \code{TRUE}.
