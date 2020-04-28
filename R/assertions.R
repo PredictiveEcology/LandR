@@ -349,10 +349,14 @@ assertRstLCChange <- function(rstLCChange, rasterToMatch,
 #' no less.
 #'
 #' @param cohortData A cohortData object
+#'
 #' @param speciesEcoregion A speciesEcoregion object
+#'
+#' @template doAssertion
+#'
 #' @export
 assertSpeciesEcoregionCohortDataMatch <- function(cohortData, speciesEcoregion,
-                                                   doAssertion = getOption("LandR.assertions", TRUE)) {
+                                                  doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     a <- setdiff(unique(paste(speciesEcoregion$ecoregionGroup, speciesEcoregion$speciesCode)),
                  unique(paste(cohortData$ecoregionGroup, cohortData$speciesCode)))

@@ -1,13 +1,13 @@
 if (getRversion() >= "3.1.0") {
   utils::globalVariables(c(
-    ".", ".I", ":=", "..groupVar", "age", "aNPPAct", "cover", "coverOrig",
+    ".", "..cols", ".I", ":=", "..groupVar", "age", "aNPPAct", "cover", "coverOrig",
     "ecoregion", "ecoregionGroup", "hasBadAge",
     "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
     "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
     "newPossLCC", "noPixels", "oldSumB", "ord", "outBiomass", "oldEcoregionGroup",
     "pixelGroup2", "pixelIndex", "pixels", "possERC",
     "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
-    "temppixelGroup", "toDelete", "totalBiomass",
+    "temppixelGroup", "toDelete", "totalBiomass", "totalCover",
     "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
   ))
 }
@@ -698,7 +698,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   newCoverColNames <- gsub("cover\\.", "", coverColNames)
   setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
   message(blue("Create initial cohortData object, with no pixelGroups yet"))
-  message(green("-- Begin reconsiling data inconsistencies"))
+  message(green("-- Begin reconciling data inconsistencies"))
 
   inputDataTable[, totalCover := rowSums(.SD), .SDcols = newCoverColNames]
   whEnoughCover <- inputDataTable$totalCover > minCoverThreshold
@@ -826,6 +826,10 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
 #'   represent percent cover by species, rescaled to sum up to 100\%.
 #'
+#' @param imputeBadAgeModel DESCRIPTION NEEDED
+#'
+#' @param minCoverThreshold DESCRIPTION NEEDED
+#'
 #' @template doAssertion
 #'
 #' @param doSubset Turns on/off subsetting. Defaults to \code{TRUE}.
@@ -834,7 +838,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @export
 #' @importFrom crayon blue green
 #' @importFrom data.table melt setnames
-#' @importFrom reproducible Cache
+#' @importFrom reproducible Cache .sortDotsUnderscoreFirst
 #' @importFrom pemisc termsInData messageDF
 #' @rdname makeAndCleanInitialCohortData
 makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
@@ -908,8 +912,9 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
     message(blue("Impute missing age values: started", Sys.time()))
 
     outAge <- Cache(statsModel, modelFn = imputeBadAgeModel,
-                    uniqueEcoregionGroups =
-                      .sortDotsUnderscoreFirst(as.character(unique(cohortDataMissingAgeUnique$initialEcoregionCode))),
+                    uniqueEcoregionGroups = .sortDotsUnderscoreFirst(
+                      as.character(unique(cohortDataMissingAgeUnique$initialEcoregionCode))
+                    ),
                     .specialData = cohortDataMissingAgeUnique,
                     omitArgs = ".specialData")
     message(blue("                           completed", Sys.time()))
@@ -1178,6 +1183,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #' @export
 #' @importFrom data.table melt setnames set
 #' @importFrom reproducible Cache
+#' @importFrom utils tail
 makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesEcoregion,
                                 pixelGroupBiomassClass, pixelGroupAgeClass, minAgeForGrouping = 0,
                                 pixelFateDT) {

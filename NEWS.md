@@ -1,5 +1,9 @@
 bug reports https://github.com/PredictiveEcology/LandR/issues
 
+version 0.0.4
+=============
+* `assignLightProb` now allows interpolating germination probability between species shade tolerance levels for any given stand shade value. This allows for for decimal values in species shade tolerance traits and greater fine tunning of shade-related germination probabilities.
+
 version 0.0.3
 =============
 * rounding of age classes and biomass now occurs only inside `makeCohortDataFiles`, as it is the last thing to do before making `cohortData`
