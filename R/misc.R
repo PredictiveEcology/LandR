@@ -1,6 +1,7 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(".", ":=", "lightProb", "shadetolerance", "siteShade", "year"))
-}
+utils::globalVariables(c(
+  ".", ":=", "highProb", "highShadetol", "lightProb", "lowProb", "lowShadetol",
+  "shadetolerance", "siteShade", "year"
+))
 
 #' Assign light probability
 #'
