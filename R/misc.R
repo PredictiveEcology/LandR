@@ -11,7 +11,7 @@ utils::globalVariables(c(
 #' @param newCohortData  a modified version of \code{cohortData} that contains new cohorts.
 #'
 #' @param interpolate Logical. Activates interpolation of probabilities of establishment between
-#'   any two values of shade tolerance in the sufficient light table, allowing species shade tolarance
+#'   any two values of shade tolerance in the sufficient light table, allowing species shade tolerance
 #'   trait values to take any decimal value between 1 and 5 (inclusively). If false, species shade tolerances
 #'   can only take integer values between 1 and 5  (inclusively).
 #'

@@ -2,7 +2,7 @@
 % Please edit documentation in R/cohorts.R
 \name{pixelFate}
 \alias{pixelFate}
-\title{Create or amend data to a pixelFateDT object}
+\title{Create or amend data to a \code{pixelFateDT} object}
 \usage{
 pixelFate(
   pixelFateDT,
@@ -12,21 +12,20 @@ pixelFate(
 )
 }
 \arguments{
-\item{pixelFateDT}{A pixelFateDT data.table (has 3 columns, fate, pixelsRemoted, and
-runningPixelTotal)}
+\item{pixelFateDT}{A \code{pixelFateDT} \code{data.table} with 3 columns: \code{fate},
+\code{pixelsRemoted}, and \code{runningPixelTotal}.}
 
 \item{fate}{A character string (length 1) describing in words the change}
 
-\item{pixelsRemoved}{A numeric indicating how many pixels were removed due to the
-\code{fate}}
+\item{pixelsRemoved}{A numeric indicating how many pixels were removed due to the \code{fate}.}
 
 \item{runningPixelTotal}{an optional numeric with new, running total. If not supplied,
-it will be calculated from the last row of pixelFateDT runningTotal minus the
+it will be calculated from the last row of \code{pixelFateDT} \code{runningTotal} minus the
 \code{pixelsRemoved}}
 }
 \value{
-A pixelFateDT object, updated with one extra row.
+A \code{pixelFateDT} object, updated with one extra row.
 }
 \description{
-Create or amend data to a pixelFateDT object
+Create or amend data to a \code{pixelFateDT} object
 }

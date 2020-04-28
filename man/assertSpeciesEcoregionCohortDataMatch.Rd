@@ -2,7 +2,7 @@
 % Please edit documentation in R/assertions.R
 \name{assertSpeciesEcoregionCohortDataMatch}
 \alias{assertSpeciesEcoregionCohortDataMatch}
-\title{Assert that the cohortData speciesEcoregion have matching clases}
+\title{Assert that the \code{cohortData} \code{speciesEcoregion} have matching classes}
 \usage{
 assertSpeciesEcoregionCohortDataMatch(
   cohortData,
@@ -11,15 +11,15 @@ assertSpeciesEcoregionCohortDataMatch(
 )
 }
 \arguments{
-\item{cohortData}{A cohortData object}
+\item{cohortData}{A \code{cohortData} object}
 
-\item{speciesEcoregion}{A speciesEcoregion object}
+\item{speciesEcoregion}{A \code{speciesEcoregion} object}
 
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \description{
-Specifically, whether all combinations of ecoregionGroup and speciesCode are in both objects, no more
-no less.
+Specifically, whether all combinations of \code{ecoregionGroup} and \code{speciesCode} are in
+both objects, no more no less.
 }

@@ -1164,21 +1164,23 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #'
 #' @template pixelCohortData
 #' @param columnsForPixelGroups Default columns that define pixel groups
-#' @param pixelGroupAgeClass Integer. When assigning pixelGroup membership, this defines the resolution of ages
-#'   that will be considered 'the same pixelGroup', e.g., if it is 10, then 6 and 14 will be the same
-#' @param pixelGroupBiomassClass Integer. When assigning pixelGroup membership, this defines
-#'   the resolution of biomass that will be considered 'the same pixelGroup', e.g., if it is
+#' @param pixelGroupAgeClass Integer. When assigning \code{pixelGroup} membership, this defines the
+#'   resolution of ages that will be considered 'the same \code{pixelGroup}', e.g., if it is 10,
+#'   then 6 and 14 will be the same.
+#' @param pixelGroupBiomassClass Integer. When assigning \code{pixelGroup} membership, this defines
+#'   the resolution of biomass that will be considered 'the same \code{pixelGroup}', e.g., if it is
 #'   100, then 5160 and 5240 will be the same
 #' @param minAgeForGrouping Minimum age for regrouping. This may be because there is a source of
-#'   ages for young stands/trees that is very reliable, such as a fire database. Ages below this
-#'   will not be grouped together. Defaults to -1, meaning treat all ages equally. If this is related to
-#'   known ages from a high quality database, then use age of the oldest trees in that database.
-#' @param pixelFateDT A data.table of pixelFateDT; if none provided, it will make an empty one.
+#'   ages for young stands/trees that is very reliable, such as a fire database.
+#'   Ages below this will not be grouped together. Defaults to -1, meaning treat all ages equally.
+#'   If this is related to known ages from a high quality database, then use age of the oldest
+#'   trees in that database.
+#' @param pixelFateDT A \code{data.table} of \code{pixelFateDT}; if none provided, will make an empty one.
 #'
 #' @template speciesEcoregion
 #'
-#' @return
-#' A list with a modified \code{pixelCohortData}, \code{cohortData}, and \code{pixelFateDT} \code{data.table}s
+#' @return A list with a modified \code{pixelCohortData}, \code{cohortData}, and \code{pixelFateDT}
+#' \code{data.table}s.
 #'
 #' @export
 #' @importFrom data.table melt setnames set
@@ -1362,7 +1364,6 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 #' @param verbose Integer, where increasing number is increasing verbosity. Currently,
 #'    only level 1 exists; but this may change.
 #'
-#'
 #' @template doAssertion
 #'
 #' @return
@@ -1370,12 +1371,12 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 #' \code{newPixelCohortData} inserted.
 #'
 #' @export
-#' @rdname updateCohortDataPostHarvest
 #' @importFrom crayon green magenta
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
 #' @importFrom SpaDES.core paddedFloatToChar
 #' @importFrom stats na.omit
+#' @rdname updateCohortDataPostHarvest
 updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                              speciesEcoregion, treedHarvestPixelTableSinceLastDisp = NULL,
                              successionTimestep, provenanceTable,
@@ -1520,19 +1521,19 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
               pixelGroupMap = outs$pixelGroupMap))
 }
 
-#' Create or amend data to a pixelFateDT object
+#' Create or amend data to a \code{pixelFateDT} object
 #'
-#' @param pixelFateDT A pixelFateDT data.table (has 3 columns, fate, pixelsRemoted, and
-#'   runningPixelTotal)
+#' @param pixelFateDT A \code{pixelFateDT} \code{data.table} with 3 columns: \code{fate},
+#'   \code{pixelsRemoted}, and \code{runningPixelTotal}.
 #' @param fate A character string (length 1) describing in words the change
-#' @param pixelsRemoved A numeric indicating how many pixels were removed due to the
-#'   \code{fate}
+#' @param pixelsRemoved A numeric indicating how many pixels were removed due to the \code{fate}.
 #' @param runningPixelTotal an optional numeric with new, running total. If not supplied,
-#'   it will be calculated from the last row of pixelFateDT runningTotal minus the
+#'   it will be calculated from the last row of \code{pixelFateDT} \code{runningTotal} minus the
 #'   \code{pixelsRemoved}
+#'
+#' @return A \code{pixelFateDT} object, updated with one extra row.
+#'
 #' @export
-#' @return
-#' A pixelFateDT object, updated with one extra row.
 pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
                       runningPixelTotal = NA_integer_) {
   if (missing(pixelFateDT))
@@ -1542,6 +1543,4 @@ pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
   pixelFateDT <- rbindlist(list(pixelFateDT, data.table(fate = fate, pixelsRemoved = pixelsRemoved,
                                                         runningPixelTotal = runningPixelTotal)))
   pixelFateDT
-
 }
-

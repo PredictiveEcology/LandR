@@ -1,3 +1,4 @@
+1s
 Andison
 AppVeyor
 Barros
@@ -5,6 +6,7 @@ biomasses
 Boreal
 Boulanger
 BSW
+bugfixes
 CASFRI
 CFS
 CRS
@@ -25,7 +27,7 @@ LQ
 Montane
 ORCID
 rasterize
-rasterizing
+Rasterize
 rasters
 repo
 reproject
@@ -35,5 +37,8 @@ resprout
 resprouting
 serotiny
 SpaDES
+subsampled
+v0
+v1
 vectorized
 Yan
