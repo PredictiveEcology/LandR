@@ -218,7 +218,8 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
     sppEquivCol = sppEquivCol,
     thresh = thresh,
     url = url,
-    userTags = c("speciesLayers", "KNN"))
+    userTags = c("speciesLayers", "KNN")
+  )
 }
 
 #' @export
@@ -305,7 +306,7 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
   makePickellStack(PickellRaster = speciesLayers,
                    sppEquiv = sppEquiv,
                    sppEquivCol = sppEquivCol,
-                   destinationPath = destinationPath)
+                   destinationPath = outputPath)
 }
 
 #' @export
