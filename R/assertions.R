@@ -83,15 +83,30 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
     if (!missing(minRelativeB))
       erg[[4]] <- sort(unique(minRelativeB$ecoregionGroup))
 
+    ## first test will detect differences in both factor levels and values
     lens <- sapply(erg, function(x) length(x) > 1)
     erg <- erg[lens]
-    test3 <- all(sapply(seq(erg)[-1], function(x)
-      identical(erg[[1]], erg[[x]])))
+    # test3 <- all(sapply(seq(erg)[-1], function(x)
+      # identical(erg[[1]], erg[[x]])))
+    test3 <- all(outer(erg, erg, FUN = Vectorize(identical)))
 
-    if (!test3) {
+    ## second test only detects differences in values
+    erg <- lapply(erg, as.character)
+    # test4 <- all(sapply(seq(erg)[-1], function(x)
+    #   identical(erg[[1]], erg[[x]])))
+    test4 <- all(outer(erg, erg, FUN = Vectorize(identical)))
+
+    if (!test4) {
       message(str(erg, 1))
       stop("speciesEcoregion, cohortData, and ecoregionMap should all have exactly the same",
            "\n  ecoregionGroups. They do not. This needs to be fixed before proceeding.")
+    }
+
+    ## only necessary to check this one if the first doesn't fail.
+    if (!test3) {
+      message(str(erg, 1))
+      stop("speciesEcoregion, cohortData, and ecoregionMap should all have exactly the same",
+           "\n  ecoregionGroup levels. They do not. This needs to be fixed before proceeding.")
     }
   }
 }
@@ -324,5 +339,35 @@ assertRstLCChange <- function(rstLCChange, rasterToMatch,
     if (length(temp))
       stop("rstLCChange should be a 'mask', with 1s in disturbed pixels and NAs everywhere else")
 
+  }
+}
+
+
+#' Assert that the \code{cohortData} \code{speciesEcoregion} have matching classes
+#'
+#' Specifically, whether all combinations of \code{ecoregionGroup} and \code{speciesCode} are in
+#' both objects, no more no less.
+#'
+#' @param cohortData A \code{cohortData} object
+#'
+#' @param speciesEcoregion A \code{speciesEcoregion} object
+#'
+#' @template doAssertion
+#'
+#' @export
+assertSpeciesEcoregionCohortDataMatch <- function(cohortData, speciesEcoregion,
+                                                  doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    a <- setdiff(unique(paste(speciesEcoregion$ecoregionGroup, speciesEcoregion$speciesCode)),
+                 unique(paste(cohortData$ecoregionGroup, cohortData$speciesCode)))
+
+    if (length(a) > 0)
+      stop("speciesEcoregion has ecoregionGroup x speciesCode values that are not in cohortData: ",
+           paste(a, collapse = ", "))
+    b <- setdiff(unique(paste(cohortData$ecoregionGroup, cohortData$speciesCode)),
+                 unique(paste(speciesEcoregion$ecoregionGroup, speciesEcoregion$speciesCode)))
+    if (length(b) > 0)
+      stop("cohortData has ecoregionGroup x speciesCode values that are not in speciesEcoregion: ",
+           paste(b, collapse = ", "))
   }
 }

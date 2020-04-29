@@ -5,7 +5,15 @@
 \title{Make the \code{cohortData} table, while modifying the temporary
 \code{pixelCohortData} that will be used to prepare other files.}
 \usage{
-makeCohortDataFiles(pixelCohortData, columnsForPixelGroups, speciesEcoregion)
+makeCohortDataFiles(
+  pixelCohortData,
+  columnsForPixelGroups,
+  speciesEcoregion,
+  pixelGroupBiomassClass,
+  pixelGroupAgeClass,
+  minAgeForGrouping = 0,
+  pixelFateDT
+)
 }
 \arguments{
 \item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
@@ -13,9 +21,26 @@ makeCohortDataFiles(pixelCohortData, columnsForPixelGroups, speciesEcoregion)
 \item{columnsForPixelGroups}{Default columns that define pixel groups}
 
 \item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
+
+\item{pixelGroupBiomassClass}{Integer. When assigning \code{pixelGroup} membership, this defines
+the resolution of biomass that will be considered 'the same \code{pixelGroup}', e.g., if it is
+100, then 5160 and 5240 will be the same}
+
+\item{pixelGroupAgeClass}{Integer. When assigning \code{pixelGroup} membership, this defines the
+resolution of ages that will be considered 'the same \code{pixelGroup}', e.g., if it is 10,
+then 6 and 14 will be the same.}
+
+\item{minAgeForGrouping}{Minimum age for regrouping. This may be because there is a source of
+ages for young stands/trees that is very reliable, such as a fire database.
+Ages below this will not be grouped together. Defaults to -1, meaning treat all ages equally.
+If this is related to known ages from a high quality database, then use age of the oldest
+trees in that database.}
+
+\item{pixelFateDT}{A \code{data.table} of \code{pixelFateDT}; if none provided, will make an empty one.}
 }
 \value{
-A list with a modified \code{pixelCohortData} and \code{cohortData} \code{data.table}s.
+A list with a modified \code{pixelCohortData}, \code{cohortData}, and \code{pixelFateDT}
+\code{data.table}s.
 }
 \description{
 Takes a \code{pixelCohortData} table (see \code{makeAndCleanInitialCohortData}),

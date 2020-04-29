@@ -4,13 +4,18 @@
 \alias{assignLightProb}
 \title{Assign light probability}
 \usage{
-assignLightProb(sufficientLight, newCohortData)
+assignLightProb(sufficientLight, newCohortData, interpolate = TRUE)
 }
 \arguments{
 \item{sufficientLight}{a \code{data.table} containing probability of establishment, given a
-site's light conditions (\code{X0}-\code{X5}) for each level of a specie's shade tolerance (1-5).}
+site's light conditions (\code{X0}-\code{X5}) for each level of a species' shade tolerance (1-5).}
 
 \item{newCohortData}{a modified version of \code{cohortData} that contains new cohorts.}
+
+\item{interpolate}{Logical. Activates interpolation of probabilities of establishment between
+any two values of shade tolerance in the sufficient light table, allowing species shade tolerance
+trait values to take any decimal value between 1 and 5 (inclusively). If false, species shade tolerances
+can only take integer values between 1 and 5  (inclusively).}
 }
 \value{
 \code{newCohortData} with a \code{lightProb} column

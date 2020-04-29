@@ -1,5 +1,6 @@
 if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c("active", "ecoregion", "ecoregionGroup", "ID", "mapcode"))
+  utils::globalVariables(c("active", "ecoregion", "ecoregionGroup", "ID", "mapcode",
+                           "landcover", "ecoregion_lcc"))
 }
 
 #' Make \code{ecoregionMap} and \code{ecoregion} table
@@ -11,10 +12,7 @@ if (getRversion() >= "3.1.0") {
 #' @param ecoregionMaps a \code{list} with two rasters, one with ecoregions (e.g. ecodistricts)
 #' and another with land cover (e.g. LCC)
 #' @param ecoregionName the name describing the type of ecoregions in first map
-#' (e.g. \code{"ecoDistrict"})
-#' @param ecoregionActiveStatus A two column \code{data.table} detailing with ecoregions
-#' are to be considered active for the simulations. Columns should be named 'active'
-#' (with 'yes' or 'no' values) and 'ecoregion'.
+#' (e.g. \code{"ecoDistrict"}) if passing a polygon file
 #' @template rasterToMatch
 #'
 #' @return
@@ -27,8 +25,7 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom raster getValues levels raster
 #' @importFrom sf st_as_sf
 #' @importFrom SpaDES.core paddedFloatToChar
-ecoregionProducer <- function(ecoregionMaps, ecoregionName,
-                              ecoregionActiveStatus, rasterToMatch) {
+ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch) {
   # change the coordinate reference for all spatialpolygons
   message("ecoregionProducer 1: ", Sys.time())
   #ecoregionMapInStudy <- raster::intersect(ecoregionMapFull, fixErrors(aggregate(studyArea)))
@@ -62,34 +59,13 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName,
   rstEcoregion[!NAs] <- as.integer(ecoregionValues)
   levels(rstEcoregion) <- data.frame(ID = seq(ecoregionFactorLevels),
                                      mapcode = seq(ecoregionFactorLevels),
-                                     ecoRegion = gsub("_.*", "", ecoregionFactorLevels),
-                                     landCover = gsub(".*_", "", ecoregionFactorLevels),
-                                     ecoregion = ecoregionFactorLevels)
-  #ecoregionFactorValues <- na.omit(unique(rstEcoregion[]))
-
-  #ecoregionTable <- raster::levels(rstEcoregion)[[1]]
-
-  if (FALSE) {
-    data.table(
-      mapcode = seq_along(ecoregionFactorLevels[!is.na(ecoregionFactorLevels)]),
-      ecoregion = ecoregionFactorLevels[!is.na(ecoregionFactorLevels)]
-    )
-    message("ecoregionProducer mapvalues: ", Sys.time())
-    # rstEcoregion[] <- plyr::mapvalues(rstEcoregion[], from = ecoregionTable$ecoregion,
-    #                                   to = ecoregionTable$mapcode)
-    ecoregionActiveStatus[, ecoregion := as.factor(ecoregion)]
-    ecoregionTable <- ecoregionTable[!is.na(mapcode), ][, ecoregion := as.character(ecoregion)]
-    message("ecoregionProducer dplyr_leftjoin: ", Sys.time())
-    ecoregionTable <- dplyr::left_join(ecoregionTable, ecoregionActiveStatus, by = "ecoregion") %>%
-      data.table()
-    ecoregionTable[is.na(active), active := "no"]
-
-    ecoregionTable <- ecoregionTable[, .(active, mapcode, ecoregion)]
-  }
+                                     ecoregion = gsub("_.*", "", ecoregionFactorLevels),
+                                     landcover = gsub(".*_", "", ecoregionFactorLevels),
+                                     ecoregion_lcc = ecoregionFactorLevels)
 
   ecoregionTable <- as.data.table(raster::levels(rstEcoregion)[[1]])
   message("ecoregionProducer mapvalues: ", Sys.time())
-  ecoregionTable <- ecoregionTable[,.(active = "yes", mapcode, ecoregion)]
+  ecoregionTable <- ecoregionTable[,.(active = "yes", mapcode, ecoregion, landcover, ecoregion_lcc)]
 
   return(list(ecoregionMap = rstEcoregion, ecoregion = ecoregionTable))
 }
@@ -141,7 +117,9 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
   ecoregionMap <-  raster(ecoregionFiles$ecoregionMap)
-  ecoregionMap[pixelData$pixelIndex] <- as.integer(pixelData$ecoregionGroup)
+
+  # suppress this message call no non-missing arguments to min; returning Inf min(x@data@values, na.rm = TRUE)
+  suppressWarnings(ecoregionMap[pixelData$pixelIndex] <- as.integer(pixelData$ecoregionGroup))
   levels(ecoregionMap) <- data.frame(ID = seq(levels(pixelData$ecoregionGroup)),
                                      ecoregion = gsub("_.*", "", levels(pixelData$ecoregionGroup)),
                                      ecoregionGroup = levels(pixelData$ecoregionGroup),

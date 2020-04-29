@@ -4,23 +4,14 @@
 \alias{ecoregionProducer}
 \title{Make \code{ecoregionMap} and \code{ecoregion} table}
 \usage{
-ecoregionProducer(
-  ecoregionMaps,
-  ecoregionName,
-  ecoregionActiveStatus,
-  rasterToMatch
-)
+ecoregionProducer(ecoregionMaps, ecoregionName = NULL, rasterToMatch)
 }
 \arguments{
 \item{ecoregionMaps}{a \code{list} with two rasters, one with ecoregions (e.g. ecodistricts)
 and another with land cover (e.g. LCC)}
 
 \item{ecoregionName}{the name describing the type of ecoregions in first map
-(e.g. \code{"ecoDistrict"})}
-
-\item{ecoregionActiveStatus}{A two column \code{data.table} detailing with ecoregions
-are to be considered active for the simulations. Columns should be named 'active'
-(with 'yes' or 'no' values) and 'ecoregion'.}
+(e.g. \code{"ecoDistrict"}) if passing a polygon file}
 
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}

@@ -48,12 +48,12 @@ makeDummyRawBiomassMap <- function(rasterToMatch) {
 #'
 #' @export
 #' @importFrom raster setValues
+#' @importFrom scales rescale
 #' @rdname dummy-inputs
 makeDummyStandAgeMap <- function(rawBiomassMap) {
   standAgeMap <- setValues(rawBiomassMap, asInteger(rescale(getValues(rawBiomassMap), c(1, 300))))
   return(standAgeMap)
 }
-
 
 #' @details
 #' \code{rstLCC} is a raster land-cover class per pixel, with values between 1 and 5 that have no
@@ -83,6 +83,7 @@ makeDummyRstLCC <- function(rasterToMatch) {
 #' @export
 #' @importFrom data.table data.table
 #' @importFrom raster setValues
+#' @importFrom stats complete.cases
 #' @rdname dummy-inputs
 makeDummyEcoregionFiles <- function(ecoregionMap, rstLCC, rasterToMatch) {
   ecoregionstatus <- data.table(active = "yes",
