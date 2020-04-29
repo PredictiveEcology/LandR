@@ -646,8 +646,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   suffix <- paste0("_", suffix)
 
   ## select which targetFiles to extract
-  targetFiles <- grep(paste(kNNnames, ".*\\.tif$", sep = "", collapse = "|"),
-                      fileNames, value = TRUE)
+  targetFiles <- grep(paste(kNNnames, ".*\\.tif$", sep = "", collapse = "|"), fileNames, value = TRUE)
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
 
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
