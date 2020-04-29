@@ -1290,7 +1290,6 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
                             currentTime, successionTimestep) {
 
-  browser()
    ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum B per ecoregion, join to new cohort data
   namesNCD <- names(newPixelCohortData)
@@ -1320,7 +1319,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 
   if (getOption("LandR.assertions")) {
     if (isTRUE(NROW(unique(newCohortData, by = uniqueCohortDefinition)) != NROW(newCohortData))){
-      browser()
+
       stop("Duplicated new cohorts in a pixelGroup. Please debug LandR:::.plantNewCohorts")
     #in this situation, it may be caused by not replanting all species. Not sure if this will come up.
     }
@@ -1399,7 +1398,7 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
 
     setkey(newPixelCohortData, ecoregionGroup, speciesCode)
     setkey(provenanceTable, ecoregionGroup, speciesCode)
-    browser()
+
     newPixelCohortData <- newPixelCohortData[provenanceTable]
 
     #ecoregionGroup should remain the same, Provenance will be a newly added column
@@ -1418,7 +1417,7 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
     specieseco_current[, maxB_eco := max(maxB), by = ecoregionGroup]
 
     setkey(newPixelCohortData, speciesCode, ecoregionGroup)
-    browser() #check that newPixelCohortData looks correct
+
     newPixelCohortData <- specieseco_current[newPixelCohortData]
 
     #Perhaps this needs to be parameterized, if Provenance is not a desired column?
