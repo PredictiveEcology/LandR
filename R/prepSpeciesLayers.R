@@ -211,6 +211,7 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
 
   loadkNNSpeciesLayers(
     dPath = destinationPath,
+    outputPath = outputPath,
     rasterToMatch = rasterToMatch,
     studyArea = studyArea,
     sppEquiv = sppEquiv,
@@ -249,7 +250,7 @@ prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
                      rasterToMatch = rasterToMatch,
                      method = "bilinear", ## ignore warning re: ngb (#5)
                      datatype = "INT4U",
-                     filename2 = NULL, #TRUE,
+                     filename2 = NULL,
                      overwrite = TRUE,
                      userTags =  c("CASFRIRas", "stable"))
 

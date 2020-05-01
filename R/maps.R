@@ -577,6 +577,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   dots <- list(...)
+  oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
 
   sppEquiv <- sppEquiv[, lapply(.SD, as.character)]
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
@@ -658,7 +659,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   }
   speciesLayers <- Cache(Map,
                          targetFile = asPath(targetFiles),
-                         filename2 = postProcessedFilenames,
+                         filename2 = FALSE, #postProcessedFilenames, # TODO: save files to oPath
                          url = paste0(url, targetFiles),
                          MoreArgs = list(destinationPath = asPath(dPath),
                                          fun = "raster::raster",
@@ -671,6 +672,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                          ),
                          prepInputs, quick = TRUE) # don't need to digest all the "targetFile"
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
+
   layersWdata <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh) FALSE else TRUE)
   if (sum(!layersWdata) > 0) {
     sppKeep <- names(speciesLayers)[layersWdata]
@@ -691,7 +693,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
     if (length(sppMerge) > 0)
       speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
                                       sppEquiv = sppEquiv, column = "KNN", suffix = suffix,
-                                      dPath = dPath)
+                                      dPath = oPath)
   }
 
   ## Rename species layers - There will be 2 groups -- one
