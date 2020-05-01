@@ -562,7 +562,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @param url the source url for the data, passed to \code{\link[reproducible]{prepInputs}}
 #'
 #' @param ... Additional arguments passed to \code{\link[reproducible]{Cache}}
-#'            and \code{\link{equivalentName}}.
+#'            and \code{\link{equivalentName}}. Also valid: \code{outputPath}, and \code{studyAreaName}.
 #'
 #' @return A raster stack of percent cover layers by species.
 #'
@@ -649,6 +649,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   ## select which targetFiles to extract
   targetFiles <- grep(paste(kNNnames, ".*\\.tif$", sep = "", collapse = "|"), fileNames, value = TRUE)
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
+  postProcessedFilenamesWithStudyAreaName <- .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
 
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
   if (length(kNNnames) > 15) {
@@ -659,7 +660,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   }
   speciesLayers <- Cache(Map,
                          targetFile = asPath(targetFiles),
-                         filename2 = FALSE, #postProcessedFilenames, # TODO: save files to oPath
+                         filename2 = postProcessedFilenamesWithStudyAreaName,
                          url = paste0(url, targetFiles),
                          MoreArgs = list(destinationPath = asPath(dPath),
                                          fun = "raster::raster",

@@ -205,17 +205,20 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
                                   sppEquiv,
                                   sppEquivCol,
                                   thresh = 10, ...) {
+  dots <- list(...)
+
   if (is.null(url))
     url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
                   "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/")
 
   loadkNNSpeciesLayers(
     dPath = destinationPath,
+    knnNamesCol = "KNN",
     outputPath = outputPath,
     rasterToMatch = rasterToMatch,
     studyArea = studyArea,
+    studyAreaName = dots$studyAreaName,
     sppEquiv = sppEquiv,
-    knnNamesCol = "KNN",
     sppEquivCol = sppEquivCol,
     thresh = thresh,
     url = url,
