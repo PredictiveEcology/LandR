@@ -281,9 +281,16 @@ makeMinRelativeB <- function(pixelCohortData) {
   pixelData <- unique(pixelCohortData, by = "pixelIndex")
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
+  ## D. Cyr's values (https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/blob/master/LandisInputs/BSW/biomass-succession-main-inputs_BSW_Baseline.txt%7E)
+  ## they result in too many cohorts in more moisture-limited forests of Western Canada.
+  # minRelativeB <- data.frame(ecoregionGroup = levels(pixelData$ecoregionGroup),
+  #                            X1 = 0.2, X2 = 0.4, X3 = 0.5,
+  #                            X4 = 0.7, X5 = 0.9)
+
+  ## adjusted values for western forests.
   minRelativeB <- data.frame(ecoregionGroup = levels(pixelData$ecoregionGroup),
-                             X1 = 0.2, X2 = 0.4, X3 = 0.5,
-                             X4 = 0.7, X5 = 0.9)
+                             X1 = 0.15, X2 = 0.25, X3 = 0.5,
+                             X4 = 0.75, X5 = 0.85)
 
   return(minRelativeB)
 }
