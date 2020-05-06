@@ -259,7 +259,8 @@ makeBiomassMap <-  function(pixelCohortData, rasterToMatch) {
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
   biomassMap <- raster(rasterToMatch)
-  # suppress this message call no non-missing arguments to min; returning Inf min(x@data@values, na.rm = TRUE)
+  # suppress this message call no non-missing arguments to min;
+  # returning Inf min(x@data@values, na.rm = TRUE)
   suppressWarnings(biomassMap[pixelData$pixelIndex] <- pixelData$totalBiomass)
 
   return(biomassMap)
@@ -281,16 +282,16 @@ makeMinRelativeB <- function(pixelCohortData) {
   pixelData <- unique(pixelCohortData, by = "pixelIndex")
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
-  ## D. Cyr's values (https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/blob/master/LandisInputs/BSW/biomass-succession-main-inputs_BSW_Baseline.txt%7E)
-  ## they result in too many cohorts in more moisture-limited forests of Western Canada.
-  # minRelativeB <- data.frame(ecoregionGroup = levels(pixelData$ecoregionGroup),
-  #                            X1 = 0.2, X2 = 0.4, X3 = 0.5,
-  #                            X4 = 0.7, X5 = 0.9)
-
-  ## adjusted values for western forests.
+  ## D. Cyr's values result in too many cohorts in more moisture-limited forests of Western Canada.
+  ## https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/blob/master/LandisInputs/BSW/biomass-succession-main-inputs_BSW_Baseline.txt
+  ##
+  ## Adjusted values for western forests:
   minRelativeB <- data.frame(ecoregionGroup = levels(pixelData$ecoregionGroup),
-                             X1 = 0.15, X2 = 0.25, X3 = 0.5,
-                             X4 = 0.75, X5 = 0.85)
+                             X1 = 0.15, ## 0.2
+                             X2 = 0.25, ## 0.4
+                             X3 = 0.50, ## 0.5
+                             X4 = 0.75, ## 0.7
+                             X5 = 0.85) ## 0.9
 
   return(minRelativeB)
 }
