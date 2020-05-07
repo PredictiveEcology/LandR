@@ -1,5 +1,9 @@
 bug reports https://github.com/PredictiveEcology/LandR/issues
 
+version 0.0.5
+=============
+* new function `updateSpeciesTable` (moved from `LandWebUtils`) to allow user to update species parameters by passing a named list.
+
 version 0.0.4
 =============
 * `assignLightProb` now allows interpolating germination probability between species shade tolerance levels for any given stand shade value. This allows for for decimal values in species shade tolerance traits and greater fine tuning of shade-related germination probabilities.
