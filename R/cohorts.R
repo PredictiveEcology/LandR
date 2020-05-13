@@ -1289,7 +1289,6 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 #' @export
 plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
                             currentTime, successionTimestep) {
-
    ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum B per ecoregion, join to new cohort data
   namesNCD <- names(newPixelCohortData)
@@ -1314,8 +1313,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
   newCohortData[B == 0, B := asInteger(2 * maxANPP)]
 
   #Here we subset cohortData instead of setting added columns to NULL. However, as these are 'new' cohorts, this is okay
-  newCohortData <- newCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
-                                               mortality = 0L, aNPPAct = 0L)]
+  newCohortData <- newCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B, Provenance, mortality = 0L, aNPPAct = 0L)]
 
   if (getOption("LandR.assertions")) {
     if (isTRUE(NROW(unique(newCohortData, by = uniqueCohortDefinition)) != NROW(newCohortData))){
@@ -1382,6 +1380,9 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
                              verbose = getOption("LandR.verbose", TRUE),
                              doAssertion = getOption("LandR.assertions", TRUE)) {
 
+  cohortData <- copy(cohortData)
+  provenanceTable <- copy(provenanceTable)
+
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
 
   if (!is.null(treedHarvestPixelTableSinceLastDisp)) {
@@ -1395,11 +1396,10 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
 
   if (all(zeroOnPixelGroupMap)) {
     #non-zeroes indicate partial harvest - this is not yet operational
-
     setkey(newPixelCohortData, ecoregionGroup, speciesCode)
     setkey(provenanceTable, ecoregionGroup, speciesCode)
 
-    newPixelCohortData <- newPixelCohortData[provenanceTable]
+    newPixelCohortData <- provenanceTable[newPixelCohortData]
 
     #ecoregionGroup should remain the same, Provenance will be a newly added column
 
@@ -1420,7 +1420,6 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
 
     newPixelCohortData <- specieseco_current[newPixelCohortData]
 
-    #Perhaps this needs to be parameterized, if Provenance is not a desired column?
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B", 'maxB', 'maxANPP', 'Provenance')
 
     cd <- newPixelCohortData[,c("pixelIndex", columnsForPG), with = FALSE]
