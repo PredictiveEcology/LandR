@@ -36,7 +36,6 @@ if (getRversion() >= "3.1.0") {
 #' @param treedFirePixelTableSinceLastDisp A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
 #'   This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
 #'   to ensure that everything matches correctly.
-#' @param provenanceTable table with pixel-based provenances for reforestation
 #' @param successionTimestep The time between successive seed dispersal events.
 #'   In LANDIS-II, this is called "Succession Timestep". This is used here
 #'
@@ -58,7 +57,6 @@ if (getRversion() >= "3.1.0") {
 #' @importFrom stats na.omit
 updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                              speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
-                             provenanceTable = NULL,
                              successionTimestep,
                              verbose = getOption("LandR.verbose", TRUE),
                              doAssertion = getOption("LandR.assertions", TRUE)) {
@@ -100,6 +98,11 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
       message(crayon::green("  Regenerating open and pixels with B (likely after seed dispersal, or partial mortality following disturbance)"))
 
     pixelIndex <- which(pixelGroupMap[] %in% cohortData$pixelGroup)
+
+    #remove unnecessary columns before making cohortDataLong
+    cohortData[, prevMortality := NULL]
+    newPixelCohortData[, year := NULL]
+
     cohortDataPixelIndex <- data.table(pixelIndex = pixelIndex,
                                        pixelGroup = pixelGroupMap[][pixelIndex])
     cdLong <- cohortDataPixelIndex[cohortData, on = "pixelGroup", allow.cartesian = TRUE]
@@ -113,11 +116,15 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
     if (is.null(cohorts[["sumB"]])) {
       cohorts[, sumB := sum(B, na.rm = TRUE), by = pixelGroup]
     }
-    allCohortData <- cohorts[ , .(ecoregionGroup = ecoregionGroup[1],
-                                  mortality = mortality[1],
-                                  aNPPAct = aNPPAct[1],
-                                  sumB = sumB[1]),
-                              by = uniqueCohortDefinition]
+    #Old way that does not preserve additional 'unknown' columns in cohortData
+    # allCohortData <- cohorts[ , .(ecoregionGroup = ecoregionGroup[1],
+    #                               mortality = mortality[1],
+    #                               aNPPAct = aNPPAct[1],
+    #                               sumB = sumB[1]),
+    #                           by = uniqueCohortDefinition]
+
+    colsToSubset <- setdiff(colnames(cohortData), c("pixelIndex"))
+    allCohortData <- cohorts[!duplicated(cohorts[, ..colsToSubset]), ..colsToSubset]
 
     theNewOnes <- is.na(allCohortData$B)
     cohortData <- allCohortData[!theNewOnes]
@@ -147,6 +154,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
                                       successionTimestep = successionTimestep)
 
   outs <- rmMissingCohorts(cohortData, pixelGroupMap)
+  outs$cohortData[, sumB := NULL]
 
   assertCohortData(outs$cohortData, outs$pixelGroupMap,
                    doAssertion = doAssertion, verbose = verbose)
