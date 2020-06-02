@@ -19,7 +19,7 @@ Authors@R: c(
     role = "cph")
     )
 Depends:
-    R (>= 3.5.0)
+    R (>= 3.5)
 Imports:
     assertthat,
     backports,

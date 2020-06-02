@@ -565,15 +565,14 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   iterations <- 1
   # remove the lines that have the code "classesToReplace"
   availableERG2 <- if (hasPreDash) {
-    availableERC_by_Sp[-which(gsub(".*_", "", initialEcoregionCode) %in%
-                                classesToReplace)]
+    availableERC_by_Sp[-which(gsub(".*_", "", initialEcoregionCode) %in% classesToReplace)]
   } else {
     availableERC_by_Sp[-which(initialEcoregionCode %in% classesToReplace)]
   }
 
   availableERG2 <- unique(availableERG2, by = c("speciesCode", "initialEcoregionCode"))
   if (doAssertion) {
-    if (any(gsub(".*_","", availableERG2$initialEcoregionCode) %in% classesToReplace))
+    if (any(gsub(".*_", "", availableERG2$initialEcoregionCode) %in% classesToReplace))
       stop("classesToReplace are still considered 'available' forest classes")
   }
 
@@ -670,7 +669,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     out3 <- unique(out3)
   }
 
-  if(exists("pixelsToNA")) {
+  if (exists("pixelsToNA")) {
     ## make sure these pixels get an NA ecoregion by rm them in case they are present
     if (any(out3$pixelIndex %in% pixelsToNA))
       out3 <- out3[!pixelIndex %in% pixelsToNA]
@@ -678,7 +677,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   }
 
   if (doAssertion) {
-    if (any(gsub(".*_","", out3$ecoregionGroup) %in% classesToReplace))
+    if (any(gsub(".*_", "", out3$ecoregionGroup) %in% classesToReplace))
       stop("classesToReplace we're not fully removed")
   }
 
@@ -1552,16 +1551,16 @@ pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
   pixelFateDT
 }
 
-#' Generate and add vegetation type column to cohortData
+#' Generate and add vegetation type column to \code{cohortData}
 #'
 #' This function is a simplification of \code{vegTypeMapGenerator}
 #' and instead of generating a map, it adds the vegetation type column
-#' to the cohortData table.
+#' to the \code{cohortData} table.
 #'
 #' @param x A \code{cohortData} object
 #'
 #' @param vegLeadingProportion Numeric between 0-1, determining the relative biomass
-#'               threshold a species needs to pass to be considered "leading".
+#'                             threshold a species needs to pass to be considered "leading".
 #'
 #' @param mixedType An integer defining whether mixed stands are of any kind of species
 #'                  admixture (1), or only when deciduous mixed with conifer (2).
@@ -1581,13 +1580,13 @@ pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
 #'    of each group defined by \code{pixelGroupColName}
 #'
 #' @author Eliot McIntire, Ceres Barros, Alex Chubaty
-#' @importFrom data.table copy data.table setkey setorderv
-#' @importFrom utils data
-#' @importFrom SpaDES.tools inRange
-#' @importFrom assertthat assert_that
 #' @export
+#' @importFrom assertthat assert_that
+#' @importFrom data.table copy data.table setkey setorderv
+#' @importFrom SpaDES.tools inRange
+#' @importFrom utils data
+#'
 #' @rdname vegTypeGenerator
-
 vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
                              mixedType = 2, sppEquiv = NULL, sppEquivCol,
                              pixelGroupColName = "pixelGroup",

@@ -2,7 +2,7 @@
 % Please edit documentation in R/cohorts.R
 \name{vegTypeGenerator}
 \alias{vegTypeGenerator}
-\title{Generate and add vegetation type column to cohortData}
+\title{Generate and add vegetation type column to \code{cohortData}}
 \usage{
 vegTypeGenerator(
   x,
@@ -50,7 +50,7 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 \description{
 This function is a simplification of \code{vegTypeMapGenerator}
 and instead of generating a map, it adds the vegetation type column
-to the cohortData table.
+to the \code{cohortData} table.
 }
 \author{
 Eliot McIntire, Ceres Barros, Alex Chubaty
