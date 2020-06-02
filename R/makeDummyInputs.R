@@ -1,6 +1,4 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c())
-}
+utils::globalVariables(c())
 
 #' Create dummy inputs for test simulations
 #'

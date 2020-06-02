@@ -1,7 +1,6 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c("active", "ecoregion", "ecoregionGroup", "ID", "mapcode",
-                           "landcover", "ecoregion_lcc"))
-}
+utils::globalVariables(c(
+  "active", "ecoregion", "ecoregion_lcc", "ecoregionGroup", "ID", "landcover", "mapcode"
+))
 
 #' Make \code{ecoregionMap} and \code{ecoregion} table
 #'

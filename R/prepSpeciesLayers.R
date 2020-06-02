@@ -1,6 +1,4 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c("AGE", "CC", "GID", "keepSpecies", "layerName", "pct", "value"))
-}
+utils::globalVariables(c("AGE", "CC", "GID", "keepSpecies", "layerName", "pct", "value"))
 
 #' Load CASFRI data
 #'

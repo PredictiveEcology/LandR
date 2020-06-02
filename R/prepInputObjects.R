@@ -1,8 +1,7 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c("cover", "ecoregionGroup", "establishprob",
-                           "lcc", "longevity", "maxB", "maxANPP", "postfireregen",
-                           "resproutprob", "speciesCode"))
-}
+utils::globalVariables(c(
+  "cover", "ecoregionGroup", "establishprob", "lcc", "longevity", "maxB", "maxANPP",
+  "postfireregen", "resproutprob", "speciesCode"
+))
 
 #' Check if all species in have trait values
 #'

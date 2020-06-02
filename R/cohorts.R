@@ -1,16 +1,14 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(
-    ".", "..cols", ".I", ":=", "..groupVar", "age", "aNPPAct", "cover", "coverOrig",
-    "ecoregion", "ecoregionGroup", "hasBadAge",
-    "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
-    "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
-    "newPossLCC", "noPixels", "oldSumB", "ord", "outBiomass", "oldEcoregionGroup",
-    "pixelGroup2", "pixelIndex", "pixels", "possERC",
-    "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
-    "temppixelGroup", "toDelete", "totalBiomass", "totalCover",
-    "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
-  ))
-}
+utils::globalVariables(c(
+  ".", "..cols", ".I", ":=", "..groupVar", "age", "aNPPAct", "cover", "coverOrig",
+  "ecoregion", "ecoregionGroup", "hasBadAge",
+  "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
+  "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
+  "newPossLCC", "noPixels", "oldSumB", "ord", "outBiomass", "oldEcoregionGroup",
+  "pixelGroup2", "pixelIndex", "pixels", "possERC",
+  "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
+  "temppixelGroup", "toDelete", "totalBiomass", "totalCover",
+  "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
+))
 
 #' Add cohorts to \code{cohortData} and \code{pixelGroupMap}
 #'
@@ -766,7 +764,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   # Change temporarily to numeric for following calculation
   set(cohortData, NULL, "cover", as.numeric(cohortData[["cover"]]))
   if (isTRUE(rescale)) {
-    cohortData[, totalCover:=sum(cover), by = "pixelIndex"]
+    cohortData[, totalCover := sum(cover), by = "pixelIndex"]
     cohortData[, cover := cover/totalCover*100]
   }
 
@@ -891,7 +889,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[!is.na(cohortDataMissingAgeUnique$age)]
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(totalBiomass, age, speciesCode,
                                                                  initialEcoregionCode, cover)]
-    zeros <- sapply(cohortDataMissingAgeUnique, function(x) sum(x==0))
+    zeros <- sapply(cohortDataMissingAgeUnique, function(x) sum(x == 0))
     if (sum(zeros)) {
       hasZeros <- zeros[zeros > 0]
       message(" ", paste(names(hasZeros), collapse = ", "), " had ",
@@ -1318,7 +1316,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
                                                mortality = 0L, aNPPAct = 0L)]
 
   if (getOption("LandR.assertions")) {
-    if (isTRUE(NROW(unique(newCohortData, by = uniqueCohortDefinition)) != NROW(newCohortData))){
+    if (isTRUE(NROW(unique(newCohortData, by = uniqueCohortDefinition)) != NROW(newCohortData))) {
 
       stop("Duplicated new cohorts in a pixelGroup. Please debug LandR:::.plantNewCohorts")
     #in this situation, it may be caused by not replanting all species. Not sure if this will come up.
