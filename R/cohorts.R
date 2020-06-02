@@ -574,6 +574,11 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   }
 
   availableERG2 <- unique(availableERG2, by = c("speciesCode", "initialEcoregionCode"))
+  if (doAssertion) {
+    if (any(gsub(".*_","", availableERG2$initialEcoregionCode) %in% classesToReplace))
+      stop("classesToReplace are still considered 'available' forest classes")
+  }
+
   availableERG2[, `:=`(pixelIndex = NULL)]
 
   numCharIEC <- max(nchar(availableERC_by_Sp$initialEcoregionCode), na.rm = TRUE)
@@ -665,6 +670,11 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     # out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
     out3 <- unique(out3)
   }
+  if (doAssertion) {
+    if (any(gsub(".*_","", out3$ecoregionGroup) %in% classesToReplace))
+      stop("classesToReplace we're not fully removed")
+  }
+
   out3
 }
 
