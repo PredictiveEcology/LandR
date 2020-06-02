@@ -631,6 +631,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
       message("  removing ", NROW(theUnwantedPixels), " pixel of class ",
               paste(rstLCC[theUnwantedPixels], collapse = ", "), " because couldn't",
               " find a suitable replacement")
+      pixelsToNA <- theUnwantedPixels
       theUnwantedPixels <- integer()
     }
 
@@ -670,6 +671,14 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     # out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
     out3 <- unique(out3)
   }
+
+  if(exists("pixelsToNA")) {
+    ## make sure these pixels get an NA ecoregion by rm them in case they are present
+    if (any(out3$pixelIndex %in% pixelsToNA))
+      out3 <- out3[!pixelIndex %in% pixelsToNA]
+    out3 <- rbind(out3, data.table(pixelIndex = pixelsToNA, ecoregionGroup = NA))
+  }
+
   if (doAssertion) {
     if (any(gsub(".*_","", out3$ecoregionGroup) %in% classesToReplace))
       stop("classesToReplace we're not fully removed")
