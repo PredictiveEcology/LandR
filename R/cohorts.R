@@ -556,18 +556,9 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   # }
 
   if (missing(theUnwantedPixels)) {
-    if (FALSE) { # This is old section... can be deleted soon (April 10, 2019, Eliot)
-      rstUnwantedLCC <- integer(length(ecoregionGroupVec))
-      rstUnwantedLCC[] <- NA
-      rstUnwantedLCC[gsub(".*_", "", ecoregionGroupVec) %in% classesToReplace] <- 1
-      theUnwantedPixels1 <- which(rstUnwantedLCC == 1)
-      theUnwantedPixels1 <- theUnwantedPixels1[theUnwantedPixels1 %in%
-                                                 unique(availableERC_by_Sp$pixelIndex)]
-    } else {
       theUnwantedRows <- gsub(".*_", "", availableERC_by_Sp$initialEcoregionCode) %in%
         as.character(classesToReplace)
       theUnwantedPixels <- sort(unique(availableERC_by_Sp[theUnwantedRows, "pixelIndex"])[[1]])
-    }
   }
 
   if (doAssertion) {
