@@ -62,6 +62,32 @@ assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote,
 }
 
 
+#' Assertions
+#'
+#' Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
+#'
+#' @param cohortDataNo34to36 A \code{cohortData} \code{data.table} with only the
+#'                         pixels what were LCC 34:36
+#'
+#' @param classesToReplace Integer vector of classes that are are to be replaced,
+#'     e.g., 34, 35, 36 on LCC2005, which are burned young, burned 10 year, and cities.
+#'
+#' @template doAssertion
+#'
+#' @export
+#' @rdname assertions
+assert2 <- function(cohortDataNo34to36, classesToReplace = 34:36,
+                    doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    noCodesAre34to36 <- all(!grepl(paste(paste0(".*_", classesToReplace), collapse = "|"),
+                                   as.character(cohortDataNo34to36$ecoregionGroup)))
+    if (!noCodesAre34to36)
+      stop("lcc classes were mismanaged and some classes were not replaced correctly;
+           contact developers: code 235")
+
+  }
+}
+
 #' Assert that \code{cohortData} has unique lines when subsetting for a given set of columns
 #'
 #' @param columns Vector of column names on which to test for unique \code{cohortData}
@@ -107,7 +133,7 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
     lens <- sapply(erg, function(x) length(x) > 1)
     erg <- erg[lens]
     # test3 <- all(sapply(seq(erg)[-1], function(x)
-      # identical(erg[[1]], erg[[x]])))
+    # identical(erg[[1]], erg[[x]])))
     test3 <- all(outer(erg, erg, FUN = Vectorize(identical)))
 
     ## second test only detects differences in values
