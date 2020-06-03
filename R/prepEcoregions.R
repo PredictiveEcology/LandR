@@ -47,7 +47,9 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
       appendEcoregionFactor <- TRUE
       #Preserve factor values
       uniqVals <- unique(ecoregionMapSF$ecoregionLayerField)
-      df <- data.frame(ID = seq_len(length(uniqVals)), ecoregionName = uniqVals)
+      df <- data.frame(ID = seq_len(length(uniqVals)),
+                       ecoregionName = uniqVals,
+                       stringsAsFactors = FALSE)
       levels(ecoregionRst) <- df #this will preserve the factors
     }
   } else {

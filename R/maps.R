@@ -213,7 +213,8 @@ vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("Lan
 
     layerNames <- names(speciesStack)
     names(layerNames) <- layerNames
-    levels(vegTypeMap) <- data.frame(ID = seq(layerNames), Species = names(layerNames))
+    levels(vegTypeMap) <- data.frame(ID = seq(layerNames), Species = names(layerNames),
+                                     stringsAsFactors = TRUE)
     vegTypeMap
 
   }
@@ -471,7 +472,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 
     vegTypeMap[pixelGroupData3[["pixelIndex"]]] <- pixelGroupData3[["leading"]]
     levels(vegTypeMap) <- data.frame(ID = seq_along(levels(pixelGroupData3[["leading"]])),
-                                     species = levels(pixelGroupData3[["leading"]]))
+                                     species = levels(pixelGroupData3[["leading"]]),
+                                     stringsAsFactors = TRUE)
   } else {
     if (is.factor(pixelGroupData3[["initialEcoregionCode"]])) {
       f <- pixelGroupData3[["initialEcoregionCode"]]

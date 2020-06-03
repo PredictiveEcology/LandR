@@ -60,7 +60,8 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch
                                      mapcode = seq(ecoregionFactorLevels),
                                      ecoregion = gsub("_.*", "", ecoregionFactorLevels),
                                      landcover = gsub(".*_", "", ecoregionFactorLevels),
-                                     ecoregion_lcc = ecoregionFactorLevels)
+                                     ecoregion_lcc = ecoregionFactorLevels,
+                                     stringsAsFactors = TRUE)
 
   ecoregionTable <- as.data.table(raster::levels(rstEcoregion)[[1]])
   message("ecoregionProducer mapvalues: ", Sys.time())
