@@ -9,36 +9,58 @@ utils::globalVariables(c(".N"))
 #' @param rmZeroBiomassQuote  An expression to evaluate, in the form of \code{quote(B>0)},
 #'    used to select cohorts with biomass.
 #'
+#' @param classesToReplace Integer vector of classes that are are to be replaced,
+#'     e.g., 34, 35, 36 on LCC2005, which are burned young, burned 10 year, and cities.
+#'
 #' @template cohortData
 #' @template doAssertion
 #'
 #' @export
 #' @rdname assertions
 assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote,
+                    classesToReplace = 34:36,
                     doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    allCodesAre34to36 <- all(grepl(".*34|.*35|.*36",
+    allCodesAre34to36 <- all(grepl(paste(paste0(".*_", classesToReplace), collapse = "|"),
                                    as.character(cohortData34to36$initialEcoregionCode)))
     if (!allCodesAre34to36)
       stop("lcc classes were mismanaged; contact developers: code 234")
 
-    ## do they match the codes found for areas with biomass?
+    ## do they match the codes found for pre selected areas (e.g. areas with biomass)?
     ## if not, is this because the non-matching codes had no biomass to start with?
-    onlyExistingCodes <- all(unique(cohortData34to36$ecoregionGroup) %in%
-                               unique(cohortData[eval(rmZeroBiomassQuote), initialEcoregionCode]))
+    ## or is it because they need to be masked?
+    if (!is.null(rmZeroBiomassQuote)) {
+      onlyExistingCodes <- all(unique(cohortData34to36$ecoregionGroup) %in%
+                                 unique(cohortData[eval(rmZeroBiomassQuote), initialEcoregionCode]))
+    } else {
+      onlyExistingCodes <- all(unique(cohortData34to36$ecoregionGroup) %in%
+                                 unique(cohortData$initialEcoregionCode))
+    }
+
     if (!onlyExistingCodes) {
-      temp1 <- unique(cohortData34to36$ecoregionGroup)
-      temp2 <- unique(cohortData[eval(rmZeroBiomassQuote), initialEcoregionCode])
-      nonMatching <- setdiff(temp1, temp2)
-
       ## was there any biomass/species data in these pixels?
-      nonMatchingB <- sum(cohortData[initialEcoregionCode %in% nonMatching, B], na.rm = TRUE)
+      if (!is.null(rmZeroBiomassQuote)) {
+        temp1 <- unique(cohortData34to36$ecoregionGroup)
+        temp2 <- unique(cohortData[eval(rmZeroBiomassQuote), initialEcoregionCode])
+        nonMatching <- setdiff(temp1, temp2)
 
-      if (nonMatchingB)
-        stop("There are some ecoregionCodes created post replacement of 34 and 35")
+        nonMatchingB <- sum(cohortData[initialEcoregionCode %in% nonMatching, B], na.rm = TRUE)
+        if (nonMatchingB)
+          stop("There are some ecoregionCodes created post replacement of 34 and 35")
+      }
+
+      ## are they pixels that will be masked because they couldn't be converted?
+      if (!is.null(rmZeroBiomassQuote)) {
+        temp1 <- unique(cohortData34to36$ecoregionGroup)
+        temp2 <- unique(cohortData[, initialEcoregionCode])
+        nonMatching <- setdiff(temp1, temp2)
+        if (!all(is.na(nonMatching)))
+          stop("There are some ecoregionCodes created post replacement of 34 and 35")
+      }
     }
   }
 }
+
 
 #' Assert that \code{cohortData} has unique lines when subsetting for a given set of columns
 #'
