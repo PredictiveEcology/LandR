@@ -1,7 +1,10 @@
 # LandR
 
+<!-- badges: start -->
+[![R build status](https://github.com/PredictiveEcology/LandR/workflows/R-CMD-check/badge.svg)](https://github.com/PredictiveEcology/LandR/actions)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/LandR)](https://cran.r-project.org/package=LandR)
 [![CRAN Downloads](http://cranlogs.r-pkg.org/badges/grand-total/LandR)](https://cran.r-project.org/package=LandR)
+<!-- badges: end -->
 
 **Landscape Ecosystem Modelling in R**
 
