@@ -1,9 +1,7 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(":=", ".SD", "Area", "col1", "growthcurve",
-                           "leafLignin", "leaflongevity", "mortalityshape",
-                           "seeddistance_eff", "seeddistance_max",
-                           "species", "species1", "species2", "wooddecayrate"))
-}
+utils::globalVariables(c(
+  ":=", ".SD", "Area", "col1", "growthcurve", "leafLignin", "leaflongevity", "mortalityshape",
+  "seeddistance_eff", "seeddistance_max", "species", "species1", "species2", "wooddecayrate"
+))
 
 #' Default LANDIS-II project repo url
 #'

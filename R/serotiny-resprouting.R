@@ -1,8 +1,8 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(".", ":=", "lightProb", "shadetolerance", "siteShade", "year",
-                           "resproutage_min", "resproutage_max", "type", "numberOfRegen",
-                           "sexualmature"))
-}
+utils::globalVariables(c(
+  ".", ":=", "lightProb", "numberOfRegen",
+  "resproutage_min", "resproutage_max", "sexualmature", "shadetolerance", "siteShade",
+  "type", "year"
+))
 
 #' Activate serotiny after a (fire) disturbance
 #'

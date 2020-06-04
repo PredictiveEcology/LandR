@@ -1,8 +1,7 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c("cover", "ecoregionGroup", "establishprob",
-                           "lcc", "longevity", "maxB", "maxANPP", "postfireregen",
-                           "resproutprob", "speciesCode"))
-}
+utils::globalVariables(c(
+  "cover", "ecoregionGroup", "establishprob", "lcc", "longevity", "maxB", "maxANPP",
+  "postfireregen", "resproutprob", "speciesCode"
+))
 
 #' Check if all species in have trait values
 #'
@@ -286,7 +285,7 @@ makeMinRelativeB <- function(pixelCohortData) {
   ## https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/blob/master/LandisInputs/BSW/biomass-succession-main-inputs_BSW_Baseline.txt
   ##
   ## Adjusted values for western forests:
-  minRelativeB <- data.frame(ecoregionGroup = levels(pixelData$ecoregionGroup),
+  minRelativeB <- data.frame(ecoregionGroup = as.factor(levels(pixelData$ecoregionGroup)),
                              X1 = 0.15, ## 0.2
                              X2 = 0.25, ## 0.4
                              X3 = 0.50, ## 0.5

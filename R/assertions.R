@@ -1,6 +1,4 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(".N"))
-}
+utils::globalVariables(c(".N"))
 
 #' Assertions
 #'
@@ -11,34 +9,82 @@ if (getRversion() >= "3.1.0") {
 #' @param rmZeroBiomassQuote  An expression to evaluate, in the form of \code{quote(B>0)},
 #'    used to select cohorts with biomass.
 #'
+#' @param classesToReplace Integer vector of classes that are are to be replaced,
+#'     e.g., 34, 35, 36 on LCC2005, which are burned young, burned 10 year, and cities.
+#'
 #' @template cohortData
 #' @template doAssertion
 #'
 #' @export
 #' @rdname assertions
 assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote,
+                    classesToReplace = 34:36,
                     doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    allCodesAre34to36 <- all(grepl(".*34|.*35|.*36",
+    allCodesAre34to36 <- all(grepl(paste(paste0(".*_", classesToReplace), collapse = "|"),
                                    as.character(cohortData34to36$initialEcoregionCode)))
     if (!allCodesAre34to36)
       stop("lcc classes were mismanaged; contact developers: code 234")
 
-    ## do they match the codes found for areas with biomass?
+    ## do they match the codes found for pre selected areas (e.g. areas with biomass)?
     ## if not, is this because the non-matching codes had no biomass to start with?
-    onlyExistingCodes <- all(unique(cohortData34to36$ecoregionGroup) %in%
-                               unique(cohortData[eval(rmZeroBiomassQuote), initialEcoregionCode]))
-    if (!onlyExistingCodes) {
-      temp1 <- unique(cohortData34to36$ecoregionGroup)
-      temp2 <- unique(cohortData[eval(rmZeroBiomassQuote), initialEcoregionCode])
-      nonMatching <- setdiff(temp1, temp2)
-
-      ## was there any biomass/species data in these pixels?
-      nonMatchingB <- sum(cohortData[initialEcoregionCode %in% nonMatching, B], na.rm = TRUE)
-
-      if (nonMatchingB)
-        stop("There are some ecoregionCodes created post replacement of 34 and 35")
+    ## or is it because they need to be masked?
+    if (!is.null(rmZeroBiomassQuote)) {
+      onlyExistingCodes <- all(unique(cohortData34to36$ecoregionGroup) %in%
+                                 unique(cohortData[eval(rmZeroBiomassQuote), initialEcoregionCode]))
+    } else {
+      onlyExistingCodes <- all(unique(cohortData34to36$ecoregionGroup) %in%
+                                 unique(cohortData$initialEcoregionCode))
     }
+
+    if (!onlyExistingCodes) {
+      ## was there any biomass/species data in these pixels?
+      if (!is.null(rmZeroBiomassQuote)) {
+        temp1 <- unique(cohortData34to36$ecoregionGroup)
+        temp2 <- unique(cohortData[eval(rmZeroBiomassQuote), initialEcoregionCode])
+        nonMatching <- setdiff(temp1, temp2)
+
+        nonMatchingB <- sum(cohortData[initialEcoregionCode %in% nonMatching, B], na.rm = TRUE)
+        if (nonMatchingB)
+          stop("There are some ecoregionCodes created post replacement of 34 and 35")
+      }
+
+      ## are they pixels that will be masked because they couldn't be converted?
+      if (!is.null(rmZeroBiomassQuote)) {
+        temp1 <- unique(cohortData34to36$ecoregionGroup)
+        temp2 <- unique(cohortData[, initialEcoregionCode])
+        nonMatching <- setdiff(temp1, temp2)
+        if (!all(is.na(nonMatching)))
+          stop("There are some ecoregionCodes created post replacement of 34 and 35")
+      }
+    }
+  }
+}
+
+
+#' Assertions
+#'
+#' Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
+#'
+#' @param cohortDataNo34to36 A \code{cohortData} \code{data.table} with only the
+#'                         pixels what were LCC 34:36
+#'
+#' @param classesToReplace Integer vector of classes that are are to be replaced,
+#'     e.g., 34, 35, 36 on LCC2005, which are burned young, burned 10 year, and cities.
+#'
+#' @template doAssertion
+#'
+#' @export
+#' @rdname assertions
+assert2 <- function(cohortDataNo34to36, classesToReplace = 34:36,
+                    doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    noCodesAre34to36 <- all(!grepl(paste(paste0(".*_", classesToReplace), collapse = "|"),
+                                   as.character(cohortDataNo34to36$ecoregionGroup)))
+    if (!noCodesAre34to36)
+      stop("lcc classes were mismanaged and some classes were not replaced correctly;
+           contact developers: code 235")
+
   }
 }
 
@@ -87,7 +133,7 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
     lens <- sapply(erg, function(x) length(x) > 1)
     erg <- erg[lens]
     # test3 <- all(sapply(seq(erg)[-1], function(x)
-      # identical(erg[[1]], erg[[x]])))
+    # identical(erg[[1]], erg[[x]])))
     test3 <- all(outer(erg, erg, FUN = Vectorize(identical)))
 
     ## second test only detects differences in values

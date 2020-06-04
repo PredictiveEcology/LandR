@@ -2,6 +2,7 @@
 % Please edit documentation in R/assertions.R
 \name{assert1}
 \alias{assert1}
+\alias{assert2}
 \alias{assertUniqueCohortData}
 \alias{assertERGs}
 \alias{assertColumns}
@@ -17,6 +18,13 @@ assert1(
   cohortData34to36,
   cohortData,
   rmZeroBiomassQuote,
+  classesToReplace = 34:36,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assert2(
+  cohortDataNo34to36,
+  classesToReplace = 34:36,
   doAssertion = getOption("LandR.assertions", TRUE)
 )
 
@@ -90,9 +98,15 @@ and \code{sumB}.}
 \item{rmZeroBiomassQuote}{An expression to evaluate, in the form of \code{quote(B>0)},
 used to select cohorts with biomass.}
 
+\item{classesToReplace}{Integer vector of classes that are are to be replaced,
+e.g., 34, 35, 36 on LCC2005, which are burned young, burned 10 year, and cities.}
+
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
+
+\item{cohortDataNo34to36}{A \code{cohortData} \code{data.table} with only the
+pixels what were LCC 34:36}
 
 \item{columns}{Vector of column names on which to test for unique \code{cohortData}}
 
@@ -148,6 +162,8 @@ Defaults to 1.}
 raster operations (i.e., the one used throughout the simulation).}
 }
 \description{
+Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
+
 Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
 
 This is the full \code{pixelCohortData}, not the collapsed one.

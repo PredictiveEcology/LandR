@@ -11,8 +11,7 @@ updateSpeciesTable <- function(speciesTable, params) {
   traits <- names(params)
   missingTraits <- traits[!traits %in% names(speciesTable)]
   if (length(missingTraits))
-    stop("The traits: ", paste(missingTraits, collapse = ", "),
-         "\ndo not exist in `speciesTable`")
+    stop("The traits: ", paste(missingTraits, collapse = ", "), "\ndo not exist in `speciesTable`")
 
   for (trt in traits) {
     subParams <- params[[trt]]
