@@ -1357,7 +1357,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 #' @template currentTime
 #' @template speciesEcoregion
 #'
-#' @param treedHarvestPixelTableSinceLastDisp A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
+#' @param treedHarvestPixelTable A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
 #'   This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
 #'   to ensure that everything matches correctly.
 #' @param successionTimestep The time between successive seed dispersal events.
@@ -1383,18 +1383,18 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 #' @importFrom stats na.omit
 #' @rdname updateCohortDataPostHarvest
 updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
-                             speciesEcoregion, treedHarvestPixelTableSinceLastDisp = NULL,
-                             successionTimestep, provenanceTable,
-                             verbose = getOption("LandR.verbose", TRUE),
-                             doAssertion = getOption("LandR.assertions", TRUE)) {
+                                        speciesEcoregion, treedHarvestPixelTable = NULL,
+                                        successionTimestep, provenanceTable,
+                                        verbose = getOption("LandR.verbose", TRUE),
+                                        doAssertion = getOption("LandR.assertions", TRUE)) {
 
   cohortData <- copy(cohortData)
   provenanceTable <- copy(provenanceTable)
 
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
 
-  if (!is.null(treedHarvestPixelTableSinceLastDisp)) {
-    pixelGroupMap[treedHarvestPixelTableSinceLastDisp$pixelIndex] <- 0L
+  if (!is.null(treedHarvestPixelTable)) {
+    pixelGroupMap[treedHarvestPixelTable$pixelIndex] <- 0L
   }
   relevantPixels <- pixelGroupMap[][newPixelCohortData$pixelIndex]
   zeroOnPixelGroupMap <- relevantPixels == 0
