@@ -1,16 +1,14 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(
-    ".", "..cols", ".I", ":=", "..groupVar", "age", "aNPPAct", "cover", "coverOrig",
-    "ecoregion", "ecoregionGroup", "hasBadAge",
-    "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
-    "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
-    "newPossLCC", "noPixels", "oldSumB", "ord", "outBiomass", "oldEcoregionGroup",
-    "pixelGroup2", "pixelIndex", "pixels", "possERC",
-    "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
-    "temppixelGroup", "toDelete", "totalBiomass", "totalCover",
-    "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
-  ))
-}
+utils::globalVariables(c(
+  ".", "..cols", ".I", ":=", "..groupVar", "age", "aNPPAct", "cover", "coverOrig",
+  "ecoregion", "ecoregionGroup", "hasBadAge",
+  "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
+  "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
+  "newPossLCC", "noPixels", "oldSumB", "ord", "outBiomass", "oldEcoregionGroup",
+  "pixelGroup2", "pixelIndex", "pixels", "possERC",
+  "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
+  "temppixelGroup", "toDelete", "totalBiomass", "totalCover",
+  "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
+))
 
 #' Add cohorts to \code{cohortData} and \code{pixelGroupMap}
 #'
@@ -564,18 +562,9 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   # }
 
   if (missing(theUnwantedPixels)) {
-    if (FALSE) { # This is old section... can be deleted soon (April 10, 2019, Eliot)
-      rstUnwantedLCC <- integer(length(ecoregionGroupVec))
-      rstUnwantedLCC[] <- NA
-      rstUnwantedLCC[gsub(".*_", "", ecoregionGroupVec) %in% classesToReplace] <- 1
-      theUnwantedPixels1 <- which(rstUnwantedLCC == 1)
-      theUnwantedPixels1 <- theUnwantedPixels1[theUnwantedPixels1 %in%
-                                                 unique(availableERC_by_Sp$pixelIndex)]
-    } else {
       theUnwantedRows <- gsub(".*_", "", availableERC_by_Sp$initialEcoregionCode) %in%
         as.character(classesToReplace)
       theUnwantedPixels <- sort(unique(availableERC_by_Sp[theUnwantedRows, "pixelIndex"])[[1]])
-    }
   }
 
   if (doAssertion) {
@@ -584,13 +573,17 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   iterations <- 1
   # remove the lines that have the code "classesToReplace"
   availableERG2 <- if (hasPreDash) {
-    availableERC_by_Sp[-which(gsub(".*_", "", initialEcoregionCode) %in%
-                                classesToReplace)]
+    availableERC_by_Sp[-which(gsub(".*_", "", initialEcoregionCode) %in% classesToReplace)]
   } else {
     availableERC_by_Sp[-which(initialEcoregionCode %in% classesToReplace)]
   }
 
   availableERG2 <- unique(availableERG2, by = c("speciesCode", "initialEcoregionCode"))
+  if (doAssertion) {
+    if (any(gsub(".*_", "", availableERG2$initialEcoregionCode) %in% classesToReplace))
+      stop("classesToReplace are still considered 'available' forest classes")
+  }
+
   availableERG2[, `:=`(pixelIndex = NULL)]
 
   numCharIEC <- max(nchar(availableERC_by_Sp$initialEcoregionCode), na.rm = TRUE)
@@ -643,6 +636,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
       message("  removing ", NROW(theUnwantedPixels), " pixel of class ",
               paste(rstLCC[theUnwantedPixels], collapse = ", "), " because couldn't",
               " find a suitable replacement")
+      pixelsToNA <- theUnwantedPixels
       theUnwantedPixels <- integer()
     }
 
@@ -682,6 +676,19 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     # out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
     out3 <- unique(out3)
   }
+
+  if (exists("pixelsToNA")) {
+    ## make sure these pixels get an NA ecoregion by rm them in case they are present
+    if (any(out3$pixelIndex %in% pixelsToNA))
+      out3 <- out3[!pixelIndex %in% pixelsToNA]
+    out3 <- rbind(out3, data.table(pixelIndex = pixelsToNA, ecoregionGroup = NA))
+  }
+
+  if (doAssertion) {
+    if (any(gsub(".*_", "", out3$ecoregionGroup) %in% classesToReplace))
+      stop("classesToReplace we're not fully removed")
+  }
+
   out3
 }
 
@@ -774,7 +781,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   # Change temporarily to numeric for following calculation
   set(cohortData, NULL, "cover", as.numeric(cohortData[["cover"]]))
   if (isTRUE(rescale)) {
-    cohortData[, totalCover:=sum(cover), by = "pixelIndex"]
+    cohortData[, totalCover := sum(cover), by = "pixelIndex"]
     cohortData[, cover := cover/totalCover*100]
   }
 
@@ -899,7 +906,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[!is.na(cohortDataMissingAgeUnique$age)]
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(totalBiomass, age, speciesCode,
                                                                  initialEcoregionCode, cover)]
-    zeros <- sapply(cohortDataMissingAgeUnique, function(x) sum(x==0))
+    zeros <- sapply(cohortDataMissingAgeUnique, function(x) sum(x == 0))
     if (sum(zeros)) {
       hasZeros <- zeros[zeros > 0]
       message(" ", paste(names(hasZeros), collapse = ", "), " had ",
@@ -1324,7 +1331,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
   newCohortData <- newCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B, Provenance, mortality = 0L, aNPPAct = 0L)]
 
   if (getOption("LandR.assertions")) {
-    if (isTRUE(NROW(unique(newCohortData, by = uniqueCohortDefinition)) != NROW(newCohortData))){
+    if (isTRUE(NROW(unique(newCohortData, by = uniqueCohortDefinition)) != NROW(newCohortData))) {
 
       stop("Duplicated new cohorts in a pixelGroup. Please debug LandR:::.plantNewCohorts")
     #in this situation, it may be caused by not replanting all species. Not sure if this will come up.
@@ -1551,16 +1558,16 @@ pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
   pixelFateDT
 }
 
-#' Generate and add vegetation type column to cohortData
+#' Generate and add vegetation type column to \code{cohortData}
 #'
 #' This function is a simplification of \code{vegTypeMapGenerator}
 #' and instead of generating a map, it adds the vegetation type column
-#' to the cohortData table.
+#' to the \code{cohortData} table.
 #'
 #' @param x A \code{cohortData} object
 #'
 #' @param vegLeadingProportion Numeric between 0-1, determining the relative biomass
-#'               threshold a species needs to pass to be considered "leading".
+#'                             threshold a species needs to pass to be considered "leading".
 #'
 #' @param mixedType An integer defining whether mixed stands are of any kind of species
 #'                  admixture (1), or only when deciduous mixed with conifer (2).
@@ -1580,13 +1587,13 @@ pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
 #'    of each group defined by \code{pixelGroupColName}
 #'
 #' @author Eliot McIntire, Ceres Barros, Alex Chubaty
-#' @importFrom data.table copy data.table setkey setorderv
-#' @importFrom utils data
-#' @importFrom SpaDES.tools inRange
-#' @importFrom assertthat assert_that
 #' @export
+#' @importFrom assertthat assert_that
+#' @importFrom data.table copy data.table setkey setorderv
+#' @importFrom SpaDES.tools inRange
+#' @importFrom utils data
+#'
 #' @rdname vegTypeGenerator
-
 vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
                              mixedType = 2, sppEquiv = NULL, sppEquivCol,
                              pixelGroupColName = "pixelGroup",

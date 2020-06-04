@@ -1,6 +1,4 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c("ecoregionCode", "NAs", "newLCC"))
-}
+utils::globalVariables(c("ecoregionCode", "NAs", "newLCC"))
 
 #' Overlay different LCC data sources
 #'

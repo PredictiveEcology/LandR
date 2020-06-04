@@ -1,7 +1,4 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(".", ":=", "X1", "X2", "X3", "X4", "X5",
-                           "maxMaxB", "prevMortality"))
-}
+utils::globalVariables(c(".", ":=", "X1", "X2", "X3", "X4", "X5", "maxMaxB", "prevMortality"))
 
 #' Calculate site shade
 #'
