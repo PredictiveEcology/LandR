@@ -903,7 +903,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
       hasZeros <- zeros[zeros > 0]
       message(" ", paste(names(hasZeros), collapse = ", "), " had ",
               paste(hasZeros, collapse = ", "), " zeros, respectively")
-      warning(" These are being removing them from dataset. If this is not desired; please fix")
+      warning(" These are being removed from the dataset. If this is not desired; please fix.")
       # terms <- strsplit(gsub(" ", "", as.character(imputeBadAgeModel)), split = "[[:punct:]]+")[[2]][-1] # remove response
       # terms <- unique(terms)
       # terms <- terms[terms %in% colnames(cohortDataMissingAgeUnique)]
