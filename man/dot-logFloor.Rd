@@ -16,4 +16,17 @@ Avoid \code{-Inf} problems when \code{x == 0} by setting a non-zero floor value 
 This is preferred over using some \code{log(x + d)} transformation, as the choice of \code{d} is
 arbitrary, and will affect model fit.
 }
+\examples{
+\dontrun{
+  x <- sample(0:400, 1e7, replace = TRUE)
+  floor <- 0.3
+  logFloor <- log(floor)
+  microbenchmark::microbenchmark(
+    log(pmax(floor, x)),
+    pmax(log(floor), log(x)),
+    {x[x < floor] <- floor; log(x)},
+    {y <- log(x); y[is.infinite(y)] <- logFloor} ## fastest; TODO: implement? not a bottleneck
+  )
+}
+}
 \keyword{internal}

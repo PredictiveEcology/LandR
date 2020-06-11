@@ -141,6 +141,21 @@ scheduleDisturbance <- function(disturbanceLayer, currentYear) {
 #' @param floor Minimum age value boundary. Default \code{0.3}.
 #'
 #' @keywords internal
+#'
+#' @examples
+#' \dontrun{
+#'   x <- sample(0:400, 1e7, replace = TRUE)
+#'   floor <- 0.3
+#'   logFloor <- log(floor)
+#'   microbenchmark::microbenchmark(
+#'     log(pmax(floor, x)),
+#'     pmax(log(floor), log(x)),
+#'     {x[x < floor] <- floor; log(x)},
+#'     {y <- log(x); y[is.infinite(y)] <- logFloor} ## fastest; TODO: implement? not a bottleneck
+#'   )
+#' }
 .logFloor <- function(x, floor = 0.3) {
   log(pmax(floor, x))
 }
+
+## TODO: rename the function "logTrunc"? implement a ceiling?
