@@ -754,7 +754,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   cncd <- colnames(cohortData)
   # if (any(c("age", "logAge") %in% cncd)) {
   #   set(cohortData, hasCover0, "age", 0L)
-  #   set(cohortData, hasCover0, "logAge", -Inf)
+  #   set(cohortData, hasCover0, "logAge", .logFloor(0))
   # }
   if (any(c("B", "totalBiomass") %in% cncd)) {
     #set(cohortData, hasCover0, "B", 0)
@@ -937,7 +937,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
 
     cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
       cohortData, on = c("pixelIndex", "speciesCode")]
-    cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = log(imputedAge))]
+    cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = .logFloor(imputedAge))]
     cohortData[, `:=`(imputedAge = NULL)]
 
   }
@@ -1147,7 +1147,6 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 
   return(pixelCohortData)
 }
-
 
 #' Make the \code{cohortData} table, while modifying the temporary
 #' \code{pixelCohortData} that will be used to prepare other files.
