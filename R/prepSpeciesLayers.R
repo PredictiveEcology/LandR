@@ -78,9 +78,7 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
   setkey(CASFRIdt, GID)
   #set(CASFRIdt, NULL, "isNA", NULL)
 
-  return(list(#keepSpecies = keepSpecies,
-    CASFRIattrLong = CASFRIattrLong,
-    CASFRIdt = CASFRIdt))
+  return(list(CASFRIattrLong = CASFRIattrLong, CASFRIdt = CASFRIdt))
 }
 
 #' \code{CASFRItoSpRasts}
@@ -111,7 +109,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
   names(sppNameVector) <- sppNameVector
 
   # This
-  sppListMergesCASFRI <-lapply(sppNameVector, function(x)
+  sppListMergesCASFRI <- lapply(sppNameVector, function(x)
     equivalentName(x, sppEquiv,  column = "CASFRI", multi = TRUE)
   )
 
@@ -146,9 +144,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     message("starting ", sp)
     if (length(spCASFRI) > 1)
       message("  Merging ", paste(spCASFRI, collapse = ", "), "; becoming: ", sp)
-    aa2 <- CASFRIattrLong[
-      value %in% spCASFRI][
-        , min(100L, sum(pct)), by = GID]
+    aa2 <- CASFRIattrLong[value %in% spCASFRI][, min(100L, sum(pct)), by = GID]
     setkey(aa2, GID)
     cc <- aa2[CASFRIdt] %>% na.omit()
     rm(aa2)

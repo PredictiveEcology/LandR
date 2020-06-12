@@ -762,7 +762,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   cncd <- colnames(cohortData)
   # if (any(c("age", "logAge") %in% cncd)) {
   #   set(cohortData, hasCover0, "age", 0L)
-  #   set(cohortData, hasCover0, "logAge", -Inf)
+  #   set(cohortData, hasCover0, "logAge", .logFloor(0))
   # }
   if (any(c("B", "totalBiomass") %in% cncd)) {
     #set(cohortData, hasCover0, "B", 0)
@@ -911,7 +911,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
       hasZeros <- zeros[zeros > 0]
       message(" ", paste(names(hasZeros), collapse = ", "), " had ",
               paste(hasZeros, collapse = ", "), " zeros, respectively")
-      warning(" These are being removing them from dataset. If this is not desired; please fix")
+      warning(" These are being removed from the dataset. If this is not desired; please fix.")
       # terms <- strsplit(gsub(" ", "", as.character(imputeBadAgeModel)), split = "[[:punct:]]+")[[2]][-1] # remove response
       # terms <- unique(terms)
       # terms <- terms[terms %in% colnames(cohortDataMissingAgeUnique)]
@@ -945,7 +945,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
 
     cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
       cohortData, on = c("pixelIndex", "speciesCode")]
-    cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = log(imputedAge))]
+    cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = .logFloor(imputedAge))]
     cohortData[, `:=`(imputedAge = NULL)]
 
   }
@@ -1155,7 +1155,6 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 
   return(pixelCohortData)
 }
-
 
 #' Make the \code{cohortData} table, while modifying the temporary
 #' \code{pixelCohortData} that will be used to prepare other files.
