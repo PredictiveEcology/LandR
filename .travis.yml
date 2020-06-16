@@ -128,9 +128,35 @@ matrix:
       - rgeos
   - os: osx
     osx_image: xcode9.4
+    addons:
+      homebrew:
+        packages:
+        - glpk
+        - libgit2
+        - llvm
+        - udunits
+        update: true
     latex: false
-    r_build_args: '--no-build-vignettes'
-    r_check_args: '--as-cran --ignore-vignettes --no-examples'
+    r_build_args: "--no-build-vignettes"
+    r_check_args: "--as-cran --ignore-vignettes --no-examples"
+    env:
+      - GLPK=true
+    before_install:
+      - Rscript -e 'install.packages(c("digest", "igraph", "rgdal", "rgeos"), type = "source")'
+  - os: osx
+    osx_image: xcode9.4
+    addons:
+      homebrew:
+        packages:
+        - libgit2
+        - llvm
+        - udunits
+        update: true
+    latex: false
+    r_build_args: "--no-build-vignettes"
+    r_check_args: "--as-cran --ignore-vignettes --no-examples"
+    env:
+      - GLPK=false
     before_script:
       - Rscript -e "install.packages(c('rgdal', 'rgeos'), type = 'source')"
 r_build_args: " "
