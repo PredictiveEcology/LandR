@@ -114,6 +114,7 @@ jobs:
         - glpk
         - libgit2
         - llvm
+        - udunits
         update: true
     latex: false
     r_build_args: "--no-build-vignettes"
@@ -129,6 +130,7 @@ jobs:
         packages:
         - libgit2
         - llvm
+        - udunits
         update: true
     latex: false
     r_build_args: "--no-build-vignettes"
