@@ -597,7 +597,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   }
 
   ## get all files in url folder
-  fileURLs <- getURL(url, dirlistonly = TRUE)
+  fileURLs <- getURL(url, dirlistonly = TRUE,
+                     .opts = list(followlocation = TRUE, ssl.verifypeer = 0L)) ## TODO: re-enable verification!!
   fileNames <- getHTMLLinks(fileURLs)
   ## get all kNN species - names only
   allSpp <- grep("2001_kNN_Species_.*\\.tif$", fileNames, value = TRUE) %>%
