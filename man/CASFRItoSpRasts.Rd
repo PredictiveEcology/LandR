@@ -2,10 +2,16 @@
 % Please edit documentation in R/prepSpeciesLayers.R
 \name{CASFRItoSpRasts}
 \alias{CASFRItoSpRasts}
-\title{CASFRItoSpRasts}
+\title{\code{CASFRItoSpRasts}}
 \usage{
-CASFRItoSpRasts(CASFRIRas, CASFRIattrLong, CASFRIdt, sppEquiv, sppEquivCol,
-  destinationPath)
+CASFRItoSpRasts(
+  CASFRIRas,
+  CASFRIattrLong,
+  CASFRIdt,
+  sppEquiv,
+  sppEquivCol,
+  destinationPath
+)
 }
 \arguments{
 \item{CASFRIRas}{TODO: description needed}
@@ -14,9 +20,15 @@ CASFRItoSpRasts(CASFRIRas, CASFRIattrLong, CASFRIdt, sppEquiv, sppEquivCol,
 
 \item{CASFRIdt}{TODO: description needed}
 
-\item{sppEquiv}{TODO: description needed}
+\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
+See \code{data("sppEquivalencies_CA", "LandR")}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use
+\code{data("sppEquivalencies_CA", "LandR")}.}
 
-\item{sppEquivCol}{TODO: description needed}
+\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
 \item{destinationPath}{TODO: description needed}
 }

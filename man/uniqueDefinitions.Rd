@@ -4,18 +4,18 @@
 \name{uniqueCohortDefinition}
 \alias{uniqueCohortDefinition}
 \alias{uniqueSpeciesEcoregionDefinition}
-\title{The columns in a cohortData that define "unique"}
-\format{An object of class \code{character} of length 4.}
+\title{The columns in a \code{cohortData} that define "unique"}
+\format{
+An object of class \code{character} of length 4.
+
+An object of class \code{character} of length 2.
+}
 \usage{
 uniqueCohortDefinition
 
 uniqueSpeciesEcoregionDefinition
 }
 \description{
-If 2 pixels have identical values in all of these columns, then they are the
-same \code{pixelGroup}
-
-If 2 pixels have identical values in all of these columns, then they are the
-same \code{pixelGroup}
+If two pixels have identical values in all of these columns, they are the same \code{pixelGroup}.
 }
 \keyword{datasets}

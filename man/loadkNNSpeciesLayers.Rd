@@ -4,26 +4,40 @@
 \alias{loadkNNSpeciesLayers}
 \title{Load kNN species layers from online data repository}
 \usage{
-loadkNNSpeciesLayers(dPath, rasterToMatch, studyArea, sppEquiv,
-  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...)
+loadkNNSpeciesLayers(
+  dPath,
+  rasterToMatch,
+  studyArea,
+  sppEquiv,
+  knnNamesCol = "KNN",
+  sppEquivCol,
+  thresh = 1,
+  url,
+  ...
+)
 }
 \arguments{
 \item{dPath}{path to the data directory}
 
-\item{rasterToMatch}{passed to \code{\link[reproducible]{prepInputs}}}
+\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).}
 
-\item{studyArea}{passed to \code{\link[reproducible]{prepInputs}}}
+\item{studyArea}{A \code{SpatialPolygons*} object used as the principle study region,
+passed to \code{\link[reproducible]{prepInputs}}.}
 
-\item{sppEquiv}{table with species name equivalencies between the
-kNN format and the final naming format.
-See \code{data("sppEquivalencies_CA", "LandR")}.}
+\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
+See \code{data("sppEquivalencies_CA", "LandR")}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use
+\code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{knnNamesCol}{character string indicating the column in \code{sppEquiv}
 containing kNN species names.
 Default \code{"KNN"} for when \code{sppEquivalencies_CA} is used.}
 
-\item{sppEquivCol}{character string indicating the column in \code{sppEquiv}
-to use for final species names.}
+\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
 \item{thresh}{the minimum number of pixels where the species must have
 \code{biomass > 0} to be considered present in the study area.
@@ -31,8 +45,8 @@ Defaults to 1.}
 
 \item{url}{the source url for the data, passed to \code{\link[reproducible]{prepInputs}}}
 
-\item{...}{Additonal arguments passed to \code{\link[reproducible]{Cache}}
-and \code{\link{equivalentName}}.}
+\item{...}{Additional arguments passed to \code{\link[reproducible]{Cache}}
+and \code{\link{equivalentName}}. Also valid: \code{outputPath}, and \code{studyAreaName}.}
 }
 \value{
 A raster stack of percent cover layers by species.

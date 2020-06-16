@@ -11,20 +11,20 @@
 #' @param vegLeadingProportion The minimum proportion cover required to consider
 #'                             a species to be the "leading" one. Default 0.8.
 #'
-#' @param sppEquiv a species equivalency table TODO: description needed
+#' @template sppEquiv
 #'
-#' @param sppEquivCol the column name to use from \code{sppEquiv}.
+#' @template sppEquivCol
 #'
 #' @param colors Named vector of colour codes, named using species names. NOTE:
 #'               plot order will follow this order.
 #'
 #' @param title The title to use for the generated plots.
 #'
-#' @author Eilot McIntire
+#' @author Eliot McIntire
 #' @export
 #' @importFrom data.table data.table setkeyv
-#' @importFrom ggplot2 aes element_blank element_text geom_bar ggplot scale_fill_manual theme
-#' @importFrom ggplot2 guides guide_legend guide_legend scale_x_discrete
+#' @importFrom ggplot2 aes element_blank element_text geom_bar ggplot guide_legend guides
+#' @importFrom ggplot2 scale_fill_manual scale_x_discrete theme
 #' @importFrom pemisc factorValues2
 #' @importFrom quickPlot Plot setColors<-
 #' @importFrom raster factorValues maxValue minValue
@@ -32,7 +32,6 @@
 #' @importFrom stats na.omit
 plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
                     sppEquiv, sppEquivCol, colors, title = "Leading vegetation types") {
-
   colorsEN <- equivalentName(names(colors), sppEquiv, "EN_generic_short")
   colDT <- data.table(cols = colors, species = colorsEN,
                       speciesOrig = names(colors),
@@ -51,7 +50,14 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 
   if (is.null(vtm)) {
     if (!is.null(speciesStack))
-      vtm <- Cache(makeVegTypeMap, speciesStack, vegLeadingProportion, mixed = TRUE)
+      vtm <- Cache(vegTypeMapGenerator,
+                   x = speciesStack,
+                   vegLeadingProportion = vegLeadingProportion,
+                   mixedType = 2,
+                   sppEquiv = sppEquiv,
+                   sppEquivCol = sppEquivCol,
+                   colors = colors,
+                   doAssertion = getOption("LandR.assertions", TRUE))
     else
       stop("plotVTM requires either a speciesStack of percent cover or a",
            " vegetation type map (vtm).")
@@ -60,22 +66,22 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   ## the ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   facLevels <- raster::levels(vtm)[[1]]
-  vtmTypes <- as.character(factorValues2(vtm, facLevels$ID, att = "Species"))
+  vtmTypes <- as.character(factorValues2(vtm, facLevels$ID, att = 2)) ## 'species', 'Species', 'VALUE'
   vtmCols <- colors[match(vtmTypes, names(colors))]
   whMixed <- which(vtmTypes == "Mixed")
 
   vtmTypes <- equivalentName(vtmTypes, sppEquiv, "EN_generic_short")
   vtmTypes[whMixed] <- "Mixed"
   names(vtmCols) <- vtmTypes
-  facLevels$Species <- vtmTypes
+  facLevels$Species <- vtmTypes #nolint
 
   ## plot initial types bar chart
-  facVals <- factorValues2(vtm, vtm[], att = "Species", na.rm = TRUE)
+  facVals <- factorValues2(vtm, vtm[], att = 2, na.rm = TRUE) ## 'species', 'Species', 'VALUE'
   df <- data.table(species = as.character(facVals), stringsAsFactors = FALSE)
   df <- df[!is.na(df$species)]
 
   speciesEN <- equivalentName(df$species, sppEquiv, "EN_generic_short")
-  if (all(na.omit(speciesEN) %in% colorsEN)){
+  if (all(na.omit(speciesEN) %in% colorsEN)) {
     whMixed <- which(df$species == mixedString)
 
     df$species <- speciesEN
@@ -84,7 +90,6 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
       df[whMixed, species := mixedString]
 
     df <- colDT[df, on = "species"] # merge color and species
-
   } else {
     stop("Species names of 'colors' must match those in 'speciesStack'.")
   }
@@ -113,18 +118,16 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   Plot(vtm, title = title)
 }
 
-#' Create species color vector from a sppEquiv table
+#' Create species colour vector from a \code{sppEquiv} table
 #'
-#' Create species color vector from a sppEquiv table
+#' @template sppEquiv
 #'
-#' @param sppEquiv A species equivalency table, e.g., \code{data("sppEquivalencies_CA")}.
-#' @param sppEquivCol The name of the column to get names from.
+#' @template sppEquivCol
 #' @param newVals An optional character vector of extra names to use, e.g., "Mixed".
-#' @param palette An RColorBrewer palette, e.g., "Accent".
-#'                Can get RColorBrewer palette names from
-#'                \code{rownames(RColorBrewer::brewer.pal.info)}.
+#' @param palette An \pkg{RColorBrewer} palette, e.g., "Accent".
+#'     Can get \pkg{RColorBrewer} palette names from \code{rownames(RColorBrewer::brewer.pal.info)}.
 #'
-#' @return A named vector of color codes, where the names are the species names
+#' @return A named vector of colour codes, where the names are the species names
 #' plus any extra names passed with \code{newVals}.
 #'
 #' @export
@@ -135,11 +138,14 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
 
   sppColors <- NULL
   sppColors <- if (is.character(palette))
-    if (palette %in% rownames(RColorBrewer::brewer.pal.info))
-      RColorBrewer::brewer.pal(length(sppColorNames), palette)
+    if (palette %in% rownames(RColorBrewer::brewer.pal.info)) {
+      colorPalette <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 7, name = palette))
+      colorPalette(length(sppColorNames))
+    }
 
   if (is.null(sppColors))
     stop("Currently palette must be one of the RColorBrewer::brewer.pal names")
+
   names(sppColors) <- sppColorNames
   sppColors
 }

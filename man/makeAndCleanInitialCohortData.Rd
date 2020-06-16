@@ -4,28 +4,47 @@
 \alias{makeAndCleanInitialCohortData}
 \title{Generate initial \code{cohortData} table}
 \usage{
-makeAndCleanInitialCohortData(inputDataTable, sppColumns,
-  pixelGroupBiomassClass)
+makeAndCleanInitialCohortData(
+  inputDataTable,
+  sppColumns,
+  imputeBadAgeModel = quote(lme4::lmer(age ~ B * speciesCode + cover * speciesCode + (1
+    | initialEcoregionCode))),
+  minCoverThreshold,
+  doAssertion = getOption("LandR.assertions", TRUE),
+  doSubset = TRUE
+)
 }
 \arguments{
 \item{inputDataTable}{A \code{data.table} with columns described above.}
 
 \item{sppColumns}{A vector of the names of the columns in \code{inputDataTable} that
-represent percent cover by species}
+represent percent cover by species, rescaled to sum up to 100\%.}
 
-\item{pixelGroupBiomassClass}{Round B to the nearest \code{pixelGroupBiomassClass}
-to establish unique pixelGroups}
+\item{imputeBadAgeModel}{DESCRIPTION NEEDED}
+
+\item{minCoverThreshold}{DESCRIPTION NEEDED}
+
+\item{doAssertion}{A logical indicating whether some internal tests should be run to
+ensure the function is running correctly.
+Default: \code{getOption("LandR.assertions", TRUE)}.}
+
+\item{doSubset}{Turns on/off subsetting. Defaults to \code{TRUE}.}
 }
 \description{
 Takes a single \code{data.table} input, which has the following columns in addition to
-others that will be labelled with species name, and contain percent cover of each:
+   others that will be labelled with species name, and contain percent cover of each:
 \itemize{
-  \item age
-  \item logAge
-  \item initialEcoregionCode
-  \item totalBiomass
-  \item pixelIndex
-  \item lcc
+  \item \code{pixelIndex} (integer)
+  \item \code{age} (integer)
+  \item \code{logAge} (numeric)
+  \item \code{initialEcoregionCode} (factor)
+  \item \code{totalBiomass} (integer)
+  \item \code{lcc} (integer)
+  \item \code{rasterToMatch} (integer)
+  \item \code{speciesCode} (factor)
+  \item \code{cover} (integer)
+  \item \code{coverOrig} (integer)
+  \item \code{B} (integer)
 }
 }
 \author{

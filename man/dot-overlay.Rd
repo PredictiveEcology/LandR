@@ -4,15 +4,23 @@
 \alias{.overlay}
 \title{Overlaying function}
 \usage{
-.overlay(SPP, HQ, LQ, hqLarger, highQualityStack, lowQualityStack,
-  outputFilenameSuffix = "overlay", destinationPath)
+.overlay(
+  SPP,
+  HQ,
+  LQ,
+  hqLarger,
+  highQualityStack,
+  lowQualityStack,
+  outputFilenameSuffix = "overlay",
+  destinationPath
+)
 }
 \arguments{
 \item{SPP}{\code{data.table} column of species layer name}
 
-\item{HQ}{\code{data.table} column of whether SPP is present in HQ layers}
+\item{HQ}{\code{data.table} column of whether \code{SPP} is present in HQ layers}
 
-\item{LQ}{\code{data.table} column of whether SPP is present in LQ layers}
+\item{LQ}{\code{data.table} column of whether \code{SPP} is present in LQ layers}
 
 \item{highQualityStack}{high quality list/stack of rasters
 (will be used preferentially)}

@@ -1,9 +1,13 @@
-^docs$
 ^_pkgdown\.yml$
-^appveyor\.yml$
+^\.httr-oauth$
 ^\.lintr$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.travis\.yml$
+^appveyor\.yml$
+^appveyor_cache\.txt$
+^data-raw$
+^docs$
 ^LICENSE$
-^\.httr-oauth$
+^man-roxygen$
+^\.github$

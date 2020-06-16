@@ -2,37 +2,172 @@
 % Please edit documentation in R/assertions.R
 \name{assert1}
 \alias{assert1}
+\alias{assert2}
 \alias{assertUniqueCohortData}
 \alias{assertERGs}
 \alias{assertColumns}
+\alias{assertCohortData}
+\alias{assertPixelCohortData}
+\alias{assertSpeciesPlotLabels}
+\alias{assertFireToleranceDif}
+\alias{assertSpeciesLayers}
+\alias{assertRstLCChange}
 \title{Assertions}
 \usage{
-assert1(cohortData34to36, cohortData)
+assert1(
+  cohortData34to36,
+  cohortData,
+  rmZeroBiomassQuote,
+  classesToReplace = 34:36,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 
-assertUniqueCohortData(cohortData, columns)
+assert2(
+  cohortDataNo34to36,
+  classesToReplace = 34:36,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 
-assertERGs(ecoregionMap, cohortData, speciesEcoregion, minRelativeB)
+assertUniqueCohortData(
+  cohortData,
+  columns,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 
-assertColumns(obj, colClasses)
+assertERGs(
+  ecoregionMap,
+  cohortData,
+  speciesEcoregion,
+  minRelativeB,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertColumns(
+  obj,
+  colClasses,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertCohortData(
+  cohortData,
+  pixelGroupMap,
+  sim,
+  maxExpectedNumDiverge = 1,
+  message = "",
+  doAssertion = getOption("LandR.assertions", TRUE),
+  verbose = getOption("LandR.verbose", TRUE)
+)
+
+assertPixelCohortData(
+  pixelCohortData,
+  pixelGroupMap,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertSpeciesPlotLabels(
+  speciesNames,
+  sppEquiv,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertFireToleranceDif(
+  burnedPixelCohortData,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertSpeciesLayers(
+  speciesLayers,
+  thresh,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertRstLCChange(
+  rstLCChange,
+  rasterToMatch,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 }
 \arguments{
 \item{cohortData34to36}{A \code{cohortData} \code{data.table} with only the
-pixels what were lcc 34:36}
+pixels what were LCC 34:36}
 
-\item{cohortData}{The full \code{cohortData} \code{data.table}}
+\item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
+\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
+and \code{sumB}.}
 
-\item{columns}{Vector of column names on which to test for unique cohortData}
+\item{rmZeroBiomassQuote}{An expression to evaluate, in the form of \code{quote(B>0)},
+used to select cohorts with biomass.}
+
+\item{classesToReplace}{Integer vector of classes that are are to be replaced,
+e.g., 34, 35, 36 on LCC2005, which are burned young, burned 10 year, and cities.}
+
+\item{doAssertion}{A logical indicating whether some internal tests should be run to
+ensure the function is running correctly.
+Default: \code{getOption("LandR.assertions", TRUE)}.}
+
+\item{cohortDataNo34to36}{A \code{cohortData} \code{data.table} with only the
+pixels what were LCC 34:36}
+
+\item{columns}{Vector of column names on which to test for unique \code{cohortData}}
 
 \item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique groupings}
 
-\item{speciesEcoregion}{The \code{speciesEcoregion} \code{data.table}}
+\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
 
 \item{minRelativeB}{TODO: add description}
 
 \item{obj}{A data.frame or data.table-like object}
 
 \item{colClasses}{A named vector of column classes, where the names are the column names}
+
+\item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
+number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
+
+\item{sim}{If the \code{simList} is included, then the \code{browser()} call will be more useful.}
+
+\item{maxExpectedNumDiverge}{A numeric, length 1, indicating by how many they
+can diverge. Default 1.}
+
+\item{message}{An optional message to print. This may help identify where this function
+was called.}
+
+\item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
+
+\item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
+
+\item{speciesNames}{A vector of species names for which the labels will be checked}
+
+\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
+See \code{data("sppEquivalencies_CA", "LandR")}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use
+\code{data("sppEquivalencies_CA", "LandR")}.}
+
+\item{burnedPixelCohortData}{An expanded \code{cohortData} \code{data.table} with pixel-level
+cohort information on burnt pixels and columns:
+\code{severity} - fire severity in that pixel calculated based on fire behaviour properties;
+\code{firetolerance} - species-level fire tolerance;
+\code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}.}
+
+\item{speciesLayers}{A \code{RasterStack} or \code{RasterLayer} that
+should contain species cover data in the study area}
+
+\item{thresh}{the minimum number of pixels where the species must have
+\code{biomass > 0} to be considered present in the study area.
+Defaults to 1.}
+
+\item{rstLCChange}{a raster layer indicating pixels were land-use change occurred as 1s}
+
+\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).}
 }
 \description{
-Assertions
+Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
+
+Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
+
+This is the full \code{pixelCohortData}, not the collapsed one.
+}
+\note{
+TODO
 }

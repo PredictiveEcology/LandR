@@ -3,7 +3,7 @@
 \name{prepInputsSpecies}
 \alias{prepInputsSpecies}
 \alias{prepInputsMainInput}
-\title{Download and prepare a species traits table for use with \code{LandR_BiomassGMOrig} module}
+\title{Download and prepare a species traits table for use with \code{Biomass_core} module}
 \usage{
 prepInputsSpecies(url = NULL, dPath, cacheTags = NULL)
 

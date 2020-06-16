@@ -2,19 +2,19 @@
 % Please edit documentation in R/cohorts.R
 \name{speciesEcoregionLatestYear}
 \alias{speciesEcoregionLatestYear}
-\title{Pull out the values from speciesEcoregion table for current time}
+\title{Pull out the values from \code{speciesEcoregion} table for current time}
 \usage{
 speciesEcoregionLatestYear(speciesEcoregion, currentTime)
 }
 \arguments{
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values}
+\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
 
-\item{currentTime}{The current time e.g., \code{time(sim)}}
+\item{currentTime}{The current simulation time e.g., \code{time(sim)}.}
 }
 \value{
-The speciesEcoregion input object, but with data from only one year, the year
+The \code{speciesEcoregion} input object, but with data from only one year, the year
 that is less than or equal to the \code{currentTime}
 }
 \description{
-Pull out the values from speciesEcoregion table for current time
+Pull out the values from \code{speciesEcoregion} table for current time
 }

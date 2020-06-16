@@ -16,9 +16,6 @@ Default \code{1e4}.}
 \item{seed}{Numeric indicating the random seed to set internally
 (useful for ensuring the same study area is produced each time).}
 }
-\value{
-\code{SpatalPolygonsDataFrame}
-}
 \description{
-Create default study areas for use with LandR modules
+This simply re-exports \code{SpaDES.tools::randomStudyArea}
 }

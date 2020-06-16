@@ -1,9 +1,7 @@
-if (getRversion() >= "3.1.0") {
-  utils::globalVariables(c(":=", ".SD", "Area", "col1", "growthcurve",
-                           "leafLignin", "leaflongevity", "mortalityshape",
-                           "seeddistance_eff", "seeddistance_max",
-                           "species", "species1", "species2", "wooddecayrate"))
-}
+utils::globalVariables(c(
+  ":=", ".SD", "Area", "col1", "growthcurve", "leafLignin", "leaflongevity", "mortalityshape",
+  "seeddistance_eff", "seeddistance_max", "species", "species1", "species2", "wooddecayrate"
+))
 
 #' Default LANDIS-II project repo url
 #'
@@ -12,7 +10,7 @@ landisIIrepo <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/"
                       "Extensions-Succession/master/biomass-succession-archive/",
                       "trunk/tests/v6.0-2.0/")
 
-#' Download and prepare a species traits table for use with LBMR module
+#' Download and prepare a species traits table for use with \code{Biomass_core} module
 #'
 #' TODO: add detailed description
 #'
@@ -47,52 +45,38 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
   return(speciesTable)
 }
 
+#' Species Table Column Names
+#'
+#' @keywords internal
+.speciesTableColNames <- c("species", "Area", "longevity", "sexualmature", "shadetolerance",
+                           "firetolerance", "seeddistance_eff", "seeddistance_max", "resproutprob",
+                           "resproutage_min", "resproutage_max", "postfireregen", "leaflongevity",
+                           "wooddecayrate", "mortalityshape", "growthcurve", "leafLignin",
+                           "hardsoft")
+
 #' @param speciesTable  A raw species traits table
 #'
-#' @param speciesLayers TODO: description needed
+#' @param speciesLayers stack of species layers rasters
 #'
-#' @param sppEquiv TODO: description needed
+#' @template sppEquiv
 #'
-#' @param sppEquivCol TODO: description needed
+#' @template sppEquivCol
 #'
 #' @return A \code{data.table} with columns ... TODO
 #'
 #' @export
 #' @rdname speciesTable
 prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEquivCol = "LandR") {
-
   if (is.null(sppEquiv))
-    sppEquiv <- data.table(utils::data("sppEquivalencies_CA",
-                                                 package = "LandR",
-                                                 envir = environment()))
+    sppEquiv <- data.table(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
 
-  names(speciesTable) <- c(
-    "species",
-    "Area",
-    "longevity",
-    "sexualmature",
-    "shadetolerance",
-    "firetolerance",
-    "seeddistance_eff",
-    "seeddistance_max",
-    "resproutprob",
-    "resproutage_min",
-    "resproutage_max",
-    "postfireregen",
-    "leaflongevity",
-    "wooddecayrate",
-    "mortalityshape",
-    "growthcurve",
-    "leafLignin",
-    "hardsoft"
-  )
+  names(speciesTable) <- .speciesTableColNames
 
   speciesTable[, growthcurve := as.numeric(growthcurve)]
 
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
-  speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv,
-                                                           "LANDIS_traits", multi = TRUE) &
+  speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv, "LANDIS_traits", multi = TRUE) &
                                  Area %in% c("BSW", "BP", "MC")]
 
   speciesTable[, species := equivalentName(speciesTable$species, sppEquiv, sppEquivCol)]
@@ -103,7 +87,73 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
   return(speciesTable)
 }
 
-#' Download and prepare a species traits table for use with \code{LandR_BiomassGMOrig} module
+#' Change species table of parameters/traits
+#'
+#' Changes longevity values in the species table according to Burton & Cumming (1995).
+#' Only the species and values present in Boreal Shield West (BSW), Boreal Plains (BP) and
+#' Montane Cordillera (MC) \code{speciesTable$Area} are being changed.
+#' All others follow Dominic Cyr and Yan Boulanger's trait values
+#' (\url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
+#' Note that BSW and BP areas correspond more closely to the region considered in Table 2 of
+#' Burton & Cumming (1995), while MC will correspond to both tables.
+#'
+#' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
+#'
+#' @param speciesTable TODO: DESCRIPTION NEEDED
+#'
+#' @template sppEquiv
+#'
+#' @template sppEquivCol
+#'
+#' @return An updated species \code{data.table}
+#'
+#' @export
+#' @importFrom data.table data.table
+#' @rdname speciesTableUpdate
+speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
+  if (is.null(sppEquiv))
+    sppEquiv <- data.table(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
+
+  if (is.null(sppEquivCol))
+    stop("Please provide sppEquivCol")
+
+  names(speciesTable) <- .speciesTableColNames
+
+  ## make temporary table that will have new parameters for Boreal spp.
+  speciesTableShort <- speciesTable[Area %in% c("BSW", "BP", "MC"), .(species, longevity, shadetolerance)]
+  speciesTableShort[species == "ABIE.BAL", c('longevity', 'shadetolerance') := .(200, 3)] #default 150, 5
+  speciesTableShort[species == "ABIE.LAS", c('longevity', 'shadetolerance') := .(240, 3)] #default 250, 4
+  speciesTableShort[species == "BETU.PAP", longevity := 140] #default 150
+  speciesTableShort[species == "LARI.LAR", longevity := 350] #default 150
+  speciesTableShort[species == "LARI.OCC", longevity := 450] #default 900!
+  speciesTableShort[species == "PICE.ENG", c('longevity', 'shadetolerance') := .(460, 3)] #default 450, 4
+  speciesTableShort[species == "PICE.GLA", c('longevity', 'shadetolerance') := .(400, 2)] #default 250, 3
+  speciesTableShort[species == "PICE.MAR", c('longevity', 'shadetolerance') := .(250, 3)] #default 200, 4
+  speciesTableShort[species == "PINU.BAN", longevity := 150]
+  speciesTableShort[species == "PINU.CON.LAT", longevity := 335] #default 300
+  speciesTableShort[species == "PINU.PON", longevity := 575] #default 500
+  speciesTableShort[species == "POPU.BAL", longevity := 200] #default 130
+  speciesTableShort[species == "POPU.TRE", longevity := 200] #default 150
+  speciesTableShort[species == "PSEU.MEN", longevity := 525] ## default 600, only in MC area, corresponding to var. glauca
+  speciesTableShort[species == "THUJ.PLI", longevity := 1500] ##default 700, 1500 may be incorrect for MC
+  speciesTableShort[species == "TSUG.HET", c('longevity', 'shadetolerance') := .(500, 4)] #default 475, 5
+  speciesTableShort[species == "TSUG.MER", c('longevity', 'shadetolerance') := .(800, 3)] #default 700, 4
+
+  ## subset, rename and "merge" species by using the minimum value
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
+  sppNameVector <- species$species
+  speciesTableShort <- speciesTableShort[species %in% equivalentName(sppNameVector, sppEquiv,
+                                                                     "LANDIS_traits", multi = TRUE)]
+  speciesTableShort[, species := equivalentName(speciesTableShort$species, sppEquiv, sppEquivCol)]
+  speciesTableShort <- speciesTableShort[, .(longevity = min(longevity), shadetolerance = min(shadetolerance)), by = "species"]
+
+  ## join and replace
+  species <- species[, c("longevity", "shadetolerance") := .(speciesTableShort[, longevity], speciesTableShort[, shadetolerance])]
+
+  return(species)
+}
+
+#' Download and prepare a species traits table for use with \code{Biomass_core} module
 #'
 #' TODO: add detailed description
 #'

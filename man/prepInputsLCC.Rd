@@ -2,13 +2,19 @@
 % Please edit documentation in R/maps.R
 \name{prepInputsLCC}
 \alias{prepInputsLCC}
-\title{Simple prepInputs for LCC2005 or LCC2010}
+\title{Simple \code{prepInputs} for LCC2005 or LCC2010 data}
 \usage{
-prepInputsLCC(year = 2005, destinationPath = asPath("."),
-  studyArea = NULL, rasterToMatch = NULL, filename2 = NULL, ...)
+prepInputsLCC(
+  year = 2005,
+  destinationPath = asPath("."),
+  studyArea = NULL,
+  rasterToMatch = NULL,
+  filename2 = NULL,
+  ...
+)
 }
 \arguments{
-\item{year}{Numeric, either 2005 or 2010 (not yet implemented)}
+\item{year}{Numeric, either 2005 or 2010}
 
 \item{destinationPath}{Character string of a directory in which to download
 and save the file that comes from \code{url} and is also where the function
@@ -27,7 +33,7 @@ CRS of \code{x} before masking. Currently, this function will not reproject the
 \item{rasterToMatch}{Template \code{Raster*} object used for cropping (so extent should be
 the extent of desired outcome) and reprojecting (including changing the
 resolution and projection).
-See details in \code{\link{postProcess}}.}
+See details in \code{\link[reproducible]{postProcess}}.}
 
 \item{filename2}{\code{filename2} is optional, and is either
 NULL (no writing of outputs to disk), or several options
@@ -35,10 +41,10 @@ for writing the object to disk. If
 \code{TRUE} (the default), it will give it a file name determined by
 \code{.prefix(basename(filename1), prefix)}. If
 a character string, it will use this as its file name. See
-\code{\link{determineFilename}}.}
+\code{\link[reproducible]{determineFilename}}.}
 
 \item{...}{Passed to raster::crop}
 }
 \description{
-A wrapper around prepInputs for the Canadian Land Cover Classification product(s)
+A wrapper around \code{prepInputs} for the Canadian Land Cover Classification product(s).
 }

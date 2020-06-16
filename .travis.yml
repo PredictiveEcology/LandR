@@ -1,131 +1,111 @@
-sudo: required
 language: r
 cache: packages
-cran: https://cran.rstudio.com/
+cran: https://cloud.r-project.org
 env:
   global:
-    - CRAN_REPO=https://cran.rstudio.com
-matrix:
+    - CRAN_REPO=https://cloud.r-project.org
+jobs:
   include:
   - os: linux
-    dist: trusty
-    r: 3.3
-    addons:
-      apt:
-        sources:
-          - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
-        packages:
-          - libgdal-dev
-          - libgdal1-dev
-          - libgeos-dev
-          - libnlopt-dev
-          - libproj-dev
-          - libudunits2-dev
-          - gdal-bin
-    before_script:
-      - "export DISPLAY=:99.0"
-      - "sh -e /etc/init.d/xvfb start"
-      - sleep 3 # give xvfb some time to start
-    r_packages:
-      - rgdal
-      - rgeos
-  - os: linux
-    dist: trusty
-    r: 3.4
-    addons:
-      apt:
-        sources:
-          - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
-        packages:
-          - libgdal-dev
-          - libgdal1-dev
-          - libgeos-dev
-          - libnlopt-dev
-          - libproj-dev
-          - libudunits2-dev
-          - gdal-bin
-    before_script:
-      - "export DISPLAY=:99.0"
-      - "sh -e /etc/init.d/xvfb start"
-      - sleep 3 # give xvfb some time to start
-    r_packages:
-      - rgdal
-      - rgeos
-  - os: linux
-    dist: trusty
+    dist: xenial
     r: oldrel
     addons:
       apt:
         sources:
           - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
         packages:
-          - libgdal-dev
+          - hunspell-en-ca
           - libgdal1-dev
           - libgeos-dev
+          - libglpk-dev
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
-          - gdal-bin
+    services:
+      - xvfb
+    r_binary_packages:
+      - BH
+      - dplyr
+      - git2r
+      - igraph
+      - raster
+      - RSQlite
     before_script:
-      - "export DISPLAY=:99.0"
-      - "sh -e /etc/init.d/xvfb start"
-      - sleep 3 # give xvfb some time to start
-    r_packages:
-      - rgdal
-      - rgeos
+      - Rscript -e 'install.packages("devtools", type = "source")'
+      - Rscript -e 'devtools::install_github("PredictiveEcology/map@development", dependencies = TRUE)'
+      - Rscript -e 'devtools::install_github("PredictiveEcology/pemisc@development", dependencies = TRUE)'
+    before_install:
+      - Rscript -e 'install.packages(c("ggplot2", "quickPlot", "reproducible", "SpaDES.core"), type = "source")'
   - os: linux
-    dist: trusty
+    dist: xenial
     r: release
     addons:
       apt:
         sources:
           - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
         packages:
-          - libgdal-dev
+          - hunspell-en-ca
           - libgdal1-dev
           - libgeos-dev
+          - libglpk-dev
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
-          - gdal-bin
+    services:
+      - xvfb
+    r_binary_packages:
+      - BH
+      - dplyr
+      - git2r
+      - igraph
+      - raster
+      - RSQlite
+      - stringi
     before_script:
-      - "export DISPLAY=:99.0"
-      - "sh -e /etc/init.d/xvfb start"
-      - sleep 3 # give xvfb some time to start
-    r_packages:
-      - covr
-      - devtools
+      - Rscript -e 'install.packages("devtools", type = "source")'
+      - Rscript -e 'devtools::install_github("PredictiveEcology/map@development", dependencies = TRUE)'
+      - Rscript -e 'devtools::install_github("PredictiveEcology/pemisc@development", dependencies = TRUE)'
+    before_install:
+      - Rscript -e 'install.packages(c("ggplot2", "quickPlot", "reproducible", "rgdal", "rgeos", "SpaDES.core"), type = "source")'
     r_github_packages:
       - jimhester/lintr
+      - r-lib/covr
+    after_failure:
+      - cat ./LandR.Rcheck/tests/test-all.Rout
     after_success:
-      - Rscript -e 'covr::coveralls(type = "all", quiet = FALSE)'
+      - travis_wait 15 Rscript -e 'covr::coveralls(type = "all", quiet = FALSE)'
       - Rscript -e 'lintr::lint_package()'
-    r_packages:
-      - rgdal
-      - rgeos
   - os: linux
-    dist: trusty
+    dist: xenial
     r: devel
     addons:
       apt:
         sources:
           - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
         packages:
-          - libgdal-dev
+          - hunspell-en-ca
           - libgdal1-dev
           - libgeos-dev
+          - libglpk-dev
           - libnlopt-dev
           - libproj-dev
           - libudunits2-dev
-          - gdal-bin
+    services:
+      - xvfb
+    r_binary_packages:
+      - BH
+      - dplyr
+      - git2r
+      - igraph
+      - raster
+      - RSQlite
+      - stringi
     before_script:
-      - "export DISPLAY=:99.0"
-      - "sh -e /etc/init.d/xvfb start"
-      - sleep 3 # give xvfb some time to start
-    r_packages:
-      - devtools
-      - rgdal
-      - rgeos
+      - Rscript -e 'install.packages("devtools", type = "source")'
+      - Rscript -e 'devtools::install_github("PredictiveEcology/map@development", dependencies = TRUE)'
+      - Rscript -e 'devtools::install_github("PredictiveEcology/pemisc@development", dependencies = TRUE)'
+    before_install:
+      - Rscript -e 'install.packages(c("ggplot2", "quickPlot", "reproducible", "rgdal", "rgeos", "SpaDES.core"), type = "source")'
   - os: osx
     osx_image: xcode9.4
     addons:
@@ -158,7 +138,7 @@ matrix:
     env:
       - GLPK=false
     before_script:
-      - Rscript -e "install.packages(c('rgdal', 'rgeos'), type = 'source')"
+      - Rscript -e 'install.packages(c("digest", "igraph", "rgdal", "rgeos"), type = "source")'
 r_build_args: " "
 r_check_args: "--as-cran"
 warnings_are_errors: true

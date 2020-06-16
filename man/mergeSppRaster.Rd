@@ -4,15 +4,18 @@
 \alias{mergeSppRaster}
 \title{Merge species percent-cover rasters}
 \usage{
-mergeSppRaster(sppMerge, speciesLayers, sppEquiv, column, suffix, dPath,
-  ...)
+mergeSppRaster(sppMerge, speciesLayers, sppEquiv, column, suffix, dPath, ...)
 }
 \arguments{
 \item{sppMerge}{TODO}
 
-\item{speciesLayers}{TODO}
+\item{speciesLayers}{stack of species layers rasters}
 
-\item{sppEquiv}{TODO}
+\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
+See \code{data("sppEquivalencies_CA", "LandR")}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use
+\code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{column}{TODO}
 
@@ -20,7 +23,7 @@ mergeSppRaster(sppMerge, speciesLayers, sppEquiv, column, suffix, dPath,
 
 \item{dPath}{destination path TODO}
 
-\item{...}{Additonal arguments TODO}
+\item{...}{Additional arguments TODO}
 }
 \description{
 Used internally in \code{overlayStacks}.

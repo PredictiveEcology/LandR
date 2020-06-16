@@ -11,7 +11,7 @@ install:
   ps: Bootstrap
 
 cache:
-  - C:\RLibrary
+  - C:\RLibrary -> appveyor_cache.txt
 
 # Adapt as necessary starting from here
 
@@ -20,29 +20,26 @@ version: 1.0.{build}-{branch}
 environment:
   global:
     R_ARCH: x64
+    R_REMOTES_STANDALONE: true
     CRAN_REPO: https://cran.rstudio.com
     USE_RTOOLS: true
     WARNINGS_ARE_ERRORS: 1
 
   matrix:
   - R_VERSION: devel
-    PKGTYPE: source
 
   - R_VERSION: release
 
   - R_VERSION: oldrel
-    RTOOLS_VERSION: 34
-
-  - R_VERSION: 3.4.4
-    RTOOLS_VERSION: 34
-
-  - R_VERSION: 3.3.3
-    RTOOLS_VERSION: 33
+    RTOOLS_VERSION: 35
 
 clone_depth: 5
 
 build_script:
   - Rscript -e "install.packages(c('igraph', 'RCurl'), repos = 'https://cran.rstudio.com')"
+  - Rscript -e "install.packages(c('data.table', 'utf8'), repos = 'https://cran.rstudio.com', type = 'source')"
+  - travis-tool.sh install_github PredictiveEcology/map@development
+  - travis-tool.sh install_github PredictiveEcology/pemisc@development
   - travis-tool.sh install_deps
 
 test_script:

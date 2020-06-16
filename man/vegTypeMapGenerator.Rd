@@ -2,27 +2,64 @@
 % Please edit documentation in R/maps.R
 \name{vegTypeMapGenerator}
 \alias{vegTypeMapGenerator}
+\alias{vegTypeMapGenerator.RasterStack}
+\alias{vegTypeMapGenerator.data.table}
 \title{Generate vegetation type map}
 \usage{
-vegTypeMapGenerator(cohortdata, pixelGroupMap, vegLeadingProportion,
-  colors, unitTest = getOption("LandR.assertions", FALSE))
+vegTypeMapGenerator(x, ...)
+
+\method{vegTypeMapGenerator}{RasterStack}(x, ..., doAssertion = getOption("LandR.doAssertion", TRUE))
+
+\method{vegTypeMapGenerator}{data.table}(
+  x,
+  pixelGroupMap,
+  vegLeadingProportion = 0.8,
+  mixedType = 2,
+  sppEquiv = NULL,
+  sppEquivCol,
+  colors,
+  pixelGroupColName = "pixelGroup",
+  doAssertion = getOption("LandR.assertions", TRUE),
+  ...
+)
 }
 \arguments{
-\item{cohortdata}{A different \code{data.table} of stuff}
+\item{x}{Either a \code{cohortData} object or a \code{speciesCover} \code{RasterStack}}
 
-\item{pixelGroupMap}{A \code{raster}}
+\item{...}{Additional arguments.}
 
-\item{vegLeadingProportion}{Numeric between 0-1.}
+\item{doAssertion}{A logical indicating whether some internal tests should be run to
+ensure the function is running correctly.
+Default: \code{getOption("LandR.assertions", TRUE)}.}
 
-\item{colors}{A named vector of color codes. The names MUST match the names of species
-in \code{cohortdata$speciesCode}, plus an optional "Mixed" color}
+\item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
+number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
-\item{unitTest}{A logical indicating whether some internal tests should be run to
-ensure the function is running correctly.}
+\item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
+threshold a species needs to pass to be considered "leading".}
+
+\item{mixedType}{An integer defining whether mixed stands are of any kind of species
+admixture (1), or only when deciduous mixed with conifer (2).
+Defaults to 2.}
+
+\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
+See \code{data("sppEquivalencies_CA", "LandR")}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use
+\code{data("sppEquivalencies_CA", "LandR")}.}
+
+\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+Only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
+
+\item{colors}{A named vector of colour codes. The names MUST match the names of species
+in \code{cohortData$speciesCode}, plus an optional "Mixed" colour.}
+
+\item{pixelGroupColName}{Name of the column in \code{pixelGroup} to use.}
 }
 \description{
 Generate vegetation type map
 }
 \author{
-Eliot McIntire
+Eliot McIntire, Ceres Barros, Alex Chubaty
 }
