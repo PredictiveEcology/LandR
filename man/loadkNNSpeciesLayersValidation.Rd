@@ -45,7 +45,7 @@ Defaults to 1.}
 
 \item{url}{the source url for the data, passed to \code{\link[reproducible]{prepInputs}}}
 
-\item{...}{Additional arguments passed to \code{\link[reproducible:cache]{Cache}}
+\item{...}{Additional arguments passed to \code{\link[reproducible]{Cache}}
 and \code{\link{equivalentName}}.}
 }
 \value{

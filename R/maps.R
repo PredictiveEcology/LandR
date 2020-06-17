@@ -564,7 +564,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #'
 #' @param url the source url for the data, passed to \code{\link[reproducible]{prepInputs}}
 #'
-#' @param ... Additional arguments passed to \code{\link[reproducible:cache]{Cache}}
+#' @param ... Additional arguments passed to \code{\link[reproducible]{Cache}}
 #'            and \code{\link{equivalentName}}. Also valid: \code{outputPath}, and \code{studyAreaName}.
 #'
 #' @return A raster stack of percent cover layers by species.
@@ -746,7 +746,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 #'
 #' @param url the source url for the data, passed to \code{\link[reproducible]{prepInputs}}
 #'
-#' @param ... Additional arguments passed to \code{\link[reproducible:cache]{Cache}}
+#' @param ... Additional arguments passed to \code{\link[reproducible]{Cache}}
 #'            and \code{\link{equivalentName}}.
 #'
 #' @return A raster stack of percent cover layers by species.
@@ -755,7 +755,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
 #' @importFrom RCurl getURL
-#' @importFrom reproducible Cache .prefix preProcess basename2
+#' @importFrom reproducible basename2 Cache .prefix preProcess
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
 #' @importFrom XML getHTMLLinks
