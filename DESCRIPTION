@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2020-06-11
-Version: 0.0.5.9003
+Date: 2020-06-16
+Version: 0.0.6
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -64,7 +64,8 @@ Suggests:
     testthat
 Remotes:
     PredictiveEcology/map@development,
-    PredictiveEcology/pemisc@development
+    PredictiveEcology/pemisc@development,
+    PredictiveEcology/reproducible@development
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3

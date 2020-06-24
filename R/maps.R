@@ -600,10 +600,16 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   fileURLs <- getURL(url, dirlistonly = TRUE)
   fileNames <- getHTMLLinks(fileURLs)
   ## get all kNN species - names only
-  allSpp <- grep("2001_kNN_Species_.*\\.tif$", fileNames, value = TRUE)
-  allSpp <- allSpp %>%
+  allSpp <- grep("2001_kNN_Species_.*\\.tif$", fileNames, value = TRUE) %>%
     sub("_v1.tif", "", .) %>%
     sub(".*Species_", "", .)
+
+  if (getRversion() < "4.0.0") {
+    if (length(allSpp) == 0)
+      stop("Incomplete file list retrieved from server.")
+  } else {
+    stopifnot("Incomplete file list retrieved from server." = length(allSpp) > 1)
+  }
 
   ## get all species layers from .tar
   if (length(sppNameVector) == 1) ## avoids a warning in next if
@@ -749,7 +755,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
 #' @importFrom RCurl getURL
-#' @importFrom reproducible Cache .prefix preProcess basename2
+#' @importFrom reproducible basename2 Cache .prefix preProcess
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
 #' @importFrom XML getHTMLLinks

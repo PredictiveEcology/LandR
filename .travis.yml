@@ -23,13 +23,6 @@ jobs:
           - libudunits2-dev
     services:
       - xvfb
-    r_binary_packages:
-      - BH
-      - dplyr
-      - git2r
-      - igraph
-      - raster
-      - RSQlite
     before_script:
       - Rscript -e 'install.packages("devtools", type = "source")'
       - Rscript -e 'devtools::install_github("PredictiveEcology/map@development", dependencies = TRUE)'
@@ -53,14 +46,6 @@ jobs:
           - libudunits2-dev
     services:
       - xvfb
-    r_binary_packages:
-      - BH
-      - dplyr
-      - git2r
-      - igraph
-      - raster
-      - RSQlite
-      - stringi
     before_script:
       - Rscript -e 'install.packages("devtools", type = "source")'
       - Rscript -e 'devtools::install_github("PredictiveEcology/map@development", dependencies = TRUE)'
@@ -92,14 +77,6 @@ jobs:
           - libudunits2-dev
     services:
       - xvfb
-    r_binary_packages:
-      - BH
-      - dplyr
-      - git2r
-      - igraph
-      - raster
-      - RSQlite
-      - stringi
     before_script:
       - Rscript -e 'install.packages("devtools", type = "source")'
       - Rscript -e 'devtools::install_github("PredictiveEcology/map@development", dependencies = TRUE)'
@@ -114,6 +91,7 @@ jobs:
         - glpk
         - libgit2
         - llvm
+        - udunits
         update: true
     latex: false
     r_build_args: "--no-build-vignettes"
@@ -129,6 +107,7 @@ jobs:
         packages:
         - libgit2
         - llvm
+        - udunits
         update: true
     latex: false
     r_build_args: "--no-build-vignettes"
