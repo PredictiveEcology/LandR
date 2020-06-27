@@ -207,7 +207,8 @@ assertColumns <- function(obj, colClasses,
 #' @rdname assertions
 assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1,
                              message = "", doAssertion = getOption("LandR.assertions", TRUE),
-                             verbose = getOption("LandR.verbose", TRUE)) {
+                             verbose = getOption("LandR.verbose", TRUE),
+                             cohortDefinitionCols = c("pixelGroup", "age", "speciesCode")) {
   if (doAssertion) {
     if (!isTRUE("pixelGroup" %in% names(cohortData))) {
       stop("cohortData must have pixelGroup")
@@ -219,7 +220,7 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
     test2 <- sum(!b %in% a)
 
     browser(expr = exists("aaaa"))
-    cohortDataN <- cohortData[, .N, by = c("pixelGroup", "speciesCode", "age", "B")]
+    cohortDataN <- cohortData[, .N, by = cohortDefinitionCols]
     test3 <- which(cohortDataN$N != 1)
     if (test1 > maxExpectedNumDiverge || test2 > maxExpectedNumDiverge) {
       if (nchar(message) > 0) message(message)

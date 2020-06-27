@@ -12,7 +12,6 @@ updateCohortData(
   currentTime,
   speciesEcoregion,
   treedFirePixelTableSinceLastDisp = NULL,
-  provenanceTable = NULL,
   successionTimestep,
   verbose = getOption("LandR.verbose", TRUE),
   doAssertion = getOption("LandR.assertions", TRUE)
@@ -49,8 +48,6 @@ number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}
 \item{treedFirePixelTableSinceLastDisp}{A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
 This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
 to ensure that everything matches correctly.}
-
-\item{provenanceTable}{table with pixel-based provenances for reforestation}
 
 \item{successionTimestep}{The time between successive seed dispersal events.
 In LANDIS-II, this is called "Succession Timestep". This is used here}

@@ -55,7 +55,8 @@ assertCohortData(
   maxExpectedNumDiverge = 1,
   message = "",
   doAssertion = getOption("LandR.assertions", TRUE),
-  verbose = getOption("LandR.verbose", TRUE)
+  verbose = getOption("LandR.verbose", TRUE),
+  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode")
 )
 
 assertPixelCohortData(
