@@ -134,6 +134,8 @@ was called.}
 
 \item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
 
+\item{cohortDefinitionCols}{columns in cohortData that define a cohort}
+
 \item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
 
 \item{speciesNames}{A vector of species names for which the labels will be checked}

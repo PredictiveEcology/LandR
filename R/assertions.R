@@ -197,7 +197,7 @@ assertColumns <- function(obj, colClasses,
 #'   was called.
 #'
 #' @param verbose Controls message output. Defaults to \code{getOption("LandR.verbose")}
-#'
+#' @param cohortDefinitionCols columns in cohortData that define a cohort
 #' @note
 #' TODO
 #'
