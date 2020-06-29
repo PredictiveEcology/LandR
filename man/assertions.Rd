@@ -134,7 +134,7 @@ was called.}
 
 \item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
 
-\item{cohortDefinitionCols}{columns in cohortData that define a cohort}
+\item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
 
 \item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
 

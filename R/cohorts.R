@@ -295,7 +295,6 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
 rmMissingCohorts <- function(cohortData, pixelGroupMap,
-                             cohortData,
                              cohortDefinitionCols,
                              doAssertion = getOption("LandR.assertions", TRUE)) {
 
