@@ -187,7 +187,7 @@ assertColumns <- function(obj, colClasses,
 #' @template cohortData
 #'
 #' @template pixelGroupMap
-#'
+#' @template cohortDefinitionCols
 #' @param sim If the \code{simList} is included, then the \code{browser()} call will be more useful.
 #'
 #' @param maxExpectedNumDiverge A numeric, length 1, indicating by how many they
@@ -197,7 +197,6 @@ assertColumns <- function(obj, colClasses,
 #'   was called.
 #'
 #' @param verbose Controls message output. Defaults to \code{getOption("LandR.verbose")}
-#' @param cohortDefinitionCols columns in cohortData that define a cohort
 #' @note
 #' TODO
 #'

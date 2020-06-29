@@ -30,13 +30,13 @@ utils::globalVariables(c(
 #' @template pixelGroupMap
 #' @template currentTime
 #' @template speciesEcoregion
+#' @template cohortDefinitionCols
 #'
 #' @param treedFirePixelTableSinceLastDisp A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
 #'   This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
 #'   to ensure that everything matches correctly.
 #' @param successionTimestep The time between successive seed dispersal events.
 #'   In LANDIS-II, this is called "Succession Timestep". This is used here
-#'
 #' @param verbose Integer, where increasing number is increasing verbosity. Currently,
 #'    only level 1 exists; but this may change.
 #'
@@ -56,6 +56,7 @@ utils::globalVariables(c(
 updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                              speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
                              successionTimestep,
+                             cohortDefinitionCols = c("pixelGroup", 'age', 'speciesCode'),
                              verbose = getOption("LandR.verbose", TRUE),
                              doAssertion = getOption("LandR.assertions", TRUE)) {
 
@@ -153,9 +154,9 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
                                       successionTimestep = successionTimestep)
 
   outs <- rmMissingCohorts(cohortData, pixelGroupMap)
-  outs$cohortData[, sumB := NULL]
 
   assertCohortData(outs$cohortData, outs$pixelGroupMap,
+                   cohortDefinitionCols = cohortDefinitionCols,
                    doAssertion = doAssertion, verbose = verbose)
 
   if (doAssertion) {
@@ -197,6 +198,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 #'
 #' @template newPixelCohortData
 #' @template cohortData
+#' @template cohortDefinitionCols
 #'
 #' @return A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
 #'
@@ -205,7 +207,9 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 #' @importFrom stats na.omit
 #' @rdname updateCohortData
 .initiateNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
+                                cohortDefinitionCols = c("pixelGroup", 'speciesCode', 'age'),
                                 speciesEcoregion, successionTimestep) {
+
   ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum B per ecoregion, join to new cohort data
   namesNCD <- names(newPixelCohortData)
@@ -262,7 +266,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
                                                mortality = 0L, aNPPAct = 0L)]
 
   if (getOption("LandR.assertions")) {
-    if (isTRUE(NROW(unique(newPixelCohortData, by = uniqueCohortDefinition)) != NROW(newPixelCohortData)))
+    if (isTRUE(NROW(unique(newPixelCohortData, by = cohortDefinitionCols)) != NROW(newPixelCohortData)))
       stop("Duplicated new cohorts in a pixelGroup. Please debug LandR:::.initiateNewCohorts")
   }
 
@@ -277,7 +281,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 #' Remove missing cohorts from \code{cohortData} based on \code{pixelGroupMap}
 #'
 #' @template cohortData
-#'
+#' @template cohortDefinitionCols
 #' @template pixelGroupMap
 #'
 #' @template doAssertion
@@ -291,6 +295,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
 rmMissingCohorts <- function(cohortData, pixelGroupMap,
+                             cohortData,
+                             cohortDefinitionCols,
                              doAssertion = getOption("LandR.assertions", TRUE)) {
 
   pgmValues <- data.table(pixelGroup = getValues(pixelGroupMap),
@@ -310,6 +316,7 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
   pixelGroupMap[pgsStillInPGMGoneFromCD$pixelIndex] <- NA
 
   assertCohortData(cohortData, pixelGroupMap, message = "rmMissingCohorts",
+                   cohortDefinitionCols = cohortDefinitionCols,
                    doAssertion = doAssertion)
 
   if (NROW(unique(cohortData[pixelGroup == 67724]$ecoregionGroup)) > 1) stop()
@@ -1100,6 +1107,8 @@ columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 #'
 #' @template pixelGroupMap
 #'
+#' @template cohortDefinitionCols
+#'
 #' @template doAssertion
 #'
 #' @return
@@ -1108,8 +1117,10 @@ columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 #' @export
 #' @importFrom raster getValues ncell
 addPixels2CohortData <- function(cohortData, pixelGroupMap,
+                                 cohortDefinitionCols = c("pixelGroup", 'age', 'speciesCode'),
                                  doAssertion = getOption("LandR.assertions", TRUE)) {
-  assertCohortData(cohortData, pixelGroupMap, doAssertion = doAssertion)
+  assertCohortData(cohortData, pixelGroupMap, cohortDefinitionCols = cohortDefinitionCols,
+                   doAssertion = doAssertion)
 
   pixelGroupTable <- na.omit(data.table(pixelGroup = getValues(pixelGroupMap),
                                         pixelIndex = 1:ncell(pixelGroupMap)))
@@ -1126,7 +1137,7 @@ addPixels2CohortData <- function(cohortData, pixelGroupMap,
 #' @template cohortData
 #'
 #' @template pixelGroupMap
-#'
+#' @template cohortDefinitionCols
 #' @template doAssertion
 #'
 #' @return
@@ -1137,8 +1148,10 @@ addPixels2CohortData <- function(cohortData, pixelGroupMap,
 #' @importFrom data.table data.table
 #' @importFrom raster maxValue
 addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
+                                  cohortDefinitionCols = c("pixelGroup", 'age', 'speciesCode'),
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
-  assertCohortData(cohortData, pixelGroupMap, doAssertion = doAssertion)
+  assertCohortData(cohortData, pixelGroupMap,
+                   cohortDefinitionCols = cohortDefinitionCols, doAssertion = doAssertion)
 
   noPixelsXGroup <- data.table(noPixels = tabulate(pixelGroupMap[]),
                                pixelGroup = c(1:maxValue(pixelGroupMap)))
@@ -1331,7 +1344,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
   newCohortData <- newCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B, Provenance, mortality = 0L, aNPPAct = 0L)]
 
   if (getOption("LandR.assertions")) {
-    if (isTRUE(NROW(unique(newCohortData, by = uniqueCohortDefinition)) != NROW(newCohortData))) {
+    if (isTRUE(NROW(unique(newCohortData, by = c("pixelGroup", 'age', 'speciesCode', 'Provenance'))) != NROW(newCohortData))) {
 
       stop("Duplicated new cohorts in a pixelGroup. Please debug LandR:::.plantNewCohorts")
     #in this situation, it may be caused by not replanting all species. Not sure if this will come up.
@@ -1361,6 +1374,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 #' @template newPixelCohortData
 #' @template cohortData
 #' @template pixelGroupMap
+#' @template cohortDefinitionCols
 #' @template currentTime
 #' @template speciesEcoregion
 #'
@@ -1392,6 +1406,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                                         speciesEcoregion, treedHarvestPixelTable = NULL,
                                         successionTimestep, provenanceTable,
+                                        cohortDefinitionCols =c("pixelGroup", 'age', 'speciesCode'),
                                         verbose = getOption("LandR.verbose", TRUE),
                                         doAssertion = getOption("LandR.assertions", TRUE)) {
 
@@ -1464,6 +1479,7 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
   outs <- rmMissingCohorts(cohortData, pixelGroupMap)
 
   assertCohortData(outs$cohortData, outs$pixelGroupMap,
+                   cohortDefinitionCols = cohortDefinitionCols,
                    doAssertion = doAssertion, verbose = verbose)
 
   if (doAssertion) {
