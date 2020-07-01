@@ -153,7 +153,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
                                       speciesEcoregion = speciesEcoregion,
                                       successionTimestep = successionTimestep)
 
-  outs <- rmMissingCohorts(cohortData, pixelGroupMap)
+  outs <- rmMissingCohorts(cohortData, pixelGroupMap, cohortDefinitionCols = cohortDefinitionCols)
+  outs$cohortData[, sumB := NULL]
 
   assertCohortData(outs$cohortData, outs$pixelGroupMap,
                    cohortDefinitionCols = cohortDefinitionCols,
@@ -295,7 +296,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
 rmMissingCohorts <- function(cohortData, pixelGroupMap,
-                             cohortDefinitionCols,
+                             cohortDefinitionCols = c("pixelGroup", 'age', 'speciesCode'),
                              doAssertion = getOption("LandR.assertions", TRUE)) {
 
   pgmValues <- data.table(pixelGroup = getValues(pixelGroupMap),
@@ -1475,7 +1476,7 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
                                 pixelGroupMap, currentTime = currentTime,
                                 successionTimestep = successionTimestep)
 
-  outs <- rmMissingCohorts(cohortData, pixelGroupMap)
+  outs <- rmMissingCohorts(cohortData, pixelGroupMap, cohortDefinitionCols = cohortDefinitionCols)
 
   assertCohortData(outs$cohortData, outs$pixelGroupMap,
                    cohortDefinitionCols = cohortDefinitionCols,
