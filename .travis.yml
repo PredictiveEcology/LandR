@@ -88,6 +88,7 @@ jobs:
     addons:
       homebrew:
         packages:
+        - gdal
         - glpk
         - libgit2
         - llvm
@@ -105,6 +106,7 @@ jobs:
     addons:
       homebrew:
         packages:
+        - gdal
         - libgit2
         - llvm
         - udunits
