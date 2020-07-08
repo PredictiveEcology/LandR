@@ -756,7 +756,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
 #' @importFrom RCurl getURL
-#' @importFrom reproducible Cache .prefix preProcess basename2
+#' @importFrom reproducible basename2 Cache .prefix preProcess
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
 #' @importFrom XML getHTMLLinks
