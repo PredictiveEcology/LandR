@@ -780,7 +780,9 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   }
 
   ## get all online file names
-  fileURLs <- getURL(url, dirlistonly = TRUE)
+  fileURLs <- getURL(url, dirlistonly = TRUE,
+                     .opts = list(followlocation = TRUE,
+                                  ssl.verifypeer = 0L)) ## TODO: re-enable verify
   fileNames <- getHTMLLinks(fileURLs)
   fileNames <- grep("Species_.*.tif$", fileNames, value = TRUE)
 
