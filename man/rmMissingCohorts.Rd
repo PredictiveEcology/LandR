@@ -7,7 +7,7 @@
 rmMissingCohorts(
   cohortData,
   pixelGroupMap,
-  cohortDefinitionCols,
+  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
   doAssertion = getOption("LandR.assertions", TRUE)
 )
 }
