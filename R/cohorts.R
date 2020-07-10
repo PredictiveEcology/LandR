@@ -154,7 +154,6 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
                                       successionTimestep = successionTimestep)
 
   outs <- rmMissingCohorts(cohortData, pixelGroupMap, cohortDefinitionCols = cohortDefinitionCols)
-  outs$cohortData[, sumB := NULL]
 
   assertCohortData(outs$cohortData, outs$pixelGroupMap,
                    cohortDefinitionCols = cohortDefinitionCols,
@@ -194,7 +193,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 
 #' Initiate new cohorts
 #'
-#' Calculate new values for \code{B}, add \code{age}, then \code{rbindlist} this
+#' dCalculate new values for \code{B}, add \code{age}, then \code{rbindlist} this
 #' with \code{cohortData}.
 #'
 #' @template newPixelCohortData
