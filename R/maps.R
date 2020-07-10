@@ -570,6 +570,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @return A raster stack of percent cover layers by species.
 #'
 #' @export
+#' @importFrom httr config with_config
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
 #' @importFrom reproducible Cache .prefix preProcess basename2
@@ -669,7 +670,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
             " You can use the list above to choose species, then select only those rows",
             " in sppEquiv before passing here.")
   }
-  httr::with_config(config = httr::config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
+  with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
     speciesLayers <- Cache(Map,
                            targetFile = asPath(targetFiles),
                            filename2 = postProcessedFilenamesWithStudyAreaName,
@@ -756,6 +757,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 #' @return A raster stack of percent cover layers by species.
 #'
 #' @export
+#' @importFrom httr config with_config
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
 #' @importFrom RCurl getURL
@@ -851,7 +853,7 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   speciesLayers <- list()
 
   for (i in seq_along(targetFiles)) {
-    httr::with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
+    with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
       speciesLayers[i] <- Cache(Map,
                                 targetFile = asPath(targetFiles[i]),
                                 filename2 = postProcessedFilenames[i],
