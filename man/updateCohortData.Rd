@@ -12,8 +12,8 @@ updateCohortData(
   currentTime,
   speciesEcoregion,
   treedFirePixelTableSinceLastDisp = NULL,
-  provenanceTable = NULL,
   successionTimestep,
+  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
   verbose = getOption("LandR.verbose", TRUE),
   doAssertion = getOption("LandR.assertions", TRUE)
 )
@@ -23,6 +23,7 @@ updateCohortData(
   cohortData,
   pixelGroupMap,
   currentTime,
+  cohortDefinitionCols = c("pixelGroup", "speciesCode", "age"),
   speciesEcoregion,
   successionTimestep
 )
@@ -50,10 +51,10 @@ number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}
 This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
 to ensure that everything matches correctly.}
 
-\item{provenanceTable}{table with pixel-based provenances for reforestation}
-
 \item{successionTimestep}{The time between successive seed dispersal events.
 In LANDIS-II, this is called "Succession Timestep". This is used here}
+
+\item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
 
 \item{verbose}{Integer, where increasing number is increasing verbosity. Currently,
 only level 1 exists; but this may change.}
