@@ -91,7 +91,6 @@ makeDummyEcoregionFiles <- function(ecoregionMap, rstLCC, rasterToMatch) {
   ecoregionFiles <- Cache(ecoregionProducer,
                           ecoregionMaps = list(ecoregionMap, rstLCC),
                           ecoregionName = "ECODISTRIC",
-                          ecoregionActiveStatus = ecoregionstatus,
                           rasterToMatch = rasterToMatch,
                           userTags = "ecoregionFiles")
   return(ecoregionFiles)
