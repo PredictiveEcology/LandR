@@ -155,6 +155,10 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 
   outs <- rmMissingCohorts(cohortData, pixelGroupMap, cohortDefinitionCols = cohortDefinitionCols)
 
+  if (!is.null(outs$cohortData$sumB)) {
+    outs$cohortData[, sumB := NULL]
+  }
+
   assertCohortData(outs$cohortData, outs$pixelGroupMap,
                    cohortDefinitionCols = cohortDefinitionCols,
                    doAssertion = doAssertion, verbose = verbose)
