@@ -197,7 +197,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 
 #' Initiate new cohorts
 #'
-#' dCalculate new values for \code{B}, add \code{age}, then \code{rbindlist} this
+#' Calculate new values for \code{B}, add \code{age}, then \code{rbindlist} this
 #' with \code{cohortData}.
 #'
 #' @template newPixelCohortData
