@@ -918,7 +918,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(totalBiomass, age, speciesCode,
                                                                  initialEcoregionCode, cover)]
     zeros <- sapply(cohortDataMissingAgeUnique, function(x) sum(x == 0))
-    if (sum(zeros)) {
+    if (sum(zeros, na.rm = TRUE)) {
       hasZeros <- zeros[zeros > 0]
       message(" ", paste(names(hasZeros), collapse = ", "), " had ",
               paste(hasZeros, collapse = ", "), " zeros, respectively")
