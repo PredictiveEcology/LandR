@@ -899,7 +899,7 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
     if (length(sppMerge) == 0) {
       lapply(1:length(speciesLayers), FUN = function(i, rasters = speciesLayers, 
                                                      filenames = postProcessedFilenamesWithStudyAreaName){
-        writeRaster(rasters[[i]], file.path(oPath, paste0(filenames[i], '.tif')))
+        writeRaster(rasters[[i]], file.path(oPath, paste0(filenames[i], '.tif')), overwrite = TRUE)
       })
     } else {
       speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
