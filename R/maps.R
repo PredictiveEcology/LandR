@@ -705,12 +705,17 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   }
   speciesLayers <- speciesLayers[layersWdata]
   if (!is.null(sppMerge)) {
-    if (length(sppMerge) > 0)
+    if (length(sppMerge) == 0) {
+      lapply(1:length(speciesLayers), FUN = function(i, rasters = speciesLayers, 
+                                                     filenames = postProcessedFilenamesWithStudyAreaName){
+        writeRaster(rasters[[i]], file.path(oPath, paste0(filenames[i], '.tif')), overwrite = TRUE)
+      })
+    } else {
       speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
                                       sppEquiv = sppEquiv, column = "KNN", suffix = suffix,
                                       dPath = oPath)
+    }
   }
-
   ## Rename species layers - There will be 2 groups -- one
   nameChanges <- equivalentName(names(speciesLayers), sppEquiv, column = sppEquivCol)
   nameChangeNA <- is.na(nameChanges)
@@ -768,7 +773,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                            knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   dots <- list(...)
-
+  oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
+  
   sppEquiv <- sppEquiv[, lapply(.SD, as.character)]
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
@@ -842,7 +848,7 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   ## select which archives/targetFiles to extract -- because there was "multi" above, need unique here
   targetFiles <- fileNames[allSpp %in% kNNnames]
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
-
+  postProcessedFilenamesWithStudyAreaName <- .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
   if (length(kNNnames) > 15) {
     message("This looks like a lot of species; did you mean to pass only a subset of this to sppEquiv?",
@@ -856,7 +862,7 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
     with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
       speciesLayers[i] <- Cache(Map,
                                 targetFile = asPath(targetFiles[i]),
-                                filename2 = postProcessedFilenames[i],
+                                filename2 = postProcessedFilenamesWithStudyAreaName[i],
                                 MoreArgs = list(url = paste0(url, targetFiles[i]),
                                                 destinationPath = asPath(dPath),
                                                 fun = "raster::raster",
@@ -890,12 +896,17 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   }
   speciesLayers <- speciesLayers[layersWdata]
   if (!is.null(sppMerge)) {
-    if (length(sppMerge) > 0)
+    if (length(sppMerge) == 0) {
+      lapply(1:length(speciesLayers), FUN = function(i, rasters = speciesLayers, 
+                                                     filenames = postProcessedFilenamesWithStudyAreaName){
+        writeRaster(rasters[[i]], file.path(oPath, paste0(filenames[i], '.tif')))
+      })
+    } else {
       speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
                                       sppEquiv = sppEquiv, column = "KNN", suffix = suffix,
-                                      dPath = dPath)
+                                      dPath = oPath)
+    }
   }
-
   ## Rename species layers - There will be 2 groups -- one
   nameChanges <- equivalentName(names(speciesLayers), sppEquiv, column = sppEquivCol)
   nameChangeNA <- is.na(nameChanges)
