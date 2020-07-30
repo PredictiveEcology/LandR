@@ -4,7 +4,9 @@
 \name{.speciesTableColNames}
 \alias{.speciesTableColNames}
 \title{Species Table Column Names}
-\format{An object of class \code{character} of length 18.}
+\format{
+An object of class \code{character} of length 18.
+}
 \usage{
 .speciesTableColNames
 }

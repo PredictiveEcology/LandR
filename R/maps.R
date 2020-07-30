@@ -706,8 +706,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   speciesLayers <- speciesLayers[layersWdata]
   if (!is.null(sppMerge)) {
     if (length(sppMerge) == 0) {
-      lapply(1:length(speciesLayers), FUN = function(i, rasters = speciesLayers, 
-                                                     filenames = postProcessedFilenamesWithStudyAreaName){
+      lapply(1:length(speciesLayers), function(i, rasters = speciesLayers,
+                                               filenames = postProcessedFilenamesWithStudyAreaName) {
         writeRaster(rasters[[i]], file.path(oPath, paste0(filenames[i], '.tif')), overwrite = TRUE)
       })
     } else {
@@ -774,7 +774,7 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
                                            knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
-  
+
   sppEquiv <- sppEquiv[, lapply(.SD, as.character)]
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
@@ -897,8 +897,8 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   speciesLayers <- speciesLayers[layersWdata]
   if (!is.null(sppMerge)) {
     if (length(sppMerge) == 0) {
-      lapply(1:length(speciesLayers), FUN = function(i, rasters = speciesLayers, 
-                                                     filenames = postProcessedFilenamesWithStudyAreaName){
+      lapply(1:length(speciesLayers), function(i, rasters = speciesLayers,
+                                               filenames = postProcessedFilenamesWithStudyAreaName) {
         writeRaster(rasters[[i]], file.path(oPath, paste0(filenames[i], '.tif')), overwrite = TRUE)
       })
     } else {
