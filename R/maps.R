@@ -726,9 +726,9 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
 
   ## return stack and updated species names vector
-  if (length(speciesLayers))
-    stack(speciesLayers) else
-      raster()
+  if (length(speciesLayers)) {
+    stack(speciesLayers)
+  }
 }
 
 #' Load kNN species layers from online data repository
@@ -917,9 +917,9 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
 
   ## return stack and updated species names vector
-  if (length(speciesLayers))
-    stack(speciesLayers) else
-      raster()
+  if (length(speciesLayers)) {
+    stack(speciesLayers)
+  }
 }
 
 #' Function to sum rasters of species layers
