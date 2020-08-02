@@ -1242,7 +1242,11 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   # Remove B == 0 cohorts after young removals
   message(green("  -- Removing cohorts with B = 0 and age > 0 -- these were likely poor predictions from updateYoungBiomasses"))
   whBEqZeroAgeGT0 <- which(pixelCohortData$B == 0 & pixelCohortData$age > 0)
-  pixelCohortData2 <- pixelCohortData[-whBEqZeroAgeGT0]
+
+  if (length(whBEqZeroAgeGT0) > 0)
+    pixelCohortData2 <- pixelCohortData[-whBEqZeroAgeGT0]
+  else
+    pixelCohortData2 <- pixelCohortData
 
   lostPixels <- setdiff(pixelCohortData$pixelIndex, pixelCohortData2$pixelIndex)
   message(green("     affected", length(whBEqZeroAgeGT0), "cohorts, in", length(lostPixels), "pixels;"))
