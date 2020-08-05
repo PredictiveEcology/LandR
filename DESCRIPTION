@@ -66,7 +66,8 @@ Suggests:
 Remotes:
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
-    PredictiveEcology/reproducible@development
+    PredictiveEcology/reproducible@development,
+    PredictiveEcology/Require@development
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
