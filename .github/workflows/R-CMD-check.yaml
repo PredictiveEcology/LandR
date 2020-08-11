@@ -3,6 +3,7 @@ on:
     branches:
       - master
       - development
+      - LandWeb
   pull_request:
     branches:
       - master
