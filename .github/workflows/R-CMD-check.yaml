@@ -47,6 +47,10 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@master
 
+      - name: Install spellcheck files
+        run: |
+          sudo apt-get install -y hunspell-en-ca
+
       - name: Query dependencies
         run: |
           install.packages('remotes')
