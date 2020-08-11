@@ -88,6 +88,7 @@ jobs:
       - xvfb
     before_script:
       - Rscript -e 'devtools::install_github("traversc/stringfish")'
+      - Rscript -e 'devtools::install_github("PredictiveEcology/Require@development")'
       - Rscript -e 'devtools::install_github("PredictiveEcology/map@development", dependencies = TRUE)'
       - Rscript -e 'devtools::install_github("PredictiveEcology/pemisc@development", dependencies = TRUE)'
     before_install:
