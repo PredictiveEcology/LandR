@@ -1,8 +1,9 @@
-pandoc: 1.19.2.4
-pkgdown: 1.3.0
+pandoc: 2.7.3
+pkgdown: 1.5.1
 pkgdown_sha: ~
 articles: []
+last_built: 2020-08-13T23:21Z
 urls:
-  reference: http://landr.predictiveecology.org/reference
-  article: http://landr.predictiveecology.org/articles
+  reference: https://landr.predictiveecology.org/reference
+  article: https://landr.predictiveecology.org/articles
 

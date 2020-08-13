@@ -8,21 +8,29 @@
 
 <title>Function reference • LandR</title>
 
-<!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-<!-- Bootstrap -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<!-- jquery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<!-- Bootstrap -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -30,7 +38,9 @@
 
 
 
+
 <meta property="og:title" content="Function reference" />
+
 
 
 
@@ -54,9 +64,10 @@
   gtag('config', 'UA-58633549-5');
 </script>
 
+
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-index">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -70,7 +81,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">LandR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.8</span>
       </span>
     </div>
 
@@ -78,7 +89,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -89,11 +100,10 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/PredictiveEcology/LandR">
-    <span class="fa fa-github fa-lg"></span>
+  <a href="https://github.com/PredictiveEcology/LandR/">
+    <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -104,6 +114,7 @@
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
@@ -127,7 +138,24 @@
           <p class="section-desc"></p>
         </th>
       </tr>
+      
+      
+    </tbody><tbody>
+      
+      
       <tr>
+        
+        <td>
+          <p><code><a href="CASFRItoSpRasts.html">CASFRItoSpRasts()</a></code> </p>
+        </td>
+        <td><p><code>CASFRItoSpRasts</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="LandR-deprecated.html">makeVegTypeMap()</a></code> </p>
+        </td>
+        <td><p>Make a vegetation type map from a stack of species abundances</p></td>
+      </tr><tr>
         
         <td>
           <p><code><a href="LandR-package.html">LandR-package</a></code> </p>
@@ -136,15 +164,33 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="addCohorts.html">addCohorts()</a></code> <code><a href="addCohorts.html">initiateNewCohort()</a></code> </p>
+          <p><code><a href="addNoPixel2CohortData.html">addNoPixel2CohortData()</a></code> </p>
         </td>
-        <td><p>Add cohorts to <code>cohortData</code> and <code>pixelGroupMap</code></p></td>
+        <td><p>Add number of pixels per <code>pixelGroup</code> and add it has a new column to <code>cohortData</code></p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="addPixelGroup.html">addPixelGroup()</a></code> </p>
+          <p><code><a href="addPixels2CohortData.html">addPixels2CohortData()</a></code> </p>
         </td>
-        <td><p>Add the correct <code>pixelGroups</code> to a <code>pixelCohortData</code> object</p></td>
+        <td><p>Generate <code>cohortData</code> table per pixel:</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="asInteger.html">asInteger()</a></code> </p>
+        </td>
+        <td><p>Convert numeric values to rounded integers</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="assertSpeciesEcoregionCohortDataMatch.html">assertSpeciesEcoregionCohortDataMatch()</a></code> </p>
+        </td>
+        <td><p>Assert that the <code>cohortData</code> <code>speciesEcoregion</code> have matching classes</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="assertions.html">assert1()</a></code> <code><a href="assertions.html">assert2()</a></code> <code><a href="assertions.html">assertUniqueCohortData()</a></code> <code><a href="assertions.html">assertERGs()</a></code> <code><a href="assertions.html">assertColumns()</a></code> <code><a href="assertions.html">assertCohortData()</a></code> <code><a href="assertions.html">assertPixelCohortData()</a></code> <code><a href="assertions.html">assertSpeciesPlotLabels()</a></code> <code><a href="assertions.html">assertFireToleranceDif()</a></code> <code><a href="assertions.html">assertSpeciesLayers()</a></code> <code><a href="assertions.html">assertRstLCChange()</a></code> </p>
+        </td>
+        <td><p>Assertions</p></td>
       </tr><tr>
         
         <td>
@@ -154,9 +200,57 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="calcSiteShade.html">calcSiteShade()</a></code> </p>
+        </td>
+        <td><p>Calculate site shade</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="calculateClimateEffect.html">calculateClimateEffect()</a></code> </p>
+        </td>
+        <td><p>Null climate effect</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="checkSpeciesTraits.html">checkSpeciesTraits()</a></code> </p>
+        </td>
+        <td><p>Check if all species in have trait values</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="columnsForPixelGroups.html">columnsForPixelGroups</a></code> </p>
+        </td>
+        <td><p>Default columns that define pixel groups</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="convertUnwantedLCC.html">convertUnwantedLCC()</a></code> </p>
+        </td>
+        <td><p>Convert Land Cover Classes (LCC) to another value in its neighbourhood</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="defineFlammable.html">defineFlammable()</a></code> </p>
         </td>
         <td><p>Define flammability map</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="describeCohortData.html">describeCohortData()</a></code> </p>
+        </td>
+        <td><p>Summary for <code>cohortData</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="doResprouting.html">doResprouting()</a></code> </p>
+        </td>
+        <td><p>Activate resprouting after a (fire) disturbance</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="doSerotiny.html">doSerotiny()</a></code> </p>
+        </td>
+        <td><p>Activate serotiny after a (fire) disturbance</p></td>
       </tr><tr>
         
         <td>
@@ -166,9 +260,45 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="dot-interpolateLightProb.html">.interpolateLightProb()</a></code> </p>
+        </td>
+        <td><p>Find interpolated value of light probability</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="dummy-inputs.html">makeDummyEcoregionMap()</a></code> <code><a href="dummy-inputs.html">makeDummyRawBiomassMap()</a></code> <code><a href="dummy-inputs.html">makeDummyStandAgeMap()</a></code> <code><a href="dummy-inputs.html">makeDummyRstLCC()</a></code> <code><a href="dummy-inputs.html">makeDummyEcoregionFiles()</a></code> </p>
+        </td>
+        <td><p>Create dummy inputs for test simulations</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="ecoregionProducer.html">ecoregionProducer()</a></code> </p>
+        </td>
+        <td><p>Make <code>ecoregionMap</code> and <code>ecoregion</code> table</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="equivalentName.html">equivalentName()</a></code> </p>
         </td>
         <td><p>Return equivalent name from a <code>data.frame</code> of equivalencies</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="fasterizeFromSp.html">fasterizeFromSp()</a></code> </p>
+        </td>
+        <td><p>Rasterize polygons using <code>fasterize</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="generatePixelGroups.html">generatePixelGroups()</a></code> </p>
+        </td>
+        <td><p>Add the correct <code>pixelGroups</code> to a <code>pixelDataTable</code> object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="loadCASFRI.html">loadCASFRI()</a></code> </p>
+        </td>
+        <td><p>Load CASFRI data</p></td>
       </tr><tr>
         
         <td>
@@ -178,21 +308,94 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="makePixelGroups.html">makePixelGroups()</a></code> </p>
+          <p><code><a href="loadkNNSpeciesLayersValidation.html">loadkNNSpeciesLayersValidation()</a></code> </p>
         </td>
-        <td><p>Create the correct string for pixelGroups</p></td>
+        <td><p>Load kNN species layers from online data repository</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="makeVegTypeMap.html">makeVegTypeMap()</a></code> </p>
+          <p><code><a href="makeAndCleanInitialCohortData.html">makeAndCleanInitialCohortData()</a></code> </p>
         </td>
-        <td><p>Make a vegetation type map from a stack of species abundances</p></td>
+        <td><p>Generate initial <code>cohortData</code> table</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="makeBiomassMap.html">makeBiomassMap()</a></code> </p>
+        </td>
+        <td><p>Create <code>biomassMap</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="makeCohortDataFiles.html">makeCohortDataFiles()</a></code> </p>
+        </td>
+        <td><p>Make the <code>cohortData</code> table, while modifying the temporary
+<code>pixelCohortData</code> that will be used to prepare other files.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="makeEcoregionDT.html">makeEcoregionDT()</a></code> </p>
+        </td>
+        <td><p>Make the <code>ecoregion</code> table</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="makeEcoregionMap.html">makeEcoregionMap()</a></code> </p>
+        </td>
+        <td><p>Make the <code>ecoregionMap</code> raster</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="makeMinRelativeB.html">makeMinRelativeB()</a></code> </p>
+        </td>
+        <td><p>Create <code>minRelativeB</code> table</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="makePickellStack.html">makePickellStack()</a></code> </p>
+        </td>
+        <td><p><code>makePickellStack</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="makePixelGroupMap.html">makePixelGroupMap()</a></code> </p>
+        </td>
+        <td><p>Create <code>makePixelGroupMap</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="makePixelTable.html">makePixelTable()</a></code> </p>
+        </td>
+        <td><p>Make <code>pixelTable</code> from biomass, age, land-cover and species cover data</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="makeSpeciesEcoregion.html">makeSpeciesEcoregion()</a></code> </p>
+        </td>
+        <td><p>Create <code>speciesEcoregion</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="overlayLCCs.html">overlayLCCs()</a></code> </p>
+        </td>
+        <td><p>Overlay different LCC data sources</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="overlayStacks.html">overlayStacks()</a></code> </p>
         </td>
         <td><p>Overlay layers within raster stacks</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="pixelFate.html">pixelFate()</a></code> </p>
+        </td>
+        <td><p>Create or amend data to a <code>pixelFateDT</code> object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="plantNewCohorts.html">plantNewCohorts()</a></code> </p>
+        </td>
+        <td><p>Create new cohorts based on provenance table with unique <code>pixelGroup</code> and add to <code>cohortData</code></p></td>
       </tr><tr>
         
         <td>
@@ -208,6 +411,12 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="prepEcoregions.html">prepEcoregions()</a></code> </p>
+        </td>
+        <td><p>Prepare ecoregions objects</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="prepInputsEcoregion.html">prepInputsEcoregion()</a></code> </p>
         </td>
         <td><p>Prepare ecoregion table</p></td>
@@ -216,19 +425,25 @@
         <td>
           <p><code><a href="prepInputsLCC.html">prepInputsLCC()</a></code> </p>
         </td>
-        <td><p>Simple prepInputs for LCC2005 or LCC2010</p></td>
+        <td><p>Simple <code>prepInputs</code> for LCC2005 or LCC2010 data</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="prepInputsSpecies.html">prepInputsSpecies()</a></code> <code><a href="prepInputsSpecies.html">prepInputsMainInput()</a></code> </p>
         </td>
-        <td><p>Download and prepare a species traits table for use with <code>LandR_BiomassGMOrig</code> module</p></td>
+        <td><p>Download and prepare a species traits table for use with <code>Biomass_core</code> module</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="prepInputsSpeciesEcoregion.html">prepInputsSpeciesEcoregion()</a></code> </p>
         </td>
         <td><p>Prepare species ecoregion table</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="prepSpeciesLayers.html">prepSpeciesLayers_KNN()</a></code> <code><a href="prepSpeciesLayers.html">prepSpeciesLayers_CASFRI()</a></code> <code><a href="prepSpeciesLayers.html">prepSpeciesLayers_Pickell()</a></code> <code><a href="prepSpeciesLayers.html">prepSpeciesLayers_ForestInventory()</a></code> <code><a href="prepSpeciesLayers.html">prepSpeciesLayers_KNN2011()</a></code> </p>
+        </td>
+        <td><p>Prepare species layers</p></td>
       </tr><tr>
         
         <td>
@@ -240,25 +455,37 @@
         <td>
           <p><code><a href="rmMissingCohorts.html">rmMissingCohorts()</a></code> </p>
         </td>
-        <td><p>Remove missing cohorts from cohortData based on pixelGroupMap</p></td>
+        <td><p>Remove missing cohorts from <code>cohortData</code> based on <code>pixelGroupMap</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="scheduleDisturbance.html">scheduleDisturbance()</a></code> </p>
+        </td>
+        <td><p>Test whether disturbance should be scheduled</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="speciesEcoregionLatestYear.html">speciesEcoregionLatestYear()</a></code> </p>
         </td>
-        <td><p>Pull out the values from speciesEcoregion table for current time</p></td>
+        <td><p>Pull out the values from <code>speciesEcoregion</code> table for current time</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="speciesTable.html">getSpeciesTable()</a></code> <code><a href="speciesTable.html">prepSpeciesTable()</a></code> </p>
         </td>
-        <td><p>Download and prepare a species traits table for use with LBMR module</p></td>
+        <td><p>Download and prepare a species traits table for use with <code>Biomass_core</code> module</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="speciesTableUpdate.html">speciesTableUpdate()</a></code> </p>
+        </td>
+        <td><p>Change species table of parameters/traits</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="sppColors.html">sppColors()</a></code> </p>
         </td>
-        <td><p>Create species color vector from a sppEquiv table</p></td>
+        <td><p>Create species colour vector from a <code>sppEquiv</code> table</p></td>
       </tr><tr>
         
         <td>
@@ -268,15 +495,51 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="statsModel.html">statsModel()</a></code> </p>
+        </td>
+        <td><p>The generic statistical model to run (<code>lmer</code> or <code>glmer</code>)</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="subsetDT.html">subsetDT()</a></code> </p>
+        </td>
+        <td><p>Subset a <code>data.table</code> with random subsampling within <code>by</code> groups</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="sumRastersBySpecies.html">sumRastersBySpecies()</a></code> </p>
         </td>
         <td><p>Function to sum rasters of species layers</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="testCohortData.html">testCohortData()</a></code> </p>
+          <p><code><a href="uniqueDefinitions.html">uniqueCohortDefinition</a></code> <code><a href="uniqueDefinitions.html">uniqueSpeciesEcoregionDefinition</a></code> </p>
         </td>
-        <td><p>Test that <code>pixelGroupMap</code> and <code>cohortData</code> match</p></td>
+        <td><p>The columns in a <code>cohortData</code> that define "unique"</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="updateCohortData.html">updateCohortData()</a></code> <code><a href="updateCohortData.html">.initiateNewCohorts()</a></code> </p>
+        </td>
+        <td><p>Add cohorts to <code>cohortData</code> and <code>pixelGroupMap</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="updateCohortDataPostHarvest.html">updateCohortDataPostHarvest()</a></code> </p>
+        </td>
+        <td><p>Add cohorts to <code>cohortData</code> and <code>pixelGroupMap</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="updateSpeciesTable.html">updateSpeciesTable()</a></code> </p>
+        </td>
+        <td><p>Customize species trait table values</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="vegTypeGenerator.html">vegTypeGenerator()</a></code> </p>
+        </td>
+        <td><p>Generate and add vegetation type column to <code>cohortData</code></p></td>
       </tr><tr>
         
         <td>
@@ -288,13 +551,13 @@
     </table>
   </div>
 
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#section-all-functions">All functions</a></li>
-    </ul>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
+
 
       <footer>
       <div class="copyright">
@@ -302,13 +565,16 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 
