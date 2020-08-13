@@ -3,11 +3,9 @@
 ^\.lintr$
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^\.travis\.yml$
-^appveyor\.yml$
-^appveyor_cache\.txt$
 ^data-raw$
 ^docs$
 ^LICENSE$
 ^man-roxygen$
 ^\.github$
+^codecov\.yml$
