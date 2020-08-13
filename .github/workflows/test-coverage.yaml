@@ -31,6 +31,15 @@ jobs:
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
         shell: Rscript {0}
 
+      - name: Install additional dependencies
+        run: |
+          remotes::install_github('traversc/stringfish')
+          remotes::install_github('PredictiveEcology/Require@development')
+          remotes::install_github('PredictiveEcology/reproducible@development')
+          remotes::install_github('PredictiveEcology/pemisc@development')
+          remotes::install_github('PredictiveEcology/map@development')
+        shell: Rscript {0}
+
       - name: Cache R packages
         uses: actions/cache@v1
         with:
