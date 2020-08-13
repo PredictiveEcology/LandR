@@ -4,7 +4,9 @@
 \name{landisIIrepo}
 \alias{landisIIrepo}
 \title{Default LANDIS-II project repo url}
-\format{An object of class \code{character} of length 1.}
+\format{
+An object of class \code{character} of length 1.
+}
 \usage{
 landisIIrepo
 }

@@ -1,10 +1,10 @@
 utils::globalVariables(c(
-  ".", "..cols", ".I", ":=", "..groupVar", "age", "aNPPAct", "cover", "coverOrig",
+  ".", "..cols", "..colsToSubset", ".I", ":=", "..groupVar", "age", "aNPPAct", "cover", "coverOrig",
   "ecoregion", "ecoregionGroup", "hasBadAge",
   "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
   "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
   "newPossLCC", "noPixels", "oldSumB", "ord", "outBiomass", "oldEcoregionGroup",
-  "pixelGroup2", "pixelIndex", "pixels", "possERC",
+  "pixelGroup2", "pixelIndex", "pixels", "Provenance", "possERC",
   "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
   "temppixelGroup", "toDelete", "totalBiomass", "totalCover",
   "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
@@ -918,7 +918,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
     cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(totalBiomass, age, speciesCode,
                                                                  initialEcoregionCode, cover)]
     zeros <- sapply(cohortDataMissingAgeUnique, function(x) sum(x == 0))
-    if (sum(zeros)) {
+    if (sum(zeros, na.rm = TRUE)) {
       hasZeros <- zeros[zeros > 0]
       message(" ", paste(names(hasZeros), collapse = ", "), " had ",
               paste(hasZeros, collapse = ", "), " zeros, respectively")
@@ -1242,7 +1242,11 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   # Remove B == 0 cohorts after young removals
   message(green("  -- Removing cohorts with B = 0 and age > 0 -- these were likely poor predictions from updateYoungBiomasses"))
   whBEqZeroAgeGT0 <- which(pixelCohortData$B == 0 & pixelCohortData$age > 0)
-  pixelCohortData2 <- pixelCohortData[-whBEqZeroAgeGT0]
+
+  if (length(whBEqZeroAgeGT0) > 0)
+    pixelCohortData2 <- pixelCohortData[-whBEqZeroAgeGT0]
+  else
+    pixelCohortData2 <- pixelCohortData
 
   lostPixels <- setdiff(pixelCohortData$pixelIndex, pixelCohortData2$pixelIndex)
   message(green("     affected", length(whBEqZeroAgeGT0), "cohorts, in", length(lostPixels), "pixels;"))
@@ -1344,10 +1348,12 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
   newCohortData[, B := asInteger(2 * maxANPP)]
 
   #Here we subset cohortData instead of setting added columns to NULL. However, as these are 'new' cohorts, this is okay
-  newCohortData <- newCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B, Provenance, mortality = 0L, aNPPAct = 0L)]
+  newCohortData <- newCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B, Provenance,
+                                     mortality = 0L, aNPPAct = 0L)]
 
   if (getOption("LandR.assertions")) {
-    if (isTRUE(NROW(unique(newCohortData, by = c("pixelGroup", 'age', 'speciesCode', 'Provenance'))) != NROW(newCohortData))) {
+    if (isTRUE(NROW(unique(newCohortData, by = c("pixelGroup", 'age', 'speciesCode', 'Provenance')))
+               != NROW(newCohortData))) {
 
       stop("Duplicated new cohorts in a pixelGroup. Please debug LandR:::.plantNewCohorts")
     #in this situation, it may be caused by not replanting all species. Not sure if this will come up.

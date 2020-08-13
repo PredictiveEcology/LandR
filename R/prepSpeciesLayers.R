@@ -368,6 +368,36 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   stack(CCstack)
 }
 
+#' @export
+#' @rdname prepSpeciesLayers
+prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath,
+                                      url = NULL,
+                                      studyArea, rasterToMatch,
+                                      sppEquiv,
+                                      sppEquivCol,
+                                      thresh = 10, ...){
+  dots <- list(...)
+
+  if (is.null(url))
+    url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                  "canada-forests-attributes_attributs-forests-canada/2011-",
+                  "attributes_attributs-2011/")
+
+  loadkNNSpeciesLayersValidation(
+    dPath = destinationPath,
+    knnNamesCol = "KNN",
+    outputPath = outputPath,
+    rasterToMatch = rasterToMatch,
+    studyArea = studyArea,
+    studyAreaName = dots$studyAreaName,
+    sppEquiv = sppEquiv,
+    sppEquivCol = sppEquivCol,
+    thresh = thresh,
+    url = url,
+    userTags = c("speciesLayers", "KNN")
+  )
+}
+
 
 #' \code{makePickellStack}
 #'
