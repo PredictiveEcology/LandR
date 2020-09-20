@@ -22,17 +22,12 @@ Depends:
     R (>= 3.6)
 Imports:
     assertthat,
-    backports,
-    CircStats,
     crayon,
     data.table,
-    dplyr,
-    fastdigest,
     fasterize,
     fpCompare,
     gdalUtils,
     ggplot2,
-    googledrive,
     grDevices,
     httr,
     lme4,
