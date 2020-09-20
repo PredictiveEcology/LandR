@@ -223,7 +223,6 @@ vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("Lan
 
 #' @export
 #' @importFrom SpaDES.tools inRange
-#' @importFrom assertthat assert_that
 #' @rdname vegTypeMapGenerator
 vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportion = 0.8,
                                            mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,

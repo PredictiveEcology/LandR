@@ -1577,7 +1577,6 @@ pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
 #'
 #' @author Eliot McIntire, Ceres Barros, Alex Chubaty
 #' @export
-#' @importFrom assertthat assert_that
 #' @importFrom data.table copy data.table setkey setorderv
 #' @importFrom SpaDES.tools inRange
 #' @importFrom utils data

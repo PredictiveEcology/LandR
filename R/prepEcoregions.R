@@ -10,7 +10,6 @@
 #' @param cacheTags \code{UserTags} to pass to cache
 #' @param pixelsToRm a vector of pixels to remove
 #'
-#' @importFrom assertthat assert_that
 #' @importFrom data.table as.data.table data.table
 #' @importFrom fasterize fasterize
 #' @importFrom raster getValues levels raster
@@ -63,8 +62,9 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
 
   message(blue("Make initial ecoregionGroups ", Sys.time()))
 
-  assertthat::assert_that(isTRUE(compareRaster(ecoregionRst, rstLCCAdj,
-                                               res = TRUE, orig = TRUE, stopiffalse = FALSE)))
+  if (!isTRUE(compareRaster(ecoregionRst, rstLCCAdj,
+                           res = TRUE, orig = TRUE, stopiffalse = FALSE)))
+    stop("problem with rasters ecoregionRst and rstLCCAdj -- they don't have same metadata")
 
   ecoregionFiles <- Cache(ecoregionProducer,
                           ecoregionMaps = list(ecoregionRst, rstLCCAdj),
