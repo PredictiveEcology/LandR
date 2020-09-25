@@ -10,7 +10,7 @@ plantNewCohorts(
   pixelGroupMap,
   currentTime,
   successionTimestep,
-  trackHarvest = FALSE
+  trackPlanting = FALSE
 )
 }
 \arguments{
@@ -27,7 +27,7 @@ number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}
 
 \item{successionTimestep}{succession timestep used in the simulation}
 
-\item{trackHarvest}{adds column that tracks harvest if \code{TRUE}}
+\item{trackPlanting}{adds column that tracks planted cohorts if \code{TRUE}}
 }
 \value{
 A \code{data.table} with a new \code{cohortData}

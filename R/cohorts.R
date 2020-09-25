@@ -1315,7 +1315,7 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 #' @template pixelGroupMap
 #' @template currentTime
 #' @param successionTimestep succession timestep used in the simulation
-#' @param trackHarvest adds column that tracks harvest if \code{TRUE}
+#' @param trackPlanting adds column that tracks planted cohorts if \code{TRUE}
 #'
 #' @return A \code{data.table} with a new \code{cohortData}
 #'
@@ -1324,7 +1324,7 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 #' @importFrom stats na.omit
 #' @export
 plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
-                            currentTime, successionTimestep, trackHarvest = FALSE) {
+                            currentTime, successionTimestep, trackPlanting = FALSE) {
    ## get spp "productivity traits" per ecoregion/present year
 
   namesNCD <- names(newPixelCohortData)
@@ -1361,8 +1361,8 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
     }
   }
 
-  if (trackHarvest) {
-    newCohortData[, harvested := TRUE]
+  if (trackPlanting) {
+    newCohortData[, planted := TRUE]
   }
 
   cohortData <- rbindlist(list(cohortData, newCohortData), fill = TRUE, use.names = TRUE)
@@ -1400,8 +1400,8 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 #' @param provenanceTable A \code{data.table} with three columns:
 #' New cohorts are initiated at the \code{ecoregionGroup} \code{speciesEcoregion} from the
 #' corresponding \code{speciesEcoregion} listed in the \code{Provenance} column
-#' @param trackHarvest if true, harvested cohorts in \code{cohortData} are tracked with \code{TRUE}
-#' in column 'harvested'
+#' @param trackPlanting if true, planted cohorts in \code{cohortData} are tracked with \code{TRUE}
+#' in column 'planted'
 #'
 #' @param verbose Integer, where increasing number is increasing verbosity. Currently,
 #'    only level 1 exists; but this may change.
@@ -1421,7 +1421,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 #' @rdname updateCohortDataPostHarvest
 updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                                         speciesEcoregion, treedHarvestPixelTable = NULL,
-                                        successionTimestep, provenanceTable, trackHarvest = FALSE,
+                                        successionTimestep, provenanceTable, trackPlanting = FALSE,
                                         cohortDefinitionCols =c("pixelGroup", 'age', 'speciesCode'),
                                         verbose = getOption("LandR.verbose", TRUE),
                                         doAssertion = getOption("LandR.assertions", TRUE)) {
@@ -1491,7 +1491,7 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
   cohortData <- plantNewCohorts(newPixelCohortData, cohortData,
                                 pixelGroupMap, currentTime = currentTime,
                                 successionTimestep = successionTimestep,
-                                trackHarvest = trackHarvest)
+                                trackPlanting = trackPlanting)
 
   outs <- rmMissingCohorts(cohortData, pixelGroupMap, cohortDefinitionCols = cohortDefinitionCols)
 
