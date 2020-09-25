@@ -13,6 +13,7 @@ updateCohortDataPostHarvest(
   treedHarvestPixelTable = NULL,
   successionTimestep,
   provenanceTable,
+  trackHarvest = FALSE,
   cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
   verbose = getOption("LandR.verbose", TRUE),
   doAssertion = getOption("LandR.assertions", TRUE)
@@ -47,6 +48,9 @@ In LANDIS-II, this is called "Succession Timestep". This is used here}
 \item{provenanceTable}{A \code{data.table} with three columns:
 New cohorts are initiated at the \code{ecoregionGroup} \code{speciesEcoregion} from the
 corresponding \code{speciesEcoregion} listed in the \code{Provenance} column}
+
+\item{trackHarvest}{if true, harvested cohorts in \code{cohortData} are tracked with \code{TRUE}
+in column 'harvested'}
 
 \item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
 
