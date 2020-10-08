@@ -40,6 +40,7 @@ Imports:
     quickPlot,
     raster,
     RColorBrewer,
+    Rcpp,
     RCurl,
     reproducible,
     scales,
@@ -63,6 +64,7 @@ Remotes:
     PredictiveEcology/pemisc@development,
     PredictiveEcology/reproducible@development,
     PredictiveEcology/Require@development
+LinkingTo: Rcpp
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
