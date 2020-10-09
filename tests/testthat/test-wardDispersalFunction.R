@@ -3,7 +3,7 @@ test_that("test Ward dispersal seeding algorithm", {
   library(raster)
 
   # keep this here for interactive testing with a larger raster
-  doLarge <- TRUE
+  doLarge <- FALSE
   if (doLarge) {
     reducedPixelGroupMap <- raster(xmn = 50, xmx = 50 + 99*300,
                                    ymn = 50, ymx = 50 + 99*300,
@@ -111,19 +111,19 @@ test_that("test Ward dispersal seeding algorithm", {
     tests <- unlist(testDists)
     # Fairly conservative test -- the number of tests that fail at p < 0.01 should be about 5% ... really, it should be 1%
     expect_true(sum(tests < 0.01)/length(tests) <= 0.05)
-  }
 
-  # Where rcv can receive a species, but it doesn't exist in Src
-  seedReceive <- data.table(pixelGroup = 3, speciesCode = 1)
-  seedSource <- data.table(pixelGroup = 1, speciesCode = 2)
-  output <-
-    LANDISDisp(dtRcv = seedReceive, plot.it = FALSE,
-               dtSrc = seedSource,
-               speciesTable = species,
-               pixelGroupMap = ras2,
-               verbose = FALSE,
-               successionTimestep = successionTimestep)
-  expect_true(NROW(output) == 0)
+    # Where rcv can receive a species, but it doesn't exist in Src
+    seedReceive <- data.table(pixelGroup = 3, speciesCode = 1)
+    seedSource <- data.table(pixelGroup = 1, speciesCode = 2)
+    output <-
+      LANDISDisp(dtRcv = seedReceive, plot.it = FALSE,
+                 dtSrc = seedSource,
+                 speciesTable = species,
+                 pixelGroupMap = ras2,
+                 verbose = FALSE,
+                 successionTimestep = successionTimestep)
+    expect_true(NROW(output) == 0)
+  }
 
 
 })
