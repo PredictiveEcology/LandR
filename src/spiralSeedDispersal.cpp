@@ -21,7 +21,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords, // double overallMa
                        Rcpp::List speciesVectorsList, List rcvSpeciesByIndex,
                        NumericMatrix speciesTable, // IntegerVector speciesNamesNumeric,
                        int numCols, int numCells, int cellSize, int xmin, int ymin,
-                       double k, double b, double successionTimestep)
+                       double k, double b, double successionTimestep, bool verbose = 0)
 {
   // List spiralSeedDispersal( IntegerMatrix cellCoords, double overallMaxDist,
 
@@ -100,14 +100,16 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords, // double overallMa
 
     ////////////////////////////////////
     // messaging for progress
-    disInt = floor(dis1[0]/ sqrt(2));
-    possCurModVal = disInt % moduloVal;
-    possCurMessage = floor(disInt / moduloVal) * moduloVal;
-    if (possCurModVal < curModVal && possCurMessage > curMessage)  {
-      curMessage = possCurMessage;
-      Rcpp::Rcout << "Dispersal distance completed: " << curMessage << " of " << overallMaxDist << std::endl;
+    if (verbose) {
+      disInt = floor(dis1[0]/ sqrt(2));
+      possCurModVal = disInt % moduloVal;
+      possCurMessage = floor(disInt / moduloVal) * moduloVal;
+      if (possCurModVal < curModVal && possCurMessage > curMessage)  {
+        curMessage = possCurMessage;
+        Rcpp::Rcout << "Dispersal distance completed: " << curMessage << " of " << overallMaxDist << std::endl;
+      }
+      curModVal = possCurModVal;
     }
-    curModVal = possCurModVal;
     // End messaging for progress
     ////////////////////////////////////////////////////
 
@@ -189,7 +191,9 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords, // double overallMa
         newOverallMaxDistCorner = maxOfMaxDists * sqrt(2);
         if (newOverallMaxDistCorner < overallMaxDistCorner) {
           IntegerVector rcvSpCodesDone = which2(rcvSpDone) + 1;
-          Rcpp::Rcout << "Species " << rcvSpCodesDone << " complete. New max dispersal distance: " << maxOfMaxDists << std::endl;
+          if (verbose) {
+            Rcpp::Rcout << "Species " << rcvSpCodesDone << " complete. New max dispersal distance: " << maxOfMaxDists << std::endl;
+          }
           overallMaxDistCorner = newOverallMaxDistCorner;
           overallMaxDist = maxOfMaxDists;
         }

@@ -11,7 +11,7 @@ which2 <- function(x) {
 #' @param overallMaxDist The maximum distance to test for seed dispersal
 #' @return A list.
 #' @export
-spiralSeedDispersal <- function(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep) {
-    .Call('_LandR_spiralSeedDispersal', PACKAGE = 'LandR', cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep)
+spiralSeedDispersal <- function(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose = 0L) {
+    .Call('_LandR_spiralSeedDispersal', PACKAGE = 'LandR', cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose)
 }
 

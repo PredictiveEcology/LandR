@@ -17,8 +17,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // spiralSeedDispersal
-LogicalMatrix spiralSeedDispersal(IntegerMatrix cellCoords, Rcpp::List speciesVectorsList, List rcvSpeciesByIndex, NumericMatrix speciesTable, int numCols, int numCells, int cellSize, int xmin, int ymin, double k, double b, double successionTimestep);
-RcppExport SEXP _LandR_spiralSeedDispersal(SEXP cellCoordsSEXP, SEXP speciesVectorsListSEXP, SEXP rcvSpeciesByIndexSEXP, SEXP speciesTableSEXP, SEXP numColsSEXP, SEXP numCellsSEXP, SEXP cellSizeSEXP, SEXP xminSEXP, SEXP yminSEXP, SEXP kSEXP, SEXP bSEXP, SEXP successionTimestepSEXP) {
+LogicalMatrix spiralSeedDispersal(IntegerMatrix cellCoords, Rcpp::List speciesVectorsList, List rcvSpeciesByIndex, NumericMatrix speciesTable, int numCols, int numCells, int cellSize, int xmin, int ymin, double k, double b, double successionTimestep, bool verbose);
+RcppExport SEXP _LandR_spiralSeedDispersal(SEXP cellCoordsSEXP, SEXP speciesVectorsListSEXP, SEXP rcvSpeciesByIndexSEXP, SEXP speciesTableSEXP, SEXP numColsSEXP, SEXP numCellsSEXP, SEXP cellSizeSEXP, SEXP xminSEXP, SEXP yminSEXP, SEXP kSEXP, SEXP bSEXP, SEXP successionTimestepSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -34,14 +34,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type k(kSEXP);
     Rcpp::traits::input_parameter< double >::type b(bSEXP);
     Rcpp::traits::input_parameter< double >::type successionTimestep(successionTimestepSEXP);
-    rcpp_result_gen = Rcpp::wrap(spiralSeedDispersal(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep));
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(spiralSeedDispersal(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_LandR_which2", (DL_FUNC) &_LandR_which2, 1},
-    {"_LandR_spiralSeedDispersal", (DL_FUNC) &_LandR_spiralSeedDispersal, 12},
+    {"_LandR_spiralSeedDispersal", (DL_FUNC) &_LandR_spiralSeedDispersal, 13},
     {NULL, NULL, 0}
 };
 
