@@ -41,15 +41,14 @@ which2 <- function(x) {
 #' @param k Numeric, parameter passed to Ward dispersal kernel
 #' @param b Numeric, parameter passed to Ward dispersal kernel
 #' @param successionTimestep Integer, Same as Biomass_core.
-#' @param verbose Numeric, length 1. Currently \code{0} (no messaging), the fastest option,
-#'   \code{1} (some messaging) and \code{2} or greater (more messaging) are active. Default is
-#'   \code{getOption("LandR.verbose", TRUE)}.
+#' @param verbose Logical, length 1. If \code{TRUE}, some progress reporting will occur.
+#'   Default is \code{getOption("LandR.verbose", TRUE)}.
 #' @return A logical matrix with ncols = \code{length(speciesVectorsList)} and nrows =
 #'   \code{NROW(cellCoords)}, indicating whether that cellCoords successfully
 #'   received seeds from each species.
 #' @author Eliot McIntire
 #' @export
-spiralSeedDispersal <- function(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose = 0.0) {
+spiralSeedDispersal <- function(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose) {
     .Call('_LandR_spiralSeedDispersal', PACKAGE = 'LandR', cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose)
 }
 
