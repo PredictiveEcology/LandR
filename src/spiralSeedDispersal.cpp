@@ -46,8 +46,9 @@ Rcpp::IntegerVector which2(Rcpp::LogicalVector x) {
 //' @param k Numeric, parameter passed to Ward dispersal kernel
 //' @param b Numeric, parameter passed to Ward dispersal kernel
 //' @param successionTimestep Integer, Same as Biomass_core.
-//' @param verbose Logical, length 1. If \code{TRUE}, some progress reporting will occur.
-//'   Default is \code{getOption("LandR.verbose", TRUE)}.
+//' @param verbose Numeric, length 1. Currently \code{0} (no messaging), the fastest option,
+//'   \code{1} (some messaging) and \code{2} or greater (more messaging) are active. Default is
+//'   \code{getOption("LandR.verbose", TRUE)}.
 //' @return A logical matrix with ncols = \code{length(speciesVectorsList)} and nrows =
 //'   \code{NROW(cellCoords)}, indicating whether that cellCoords successfully
 //'   received seeds from each species.
@@ -58,13 +59,13 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
                        Rcpp::List speciesVectorsList, List rcvSpeciesByIndex,
                        NumericMatrix speciesTable,
                        int numCols, int numCells, int cellSize, int xmin, int ymin,
-                       double k, double b, double successionTimestep, bool verbose)
+                       double k, double b, double successionTimestep, double verbose = 0.0)
 {
 
   int nCellsRcv(cellCoords.nrow());
   int nSpeciesEntries(speciesTable.nrow());
   int x, y, dx, dy, spiralIndex;
-  // int spiralIndexMax = 20000000; // not really used except for debugging, it can be shrunk
+  int spiralIndexMax = 20000000; // not really used except for debugging, it can be shrunk
   bool underMaxDist = true;
 
   // max distances by species
@@ -116,7 +117,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
   // then add this offset to cellCoods matrix of initial cells.
   // This will create a square-ish shape, i.e., make a square then add a single
   // pixel width around entire square to make a new slightly bigger square.
-  while(underMaxDist == true) { // } && spiralIndex < spiralIndexMax) {
+  while(underMaxDist == true && spiralIndex < spiralIndexMax) {
     spiralIndex += 1;
     NumericVector numActiveCellsByRcvSp(nSpeciesEntries); // need to rezero
     numActiveCellsByRcvSp = numActiveCellsByRcvSp + numActiveCellsByRcvSpDone;
@@ -128,7 +129,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
 
     ////////////////////////////////////
     // messaging for progress
-    if (verbose) {
+    if (verbose > 0) {
       disInt = floor(dis1[0]/ sqrt(2));
       possCurModVal = disInt % moduloVal;
       possCurMessage = floor(disInt / moduloVal) * moduloVal;
@@ -172,14 +173,14 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
                 NumericVector dis(1);
                 dis = dis1[0];
                 if (is_true(all(dis <= maxDist))) {
-                  // if (verbose > 1) {
-                  //   Rcpp::Rcout << "------- pixelVal: " << pixelVal << std::endl;
-                  //   Rcpp::Rcout << "dis : " << dis << std::endl;
-                  //   Rcpp::Rcout << "effDist : " << effDist << std::endl;
-                  //   Rcpp::Rcout << "maxDist : " << maxDist << std::endl;
-                  //   Rcpp::Rcout << "effDistSpV : " << effDistsSpV << std::endl;
-                  //   Rcpp::Rcout << "maxDistSpV : " << maxDistsSpV << std::endl;
-                  // }
+                  if (verbose > 1) {
+                    Rcpp::Rcout << "------- pixelVal: " << pixelVal << std::endl;
+                    Rcpp::Rcout << "dis : " << dis << std::endl;
+                    Rcpp::Rcout << "effDist : " << effDist << std::endl;
+                    Rcpp::Rcout << "maxDist : " << maxDist << std::endl;
+                    Rcpp::Rcout << "effDistSpV : " << effDistsSpV << std::endl;
+                    Rcpp::Rcout << "maxDistSpV : " << maxDistsSpV << std::endl;
+                  }
                   if (dis[0] == 0) {
                     inequ = 1;
                   } else {

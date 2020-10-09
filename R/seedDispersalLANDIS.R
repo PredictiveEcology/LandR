@@ -233,7 +233,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                                  cellSize = cellSize, numCells = numCells, xmin = xmin,
                                  ymin = ymin, numCols = numCols, b = b, k = k,
                                  successionTimestep = successionTimestep,
-                                 verbose = verbose)
+                                 verbose = as.numeric(verbose))
       colNum <- seq(ncol(out))
       names(colNum) <- paste0("spCode", seq(colNum))
       seedsArrivedList <- lapply(colNum, function(col) {
