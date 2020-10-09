@@ -9,14 +9,13 @@ LANDISDisp(
   dtSrc,
   dtRcv,
   pixelGroupMap,
-  species,
+  speciesTable,
   dispersalFn = WardFast,
   b = 0.01,
   k = 0.95,
   plot.it = FALSE,
   successionTimestep,
   verbose = getOption("LandR.verbose", TRUE),
-  useParallel,
   ...
 )
 }
@@ -26,8 +25,6 @@ LANDISDisp(
 \item{dtRcv}{data.table}
 
 \item{pixelGroupMap}{map}
-
-\item{species}{Landis object from initial species file}
 
 \item{dispersalFn}{An expression that can take a "dis" argument. See details. Default is "Ward"}
 
@@ -43,14 +40,9 @@ LANDISDisp event grow.}
 
 \item{verbose}{Logical. Whether a somewhat verbose output to screen occurs. For debugging.}
 
-\item{useParallel}{ANY. if the class of this arguement is logical, whether the function creates the cluster based on TRue and FALSE.
-if the class of this arguement is cluster, the function will use this cluster to implement the parallel computation.}
-
 \item{...}{Additional parameters. Currently none}
 
-\item{effDist}{Landis species- and ecoregion-specific effective distance parameter}
-
-\item{maxDist}{Landis species- and ecoregion-specific effective distance parameter}
+\item{species}{Landis object from initial species file}
 }
 \value{
 A numeric vector of raster pixel indices, in the same resolution and extent as
@@ -80,25 +72,47 @@ of active pixels. \code{SpaDES} includes the \code{\link{Ward}} kernel as
 defined in the LANDIS-II documentation.
 }
 \examples{
+library(data.table)
 library(raster)
-library(SpaDES.tools)
+# keep this here for interactive testing with a larger raster
+rasterTemplate <- raster(extent(0, 2500, 0, 2500), res = 100)
 
-# Make random forest cover map
-a <- raster(extent(0, 1e4, 0, 1e4), res = 100)
-hab <- gaussMap(a, speedup = 1) # if raster is large (>1e6 pixels), use speedup>1
-names(hab) <- "hab"
+# make a pixelGroupMap
+pgs <- 4 # make even just because of approach below requires even
+pixelGroupMap <- SpaDES.tools::randomPolygons(rasterTemplate, numTypes = pgs)
 
-seedSrc <- hab > 5
-setColors(seedSrc, 1) <- c("white", "black")
+# Make a receive pixels table -- need pixelGroup and species
+rcvSpByPG <- lapply(seq_len(pgs/2), function(pg) {
+  data.table(speciesCode = sample(1:11, size = sample(1:5, 1)))
+})
+seedReceive <- rbindlist(rcvSpByPG, idcol = "pixelGroup")
 
-seedRcv <- hab > 5
-pixelGroupMap <- raster(seedRcv)
-system.time(seeds <- LANDISDisp(seedSrc, seedRcv = seedRcv, maxDist = 250, plot.it = TRUE))
-seedRcvRaster <- raster(seedSrc)
-if (length(seeds) > 0) {
-  seedRcvRaster[seeds] <- 1
-  Plot(seedRcvRaster, cols = "black")
-}
+# Make a source pixels table -- need pixelGroup and species
+srcSpByPG <- lapply(seq_len(pgs/2), function(pg) {
+  data.table(speciesCode = sample(1:11, size = sample(1:5, 1)))
+})
+seedSource <- rbindlist(srcSpByPG, idcol = "pixelGroup")
+# make source pixels not same pixelGroups as receive
+seedSource[, pixelGroup := pixelGroup + pgs/2]
+
+# Get a species table -- if using in Canada, can use this
+speciesTable <- getSpeciesTable(dPath = ".")
+speciesTable <- speciesTable[Area == "BSW"]
+speciesTable[, speciesCode := as.factor(LandisCode)]
+speciesTable[, seeddistance_eff := SeedEffDist]
+speciesTable[, seeddistance_max := SeedMaxDist]
+
+speciesTable <- speciesTable
+speciesTable <- data.table(speciesTable)[, speciesCode := seq_along(LandisCode)]
+seedReceiveFull <- speciesTable[seedReceive, on = "speciesCode"]
+output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
+                     dtSrc = seedSource,
+                     speciesTable = speciesTable,
+                     pixelGroupMap,
+                     verbose = FALSE,
+                     successionTimestep = 10)
+# Summarize
+output[, .N, by = speciesCode]
 
 }
 \author{

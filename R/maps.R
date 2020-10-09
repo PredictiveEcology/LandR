@@ -222,30 +222,20 @@ vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("Lan
 }
 
 #' @export
-#' @importFrom SpaDES.tools inRange
 #' @rdname vegTypeMapGenerator
+#' @include cohorts.R
+#' @examples
+#' x <- data.table(pixelGroup = rep(1:2, each = 2), B = c(100, 200, 20, 400),
+#'                 speciesCode = rep(c("Pice_Gla", "Popu_Tre"), 2))
+#' pixelGroupMap <- raster(extent(0,3, 0, 3), res = 1)
+#' pixelGroupMap[] <- sample(1:2, size = 9, replace = T)
+#' vtm <- vegTypeMapGenerator(x, pixelGroupMap = pixelGroupMap)
 vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportion = 0.8,
                                            mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,
                                            pixelGroupColName = "pixelGroup",
                                            doAssertion = getOption("LandR.assertions", TRUE), ...) {
-  if (!inRange(vegLeadingProportion, 0, 1))
-    stop("vegLeadingProportion must be a proportion")
-
   nrowCohortData <- NROW(x)
-
-  leadingBasedOn <- if ("B" %in% colnames(x)) {
-    message("Using B to derive leading type")
-    "B"
-  } else if ("cover" %in% colnames(x)) {
-    message("Using cover to derive leading type, as there is no B column")
-    "cover"
-  } else {
-    stop("x must have either B or cover to determine leading species/type")
-  }
-  if (!nrowCohortData > 0) stop("cohortData is empty")
-
-  if (isTRUE(doAssertion))
-    message("LandR::vegTypeMapGenerator: NROW(x) == ", nrowCohortData)
+  leadingBasedOn <- preambleVTG(x, vegLeadingProportion, doAssertion, nrowCohortData)
 
   if (mixedType == 2) {
     if (is.null(sppEquiv)) {

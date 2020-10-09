@@ -91,10 +91,6 @@ WardFast <- expression(ifelse(cellSize <= effDist, {
 #'
 #' @param plot.it  If TRUE, then plot the raster at every iteraction, so one can watch the
 #' LANDISDisp event grow.
-#' @param effDist Landis species- and ecoregion-specific effective distance parameter
-#'
-#' @param maxDist  Landis species- and ecoregion-specific effective distance parameter
-#'
 #' @param b  Landis ward seed dispersal calibration coefficient (set to 0.01 in Landis)
 #'
 #' @param k  Landis ward seed dispersal the probability that seed will disperse within
@@ -121,31 +117,53 @@ WardFast <- expression(ifelse(cellSize <= effDist, {
 #' @rdname LANDISDisp
 #'
 #' @examples
+#' library(data.table)
 #' library(raster)
-#' library(SpaDES.tools)
+#' # keep this here for interactive testing with a larger raster
+#' rasterTemplate <- raster(extent(0, 2500, 0, 2500), res = 100)
 #'
-#' # Make random forest cover map
-#' a <- raster(extent(0, 1e4, 0, 1e4), res = 100)
-#' hab <- gaussMap(a, speedup = 1) # if raster is large (>1e6 pixels), use speedup>1
-#' names(hab) <- "hab"
+#' # make a pixelGroupMap
+#' pgs <- 4 # make even just because of approach below requires even
+#' pixelGroupMap <- SpaDES.tools::randomPolygons(rasterTemplate, numTypes = pgs)
 #'
-#' seedSrc <- hab > 5
-#' setColors(seedSrc, 1) <- c("white", "black")
+#' # Make a receive pixels table -- need pixelGroup and species
+#' rcvSpByPG <- lapply(seq_len(pgs/2), function(pg) {
+#'   data.table(speciesCode = sample(1:11, size = sample(1:5, 1)))
+#' })
+#' seedReceive <- rbindlist(rcvSpByPG, idcol = "pixelGroup")
 #'
-#' seedRcv <- hab > 5
-#' pixelGroupMap <- raster(seedRcv)
-#' system.time(seeds <- LANDISDisp(seedSrc, seedRcv = seedRcv, maxDist = 250, plot.it = TRUE))
-#' seedRcvRaster <- raster(seedSrc)
-#' if (length(seeds) > 0) {
-#'   seedRcvRaster[seeds] <- 1
-#'   Plot(seedRcvRaster, cols = "black")
-#' }
+#' # Make a source pixels table -- need pixelGroup and species
+#' srcSpByPG <- lapply(seq_len(pgs/2), function(pg) {
+#'   data.table(speciesCode = sample(1:11, size = sample(1:5, 1)))
+#' })
+#' seedSource <- rbindlist(srcSpByPG, idcol = "pixelGroup")
+#' # make source pixels not same pixelGroups as receive
+#' seedSource[, pixelGroup := pixelGroup + pgs/2]
 #'
-LANDISDisp <- compiler::cmpfun(function(dtSrc, dtRcv, pixelGroupMap, species,
-                                        dispersalFn = WardFast, b = 0.01, k = 0.95, plot.it = FALSE,
-                                        successionTimestep,
-                                        verbose = getOption("LandR.verbose", TRUE),
-                                        useParallel, ...) {
+#' # Get a species table -- if using in Canada, can use this
+#' speciesTable <- getSpeciesTable(dPath = ".")
+#' speciesTable <- speciesTable[Area == "BSW"]
+#' speciesTable[, speciesCode := as.factor(LandisCode)]
+#' speciesTable[, seeddistance_eff := SeedEffDist]
+#' speciesTable[, seeddistance_max := SeedMaxDist]
+#'
+#' speciesTable <- speciesTable
+#' speciesTable <- data.table(speciesTable)[, speciesCode := seq_along(LandisCode)]
+#' seedReceiveFull <- speciesTable[seedReceive, on = "speciesCode"]
+#' output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
+#'                      dtSrc = seedSource,
+#'                      speciesTable = speciesTable,
+#'                      pixelGroupMap,
+#'                      verbose = FALSE,
+#'                      successionTimestep = 10)
+#' # Summarize
+#' output[, .N, by = speciesCode]
+#'
+LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
+                       dispersalFn = WardFast, b = 0.01, k = 0.95, plot.it = FALSE,
+                       successionTimestep,
+                       verbose = getOption("LandR.verbose", TRUE),
+                       ...) {
     cellSize <- res(pixelGroupMap) %>% unique()
     if (length(cellSize) > 1) {
       ## check for equal cell sizes that "aren't" due to floating point error
@@ -159,7 +177,7 @@ LANDISDisp <- compiler::cmpfun(function(dtSrc, dtRcv, pixelGroupMap, species,
     seedsReceived[] <- 0L
 
     # NOTE new as.integer for speciesCode -- it is now a factor
-    sc <- species[, list(
+    sc <- speciesTable[, list(
       speciesCode = as.integer(speciesCode),
       effDist = seeddistance_eff,
       maxDist = seeddistance_max
@@ -216,7 +234,7 @@ LANDISDisp <- compiler::cmpfun(function(dtSrc, dtRcv, pixelGroupMap, species,
     seedSourceMaps$speciesSrcPool <-
       NULL # don't need once xysAll are gotten
 
-    lociReturn <- data.table(fromInit = seedRcvOrig, key = "fromInit")
+    lociReturn <- data.table("fromInit" = seedRcvOrig, key = "fromInit")
 
     potentialsOrig <- data.table(
       "fromInit" = seedRcvOrig,
@@ -256,14 +274,14 @@ LANDISDisp <- compiler::cmpfun(function(dtSrc, dtRcv, pixelGroupMap, species,
         speciesComm,
         pointDistance,
         successionTimestep = successionTimestep,
-        verbose = verbose
+        verbose = TRUE#verbose
       )
 
-    # COnvert speciesCode back to factor using original species object from top of this fn
-    seedsArrived[, speciesCode := species$speciesCode[speciesCode]]
+    # COnvert speciesCode back to factor using original speciesTable object from top of this fn
+    seedsArrived[, speciesCode := speciesTable$speciesCode[speciesCode]]
     # setnames(seedsArrived, "fromInit", "pixelIndex")
     return(seedsArrived)
-})
+}
 
 speciesCodeFromCommunity <- function(num) {
   indices <- lapply(strsplit(R.utils::intToBin(num), split = ""), function(x) {

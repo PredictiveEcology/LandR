@@ -1,12 +1,18 @@
 test_that("test Ward dispersal seeding algorithm", {
   library(data.table)
   library(raster)
-  reducedPixelGroupMap <- raster(xmn = 50, xmx = 50 + 99*300,
-                                 ymn = 50, ymx = 50 + 99*300,
-                                 res = c(100, 100), val = 2)
-  reducedPixelGroupMap <- raster(xmn = 50, xmx = 50 + 99*25,
-                                 ymn = 50, ymx = 50 + 99*25,
-                                 res = c(100, 100), val = 2)
+
+  # keep this here for interactive testing with a larger raster
+  doLarge <- FALSE
+  if (doLarge) {
+    reducedPixelGroupMap <- raster(xmn = 50, xmx = 50 + 99*300,
+                                   ymn = 50, ymx = 50 + 99*300,
+                                   res = c(100, 100), val = 2)
+  } else {
+    reducedPixelGroupMap <- raster(xmn = 50, xmx = 50 + 99*25,
+                                   ymn = 50, ymx = 50 + 99*25,
+                                   res = c(100, 100), val = 2)
+  }
 
   pgs <- 30
   reducedPixelGroupMap <- SpaDES.tools::randomPolygons(reducedPixelGroupMap, numTypes = pgs)
@@ -32,15 +38,15 @@ test_that("test Ward dispersal seeding algorithm", {
   species <- data.table(species)[, speciesCode := seq_along(LandisCode)]
   seedReceiveFull <- species[seedReceive, on = "speciesCode"]
   objects <- list("species" = species)
-  mb <- profvis::profvis(
-     interval = 0.2,
+  # mb <- profvis::profvis(
+  #    interval = 0.2,
     output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
                          dtSrc = seedSource,
                          species = species,
                          reducedPixelGroupMap,
                          verbose = FALSE,
                          successionTimestep = successionTimestep)
-   )
+   #)
   output[, .N, by = speciesCode]
 
   ras <- raster(reducedPixelGroupMap)
