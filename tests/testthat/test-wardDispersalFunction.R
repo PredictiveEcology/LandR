@@ -72,7 +72,7 @@ test_that("test Ward dispersal seeding algorithm", {
 
   # Test whether each pixelGroup has only the species that could have arrived there
   output[, pixelGroup := reducedPixelGroupMap[pixelIndex]]
-  joined <- seedReceive[output, on = "pixelGroup", allow.cartesian = TRUE]
+  joined <- seedReceiveFull[output, on = "pixelGroup", allow.cartesian = TRUE]
   joinedTest <- joined[, all(i.speciesCode %in% speciesCode) , by = "pixelGroup"]
   expect_true(all(joinedTest$V1))
 
