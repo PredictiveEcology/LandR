@@ -29,7 +29,8 @@ test_that("test Ward dispersal seeding algorithm", {
   seedSource <- rbindlist(srcSpByPG, idcol = "pixelGroup")
   seedSource[, pixelGroup := pixelGroup + pgs/2]
 
-  speciesTable <- getSpeciesTable(dPath = ".")
+  td <- tempdir()
+  speciesTable <- getSpeciesTable(dPath = td)
   speciesTable <- speciesTable[Area == "BSW"]
   speciesTable[, speciesCode := as.factor(LandisCode)]
   speciesTable[, seeddistance_eff := SeedEffDist]
