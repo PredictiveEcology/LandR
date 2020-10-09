@@ -10,7 +10,16 @@ Rcpp::IntegerVector which2(Rcpp::LogicalVector x) {
 }
 
 
-//' Multiplies two doubles
+//' Ward seed dispersal using Rcpp
+//'
+//' This uses a spiral pattern outwards from the \code{cellCoords} cells on
+//' a raster with the dimensions \code{numCols}, \code{numCells}, \code{xmin},
+//' \code{ymin}, and \code{cellSize}. For each cell in \code{cellCoords},
+//' it evaluates whether there is a successful "dispersal" \code{to} that cell
+//' for the species that can disperse there as identified by \code{rcvSpeciesByIndex}.
+//' It will search outwards testing each and every cell in the spiral until
+//' the maximum distance is reached as specified in the 3rd column (named or unnamed)
+//' of \code{speciesTable}.
 //'
 //' @param cellCoords Matrix, 2 columns, of x-y coordinates of the Receive cells
 //' @param speciesVectorsList A list, where each element is a vector of NA and the speciesCode
@@ -19,10 +28,11 @@ Rcpp::IntegerVector which2(Rcpp::LogicalVector x) {
 //' @param rcvSpeciesByIndex A list of length \code{NROW(cellCoords)} where each element
 //'   is the vector of speciesCodes that are capable of being received in the
 //'   corresponding \code{cellCoords}
-//' @param speciesTable A data.table with species traits. Must have column 3 be
+//' @param speciesTable A numeric matrix with species traits. Must have column 3 be
 //'   \code{seeddistance_max}, column 2 be \code{seeddistance_eff}, and sorted in
 //'   increasing order on the first column, speciesCode. The speciesCode values must
-//'   be \code{seq(1, NROW(speciesTable))}
+//'   be \code{seq(1, NROW(speciesTable))}. The names of these columns is not important,
+//'   only the position in the matrix
 //' @param numCols Integer, number of columns in the raster whose \code{cellCoords}
 //'   were provided
 //' @param numCells Integer, number of cells in the raster whose \code{cellCoords}
@@ -36,9 +46,9 @@ Rcpp::IntegerVector which2(Rcpp::LogicalVector x) {
 //' @param k Numeric, parameter passed to Ward dispersal kernel
 //' @param b Numeric, parameter passed to Ward dispersal kernel
 //' @param successionTimestep Integer, Same as Biomass_core.
-//' @param verbose Logical, length 1. If \code{TRUE}, there will be some messaging.
-//'   \code{FALSE} is none. It appears to be noticeably faster when this is
-//'   \code{FALSE} (the default)
+//' @param verbose Numeric, length 1. Currently \code{0} (no messaging), the fastest option,
+//'   \code{1} (some messaging) and \code{2} or greater (more messaging) are active. Default is
+//'   \code{getOption("LandR.verbose", TRUE)}.
 //' @return A logical matrix with ncols = \code{length(speciesVectorsList)} and nrows =
 //'   \code{NROW(cellCoords)}, indicating whether that cellCoords successfully
 //'   received seeds from each species.
@@ -48,14 +58,13 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
                        Rcpp::List speciesVectorsList, List rcvSpeciesByIndex,
                        NumericMatrix speciesTable,
                        int numCols, int numCells, int cellSize, int xmin, int ymin,
-                       double k, double b, double successionTimestep, bool verbose = 0)
+                       double k, double b, double successionTimestep, double verbose = 0.0)
 {
-  // List spiralSeedDispersal( IntegerMatrix cellCoords, double overallMaxDist,
 
   int nCellsRcv(cellCoords.nrow());
   int nSpeciesEntries(speciesTable.nrow());
   int x, y, dx, dy, spiralIndex;
-  int spiralIndexMax = 10000000; // not really used except for debugging, it can be shrunk
+  int spiralIndexMax = 20000000; // not really used except for debugging, it can be shrunk
   bool underMaxDist = true;
 
   // max distances by species
@@ -119,7 +128,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
 
     ////////////////////////////////////
     // messaging for progress
-    if (verbose) {
+    if (verbose > 0) {
       disInt = floor(dis1[0]/ sqrt(2));
       possCurModVal = disInt % moduloVal;
       possCurMessage = floor(disInt / moduloVal) * moduloVal;
@@ -150,7 +159,6 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
 
             alreadyReceived = seedsArrivedMat(cellRcvInd, *speciesPixelRcv - 1);
             if (!alreadyReceived) {
-
               IntegerVector speciesVector = speciesVectorsList[*speciesPixelRcv - 1];
               pixelVal = speciesVector[pixelSrc - 1];
               numActiveCellsByRcvSp[*speciesPixelRcv - 1] += 1;
@@ -164,12 +172,14 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
                 NumericVector dis(1);
                 dis = dis1[0];
                 if (is_true(all(dis <= maxDist))) {
-                  // Rcpp::Rcout << "------- pixelVal: " << pixelVal << std::endl;
-                  // Rcpp::Rcout << "dis : " << dis << std::endl;
-                  // Rcpp::Rcout << "effDist : " << effDist << std::endl;
-                  // Rcpp::Rcout << "maxDist : " << maxDist << std::endl;
-                  // Rcpp::Rcout << "effDistSpV : " << effDistsSpV << std::endl;
-                  // Rcpp::Rcout << "maxDistSpV : " << maxDistsSpV << std::endl;
+                  if (verbose > 1) {
+                    Rcpp::Rcout << "------- pixelVal: " << pixelVal << std::endl;
+                    Rcpp::Rcout << "dis : " << dis << std::endl;
+                    Rcpp::Rcout << "effDist : " << effDist << std::endl;
+                    Rcpp::Rcout << "maxDist : " << maxDist << std::endl;
+                    Rcpp::Rcout << "effDistSpV : " << effDistsSpV << std::endl;
+                    Rcpp::Rcout << "maxDistSpV : " << maxDistsSpV << std::endl;
+                  }
                   if (dis[0] == 0) {
                     inequ = 1;
                   } else {

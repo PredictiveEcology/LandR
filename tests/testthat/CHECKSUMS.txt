@@ -1,0 +1,2 @@
+"file" "checksum" "filesize" "algorithm"
+"speciesTraits.csv" "155e633022e134cf" "9994" "xxhash64"

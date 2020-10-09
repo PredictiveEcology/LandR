@@ -81,7 +81,6 @@ Collate:
     'chooseName.R'
     'cleanLandWebStudyArea.R'
     'cohorts.R'
-    'disp.R'
     'ecoregions.R'
     'light-shade.R'
     'makeDummyInputs.R'

@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{spiralSeedDispersal}
 \alias{spiralSeedDispersal}
-\title{Multiplies two doubles}
+\title{Ward seed dispersal using Rcpp}
 \usage{
 spiralSeedDispersal(
   cellCoords,
@@ -17,7 +17,7 @@ spiralSeedDispersal(
   k,
   b,
   successionTimestep,
-  verbose = 0L
+  verbose = 0
 )
 }
 \arguments{
@@ -31,10 +31,11 @@ raster whose \code{cellCoords} are provided.}
 is the vector of speciesCodes that are capable of being received in the
 corresponding \code{cellCoords}}
 
-\item{speciesTable}{A data.table with species traits. Must have column 3 be
+\item{speciesTable}{A numeric matrix with species traits. Must have column 3 be
 \code{seeddistance_max}, column 2 be \code{seeddistance_eff}, and sorted in
 increasing order on the first column, speciesCode. The speciesCode values must
-be \code{seq(1, NROW(speciesTable))}}
+be \code{seq(1, NROW(speciesTable))}. The names of these columns is not important,
+only the position in the matrix}
 
 \item{numCols}{Integer, number of columns in the raster whose \code{cellCoords}
 were provided}
@@ -57,9 +58,9 @@ were provided}
 
 \item{successionTimestep}{Integer, Same as Biomass_core.}
 
-\item{verbose}{Logical, length 1. If \code{TRUE}, there will be some messaging.
-\code{FALSE} is none. It appears to be noticeably faster when this is
-\code{FALSE} (the default)}
+\item{verbose}{Numeric, length 1. Currently \code{0} (no messaging),
+\code{1} (some messaging) and \code{2} or greater (more messaging) are active. Default is
+\code{getOption("LandR.verbose", TRUE)}.}
 }
 \value{
 A logical matrix with ncols = \code{length(speciesVectorsList)} and nrows =
@@ -67,5 +68,12 @@ A logical matrix with ncols = \code{length(speciesVectorsList)} and nrows =
   received seeds from each species.
 }
 \description{
-Multiplies two doubles
+This uses a spiral pattern outwards from the \code{cellCoords} cells on
+a raster with the dimensions \code{numCols}, \code{numCells}, \code{xmin},
+\code{ymin}, and \code{cellSize}. For each cell in \code{cellCoords},
+it evaluates whether there is a successful "dispersal" \code{to} that cell
+for the species that can disperse there as identified by \code{rcvSpeciesByIndex}.
+It will search outwards testing each and every cell in the spiral until
+the maximum distance is reached as specified in the 3rd column (named or unnamed)
+of \code{speciesTable}.
 }

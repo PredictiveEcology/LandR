@@ -5,7 +5,16 @@ which2 <- function(x) {
     .Call('_LandR_which2', PACKAGE = 'LandR', x)
 }
 
-#' Multiplies two doubles
+#' Ward seed dispersal using Rcpp
+#'
+#' This uses a spiral pattern outwards from the \code{cellCoords} cells on
+#' a raster with the dimensions \code{numCols}, \code{numCells}, \code{xmin},
+#' \code{ymin}, and \code{cellSize}. For each cell in \code{cellCoords},
+#' it evaluates whether there is a successful "dispersal" \code{to} that cell
+#' for the species that can disperse there as identified by \code{rcvSpeciesByIndex}.
+#' It will search outwards testing each and every cell in the spiral until
+#' the maximum distance is reached as specified in the 3rd column (named or unnamed)
+#' of \code{speciesTable}.
 #'
 #' @param cellCoords Matrix, 2 columns, of x-y coordinates of the Receive cells
 #' @param speciesVectorsList A list, where each element is a vector of NA and the speciesCode
@@ -14,10 +23,11 @@ which2 <- function(x) {
 #' @param rcvSpeciesByIndex A list of length \code{NROW(cellCoords)} where each element
 #'   is the vector of speciesCodes that are capable of being received in the
 #'   corresponding \code{cellCoords}
-#' @param speciesTable A data.table with species traits. Must have column 3 be
+#' @param speciesTable A numeric matrix with species traits. Must have column 3 be
 #'   \code{seeddistance_max}, column 2 be \code{seeddistance_eff}, and sorted in
 #'   increasing order on the first column, speciesCode. The speciesCode values must
-#'   be \code{seq(1, NROW(speciesTable))}
+#'   be \code{seq(1, NROW(speciesTable))}. The names of these columns is not important,
+#'   only the position in the matrix
 #' @param numCols Integer, number of columns in the raster whose \code{cellCoords}
 #'   were provided
 #' @param numCells Integer, number of cells in the raster whose \code{cellCoords}
@@ -31,14 +41,14 @@ which2 <- function(x) {
 #' @param k Numeric, parameter passed to Ward dispersal kernel
 #' @param b Numeric, parameter passed to Ward dispersal kernel
 #' @param successionTimestep Integer, Same as Biomass_core.
-#' @param verbose Logical, length 1. If \code{TRUE}, there will be some messaging.
-#'   \code{FALSE} is none. It appears to be noticeably faster when this is
-#'   \code{FALSE} (the default)
+#' @param verbose Numeric, length 1. Currently \code{0} (no messaging), the fastest option,
+#'   \code{1} (some messaging) and \code{2} or greater (more messaging) are active. Default is
+#'   \code{getOption("LandR.verbose", TRUE)}.
 #' @return A logical matrix with ncols = \code{length(speciesVectorsList)} and nrows =
 #'   \code{NROW(cellCoords)}, indicating whether that cellCoords successfully
 #'   received seeds from each species.
 #' @export
-spiralSeedDispersal <- function(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose = 0L) {
+spiralSeedDispersal <- function(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose = 0.0) {
     .Call('_LandR_spiralSeedDispersal', PACKAGE = 'LandR', cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose)
 }
 

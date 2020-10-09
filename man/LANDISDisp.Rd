@@ -72,6 +72,9 @@ of active pixels. \code{SpaDES} includes the \code{\link{Ward}} kernel as
 defined in the LANDIS-II documentation.
 }
 \examples{
+seed <- sample(1e6, 1)
+seed <- 532597
+set.seed(seed)
 library(data.table)
 library(raster)
 # keep this here for interactive testing with a larger raster
@@ -82,14 +85,16 @@ pgs <- 4 # make even just because of approach below requires even
 pixelGroupMap <- SpaDES.tools::randomPolygons(rasterTemplate, numTypes = pgs)
 
 # Make a receive pixels table -- need pixelGroup and species
+nSpecies <- 3
+maxNSpeciesPerPixel <- min(5, nSpecies)
 rcvSpByPG <- lapply(seq_len(pgs/2), function(pg) {
-  data.table(speciesCode = sample(1:11, size = sample(1:5, 1)))
+  data.table(speciesCode = sample(nSpecies, size = sample(maxNSpeciesPerPixel, 1)))
 })
 seedReceive <- rbindlist(rcvSpByPG, idcol = "pixelGroup")
 
 # Make a source pixels table -- need pixelGroup and species
 srcSpByPG <- lapply(seq_len(pgs/2), function(pg) {
-  data.table(speciesCode = sample(1:11, size = sample(1:5, 1)))
+  data.table(speciesCode = sample(nSpecies, size = sample(maxNSpeciesPerPixel, 1)))
 })
 seedSource <- rbindlist(srcSpByPG, idcol = "pixelGroup")
 # make source pixels not same pixelGroups as receive
@@ -109,7 +114,7 @@ output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
                      dtSrc = seedSource,
                      speciesTable = speciesTable,
                      pixelGroupMap,
-                     verbose = FALSE,
+                     verbose = TRUE,
                      successionTimestep = 10)
 # Summarize
 output[, .N, by = speciesCode]
