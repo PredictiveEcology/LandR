@@ -13,13 +13,40 @@ Rcpp::IntegerVector which2(Rcpp::LogicalVector x) {
 //' Multiplies two doubles
 //'
 //' @param cellCoords Matrix, 2 columns, of x-y coordinates of the Receive cells
-//' @param overallMaxDist The maximum distance to test for seed dispersal
-//' @return A list.
+//' @param speciesVectorsList A list, where each element is a vector of NA and the speciesCode
+//'   value of the list. The length of each vector MUST be the number of cells in the
+//'   raster whose \code{cellCoords} are provided.
+//' @param rcvSpeciesByIndex A list of length \code{NROW(cellCoords)} where each element
+//'   is the vector of speciesCodes that are capable of being received in the
+//'   corresponding \code{cellCoords}
+//' @param speciesTable A data.table with species traits. Must have column 3 be
+//'   \code{seeddistance_max}, column 2 be \code{}seeddistance_eff}, and sorted in
+//'   increasing order on the first column, speciesCode. The speciesCode values must
+//'   be \code{seq(1, NROW(speciesTable))}
+//' @param numCols Integer, number of columns in the raster whose \code{cellCoords}
+//'   were provided
+//' @param numCells Integer, number of cells in the raster whose \code{cellCoords}
+//'   were provided
+//' @param cellSize Integer, the \code{res(ras)[1]} of the raster whose \code{cellCoords}
+//'   were provided
+//' @param xmin Integer, the \code{xmin(ras)} of the raster whose \code{cellCoords}
+//'   were provided
+//' @param ymin Integer, the \code{ymin(ras)} of the raster whose \code{cellCoords}
+//'   were provided
+//' @param k Numeric, parameter passed to Ward dispersal kernel
+//' @param b Numeric, parameter passed to Ward dispersal kernel
+//' @param successionTimestep Integer, Same as Biomass_core.
+//' @param verbose Logical, length 1. If \code{TRUE}, there will be some messaging.
+//'   \code{FALSE} is none. It appears to be noticeably faster when this is
+//'   \code{FALSE} (the default)
+//' @return A logical matrix with ncols = \code{length(speciesVectorsList)} and nrows =
+//'   \code{NROW(cellCoords)}, indicating whether that cellCoords successfully
+//'   received seeds from each species.
 //' @export
 // [[Rcpp::export]]
-LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords, // double overallMaxDist,
+LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
                        Rcpp::List speciesVectorsList, List rcvSpeciesByIndex,
-                       NumericMatrix speciesTable, // IntegerVector speciesNamesNumeric,
+                       NumericMatrix speciesTable,
                        int numCols, int numCells, int cellSize, int xmin, int ymin,
                        double k, double b, double successionTimestep, bool verbose = 0)
 {

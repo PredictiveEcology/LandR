@@ -16,16 +16,50 @@ spiralSeedDispersal(
   ymin,
   k,
   b,
-  successionTimestep
+  successionTimestep,
+  verbose = 0L
 )
 }
 \arguments{
 \item{cellCoords}{Matrix, 2 columns, of x-y coordinates of the Receive cells}
 
-\item{overallMaxDist}{The maximum distance to test for seed dispersal}
+\item{speciesVectorsList}{A list, where each element is a vector of NA and the speciesCode
+value of the list. The length of each vector MUST be the number of cells in the
+raster whose \code{cellCoords} are provided.}
+
+\item{rcvSpeciesByIndex}{A list of length \code{NROW(cellCoords)} where each element
+is the vector of speciesCodes that are capable of being received in the
+corresponding \code{cellCoords}}
+
+\item{numCols}{Integer, number of columns in the raster whose \code{cellCoords}
+were provided}
+
+\item{numCells}{Integer, number of cells in the raster whose \code{cellCoords}
+were provided}
+
+\item{cellSize}{Integer, the \code{res(ras)[1]} of the raster whose \code{cellCoords}
+were provided}
+
+\item{xmin}{Integer, the \code{xmin(ras)} of the raster whose \code{cellCoords}
+were provided}
+
+\item{ymin}{Integer, the \code{ymin(ras)} of the raster whose \code{cellCoords}
+were provided}
+
+\item{k}{Numeric, parameter passed to Ward dispersal kernel}
+
+\item{b}{Numeric, parameter passed to Ward dispersal kernel}
+
+\item{successionTimestep}{Integer, Same as Biomass_core.}
+
+\item{verbose}{Logical, length 1. If \code{TRUE}, there will be some messaging.
+\code{FALSE} is none. It appears to be noticeably faster when this is
+\code{FALSE} (the default)}
 }
 \value{
-A list.
+A logical matrix with ncols = \code{length(speciesVectorsList)} and nrows =
+  \code{NROW(cellCoords)}, indicating whether that cellCoords successfully
+  received seeds from each species.
 }
 \description{
 Multiplies two doubles
