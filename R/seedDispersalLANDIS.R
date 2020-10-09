@@ -8,8 +8,9 @@ utils::globalVariables(c(
 #' pixel" focused dispersal approach. It is the "potentially receiving" cell
 #' that looks around itself for potential seed sources. If it finds a single
 #' seed source, that passes the probability function described by the
-#' dispersalFn, then the cluster ends and the receiving cell index is returned
-#' as part of a vector of indices of all successfully cells that received seeds.
+#' \code{dispersalFn}. If this passes a comparison to a uniform random draw,
+#' then the receiving cell is deemed to have a "successful" dispersal for that
+#' species.
 #' This function can therefore only be used for a relatively specific situation
 #' where there is a yes/no returned for each potential receiving cell, i.e., not
 #' abundance. This function is also not cumulative, i.e,. there is no higher
@@ -17,7 +18,9 @@ utils::globalVariables(c(
 #' around it vs. a single seed source. The difference will come with a higher
 #' probability of successfully receiving a "seed".
 #'
-#' \code{dispersalFn} must be an expression that returns a probability
+#' \code{dispersalFn} (temporarily unused as code is converted to Rcpp -- the
+#' default \code{dispersalFn} is hard coded within the \code{spiralSeedDispersal}
+#' function that uses C++) must be an expression that returns a probability
 #' distribution. Because it is a dispersal kernal, it must be a probability
 #' distribution. The expression that can take an argument named "dis" (without
 #' quotes) as this will be calculated internally and represents the distance
@@ -31,20 +34,27 @@ utils::globalVariables(c(
 #'
 #' @param pixelGroupMap map
 #'
-#' @param species Landis object from initial species file
+#' @param species A data.table that should have at least 3 columns:
+#'   \code{speciesCode} an integer representation of species, \code{seeddistance_max}
+#'   a numeric with the maximum seed dispersal distance and \code{seeddistance_eff}
+#'   the "effective" seed dispersal distance. These latter two are
+#'   parameters passed to Ward dispersal kernel. This data.table can come from
+#'   a \code{species} table from a LANDIS project.
 #'
-#' @param dispersalFn  An expression that can take a "dis" argument. See details. Default is "Ward"
+#' @param dispersalFn  An expression that can take a "dis" argument. See details.
+#'   Default is "Ward" (temporarily unused, as it is hard coded inside Rcpp function)
 #'
-#' @param plot.it  If TRUE, then plot the raster at every iteraction, so one can watch the
+#' @param plot.it  If TRUE, then plot the raster at every interaction, so one can watch the
 #' LANDISDisp event grow.
-#' @param b  Landis ward seed dispersal calibration coefficient (set to 0.01 in Landis)
+#' @param b  Landis Ward seed dispersal calibration coefficient (set to 0.01 in Landis)
 #'
-#' @param k  Landis ward seed dispersal the probability that seed will disperse within
+#' @param k  Landis Ward seed dispersal the probability that seed will disperse within
 #' the effective distance (eg., 0.95)
 #'
 #' @param successionTimestep integer. The time in timeunits between succession (i.e., dispersal) events.
 #'
-#' @param verbose Logical. Whether a somewhat verbose output to screen occurs. For debugging.
+#' @param verbose Numeric. \code{0} is not verbose, with increasing numbers indicating
+#'   increasing levels of verbosity (currently up to 2)
 #'
 #' @param ...   Additional parameters. Currently none
 #'
@@ -102,7 +112,7 @@ utils::globalVariables(c(
 #' speciesTable <- speciesTable
 #' speciesTable <- data.table(speciesTable)[, speciesCode := seq_along(LandisCode)]
 #' seedReceiveFull <- speciesTable[seedReceive, on = "speciesCode"]
-#' output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
+#' output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = interactive(),
 #'                      dtSrc = seedSource,
 #'                      speciesTable = speciesTable,
 #'                      pixelGroupMap,
@@ -349,7 +359,8 @@ speciesComm <- function(num, sc) {
 }
 
 
-WardEqn <- compiler::cmpfun(function(dis, cellSize, effDist, maxDist, k, b) {
+#' @importFrom fpCompare %<=%
+WardEqn <- function(dis, cellSize, effDist, maxDist, k, b) {
   if (cellSize %<=% effDist) {
     ifelse(
       dis %<=% effDist,
@@ -367,7 +378,7 @@ WardEqn <- compiler::cmpfun(function(dis, cellSize, effDist, maxDist, k, b) {
         (1 - k) * exp((dis - effDist) * log(b) / maxDist)
     )
   }
-})
+}
 
 
 #' @inheritParams LANDISDisp

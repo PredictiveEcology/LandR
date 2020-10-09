@@ -26,23 +26,30 @@ LANDISDisp(
 
 \item{pixelGroupMap}{map}
 
-\item{dispersalFn}{An expression that can take a "dis" argument. See details. Default is "Ward"}
+\item{dispersalFn}{An expression that can take a "dis" argument. See details.
+Default is "Ward" (temporarily unused, as it is hard coded inside Rcpp function)}
 
-\item{b}{Landis ward seed dispersal calibration coefficient (set to 0.01 in Landis)}
+\item{b}{Landis Ward seed dispersal calibration coefficient (set to 0.01 in Landis)}
 
-\item{k}{Landis ward seed dispersal the probability that seed will disperse within
+\item{k}{Landis Ward seed dispersal the probability that seed will disperse within
 the effective distance (eg., 0.95)}
 
-\item{plot.it}{If TRUE, then plot the raster at every iteraction, so one can watch the
+\item{plot.it}{If TRUE, then plot the raster at every interaction, so one can watch the
 LANDISDisp event grow.}
 
 \item{successionTimestep}{integer. The time in timeunits between succession (i.e., dispersal) events.}
 
-\item{verbose}{Logical. Whether a somewhat verbose output to screen occurs. For debugging.}
+\item{verbose}{Numeric. \code{0} is not verbose, with increasing numbers indicating
+increasing levels of verbosity (currently up to 2)}
 
 \item{...}{Additional parameters. Currently none}
 
-\item{species}{Landis object from initial species file}
+\item{species}{A data.table that should have at least 3 columns:
+\code{speciesCode} an integer representation of species, \code{seeddistance_max}
+a numeric with the maximum seed dispersal distance and \code{seeddistance_eff}
+the "effective" seed dispersal distance. These latter two are
+parameters passed to Ward dispersal kernel. This data.table can come from
+a \code{species} table from a LANDIS project.}
 }
 \value{
 A numeric vector of raster pixel indices, in the same resolution and extent as
@@ -53,8 +60,9 @@ Simulate seed dispersal using user defined function. This is a "receiving
 pixel" focused dispersal approach. It is the "potentially receiving" cell
 that looks around itself for potential seed sources. If it finds a single
 seed source, that passes the probability function described by the
-dispersalFn, then the cluster ends and the receiving cell index is returned
-as part of a vector of indices of all successfully cells that received seeds.
+\code{dispersalFn}. If this passes a comparison to a uniform random draw,
+then the receiving cell is deemed to have a "successful" dispersal for that
+species.
 This function can therefore only be used for a relatively specific situation
 where there is a yes/no returned for each potential receiving cell, i.e., not
 abundance. This function is also not cumulative, i.e,. there is no higher
@@ -63,7 +71,9 @@ around it vs. a single seed source. The difference will come with a higher
 probability of successfully receiving a "seed".
 }
 \details{
-\code{dispersalFn} must be an expression that returns a probability
+\code{dispersalFn} (temporarily unused as code is converted to Rcpp -- the
+default \code{dispersalFn} is hard coded within the \code{spiralSeedDispersal}
+function that uses C++) must be an expression that returns a probability
 distribution. Because it is a dispersal kernal, it must be a probability
 distribution. The expression that can take an argument named "dis" (without
 quotes) as this will be calculated internally and represents the distance

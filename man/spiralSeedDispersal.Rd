@@ -58,7 +58,7 @@ were provided}
 
 \item{successionTimestep}{Integer, Same as Biomass_core.}
 
-\item{verbose}{Numeric, length 1. Currently \code{0} (no messaging),
+\item{verbose}{Numeric, length 1. Currently \code{0} (no messaging), the fastest option,
 \code{1} (some messaging) and \code{2} or greater (more messaging) are active. Default is
 \code{getOption("LandR.verbose", TRUE)}.}
 }
@@ -76,4 +76,7 @@ for the species that can disperse there as identified by \code{rcvSpeciesByIndex
 It will search outwards testing each and every cell in the spiral until
 the maximum distance is reached as specified in the 3rd column (named or unnamed)
 of \code{speciesTable}.
+}
+\author{
+Eliot McIntire
 }

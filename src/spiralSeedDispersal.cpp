@@ -52,6 +52,7 @@ Rcpp::IntegerVector which2(Rcpp::LogicalVector x) {
 //' @return A logical matrix with ncols = \code{length(speciesVectorsList)} and nrows =
 //'   \code{NROW(cellCoords)}, indicating whether that cellCoords successfully
 //'   received seeds from each species.
+//' @author Eliot McIntire
 //' @export
 // [[Rcpp::export]]
 LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,

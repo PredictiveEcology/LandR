@@ -47,6 +47,7 @@ which2 <- function(x) {
 #' @return A logical matrix with ncols = \code{length(speciesVectorsList)} and nrows =
 #'   \code{NROW(cellCoords)}, indicating whether that cellCoords successfully
 #'   received seeds from each species.
+#' @author Eliot McIntire
 #' @export
 spiralSeedDispersal <- function(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose = 0.0) {
     .Call('_LandR_spiralSeedDispersal', PACKAGE = 'LandR', cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose)

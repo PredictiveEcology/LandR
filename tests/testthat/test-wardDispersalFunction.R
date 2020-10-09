@@ -57,7 +57,7 @@ test_that("test Ward dispersal seeding algorithm", {
   if (FALSE) {
     dev()
     clearPlot()
-    Plot(reducedPixelGroupMap, ras, new= TRUE, col = c("red", "blue"))
+    Plot(reducedPixelGroupMap, ras, new = TRUE, col = c("red", "blue"))
   }
 
   expect_true(all(unique(output$speciesCode) %in% unique(seedReceiveFull$speciesCode)))
