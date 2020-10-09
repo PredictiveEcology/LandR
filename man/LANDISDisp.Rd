@@ -6,7 +6,6 @@
 \title{Simulate a LANDIS-II dispersal process on a landscape.}
 \usage{
 LANDISDisp(
-  sim,
   dtSrc,
   dtRcv,
   pixelGroupMap,
@@ -22,8 +21,6 @@ LANDISDisp(
 )
 }
 \arguments{
-\item{sim}{A simList object}
-
 \item{dtSrc}{data.table}
 
 \item{dtRcv}{data.table}

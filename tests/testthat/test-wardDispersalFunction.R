@@ -5,12 +5,12 @@ test_that("test Ward dispersal seeding algorithm", {
   library(fpCompare)
   library(magrittr)
   # library(LandR)
-  module <- list("Biomass_core")
-  path <- list(modulePath="..",
-               outputPath="../tmp")
-  parameters <- list(.progress = list(type = "graphical", interval = 1),
-                     .globals = list(verbose = FALSE),
-                     Biomass_core = list( .saveInitialTime = NA))
+  # module <- list("Biomass_core")
+  # path <- list(modulePath="..",
+  #              outputPath="../tmp")
+  # parameters <- list(.progress = list(type = "graphical", interval = 1),
+  #                    .globals = list(verbose = FALSE),
+  #                    Biomass_core = list( .saveInitialTime = NA))
 
   reducedPixelGroupMap <- raster(xmn = 50, xmx = 50 + 99*300,
                                  ymn = 50, ymx = 50 + 99*300,
@@ -33,9 +33,9 @@ test_that("test Ward dispersal seeding algorithm", {
   seedSource <- rbindlist(srcSpByPG, idcol = "pixelGroup")
   seedSource[, pixelGroup := pixelGroup + pgs/2]
 
-  mySim <- simInit(times = list(start = 0, end = 2),
-                   params = parameters,
-                   paths = path)
+  # mySim <- simInit(times = list(start = 0, end = 2),
+  #                   params = parameters,
+  #                  paths = path)
   speciesTable <- getSpeciesTable(dPath = ".")
   speciesTable <- speciesTable[Area == "BSW"]
   speciesTable[, speciesCode := as.factor(LandisCode)]
@@ -48,7 +48,7 @@ test_that("test Ward dispersal seeding algorithm", {
   objects <- list("species" = species)
   # mb <- profvis::profvis(
   #   interval = 0.2,
-    output <- LANDISDisp(mySim, dtRcv = seedReceiveFull, plot.it = FALSE,
+    output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
                          dtSrc = seedSource,
                          species = species,
                          reducedPixelGroupMap,
@@ -82,8 +82,10 @@ test_that("test Ward dispersal seeding algorithm", {
   env$b = 0.01
   env$k = 0.95
 
+  testDists <- list()
+
   for (dis in 1:12) {
-    message(dis * env$cellSize)
+    message("Working on ", dis * env$cellSize, " m")
     ras2 <- raster(reducedPixelGroupMap)
     ras2[] <- 2
     ras2[middlePixel(ras)] <- 1
@@ -91,7 +93,7 @@ test_that("test Ward dispersal seeding algorithm", {
     seedReceive <- data.table(pixelGroup = 3, speciesCode = 1:11)
     seedSource <- data.table(pixelGroup = 1, speciesCode = 1:11)
     output <- lapply(1:100, function(x)  {
-      LANDISDisp(mySim, dtRcv = seedReceive, plot.it = FALSE,
+      LANDISDisp(dtRcv = seedReceive, plot.it = FALSE,
                  dtSrc = seedSource,
                  species = species,
                  pixelGroupMap = ras2,
@@ -103,7 +105,7 @@ test_that("test Ward dispersal seeding algorithm", {
     tooFar <- joined$seeddistance_max < dis * res(ras2)[1]
     expect_true(all(is.na(joined$pixelIndex[tooFar])))
 
-    testDists <- sapply(unique(output$speciesCode), function(spCode) {
+    testDists[[dis]] <- sapply(unique(output$speciesCode), function(spCode) {
       env$effDist <- unique(joined[speciesCode == spCode]$seeddistance_eff)
       env$maxDist <- unique(joined[speciesCode == spCode]$seeddistance_max)
       env$dis <- dis * env$cellSize
@@ -111,8 +113,9 @@ test_that("test Ward dispersal seeding algorithm", {
       dispersalProb = 1 - (1 - dispersalProb)^successionTimestep
       probOfThatNumber <- dbinom(x = NROW(output[speciesCode == spCode]), size = 100, prob = dispersalProb)
     })
-    expect_true(all(testDists > 0.001))
   }
+  tests <- unlist(testDists)
+  expect_true(sum(tests < 0.01)/length(tests) <= 0.1)
 
 })
 

@@ -79,8 +79,6 @@ WardFast <- expression(ifelse(cellSize <= effDist, {
 #' of active pixels. \code{SpaDES} includes the \code{\link{Ward}} kernel as
 #' defined in the LANDIS-II documentation.
 #'
-#' @param sim A simList object
-#'
 #' @param dtSrc data.table
 #'
 #' @param dtRcv data.table
@@ -114,10 +112,8 @@ WardFast <- expression(ifelse(cellSize <= effDist, {
 #' @return A numeric vector of raster pixel indices, in the same resolution and extent as
 #' \code{seedSrc} raster.
 #'
-#' @import data.table
-#' @import dplyr
-#' @import raster
 #' @importFrom R.utils intToBin
+#' @importFrom magrittr %>%
 #' @export
 #' @docType methods
 #'
@@ -147,9 +143,8 @@ WardFast <- expression(ifelse(cellSize <= effDist, {
 #'   Plot(seedRcvRaster, cols = "black")
 #' }
 #'
-LANDISDisp <- compiler::cmpfun(function(sim, dtSrc, dtRcv, pixelGroupMap, species,
+LANDISDisp <- compiler::cmpfun(function(dtSrc, dtRcv, pixelGroupMap, species,
                                         dispersalFn = WardFast, b = 0.01, k = 0.95, plot.it = FALSE,
-                                        # maxPotentialsLength = 1e5,
                                         successionTimestep,
                                         verbose = getOption("LandR.verbose", TRUE),
                                         useParallel, ...) {

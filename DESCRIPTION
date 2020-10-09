@@ -38,6 +38,7 @@ Imports:
     pemisc,
     plyr,
     quickPlot,
+    R.utils,
     raster,
     RColorBrewer,
     Rcpp,

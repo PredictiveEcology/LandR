@@ -20,7 +20,7 @@ Rcpp::IntegerVector which2(Rcpp::LogicalVector x) {
 //'   is the vector of speciesCodes that are capable of being received in the
 //'   corresponding \code{cellCoords}
 //' @param speciesTable A data.table with species traits. Must have column 3 be
-//'   \code{seeddistance_max}, column 2 be \code{}seeddistance_eff}, and sorted in
+//'   \code{seeddistance_max}, column 2 be \code{seeddistance_eff}, and sorted in
 //'   increasing order on the first column, speciesCode. The speciesCode values must
 //'   be \code{seq(1, NROW(speciesTable))}
 //' @param numCols Integer, number of columns in the raster whose \code{cellCoords}
