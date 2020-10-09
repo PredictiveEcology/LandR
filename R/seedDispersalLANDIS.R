@@ -132,19 +132,30 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     pgv <- pixelGroupMap[]
     cellsCanRcv <- which(pgv %in% dtRcv$pixelGroup)
     rcvSpeciesByIndex <- lapply(cellsCanRcv, function(ccr) {
-      dtRcv[pixelGroup %in% pgv[ccr]]$speciesCode
+      dtRcv$speciesCode[dtRcv$pixelGroup %in% pgv[ccr]]
     })
 
     # cellCoords
     cellCoords <- xyFromCell(pixelGroupMap, cellsCanRcv)
 
     # speciesVectorsList
-    dtSrcShort <- dtSrc$pixelGroup
+    # dtSrcShort <- dtSrc$pixelGroup
     dtSrcNoDups <- unique(dtSrc, by = c("speciesCode"))
-    speciesSrcRasterVecList <- by(dtSrcNoDups, INDICES = dtSrcNoDups$speciesCode, function(x)
-      rasterizeReduced(x, pixelGroupMap, "speciesCode", "pixelGroup")[])
-    speciesCodes <- as.character(dtSrcNoDups$speciesCode)
-    names(speciesSrcRasterVecList) <- speciesCodes
+    # setorderv(dtSrcNoDups, c("speciesCode", "pixelGroup"))
+    # rasTemplate <- raster(pixelGroupMap)
+    rasTemplate <- rep(NA_integer_, ncell(pixelGroupMap))
+    pixelGroupMapVec <- pixelGroupMap[]
+    spCodes <- sort(dtSrcNoDups$speciesCode)
+    names(spCodes) <- as.character(spCodes)
+    speciesSrcRasterVecList <- lapply(spCodes, function(sp) {
+      ras <- rasTemplate
+      hasSp <- dtSrc$speciesCode == sp
+      # dtSrcSp <- dtSrc[hasSp]
+      pgs <- dtSrc$pixelGroup[hasSp]
+      pixels <- pixelGroupMapVec %in% pgs
+      ras[pixels] <- sp
+      ras
+    })
     maxSpCode <- max(as.integer(names(speciesSrcRasterVecList)))
     speciesSrcRasterVecList <- lapply(seq_len(maxSpCode), function(ind) {
       if (as.character(ind) %in% names(speciesSrcRasterVecList))
@@ -153,11 +164,12 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     speciesVectorsList <- speciesSrcRasterVecList
 
     # Raster metadata
-    ymin <- ymin(pixelGroupMap)
-    xmin <- xmin(pixelGroupMap)
-    numCols <- ncol(pixelGroupMap)
-    numCells <- ncell(pixelGroupMap)
-    cellSize <- res(pixelGroupMap) %>% unique()
+    e <- pixelGroupMap@extent
+    ymin <- e@ymin
+    xmin <- e@xmin
+    numCols <- pixelGroupMap@ncols
+    numCells <- pixelGroupMap@ncols * pixelGroupMap@nrows #ncell(pixelGroupMap)
+    cellSize <- xr <- (e@xmax - e@xmin)/numCols # cellSize <- res(pixelGroupMap) %>% unique()
 
     if (length(cellSize) > 1) {
       ## check for equal cell sizes that "aren't" due to floating point error
@@ -198,7 +210,9 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       maxDistColName <- grep("max", colnames(speciesTable), value = TRUE)
       effDistColName <- grep("eff", colnames(speciesTable), value = TRUE)
       colnamesST <- c("speciesCode", effDistColName, maxDistColName)
-      speciesTableInner <- as.matrix(unique(speciesTable[, ..colnamesST]))
+      speciesTableSmall <- speciesTable[, ..colnamesST]
+      uniqueSTS <- unique(speciesTableSmall)
+      speciesTableInner <- as.matrix(uniqueSTS)
 
       speciesTableInner2 <- lapply(seq_len(maxSpCode), function(ind) {
         hasRow <- (speciesTableInner[, "speciesCode"] %in% ind )
