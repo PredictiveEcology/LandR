@@ -28,14 +28,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords, // double overallMa
   int nCellsRcv(cellCoords.nrow());
   int nSpeciesEntries(speciesTable.nrow());
   int x, y, dx, dy, spiralIndex;
-  int spiralIndexMax = 10000000;
-  // NumericVector xKeep;
-  // NumericVector yKeep;
-  // NumericVector disKeep;
-  // NumericVector dispersalProbKeep;
-  // IntegerVector spiralIndexKeep;
-  // dispersalProbKeep[0] = 0;
-
+  int spiralIndexMax = 10000000; // not really used except for debugging, it can be shrunk
   bool underMaxDist = true;
 
   // max distances by species
@@ -47,18 +40,14 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords, // double overallMa
   NumericVector maxDistNotNA;
   NumericVector numActiveCellsByRcvSp(nSpeciesEntries);
   NumericVector numActiveCellsByRcvSpDone(nSpeciesEntries);
-  double maxOfMaxDists;
-  double newOverallMaxDistCorner;
+  double maxOfMaxDists, newOverallMaxDistCorner;
 
   // coordinates and distances
   NumericVector xCoord;
   NumericVector yCoord;
   NumericVector dis1;
-  int pixelSrc;
-  bool notNegative;
-  bool notTooBig;
-  int pixelVal;
-  bool inequ;
+  int pixelSrc, pixelVal;
+  bool notNegative, notTooBig, inequ;
 
   // output
   LogicalMatrix seedsArrivedMat(nCellsRcv, nSpeciesEntries);
@@ -80,8 +69,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords, // double overallMa
   int curModVal = moduloVal;
   int curMessage = 0;
   double possCurModVal;
-  int possCurMessage;
-  int disInt;
+  int possCurMessage, disInt;
 
   // Primary "spiral" loop, one pixel at a time. Only calculate for the "generic" pixel,
   // which is effectively an offset from the "central" pixel;
