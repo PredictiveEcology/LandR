@@ -1588,6 +1588,7 @@ pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
 #' @importFrom data.table copy data.table setkey setorderv
 #' @importFrom SpaDES.tools inRange
 #' @importFrom utils data
+#' @importFrom testthat assert_that
 #'
 #' @rdname vegTypeGenerator
 vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
@@ -1608,7 +1609,7 @@ vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
   } else {
     stop("x must have either B or cover to determine leading species/type")
   }
-  assert_that(nrowCohortData > 0)
+  if (!nrowCohortData > 0) stop("cohortData is empty")
 
   if (isTRUE(doAssertion))
     message("LandR::vegTypeMapGenerator: NROW(x) == ", nrowCohortData)

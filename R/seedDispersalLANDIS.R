@@ -104,9 +104,6 @@ WardFast <- expression(ifelse(cellSize <= effDist, {
 #'
 #' @param verbose Logical. Whether a somewhat verbose output to screen occurs. For debugging.
 #'
-#' @param useParallel ANY. if the class of this arguement is logical, whether the function creates the cluster based on TRue and FALSE.
-#'                         if the class of this arguement is cluster, the function will use this cluster to implement the parallel computation.
-#'
 #' @param ...   Additional parameters. Currently none
 #'
 #' @return A numeric vector of raster pixel indices, in the same resolution and extent as
@@ -114,6 +111,7 @@ WardFast <- expression(ifelse(cellSize <= effDist, {
 #'
 #' @importFrom R.utils intToBin
 #' @importFrom magrittr %>%
+#' @importFrom raster xyFromCell pointDistance
 #' @export
 #' @docType methods
 #'
@@ -290,17 +288,6 @@ speciesComm <- function(num, sc) {
     sc[.]
 }
 
-ringCells <- compiler::cmpfun(function(x, index, minDist, maxDist) {
-  ras <- raster(x)
-  ras[index] <- 1
-  xOuter <- buffer(ras, width = maxDist)
-  xInner <- buffer(ras, width = minDist)
-  xOuter[xInner == 1] <- NA
-  return(Which(xOuter == 1, cells = TRUE))
-
-  #  xOuter[xInner==1] <- NA
-  #  return(xOuter)
-})
 
 # ringWeight <- function(x, minDist, maxDist) {
 #   b = focalWeight(x, minDist, "circle")
@@ -402,8 +389,6 @@ seedDispInnerFn <- #compiler::cmpfun(
            dtSrc, dispersalFn, k, b, lociReturn, speciesComm,
            pointDistance, successionTimestep,
            verbose = getOption("LandR.verbose", TRUE)) {
-    if (verbose > 0)
-      message("  Seed dispersall")
 
     seedsArrived <- data.table(
       fromInit = integer(),

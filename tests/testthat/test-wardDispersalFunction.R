@@ -1,17 +1,6 @@
 test_that("test Ward dispersal seeding algorithm", {
   library(data.table)
   library(raster)
-  library(SpaDES)
-  library(fpCompare)
-  library(magrittr)
-  # library(LandR)
-  # module <- list("Biomass_core")
-  # path <- list(modulePath="..",
-  #              outputPath="../tmp")
-  # parameters <- list(.progress = list(type = "graphical", interval = 1),
-  #                    .globals = list(verbose = FALSE),
-  #                    Biomass_core = list( .saveInitialTime = NA))
-
   reducedPixelGroupMap <- raster(xmn = 50, xmx = 50 + 99*300,
                                  ymn = 50, ymx = 50 + 99*300,
                                  res = c(100, 100), val = 2)
@@ -33,9 +22,6 @@ test_that("test Ward dispersal seeding algorithm", {
   seedSource <- rbindlist(srcSpByPG, idcol = "pixelGroup")
   seedSource[, pixelGroup := pixelGroup + pgs/2]
 
-  # mySim <- simInit(times = list(start = 0, end = 2),
-  #                   params = parameters,
-  #                  paths = path)
   speciesTable <- getSpeciesTable(dPath = ".")
   speciesTable <- speciesTable[Area == "BSW"]
   speciesTable[, speciesCode := as.factor(LandisCode)]
@@ -46,15 +32,15 @@ test_that("test Ward dispersal seeding algorithm", {
   species <- data.table(species)[, speciesCode := seq_along(LandisCode)]
   seedReceiveFull <- species[seedReceive, on = "speciesCode"]
   objects <- list("species" = species)
-  # mb <- profvis::profvis(
-  #   interval = 0.2,
+  mb <- profvis::profvis(
+     interval = 0.2,
     output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
                          dtSrc = seedSource,
                          species = species,
                          reducedPixelGroupMap,
                          verbose = FALSE,
                          successionTimestep = successionTimestep)
-  # )
+   )
   output[, .N, by = speciesCode]
 
   ras <- raster(reducedPixelGroupMap)
@@ -115,7 +101,8 @@ test_that("test Ward dispersal seeding algorithm", {
     })
   }
   tests <- unlist(testDists)
-  expect_true(sum(tests < 0.01)/length(tests) <= 0.1)
+  # Fairly conservative test -- the number of tests that fail at p < 0.01 should be about 5% ... really, it should be 1%
+  expect_true(sum(tests < 0.01)/length(tests) <= 0.05)
 
 })
 

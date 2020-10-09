@@ -242,7 +242,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
   } else {
     stop("x must have either B or cover to determine leading species/type")
   }
-  assert_that(nrowCohortData > 0)
+  if (!nrowCohortData > 0) stop("cohortData is empty")
 
   if (isTRUE(doAssertion))
     message("LandR::vegTypeMapGenerator: NROW(x) == ", nrowCohortData)
