@@ -72,8 +72,7 @@ test_that("test Ward dispersal seeding algorithm", {
   if (!doLarge) {
     env <- new.env()
     env$cellSize = res(ras)[1]
-    env$k =
-      env$b = 0.01
+    env$b = 0.01
     env$k = 0.95
 
     testDists <- list()
