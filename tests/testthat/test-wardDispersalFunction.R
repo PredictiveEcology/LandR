@@ -18,7 +18,7 @@
   }
 
   seed <- sample(1e6, 1)
-  # seed <- 20692
+  seed <- 308508
   set.seed(seed)
   pgs <- 30
   reducedPixelGroupMap <- SpaDES.tools::randomPolygons(reducedPixelGroupMap, numTypes = pgs)

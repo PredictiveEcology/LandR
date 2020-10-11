@@ -234,7 +234,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                                              cellSize = cellSize, numCells = numCells, xmin = xmin,
                                              ymin = ymin, numCols = numCols, b = b, k = k,
                                              successionTimestep = successionTimestep,
-                                             verbose = 2,#as.numeric(verbose),
+                                             verbose = 1,#as.numeric(verbose),
                                              maxSpiral = 1e8)
       )
       colNum <- seq(ncol(out))
