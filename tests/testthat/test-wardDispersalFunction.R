@@ -1,5 +1,6 @@
 #test_that("test Ward dispersal seeding algorithm", {
-  devtools::load_all("~/GitHub/LandR")
+  library(LandR)
+  # devtools::load_all("~/GitHub/LandR")
   library(data.table)
   library(raster)
   library(quickPlot)
@@ -17,7 +18,7 @@
   }
 
   seed <- sample(1e6, 1)
-  seed <- 20692
+  # seed <- 20692
   set.seed(seed)
   pgs <- 30
   reducedPixelGroupMap <- SpaDES.tools::randomPolygons(reducedPixelGroupMap, numTypes = pgs)
