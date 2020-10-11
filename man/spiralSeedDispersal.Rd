@@ -17,7 +17,8 @@ spiralSeedDispersal(
   k,
   b,
   successionTimestep,
-  verbose = 0
+  verbose = 0,
+  maxSpiral = 1000000L
 )
 }
 \arguments{
