@@ -18,7 +18,7 @@ if (FALSE) {
 # keep this here for interactive testing with a larger raster
 
 # keep this here for interactive testing with a larger raster
-doLarge <- TRUE
+doLarge <- FALSE
 if (doLarge) {
   reducedPixelGroupMap <- raster(xmn = 50, xmx = 50 + 99*300,
                                  ymn = 50, ymx = 50 + 99*300,
@@ -55,7 +55,7 @@ species <- speciesTable
 species <- data.table(species)[, speciesCode := seq_along(LandisCode)]
 seedReceiveFull <- species[seedReceive, on = "speciesCode"]
 objects <- list("species" = species)
-# mb <- profvis::profvis(
+mb <- profvis::profvis(
 #    interval = 0.2,
 output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
                      dtSrc = seedSource,
@@ -63,7 +63,7 @@ output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
                      useParallel = TRUE, sim = mySim,
                      verbose = FALSE,
                      successionTimestep = successionTimestep)
-#)
+)
 output[, .N, by = speciesCode]
 
 pixelName <- grep("pixelIn", names(output), value = TRUE)

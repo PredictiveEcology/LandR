@@ -40,15 +40,15 @@ test_that("test Ward dispersal seeding algorithm", {
   species <- data.table(species)[, speciesCode := seq_along(LandisCode)]
   seedReceiveFull <- species[seedReceive, on = "speciesCode"]
   objects <- list("species" = species)
-  # mb <- profvis::profvis(
+  mb <- profvis::profvis(replicate(10,
   #    interval = 0.2,
     output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
                          dtSrc = seedSource,
                          speciesTable = species,
                          reducedPixelGroupMap,
-                         verbose = FALSE,
+                         verbose = 0,
                          successionTimestep = successionTimestep)
-   #)
+  ))
   output[, .N, by = speciesCode]
 
   pixelName <- grep("pixelIn", names(output), value = TRUE)

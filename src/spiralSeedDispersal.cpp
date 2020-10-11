@@ -65,10 +65,13 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
   int nCellsRcv(cellCoords.nrow());
   int nSpeciesEntries(speciesTable.nrow());
   int x, y, dx, dy, spiralIndex;
-  int spiralIndexMax = 20000000; // not really used except for debugging, it can be shrunk
+  int spiralIndexMax = 100000000; // not really used except for debugging, it can be shrunk
   bool underMaxDist = true;
 
   // max distances by species
+  NumericVector maxDist(1);
+  NumericVector effDist(1);
+  NumericVector dis(1);
   NumericVector maxDistsSpV = speciesTable(_, 2);
   double overallMaxDist = max(maxDistsSpV);
   double overallMaxDistCorner = overallMaxDist * sqrt(2);
@@ -119,6 +122,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
   // pixel width around entire square to make a new slightly bigger square.
   while(underMaxDist == true && spiralIndex < spiralIndexMax) {
     spiralIndex += 1;
+    Rcpp::Rcout << "------- spiralIndex: " << spiralIndex << std::endl;
     NumericVector numActiveCellsByRcvSp(nSpeciesEntries); // need to rezero
     numActiveCellsByRcvSp = numActiveCellsByRcvSp + numActiveCellsByRcvSpDone;
 
@@ -146,6 +150,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
 
       // Loop around each of the original cells
       for (int cellRcvInd = 0; cellRcvInd < nCellsRcv; ++cellRcvInd) {
+        // std::vector<int> speciesPixelRcvPool = rcvSpeciesByIndex[cellRcvInd];
         IntegerVector speciesPixelRcvPool = rcvSpeciesByIndex[cellRcvInd];
 
         pixelSrc = (numCols - ((yCoord[cellRcvInd] - ymin + cellSize/2)/cellSize)) * numCols +
@@ -154,67 +159,79 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
         notNegative = pixelSrc > 0;
         notTooBig = pixelSrc <= numCells;
         if (notNegative && notTooBig) {
+          int tmp = cellRcvInd + 1;
+          Rcpp::Rcout << "-- pixelRcv: " << tmp << "-- pixelSrc: " << pixelSrc << ", speciesPixelRcvPool: " << speciesPixelRcvPool << std::endl;
 
           for(IntegerVector::iterator speciesPixelRcv = speciesPixelRcvPool.begin();
               speciesPixelRcv != speciesPixelRcvPool.end(); ++speciesPixelRcv) {
 
-            alreadyReceived = seedsArrivedMat(cellRcvInd, *speciesPixelRcv - 1);
-            if (!alreadyReceived) {
-              IntegerVector speciesVector = speciesVectorsList[*speciesPixelRcv - 1];
-              pixelVal = speciesVector[pixelSrc - 1];
-              numActiveCellsByRcvSp[*speciesPixelRcv - 1] += 1;
+            maxDist = maxDistsSpV[*speciesPixelRcv - 1];
+            Rcpp::Rcout << "pixelVal: " << pixelVal << std::endl;
+            Rcpp::Rcout << "dis : " << dis << std::endl;
+            Rcpp::Rcout << "maxDist : " << maxDist << std::endl;
+            if (dis[0] > maxDist[0]) {
+              // LogicalVector toRm = speciesPixelRcvPool == *speciesPixelRcv - 1;
+              // IntegerVector whToRm = which2(toRm) - 1;
+              speciesPixelRcvPool.erase(*speciesPixelRcv);
+              rcvSpeciesByIndex[cellRcvInd] = speciesPixelRcvPool;
+              Rcpp::Rcout << "removed *speciesPixelRcv: " << *speciesPixelRcv << std::endl;
 
-              inequ = 0;
-              if (pixelVal >= 0) { // covers NA which is -2147483648
-                NumericVector effDist(1);
-                effDist = effDistsSpV[*speciesPixelRcv - 1];
-                NumericVector maxDist(1);
-                maxDist = maxDistsSpV[*speciesPixelRcv - 1];
-                NumericVector dis(1);
-                dis = dis1[0];
-                if (is_true(all(dis <= maxDist))) {
-                  if (verbose > 1) {
-                    Rcpp::Rcout << "------- pixelVal: " << pixelVal << std::endl;
-                    Rcpp::Rcout << "dis : " << dis << std::endl;
-                    Rcpp::Rcout << "effDist : " << effDist << std::endl;
-                    Rcpp::Rcout << "maxDist : " << maxDist << std::endl;
-                    Rcpp::Rcout << "effDistSpV : " << effDistsSpV << std::endl;
-                    Rcpp::Rcout << "maxDistSpV : " << maxDistsSpV << std::endl;
-                  }
-                  if (dis[0] == 0) {
-                    inequ = 1;
-                  } else {
+            } else {
 
-                    // Hard coded Ward dispersal kernel -- could not figure out how to use eval(Ward, ...)
-                    NumericVector dispersalProb =
-                      ifelse(cellSize <= effDist,
-                             ifelse(dis <= effDist,
-                                    exp((dis - cellSize) * log(1 - k)/effDist) - exp(dis * log(1 - k)/effDist),
-                                    (1 - k) * exp((dis - cellSize - effDist) * log(b)/maxDist) - (1 - k) * exp((dis - effDist) * log(b)/maxDist)),
-                                    ifelse(dis <= cellSize,
-                                           exp((dis - cellSize) * log(1 - k)/effDist) - (1 - k) * exp((dis - effDist) * log(b)/maxDist),
-                                           (1 - k) * exp((dis - cellSize - effDist) * log(b)/maxDist) - (1 - k) * exp((dis - effDist) * log(b)/maxDist)));
-                    dispersalProb = 1 - pow(1 - dispersalProb, successionTimestep);
-                    ran = R::runif(0, 1);
-                    inequ = ran < dispersalProb[0];
-                  }
+              alreadyReceived = seedsArrivedMat(cellRcvInd, *speciesPixelRcv - 1);
+              if (!alreadyReceived) {
+                IntegerVector speciesVector = speciesVectorsList[*speciesPixelRcv - 1];
+                pixelVal = speciesVector[pixelSrc - 1];
+                numActiveCellsByRcvSp[*speciesPixelRcv - 1] += 1;
 
-                  // update the final matrix with a TRUE, if dispersal was successful
-                  seedsArrivedMat(cellRcvInd, *speciesPixelRcv - 1) = inequ || seedsArrivedMat(cellRcvInd, *speciesPixelRcv - 1);
+                inequ = 0;
+                if (pixelVal >= 0) { // covers NA which is -2147483648
+                  effDist = effDistsSpV[*speciesPixelRcv - 1];
+                  dis = dis1[0];
+                  if (is_true(all(dis <= maxDist))) {
+                    if (verbose > 1) {
+                      // Rcpp::Rcout << "effDist : " << effDist << std::endl;
+                      // Rcpp::Rcout << "maxDist : " << maxDist << std::endl;
+                      // Rcpp::Rcout << "effDistSpV : " << effDistsSpV << std::endl;
+                      // Rcpp::Rcout << "maxDistSpV : " << maxDistsSpV << std::endl;
+                    }
+                    if (dis[0] == 0) {
+                      inequ = 1;
+                    } else {
 
-                  if (inequ) {
-                    IntegerVector speciesPixelRcvIV(1);
-                    speciesPixelRcvIV = *speciesPixelRcv;// [[Rcpp::export]]
-                    IntegerVector rcvSpeciesByIndexIV = rcvSpeciesByIndex[cellRcvInd];
-                    rcvSpeciesByIndex[cellRcvInd] = setdiff(rcvSpeciesByIndexIV, speciesPixelRcvIV);
-                    rcvSpeciesByIndexIV = rcvSpeciesByIndex[cellRcvInd];
-                    numActiveCellsByRcvSp[*speciesPixelRcv - 1] = numActiveCellsByRcvSp[*speciesPixelRcv - 1] - 1;
+                      // Hard coded Ward dispersal kernel -- could not figure out how to use eval(Ward, ...)
+                      NumericVector dispersalProb =
+                        ifelse(cellSize <= effDist,
+                               ifelse(dis <= effDist,
+                                      exp((dis - cellSize) * log(1 - k)/effDist) - exp(dis * log(1 - k)/effDist),
+                                      (1 - k) * exp((dis - cellSize - effDist) * log(b)/maxDist) - (1 - k) * exp((dis - effDist) * log(b)/maxDist)),
+                                      ifelse(dis <= cellSize,
+                                             exp((dis - cellSize) * log(1 - k)/effDist) - (1 - k) * exp((dis - effDist) * log(b)/maxDist),
+                                             (1 - k) * exp((dis - cellSize - effDist) * log(b)/maxDist) - (1 - k) * exp((dis - effDist) * log(b)/maxDist)));
+                      dispersalProb = 1 - pow(1 - dispersalProb, successionTimestep);
+                      ran = R::runif(0, 1);
+                      inequ = ran < dispersalProb[0];
+                    }
+
+                    // update the final matrix with a TRUE, if dispersal was successful
+                    seedsArrivedMat(cellRcvInd, *speciesPixelRcv - 1) = inequ || seedsArrivedMat(cellRcvInd, *speciesPixelRcv - 1);
+
+                    if (inequ) {
+                      IntegerVector speciesPixelRcvIV(1);
+                      speciesPixelRcvIV = *speciesPixelRcv;// [[Rcpp::export]]
+                      IntegerVector rcvSpeciesByIndexIV = rcvSpeciesByIndex[cellRcvInd];
+                      rcvSpeciesByIndex[cellRcvInd] = setdiff(rcvSpeciesByIndexIV, speciesPixelRcvIV);
+                      rcvSpeciesByIndexIV = rcvSpeciesByIndex[cellRcvInd];
+                      numActiveCellsByRcvSp[*speciesPixelRcv - 1] = numActiveCellsByRcvSp[*speciesPixelRcv - 1] - 1;
+                    }
                   }
                 }
-              }
 
+              }
             }
           }
+        } else {
+          numActiveCellsByRcvSp = 1;
         }
       }
 

@@ -226,8 +226,10 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       speciesTableInner <- do.call(rbind, speciesTableInner2)
       speciesTableInner <- na.omit(speciesTableInner)
 
-      out <- spiralSeedDispersal(cellCoords = cellCoords,
-                                 rcvSpeciesByIndex = rcvSpeciesByIndex,
+      browser()
+      ind <- 6:7
+      out <- spiralSeedDispersal(cellCoords = cellCoords[ind,],
+                                 rcvSpeciesByIndex = rcvSpeciesByIndex[ind],
                                  speciesTable = speciesTableInner,
                                  speciesVectorsList = speciesSrcRasterVecList,
                                  cellSize = cellSize, numCells = numCells, xmin = xmin,
