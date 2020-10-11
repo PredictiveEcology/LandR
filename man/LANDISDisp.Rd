@@ -120,7 +120,7 @@ speciesTable[, seeddistance_max := SeedMaxDist]
 speciesTable <- speciesTable
 speciesTable <- data.table(speciesTable)[, speciesCode := seq_along(LandisCode)]
 seedReceiveFull <- speciesTable[seedReceive, on = "speciesCode"]
-output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
+output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = interactive(),
                      dtSrc = seedSource,
                      speciesTable = speciesTable,
                      pixelGroupMap,

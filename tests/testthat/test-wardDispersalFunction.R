@@ -1,6 +1,7 @@
 test_that("test Ward dispersal seeding algorithm", {
   library(data.table)
   library(raster)
+  library(quickPlot)
 
   # keep this here for interactive testing with a larger raster
   doLarge <- FALSE
@@ -14,6 +15,7 @@ test_that("test Ward dispersal seeding algorithm", {
                                    res = c(100, 100), val = 2)
   }
 
+  set.seed(2)
   pgs <- 30
   reducedPixelGroupMap <- SpaDES.tools::randomPolygons(reducedPixelGroupMap, numTypes = pgs)
   ras <- raster(reducedPixelGroupMap)
@@ -40,7 +42,7 @@ test_that("test Ward dispersal seeding algorithm", {
   species <- data.table(species)[, speciesCode := seq_along(LandisCode)]
   seedReceiveFull <- species[seedReceive, on = "speciesCode"]
   objects <- list("species" = species)
-  mb <- profvis::profvis(replicate(10,
+  # mb <- profvis::profvis(replicate(10,
   #    interval = 0.2,
     output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
                          dtSrc = seedSource,
@@ -48,7 +50,7 @@ test_that("test Ward dispersal seeding algorithm", {
                          reducedPixelGroupMap,
                          verbose = 0,
                          successionTimestep = successionTimestep)
-  ))
+  # )
   output[, .N, by = speciesCode]
 
   pixelName <- grep("pixelIn", names(output), value = TRUE)
