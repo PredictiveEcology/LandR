@@ -226,7 +226,13 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       speciesTableInner <- do.call(rbind, speciesTableInner2)
       speciesTableInner <- na.omit(speciesTableInner)
 
-      ind <- sample(NROW(cellCoords), 5)
+      curSeed <- .Random.seed
+      .Random.seed <- curSeed
+      ind <- sample(NROW(cellCoords), 2)
+
+      sam <- sample(1e6, 1)
+      print(sam)
+      set.seed(sam)
       system.time(out <- spiralSeedDispersal(cellCoords = cellCoords[ind,, drop = FALSE],
                                              rcvSpeciesByIndex = rcvSpeciesByIndex[ind],
                                              speciesTable = speciesTableInner,
@@ -234,8 +240,8 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                                              cellSize = cellSize, numCells = numCells, xmin = xmin,
                                              ymin = ymin, numCols = numCols, b = b, k = k,
                                              successionTimestep = successionTimestep,
-                                             verbose = 1,#as.numeric(verbose),
-                                             maxSpiral = 1e8)
+                                             verbose = as.numeric(verbose),
+                                             maxSpiral = 40000000)
       )
       colNum <- seq(ncol(out))
       names(colNum) <- paste0("spCode", seq(colNum))
