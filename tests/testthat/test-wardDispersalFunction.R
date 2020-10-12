@@ -25,7 +25,7 @@
   }
 
   seedOuter <- sample(1e6, 1)
-  seedOuter <- 853237 # 368697
+  seedOuter <- 303747 # 368697
   set.seed(seedOuter)
   pgs <- 30
   reducedPixelGroupMap <- SpaDES.tools::randomPolygons(reducedPixelGroupMap, numTypes = pgs)
@@ -60,7 +60,7 @@
                          dtSrc = seedSource,
                          speciesTable = species,
                          reducedPixelGroupMap,
-                         verbose = 3,
+                         verbose = 0,
                          successionTimestep = successionTimestep)
   # )
   print(output[, .N, by = speciesCode])

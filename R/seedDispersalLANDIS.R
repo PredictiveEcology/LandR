@@ -203,7 +203,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     #   (but less than all -- was dealt with by keep) rcv species does not
     #   exist in any src pixel
     rcvSpeciesByIndex <- lapply(rcvSpeciesByIndex, function(rsbi) {
-      rsbi[rsbi %in% srcSpeciesCodes]
+      sort(rsbi[rsbi %in% srcSpeciesCodes])
     })
 
     if (sum(keep) > 0) {
@@ -230,6 +230,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       print(sam)
       set.seed(sam)
       ind <- sample(NROW(cellCoords), 4)
+      browser()
       system.time(out <- spiralSeedDispersal(cellCoords = cellCoords[ind,, drop = FALSE],
                                              rcvSpeciesByIndex = rcvSpeciesByIndex[ind],
                                              speciesTable = speciesTableInner,
@@ -238,7 +239,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                                              ymin = ymin, numCols = numCols, b = b, k = k,
                                              successionTimestep = successionTimestep,
                                              verbose = as.numeric(verbose),
-                                             maxSpiral = 40000000)
+                                             maxSpiral = 1)
       )
       colNum <- seq(ncol(out))
       names(colNum) <- paste0("spCode", seq(colNum))
