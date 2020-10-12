@@ -5,6 +5,11 @@ which2 <- function(x) {
     .Call('_LandR_which2', PACKAGE = 'LandR', x)
 }
 
+#' @export
+rmElem <- function(x, toRm) {
+    .Call('_LandR_rmElem', PACKAGE = 'LandR', x, toRm)
+}
+
 #' Ward seed dispersal using Rcpp
 #'
 #' This uses a spiral pattern outwards from the \code{cellCoords} cells on

@@ -226,13 +226,10 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       speciesTableInner <- do.call(rbind, speciesTableInner2)
       speciesTableInner <- na.omit(speciesTableInner)
 
-      curSeed <- .Random.seed
-      .Random.seed <- curSeed
-      ind <- sample(NROW(cellCoords), 2)
-
       sam <- sample(1e6, 1)
       print(sam)
       set.seed(sam)
+      ind <- sample(NROW(cellCoords), 4)
       system.time(out <- spiralSeedDispersal(cellCoords = cellCoords[ind,, drop = FALSE],
                                              rcvSpeciesByIndex = rcvSpeciesByIndex[ind],
                                              speciesTable = speciesTableInner,
@@ -247,7 +244,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       names(colNum) <- paste0("spCode", seq(colNum))
       seedsArrivedList <- lapply(colNum, function(col) {
         a <- out[, col]
-        cells1 <- cellsCanRcv[keep][a]
+        cells1 <- cellsCanRcv[keep][ind][a]
       })
 
       seedsArrived <- data.table(pixelIndex = do.call(c, seedsArrivedList),

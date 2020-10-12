@@ -16,6 +16,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rmElem
+Rcpp::IntegerVector rmElem(Rcpp::IntegerVector x, IntegerVector toRm);
+RcppExport SEXP _LandR_rmElem(SEXP xSEXP, SEXP toRmSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type toRm(toRmSEXP);
+    rcpp_result_gen = Rcpp::wrap(rmElem(x, toRm));
+    return rcpp_result_gen;
+END_RCPP
+}
 // spiralSeedDispersal
 LogicalMatrix spiralSeedDispersal(IntegerMatrix cellCoords, Rcpp::List speciesVectorsList, List rcvSpeciesByIndex, NumericMatrix speciesTable, int numCols, int numCells, int cellSize, int xmin, int ymin, double k, double b, double successionTimestep, double verbose, int maxSpiral);
 RcppExport SEXP _LandR_spiralSeedDispersal(SEXP cellCoordsSEXP, SEXP speciesVectorsListSEXP, SEXP rcvSpeciesByIndexSEXP, SEXP speciesTableSEXP, SEXP numColsSEXP, SEXP numCellsSEXP, SEXP cellSizeSEXP, SEXP xminSEXP, SEXP yminSEXP, SEXP kSEXP, SEXP bSEXP, SEXP successionTimestepSEXP, SEXP verboseSEXP, SEXP maxSpiralSEXP) {
@@ -43,6 +55,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_LandR_which2", (DL_FUNC) &_LandR_which2, 1},
+    {"_LandR_rmElem", (DL_FUNC) &_LandR_rmElem, 2},
     {"_LandR_spiralSeedDispersal", (DL_FUNC) &_LandR_spiralSeedDispersal, 14},
     {NULL, NULL, 0}
 };

@@ -1,6 +1,12 @@
 #test_that("test Ward dispersal seeding algorithm", {
+
   library(LandR)
-  # devtools::load_all("~/GitHub/LandR")
+  if (FALSE) {
+    devtools::load_all("~/GitHub/LandR")
+    outSummary <- list()
+    ff <- 1
+  }
+  #
   # devtools::install("~/GitHub/LandR")
   library(data.table)
   library(raster)
@@ -18,9 +24,9 @@
                                    res = c(100, 100), val = 2)
   }
 
-  seed <- sample(1e6, 1)
-  seed <- 134682 # 368697
-  set.seed(seed)
+  seedOuter <- sample(1e6, 1)
+  seedOuter <- 853237 # 368697
+  set.seed(seedOuter)
   pgs <- 30
   reducedPixelGroupMap <- SpaDES.tools::randomPolygons(reducedPixelGroupMap, numTypes = pgs)
   ras <- raster(reducedPixelGroupMap)
@@ -49,15 +55,18 @@
   objects <- list("species" = species)
   # mb <- profvis::profvis(replicate(10,
   #    interval = 0.2,
-  print(seed)
+  print(seedOuter)
     output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
                          dtSrc = seedSource,
                          speciesTable = species,
                          reducedPixelGroupMap,
-                         verbose = 0,
+                         verbose = 3,
                          successionTimestep = successionTimestep)
   # )
   print(output[, .N, by = speciesCode])
+
+  outSummary[[ff]] <- output
+  ff <- ff + 1
 
 #
 #   pixelName <- grep("pixelIn", names(output), value = TRUE)
