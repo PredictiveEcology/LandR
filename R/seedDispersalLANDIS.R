@@ -232,16 +232,15 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       # set.seed(sam)
       ind <- seq(NROW(cellCoords))
       # ind <- sample(NROW(cellCoords), 15)
-      system.time(out <- spiralSeedDispersal(cellCoords = cellCoords[ind,, drop = FALSE],
+      out <- spiralSeedDispersal(cellCoords = cellCoords[ind,, drop = FALSE],
                                              rcvSpeciesByIndex = rcvSpeciesByIndex[ind],
                                              speciesTable = speciesTableInner,
                                              speciesVectorsList = speciesSrcRasterVecList,
                                              cellSize = cellSize, numCells = numCells, xmin = xmin,
                                              ymin = ymin, numCols = numCols, numRows = numRows, b = b, k = k,
                                              successionTimestep = successionTimestep,
-                                             verbose = as.numeric(verbose),
-                                             maxSpiral = maxSpiral)
-      )
+                                             verbose = as.numeric(verbose))
+
       colNum <- seq(ncol(out))
       names(colNum) <- paste0("spCode", seq(colNum))
       seedsArrivedList <- lapply(colNum, function(col) {
