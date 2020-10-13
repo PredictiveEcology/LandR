@@ -1,6 +1,7 @@
 library(data.table)
 library(raster)
 library(testthat)
+verbose <- -1
 if (FALSE) {
   library(SpaDES.core)
   library(SpaDES.tools)
@@ -61,7 +62,7 @@ output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
                      dtSrc = seedSource,
                      pixelGroupMap = reducedPixelGroupMap, species = species,
                      useParallel = TRUE, sim = mySim,
-                     verbose = FALSE,
+                     verbose = verbose,
                      successionTimestep = successionTimestep)
 )
 output[, .N, by = speciesCode]
@@ -107,7 +108,7 @@ if (!doLarge) {
                  species = species,
                  useParallel = TRUE, sim = mySim,
                  pixelGroupMap = ras2,
-                 verbose = FALSE,
+                 verbose = verbose,
                  successionTimestep = successionTimestep)
     })
     output <- rbindlist(output)
@@ -138,7 +139,7 @@ if (!doLarge) {
                species = species,
                useParallel = TRUE, sim = mySim,
                pixelGroupMap = ras2,
-               verbose = FALSE,
+               verbose = verbose,
                successionTimestep = successionTimestep)
   expect_true(NROW(output) == 0)
 }

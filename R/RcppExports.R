@@ -54,7 +54,7 @@ rmElem <- function(x, toRm) {
 #'   received seeds from each species.
 #' @author Eliot McIntire
 #' @export
-spiralSeedDispersal <- function(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose = 0.0, maxSpiral = 1000000L) {
-    .Call('_LandR_spiralSeedDispersal', PACKAGE = 'LandR', cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose, maxSpiral)
+spiralSeedDispersal <- function(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose = 0.0, maxSpiral = 1000000L) {
+    .Call('_LandR_spiralSeedDispersal', PACKAGE = 'LandR', cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose, maxSpiral)
 }
 

@@ -1,11 +1,18 @@
 #test_that("test Ward dispersal seeding algorithm", {
 
   library(LandR)
+  verbose <- -1
+  maxSpiral <- 2500000
+  seedOuter <- sample(1e6, 1)
+  # seedOuter <- 309277 # 425544#337819 # 867213 # 787953 # 337819 # 867213
+
   if (FALSE) {
     devtools::load_all("~/GitHub/LandR")
     outSummary <- list()
-    ff <- 1
+    seeds <- list()
+    ff <- 0
   }
+  ff <- ff + 1
   #
   # devtools::install("~/GitHub/LandR")
   library(data.table)
@@ -13,7 +20,7 @@
   library(quickPlot)
 
   # keep this here for interactive testing with a larger raster
-  doLarge <- FALSE
+  doLarge <- TRUE
   if (doLarge) {
     reducedPixelGroupMap <- raster(xmn = 50, xmx = 50 + 99*300,
                                    ymn = 50, ymx = 50 + 99*300,
@@ -24,9 +31,10 @@
                                    res = c(100, 100), val = 2)
   }
 
-  seedOuter <- sample(1e6, 1)
-  seedOuter <- 303747 # 368697
+  seeds[[ff]] <- seedOuter # 639394 # 368697
   set.seed(seedOuter)
+  saveRDS(seeds, file = "seed.rds")
+  saveRDS(verbose, file = "verbose.rds")
   pgs <- 30
   reducedPixelGroupMap <- SpaDES.tools::randomPolygons(reducedPixelGroupMap, numTypes = pgs)
   ras <- raster(reducedPixelGroupMap)
@@ -43,7 +51,7 @@
   seedSource[, pixelGroup := pixelGroup + pgs/2]
 
   td <- tempdir()
-  speciesTable <- getSpeciesTable(dPath = td)
+  speciesTable <- reproducible::Cache(getSpeciesTable, dPath = td)
   speciesTable <- speciesTable[Area == "BSW"]
   speciesTable[, speciesCode := as.factor(LandisCode)]
   speciesTable[, seeddistance_eff := SeedEffDist]
@@ -55,28 +63,40 @@
   objects <- list("species" = species)
   # mb <- profvis::profvis(replicate(10,
   #    interval = 0.2,
+  set.seed(seedOuter)
   print(seedOuter)
     output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
                          dtSrc = seedSource,
                          speciesTable = species,
                          reducedPixelGroupMap,
-                         verbose = 0,
+                         verbose = verbose,
                          successionTimestep = successionTimestep)
   # )
   print(output[, .N, by = speciesCode])
 
   outSummary[[ff]] <- output
-  ff <- ff + 1
 
-#
-#   pixelName <- grep("pixelIn", names(output), value = TRUE)
-#   outputSum <- output[, list(speciesCode = sum(speciesCode)), by = pixelName]
-#   ras[outputSum[[pixelName]]] <- outputSum$speciesCode
-#   if (FALSE) {
-#     dev()
-#     clearPlot()
-#     Plot(reducedPixelGroupMap, ras, new = TRUE, col = c("red", "blue"))
-#   }
+
+  pixelName <- grep("pixelIn", names(output), value = TRUE)
+  outputSum <- output[, list(speciesCode = sum(speciesCode)), by = pixelName]
+  ras[outputSum[[pixelName]]] <- outputSum$speciesCode
+  if (FALSE) {
+    sps <- 1:11
+    names(sps) <- paste0("CanReceiveSp", as.character(sps))
+    sps <- lapply(sps, function(sp) {
+      ras <- rasterizeReduced(seedReceiveFull[speciesCode == sp], reducedPixelGroupMap, "speciesCode", "pixelGroup")
+      ras[!is.na(ras[])] <- 1
+
+      ras2 <- rasterizeReduced(seedSource[speciesCode == sp], reducedPixelGroupMap, "speciesCode", "pixelGroup")
+      ras[!is.na(ras2[])] <- 2
+
+      out <- output[speciesCode == sp]
+      ras[out$pixelIndex] <- 3
+      ras
+    })
+    i <<- i + 1;
+
+  }
 #
 #   expect_true(all(unique(output$speciesCode) %in% unique(seedReceiveFull$speciesCode)))
 #   expect_true(all(is.na(ras[reducedPixelGroupMap[] > 15]))) # nothing regenerates in the pgs that don't have receive available

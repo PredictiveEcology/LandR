@@ -169,6 +169,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     xmin <- e@xmin
     numCols <- pixelGroupMap@ncols
     numCells <- pixelGroupMap@ncols * pixelGroupMap@nrows #ncell(pixelGroupMap)
+    numRows <- numCells / numCols
     cellSize <- xr <- (e@xmax - e@xmin)/numCols # cellSize <- res(pixelGroupMap) %>% unique()
 
     if (length(cellSize) > 1) {
@@ -226,20 +227,20 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       speciesTableInner <- do.call(rbind, speciesTableInner2)
       speciesTableInner <- na.omit(speciesTableInner)
 
-      sam <- sample(1e6, 1)
-      print(sam)
-      set.seed(sam)
-      ind <- sample(NROW(cellCoords), 4)
-      browser()
+      # sam <- sample(1e6, 1)
+      # print(sam)
+      # set.seed(sam)
+      ind <- seq(NROW(cellCoords))
+      # ind <- sample(NROW(cellCoords), 15)
       system.time(out <- spiralSeedDispersal(cellCoords = cellCoords[ind,, drop = FALSE],
                                              rcvSpeciesByIndex = rcvSpeciesByIndex[ind],
                                              speciesTable = speciesTableInner,
                                              speciesVectorsList = speciesSrcRasterVecList,
                                              cellSize = cellSize, numCells = numCells, xmin = xmin,
-                                             ymin = ymin, numCols = numCols, b = b, k = k,
+                                             ymin = ymin, numCols = numCols, numRows = numRows, b = b, k = k,
                                              successionTimestep = successionTimestep,
                                              verbose = as.numeric(verbose),
-                                             maxSpiral = 1)
+                                             maxSpiral = maxSpiral)
       )
       colNum <- seq(ncol(out))
       names(colNum) <- paste0("spCode", seq(colNum))

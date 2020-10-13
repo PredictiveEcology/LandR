@@ -29,8 +29,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // spiralSeedDispersal
-LogicalMatrix spiralSeedDispersal(IntegerMatrix cellCoords, Rcpp::List speciesVectorsList, List rcvSpeciesByIndex, NumericMatrix speciesTable, int numCols, int numCells, int cellSize, int xmin, int ymin, double k, double b, double successionTimestep, double verbose, int maxSpiral);
-RcppExport SEXP _LandR_spiralSeedDispersal(SEXP cellCoordsSEXP, SEXP speciesVectorsListSEXP, SEXP rcvSpeciesByIndexSEXP, SEXP speciesTableSEXP, SEXP numColsSEXP, SEXP numCellsSEXP, SEXP cellSizeSEXP, SEXP xminSEXP, SEXP yminSEXP, SEXP kSEXP, SEXP bSEXP, SEXP successionTimestepSEXP, SEXP verboseSEXP, SEXP maxSpiralSEXP) {
+LogicalMatrix spiralSeedDispersal(IntegerMatrix cellCoords, Rcpp::List speciesVectorsList, List rcvSpeciesByIndex, NumericMatrix speciesTable, int numCols, int numRows, int numCells, int cellSize, int xmin, int ymin, double k, double b, double successionTimestep, double verbose, int maxSpiral);
+RcppExport SEXP _LandR_spiralSeedDispersal(SEXP cellCoordsSEXP, SEXP speciesVectorsListSEXP, SEXP rcvSpeciesByIndexSEXP, SEXP speciesTableSEXP, SEXP numColsSEXP, SEXP numRowsSEXP, SEXP numCellsSEXP, SEXP cellSizeSEXP, SEXP xminSEXP, SEXP yminSEXP, SEXP kSEXP, SEXP bSEXP, SEXP successionTimestepSEXP, SEXP verboseSEXP, SEXP maxSpiralSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -39,6 +39,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< List >::type rcvSpeciesByIndex(rcvSpeciesByIndexSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type speciesTable(speciesTableSEXP);
     Rcpp::traits::input_parameter< int >::type numCols(numColsSEXP);
+    Rcpp::traits::input_parameter< int >::type numRows(numRowsSEXP);
     Rcpp::traits::input_parameter< int >::type numCells(numCellsSEXP);
     Rcpp::traits::input_parameter< int >::type cellSize(cellSizeSEXP);
     Rcpp::traits::input_parameter< int >::type xmin(xminSEXP);
@@ -48,7 +49,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type successionTimestep(successionTimestepSEXP);
     Rcpp::traits::input_parameter< double >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< int >::type maxSpiral(maxSpiralSEXP);
-    rcpp_result_gen = Rcpp::wrap(spiralSeedDispersal(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose, maxSpiral));
+    rcpp_result_gen = Rcpp::wrap(spiralSeedDispersal(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose, maxSpiral));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -56,7 +57,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_LandR_which2", (DL_FUNC) &_LandR_which2, 1},
     {"_LandR_rmElem", (DL_FUNC) &_LandR_rmElem, 2},
-    {"_LandR_spiralSeedDispersal", (DL_FUNC) &_LandR_spiralSeedDispersal, 14},
+    {"_LandR_spiralSeedDispersal", (DL_FUNC) &_LandR_spiralSeedDispersal, 15},
     {NULL, NULL, 0}
 };
 
