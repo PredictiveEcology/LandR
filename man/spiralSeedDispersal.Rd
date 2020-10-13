@@ -10,6 +10,7 @@ spiralSeedDispersal(
   rcvSpeciesByIndex,
   speciesTable,
   numCols,
+  numRows,
   numCells,
   cellSize,
   xmin,
