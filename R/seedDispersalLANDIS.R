@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "..colnamesST"
+  "..colnamesST", "RcvCommunity"
 ))
 
 #' Simulate a LANDIS-II dispersal process on a landscape.
@@ -131,9 +131,17 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     # rcvSpeciesByIndex
     pgv <- pixelGroupMap[]
     cellsCanRcv <- which(pgv %in% dtRcv$pixelGroup)
-    rcvSpeciesByIndex <- lapply(cellsCanRcv, function(ccr) {
-      dtRcv$speciesCode[dtRcv$pixelGroup %in% pgv[ccr]]
-    })
+
+    dt <- data.table(pixelGroup = pgv[cellsCanRcv], pixelIndex = cellsCanRcv)
+    dt <- dt[dtRcv[, c("pixelGroup", "speciesCode")], on = "pixelGroup", allow.cartesian = TRUE] # $speciesCode
+    setorderv(dt, "pixelIndex")
+    rcvSpeciesByIndex <- split(dt$speciesCode, dt$pixelIndex)
+    # identical(unname(dt1), rcvSpeciesByIndex)
+
+     # rcvSpeciesByIndex <- lapply(cellsCanRcv, function(ccr) {
+     #   a <- dtRcv$pixelGroup %in% pgv[ccr]
+     #   dtRcv$speciesCode[a]
+     # })
 
     # cellCoords
     cellCoords <- xyFromCell(pixelGroupMap, cellsCanRcv)
