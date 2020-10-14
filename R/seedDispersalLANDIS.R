@@ -128,42 +128,39 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                        ...) {
   if (TRUE) { # This is rewrite and MASSIVE simplification for spiralSeedDispersal
     # Setup Rcv components cellCoords and rcvSpeciesByIndex
-    # rcvSpeciesByIndex
+
     pgv <- pixelGroupMap[]
-    cellsCanRcv <- which(pgv %in% dtRcv$pixelGroup)
 
-    dt <- data.table(pixelGroup = pgv[cellsCanRcv], pixelIndex = cellsCanRcv)
-    dt <- dt[dtRcv[, c("pixelGroup", "speciesCode")], on = "pixelGroup", allow.cartesian = TRUE] # $speciesCode
-    setorderv(dt, "pixelIndex")
-    rcvSpeciesByIndex <- split(dt$speciesCode, dt$pixelIndex)
-    # identical(unname(dt1), rcvSpeciesByIndex)
-
-     # rcvSpeciesByIndex <- lapply(cellsCanRcv, function(ccr) {
-     #   a <- dtRcv$pixelGroup %in% pgv[ccr]
-     #   dtRcv$speciesCode[a]
-     # })
-
-    # cellCoords
-    cellCoords <- xyFromCell(pixelGroupMap, cellsCanRcv)
-
-    # speciesVectorsList
-    # dtSrcShort <- dtSrc$pixelGroup
-    dtSrcNoDups <- unique(dtSrc, by = c("speciesCode"))
-    # setorderv(dtSrcNoDups, c("speciesCode", "pixelGroup"))
-    # rasTemplate <- raster(pixelGroupMap)
+    # speciesSrcRasterVecList
     rasTemplate <- rep(NA_integer_, ncell(pixelGroupMap))
-    pixelGroupMapVec <- pixelGroupMap[]
-    spCodes <- sort(dtSrcNoDups$speciesCode)
-    names(spCodes) <- as.character(spCodes)
-    speciesSrcRasterVecList <- lapply(spCodes, function(sp) {
-      ras <- rasTemplate
-      hasSp <- dtSrc$speciesCode == sp
-      # dtSrcSp <- dtSrc[hasSp]
-      pgs <- dtSrc$pixelGroup[hasSp]
-      pixels <- pixelGroupMapVec %in% pgs
-      ras[pixels] <- sp
-      ras
-    })
+    srcSpeciesCodes <- sort(unique(dtSrc$speciesCode))
+    names(srcSpeciesCodes) <- as.character(srcSpeciesCodes)
+    cellsCanSrc <- which(pgv %in% dtSrc$pixelGroup)
+    dt <- data.table(pixelGroup = pgv[cellsCanSrc], pixelIndex = cellsCanSrc)
+    dt <- dtSrc[, c("pixelGroup", "speciesCode")][dt, on = "pixelGroup", allow.cartesian = TRUE] # $speciesCode
+    srcSpeciesByIndex <- split(dt$pixelIndex, dt$speciesCode)
+    speciesSrcRasterVecList <- lapply(srcSpeciesCodes, function(sc) {
+      rasTemplate[srcSpeciesByIndex[[sc]]] <- sc; rasTemplate
+      })
+
+    # # speciesVectorsList
+    # # dtSrcShort <- dtSrc$pixelGroup
+    # dtSrcNoDups <- unique(dtSrc, by = c("speciesCode"))
+    # # setorderv(dtSrcNoDups, c("speciesCode", "pixelGroup"))
+    # # rasTemplate <- raster(pixelGroupMap)
+    # rasTemplate <- rep(NA_integer_, ncell(pixelGroupMap))
+    # pixelGroupMapVec <- pixelGroupMap[]
+    # spCodes <- sort(dtSrcNoDups$speciesCode)
+    # names(spCodes) <- as.character(spCodes)
+    # speciesSrcRasterVecList <- lapply(spCodes, function(sp) {
+    #   ras <- rasTemplate
+    #   hasSp <- dtSrc$speciesCode == sp
+    #   # dtSrcSp <- dtSrc[hasSp]
+    #   pgs <- dtSrc$pixelGroup[hasSp]
+    #   pixels <- pixelGroupMapVec %in% pgs
+    #   ras[pixels] <- sp
+    #   ras
+    # })
     maxSpCode <- max(as.integer(names(speciesSrcRasterVecList)))
     speciesSrcRasterVecList <- lapply(seq_len(maxSpCode), function(ind) {
       if (as.character(ind) %in% names(speciesSrcRasterVecList))
@@ -191,9 +188,23 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         stop("pixelGroupMap resolution must be same in x and y dimension")
     }
 
-    rcvSpeciesCodes <- sort(unique(unlist(rcvSpeciesByIndex)))
+    # rcvSpeciesCodes <- sort(unique(unlist(rcvSpeciesByIndex)))
     srcSpeciesCodes <- seq_along(speciesSrcRasterVecList)
     srcSpeciesCodes <- srcSpeciesCodes[!unlist(lapply(speciesSrcRasterVecList, is.null))]
+
+    # rcvSpeciesByIndex
+    cellsCanRcv <- which(pgv %in% dtRcv$pixelGroup)
+    rcvSpeciesCodes <- sort(unique(dtRcv$speciesCode))
+    dt <- data.table(pixelGroup = pgv[cellsCanRcv], pixelIndex = cellsCanRcv)
+    dtRcvSmall <- dtRcv[, c("pixelGroup", "speciesCode")]
+    dtSrcUniqueSP <- unique(dtSrc[, "speciesCode"], by = "speciesCode")
+    dtRcvSmall1 <- dtRcvSmall[dtSrcUniqueSP, on = "speciesCode"]
+    dt <- dt[dtRcvSmall, on = "pixelGroup", allow.cartesian = TRUE] # $speciesCode
+    setorderv(dt, c("pixelIndex", "speciesCode"))
+    rcvSpeciesByIndex <- split(dt$speciesCode, dt$pixelIndex)
+
+    # cellCoords
+    cellCoords <- xyFromCell(pixelGroupMap, cellsCanRcv)
 
     # Removing cases ## 2 stages
     # 1st stage -- keep is for "keeping" only rcv pixels where at least 1 species is in the src pixels
@@ -211,9 +222,9 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     # This 2nd stage removal is to remove individual cases where the more than one
     #   (but less than all -- was dealt with by keep) rcv species does not
     #   exist in any src pixel
-    rcvSpeciesByIndex <- lapply(rcvSpeciesByIndex, function(rsbi) {
-      sort(rsbi[rsbi %in% srcSpeciesCodes])
-    })
+    # rcvSpeciesByIndex1 <- lapply(rcvSpeciesByIndex, function(rsbi) {
+    #   sort(rsbi[rsbi %in% srcSpeciesCodes])
+    # })
 
     if (sum(keep) > 0) {
       maxDistColName <- grep("max", colnames(speciesTable), value = TRUE)
@@ -240,8 +251,8 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       # set.seed(sam)
       ind <- seq(NROW(cellCoords))
       # ind <- sample(NROW(cellCoords), 15)
-      out <- spiralSeedDispersal(cellCoords = cellCoords[ind,, drop = FALSE],
-                                             rcvSpeciesByIndex = rcvSpeciesByIndex[ind],
+      out <- spiralSeedDispersal(cellCoords = cellCoords, #[ind,, drop = FALSE],
+                                             rcvSpeciesByIndex = rcvSpeciesByIndex, #[ind],
                                              speciesTable = speciesTableInner,
                                              speciesVectorsList = speciesSrcRasterVecList,
                                              cellSize = cellSize, numCells = numCells, xmin = xmin,
