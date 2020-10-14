@@ -6,6 +6,7 @@ test_that("test Ward dispersal seeding algorithm", {
     # devtools::load_all("~/GitHub/LandR")
     outSummary <- list()
   }
+  library(LandR)
   library(data.table)
   library(raster)
   library(quickPlot)
@@ -52,7 +53,7 @@ test_that("test Ward dispersal seeding algorithm", {
   speciesTable[, speciesCode := as.factor(LandisCode)]
   speciesTable[, seeddistance_eff := SeedEffDist]
   speciesTable[, seeddistance_max := SeedMaxDist]
-  # speciesTable[seeddistance_max > 2000, seeddistance_max := 2000]
+  speciesTable[seeddistance_max > 2000, seeddistance_max := 2000]
 
   species <- speciesTable
   species <- data.table(species)[, speciesCode := seq_along(LandisCode)]
