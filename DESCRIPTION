@@ -61,9 +61,7 @@ Suggests:
     testthat
 Remotes:
     PredictiveEcology/map@development,
-    PredictiveEcology/pemisc@development,
-    PredictiveEcology/reproducible@development,
-    PredictiveEcology/Require@development
+    PredictiveEcology/pemisc@development
 LinkingTo: Rcpp
 Encoding: UTF-8
 Language: en-CA
