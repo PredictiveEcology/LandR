@@ -225,6 +225,7 @@ vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("Lan
 #' @rdname vegTypeMapGenerator
 #' @include cohorts.R
 #' @examples
+#' library(data.table)
 #' x <- data.table(pixelGroup = rep(1:2, each = 2), B = c(100, 200, 20, 400),
 #'                 speciesCode = rep(c("Pice_Gla", "Popu_Tre"), 2))
 #' pixelGroupMap <- raster(extent(0,3, 0, 3), res = 1)

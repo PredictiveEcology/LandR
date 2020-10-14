@@ -111,7 +111,7 @@ seedSource <- rbindlist(srcSpByPG, idcol = "pixelGroup")
 seedSource[, pixelGroup := pixelGroup + pgs/2]
 
 # Get a species table -- if using in Canada, can use this
-speciesTable <- getSpeciesTable(dPath = ".")
+speciesTable <- getSpeciesTable(dPath = tempdir())
 speciesTable <- speciesTable[Area == "BSW"]
 speciesTable[, speciesCode := as.factor(LandisCode)]
 speciesTable[, seeddistance_eff := SeedEffDist]
