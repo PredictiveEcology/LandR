@@ -140,8 +140,14 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     dt <- dtSrc[, c("pixelGroup", "speciesCode")][dt, on = "pixelGroup", allow.cartesian = TRUE] # $speciesCode
     srcSpeciesByIndex <- split(dt$pixelIndex, dt$speciesCode)
     speciesSrcRasterVecList <- lapply(srcSpeciesCodes, function(sc) {
-      rasTemplate[srcSpeciesByIndex[[sc]]] <- sc; rasTemplate
+      rasTemplate[srcSpeciesByIndex[[as.character(sc)]]] <- sc; rasTemplate
       })
+    maxSpCode <- max(as.integer(names(speciesSrcRasterVecList)))
+    speciesSrcRasterVecList <- lapply(seq_len(maxSpCode), function(ind) {
+      if (as.character(ind) %in% names(speciesSrcRasterVecList))
+        speciesSrcRasterVecList[[as.character(ind)]]
+    })
+    speciesVectorsList <- speciesSrcRasterVecList
 
     # # speciesVectorsList
     # # dtSrcShort <- dtSrc$pixelGroup
@@ -161,12 +167,6 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     #   ras[pixels] <- sp
     #   ras
     # })
-    maxSpCode <- max(as.integer(names(speciesSrcRasterVecList)))
-    speciesSrcRasterVecList <- lapply(seq_len(maxSpCode), function(ind) {
-      if (as.character(ind) %in% names(speciesSrcRasterVecList))
-        speciesSrcRasterVecList[[as.character(ind)]]
-    })
-    speciesVectorsList <- speciesSrcRasterVecList
 
     # Raster metadata
     e <- pixelGroupMap@extent
