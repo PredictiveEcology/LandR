@@ -12,7 +12,7 @@ test_that("test Ward dispersal seeding algorithm", {
   library(quickPlot)
 
   # keep this here for interactive testing with a larger raster
-  doLarge <- if (interactive()) TRUE else FALSE
+  doLarge <- if (interactive()) FALSE else FALSE
   if (doLarge) {
     set.seed(1234)
     print("Doing LARGE raster test -- should take more than 4 minutes")
@@ -37,10 +37,6 @@ test_that("test Ward dispersal seeding algorithm", {
     proportionRcvCells <- 0.5
   }
 
-  # seeds[[ff]] <- seedOuter # 639394 # 368697
-  # set.seed(seedOuter)
-  # saveRDS(seeds, file = "seed.rds")
-  # saveRDS(verbose, file = "verbose.rds")
   reducedPixelGroupMap <- SpaDES.tools::randomPolygons(reducedPixelGroupMap, numTypes = pgs)
   Sum_of_species <- raster(reducedPixelGroupMap)
   rcvSpByPG <- lapply(seq_len(pgs * proportionRcvCells), function(pg) {

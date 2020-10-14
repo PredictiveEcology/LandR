@@ -53,6 +53,7 @@ and instead of generating a map, it adds the vegetation type column
 to the \code{cohortData} table.
 }
 \examples{
+library(data.table)
 x <- data.table(pixelGroup = rep(1:2, each = 2), B = c(100, 200, 20, 400),
                 speciesCode = rep(c("Pice_Gla", "Popu_Tre"), 2))
 vegTypeGenerator(x)
