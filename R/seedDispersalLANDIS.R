@@ -193,6 +193,8 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     srcSpeciesCodes <- srcSpeciesCodes[!unlist(lapply(speciesSrcRasterVecList, is.null))]
 
     # rcvSpeciesByIndex
+    #  Remove any species in dtRcv that are not available in dtSrc
+    dtRcv <- dtRcv[unique(dtSrc[, "speciesCode"], by = "speciesCode"), on = "speciesCode"]
     cellsCanRcv <- which(pgv %in% dtRcv$pixelGroup)
     rcvSpeciesCodes <- sort(unique(dtRcv$speciesCode))
     dt <- data.table(pixelGroup = pgv[cellsCanRcv], pixelIndex = cellsCanRcv)
