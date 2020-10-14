@@ -13,6 +13,7 @@ test_that("test Ward dispersal seeding algorithm", {
   # keep this here for interactive testing with a larger raster
   doLarge <- if (interactive()) TRUE else FALSE
   if (doLarge) {
+    set.seed(1234)
     print("Doing LARGE raster test -- should take more than 4 minutes")
     reducedPixelGroupMap <- raster(xmn = 50, xmx = 50 + 99*18000,
                                    ymn = 50, ymx = 50 + 99*18000,
