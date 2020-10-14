@@ -61,7 +61,6 @@ utils::globalVariables(c(
 #' @return A numeric vector of raster pixel indices, in the same resolution and extent as
 #' \code{seedSrc} raster.
 #'
-#' @importFrom R.utils intToBin
 #' @importFrom magrittr %>%
 #' @importFrom raster xyFromCell
 #' @importFrom stats na.omit
@@ -378,7 +377,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
 }
 
 speciesCodeFromCommunity <- function(num) {
-  indices <- lapply(strsplit(R.utils::intToBin(num), split = ""), function(x) {
+  indices <- lapply(strsplit(intToBin2(num), split = ""), function(x) {
     rev(as.logical(as.numeric(x)))
   })
 
@@ -388,11 +387,6 @@ speciesCodeFromCommunity <- function(num) {
 
 
 speciesComm <- function(num, sc) {
-  # indices <- lapply(strsplit(R.utils::intToBin(num), split = ""), function(x) {
-  #   rev(as.logical(as.numeric(x)))
-  # })
-  #
-  # speciesCode <- lapply(indices, function(x) (seq_len(length(x)) - 1)[x])
   speciesCode <- speciesCodeFromCommunity(num)
   data.table(RcvCommunity = as.integer(rep(num, sapply(speciesCode, length))),
              speciesCode = unlist(speciesCode),
@@ -590,3 +584,12 @@ WardFast <- expression(ifelse(cellSize <= effDist, {
       (1 - k) * exp((dis - effDist) * log(b) / maxDist)
   )
 }))
+
+intToBin2 <- function (x)
+{
+  y <- as.integer(x)
+  class(y) <- "binmode"
+  y <- as.character(y)
+  dim(y) <- dim(x)
+  y
+}

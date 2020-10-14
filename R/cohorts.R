@@ -51,7 +51,7 @@ utils::globalVariables(c(
 #' @importFrom crayon green magenta
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
-#' @importFrom SpaDES.core paddedFloatToChar
+#' @importFrom reproducible paddedFloatToChar
 #' @importFrom stats na.omit
 updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                              speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
@@ -348,7 +348,6 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
 #'
 #' @export
 #' @importFrom data.table setkey setorderv
-#' @importFrom SpaDES.core paddedFloatToChar
 generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
                                 columns = c("ecoregionGroup", "speciesCode", "age", "B")) {
   columnsOrig <- columns
@@ -531,7 +530,7 @@ describeCohortData <- function(cohortData) {
 #' @export
 #' @importFrom data.table as.data.table is.data.table rbindlist setnames
 #' @importFrom raster raster
-#' @importFrom SpaDES.core paddedFloatToChar
+#' @importFrom reproducible paddedFloatToChar
 #' @importFrom SpaDES.tools spread2
 convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
                                availableERC_by_Sp, theUnwantedPixels,
@@ -1419,7 +1418,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 #' @importFrom crayon green magenta
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
-#' @importFrom SpaDES.core paddedFloatToChar
+#' @importFrom reproducible paddedFloatToChar
 #' @importFrom stats na.omit
 #' @rdname updateCohortDataPostHarvest
 updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,

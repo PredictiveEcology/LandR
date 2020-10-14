@@ -36,16 +36,14 @@ Imports:
     MuMIn (>= 1.42.5),
     pemisc,
     quickPlot,
-    R.utils,
     raster,
     RColorBrewer,
     Rcpp,
     RCurl,
-    reproducible,
+    reproducible (>= 1.2.1.9007),
     scales,
     sf,
     sp,
-    SpaDES.core,
     SpaDES.tools (>= 0.3.1.9000),
     stats,
     tools,
@@ -61,7 +59,8 @@ Suggests:
     testthat
 Remotes:
     PredictiveEcology/map@development,
-    PredictiveEcology/pemisc@development
+    PredictiveEcology/pemisc@development,
+    PredictiveEcology/reproducible@development
 LinkingTo: Rcpp
 Encoding: UTF-8
 Language: en-CA
