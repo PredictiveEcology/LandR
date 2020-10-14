@@ -375,7 +375,7 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
     pcd[, ord := 1:.N]
     setorderv(pcd, c("pixelIndex"))
     uniqPG <- unique(pcd$pixelGroup);
-    pcd[, pixelGroup2 := mapvalues(pixelGroup, from = uniqPG, to = as.character(seq_along(uniqPG)))]
+    pcd[, pixelGroup2 := mapvalues2(pixelGroup, from = uniqPG, to = as.character(seq_along(uniqPG)))]
     # pcd[, pixelGroup2 := mapvalues(pixelGroup, from = unique(pixelGroup), to = as.character(seq_along(unique(pixelGroup))))]
     setorderv(pcd, "ord")
 
