@@ -3,7 +3,7 @@ test_that("test Ward dispersal seeding algorithm", {
   verbose <- 0
 
   if (FALSE) {
-    devtools::load_all("~/GitHub/LandR")
+    # devtools::load_all("~/GitHub/LandR")
     outSummary <- list()
   }
   library(data.table)
