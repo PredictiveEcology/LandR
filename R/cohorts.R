@@ -348,7 +348,6 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
 #'
 #' @export
 #' @importFrom data.table setkey setorderv
-#' @importFrom plyr mapvalues
 #' @importFrom SpaDES.core paddedFloatToChar
 generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
                                 columns = c("ecoregionGroup", "speciesCode", "age", "B")) {
@@ -375,7 +374,9 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
     # prepare object 1 (pcd) for checking below
     pcd[, ord := 1:.N]
     setorderv(pcd, c("pixelIndex"))
-    pcd[, pixelGroup2 := mapvalues(pixelGroup, from = unique(pixelGroup), to = as.character(seq_along(unique(pixelGroup))))]
+    uniqPG <- unique(pcd$pixelGroup);
+    pcd[, pixelGroup2 := mapvalues(pixelGroup, from = uniqPG, to = as.character(seq_along(uniqPG)))]
+    # pcd[, pixelGroup2 := mapvalues(pixelGroup, from = unique(pixelGroup), to = as.character(seq_along(unique(pixelGroup))))]
     setorderv(pcd, "ord")
 
     pcdOld <- data.table::copy(pcdOrig)
@@ -397,8 +398,10 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
     # prepare object 2 (pcdOld) for checking below
     pcdOld[, ord := 1:.N]
     setorderv(pcdOld, c("pixelIndex"))
-    pcdOld[, pixelGroup2 := mapvalues(pixelGroup, from = unique(pixelGroup),
-                                      to = as.character(seq_along(unique(pixelGroup))))]
+
+    uniqPG <- unique(pcdOld$pixelGroup);
+    pcdOld[, pixelGroup2 := mapvalues2(pixelGroup, from = uniqPG, to = as.character(seq_along(uniqPG)))]
+
     setorderv(pcdOld, "ord")
 
     # The check
@@ -1826,4 +1829,16 @@ preambleVTG <- function(x, vegLeadingProportion, doAssertion, nrowCohortData) {
     message("LandR::vegTypeMapGenerator: NROW(x) == ", nrowCohortData)
 
   leadingBasedOn
+}
+
+# derived from plyr::mapvalues
+mapvalues2 <- function (x, from, to) { #
+  if (length(from) != length(to)) {
+    stop("`from` and `to` vectors are not the same length.")
+  }
+  mapidx <- match(x, from)
+  mapidxNA <- is.na(mapidx)
+  from_found <- sort(unique(mapidx))
+  x[!mapidxNA] <- to[mapidx[!mapidxNA]]
+  x
 }
