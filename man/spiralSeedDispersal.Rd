@@ -18,8 +18,7 @@ spiralSeedDispersal(
   k,
   b,
   successionTimestep,
-  verbose = 0,
-  maxSpiral = 1000000L
+  verbose = 0
 )
 }
 \arguments{
@@ -40,6 +39,9 @@ be \code{seq(1, NROW(speciesTable))}. The names of these columns is not importan
 only the position in the matrix}
 
 \item{numCols}{Integer, number of columns in the raster whose \code{cellCoords}
+were provided}
+
+\item{numRows}{Integer, number of rows in the raster whose \code{cellCoords}
 were provided}
 
 \item{numCells}{Integer, number of cells in the raster whose \code{cellCoords}

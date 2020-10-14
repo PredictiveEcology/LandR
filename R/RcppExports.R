@@ -5,7 +5,6 @@ which2 <- function(x) {
     .Call('_LandR_which2', PACKAGE = 'LandR', x)
 }
 
-#' @export
 rmElem <- function(x, toRm) {
     .Call('_LandR_rmElem', PACKAGE = 'LandR', x, toRm)
 }
@@ -35,6 +34,8 @@ rmElem <- function(x, toRm) {
 #'   only the position in the matrix
 #' @param numCols Integer, number of columns in the raster whose \code{cellCoords}
 #'   were provided
+#' @param numRows Integer, number of rows in the raster whose \code{cellCoords}
+#'   were provided
 #' @param numCells Integer, number of cells in the raster whose \code{cellCoords}
 #'   were provided
 #' @param cellSize Integer, the \code{res(ras)[1]} of the raster whose \code{cellCoords}
@@ -54,7 +55,7 @@ rmElem <- function(x, toRm) {
 #'   received seeds from each species.
 #' @author Eliot McIntire
 #' @export
-spiralSeedDispersal <- function(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose = 0.0, maxSpiral = 1000000L) {
-    .Call('_LandR_spiralSeedDispersal', PACKAGE = 'LandR', cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose, maxSpiral)
+spiralSeedDispersal <- function(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose = 0.0) {
+    .Call('_LandR_spiralSeedDispersal', PACKAGE = 'LandR', cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose)
 }
 

@@ -26,6 +26,13 @@ LANDISDisp(
 
 \item{pixelGroupMap}{map}
 
+\item{speciesTable}{A data.table that should have at least 3 columns:
+\code{speciesCode} an integer representation of species, \code{seeddistance_max}
+a numeric with the maximum seed dispersal distance and \code{seeddistance_eff}
+the "effective" seed dispersal distance. These latter two are
+parameters passed to Ward dispersal kernel. This data.table can come from
+a \code{species} table from a LANDIS project.}
+
 \item{dispersalFn}{An expression that can take a "dis" argument. See details.
 Default is "Ward" (temporarily unused, as it is hard coded inside Rcpp function)}
 
@@ -43,13 +50,6 @@ LANDISDisp event grow.}
 increasing levels of verbosity (currently up to 2)}
 
 \item{...}{Additional parameters. Currently none}
-
-\item{species}{A data.table that should have at least 3 columns:
-\code{speciesCode} an integer representation of species, \code{seeddistance_max}
-a numeric with the maximum seed dispersal distance and \code{seeddistance_eff}
-the "effective" seed dispersal distance. These latter two are
-parameters passed to Ward dispersal kernel. This data.table can come from
-a \code{species} table from a LANDIS project.}
 }
 \value{
 A numeric vector of raster pixel indices, in the same resolution and extent as

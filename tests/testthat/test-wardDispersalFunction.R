@@ -21,6 +21,14 @@ test_that("test Ward dispersal seeding algorithm", {
                                    res = c(250, 250), val = 2)
     pgs <- 10000
     proportionRcvCells <- 0.01
+    if (FALSE) { # medium sized for interaactive use
+      reducedPixelGroupMap <- raster(xmn = 50, xmx = 50 + 99*300,
+                                     ymn = 50, ymx = 50 + 99*300,
+                                     res = c(250, 250), val = 2)
+      proportionRcvCells <- 0.5
+      pgs <- 30
+
+    }
   } else {
     reducedPixelGroupMap <- raster(xmn = 50, xmx = 50 + 99*25,
                                    ymn = 50, ymx = 50 + 99*25,

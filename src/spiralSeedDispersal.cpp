@@ -9,7 +9,6 @@ Rcpp::IntegerVector which2(Rcpp::LogicalVector x) {
   return v[x];
 }
 
-//' @export
 // [[Rcpp::export]]
 Rcpp::IntegerVector rmElem(Rcpp::IntegerVector x, IntegerVector toRm) {
   for(IntegerVector::iterator toRmIt = toRm.begin(); toRmIt != toRm.end(); ++toRmIt) {
@@ -51,6 +50,8 @@ Rcpp::IntegerVector rmElem(Rcpp::IntegerVector x, IntegerVector toRm) {
 //'   only the position in the matrix
 //' @param numCols Integer, number of columns in the raster whose \code{cellCoords}
 //'   were provided
+//' @param numRows Integer, number of rows in the raster whose \code{cellCoords}
+//'   were provided
 //' @param numCells Integer, number of cells in the raster whose \code{cellCoords}
 //'   were provided
 //' @param cellSize Integer, the \code{res(ras)[1]} of the raster whose \code{cellCoords}
@@ -75,14 +76,13 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
                                    Rcpp::List speciesVectorsList, List rcvSpeciesByIndex,
                                    NumericMatrix speciesTable,
                                    int numCols, int numRows, int numCells, int cellSize, int xmin, int ymin,
-                                   double k, double b, double successionTimestep, double verbose = 0.0,
-                                   int maxSpiral = 1000000)
+                                   double k, double b, double successionTimestep, double verbose = 0.0)
 {
 
   int nCellsRcv(cellCoords.nrow());
   int nSpeciesEntries(speciesTable.nrow());
   int x, y, dx, dy, spiralIndex;
-  int spiralIndexMax = maxSpiral; // not really used except for debugging, it can be shrunk
+  // int spiralIndexMax = maxSpiral; // not really used except for debugging, it can be shrunk
   bool underMaxDist = true;
 
   // max distances by species
@@ -140,7 +140,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
   // then add this offset to cellCoods matrix of initial cells.
   // This will create a square-ish shape, i.e., make a square then add a single
   // pixel width around entire square to make a new slightly bigger square.
-  while(underMaxDist == true && spiralIndex < spiralIndexMax) {
+  while(underMaxDist == true) { // && spiralIndex < spiralIndexMax) {
     spiralIndex += 1;
     NumericVector numActiveCellsByRcvSp(nSpeciesEntries); // need to rezero
     numActiveCellsByRcvSp = numActiveCellsByRcvSp + numActiveCellsByRcvSpDone;

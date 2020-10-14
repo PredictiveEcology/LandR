@@ -34,7 +34,7 @@ utils::globalVariables(c(
 #'
 #' @param pixelGroupMap map
 #'
-#' @param species A data.table that should have at least 3 columns:
+#' @param speciesTable A data.table that should have at least 3 columns:
 #'   \code{speciesCode} an integer representation of species, \code{seeddistance_max}
 #'   a numeric with the maximum seed dispersal distance and \code{seeddistance_eff}
 #'   the "effective" seed dispersal distance. These latter two are
