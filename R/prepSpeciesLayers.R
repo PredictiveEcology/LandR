@@ -308,7 +308,6 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
 }
 
 #' @export
-#' @importFrom assertthat assert_that
 #' @importFrom map mapAdd maps
 #' @importFrom raster maxValue minValue stack unstack
 #' @rdname prepSpeciesLayers
@@ -318,7 +317,7 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
                                               sppEquiv,
                                               sppEquivCol, ...) {
   if (is.null(url))
-    url <- "https://drive.google.com/file/d/1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1/view?usp=sharing"
+    url <- "https://drive.google.com/file/d/1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1"
 
   # The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
@@ -348,8 +347,8 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   CCstack <- raster::stack(CCs)
   CCstackNames <- names(CCstack)
 
-  assertthat::assert_that(all(raster::minValue(CCstack) >= 0))
-  assertthat::assert_that(all(raster::maxValue(CCstack) <= 10))
+  if (!all(raster::minValue(CCstack) >= 0)) stop("problem with minValue of CCstack (< 0)")
+  if (!all(raster::maxValue(CCstack) <= 10)) stop("problem with maxValue of CCstack (> 10)")
 
   CCstack[CCstack[] < 0] <- 0  ## turns stack into brick, so need to restack later
   CCstack[CCstack[] > 10] <- 10
