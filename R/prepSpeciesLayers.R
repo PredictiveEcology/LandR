@@ -317,7 +317,7 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
                                               sppEquiv,
                                               sppEquivCol, ...) {
   if (is.null(url))
-    url <- "https://drive.google.com/file/d/1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1/view?usp=sharing"
+    url <- "https://drive.google.com/file/d/1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1"
 
   # The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
