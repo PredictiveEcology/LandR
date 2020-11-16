@@ -380,8 +380,18 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   ## TODO: this is sneaky and annoying (runName is part of outputPath)
   if (grepl("AOU", outputPath)) {
     sA <- "ceon"
+    if (grepl("test", outputPath)) {
+      sAN <- "AOU_test"
+    } else {
+      sAN <- "AOU"
+    }
   } else if (grepl("ROF", outputPath)) {
     sA <- "rof"
+    if (grepl("test", outhputPath)) {
+      sAN <- "ROF_test"
+    } else {
+      sAN <- "ROF"
+    }
   }
 
   if (grepl("res125", outputPath)) {
@@ -447,8 +457,6 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   ## merge species layers (currently only Popu; TODO: pine?)
   idsPopu <- grep("Popu", CCstackNames)
   mergedPopu <- calc(stack(CCstack[[idsPopu]]), sum, na.rm = TRUE)
-  mergedPopu <- writeRaster(mergedPopu, filename = file.path(outputPath, "ONFRI_Popu_spp.tif"),
-                            overwrite = TRUE)
 
   CCstack <- dropLayer(CCstack, idsPopu)
   CCstack[["Popu_sp"]] <- mergedPopu ## NOTE: addLayer sporadically fails to add layer, w/o warning
