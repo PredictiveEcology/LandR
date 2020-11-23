@@ -20,7 +20,7 @@ utils::globalVariables(c(
 #' @importFrom quickPlot setColors<-
 #' @importFrom raster maxValue minValue ratify reclassify writeRaster
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
-                            nonFlammClasses = c(36L, 37L, 38L, 39L),
+                            nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
                             mask = NULL, filename2 = NULL) {
   if (!is.null(mask))
     if (!is(mask, "Raster")) stop("mask must be a raster layer")
