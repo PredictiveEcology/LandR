@@ -32,7 +32,8 @@ utils::globalVariables(c(
 #' @template speciesEcoregion
 #' @template cohortDefinitionCols
 #'
-#' @param treedFirePixelTableSinceLastDisp A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
+#' @param treedFirePixelTableSinceLastDisp A data.table with at least 2 columns, \code{pixelIndex}
+#'   and \code{pixelGroup}.
 #'   This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
 #'   to ensure that everything matches correctly.
 #' @param successionTimestep The time between successive seed dispersal events.
