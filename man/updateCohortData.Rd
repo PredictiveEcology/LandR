@@ -47,7 +47,8 @@ number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}
 
 \item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
 
-\item{treedFirePixelTableSinceLastDisp}{A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
+\item{treedFirePixelTableSinceLastDisp}{A data.table with at least 2 columns, \code{pixelIndex}
+and \code{pixelGroup}.
 This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
 to ensure that everything matches correctly.}
 

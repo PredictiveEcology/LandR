@@ -20,7 +20,7 @@ utils::globalVariables(c(
 #' @importFrom quickPlot setColors<-
 #' @importFrom raster maxValue minValue ratify reclassify writeRaster
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
-                            nonFlammClasses = c(36L, 37L, 38L, 39L),
+                            nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
                             mask = NULL, filename2 = NULL) {
   if (!is.null(mask))
     if (!is(mask, "Raster")) stop("mask must be a raster layer")
@@ -222,6 +222,8 @@ vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("Lan
 }
 
 #' @export
+#' @importFrom assertthat assert_that
+#' @importFrom SpaDES.tools inRange
 #' @rdname vegTypeMapGenerator
 #' @include cohorts.R
 #' @examples
@@ -616,7 +618,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   sppNameVector <- as.character(equivalentName(sppNameVector, sppEquiv, column = sppEquivCol,
                                                multi = TRUE))
 
-  ## if there are NA's, that means some species can't be found in kNN data base
+  ## if there are NA's, that means some species can't be found in kNN database
   if (any(is.na(kNNnames))) {
     warning(paste0("Can't find ", sppNameVector[is.na(kNNnames)], " in `sppEquiv$",
                    knnNamesCol, ".\n",
@@ -1126,9 +1128,8 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
   ## make sure species names and list names are in the right formats
   names(sppMerge) <- sppMerge
   sppMerges <- lapply(sppMerge, FUN = function(x) {
-    unique(equivalentName(x, sppEquiv,  column = "KNN", multi = TRUE))
+    unique(equivalentName(x, sppEquiv,  column = column, multi = TRUE))
   })
-  #names(sppMerges) <- equivalentName(names(sppMerges), sppEquiv,  column = sppEquivCol)
 
   ## keep species present in the data
   sppMerges <- lapply(sppMerges, FUN = function(x) x[x %in% names(speciesLayers)])
