@@ -101,7 +101,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
   )
   if (!missing(standAgeMap)) {
     set(pixelTable, NULL, "age", asInteger(standAgeMap[]))
-    set(pixelTable, NULL, "logAge", log(standAgeMap[]))
+    set(pixelTable, NULL, "logAge", .logFloor(standAgeMap[]))
   }
 
   if (!missing(biomassMap)) {
@@ -114,7 +114,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 
   #pixelTable <- data.table(#age = asInteger(ceiling(asInteger(standAgeMap[]) /
                           #                           pixelGroupAgeClass) * pixelGroupAgeClass),
-                          # logAge = log(standAgeMap[]),
+                          # logAge = .logFloor(standAgeMap[]),
                           # initialEcoregionCode = factor(initialEcoregionCodeVals),
                           # totalBiomass = asInteger(biomassMap[] * 100), # change units
                           # cover = coverMatrix,
@@ -221,7 +221,7 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
   #################################################
   # maxB
   # Set age to the age of longevity and cover to 100%
-  speciesEcoregion[, `:=`(logAge = log(longevity), cover = 100)]
+  speciesEcoregion[, `:=`(logAge = .logFloor(longevity), cover = 100)]
   speciesEcoregion[ , maxB := asInteger(predict(modelBiomass$mod,
                                                 newdata = speciesEcoregion,
                                                 type = "response"))]

@@ -20,7 +20,7 @@ utils::globalVariables(c(
 #' @importFrom quickPlot setColors<-
 #' @importFrom raster maxValue minValue ratify reclassify writeRaster
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
-                            nonFlammClasses = c(36L, 37L, 38L, 39L),
+                            nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
                             mask = NULL, filename2 = NULL) {
   if (!is.null(mask))
     if (!is(mask, "Raster")) stop("mask must be a raster layer")
@@ -222,8 +222,8 @@ vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("Lan
 }
 
 #' @export
-#' @importFrom SpaDES.tools inRange
 #' @importFrom assertthat assert_that
+#' @importFrom SpaDES.tools inRange
 #' @rdname vegTypeMapGenerator
 vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportion = 0.8,
                                            mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,
@@ -570,6 +570,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @return A raster stack of percent cover layers by species.
 #'
 #' @export
+#' @importFrom httr config with_config
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
 #' @importFrom reproducible Cache .prefix preProcess basename2
@@ -597,13 +598,21 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   }
 
   ## get all files in url folder
-  fileURLs <- getURL(url, dirlistonly = TRUE)
+  fileURLs <- getURL(url, dirlistonly = TRUE,
+                     .opts = list(followlocation = TRUE,
+                                  ssl.verifypeer = 0L)) ## TODO: re-enable verify
   fileNames <- getHTMLLinks(fileURLs)
   ## get all kNN species - names only
-  allSpp <- grep("2001_kNN_Species_.*\\.tif$", fileNames, value = TRUE)
-  allSpp <- allSpp %>%
+  allSpp <- grep("2001_kNN_Species_.*\\.tif$", fileNames, value = TRUE) %>%
     sub("_v1.tif", "", .) %>%
     sub(".*Species_", "", .)
+
+  if (getRversion() < "4.0.0") {
+    if (length(allSpp) == 0)
+      stop("Incomplete file list retrieved from server.")
+  } else {
+    stopifnot("Incomplete file list retrieved from server." = length(allSpp) > 1)
+  }
 
   ## get all species layers from .tar
   if (length(sppNameVector) == 1) ## avoids a warning in next if
@@ -616,7 +625,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   sppNameVector <- as.character(equivalentName(sppNameVector, sppEquiv, column = sppEquivCol,
                                                multi = TRUE))
 
-  ## if there are NA's, that means some species can't be found in kNN data base
+  ## if there are NA's, that means some species can't be found in kNN database
   if (any(is.na(kNNnames))) {
     warning(paste0("Can't find ", sppNameVector[is.na(kNNnames)], " in `sppEquiv$",
                    knnNamesCol, ".\n",
@@ -661,22 +670,32 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
             " You can use the list above to choose species, then select only those rows",
             " in sppEquiv before passing here.")
   }
-  speciesLayers <- Cache(Map,
-                         targetFile = asPath(targetFiles),
-                         filename2 = postProcessedFilenamesWithStudyAreaName,
-                         url = paste0(url, targetFiles),
-                         MoreArgs = list(destinationPath = asPath(dPath),
-                                         fun = "raster::raster",
-                                         studyArea = studyArea,
-                                         rasterToMatch = rasterToMatch,
-                                         method = "bilinear",
-                                         datatype = "INT2U",
-                                         overwrite = TRUE,
-                                         userTags = dots$userTags
-                         ),
-                         prepInputs, quick = TRUE) # don't need to digest all the "targetFile"
+  with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
+    speciesLayers <- Cache(Map,
+                           targetFile = asPath(targetFiles),
+                           filename2 = postProcessedFilenamesWithStudyAreaName,
+                           url = paste0(url, targetFiles),
+                           MoreArgs = list(destinationPath = asPath(dPath),
+                                           fun = "raster::raster",
+                                           studyArea = studyArea,
+                                           rasterToMatch = rasterToMatch,
+                                           method = "bilinear",
+                                           datatype = "INT2U",
+                                           overwrite = TRUE,
+                                           userTags = dots$userTags
+                           ),
+                           prepInputs, quick = TRUE) # don't need to digest all the "targetFile"
+  })
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
 
+  # remove "no data" first
+  noData <- sapply(speciesLayers, function(xx) is.na(maxValue(xx)))
+  if (any(noData)) {
+    message(names(noData)[noData], " has no data in this study area; omitting it")
+    speciesLayers <- speciesLayers[!noData]
+  }
+
+  # remove "little data" first
   layersWdata <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh) FALSE else TRUE)
   if (sum(!layersWdata) > 0) {
     sppKeep <- names(speciesLayers)[layersWdata]
@@ -694,12 +713,17 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   }
   speciesLayers <- speciesLayers[layersWdata]
   if (!is.null(sppMerge)) {
-    if (length(sppMerge) > 0)
+    if (length(sppMerge) == 0) {
+      lapply(1:length(speciesLayers), function(i, rasters = speciesLayers,
+                                               filenames = postProcessedFilenamesWithStudyAreaName) {
+        writeRaster(rasters[[i]], file.path(oPath, paste0(filenames[i], '.tif')), overwrite = TRUE)
+      })
+    } else {
       speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
                                       sppEquiv = sppEquiv, column = "KNN", suffix = suffix,
                                       dPath = oPath)
+    }
   }
-
   ## Rename species layers - There will be 2 groups -- one
   nameChanges <- equivalentName(names(speciesLayers), sppEquiv, column = sppEquivCol)
   nameChangeNA <- is.na(nameChanges)
@@ -710,9 +734,9 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
 
   ## return stack and updated species names vector
-  if (length(speciesLayers))
-    stack(speciesLayers) else
-      raster()
+  if (length(speciesLayers)) {
+    stack(speciesLayers)
+  }
 }
 
 #' Load kNN species layers from online data repository
@@ -746,16 +770,18 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 #' @return A raster stack of percent cover layers by species.
 #'
 #' @export
+#' @importFrom httr config with_config
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
 #' @importFrom RCurl getURL
-#' @importFrom reproducible Cache .prefix preProcess basename2
+#' @importFrom reproducible basename2 Cache .prefix preProcess
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
 #' @importFrom XML getHTMLLinks
 loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                            knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   dots <- list(...)
+  oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
 
   sppEquiv <- sppEquiv[, lapply(.SD, as.character)]
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
@@ -772,7 +798,9 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   }
 
   ## get all online file names
-  fileURLs <- getURL(url, dirlistonly = TRUE)
+  fileURLs <- getURL(url, dirlistonly = TRUE,
+                     .opts = list(followlocation = TRUE,
+                                  ssl.verifypeer = 0L)) ## TODO: re-enable verify
   fileNames <- getHTMLLinks(fileURLs)
   fileNames <- grep("Species_.*.tif$", fileNames, value = TRUE)
 
@@ -828,7 +856,7 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   ## select which archives/targetFiles to extract -- because there was "multi" above, need unique here
   targetFiles <- fileNames[allSpp %in% kNNnames]
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
-
+  postProcessedFilenamesWithStudyAreaName <- .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
   if (length(kNNnames) > 15) {
     message("This looks like a lot of species; did you mean to pass only a subset of this to sppEquiv?",
@@ -839,21 +867,23 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   speciesLayers <- list()
 
   for (i in seq_along(targetFiles)) {
-    speciesLayers[i] <- Cache(Map,
-                              targetFile = asPath(targetFiles[i]),
-                              filename2 = postProcessedFilenames[i],
-                              MoreArgs = list(url = paste0(url, targetFiles[i]),
-                                              destinationPath = asPath(dPath),
-                                              fun = "raster::raster",
-                                              studyArea = studyArea,
-                                              rasterToMatch = rasterToMatch,
-                                              method = "bilinear",
-                                              datatype = "INT2U",
-                                              overwrite = TRUE,
-                                              userTags = dots$userTags,
-                                              omitArgs = c("userTags")
-                              ),
-                              prepInputs, quick = TRUE) # don't need to digest all the "targetFile" and "archives"
+    with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
+      speciesLayers[i] <- Cache(Map,
+                                targetFile = asPath(targetFiles[i]),
+                                filename2 = postProcessedFilenamesWithStudyAreaName[i],
+                                MoreArgs = list(url = paste0(url, targetFiles[i]),
+                                                destinationPath = asPath(dPath),
+                                                fun = "raster::raster",
+                                                studyArea = studyArea,
+                                                rasterToMatch = rasterToMatch,
+                                                method = "bilinear",
+                                                datatype = "INT2U",
+                                                overwrite = TRUE,
+                                                userTags = dots$userTags,
+                                                omitArgs = c("userTags")
+                                ),
+                                prepInputs, quick = TRUE) # don't need to digest all the "targetFile" and "archives"
+    })
   }
 
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
@@ -874,12 +904,17 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   }
   speciesLayers <- speciesLayers[layersWdata]
   if (!is.null(sppMerge)) {
-    if (length(sppMerge) > 0)
+    if (length(sppMerge) == 0) {
+      lapply(1:length(speciesLayers), function(i, rasters = speciesLayers,
+                                               filenames = postProcessedFilenamesWithStudyAreaName) {
+        writeRaster(rasters[[i]], file.path(oPath, paste0(filenames[i], '.tif')), overwrite = TRUE)
+      })
+    } else {
       speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
                                       sppEquiv = sppEquiv, column = "KNN", suffix = suffix,
-                                      dPath = dPath)
+                                      dPath = oPath)
+    }
   }
-
   ## Rename species layers - There will be 2 groups -- one
   nameChanges <- equivalentName(names(speciesLayers), sppEquiv, column = sppEquivCol)
   nameChangeNA <- is.na(nameChanges)
@@ -890,9 +925,9 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
 
   ## return stack and updated species names vector
-  if (length(speciesLayers))
-    stack(speciesLayers) else
-      raster()
+  if (length(speciesLayers)) {
+    stack(speciesLayers)
+  }
 }
 
 #' Function to sum rasters of species layers
@@ -1100,9 +1135,8 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
   ## make sure species names and list names are in the right formats
   names(sppMerge) <- sppMerge
   sppMerges <- lapply(sppMerge, FUN = function(x) {
-    unique(equivalentName(x, sppEquiv,  column = "KNN", multi = TRUE))
+    unique(equivalentName(x, sppEquiv,  column = column, multi = TRUE))
   })
-  #names(sppMerges) <- equivalentName(names(sppMerges), sppEquiv,  column = sppEquivCol)
 
   ## keep species present in the data
   sppMerges <- lapply(sppMerges, FUN = function(x) x[x %in% names(speciesLayers)])

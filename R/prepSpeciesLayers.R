@@ -78,9 +78,7 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
   setkey(CASFRIdt, GID)
   #set(CASFRIdt, NULL, "isNA", NULL)
 
-  return(list(#keepSpecies = keepSpecies,
-    CASFRIattrLong = CASFRIattrLong,
-    CASFRIdt = CASFRIdt))
+  return(list(CASFRIattrLong = CASFRIattrLong, CASFRIdt = CASFRIdt))
 }
 
 #' \code{CASFRItoSpRasts}
@@ -111,7 +109,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
   names(sppNameVector) <- sppNameVector
 
   # This
-  sppListMergesCASFRI <-lapply(sppNameVector, function(x)
+  sppListMergesCASFRI <- lapply(sppNameVector, function(x)
     equivalentName(x, sppEquiv,  column = "CASFRI", multi = TRUE)
   )
 
@@ -146,9 +144,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     message("starting ", sp)
     if (length(spCASFRI) > 1)
       message("  Merging ", paste(spCASFRI, collapse = ", "), "; becoming: ", sp)
-    aa2 <- CASFRIattrLong[
-      value %in% spCASFRI][
-        , min(100L, sum(pct)), by = GID]
+    aa2 <- CASFRIattrLong[value %in% spCASFRI][, min(100L, sum(pct)), by = GID]
     setkey(aa2, GID)
     cc <- aa2[CASFRIdt] %>% na.omit()
     rm(aa2)
@@ -206,7 +202,7 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
   dots <- list(...)
 
   if (is.null(url))
-    url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+    url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
                   "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/")
 
   loadkNNSpeciesLayers(
@@ -312,7 +308,6 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
 }
 
 #' @export
-#' @importFrom assertthat assert_that
 #' @importFrom map mapAdd maps
 #' @importFrom raster maxValue minValue stack unstack
 #' @rdname prepSpeciesLayers
@@ -322,7 +317,7 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
                                               sppEquiv,
                                               sppEquivCol, ...) {
   if (is.null(url))
-    url <- "https://drive.google.com/file/d/1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1/view?usp=sharing"
+    url <- "https://drive.google.com/file/d/1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1"
 
   # The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
@@ -352,8 +347,8 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   CCstack <- raster::stack(CCs)
   CCstackNames <- names(CCstack)
 
-  assertthat::assert_that(all(raster::minValue(CCstack) >= 0))
-  assertthat::assert_that(all(raster::maxValue(CCstack) <= 10))
+  if (!all(raster::minValue(CCstack) >= 0)) stop("problem with minValue of CCstack (< 0)")
+  if (!all(raster::maxValue(CCstack) <= 10)) stop("problem with maxValue of CCstack (> 10)")
 
   CCstack[CCstack[] < 0] <- 0  ## turns stack into brick, so need to restack later
   CCstack[CCstack[] > 10] <- 10
@@ -370,6 +365,136 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   names(CCstack) <- equivalentName(CCstackNames, sppEquiv, sppEquivCol)
 
   stack(CCstack)
+}
+
+#' @export
+#' @importFrom map mapAdd maps
+#' @importFrom raster addLayer dropLayer maxValue minValue stack unstack
+#' @rdname prepSpeciesLayers
+prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
+                                    url = NULL,
+                                    studyArea, rasterToMatch,
+                                    sppEquiv,
+                                    sppEquivCol, ...) {
+
+  ## TODO: this is sneaky and annoying (runName is part of outputPath)
+  if (grepl("AOU", outputPath)) {
+    sA <- "ceon"
+    if (grepl("test", outputPath)) {
+      sAN <- "AOU_test"
+    } else {
+      sAN <- "AOU"
+    }
+  } else if (grepl("ROF", outputPath)) {
+    sA <- "rof"
+    if (grepl("test", outhputPath)) {
+      sAN <- "ROF_test"
+    } else {
+      sAN <- "ROF"
+    }
+  }
+
+  if (grepl("res125", outputPath)) {
+    res <- 125L
+  } else if (grepl("res250", outputPath)) {
+    res <- 250L
+  } else {
+    res <- 250L
+  }
+
+  if (is.null(url)) {
+    if (sA == "ceon") {
+      url <- "https://drive.google.com/file/d/1iJq1wv06FYTvnkBXKr5HKa84ZF7QbalS"
+      url2 <- "https://drive.google.com/file/d/1eg9yhkAKDsQ8VO5Nx4QjBg4yiB0qyqng"
+    } else if (sA == "rof") {
+      if (res == 125) {
+        url <- "https://drive.google.com/file/d/12C2a3GpnwIz5j2EFERZQxCFYyZ2tWqFm"
+        url2 <- "https://drive.google.com/file/d/1JouBj0iJOPB1qQeXkRRePMN6MZSX_R_q"
+      } else if (res == 250) {
+        url <- "https://drive.google.com/file/d/1MCQhlzwVc7KhNNPfn7uK5BlI6OgUarFS"
+        url2 <- "https://drive.google.com/file/d/1-2XSrSp_WrZCnqUhHTaj0rQpzOcSLrfS"
+      }
+    }
+  }
+
+  # The ones we want
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
+
+  # Take this from the sppEquiv table; user cannot supply manually
+  sppNameVector <- unique(sppEquiv[[sppEquivCol]])
+  names(sppNameVector) <- sppNameVector
+
+  if (is.null(sppEquiv[["ONFRI"]]))
+    stop("Column 'ONFRI' not found in species equivalent table (sppEquiv).")
+
+  FRIlayerNames <- unique(sppEquiv[["ONFRI"]])
+  FRIlayerNamesFiles <- paste0(FRIlayerNames, "_fri_", sA, "_", res, "m.tif")
+  FRIlccname <- paste0("lcc_fri_", sA, "_", res, "m.tif")
+  options(map.useParallel = FALSE) ## TODO: pass additional arg to function
+  ml <- mapAdd(rasterToMatch, isRasterToMatch = TRUE, layerName = "rasterToMatch", filename2 = NULL)
+
+  ml <- mapAdd(studyArea, map = ml, isStudyArea = TRUE, layerName = "studyArea",
+               useSAcrs = TRUE, filename2 = NULL)
+
+  ml <- mapAdd(map = ml, url = url, layerName = FRIlayerNames, CC = TRUE,
+               destinationPath = destinationPath,
+               targetFile = FRIlayerNamesFiles, filename2 = NULL,
+               alsoExtract = NA, leaflet = FALSE, method = "ngb")
+
+  ml <- mapAdd(map = ml, url = url2, layerName = "LCC_FRI", CC = TRUE,
+               destinationPath = destinationPath,
+               targetFile = FRIlccname, filename2 = NULL,
+               alsoExtract = NA, leaflet = FALSE, method = "ngb")
+
+  ccs <- ml@metadata[CC == TRUE & !(layerName == "LCC_FRI"), ]
+  CCs <- maps(ml, layerName = ccs$layerName)
+  CCstack <- raster::stack(CCs)
+  CCstackNames <- names(CCstack)
+
+  if (!all(raster::minValue(CCstack) >= 0)) stop("problem with minValue of CCstack (< 0)")
+  if (!all(raster::maxValue(CCstack) <= 100)) stop("problem with maxValue of CCstack (> 100)")
+
+  ## merge species layers (currently only Popu; TODO: pine?)
+  idsPopu <- grep("Popu", CCstackNames)
+  mergedPopu <- calc(stack(CCstack[[idsPopu]]), sum, na.rm = TRUE)
+
+  CCstack <- dropLayer(CCstack, idsPopu)
+  CCstack[["Popu_sp"]] <- mergedPopu ## NOTE: addLayer sporadically fails to add layer, w/o warning
+
+  idThuj <- grep("Thuj_spp", names(CCstack))
+  names(CCstack[[idThuj]]) <- "Thuj_sp"
+
+  stack(CCstack) ## ensure it's still a stack
+}
+
+#' @export
+#' @rdname prepSpeciesLayers
+prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath,
+                                      url = NULL,
+                                      studyArea, rasterToMatch,
+                                      sppEquiv,
+                                      sppEquivCol,
+                                      thresh = 10, ...) {
+  dots <- list(...)
+
+  if (is.null(url))
+    url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                  "canada-forests-attributes_attributs-forests-canada/2011-",
+                  "attributes_attributs-2011/")
+
+  loadkNNSpeciesLayersValidation(
+    dPath = destinationPath,
+    knnNamesCol = "KNN",
+    outputPath = outputPath,
+    rasterToMatch = rasterToMatch,
+    studyArea = studyArea,
+    studyAreaName = dots$studyAreaName,
+    sppEquiv = sppEquiv,
+    sppEquivCol = sppEquivCol,
+    thresh = thresh,
+    url = url,
+    userTags = c("speciesLayers", "KNN")
+  )
 }
 
 

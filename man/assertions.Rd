@@ -55,7 +55,8 @@ assertCohortData(
   maxExpectedNumDiverge = 1,
   message = "",
   doAssertion = getOption("LandR.assertions", TRUE),
-  verbose = getOption("LandR.verbose", TRUE)
+  verbose = getOption("LandR.verbose", TRUE),
+  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode")
 )
 
 assertPixelCohortData(
@@ -132,6 +133,8 @@ can diverge. Default 1.}
 was called.}
 
 \item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
+
+\item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
 
 \item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
 

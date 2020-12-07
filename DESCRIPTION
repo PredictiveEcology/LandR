@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2020-06-01
-Version: 0.0.5.9002
+Date: 2020-11-16
+Version: 0.0.10
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -19,21 +19,17 @@ Authors@R: c(
     role = "cph")
     )
 Depends:
-    R (>= 3.5)
+    R (>= 3.6)
 Imports:
     assertthat,
-    backports,
-    CircStats,
     crayon,
     data.table,
-    dplyr,
-    fastdigest,
     fasterize,
     fpCompare,
     gdalUtils,
     ggplot2,
-    googledrive,
     grDevices,
+    httr,
     lme4,
     magrittr,
     map,
@@ -57,6 +53,7 @@ Imports:
     utils,
     XML
 Suggests:
+    covr,
     knitr,
     roxygen2,
     rmarkdown,
@@ -64,7 +61,9 @@ Suggests:
     testthat
 Remotes:
     PredictiveEcology/map@development,
-    PredictiveEcology/pemisc@development
+    PredictiveEcology/pemisc@development,
+    PredictiveEcology/reproducible@development,
+    PredictiveEcology/Require@development
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
@@ -72,4 +71,4 @@ VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1

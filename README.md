@@ -4,6 +4,8 @@
 [![R build status](https://github.com/PredictiveEcology/LandR/workflows/R-CMD-check/badge.svg)](https://github.com/PredictiveEcology/LandR/actions)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/LandR)](https://cran.r-project.org/package=LandR)
 [![CRAN Downloads](http://cranlogs.r-pkg.org/badges/grand-total/LandR)](https://cran.r-project.org/package=LandR)
+[![Codecov test coverage](https://codecov.io/gh/PredictiveEcology/LandR/branch/master/graph/badge.svg)](https://codecov.io/gh/PredictiveEcology/LandR?branch=master)
+[![Gitter](https://badges.gitter.im/PredictiveEcology/LandR_Biomass.svg)](https://gitter.im/PredictiveEcology/LandR_Biomass?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 <!-- badges: end -->
 
 **Landscape Ecosystem Modelling in R**
@@ -16,9 +18,8 @@ Models are implemented as `SpaDES` modules.
 
 ### Current release
 
-[![Build Status](https://travis-ci.org/PredictiveEcology/LandR.svg?branch=master)](https://travis-ci.org/PredictiveEcology/LandR)
-[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/2fxqhgk6miv2fytd/branch/master?svg=true)](https://ci.appveyor.com/project/achubaty/LandR/branch/master)
-[![Coverage Status](https://coveralls.io/repos/github/PredictiveEcology/LandR/badge.svg?branch=master)](https://coveralls.io/github/PredictiveEcology/LandR?branch=master)
+[![R build status](https://github.com/PredictiveEcology/LandR/workflows/R-CMD-check/badge.svg?branch=master)](https://github.com/PredictiveEcology/LandR/actions)
+[![Codecov test coverage](https://codecov.io/gh/PredictiveEcology/LandR/branch/master/graph/badge.svg)](https://codecov.io/gh/PredictiveEcology/LandR?branch=master)
 
 **Install from CRAN:**
 
@@ -36,9 +37,8 @@ install_github("PredictiveEcology/LandR", dependencies = TRUE)
 
 ### Development version
 
-[![Build Status](https://travis-ci.org/PredictiveEcology/LandR.svg?branch=development)](https://travis-ci.org/PredictiveEcology/LandR)
-[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/2fxqhgk6miv2fytd/branch/development?svg=true)](https://ci.appveyor.com/project/achubaty/LandR/branch/development)
-[![Coverage Status](https://coveralls.io/repos/github/PredictiveEcology/LandR/badge.svg?branch=development)](https://coveralls.io/github/PredictiveEcology/LandR?branch=development)
+[![R build status](https://github.com/PredictiveEcology/LandR/workflows/R-CMD-check/badge.svg?branch=development)](https://github.com/PredictiveEcology/LandR/actions)
+[![Codecov test coverage](https://codecov.io/gh/PredictiveEcology/LandR/branch/development/graph/badge.svg)](https://codecov.io/gh/PredictiveEcology/LandR?branch=development)
 
 **Install from GitHub:**
 
@@ -47,3 +47,8 @@ install_github("PredictiveEcology/LandR", dependencies = TRUE)
 library("devtools")
 install_github("PredictiveEcology/LandR", ref = "development", dependencies = TRUE) 
 ```
+
+## Getting help
+
+- Discussion: https://gitter.im/PredictiveEcology/LandR_Biomass
+- Bug reports: https://github.com/PredictiveEcology/LandR/issues

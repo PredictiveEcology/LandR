@@ -10,9 +10,11 @@ updateCohortDataPostHarvest(
   pixelGroupMap,
   currentTime,
   speciesEcoregion,
-  treedHarvestPixelTableSinceLastDisp = NULL,
+  treedHarvestPixelTable = NULL,
   successionTimestep,
   provenanceTable,
+  trackPlanting = FALSE,
+  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
   verbose = getOption("LandR.verbose", TRUE),
   doAssertion = getOption("LandR.assertions", TRUE)
 )
@@ -36,7 +38,7 @@ number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}
 
 \item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
 
-\item{treedHarvestPixelTableSinceLastDisp}{A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
+\item{treedHarvestPixelTable}{A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
 This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
 to ensure that everything matches correctly.}
 
@@ -46,6 +48,11 @@ In LANDIS-II, this is called "Succession Timestep". This is used here}
 \item{provenanceTable}{A \code{data.table} with three columns:
 New cohorts are initiated at the \code{ecoregionGroup} \code{speciesEcoregion} from the
 corresponding \code{speciesEcoregion} listed in the \code{Provenance} column}
+
+\item{trackPlanting}{if true, planted cohorts in \code{cohortData} are tracked with \code{TRUE}
+in column 'planted'}
+
+\item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
 
 \item{verbose}{Integer, where increasing number is increasing verbosity. Currently,
 only level 1 exists; but this may change.}
