@@ -887,6 +887,14 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   }
 
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
+
+  # remove "no data" first
+  noData <- sapply(speciesLayers, function(xx) is.na(maxValue(xx)))
+  if (any(noData)) {
+    message(names(noData)[noData], " has no data in this study area; omitting it")
+    speciesLayers <- speciesLayers[!noData]
+  }
+
   layersWdata <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh) FALSE else TRUE)
   if (sum(!layersWdata) > 0) {
     sppKeep <- names(speciesLayers)[layersWdata]
