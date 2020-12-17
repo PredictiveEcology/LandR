@@ -1,7 +1,7 @@
 utils::globalVariables(c(
-  ":=", ".SD", "Area", "col1", "growthcurve", "leafLignin", "leaflongevity", "mortalityshape",
-  "seeddistance_eff", "seeddistance_max", "species", "species1", "species2", "wooddecayrate",
-  "hardsoft"
+  ":=", ".SD", "Area", "col1", "growthcurve", "hardsoft", "leafLignin", "leaflongevity",
+  "mortalityshape", "seeddistance_eff", "seeddistance_max", "species", "species1", "species2",
+  "wooddecayrate"
 ))
 
 #' Default LANDIS-II project repo url
