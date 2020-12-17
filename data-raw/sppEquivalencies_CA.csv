@@ -105,19 +105,19 @@ picesitc,PICE.SIT,Pice_sit,Pice_Sit,Pice sitc,Picea sitchensis,,,,,,Conifer,,Ss,
 ,,Pice_sp,Pice_Spp,Pice spp,Picea spp.,Spruce,Spruce,Spruce leading,,Pice_Spp,Conifer,spruce,,class3
 ,,Pice_sp,,Pice sppx,Picea spp x,,,,,,Conifer,spruce,,class3
 pinualbi,,Pinu_alb,Pinu_Alb,Pinu albi,Pinus albicaulis,Wh pine,Whitebark pine,Whitebark pine leading,,Pinu_Alb,Conifer,,Pa,class3
-pinubank,PINU.BAN,Pinu_ban,Pinu_Ban,Pinu bank,Pinus banksiana,Jk pine,Jack pine,Jack pine leading,,Pinu_Ban,Conifer,jack pine,Pj,class4
-pinuconcon,PINU.CON.CON,Pinu_con,Pinu_Con,Pinu conc,Pinus contorta var. contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,,Pinu_Con,Conifer,lodgepole pine,Plc,class4
-,PINU.CON.LAT,Pinu_con,Pinu_Con_Lat,Pinu cont,Pinus contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,Pinus contorta latifolia is a synonym of var. latifolia,Pinu_Con_Lat,Conifer,lodgepole pine,Pli,class4
-pinuflex,,Pinu_fle,Pinu_Fle,Pinu flex,Pinus flexilis,Pine,Pine,Pine leading,,,Conifer,,Pf,class4
-,,Pinu_lam,,Pinu lamb,Pinus lambertiana,Pine,Pine,Pine leading,,,Conifer,,,class4
-,,Pinu_mon,Pinu_Mon,Pinu mont,Pinus monticola,Ww pine,Western white pine,Western white pine leading,,Pinu_Mon,Conifer,,Pxj,class4
+pinubank,PINU.BAN,Pinu_ban,Pinu_Ban,Pinu bank,Pinus banksiana,Jk pine,Jack pine,Jack pine leading,,Pinu_Ban,Conifer,jack pine,Pj,class3
+pinuconcon,PINU.CON.CON,Pinu_con,Pinu_Con,Pinu conc,Pinus contorta var. contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,,Pinu_Con,Conifer,lodgepole pine,Plc,class3
+,PINU.CON.LAT,Pinu_con,Pinu_Con_Lat,Pinu cont,Pinus contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,Pinus contorta latifolia is a synonym of var. latifolia,Pinu_Con_Lat,Conifer,lodgepole pine,Pli,class3
+pinuflex,,Pinu_fle,Pinu_Fle,Pinu flex,Pinus flexilis,Pine,Pine,Pine leading,,,Conifer,,Pf,class3
+,,Pinu_lam,,Pinu lamb,Pinus lambertiana,Pine,Pine,Pine leading,,,Conifer,,,class3
+,,Pinu_mon,Pinu_Mon,Pinu mont,Pinus monticola,Ww pine,Western white pine,Western white pine leading,,Pinu_Mon,Conifer,,Pxj,class3
 ,,Pinu_mur,,Pinu murx,Pinus x murraybanksiana,Pine,Pine,Pine leading,,,Conifer,,,
 ,,Pinu_nig,,Pinu nigr,Pinus nigra,Pine,Pine,Pine leading,,,Conifer,,,
 pinupon,,Pinu_pon,Pinu_Pon,Pinu pond,Pinus ponderosa,Pine,Pine,Pine leading,,,Conifer,ponderosa pine,Py,class3
 ,,Pinu_rad,,Pinu radi,Pinus radiata,Pine,Pine,Pine leading,,,Conifer,,,
 pinuresi,PINU.RES,Pinu_res,Pinu_Res,Pinu resi,Pinus resinosa,Rd pine,Red pine,Red pine leading,,Pinu_Res,Conifer,,,
 ,,Pinu_rig,Pinu_Rig,Pinu rigi,Pinus rigida,Pine,Pine,Pine leading,,,Conifer,,,
-,,Pinu_sp,Pinu_Spp,Pinu spp,Pinus spp.,Pine,Pine,Pine leading,,Pinu_Spp,Conifer,,,class4
+,,Pinu_sp,Pinu_Spp,Pinu spp,Pinus spp.,Pine,Pine,Pine leading,,Pinu_Spp,Conifer,,,class3
 pinustro,PINU.STR,Pinu_str,Pinu_Str,Pinu stro,Pinus strobus,Pine,Pine,Pine leading,,,Conifer,white pine,,
 ,,Pinu_syl,Pinu_Syl,Pinu sylv,Pinus sylvestris,Pine,Pine,Pine leading,,,Conifer,,,
 ,,Plan_occ,Plat_Occ,Plan occi,Platanus occidentalis,,,,,,Deciduous,,,
@@ -141,7 +141,7 @@ poputrem,POPU.TRE,Popu_tre,Popu_Tre,Popu trem,Populus tremuloides,Tr aspen,Tremb
 ,,Prun_vir,Prun_Vir,Prun virg,Prunus virginiana,,,,,,Deciduous,,,
 pseumenz,PSEU.MEN,Pseu_men,Pseu_Men_Gla,Pseu meng,Pseudotsuga menziesii var. glauca,,,,,,Conifer,douglas-fir,Fdi,
 pseumenz,PSEU.MEN,Pseu_men,Pseu_Men_Men,Pseu menm,Pseudotsuga menziesii var. menziesii,,,,,,Conifer,douglas-fir,Fdc,
-pseumenz,PSEU.MEN,Pseu_men,Pseu_Men,Pseu menz,Pseudotsuga menziesii,,,,,,Conifer,douglas-fir,Fd,class4
+pseumenz,PSEU.MEN,Pseu_men,Pseu_Men,Pseu menz,Pseudotsuga menziesii,,,,,,Conifer,douglas-fir,Fd,class3
 ,,Pyru_com,,Pyru comm,Pyrus communis,,,,,,Deciduous,,,
 ,,Quer_alb,Quer_Alb,Quer alba,Quercus alba,,,,,,Deciduous,white oak,,
 ,,Quer_bic,Quer_Bic,Quer bico,Quercus bicolor,,,,,,Deciduous,,,
