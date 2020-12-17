@@ -84,7 +84,8 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
   }), by = "species"]
 
   ## use integers (instead of numerics) where possible; these are asserted in Biomass_core
-  speciesTable[, `:=`(growthcurve = as.numeric(growthcurve),
+  speciesTable[, `:=`(Area = as.factor(Area),
+                      growthcurve = as.numeric(growthcurve),
                       shadetolerance = as.numeric(shadetolerance),
                       hardsoft = as.factor(hardsoft),
                       seeddistance_eff = asInteger(seeddistance_eff),
