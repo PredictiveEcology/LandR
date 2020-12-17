@@ -313,32 +313,32 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 
     N <- rep.int(pixelGroupData2$N, pixelGroupData2$N)
     wh1 <- N == 1
-      set(cohortData2, which(wh1), totalOfLeadingBasedOn, cohortData2[[leadingBasedOn]][wh1])
-      if (identical(leadingBasedOn, "cover")) {
-        totalBNot1 <- cohortData2[!wh1, list(N = .N, totalcover = sum(cover, na.rm = TRUE)), by = pixelGroupColName]
-      } else {
-        totalBNot1 <- cohortData2[!wh1, list(N = .N, totalB = sum(B, na.rm = TRUE)), by = pixelGroupColName]
-      }
-      totalBNot1 <- rep.int(totalBNot1[[totalOfLeadingBasedOn]], totalBNot1[["N"]])
-      set(cohortData2, which(!wh1), totalOfLeadingBasedOn, totalBNot1)
+    set(cohortData2, which(wh1), totalOfLeadingBasedOn, cohortData2[[leadingBasedOn]][wh1])
+    if (identical(leadingBasedOn, "cover")) {
+      totalBNot1 <- cohortData2[!wh1, list(N = .N, totalcover = sum(cover, na.rm = TRUE)), by = pixelGroupColName]
+    } else {
+      totalBNot1 <- cohortData2[!wh1, list(N = .N, totalB = sum(B, na.rm = TRUE)), by = pixelGroupColName]
+    }
+    totalBNot1 <- rep.int(totalBNot1[[totalOfLeadingBasedOn]], totalBNot1[["N"]])
+    set(cohortData2, which(!wh1), totalOfLeadingBasedOn, totalBNot1)
 
-      b <- cohortData2[, list(N = .N), by = pgdAndSc]
-      b <- rep.int(b[["N"]], b[["N"]])
-      GT1 <- (b > 1)
-      if (any(GT1)) {
-        pixelGroupData2List <- list()
-        cohortData2[GT1, speciesProportion := sum(B, na.rm = TRUE) / totalB[1], by = pgdAndSc]
-        cohortData2[!GT1, speciesProportion := B / totalB]
-        #pixelGroupData2List[[2]] <- cohortData2[!GT1]
-        #pixelGroupData2 <- rbindlist(pixelGroupData2List)
-      } else {
-        # cols <- c(pixelGroupColName, "speciesCode", "speciesProportion")
-        set(cohortData2, NULL, "speciesProportion", cohortData2[[leadingBasedOn]] /
-              cohortData2[[totalOfLeadingBasedOn]])
-        # pixelGroupData2[[NROW(pixelGroupData2) + 1]] <- cohortData2[!GT1, ..cols]
-      }
-      pixelGroupData2 <- cohortData2
-      systimePost2 <- Sys.time()
+    b <- cohortData2[, list(N = .N), by = pgdAndSc]
+    b <- rep.int(b[["N"]], b[["N"]])
+    GT1 <- (b > 1)
+    if (any(GT1)) {
+      pixelGroupData2List <- list()
+      cohortData2[GT1, speciesProportion := sum(B, na.rm = TRUE) / totalB[1], by = pgdAndSc]
+      cohortData2[!GT1, speciesProportion := B / totalB]
+      #pixelGroupData2List[[2]] <- cohortData2[!GT1]
+      #pixelGroupData2 <- rbindlist(pixelGroupData2List)
+    } else {
+      # cols <- c(pixelGroupColName, "speciesCode", "speciesProportion")
+      set(cohortData2, NULL, "speciesProportion", cohortData2[[leadingBasedOn]] /
+            cohortData2[[totalOfLeadingBasedOn]])
+      # pixelGroupData2[[NROW(pixelGroupData2) + 1]] <- cohortData2[!GT1, ..cols]
+    }
+    pixelGroupData2 <- cohortData2
+    systimePost2 <- Sys.time()
   }
 
   if (isTRUE(doAssertion)) {
@@ -377,7 +377,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     ## old algorithm; keep this code as reference -- it's simpler to follow
     b1 <- Sys.time()
     pixelGroupData4 <- x[, list(totalB = sum(B, na.rm = TRUE),
-                                         speciesCode, B), by = pixelGroup]
+                                speciesCode, B), by = pixelGroup]
     pixelGroupData4 <- pixelGroupData4[, .(speciesGroupB = sum(B, na.rm = TRUE),
                                            totalB = totalB[1]),
                                        by = pgdAndSc]
@@ -866,27 +866,32 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
 
   speciesLayers <- list()
 
-  for (i in seq_along(targetFiles)) {
-    with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
-      speciesLayers[i] <- Cache(Map,
-                                targetFile = asPath(targetFiles[i]),
-                                filename2 = postProcessedFilenamesWithStudyAreaName[i],
-                                MoreArgs = list(url = paste0(url, targetFiles[i]),
-                                                destinationPath = asPath(dPath),
-                                                fun = "raster::raster",
-                                                studyArea = studyArea,
-                                                rasterToMatch = rasterToMatch,
-                                                method = "bilinear",
-                                                datatype = "INT2U",
-                                                overwrite = TRUE,
-                                                userTags = dots$userTags,
-                                                omitArgs = c("userTags")
-                                ),
-                                prepInputs, quick = TRUE) # don't need to digest all the "targetFile" and "archives"
-    })
-  }
+  with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
+    speciesLayers <- Cache(Map,
+                           targetFile = asPath(targetFiles),
+                           filename2 = postProcessedFilenamesWithStudyAreaName,
+                           url = paste0(url, targetFiles),
+                           MoreArgs = list(destinationPath = asPath(dPath),
+                                           fun = "raster::raster",
+                                           studyArea = studyArea,
+                                           rasterToMatch = rasterToMatch,
+                                           method = "bilinear",
+                                           datatype = "INT2U",
+                                           overwrite = TRUE,
+                                           userTags = dots$userTags
+                           ),
+                           prepInputs, quick = TRUE) # don't need to digest all the "targetFile"
+  })
 
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
+
+  # remove "no data" first
+  noData <- sapply(speciesLayers, function(xx) is.na(maxValue(xx)))
+  if (any(noData)) {
+    message(names(noData)[noData], " has no data in this study area; omitting it")
+    speciesLayers <- speciesLayers[!noData]
+  }
+
   layersWdata <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh) FALSE else TRUE)
   if (sum(!layersWdata) > 0) {
     sppKeep <- names(speciesLayers)[layersWdata]
