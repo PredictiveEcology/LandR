@@ -145,7 +145,8 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   speciesTableShort <- speciesTableShort[species %in% equivalentName(sppNameVector, sppEquiv,
                                                                      "LANDIS_traits", multi = TRUE)]
   speciesTableShort[, species := equivalentName(speciesTableShort$species, sppEquiv, sppEquivCol)]
-  speciesTableShort <- speciesTableShort[, .(longevity = min(longevity), shadetolerance = min(shadetolerance)), by = "species"]
+  speciesTableShort <- speciesTableShort[, .(longevity = min(longevity),
+                                             shadetolerance = min(shadetolerance)), by = "species"]
 
   ## join and replace
   species <- species[, c("longevity", "shadetolerance") := .(speciesTableShort[, longevity], speciesTableShort[, shadetolerance])]
