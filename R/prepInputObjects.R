@@ -317,3 +317,85 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 
   return(pixelGroupMap)
 }
+
+
+#' Create \code{standAgeMap}
+#'
+#' Create the \code{standAgeMap} raster containing age estimates for \code{pixelCohortData}.
+#' A separate prepInputs call will source NDFB data used to update ages of recently burned pixels
+#'
+#' @param ageURL url where age map is downloaded
+#' @param ageFun passed to 'fun' arg of prepInputs of stand age map
+#' @param maskWithRTM passed to prepInputs of stand age map
+#' @param method passed to prepInputs of stand age map
+#' @param datatype passed to prepInputs of stand age map
+#' @param destinationPath directory where  age and fire data will be downloaded
+#' @param filename2 passed to prepInputs of stand age map
+#' @param fireURL url to download fire polygons used to update age map
+#' @param fireFun passed to prepInputs of fire data
+#' @template rastertoMatch passed to both prepInputs
+#' @param fireField field used to rasterize fire polys
+#' @param startTime date of first fire year.
+#'
+#' @export
+#' @importFrom raster crs
+#' @importFrom reproducible Cache prepInputs
+
+prepInputsStandAgeMap <- function(..., ageURL = paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                                                       "canada-forests-attributes_attributs-forests-canada/",
+                                                       "2001-attributes_attributs-2001/",
+                                                       "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif"),
+                                  ageFun = 'raster::raster',
+                                  maskWithRTM = TRUE,
+                                  method = 'bilinear',
+                                  datatype = 'INT2U',
+                                  destinationPath = NULL,
+                                  filename2 = NULL,
+                                  fireURL = 'https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip',
+                                  fireFun = 'sf::st_read',
+                                  rasterToMatch, fireField = 'YEAR',
+                                  startTime) {
+  standAgeMap <- Cache(prepInputs, ...,
+                       maskWithRTM = maskWithRTM,
+                       method = method,
+                       datatype = datatype,
+                       filename2 = filename2,
+                       destinationPath = destinationPath,
+                       url = ageURL,
+                       fun = ageFun,
+                       rasterToMatch = rasterToMatch)
+  standAgeMap[] <- asInteger(standAgeMap[])
+
+  if (!(is.null(fireURL) || is.na(fireURL))) {
+    fireYear <- Cache(prepInputsFireYear, ...,
+                      url = fireURL,
+                      fun = fireFun,
+                      destinationPath = destinationPath,
+                      rasterToMatch = rasterToMatch)
+
+    toChange <- !is.na(fireYear[]) & fireYear[] <= asInteger(startTime)
+    standAgeMap[] <- asInteger(standAgeMap[])
+    standAgeMap[toChange] <- asInteger(startTime) - asInteger(fireYear[][toChange])
+  }
+  standAgeMap
+}
+
+#' Create a rasterof fire polygons
+#'
+#' wrapper on prepInputs that will rasterize fire polygons.
+#'
+#' @param rastertoMatch template used for fasterize
+#' @param field field used to rasterize fire polys
+#'
+#' @export
+#' @importFrom sf st_cast st_transform
+#' @importFrom fasterize fasterize
+#' @importFrom raster crs
+#' @importFrom reproducible Cache prepInputs
+
+prepInputsFireYear <- function(..., rasterToMatch, field = 'YEAR') {
+  a <- Cache(prepInputs, ...)
+  gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon
+  d <- st_transform(gg, crs(rasterToMatch))
+  fasterize(d, raster = rasterToMatch, field = field)
+}
