@@ -8,8 +8,8 @@ utils::globalVariables(c(
 #'
 #' @keywords internal
 landisIIrepo <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/",
-                      "Extensions-Succession/master/biomass-succession-archive/",
-                      "trunk/tests/v6.0-2.0/")
+                       "Extensions-Succession/master/biomass-succession-archive/",
+                       "trunk/tests/v6.0-2.0/")
 
 #' Download and prepare a species traits table for use with \code{Biomass_core} module
 #'
@@ -73,10 +73,6 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
 
   names(speciesTable) <- .speciesTableColNames
 
-  speciesTable[, growthcurve := as.numeric(growthcurve)]
-  speciesTable[, shadetolerance := as.numeric(shadetolerance)]
-  speciesTable[, hardsoft := as.factor(hardsoft)]
-
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv, "LANDIS_traits", multi = TRUE) &
@@ -86,6 +82,17 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
   speciesTable <- speciesTable[, lapply(.SD, function(x) {
     if (is.numeric(x)) min(x, na.rm = TRUE) else x[1]
   }), by = "species"]
+
+  ## use integers (instead of numerics) where possible; these are asserted in Biomass_core
+  speciesTable[, `:=`(growthcurve = as.numeric(growthcurve),
+                      shadetolerance = as.numeric(shadetolerance),
+                      hardsoft = as.factor(hardsoft),
+                      seeddistance_eff = asInteger(seeddistance_eff),
+                      seeddistance_max = asInteger(seeddistance_max),
+                      resproutage_min = asInteger(resproutage_min),
+                      resproutage_max = asInteger(resproutage_max),
+                      mortalityshape = asInteger(mortalityshape),
+                      postfireregen = as.factor(postfireregen))]
 
   return(speciesTable)
 }
