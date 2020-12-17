@@ -161,6 +161,10 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   ## join and replace
   species <- species[, c("longevity", "shadetolerance") := .(speciesTableShort[, longevity], speciesTableShort[, shadetolerance])]
 
+  ## make sure updated columns have the correct class
+  species[, `:=`(longevity = asInteger(longevity),
+                 shadetolerance = as.numeric(shadetolerance))]
+
   return(species)
 }
 
