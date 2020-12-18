@@ -6,18 +6,14 @@
 \usage{
 prepInputsStandAgeMap(
   ...,
-  ageURL = paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-    "canada-forests-attributes_attributs-forests-canada/",
-    "2001-attributes_attributs-2001/",
-    "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif"),
+  ageURL = NULL,
   ageFun = "raster::raster",
   maskWithRTM = TRUE,
   method = "bilinear",
   datatype = "INT2U",
   destinationPath = NULL,
   filename2 = NULL,
- 
-    fireURL = "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip",
+  fireURL = NULL,
   fireFun = "sf::st_read",
   rasterToMatch,
   fireField = "YEAR",
@@ -25,31 +21,35 @@ prepInputsStandAgeMap(
 )
 }
 \arguments{
+\item{...}{additional arguments passed to \code{prepInputs}}
+
 \item{ageURL}{url where age map is downloaded}
 
-\item{ageFun}{passed to 'fun' arg of prepInputs of stand age map}
+\item{ageFun}{passed to 'fun' arg of \code{prepInputs} of stand age map}
 
-\item{maskWithRTM}{passed to prepInputs of stand age map}
+\item{maskWithRTM}{passed to \code{prepInputs} of stand age map}
 
-\item{method}{passed to prepInputs of stand age map}
+\item{method}{passed to \code{prepInputs} of stand age map}
 
-\item{datatype}{passed to prepInputs of stand age map}
+\item{datatype}{passed to \code{prepInputs} of stand age map}
 
 \item{destinationPath}{directory where  age and fire data will be downloaded}
 
-\item{filename2}{passed to prepInputs of stand age map}
+\item{filename2}{passed to \code{prepInputs} of stand age map}
 
 \item{fireURL}{url to download fire polygons used to update age map}
 
-\item{fireFun}{passed to prepInputs of fire data}
+\item{fireFun}{passed to \code{prepInputs} of fire data}
+
+\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).}
 
 \item{fireField}{field used to rasterize fire polys}
 
 \item{startTime}{date of first fire year.}
-
-\item{rastertoMatch}{passed to both prepInputs}
 }
 \description{
 Create the \code{standAgeMap} raster containing age estimates for \code{pixelCohortData}.
-A separate prepInputs call will source NDFB data used to update ages of recently burned pixels
+A separate \code{prepInputs} call will source NDFB data used to update ages of recently burned
+pixels.
 }

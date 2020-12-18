@@ -312,49 +312,57 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 
   pixelGroupMap <- raster(rasterToMatch)
 
-  # suppress this message call no non-missing arguments to min; returning Inf min(x@data@values, na.rm = TRUE)
+  #$ suppress this message call no non-missing arguments to min;
+  ## returning Inf min(x@data@values, na.rm = TRUE)
   suppressWarnings(pixelGroupMap[pixelData$pixelIndex] <- as.integer(pixelData$pixelGroup))
 
   return(pixelGroupMap)
 }
 
-
 #' Create \code{standAgeMap}
 #'
 #' Create the \code{standAgeMap} raster containing age estimates for \code{pixelCohortData}.
-#' A separate prepInputs call will source NDFB data used to update ages of recently burned pixels
+#' A separate \code{prepInputs} call will source NDFB data used to update ages of recently burned
+#' pixels.
 #'
+#' @param ... additional arguments passed to \code{prepInputs}
 #' @param ageURL url where age map is downloaded
-#' @param ageFun passed to 'fun' arg of prepInputs of stand age map
-#' @param maskWithRTM passed to prepInputs of stand age map
-#' @param method passed to prepInputs of stand age map
-#' @param datatype passed to prepInputs of stand age map
+#' @param ageFun passed to 'fun' arg of \code{prepInputs} of stand age map
+#' @param maskWithRTM passed to \code{prepInputs} of stand age map
+#' @param method passed to \code{prepInputs} of stand age map
+#' @param datatype passed to \code{prepInputs} of stand age map
 #' @param destinationPath directory where  age and fire data will be downloaded
-#' @param filename2 passed to prepInputs of stand age map
+#' @param filename2 passed to \code{prepInputs} of stand age map
 #' @param fireURL url to download fire polygons used to update age map
-#' @param fireFun passed to prepInputs of fire data
-#' @template rastertoMatch passed to both prepInputs
+#' @param fireFun passed to \code{prepInputs} of fire data
+#' @template rasterToMatch
 #' @param fireField field used to rasterize fire polys
 #' @param startTime date of first fire year.
 #'
 #' @export
 #' @importFrom raster crs
 #' @importFrom reproducible Cache prepInputs
-
-prepInputsStandAgeMap <- function(..., ageURL = paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                                                       "canada-forests-attributes_attributs-forests-canada/",
-                                                       "2001-attributes_attributs-2001/",
-                                                       "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif"),
-                                  ageFun = 'raster::raster',
+prepInputsStandAgeMap <- function(..., ageURL = NULL,
+                                  ageFun = "raster::raster",
                                   maskWithRTM = TRUE,
-                                  method = 'bilinear',
-                                  datatype = 'INT2U',
+                                  method = "bilinear",
+                                  datatype = "INT2U",
                                   destinationPath = NULL,
                                   filename2 = NULL,
-                                  fireURL = 'https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip',
-                                  fireFun = 'sf::st_read',
-                                  rasterToMatch, fireField = 'YEAR',
+                                  fireURL = NULL,
+                                  fireFun = "sf::st_read",
+                                  rasterToMatch, fireField = "YEAR",
                                   startTime) {
+  if (is.null(ageURL))
+    ageURL <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                     "canada-forests-attributes_attributs-forests-canada/",
+                     "2001-attributes_attributs-2001/",
+                     "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif")
+
+  if (is.null(fireURL))
+    fireURL <- paste0("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/",
+                      "current_version/NFDB_poly.zip")
+
   standAgeMap <- Cache(prepInputs, ...,
                        maskWithRTM = maskWithRTM,
                        method = method,
@@ -380,19 +388,19 @@ prepInputsStandAgeMap <- function(..., ageURL = paste0("http://ftp.maps.canada.c
   standAgeMap
 }
 
-#' Create a rasterof fire polygons
+#' Create a raster of fire polygons
 #'
-#' wrapper on prepInputs that will rasterize fire polygons.
+#' Wrapper on \code{prepInputs} that will rasterize fire polygons.
 #'
-#' @param rastertoMatch template used for fasterize
+#' @param ... Additional arguments passed to \code{prepInputs}
+#' @template rasterToMatch
 #' @param field field used to rasterize fire polys
 #'
 #' @export
-#' @importFrom sf st_cast st_transform
 #' @importFrom fasterize fasterize
 #' @importFrom raster crs
 #' @importFrom reproducible Cache prepInputs
-
+#' @importFrom sf st_cast st_transform
 prepInputsFireYear <- function(..., rasterToMatch, field = 'YEAR') {
   a <- Cache(prepInputs, ...)
   gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon

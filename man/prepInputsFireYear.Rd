@@ -2,15 +2,18 @@
 % Please edit documentation in R/prepInputObjects.R
 \name{prepInputsFireYear}
 \alias{prepInputsFireYear}
-\title{Create a rasterof fire polygons}
+\title{Create a raster of fire polygons}
 \usage{
 prepInputsFireYear(..., rasterToMatch, field = "YEAR")
 }
 \arguments{
-\item{field}{field used to rasterize fire polys}
+\item{...}{Additional arguments passed to \code{prepInputs}}
 
-\item{rastertoMatch}{template used for fasterize}
+\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).}
+
+\item{field}{field used to rasterize fire polys}
 }
 \description{
-wrapper on prepInputs that will rasterize fire polygons.
+Wrapper on \code{prepInputs} that will rasterize fire polygons.
 }
