@@ -387,7 +387,7 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
     }
   } else if (grepl("ROF", outputPath)) {
     sA <- "rof"
-    if (grepl("test", outhputPath)) {
+    if (grepl("test", outputPath)) {
       sAN <- "ROF_test"
     } else {
       sAN <- "ROF"
