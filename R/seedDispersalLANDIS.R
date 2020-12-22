@@ -141,7 +141,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     speciesSrcRasterVecList <- lapply(srcSpeciesCodes, function(sc) {
       rasTemplate[srcSpeciesByIndex[[as.character(sc)]]] <- sc; rasTemplate
       })
-    maxSpCode <- max(as.integer(names(speciesSrcRasterVecList)))
+    maxSpCode <- max(as.integer(srcSpeciesCodes))
     speciesSrcRasterVecList <- lapply(seq_len(maxSpCode), function(ind) {
       if (as.character(ind) %in% names(speciesSrcRasterVecList))
         speciesSrcRasterVecList[[as.character(ind)]]
