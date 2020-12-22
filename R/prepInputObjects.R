@@ -312,7 +312,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 
   pixelGroupMap <- raster(rasterToMatch)
 
-  #$ suppress this message call no non-missing arguments to min;
+  ## suppress this message call no non-missing arguments to min;
   ## returning Inf min(x@data@values, na.rm = TRUE)
   suppressWarnings(pixelGroupMap[pixelData$pixelIndex] <- as.integer(pixelData$pixelGroup))
 
