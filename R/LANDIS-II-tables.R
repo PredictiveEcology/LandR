@@ -1,14 +1,15 @@
 utils::globalVariables(c(
-  ":=", ".SD", "Area", "col1", "growthcurve", "leafLignin", "leaflongevity", "mortalityshape",
-  "seeddistance_eff", "seeddistance_max", "species", "species1", "species2", "wooddecayrate"
+  ":=", ".SD", "Area", "col1", "growthcurve", "hardsoft", "leafLignin", "leaflongevity",
+  "mortalityshape", "seeddistance_eff", "seeddistance_max", "species", "species1", "species2",
+  "wooddecayrate"
 ))
 
 #' Default LANDIS-II project repo url
 #'
 #' @keywords internal
 landisIIrepo <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/",
-                      "Extensions-Succession/master/biomass-succession-archive/",
-                      "trunk/tests/v6.0-2.0/")
+                       "Extensions-Succession/master/biomass-succession-archive/",
+                       "trunk/tests/v6.0-2.0/")
 
 #' Download and prepare a species traits table for use with \code{Biomass_core} module
 #'
@@ -72,8 +73,6 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
 
   names(speciesTable) <- .speciesTableColNames
 
-  speciesTable[, growthcurve := as.numeric(growthcurve)]
-
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv, "LANDIS_traits", multi = TRUE) &
@@ -83,6 +82,18 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
   speciesTable <- speciesTable[, lapply(.SD, function(x) {
     if (is.numeric(x)) min(x, na.rm = TRUE) else x[1]
   }), by = "species"]
+
+  ## use integers (instead of numerics) where possible; these are asserted in Biomass_core
+  speciesTable[, `:=`(Area = as.factor(Area),
+                      growthcurve = as.numeric(growthcurve),
+                      shadetolerance = as.numeric(shadetolerance),
+                      hardsoft = as.factor(hardsoft),
+                      seeddistance_eff = asInteger(seeddistance_eff),
+                      seeddistance_max = asInteger(seeddistance_max),
+                      resproutage_min = asInteger(resproutage_min),
+                      resproutage_max = asInteger(resproutage_max),
+                      mortalityshape = asInteger(mortalityshape),
+                      postfireregen = as.factor(postfireregen))]
 
   return(speciesTable)
 }
@@ -145,10 +156,15 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   speciesTableShort <- speciesTableShort[species %in% equivalentName(sppNameVector, sppEquiv,
                                                                      "LANDIS_traits", multi = TRUE)]
   speciesTableShort[, species := equivalentName(speciesTableShort$species, sppEquiv, sppEquivCol)]
-  speciesTableShort <- speciesTableShort[, .(longevity = min(longevity), shadetolerance = min(shadetolerance)), by = "species"]
+  speciesTableShort <- speciesTableShort[, .(longevity = min(longevity),
+                                             shadetolerance = min(shadetolerance)), by = "species"]
 
   ## join and replace
   species <- species[, c("longevity", "shadetolerance") := .(speciesTableShort[, longevity], speciesTableShort[, shadetolerance])]
+
+  ## make sure updated columns have the correct class
+  species[, `:=`(longevity = asInteger(longevity),
+                 shadetolerance = as.numeric(shadetolerance))]
 
   return(species)
 }
