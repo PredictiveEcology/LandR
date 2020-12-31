@@ -56,25 +56,24 @@ A numeric vector of raster pixel indices, in the same resolution and extent as
 \code{seedSrc} raster.
 }
 \description{
-Simulate seed dispersal using user defined function. This is a "receiving
-pixel" focused dispersal approach. It is the "potentially receiving" cell
-that looks around itself for potential seed sources. If it finds a single
-seed source, that passes the probability function described by the
-\code{dispersalFn}. If this passes a comparison to a uniform random draw,
-then the receiving cell is deemed to have a "successful" dispersal for that
-species.
+Simulate seed dispersal using user defined function. This is a "receiving pixel" focused
+dispersal approach.
+It is the "potentially receiving" cell that looks around itself for potential seed sources.
+If it finds a single seed source, that passes the probability function described by the
+\code{dispersalFn}.
+If this passes a comparison to a uniform random draw, then the receiving cell is deemed to have
+a "successful" dispersal for that species.
 This function can therefore only be used for a relatively specific situation
-where there is a yes/no returned for each potential receiving cell, i.e., not
-abundance. This function is also not cumulative, i.e,. there is no higher
-abundance of seeds received if a receiving cell has lots of seed sources
-around it vs. a single seed source. The difference will come with a higher
-probability of successfully receiving a "seed".
+where there is a yes/no returned for each potential receiving cell, i.e., not abundance.
+This function is also not cumulative, i.e,. there is no higher abundance of seeds received if
+a receiving cell has lots of seed sources around it vs. a single seed source.
+The difference will come with a higher probability of successfully receiving a "seed".
 }
 \details{
 \code{dispersalFn} (temporarily unused as code is converted to Rcpp -- the
 default \code{dispersalFn} is hard coded within the \code{spiralSeedDispersal}
 function that uses C++) must be an expression that returns a probability
-distribution. Because it is a dispersal kernal, it must be a probability
+distribution. Because it is a dispersal kernel, it must be a probability
 distribution. The expression that can take an argument named "dis" (without
 quotes) as this will be calculated internally and represents the distance
 from the initial (receiving) pixel and all active pixels within that cluster
@@ -97,18 +96,18 @@ pixelGroupMap <- SpaDES.tools::randomPolygons(rasterTemplate, numTypes = pgs)
 # Make a receive pixels table -- need pixelGroup and species
 nSpecies <- 3
 maxNSpeciesPerPixel <- min(5, nSpecies)
-rcvSpByPG <- lapply(seq_len(pgs/2), function(pg) {
+rcvSpByPG <- lapply(seq_len(pgs / 2), function(pg) {
   data.table(speciesCode = sample(nSpecies, size = sample(maxNSpeciesPerPixel, 1)))
 })
 seedReceive <- rbindlist(rcvSpByPG, idcol = "pixelGroup")
 
 # Make a source pixels table -- need pixelGroup and species
-srcSpByPG <- lapply(seq_len(pgs/2), function(pg) {
+srcSpByPG <- lapply(seq_len(pgs / 2), function(pg) {
   data.table(speciesCode = sample(nSpecies, size = sample(maxNSpeciesPerPixel, 1)))
 })
 seedSource <- rbindlist(srcSpByPG, idcol = "pixelGroup")
 # make source pixels not same pixelGroups as receive
-seedSource[, pixelGroup := pixelGroup + pgs/2]
+seedSource[, pixelGroup := pixelGroup + pgs / 2]
 
 # Get a species table -- if using in Canada, can use this
 speciesTable <- getSpeciesTable(dPath = tempdir())
@@ -120,15 +119,16 @@ speciesTable[, seeddistance_max := SeedMaxDist]
 speciesTable <- speciesTable
 speciesTable <- data.table(speciesTable)[, speciesCode := seq_along(LandisCode)]
 seedReceiveFull <- speciesTable[seedReceive, on = "speciesCode"]
-output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = interactive(),
-                     dtSrc = seedSource,
-                     speciesTable = speciesTable,
-                     pixelGroupMap,
-                     verbose = TRUE,
-                     successionTimestep = 10)
+output <- LANDISDisp(
+  dtRcv = seedReceiveFull, plot.it = interactive(),
+  dtSrc = seedSource,
+  speciesTable = speciesTable,
+  pixelGroupMap,
+  verbose = TRUE,
+  successionTimestep = 10
+)
 # Summarize
 output[, .N, by = speciesCode]
-
 }
 \author{
 Eliot McIntire
