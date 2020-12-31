@@ -13,7 +13,7 @@ utils::globalVariables(c(".", ":=", "X1", "X2", "X3", "X4", "X5", "maxMaxB", "pr
 #'
 #' @export
 #' @importFrom data.table data.table set setkey
-calcSiteShade <- compiler::cmpfun(function(currentTime, cohortData, speciesEcoregion, minRelativeB) {
+calcSiteShade <- function(currentTime, cohortData, speciesEcoregion, minRelativeB) {
   # the siteshade was calculated based on the code:
   # https://github.com/LANDIS-II-Foundation/Extensions-Succession/blob/master/biomass-succession/trunk/src/PlugIn.cs
   if (nrow(cohortData[age > 5,]) > 0) {
@@ -55,4 +55,4 @@ calcSiteShade <- compiler::cmpfun(function(currentTime, cohortData, speciesEcore
   #   stop("aaaaa")
   bAMterm1 <- bAMterm1[, .(pixelGroup, ecoregionGroup, siteShade)]
   return(bAMterm1)
-})
+}

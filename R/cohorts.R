@@ -52,7 +52,7 @@ utils::globalVariables(c(
 #' @importFrom crayon green magenta
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
-#' @importFrom SpaDES.core paddedFloatToChar
+#' @importFrom reproducible paddedFloatToChar
 #' @importFrom stats na.omit
 updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                              speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
@@ -349,8 +349,6 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
 #'
 #' @export
 #' @importFrom data.table setkey setorderv
-#' @importFrom plyr mapvalues
-#' @importFrom SpaDES.core paddedFloatToChar
 generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
                                 columns = c("ecoregionGroup", "speciesCode", "age", "B")) {
   columnsOrig <- columns
@@ -376,7 +374,9 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
     # prepare object 1 (pcd) for checking below
     pcd[, ord := 1:.N]
     setorderv(pcd, c("pixelIndex"))
-    pcd[, pixelGroup2 := mapvalues(pixelGroup, from = unique(pixelGroup), to = as.character(seq_along(unique(pixelGroup))))]
+    uniqPG <- unique(pcd$pixelGroup);
+    pcd[, pixelGroup2 := mapvalues2(pixelGroup, from = uniqPG, to = as.character(seq_along(uniqPG)))]
+    # pcd[, pixelGroup2 := mapvalues(pixelGroup, from = unique(pixelGroup), to = as.character(seq_along(unique(pixelGroup))))]
     setorderv(pcd, "ord")
 
     pcdOld <- data.table::copy(pcdOrig)
@@ -398,8 +398,10 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
     # prepare object 2 (pcdOld) for checking below
     pcdOld[, ord := 1:.N]
     setorderv(pcdOld, c("pixelIndex"))
-    pcdOld[, pixelGroup2 := mapvalues(pixelGroup, from = unique(pixelGroup),
-                                      to = as.character(seq_along(unique(pixelGroup))))]
+
+    uniqPG <- unique(pcdOld$pixelGroup);
+    pcdOld[, pixelGroup2 := mapvalues2(pixelGroup, from = uniqPG, to = as.character(seq_along(uniqPG)))]
+
     setorderv(pcdOld, "ord")
 
     # The check
@@ -529,7 +531,7 @@ describeCohortData <- function(cohortData) {
 #' @export
 #' @importFrom data.table as.data.table is.data.table rbindlist setnames
 #' @importFrom raster raster
-#' @importFrom SpaDES.core paddedFloatToChar
+#' @importFrom reproducible paddedFloatToChar
 #' @importFrom SpaDES.tools spread2
 convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
                                availableERC_by_Sp, theUnwantedPixels,
@@ -1417,7 +1419,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 #' @importFrom crayon green magenta
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
-#' @importFrom SpaDES.core paddedFloatToChar
+#' @importFrom reproducible paddedFloatToChar
 #' @importFrom stats na.omit
 #' @rdname updateCohortDataPostHarvest
 updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
@@ -1588,32 +1590,21 @@ pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
 #' @export
 #' @importFrom assertthat assert_that
 #' @importFrom data.table copy data.table setkey setorderv
-#' @importFrom SpaDES.tools inRange
 #' @importFrom utils data
 #'
 #' @rdname vegTypeGenerator
+#' @examples
+#' library(data.table)
+#' x <- data.table(pixelGroup = rep(1:2, each = 2), B = c(100, 200, 20, 400),
+#'                 speciesCode = rep(c("Pice_Gla", "Popu_Tre"), 2))
+#' vegTypeGenerator(x)
 vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
                              mixedType = 2, sppEquiv = NULL, sppEquivCol,
                              pixelGroupColName = "pixelGroup",
                              doAssertion = getOption("LandR.assertions", TRUE), ...) {
-  if (!inRange(vegLeadingProportion, 0, 1))
-    stop("vegLeadingProportion must be a proportion")
-
   nrowCohortData <- NROW(x)
 
-  leadingBasedOn <- if ("B" %in% colnames(x)) {
-    message("Using B to derive leading type")
-    "B"
-  } else if ("cover" %in% colnames(x)) {
-    message("Using cover to derive leading type, as there is no B column")
-    "cover"
-  } else {
-    stop("x must have either B or cover to determine leading species/type")
-  }
-  assert_that(nrowCohortData > 0)
-
-  if (isTRUE(doAssertion))
-    message("LandR::vegTypeMapGenerator: NROW(x) == ", nrowCohortData)
+  leadingBasedOn <- preambleVTG(x, vegLeadingProportion, doAssertion, nrowCohortData)
 
   if (mixedType == 2) {
     if (is.null(sppEquiv)) {
@@ -1819,3 +1810,37 @@ vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
 
 
 
+#' @importFrom SpaDES.tools inRange
+preambleVTG <- function(x, vegLeadingProportion, doAssertion, nrowCohortData) {
+  if (!inRange(vegLeadingProportion, 0, 1))
+    stop("vegLeadingProportion must be a proportion")
+
+
+  leadingBasedOn <- if ("B" %in% colnames(x)) {
+    message("Using B to derive leading type")
+    "B"
+  } else if ("cover" %in% colnames(x)) {
+    message("Using cover to derive leading type, as there is no B column")
+    "cover"
+  } else {
+    stop("x must have either B or cover to determine leading species/type")
+  }
+  if (!nrowCohortData > 0) stop("cohortData is empty")
+
+  if (isTRUE(doAssertion))
+    message("LandR::vegTypeMapGenerator: NROW(x) == ", nrowCohortData)
+
+  leadingBasedOn
+}
+
+# derived from plyr::mapvalues
+mapvalues2 <- function (x, from, to) { #
+  if (length(from) != length(to)) {
+    stop("`from` and `to` vectors are not the same length.")
+  }
+  mapidx <- match(x, from)
+  mapidxNA <- is.na(mapidx)
+  from_found <- sort(unique(mapidx))
+  x[!mapidxNA] <- to[mapidx[!mapidxNA]]
+  x
+}

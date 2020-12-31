@@ -14,7 +14,7 @@
 #' @importFrom fasterize fasterize
 #' @importFrom raster getValues levels raster
 #' @importFrom reproducible Cache fixErrors
-#' @importFrom SpaDES.core paddedFloatToChar
+#' @importFrom reproducible paddedFloatToChar
 #' @importFrom sf st_as_sf
 #' @export
 prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerField = NULL,

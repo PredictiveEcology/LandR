@@ -19,3 +19,8 @@
 #' @name LandR-package
 #' @rdname LandR-package
 "_PACKAGE"
+
+#' @useDynLib LandR
+#' @importFrom Rcpp sourceCpp
+NULL
+#> NULL

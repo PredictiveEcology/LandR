@@ -225,28 +225,21 @@ vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("Lan
 #' @importFrom assertthat assert_that
 #' @importFrom SpaDES.tools inRange
 #' @rdname vegTypeMapGenerator
+#' @include cohorts.R
+#' @examples
+#' library(data.table)
+#' library(raster)
+#' x <- data.table(pixelGroup = rep(1:2, each = 2), B = c(100, 200, 20, 400),
+#'                 speciesCode = rep(c("Pice_Gla", "Popu_Tre"), 2))
+#' pixelGroupMap <- raster(extent(0,3, 0, 3), res = 1)
+#' pixelGroupMap[] <- sample(1:2, size = 9, replace = TRUE)
+#' vtm <- vegTypeMapGenerator(x, pixelGroupMap = pixelGroupMap)
 vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportion = 0.8,
                                            mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,
                                            pixelGroupColName = "pixelGroup",
                                            doAssertion = getOption("LandR.assertions", TRUE), ...) {
-  if (!inRange(vegLeadingProportion, 0, 1))
-    stop("vegLeadingProportion must be a proportion")
-
   nrowCohortData <- NROW(x)
-
-  leadingBasedOn <- if ("B" %in% colnames(x)) {
-    message("Using B to derive leading type")
-    "B"
-  } else if ("cover" %in% colnames(x)) {
-    message("Using cover to derive leading type, as there is no B column")
-    "cover"
-  } else {
-    stop("x must have either B or cover to determine leading species/type")
-  }
-  assert_that(nrowCohortData > 0)
-
-  if (isTRUE(doAssertion))
-    message("LandR::vegTypeMapGenerator: NROW(x) == ", nrowCohortData)
+  leadingBasedOn <- preambleVTG(x, vegLeadingProportion, doAssertion, nrowCohortData)
 
   if (mixedType == 2) {
     if (is.null(sppEquiv)) {
@@ -573,10 +566,10 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @importFrom httr config with_config
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
+#' @importFrom RCurl getURL
 #' @importFrom reproducible Cache .prefix preProcess basename2
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
-#' @importFrom RCurl getURL
 #' @importFrom XML getHTMLLinks
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
