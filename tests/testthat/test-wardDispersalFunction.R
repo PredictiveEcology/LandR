@@ -67,13 +67,14 @@ test_that("test Ward dispersal seeding algorithm", {
   #    interval = 0.2,
   # set.seed(seedOuter)
   # print(seedOuter)
-  st1 <- system.time(
+  st1 <- system.time({
     output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
                        dtSrc = seedSource,
                        speciesTable = species,
                        reducedPixelGroupMap,
                        verbose = 1,
-                       successionTimestep = successionTimestep))
+                       successionTimestep = successionTimestep)
+  })
   # )
   if (interactive()) {
     print(output[, .N, by = speciesCode])
@@ -107,7 +108,6 @@ test_that("test Ward dispersal seeding algorithm", {
     Plot(reducedPixelGroupMap, Sum_of_species, new = TRUE)
     Plot(sps, legendRange = 1:3)
     i <<- i + 1;
-
   }
 
   expect_true(all(unique(output$speciesCode) %in% unique(seedReceiveFull$speciesCode)))
@@ -159,21 +159,18 @@ test_that("test Ward dispersal seeding algorithm", {
     }
     tests <- unlist(testDists)
     # Fairly conservative test -- the number of tests that fail at p < 0.01 should be about 5% ... really, it should be 1%
-    expect_true(sum(tests < 0.01)/length(tests) <= 0.1)
+    expect_true(sum(tests < 0.01) / length(tests) <= 0.1)
 
     # Where rcv can receive a species, but it doesn't exist in Src
     seedReceive <- data.table(pixelGroup = 3, speciesCode = 1)
     seedSource <- data.table(pixelGroup = 1, speciesCode = 2)
-    output <-
-      LANDISDisp(dtRcv = seedReceive, plot.it = FALSE,
-                 dtSrc = seedSource,
-                 speciesTable = species,
-                 pixelGroupMap = ras2,
-                 verbose = FALSE,
-                 successionTimestep = successionTimestep)
+    output <- LANDISDisp(dtRcv = seedReceive, plot.it = FALSE,
+                         dtSrc = seedSource,
+                         speciesTable = species,
+                         pixelGroupMap = ras2,
+                         verbose = FALSE,
+                         successionTimestep = successionTimestep)
     expect_true(NROW(output) == 0)
   }
-
-
 })
 
