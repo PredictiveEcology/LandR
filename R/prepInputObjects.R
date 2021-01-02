@@ -340,6 +340,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @param startTime date of first fire year.
 #'
 #' @export
+#' @importFrom httr with_config
 #' @importFrom raster crs
 #' @importFrom reproducible Cache prepInputs
 prepInputsStandAgeMap <- function(..., ageURL = NULL,
@@ -354,7 +355,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
                                   rasterToMatch, fireField = "YEAR",
                                   startTime) {
   if (is.null(ageURL))
-    ageURL <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+    ageURL <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
                      "canada-forests-attributes_attributs-forests-canada/",
                      "2001-attributes_attributs-2001/",
                      "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif")
@@ -363,15 +364,17 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
     fireURL <- paste0("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/",
                       "current_version/NFDB_poly.zip")
 
-  standAgeMap <- Cache(prepInputs, ...,
-                       maskWithRTM = maskWithRTM,
-                       method = method,
-                       datatype = datatype,
-                       filename2 = filename2,
-                       destinationPath = destinationPath,
-                       url = ageURL,
-                       fun = ageFun,
-                       rasterToMatch = rasterToMatch)
+  with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
+    standAgeMap <- Cache(prepInputs, ...,
+                         maskWithRTM = maskWithRTM,
+                         method = method,
+                         datatype = datatype,
+                         filename2 = filename2,
+                         destinationPath = destinationPath,
+                         url = ageURL,
+                         fun = ageFun,
+                         rasterToMatch = rasterToMatch)
+  })
   standAgeMap[] <- asInteger(standAgeMap[])
 
   if (!(is.null(fireURL) || is.na(fireURL))) {
