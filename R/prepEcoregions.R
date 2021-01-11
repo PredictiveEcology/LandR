@@ -15,7 +15,7 @@
 #' @importFrom raster getValues levels raster
 #' @importFrom reproducible Cache fixErrors
 #' @importFrom reproducible paddedFloatToChar
-#' @importFrom sf st_as_sf
+#' @importFrom sf st_crs st_as_sf st_transform
 #' @export
 prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerField = NULL,
                            rasterToMatchLarge, rstLCCAdj, pixelsToRm, cacheTags) {
@@ -24,7 +24,7 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
 
   if (is.null(ecoregionRst)) {
     ecoregionLayer <- fixErrors(ecoregionLayer)
-    ecoregionMapSF <- sf::st_as_sf(ecoregionLayer)
+    ecoregionMapSF <- sf::st_as_sf(ecoregionLayer) %>% sf::st_transform(., st_crs(rasterToMatchLarge))
 
     if (is.null(ecoregionLayerField)) {
       if (!is.null(ecoregionMapSF$ECODISTRIC)) {
@@ -36,7 +36,7 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
       ecoDT <- as.data.table(ecoregionMapSF)
       ecoregionField <- ecoregionLayerField
       ecoDT[, ecoregionLayerField := ecoDT[, get(ecoregionField)]]
-      ecoregionMapSF$ecoregionLayerField <- as.factor(ecoDT$ecoregionLayerField)
+      ecoregionMapSF[["ecoregionLayerField"]] <- as.factor(ecoDT$ecoregionLayerField)
       rm(ecoDT)
     }
     ecoregionRst <- fasterize::fasterize(ecoregionMapSF, raster = rasterToMatchLarge,
