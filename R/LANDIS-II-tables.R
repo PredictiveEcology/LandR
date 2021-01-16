@@ -253,7 +253,7 @@ prepInputsSpecies <- function(url = NULL, dPath, cacheTags = NULL) {
 
 #' @export
 #' @rdname prepInputsSpecies
-prepInputsMainInput <- function(url = NULL, dPath, cacheTags) {
+prepInputsMainInput <- function(url = NULL, dPath, cacheTags = NULL) {
   if (is.null(url))
     url <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/",
                   "Extensions-Succession/master/biomass-succession-archive/",
