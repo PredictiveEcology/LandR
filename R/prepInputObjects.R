@@ -132,12 +132,12 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
   pixelTable <- na.omit(pixelTable2, cols = c(coverColNames))
 
   if (NROW(pixelTable1) != NROW(pixelTable))
-    warning("Setting pixels to NA where there is NA in sim$speciesLayers'. Vegetation succession",
+    message("Setting pixels to NA where there is NA in sim$speciesLayers. Vegetation succession",
             " parameters will only be calculated where there is data for species cover.",
             "\n  Check if rasterToMatch shoudn't also only have data where there is cover data,",
             " as this may affect other modules.")
   if (NROW(pixelTable2) != NROW(pixelTable))
-    warning("Setting pixels to NA where there is NA in dummy 'ecoregionMap'")
+    message("Setting pixels to NA where there is NA in 'ecoregionMap'")
 
   message(blue("rm NAs, leaving", magenta(NROW(pixelTable)), "pixels with data"))
   message(blue("This is the summary of the input data for age, ecoregionGroup, biomass, speciesLayers:"))
