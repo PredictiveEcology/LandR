@@ -9,9 +9,10 @@ getSpeciesTable(url = NULL, dPath = tempdir(), cacheTags = NULL)
 
 prepSpeciesTable(
   speciesTable,
-  speciesLayers,
+  speciesLayers = NULL,
   sppEquiv = NULL,
-  sppEquivCol = "LandR"
+  sppEquivCol = "LandR",
+  areas = c("BSW", "BP", "MC")
 )
 }
 \arguments{
@@ -24,23 +25,31 @@ prepSpeciesTable(
 
 \item{speciesTable}{A raw species traits table}
 
-\item{speciesLayers}{stack of species layers rasters}
+\item{speciesLayers}{Deprecated.}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
-Only necessary if \code{mixedType == 2}.
+For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
+this only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use
 \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
 Only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
+
+\item{areas}{A character vector of areas to use. Can be one or more of
+\code{c("Acadian", "AM", "NorthShore", "BP", "BSE", "BSW", "LSJ", "MC", "PM", "WestON")}.
+If it is more than one, this function will take the minimum value, within a species.
+These are short versions of the Canada Ecoprovinces. Currently defaults to
+\code{c("BSW", "BP", "MC")} for historical reasons.}
 }
 \value{
 A \code{data.table} with columns ... TODO
 }
 \description{
-TODO: add detailed description
+\code{prepSpeciesTable}
 }
 \note{
 This one is tailored to Canadian forests (?)

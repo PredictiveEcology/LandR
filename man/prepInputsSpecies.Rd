@@ -7,7 +7,7 @@
 \usage{
 prepInputsSpecies(url = NULL, dPath, cacheTags = NULL)
 
-prepInputsMainInput(url = NULL, dPath, cacheTags = NULL)
+prepInputsMainInput(url = NULL, dPath = tempdir(), cacheTags = NULL)
 }
 \arguments{
 \item{url}{If NULL (the default), uses one from the LANDIS-II project:
