@@ -13,7 +13,7 @@ landisIIrepo <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/"
 
 #' Download and prepare a species traits table for use with \code{Biomass_core} module
 #'
-#' TODO: add detailed description
+#' \code{prepSpeciesTable}
 #'
 #' @note This one is tailored to Canadian forests (?)
 #'
@@ -57,7 +57,12 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
 
 #' @param speciesTable  A raw species traits table
 #'
-#' @param speciesLayers stack of species layers rasters
+#' @param speciesLayers Deprecated.
+#' @param areas A character vector of areas to use. Can be one or more of
+#'   \code{c("Acadian", "AM", "NorthShore", "BP", "BSE", "BSW", "LSJ", "MC", "PM", "WestON")}.
+#'   If it is more than one, this function will take the minimum value, within a species.
+#'   These are short versions of the Canada Ecoprovinces. Currently defaults to
+#'   \code{c("BSW", "BP", "MC")} for historical reasons.
 #'
 #' @template sppEquiv
 #'
@@ -67,7 +72,9 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
 #'
 #' @export
 #' @rdname speciesTable
-prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEquivCol = "LandR") {
+prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
+                             sppEquiv = NULL, sppEquivCol = "LandR",
+                             areas = c("BSW", "BP", "MC")) {
   if (is.null(sppEquiv))
     sppEquiv <- data.table(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
 
@@ -76,7 +83,7 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv, "LANDIS_traits", multi = TRUE) &
-                                 Area %in% c("BSW", "BP", "MC")]
+                                 Area %in% areas]
 
   speciesTable[, species := equivalentName(speciesTable$species, sppEquiv, sppEquivCol)]
   speciesTable <- speciesTable[, lapply(.SD, function(x) {
@@ -95,7 +102,7 @@ prepSpeciesTable <- function(speciesTable, speciesLayers, sppEquiv = NULL, sppEq
                       mortalityshape = asInteger(mortalityshape),
                       postfireregen = as.factor(postfireregen))]
 
-  return(speciesTable)
+  return(speciesTable[])
 }
 
 #' Change species table of parameters/traits
@@ -253,7 +260,7 @@ prepInputsSpecies <- function(url = NULL, dPath, cacheTags = NULL) {
 
 #' @export
 #' @rdname prepInputsSpecies
-prepInputsMainInput <- function(url = NULL, dPath, cacheTags = NULL) {
+prepInputsMainInput <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
   if (is.null(url))
     url <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/",
                   "Extensions-Succession/master/biomass-succession-archive/",
