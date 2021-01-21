@@ -17,7 +17,27 @@
 #'                must be found in. The return value will still be from \code{column}
 #'
 #' @export
+#' @rdname equivalentName
 equivalentName <- function(value, df, column, multi = FALSE, searchColumn = NULL) {
+  out <- equivalentNameAsList(value, df, multi)
+  likelyMatch <- equivalentNameColumn(value, df, column, multi = FALSE, searchColumn = NULL)
+  df[[column]][out[[likelyMatch]]]
+}
+
+#' \code{equivalentNameColumn} will provide the name of the column that best matches.
+#' @export
+#' @rdname equivalentName
+equivalentNameColumn <- function(value, df, column, multi = FALSE, searchColumn = NULL) {
+  out <- equivalentNameAsList(value, df, multi)
+  likelyMatch <- if (is.null(searchColumn)) {
+    which.max(unlist(lapply(out, function(x) sum(!is.na(x)))))
+  } else {
+    searchColumn
+  }
+  names(likelyMatch)
+}
+
+equivalentNameAsList <- function(value, df, multi) {
   out <- lapply(df, function(x) {
     if (isTRUE(multi)) {
       which(x %in% as.character(value))
@@ -25,10 +45,5 @@ equivalentName <- function(value, df, column, multi = FALSE, searchColumn = NULL
       match(as.character(value), x)
     }
   })
-  likelyMatch <- if (is.null(searchColumn)) {
-    which.max(unlist(lapply(out, function(x) sum(!is.na(x)))))
-  } else {
-    searchColumn
-  }
-  df[[column]][out[[names(likelyMatch)]]]
+
 }

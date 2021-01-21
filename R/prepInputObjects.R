@@ -132,12 +132,12 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
   pixelTable <- na.omit(pixelTable2, cols = c(coverColNames))
 
   if (NROW(pixelTable1) != NROW(pixelTable))
-    warning("Setting pixels to NA where there is NA in sim$speciesLayers'. Vegetation succession",
+    message("Setting pixels to NA where there is NA in sim$speciesLayers. Vegetation succession",
             " parameters will only be calculated where there is data for species cover.",
             "\n  Check if rasterToMatch shoudn't also only have data where there is cover data,",
             " as this may affect other modules.")
   if (NROW(pixelTable2) != NROW(pixelTable))
-    warning("Setting pixels to NA where there is NA in dummy 'ecoregionMap'")
+    message("Setting pixels to NA where there is NA in 'ecoregionMap'")
 
   message(blue("rm NAs, leaving", magenta(NROW(pixelTable)), "pixels with data"))
   message(blue("This is the summary of the input data for age, ecoregionGroup, biomass, speciesLayers:"))
@@ -312,7 +312,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 
   pixelGroupMap <- raster(rasterToMatch)
 
-  #$ suppress this message call no non-missing arguments to min;
+  ## suppress this message call no non-missing arguments to min;
   ## returning Inf min(x@data@values, na.rm = TRUE)
   suppressWarnings(pixelGroupMap[pixelData$pixelIndex] <- as.integer(pixelData$pixelGroup))
 
@@ -398,15 +398,18 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @param ... Additional arguments passed to \code{prepInputs}
 #' @template rasterToMatch
 #' @param field field used to rasterize fire polys
+#' @param earliestYear the earliest fire date to allow
 #'
 #' @export
 #' @importFrom fasterize fasterize
 #' @importFrom raster crs
 #' @importFrom reproducible Cache prepInputs
 #' @importFrom sf st_cast st_transform
-prepInputsFireYear <- function(..., rasterToMatch, field = 'YEAR') {
+prepInputsFireYear <- function(..., rasterToMatch, field = 'YEAR', earliestYear = 1950) {
   a <- Cache(prepInputs, ...)
   gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon
   d <- st_transform(gg, crs(rasterToMatch))
-  fasterize(d, raster = rasterToMatch, field = field)
+  fireRas <- fasterize(d, raster = rasterToMatch, field = field)
+  fireRas[!is.na(getValues(fireRas)) & getValues(fireRas) < earliestYear] <- NA
+  return(fireRas)
 }

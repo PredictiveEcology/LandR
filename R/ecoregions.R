@@ -23,7 +23,7 @@ utils::globalVariables(c(
 #' @importFrom fasterize fasterize
 #' @importFrom raster getValues levels raster
 #' @importFrom sf st_as_sf
-#' @importFrom SpaDES.core paddedFloatToChar
+#' @importFrom reproducible paddedFloatToChar
 ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch) {
   # change the coordinate reference for all spatialpolygons
   message("ecoregionProducer 1: ", Sys.time())

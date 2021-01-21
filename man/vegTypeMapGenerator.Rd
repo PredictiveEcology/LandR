@@ -44,11 +44,13 @@ Defaults to 2.}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
-Only necessary if \code{mixedType == 2}.
+For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
+this only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use
 \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
 Only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
@@ -59,6 +61,15 @@ in \code{cohortData$speciesCode}, plus an optional "Mixed" colour.}
 }
 \description{
 Generate vegetation type map
+}
+\examples{
+library(data.table)
+library(raster)
+x <- data.table(pixelGroup = rep(1:2, each = 2), B = c(100, 200, 20, 400),
+                speciesCode = rep(c("Pice_Gla", "Popu_Tre"), 2))
+pixelGroupMap <- raster(extent(0,3, 0, 3), res = 1)
+pixelGroupMap[] <- sample(1:2, size = 9, replace = TRUE)
+vtm <- vegTypeMapGenerator(x, pixelGroupMap = pixelGroupMap)
 }
 \author{
 Eliot McIntire, Ceres Barros, Alex Chubaty

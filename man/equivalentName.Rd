@@ -2,9 +2,12 @@
 % Please edit documentation in R/chooseName.R
 \name{equivalentName}
 \alias{equivalentName}
+\alias{equivalentNameColumn}
 \title{Return equivalent name from a \code{data.frame} of equivalencies}
 \usage{
 equivalentName(value, df, column, multi = FALSE, searchColumn = NULL)
+
+equivalentNameColumn(value, df, column, multi = FALSE, searchColumn = NULL)
 }
 \arguments{
 \item{value}{Vector of values to match in \code{df}.}

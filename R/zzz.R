@@ -1,5 +1,3 @@
-## be sure to update the 'Package Options' section of the package help file
-##   in R/spades-core-package.R
 ##
 .onLoad <- function(libname, pkgname) {
   ## set options using the approach used by devtools

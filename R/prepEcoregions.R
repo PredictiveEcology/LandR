@@ -13,9 +13,8 @@
 #' @importFrom data.table as.data.table data.table
 #' @importFrom fasterize fasterize
 #' @importFrom raster getValues levels raster
-#' @importFrom reproducible Cache fixErrors
-#' @importFrom sf st_crs st_as_sf st_transform
-#' @importFrom SpaDES.core paddedFloatToChar
+#' @importFrom reproducible Cache fixErrors paddedFloatToChar
+#' @importFrom sf st_as_sf
 #' @export
 prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerField = NULL,
                            rasterToMatchLarge, rstLCCAdj, pixelsToRm, cacheTags) {
