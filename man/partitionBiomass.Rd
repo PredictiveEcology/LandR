@@ -4,17 +4,14 @@
 \alias{partitionBiomass}
 \title{Partition biomass according to cover estimates}
 \usage{
-partitionBiomass(x = 1, pixelCohortData, decidSp)
+partitionBiomass(x = 1, pixelCohortData)
 }
 \arguments{
 \item{x}{The ratio for deciduous cover:biomass, where conifer cover:biomass = 1}
 
-\item{pixelCohortData}{A full pixelCohortData object (i.e., not cohortData)}
-
-\item{decidSp}{A character vector of species that represent deciduous. Defaults
-to the equivalent names of \code{c("Popu_Tre", "Betu_Pap")}}
+\item{pixelCohortData}{A full \code{pixelCohortData} object (i.e., not \code{cohortData})}
 }
 \description{
-This function will partition totalBiomass into each cohort. It will discount
-deciduous cover, if x is < 1
+This function will partition \code{totalBiomass} into each cohort.
+It will discount deciduous cover, if \code{x < 1}.
 }
