@@ -3,6 +3,7 @@
 \name{assert1}
 \alias{assert1}
 \alias{assert2}
+\alias{assertSppMaxBMaxANPP}
 \alias{assertUniqueCohortData}
 \alias{assertERGs}
 \alias{assertColumns}
@@ -25,6 +26,11 @@ assert1(
 assert2(
   cohortDataNo34to36,
   classesToReplace = 34:36,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertSppMaxBMaxANPP(
+  speciesEcoregion,
   doAssertion = getOption("LandR.assertions", TRUE)
 )
 
@@ -109,11 +115,11 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 \item{cohortDataNo34to36}{A \code{cohortData} \code{data.table} with only the
 pixels what were LCC 34:36}
 
+\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
+
 \item{columns}{Vector of column names on which to test for unique \code{cohortData}}
 
 \item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique groupings}
-
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
 
 \item{minRelativeB}{TODO: add description}
 
@@ -169,6 +175,8 @@ raster operations (i.e., the one used throughout the simulation).}
 Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
 
 Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
+
+Assert that all species have maxB and maxANPP values in the landscape
 
 This is the full \code{pixelCohortData}, not the collapsed one.
 }
