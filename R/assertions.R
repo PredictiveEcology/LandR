@@ -88,6 +88,40 @@ assert2 <- function(cohortDataNo34to36, classesToReplace = 34:36,
   }
 }
 
+#' Assertions
+#'
+#' Assert that all species have maxB and maxANPP values in the landscape
+#'
+#' @param speciesEcoregion A \code{speciesEcoregion} object
+#'
+#' @template cohortData
+#' @template doAssertion
+#'
+#' @export
+#' @rdname assertions
+assertSppMaxBMaxANPP <- function(speciesEcoregion,
+                                 doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    tempDT <- speciesEcoregion[, .(sum(maxB, na.rm = TRUE),
+                                   sum(maxANPP, na.rm = TRUE)),
+                               by = speciesCode]
+    if (any(tempDT$V1 == 0)) {
+      noMaxB <- tempDT[V1 == 0, speciesCode]
+      warning(paste("The following species have no maxB values throughout the landscape:\n",
+                    paste(noMaxB, collapse = ", "), "\n",
+                    "This may be due to missing trait values"))
+    }
+
+    if (any(tempDT$V2 == 0)) {
+      noMaxANPP <- tempDT[V2 == 0, speciesCode]
+      warning(paste("The following species have no maxANPP values throughout the landscape:\n",
+                    paste(noMaxANPP, collapse = ", "), "\n",
+                    "This may be due to missing trait values"))
+    }
+  }
+}
+
+
 #' Assert that \code{cohortData} has unique lines when subsetting for a given set of columns
 #'
 #' @param columns Vector of column names on which to test for unique \code{cohortData}
