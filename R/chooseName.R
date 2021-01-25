@@ -20,7 +20,7 @@
 #' @rdname equivalentName
 equivalentName <- function(value, df, column, multi = FALSE, searchColumn = NULL) {
   out <- equivalentNameAsList(value, df, multi)
-  likelyMatch <- equivalentNameColumn(value, df, column, multi = FALSE, searchColumn = NULL)
+  likelyMatch <- equivalentNameColumn(value, df, column, multi = multi, searchColumn = searchColumn)
   df[[column]][out[[likelyMatch]]]
 }
 
@@ -30,11 +30,11 @@ equivalentName <- function(value, df, column, multi = FALSE, searchColumn = NULL
 equivalentNameColumn <- function(value, df, column, multi = FALSE, searchColumn = NULL) {
   out <- equivalentNameAsList(value, df, multi)
   likelyMatch <- if (is.null(searchColumn)) {
-    which.max(unlist(lapply(out, function(x) sum(!is.na(x)))))
+    names(which.max(unlist(lapply(out, function(x) sum(!is.na(x))))))
   } else {
     searchColumn
   }
-  names(likelyMatch)
+  likelyMatch
 }
 
 equivalentNameAsList <- function(value, df, multi) {
@@ -45,5 +45,4 @@ equivalentNameAsList <- function(value, df, multi) {
       match(as.character(value), x)
     }
   })
-
 }
