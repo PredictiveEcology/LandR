@@ -397,8 +397,6 @@ speciesCodeFromCommunity <- function(num) {
   speciesCode <- lapply(indices, function(x) (seq_len(length(x)) - 1)[x])
 }
 
-
-
 speciesComm <- function(num, sc) {
   speciesCode <- speciesCodeFromCommunity(num)
   data.table(
@@ -408,7 +406,6 @@ speciesComm <- function(num, sc) {
   )[!is.na(speciesCode)] %>%
     sc[.]
 }
-
 
 #' @importFrom fpCompare %<=%
 WardEqn <- function(dis, cellSize, effDist, maxDist, k, b) {
@@ -543,11 +540,8 @@ seedDispInnerFn <-
       )
     }
 
-
     return(seedsArrived)
-  }
-
-
+}
 
 #' Ward Seed Dispersal kernel
 #'
@@ -589,8 +583,7 @@ Ward <- expression(if (cellSize <= effDist) {
 #'
 #' @name WardFast
 #' @rdname WardFast
-WardFast <- expression(ifelse(cellSize <= effDist,
-  {
+WardFast <- expression(ifelse(cellSize <= effDist, {
     ifelse(
       dis <= effDist,
       exp((dis - cellSize) * log(1 - k) / effDist) -
@@ -598,8 +591,7 @@ WardFast <- expression(ifelse(cellSize <= effDist,
       (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
         (1 - k) * exp((dis - effDist) * log(b) / maxDist)
     )
-  },
-  {
+  }, {
     ifelse(
       dis <= cellSize,
       exp((dis - cellSize) * log(1 - k) / effDist) - (1 - k) *
