@@ -132,7 +132,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     spRasts[[sp]] <- spRas
     spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                            filename = asPath(file.path(destinationPath,
-                                                       paste0("CASFRI", sp, ".tif"))),
+                                                       paste0("CASFRI_", sp, ".tif"))),
                            overwrite = TRUE, datatype = "INT2U")
   }
 
@@ -154,7 +154,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     startCRS <- crs(spRasts[[sp]])
     spRasts[[sp]] <- writeRaster(spRasts[[sp]],
                                  filename = asPath(file.path(destinationPath,
-                                                             paste0("CASFRI", sp, ".tif"))),
+                                                             paste0("CASFRI_", sp, ".tif"))),
                                  datatype = "INT1U", overwrite = TRUE)
 
     if (is(spRasts[[sp]], "Raster")) {
