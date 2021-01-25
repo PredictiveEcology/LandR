@@ -107,14 +107,14 @@ assertSppMaxBMaxANPP <- function(speciesEcoregion,
                                by = speciesCode]
     if (any(tempDT$V1 == 0)) {
       noMaxB <- tempDT[V1 == 0, speciesCode]
-      warning(paste("The following species have no maxB values throughout the landscape:\n",
+      stop(paste("The following species have no maxB values throughout the landscape:\n",
                     paste(noMaxB, collapse = ", "), "\n",
                     "This may be due to missing trait values"))
     }
 
     if (any(tempDT$V2 == 0)) {
       noMaxANPP <- tempDT[V2 == 0, speciesCode]
-      warning(paste("The following species have no maxANPP values throughout the landscape:\n",
+      stop(paste("The following species have no maxANPP values throughout the landscape:\n",
                     paste(noMaxANPP, collapse = ", "), "\n",
                     "This may be due to missing trait values"))
     }
