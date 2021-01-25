@@ -45,5 +45,4 @@ equivalentNameAsList <- function(value, df, multi) {
       match(as.character(value), x)
     }
   })
-
 }
