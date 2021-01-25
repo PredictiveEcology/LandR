@@ -559,7 +559,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(14, 34)] <- 40
         spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                                filename = asPath(file.path(destinationPath,
-                                                           paste0("Pickell", sp, ".tif"))),
+                                                           paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT1U")
       }
     }
@@ -572,7 +572,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(32, 42)] <- 40
         spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                                filename = asPath(file.path(destinationPath,
-                                                           paste0("Pickell", sp, ".tif"))),
+                                                           paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT1U")
       }
     }
@@ -589,7 +589,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(23, 43)] <- 40
         spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                                filename = asPath(file.path(destinationPath,
-                                                           paste0("Pickell", sp, ".tif"))),
+                                                           paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT1U")
       }
     }
@@ -602,7 +602,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(31, 41)] <- 40
         spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                                filename = asPath(file.path(destinationPath,
-                                                           paste0("Pickell", sp, ".tif"))),
+                                                           paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT2U")
       }
     }
