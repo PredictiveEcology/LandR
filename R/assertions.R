@@ -1,4 +1,4 @@
-utils::globalVariables(c(".N"))
+utils::globalVariables(c(".N", "V1", "V2"))
 
 #' Assertions
 #'
@@ -17,8 +17,7 @@ utils::globalVariables(c(".N"))
 #'
 #' @export
 #' @rdname assertions
-assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote,
-                    classesToReplace = 34:36,
+assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote, classesToReplace = 34:36,
                     doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     allCodesAre34to36 <- all(grepl(paste(paste0(".*_", classesToReplace), collapse = "|"),
@@ -60,7 +59,6 @@ assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote,
     }
   }
 }
-
 
 #' Assertions
 #'
@@ -107,20 +105,19 @@ assertSppMaxBMaxANPP <- function(speciesEcoregion,
                                by = speciesCode]
     if (any(tempDT$V1 == 0)) {
       noMaxB <- tempDT[V1 == 0, speciesCode]
-      stop(paste("The following species have no maxB values throughout the landscape:\n",
-                    paste(noMaxB, collapse = ", "), "\n",
-                    "This may be due to missing trait values"))
+      stop("The following species have no maxB values throughout the landscape:\n",
+           paste(noMaxB, collapse = ", "), "\n",
+           "This may be due to missing trait values.")
     }
 
     if (any(tempDT$V2 == 0)) {
       noMaxANPP <- tempDT[V2 == 0, speciesCode]
-      stop(paste("The following species have no maxANPP values throughout the landscape:\n",
-                    paste(noMaxANPP, collapse = ", "), "\n",
-                    "This may be due to missing trait values"))
+      stop("The following species have no maxANPP values throughout the landscape:\n",
+           paste(noMaxANPP, collapse = ", "), "\n",
+           "This may be due to missing trait values")
     }
   }
 }
-
 
 #' Assert that \code{cohortData} has unique lines when subsetting for a given set of columns
 #'
@@ -190,7 +187,6 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
     }
   }
 }
-
 
 #' Assert that an object contains a particular set of columns
 #'
@@ -365,7 +361,6 @@ assertFireToleranceDif <- function(burnedPixelCohortData,
   }
 }
 
-
 #' Assert that species layers exist with species cover in the study area
 #'
 #' @param speciesLayers A \code{RasterStack} or \code{RasterLayer} that
@@ -421,7 +416,6 @@ assertRstLCChange <- function(rstLCChange, rasterToMatch,
 
   }
 }
-
 
 #' Assert that the \code{cohortData} \code{speciesEcoregion} have matching classes
 #'
