@@ -652,7 +652,10 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   suffix <- paste0("_", suffix)
 
   ## select which targetFiles to extract
-  targetFiles <- grep(paste(kNNnames, ".*\\.tif$", sep = "", collapse = "|"), fileNames, value = TRUE)
+  ## use sapply to preserve pattern order
+  targetFiles <- sapply(paste0(kNNnames, ".*\\.tif$"), USE.NAMES = FALSE, FUN = function(pat) {
+    grep(pat, fileNames, value = TRUE)
+  })
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
   postProcessedFilenamesWithStudyAreaName <- .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
 
@@ -847,7 +850,9 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   suffix <- paste0("_", suffix)
 
   ## select which archives/targetFiles to extract -- because there was "multi" above, need unique here
-  targetFiles <- fileNames[allSpp %in% kNNnames]
+  targetFiles <- sapply(paste0(kNNnames, ".*\\.tif$"), USE.NAMES = FALSE, FUN = function(pat) {
+    grep(pat, fileNames, value = TRUE)
+  })
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
   postProcessedFilenamesWithStudyAreaName <- .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
