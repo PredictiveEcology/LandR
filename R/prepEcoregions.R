@@ -14,7 +14,7 @@
 #' @importFrom fasterize fasterize
 #' @importFrom raster getValues levels raster
 #' @importFrom reproducible Cache fixErrors paddedFloatToChar
-#' @importFrom sf st_as_sf
+#' @importFrom sf st_as_sf st_crs st_transform
 #' @export
 prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerField = NULL,
                            rasterToMatchLarge, rstLCCAdj, pixelsToRm, cacheTags) {
