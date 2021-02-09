@@ -48,6 +48,9 @@ raster operations (i.e., the one used throughout the simulation).}
 
 \item{startTime}{date of first fire year.}
 }
+\value{
+a stand age map corrected for fires
+}
 \description{
 Create the \code{standAgeMap} raster containing age estimates for \code{pixelCohortData}.
 A separate \code{prepInputs} call will source NDFB data used to update ages of recently burned

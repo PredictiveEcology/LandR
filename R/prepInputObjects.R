@@ -338,6 +338,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @template rasterToMatch
 #' @param fireField field used to rasterize fire polys
 #' @param startTime date of first fire year.
+#' @return a stand age map corrected for fires
 #'
 #' @export
 #' @importFrom httr with_config
@@ -384,9 +385,11 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
                       destinationPath = destinationPath,
                       rasterToMatch = rasterToMatch)
 
-    toChange <- !is.na(fireYear[]) & fireYear[] <= asInteger(startTime)
-    standAgeMap[] <- asInteger(standAgeMap[])
-    standAgeMap[toChange] <- asInteger(startTime) - asInteger(fireYear[][toChange])
+    if (!is.null(fireYear)) {
+      toChange <- !is.na(fireYear[]) & fireYear[] <= asInteger(startTime)
+      standAgeMap[] <- asInteger(standAgeMap[])
+      standAgeMap[toChange] <- asInteger(startTime) - asInteger(fireYear[][toChange])
+    }
   }
   standAgeMap
 }
@@ -407,9 +410,13 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @importFrom sf st_cast st_transform
 prepInputsFireYear <- function(..., rasterToMatch, field = 'YEAR', earliestYear = 1950) {
   a <- Cache(prepInputs, ...)
-  gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon
-  d <- st_transform(gg, crs(rasterToMatch))
-  fireRas <- fasterize(d, raster = rasterToMatch, field = field)
-  fireRas[!is.na(getValues(fireRas)) & getValues(fireRas) < earliestYear] <- NA
-  return(fireRas)
+  if (nrow(a) > 0) {
+    gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon
+    d <- st_transform(gg, crs(rasterToMatch))
+    fireRas <- fasterize(d, raster = rasterToMatch, field = field)
+    fireRas[!is.na(getValues(fireRas)) & getValues(fireRas) < earliestYear] <- NA
+    return(fireRas)
+  } else {
+    return(NULL)
+  }
 }
