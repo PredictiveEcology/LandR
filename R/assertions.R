@@ -1,4 +1,5 @@
-utils::globalVariables(c(".N", "V1", "V2"))
+utils::globalVariables(c(".N", "V1", "V2", "relativeAbundObsrvd", "relativeAbund",
+                         "reps", "years"))
 
 #' Assertions
 #'
@@ -476,9 +477,11 @@ assertStandCohortData <- function(standCohortData, doAssertion = getOption("Land
 }
 
 
-#' Assert that the \code{standCohortData} has no NAs
+#' Assert that the \code{allCohortData} has the expected years and reps combinations
 #'
 #' @param allCohortData A \code{data.table} with all simulated cohortData to use for validaton
+#' @param reps repetition ids
+#' @param years years
 #'
 #' @template doAssertion
 #'
