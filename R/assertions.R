@@ -445,3 +445,57 @@ assertSpeciesEcoregionCohortDataMatch <- function(cohortData, speciesEcoregion,
            paste(b, collapse = ", "))
   }
 }
+
+#' Assert that the \code{standCohortData} has no NAs
+#'
+#' @param standCohortData A \code{data.table} with simulated and observed stand data for validation
+#'
+#' @template doAssertion
+#'
+#' @export
+assertStandCohortData <- function(standCohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    test <- standCohortData[, sapply(.SD, FUN = function(x) any(is.na(x)))]
+    if (any(test))
+      stop("there are NAs in either the observed or simulated data. Please debug 'standCohortData'")
+
+    test2 <- standCohortData[, sum(relativeAbundObsrvd), by = .(rep, year, pixelIndex)]$V1 %>%
+      unique(.)
+    test3 <- standCohortData[, sum(relativeAbund), by = .(rep, year, pixelIndex)]$V1 %>%
+      unique(.)
+
+    ## need to round, because some values "appear" to be 1, but probably have v. small decimals.
+    if (length(setdiff(round(test2, 6), c(1,0)))) {
+      stop("Observed relative abundances do not sum to 1 (per pixelIndex/rep/year)")
+    }
+
+    if (length(setdiff(round(test3, 6), c(1,0)))) {
+      stop("Simulated relative abundances do not sum to 1 (per pixelIndex/rep/year)")
+    }
+  }
+}
+
+
+#' Assert that the \code{standCohortData} has no NAs
+#'
+#' @param allCohortData A \code{data.table} with all simulated cohortData to use for validaton
+#'
+#' @template doAssertion
+#'
+#' @export
+assertRepsAllCohortData <- function(allCohortData, reps, years,
+                                    doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (getOption("LandR.assertions", TRUE)) {
+    test1 <- allCohortData[rep == reps[1] & year == years[1]]
+    out <- sapply(reps[-1], FUN = function(x, test1) {
+      test2 <- allCohortData[rep == x & year == years[1]]
+      set(test1, NULL, "rep", NULL)
+      set(test2, NULL, "rep", NULL)
+
+      if (!identical(test1, test2)) {
+        stop(paste("Simulation starting conditions are not identical between reps",
+                   reps[1], "and", x))
+      }
+    }, test1 = test1)
+  }
+}
