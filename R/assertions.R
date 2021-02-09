@@ -162,16 +162,16 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
       erg[[4]] <- sort(unique(minRelativeB$ecoregionGroup))
 
     ## first test will detect differences in both factor levels and values
-    lens <- sapply(erg, function(x) length(x) > 1)
+    lens <- vapply(erg, function(x) length(x) > 1, FUN.VALUE = logical(1))
     erg <- erg[lens]
-    # test3 <- all(sapply(seq(erg)[-1], function(x)
-    # identical(erg[[1]], erg[[x]])))
+    # test3 <- all(vapply(seq(erg)[-1], function(x)
+    # identical(erg[[1]], erg[[x]]), FUN.VALUE = logical(1)))
     test3 <- all(outer(erg, erg, FUN = Vectorize(identical)))
 
     ## second test only detects differences in values
     erg <- lapply(erg, as.character)
-    # test4 <- all(sapply(seq(erg)[-1], function(x)
-    #   identical(erg[[1]], erg[[x]])))
+    # test4 <- all(vapply(seq(erg)[-1], function(x)
+    #   identical(erg[[1]], erg[[x]]), FUN.VALUE = logical(1)))
     test4 <- all(outer(erg, erg, FUN = Vectorize(identical)))
 
     if (!test4) {
@@ -201,11 +201,11 @@ assertColumns <- function(obj, colClasses,
   if (doAssertion) {
     colNames <- names(colClasses)
     test1 <- all(colNames %in% colnames(obj))
-    test2 <- all(sapply(seq(NCOL(obj[, colNames, with = FALSE])),
+    test2 <- all(vapply(seq(NCOL(obj[, colNames, with = FALSE])),
                         function(colNum) {
                           is(obj[, colNames[colNum], with = FALSE][[1]],
                              colClasses[colNum])
-                        }))
+                        }, FUN.VALUE = logical(1)))
     if (!test1 || !test2)
       stop("obj should be a data.table with at least ", NROW(colNames), " columns: ",
            paste(colNames, collapse = ", "),
@@ -379,11 +379,11 @@ assertSpeciesLayers <- function(speciesLayers, thresh,
     if (class(speciesLayers) != "RasterStack") {
       speciesLayers <- list(speciesLayers)
 
-      test1 <- sapply(speciesLayers, FUN = function(x)
-        all(is.na(getValues(x))))
+      test1 <- vapply(speciesLayers, FUN = function(x)
+        all(is.na(getValues(x))), FUN.VALUE = logical(1))
     } else {
-      test1 <- sapply(1:nlayers(speciesLayers), FUN = function(x)
-        all(is.na(getValues(speciesLayers[[x]]))))
+      test1 <- vapply(1:nlayers(speciesLayers), FUN = function(x)
+        all(is.na(getValues(speciesLayers[[x]]))), FUN.VALUE = logical(1))
     }
 
     if (all(test1))
@@ -454,9 +454,11 @@ assertSpeciesEcoregionCohortDataMatch <- function(cohortData, speciesEcoregion,
 #' @template doAssertion
 #'
 #' @export
+#'
+#' @importFrom magrittr %>%
 assertStandCohortData <- function(standCohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    test <- standCohortData[, sapply(.SD, FUN = function(x) any(is.na(x)))]
+    test <- standCohortData[, vapply(.SD, FUN = function(x) any(is.na(x)), FUN.VALUE = logical(1))]
     if (any(test))
       stop("there are NAs in either the observed or simulated data. Please debug 'standCohortData'")
 
@@ -490,7 +492,7 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
                                     doAssertion = getOption("LandR.assertions", TRUE)) {
   if (getOption("LandR.assertions", TRUE)) {
     test1 <- allCohortData[rep == reps[1] & year == years[1]]
-    out <- sapply(reps[-1], FUN = function(x, test1) {
+    out <- vapply(reps[-1], FUN = function(x, test1) {
       test2 <- allCohortData[rep == x & year == years[1]]
       set(test1, NULL, "rep", NULL)
       set(test2, NULL, "rep", NULL)
@@ -499,6 +501,6 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
         stop(paste("Simulation starting conditions are not identical between reps",
                    reps[1], "and", x))
       }
-    }, test1 = test1)
+    }, test1 = test1, FUN.VALUE = logical(1))
   }
 }
