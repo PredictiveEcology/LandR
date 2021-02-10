@@ -123,7 +123,7 @@ pinustro,PINU.STR,Pinu_str,Pinu_Str,Pinu stro,Pinus strobus,Pine,Pine,Pine leadi
 ,,Plan_occ,Plat_Occ,Plan occi,Platanus occidentalis,,,,,,TRUE,Deciduous,,,
 ,,Popu_ang,,Popu angu,Populus angustifolia,,,,,,TRUE,Deciduous,,,
 popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamifera v. balsamifera,Ba poplar,Balsam poplar,Balsam poplar leading,,Popu_Bal,TRUE,Deciduous,balsam poplar,Acb,class2
-,,Popu_bal,Popu_Tri,Popu balt,Populus trichocarpa,Bl cottonwood,Black cottonwood,Black cottonwood leading,Populus balsamifera trichocarpa is a synonym of Populus trichocarpa,Popu_Tri,TRUE,Deciduous,balsam poplar,Act,
+,,Popu_bal,Popu_Tri,Popu balt,Populus trichocarpa,Bl cottonwood,Black cottonwood,Black cottonwood leading,Populus balsamifera trichocarpa is a synonym of Populus trichocarpa,Popu_Tri,TRUE,Deciduous,balsam poplar,Act,class2
 ,,Popu_can,,Popu cana,Populus X canadensis,,,,,,TRUE,Deciduous,,,
 ,,Popu_del,Popu_Del,Popu delo,Populus deltoides v. occidentalis,,,,,,TRUE,Deciduous,eastern cotttonwood,,class2
 popudelt,,Popu_del,Popu_Del,Popu delt,Populus deltoides,,,,,,TRUE,Deciduous,eastern cotttonwood,,
@@ -173,9 +173,9 @@ querrubr,QUER.RUB,Quer_rub,Quer_Rub,Quer rubr,Quercus rubra,,,,,,TRUE,Deciduous,
 ,,Sorb_dec,Sorb_Dec,,,,,,,,TRUE,Deciduous,,,
 ,,Sorb_sp,Sorb_Spp,,,,,,,,TRUE,Deciduous,,,
 ,,Taxu_bre,,Taxu brev,Taxus brevifolia,,,,,,FALSE,Conifer,,Tw,
-thujocci,,Thuj_occ,Thuj_Occ,Thuj occi,Thuja occidentalis,,,,,,FALSE,Conifer,,,
+thujocci,,Thuj_occ,Thuj_Occ,Thuj occi,Thuja occidentalis,,,,,,FALSE,Conifer,,,class3
 thujplic,THUJ.PLI,Thuj_pli,Thuj_Pli,Thuj plic,Thuja plicata,,,,,,FALSE,Conifer,western redcedar,Cw,class3
-,THUJ.SPP.ALL,Thuj_sp,Thuj_Spp,,,,,,,,FALSE,Conifer,,,
+,THUJ.SPP.ALL,Thuj_sp,Thuj_Spp,,,,,,,,FALSE,Conifer,,,class3
 tiliamer,,Tili_ame,Tili_Ame,Tili amer,Tilia americana,,,,,,TRUE,Deciduous,,,
 ,,Tili_cor,,Tili cord,Tilia cordata,,,,,,TRUE,Deciduous,,,
 ,,Tili_pla,,Tili plat,Tilia platyphyllos,,,,,,TRUE,Deciduous,,,
