@@ -190,8 +190,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
 #' @importFrom data.table rbindlist
 makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataShortNoCover,
                                  species, modelCover, modelBiomass, successionTimestep, currentYear,
-                                 needRescaleModelB = FALSE,
-                                 scaledVarsModelB = NULL) {
+                                 needRescaleModelB = FALSE, scaledVarsModelB = NULL) {
   if (needRescaleModelB) {
     if (is.null(scaledVarsModelB))
       stop("needRescaleModelB is TRUE, but scaledVarsModelB is NULL.
