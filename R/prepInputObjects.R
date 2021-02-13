@@ -1,6 +1,6 @@
 utils::globalVariables(c(
   "cover", "ecoregionGroup", "establishprob", "lcc", "longevity", "maxB", "maxANPP",
-  "postfireregen", "resproutprob", "speciesCode"
+  "postfireregen", "resproutprob", "speciesCode", "logAge"
 ))
 
 #' Check if all species in have trait values
