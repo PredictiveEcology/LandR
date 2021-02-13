@@ -261,7 +261,7 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
 
   ## CERES: using logB in modelBiomass prevents the problem with 0s, but needs back-transforming
   if ("logB" %in% names(modelBiomass$mod@frame)) {
-    speciesEcoregion[, maxB := exp(maxB) - 0.01]
+    speciesEcoregion[, maxB := asInteger(exp(maxB) - 0.01)]
   } else {
     speciesEcoregion[maxB < 0L, maxB := 0L] # fix negative predictions
   }
