@@ -1117,7 +1117,13 @@ subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
       } else {
         DT <- a$lineNum
       }
+    } else {
+      if (isTRUE(indices))
+        DT <- 1:nrow(DT)
     }
+  } else {
+    if (isTRUE(indices))
+      DT <- 1:nrow(DT)
   }
   return(DT)
 }
