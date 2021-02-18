@@ -492,7 +492,7 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
                                     doAssertion = getOption("LandR.assertions", TRUE)) {
   if (getOption("LandR.assertions", TRUE)) {
     test1 <- allCohortData[rep == reps[1] & year == years[1]]
-    out <- lapply(reps[-1], FUN = function(x, test1) {
+    out <- vapply(reps[-1], FUN = function(x, test1) {
       test2 <- allCohortData[rep == x & year == years[1]]
       set(test1, NULL, "rep", NULL)
       set(test2, NULL, "rep", NULL)
@@ -500,7 +500,9 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
       if (!identical(test1, test2)) {
         stop(paste("Simulation starting conditions are not identical between reps",
                    reps[1], "and", x))
+      } else {
+        TRUE
       }
-    }, test1 = test1)
+    }, test1 = test1, FUN.VALUE = logical(1))
   }
 }
