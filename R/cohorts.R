@@ -1105,7 +1105,7 @@ subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
     if (!isFALSE(doSubset)) {
       sam <- if (is.numeric(doSubset)) doSubset else 50
       message(
-        "subsampling initial dataset for faster estimation of maxBiomass parameter: ",
+        "subsampling initial dataset for faster model estimation: ",
         "using maximum of ", sam, " samples per combination of ecoregionGroup and speciesCode. ",
         "Change 'doSubset' to a different number if this is not enough"
       )
@@ -1117,7 +1117,13 @@ subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
       } else {
         DT <- a$lineNum
       }
+    } else {
+      if (isTRUE(indices))
+        DT <- 1:nrow(DT)
     }
+  } else {
+    if (isTRUE(indices))
+      DT <- 1:nrow(DT)
   }
   return(DT)
 }
