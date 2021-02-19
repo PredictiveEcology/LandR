@@ -492,9 +492,9 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
                                     doAssertion = getOption("LandR.assertions", TRUE)) {
   if (getOption("LandR.assertions", TRUE)) {
     test1 <- allCohortData[rep == reps[1] & year == years[1]]
+    set(test1, NULL, "rep", NULL)
     out <- vapply(reps[-1], FUN = function(x, test1) {
       test2 <- allCohortData[rep == x & year == years[1]]
-      set(test1, NULL, "rep", NULL)
       set(test2, NULL, "rep", NULL)
 
       if (!identical(test1, test2)) {
