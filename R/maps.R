@@ -657,7 +657,11 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
     grep(pat, fileNames, value = TRUE)
   })
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
-  postProcessedFilenamesWithStudyAreaName <- .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
+  postProcessedFilenamesWithStudyAreaName <- if (is.null(dots$studyAreaName)) {
+    postProcessedFilenames
+  } else {
+    .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
+  }
 
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
   if (length(kNNnames) > 15) {
@@ -854,7 +858,12 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
     grep(pat, fileNames, value = TRUE)
   })
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
-  postProcessedFilenamesWithStudyAreaName <- .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
+  postProcessedFilenamesWithStudyAreaName <- if (is.null(dots$studyAreaName)) {
+    postProcessedFilenames
+  } else {
+    .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
+  }
+
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
   if (length(kNNnames) > 15) {
     message("This looks like a lot of species; did you mean to pass only a subset of this to sppEquiv?",
