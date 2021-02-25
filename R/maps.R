@@ -684,7 +684,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                            overwrite = TRUE,
                                            userTags = dots$userTags
                            ),
-                           prepInputs, quick = TRUE) # don't need to digest all the "targetFile"
+                           prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
   })
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
 
@@ -887,7 +887,7 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
                                            overwrite = TRUE,
                                            userTags = dots$userTags
                            ),
-                           prepInputs, quick = TRUE) # don't need to digest all the "targetFile"
+                           prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
   })
 
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
