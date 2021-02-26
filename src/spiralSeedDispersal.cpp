@@ -75,8 +75,10 @@ Rcpp::IntegerVector rmElem(Rcpp::IntegerVector x, IntegerVector toRm) {
 LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
                                    Rcpp::List speciesVectorsList, List rcvSpeciesByIndex,
                                    NumericMatrix speciesTable,
-                                   int numCols, int numRows, int numCells, int cellSize, int xmin, int ymin,
-                                   double k, double b, double successionTimestep, double verbose = 0.0)
+                                   int numCols, int numRows, int numCells, int cellSize,
+                                   int xmin, int ymin,
+                                   double k, double b, double successionTimestep,
+                                   double verbose = 0.0)
 {
 
   int nCellsRcv(cellCoords.nrow());
