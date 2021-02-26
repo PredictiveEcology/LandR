@@ -126,3 +126,54 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
                                      stringsAsFactors = TRUE)
   return(ecoregionMap)
 }
+
+
+#' Create Stacks of the speciesEcoregion content
+#'
+#' @importFrom data.table data.table split
+#' @importFrom pemisc factorValues2
+#' @importFrom raster stack raster
+#' @param ecoregionMap The Factor RasterLayer of the ecoregionMap
+#' @param speciesEcoregion The data.table with the speciesEcoregion information
+speciesEcoregionStack <- function(ecoregionMap, speciesEcoregion,
+                                  columns = c("establishprob", "maxB", "maxANPP"),
+                                  stackFilenames = NULL) {
+  # stack of SEP
+  # Require(c("data.table", "PredictiveEcology/pemisc", "raster"))
+  # bm2011 <- biomassMaps2011
+  # speciesEcoregion <- bm2011$speciesEcoregion
+  orig <- data.table::setDTthreads(2)
+  on.exit(data.table::setDTthreads(orig))
+  whNonNAs <- which(!is.na(ecoregionMap[]))
+  fv <- factorValues2(ecoregionMap,
+                      ecoregionMap[][whNonNAs],
+                      att = "ecoregionGroup")
+  fvdt <- data.table(ecoregionGroup = as.character(fv), pixelID = whNonNAs)
+  se2 <- fvdt[speciesEcoregion, on = "ecoregionGroup", allow.cartesian = TRUE]
+  seList <- split(se2, by = "speciesCode")
+  rasTemplate <- raster(ecoregionMap)
+  names(columns) <- columns
+  spp <- names(seList)
+  stks <- lapply(columns, dtList = seList, rasTemplate = rasTemplate,
+                 spp = spp,
+                 function(column, dtList, rasTemplate, spp = spp) {
+    createStack(dtList = dtList, rasTemplate = rasTemplate,
+          column = column, spp = spp)
+  })
+}
+
+createStack <- function(dtList, rasTemplate, column = "estblishprob", spp) {
+  i <- 0
+    # mclapply(mc.cores = length(dtList),
+    outList <- lapply(
+      dtList, rasTemplate = rasTemplate, column = column, spp = spp,
+      function(dt, rasTemplate, column, spp) {
+        i <<- i + 1
+        print(paste(column, " ", spp[i]))
+        rasTemplate[dt$pixelID] <- dt[[column]]
+        print("... Done!")
+        rasTemplate
+      })
+    raster::stack(outList)
+
+}
