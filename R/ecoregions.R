@@ -130,7 +130,8 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
 
 #' Create Stacks of the speciesEcoregion content
 #'
-#' @importFrom data.table data.table split
+#' @importFrom data.table data.table setDTthreads
+#' @rawNamespace import(data.table, except = getNamespaceExports("data.table"))
 #' @importFrom pemisc factorValues2
 #' @importFrom raster stack raster
 #' @param ecoregionMap The Factor RasterLayer of the ecoregionMap
