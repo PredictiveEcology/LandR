@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2021-02-22
-Version: 0.0.12.9000
+Date: 2021-02-25
+Version: 0.0.12.9003
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -41,7 +41,7 @@ Imports:
     RColorBrewer,
     Rcpp,
     RCurl,
-    reproducible (>= 1.2.1.9007),
+    reproducible (>= 1.2.6.9003),
     scales,
     sf,
     sp,
