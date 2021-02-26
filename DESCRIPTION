@@ -44,7 +44,6 @@ Imports:
     RCurl,
     reproducible (>= 1.2.6.9003),
     sf,
-    sp,
     SpaDES.tools (>= 0.3.1.9000),
     stats,
     tools,
