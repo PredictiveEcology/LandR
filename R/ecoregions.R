@@ -130,15 +130,19 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
 
 #' Create Stacks of the speciesEcoregion content
 #'
+#' This will output a list of RasterStack objects. Each \code{RasterStack} show
+#' raster maps of one of the columns listed in \code{columns} and each
+#' \code{RasterLayer} will be one species.
 #' @importFrom data.table data.table setDTthreads
 #' @rawNamespace import(data.table, except = getNamespaceExports("data.table"))
 #' @importFrom pemisc factorValues2
 #' @importFrom raster stack raster
 #' @param ecoregionMap The Factor RasterLayer of the ecoregionMap
 #' @param speciesEcoregion The data.table with the speciesEcoregion information
+#' @param columns The columns to use in the \code{speciesEcoregion} data.table.
+#'   Default is \code{c("establishprob", "maxB", "maxANPP")}
 speciesEcoregionStack <- function(ecoregionMap, speciesEcoregion,
-                                  columns = c("establishprob", "maxB", "maxANPP"),
-                                  stackFilenames = NULL) {
+                                  columns = c("establishprob", "maxB", "maxANPP")) {
   # stack of SEP
   # Require(c("data.table", "PredictiveEcology/pemisc", "raster"))
   # bm2011 <- biomassMaps2011

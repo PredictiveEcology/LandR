@@ -942,8 +942,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @export
 #' @importFrom crayon blue green
 #' @importFrom data.table melt setnames
-#' @importFrom reproducible Cache .sortDotsUnderscoreFirst
-#' @importFrom pemisc termsInData messageDF
+#' @importFrom reproducible Cache .sortDotsUnderscoreFirst messageDF
+#' @importFrom pemisc termsInData
 #' @rdname makeAndCleanInitialCohortData
 makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
                                           # pixelGroupBiomassClass,
@@ -1764,7 +1764,6 @@ pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
 #'
 #' @author Eliot McIntire, Ceres Barros, Alex Chubaty
 #' @export
-#' @importFrom assertthat assert_that
 #' @importFrom data.table copy data.table setkey setorderv
 #' @importFrom utils data
 #'
