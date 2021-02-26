@@ -222,7 +222,6 @@ vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("Lan
 }
 
 #' @export
-#' @importFrom assertthat assert_that
 #' @importFrom SpaDES.tools inRange
 #' @rdname vegTypeMapGenerator
 #' @include cohorts.R

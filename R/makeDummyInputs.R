@@ -27,7 +27,6 @@ makeDummyEcoregionMap <- function(rasterToMatch) {
 #' @export
 #' @importFrom raster mask setValues getValues
 #' @importFrom SpaDES.tools gaussMap
-#' @importFrom scales rescale
 #' @rdname dummy-inputs
 makeDummyRawBiomassMap <- function(rasterToMatch) {
   rawBiomassMap <- gaussMap(rasterToMatch)
@@ -46,7 +45,6 @@ makeDummyRawBiomassMap <- function(rasterToMatch) {
 #'
 #' @export
 #' @importFrom raster setValues
-#' @importFrom scales rescale
 #' @rdname dummy-inputs
 makeDummyStandAgeMap <- function(rawBiomassMap) {
   standAgeMap <- setValues(rawBiomassMap, asInteger(rescale(getValues(rawBiomassMap), c(1, 300))))
@@ -94,4 +92,13 @@ makeDummyEcoregionFiles <- function(ecoregionMap, rstLCC, rasterToMatch) {
                           rasterToMatch = rasterToMatch,
                           userTags = "ecoregionFiles")
   return(ecoregionFiles)
+}
+
+#' @importFrom fpCompare %==%
+rescale <- function(x, to) {
+  # This is a simple function copied from the scales package. Too heavy
+  #   to use one simple function
+  from <- range(x, na.rm = TRUE, finite = TRUE)
+  if (diff(range(to)) %==% 0 || diff(range(from)) %==% 0) return(mean(to))
+  (x - from[1])/diff(from) * diff(to) + to[1]
 }

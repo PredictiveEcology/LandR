@@ -21,7 +21,6 @@ Authors@R: c(
 Depends:
     R (>= 3.6)
 Imports:
-    assertthat,
     crayon,
     data.table,
     fasterize,
@@ -44,7 +43,6 @@ Imports:
     Rcpp,
     RCurl,
     reproducible (>= 1.2.6.9003),
-    scales,
     sf,
     sp,
     SpaDES.tools (>= 0.3.1.9000),
