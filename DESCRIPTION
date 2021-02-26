@@ -28,6 +28,8 @@ Imports:
     fpCompare,
     gdalUtils,
     ggplot2,
+    ggpubr,
+    ggspatial,
     grDevices,
     httr,
     lme4,

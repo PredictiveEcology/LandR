@@ -150,10 +150,9 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
   sppColors
 }
 
-library(ggplot2)
-library(ggpubr)
-library(ggspatial)
-library(raster)
+#' @importFrom ggplot2 ggplot scale_fill_distiller theme labs
+#' @importFrom ggspatial layer_spatial annotation_north_arrow
+#' @importFrom ggpubr theme_pubr
 plotFunction <- function(ras, studyArea, limits = NULL) {
   if (is.null(limits))
     limits <- range(getValues(ras), na.rm = TRUE)
