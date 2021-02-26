@@ -33,10 +33,9 @@ jobs:
 
       - name: Install additional dependencies
         run: |
-          remotes::install_github('PredictiveEcology/Require@development')
           remotes::install_github('PredictiveEcology/reproducible@development')
-          remotes::install_github('PredictiveEcology/pemisc@development')
-          remotes::install_github('PredictiveEcology/map@development')
+          install.packages("pemisc", repos = "https://PredictiveEcology.github.io/drat/")
+          install.packages("map", repos = "https://PredictiveEcology.github.io/drat/")
         shell: Rscript {0}
 
       - name: Cache R packages
