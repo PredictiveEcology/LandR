@@ -128,7 +128,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
   ## 2) If in rasterToMatch and initialEcoregionCode
   pixelTable2 <- na.omit(pixelTable, cols = c("rasterToMatch", "initialEcoregionCode"))
   ## 3) For species that we have traits for (i.e., where species$species exists in the speciesLayers)
-  coverColNames <- paste0("cover.", species$species)
+  coverColNames <- paste0("cover.", names(speciesLayers))
   pixelTable <- na.omit(pixelTable2, cols = c(coverColNames))
 
   if (NROW(pixelTable1) != NROW(pixelTable))
