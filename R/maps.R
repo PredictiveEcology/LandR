@@ -222,7 +222,6 @@ vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("Lan
 }
 
 #' @export
-#' @importFrom assertthat assert_that
 #' @importFrom SpaDES.tools inRange
 #' @rdname vegTypeMapGenerator
 #' @include cohorts.R
@@ -657,7 +656,11 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
     grep(pat, fileNames, value = TRUE)
   })
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
-  postProcessedFilenamesWithStudyAreaName <- .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
+  postProcessedFilenamesWithStudyAreaName <- if (is.null(dots$studyAreaName)) {
+    postProcessedFilenames
+  } else {
+    .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
+  }
 
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
   if (length(kNNnames) > 15) {
@@ -668,10 +671,10 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
   }
   with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
     speciesLayers <- Cache(Map,
-                           targetFile = asPath(targetFiles),
+                           targetFile = targetFiles,
                            filename2 = postProcessedFilenamesWithStudyAreaName,
                            url = paste0(url, targetFiles),
-                           MoreArgs = list(destinationPath = asPath(dPath),
+                           MoreArgs = list(destinationPath = dPath,
                                            fun = "raster::raster",
                                            studyArea = studyArea,
                                            rasterToMatch = rasterToMatch,
@@ -680,9 +683,13 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                            overwrite = TRUE,
                                            userTags = dots$userTags
                            ),
-                           prepInputs, quick = TRUE) # don't need to digest all the "targetFile"
+                           prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
   })
-  names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
+
+  correctOrder <- sapply(unique(kNNnames), function(x) grep(pattern = x, x = names(speciesLayers), value = TRUE))
+  names(speciesLayers) <- names(correctOrder)[match(correctOrder, names(speciesLayers))]
+
+  # names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
 
   # remove "no data" first
   noData <- sapply(speciesLayers, function(xx) is.na(maxValue(xx)))
@@ -854,7 +861,12 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
     grep(pat, fileNames, value = TRUE)
   })
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
-  postProcessedFilenamesWithStudyAreaName <- .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
+  postProcessedFilenamesWithStudyAreaName <- if (is.null(dots$studyAreaName)) {
+    postProcessedFilenames
+  } else {
+    .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
+  }
+
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
   if (length(kNNnames) > 15) {
     message("This looks like a lot of species; did you mean to pass only a subset of this to sppEquiv?",
@@ -878,7 +890,7 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
                                            overwrite = TRUE,
                                            userTags = dots$userTags
                            ),
-                           prepInputs, quick = TRUE) # don't need to digest all the "targetFile"
+                           prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
   })
 
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10

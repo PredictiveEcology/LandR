@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2021-02-09
-Version: 0.0.12
+Date: 2021-03-01
+Version: 0.0.12.9006
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -21,13 +21,14 @@ Authors@R: c(
 Depends:
     R (>= 3.6)
 Imports:
-    assertthat,
     crayon,
     data.table,
     fasterize,
     fpCompare,
     gdalUtils,
     ggplot2,
+    ggpubr,
+    ggspatial,
     grDevices,
     httr,
     lme4,
@@ -41,10 +42,8 @@ Imports:
     RColorBrewer,
     Rcpp,
     RCurl,
-    reproducible (>= 1.2.1.9007),
-    scales,
+    reproducible (>= 1.2.6.9003),
     sf,
-    sp,
     SpaDES.tools (>= 0.3.1.9000),
     stats,
     tools,
