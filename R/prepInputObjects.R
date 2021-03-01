@@ -36,7 +36,6 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' Make \code{pixelTable} from biomass, age, land-cover and species cover data
 #'
 #' @param speciesLayers stack of species layers rasters
-#' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
 #' @param standAgeMap raster of stand age
 #' @param ecoregionFiles A list with two objects: the \code{ecoregionMap} and a table summarizing
 #'   its information per \code{pixelID.} See \code{ecoregionProducer}.
@@ -56,7 +55,7 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @importFrom data.table data.table
 #' @importFrom pemisc factorValues2
 #' @importFrom raster ncell
-makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
+makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
                            biomassMap, rasterToMatch, rstLCC, #pixelGroupAgeClass = 1,
                            printSummary = TRUE,
                            doAssertion = getOption("LandR.assertions", TRUE)) {
@@ -77,11 +76,6 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
       ecoregionFiles$ecoregionMap,
       ecoregionFiles$ecoregionMap[],
       att = 5)
-  }
-
-  if (missing(species)) {
-    species <- list()
-    species$species <- names(speciesLayers)
   }
 
   # message(blue("Round age to nearest pixelGroupAgeClass, which is", pixelGroupAgeClass))
@@ -127,7 +121,7 @@ makePixelTable <- function(speciesLayers, species, standAgeMap, ecoregionFiles,
   pixelTable1 <- na.omit(pixelTable, cols = c("rasterToMatch"))
   ## 2) If in rasterToMatch and initialEcoregionCode
   pixelTable2 <- na.omit(pixelTable, cols = c("rasterToMatch", "initialEcoregionCode"))
-  ## 3) For species that we have traits for (i.e., where species$species exists in the speciesLayers)
+  ## 3) For species that we have traits for
   coverColNames <- paste0("cover.", names(speciesLayers))
   pixelTable <- na.omit(pixelTable2, cols = c(coverColNames))
 
