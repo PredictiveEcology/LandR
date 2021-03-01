@@ -1,3 +1,7 @@
+utils::globalVariables(c(
+  "band1"
+))
+
 #' Summary plots of leading vegetation types
 #'
 #' Create raster of leading vegetation types and \code{Plot} a bar chart summary
@@ -150,8 +154,8 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
   sppColors
 }
 
-#' @importFrom ggplot2 ggplot scale_fill_distiller theme labs
-#' @importFrom ggspatial layer_spatial annotation_north_arrow
+#' @importFrom ggplot2 ggplot scale_fill_distiller theme labs stat unit
+#' @importFrom ggspatial layer_spatial annotation_north_arrow north_arrow_minimal
 #' @importFrom ggpubr theme_pubr
 plotFunction <- function(ras, studyArea, limits = NULL) {
   if (is.null(limits))
