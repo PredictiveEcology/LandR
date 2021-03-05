@@ -6,7 +6,6 @@
 \usage{
 makePixelTable(
   speciesLayers,
-  species,
   standAgeMap,
   ecoregionFiles,
   biomassMap,
@@ -18,8 +17,6 @@ makePixelTable(
 }
 \arguments{
 \item{speciesLayers}{stack of species layers rasters}
-
-\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
 
 \item{standAgeMap}{raster of stand age}
 
