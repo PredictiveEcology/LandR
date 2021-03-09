@@ -140,16 +140,13 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         stop("In LANDISDisp, dtSrc$speciesCode and dtRcv$speciesCode are both factors (good), ",
              "but they have different levels (bad). They must have the same factor levels.")
       origLevels <- levels(dtSrc$speciesCode)
-      speciesCodeLabel <- "speciesCode"
-      speciesCodeLabelOrig <- "speciesCodeOrig"
-      setnames(dtSrc, speciesCodeLabel, speciesCodeLabelOrig)
-      setnames(dtRcv, speciesCodeLabel, speciesCodeLabelOrig)
-      setnames(speciesTable, speciesCodeLabel, speciesCodeLabelOrig)
-
-      dtSrc[, speciesCode := as.integer(get(..speciesCodeLabelOrig))]
-      dtRcv[, speciesCode := as.integer(get(..speciesCodeLabelOrig))]
-      speciesTable[, speciesCode := as.integer(get(..speciesCodeLabelOrig))]
-
+      browser()
+      dtSrc <- data.table::copy(dtSrc)
+      dtRcv <- data.table::copy(dtRcv)
+      speciesTable <- data.table::copy(speciesTable)
+      dtSrc[, speciesCode := as.integer(speciesCode)]
+      dtRcv[, speciesCode := as.integer(speciesCode)]
+      speciesTable[, speciesCode := as.integer(speciesCode)]
     }
 
     if (is.character(dtSrc$speciesCode)) {
@@ -179,33 +176,14 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     })
     speciesVectorsList <- speciesSrcRasterVecList
 
-    # # speciesVectorsList
-    # # dtSrcShort <- dtSrc$pixelGroup
-    # dtSrcNoDups <- unique(dtSrc, by = c("speciesCode"))
-    # # setorderv(dtSrcNoDups, c("speciesCode", "pixelGroup"))
-    # # rasTemplate <- raster(pixelGroupMap)
-    # rasTemplate <- rep(NA_integer_, ncell(pixelGroupMap))
-    # pixelGroupMapVec <- pixelGroupMap[]
-    # spCodes <- sort(dtSrcNoDups$speciesCode)
-    # names(spCodes) <- as.character(spCodes)
-    # speciesSrcRasterVecList <- lapply(spCodes, function(sp) {
-    #   ras <- rasTemplate
-    #   hasSp <- dtSrc$speciesCode == sp
-    #   # dtSrcSp <- dtSrc[hasSp]
-    #   pgs <- dtSrc$pixelGroup[hasSp]
-    #   pixels <- pixelGroupMapVec %in% pgs
-    #   ras[pixels] <- sp
-    #   ras
-    # })
-
     # Raster metadata
     e <- pixelGroupMap@extent
-    ymin <- e@ymin
-    xmin <- e@xmin
+    ymin <- as.integer(e@ymin)
+    xmin <- as.integer(e@xmin)
     numCols <- pixelGroupMap@ncols
     numCells <- pixelGroupMap@ncols * pixelGroupMap@nrows # ncell(pixelGroupMap)
-    numRows <- numCells / numCols
-    cellSize <- xr <- (e@xmax - e@xmin) / numCols # cellSize <- res(pixelGroupMap) %>% unique()
+    numRows <- as.integer(numCells / numCols)
+    cellSize <- xr <- as.integer((e@xmax - e@xmin) / numCols) # cellSize <- res(pixelGroupMap) %>% unique()
 
     if (length(cellSize) > 1) {
       ## check for equal cell sizes that "aren't" due to floating point error
@@ -238,7 +216,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     rcvSpeciesByIndex <- split(dt$speciesCode, dt$pixelIndex)
 
     # cellCoords
-    cellCoords <- xyFromCell(pixelGroupMap, cellsCanRcv)
+    cellCoords <- matrix(as.integer(xyFromCell(pixelGroupMap, cellsCanRcv)), ncol = 2)
 
     # Removing cases ## 2 stages
     # 1st stage -- keep is for "keeping" only rcv pixels where at least 1 species is in the src pixels
@@ -279,11 +257,26 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       speciesTableInner <- do.call(rbind, speciesTableInner2)
       speciesTableInner <- na.omit(speciesTableInner)
 
-      # sam <- sample(1e6, 1)
-      # print(sam)
-      # set.seed(sam)
       ind <- seq(NROW(cellCoords))
-      # ind <- sample(NROW(cellCoords), 15)
+
+      # Assertions
+      if (!is(cellCoords, "matrix")) stop()
+      if (!is(cellCoords[,1], "integer")) stop()
+      if (!is.list(rcvSpeciesByIndex)) stop()
+      if (!is.matrix(speciesTableInner)) stop()
+      if (!is.numeric(speciesTableInner[,1])) stop()
+      if (!is.list(speciesSrcRasterVecList)) stop()
+      if (!is.integer(numCols)) stop()
+      if (!is.integer(numRows)) stop()
+      if (!is.integer(numCells)) stop()
+      if (!is.integer(cellSize)) stop()
+      if (!is.integer(xmin)) stop()
+      if (!is.integer(ymin)) stop()
+      if (!is.numeric(k)) stop()
+      if (!is.numeric(b)) stop()
+      if (!is.numeric(successionTimestep)) stop()
+      if (!is.numeric(verbose)) stop()
+
       out <- spiralSeedDispersal(
         cellCoords = cellCoords, # [ind,, drop = FALSE],
         rcvSpeciesByIndex = rcvSpeciesByIndex, # [ind],
