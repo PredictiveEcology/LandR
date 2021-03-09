@@ -39,18 +39,6 @@ test_that("test Ward dispersal seeding algorithm", {
 
   reducedPixelGroupMap <- SpaDES.tools::randomPolygons(reducedPixelGroupMap, numTypes = pgs)
   Sum_of_species <- raster(reducedPixelGroupMap)
-  rcvSpByPG <- lapply(seq_len(pgs * proportionRcvCells), function(pg) {
-    data.table(speciesCode = sample(1:11, size = sample(1:5, 1)))
-  })
-  srcSpByPG <- lapply(seq_len(pgs * (1 - proportionRcvCells)), function(pg) {
-    data.table(speciesCode = sample(1:11, size = sample(1:5, 1)))
-  })
-
-  successionTimestep = 10
-  seedReceive <- rbindlist(rcvSpByPG, idcol = "pixelGroup")
-  seedSource <- rbindlist(srcSpByPG, idcol = "pixelGroup")
-  seedSource[, pixelGroup := pixelGroup + pgs/2]
-
   td <- tempdir()
   speciesTable <- reproducible::Cache(getSpeciesTable, dPath = td)
   speciesTable <- speciesTable[Area == "BSW"]
@@ -60,65 +48,93 @@ test_that("test Ward dispersal seeding algorithm", {
   speciesTable[seeddistance_max > 2000, seeddistance_max := 2000]
 
   species <- speciesTable
-  species <- data.table(species)[, speciesCode := seq_along(LandisCode)]
-  seedReceiveFull <- species[seedReceive, on = "speciesCode"]
-  # objects <- list("species" = species)
-  # mb <- profvis::profvis(replicate(10,
-  #    interval = 0.2,
-  # set.seed(seedOuter)
-  # print(seedOuter)
-  st1 <- system.time({
-    output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
-                       dtSrc = seedSource,
-                       speciesTable = species,
-                       reducedPixelGroupMap,
-                       verbose = 1,
-                       successionTimestep = successionTimestep)
-  })
-  # )
-  if (interactive()) {
-    print(output[, .N, by = speciesCode])
-    print(st1)
-  }
 
-  pixelName <- grep("pixelIn", names(output), value = TRUE)
-  outputSum <- output[, list(speciesCode = sum(speciesCode)), by = pixelName]
-  Sum_of_species[outputSum[[pixelName]]] <- outputSum$speciesCode
-  if (FALSE) {
-    a <- reducedPixelGroupMap[] %in% seedReceive$pixelGroup
-    sum(a)
+  for (jj in 1:2) {
+    if (jj == 1) {
+      rcvSpByPG <- lapply(seq_len(pgs * proportionRcvCells), function(pg) {
+        data.table(speciesCode = sample(c(1, 3:11), size = sample(1:5, 1)))
+      })
+      srcSpByPG <- lapply(seq_len(pgs * (1 - proportionRcvCells)), function(pg) {
+        data.table(speciesCode = sample(c(1, 3:11), size = sample(1:5, 1)))
+      })
+      species <- data.table(species)[, speciesCode := seq_along(LandisCode)]
+    } else {
+      speciesCodes <- factor(sample(paste0("spp_",LETTERS[c(1, 3:11)])))
+      rcvSpByPG <- lapply(seq_len(pgs * proportionRcvCells), function(pg) {
+        data.table(speciesCode = sample(speciesCodes[c(1:4, 6:10)], size = sample(1:5, 1)))
+      })
+      srcSpByPG <- lapply(seq_len(pgs * (1 - proportionRcvCells)), function(pg) {
+        data.table(speciesCode = sample(speciesCodes[c(1:4, 8:10)], size = sample(1:5, 1)))
+      })
+      species <- data.table(species)[, speciesCode := factor(seq_along(LandisCode))]
+    }
 
-    library(SpaDES.tools)
-    sps <- 1:11
-    names(sps) <- paste0("Species", as.character(sps))
-    sps <- lapply(sps, function(sp) {
-      ras <- rasterizeReduced(seedReceiveFull[speciesCode == sp], reducedPixelGroupMap, "speciesCode", "pixelGroup")
-      ras[!is.na(ras[])] <- 1
 
-      ras2 <- rasterizeReduced(seedSource[speciesCode == sp], reducedPixelGroupMap, "speciesCode", "pixelGroup")
-      ras[!is.na(ras2[])] <- 2
+    successionTimestep = 10
+    seedReceive <- rbindlist(rcvSpByPG, idcol = "pixelGroup")
+    seedSource <- rbindlist(srcSpByPG, idcol = "pixelGroup")
+    seedSource[, pixelGroup := pixelGroup + pgs/2]
 
-      out <- output[speciesCode == sp]
-      ras[out$pixelIndex] <- 3
-      levels(ras) <- data.frame(ID = 1:3, c("Receive", "Source", "Successful"))
-      ras
+    seedReceiveFull <- species[seedReceive, on = "speciesCode"]
+    # objects <- list("species" = species)
+    # mb <- profvis::profvis(replicate(10,
+    #    interval = 0.2,
+    # set.seed(seedOuter)
+    # print(seedOuter)
+
+    st1 <- system.time({
+      output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
+                           dtSrc = seedSource,
+                           speciesTable = species,
+                           reducedPixelGroupMap,
+                           verbose = 1,
+                           successionTimestep = successionTimestep)
     })
-    dev()
-    clearPlot()
-    Plot(reducedPixelGroupMap, Sum_of_species, new = TRUE)
-    Plot(sps, legendRange = 1:3)
-    i <<- i + 1;
+    # )
+    if (interactive()) {
+      print(output[, .N, by = speciesCode])
+      print(st1)
+    }
+
+    pixelName <- grep("pixelIn", names(output), value = TRUE)
+    outputSum <- output[, list(speciesCode = sum(speciesCode)), by = pixelName]
+    Sum_of_species[outputSum[[pixelName]]] <- outputSum$speciesCode
+    if (FALSE) {
+      a <- reducedPixelGroupMap[] %in% seedReceive$pixelGroup
+      sum(a)
+
+      library(SpaDES.tools)
+      sps <- 1:11
+      names(sps) <- paste0("Species", as.character(sps))
+      sps <- lapply(sps, function(sp) {
+        ras <- rasterizeReduced(seedReceiveFull[speciesCode == sp], reducedPixelGroupMap, "speciesCode", "pixelGroup")
+        ras[!is.na(ras[])] <- 1
+
+        ras2 <- rasterizeReduced(seedSource[speciesCode == sp], reducedPixelGroupMap, "speciesCode", "pixelGroup")
+        ras[!is.na(ras2[])] <- 2
+
+        out <- output[speciesCode == sp]
+        ras[out$pixelIndex] <- 3
+        levels(ras) <- data.frame(ID = 1:3, c("Receive", "Source", "Successful"))
+        ras
+      })
+      dev()
+      clearPlot()
+      Plot(reducedPixelGroupMap, Sum_of_species, new = TRUE)
+      Plot(sps, legendRange = 1:3)
+      i <<- i + 1;
+    }
+
+    expect_true(all(unique(output$speciesCode) %in% unique(seedReceiveFull$speciesCode)))
+    expect_true(all(is.na(Sum_of_species[reducedPixelGroupMap[] > 15]))) # nothing regenerates in the pgs that don't have receive available
+
+    # Test whether each pixelGroup has only the species that could have arrived there
+    output[, pixelGroup := reducedPixelGroupMap[pixelIndex]]
+    joined <- seedReceiveFull[output, on = "pixelGroup", allow.cartesian = TRUE]
+    joinedTest <- joined[, all(i.speciesCode %in% speciesCode) , by = "pixelGroup"]
+    expect_true(all(joinedTest$V1))
+
   }
-
-  expect_true(all(unique(output$speciesCode) %in% unique(seedReceiveFull$speciesCode)))
-  expect_true(all(is.na(Sum_of_species[reducedPixelGroupMap[] > 15]))) # nothing regenerates in the pgs that don't have receive available
-
-  # Test whether each pixelGroup has only the species that could have arrived there
-  output[, pixelGroup := reducedPixelGroupMap[pixelIndex]]
-  joined <- seedReceiveFull[output, on = "pixelGroup", allow.cartesian = TRUE]
-  joinedTest <- joined[, all(i.speciesCode %in% speciesCode) , by = "pixelGroup"]
-  expect_true(all(joinedTest$V1))
-
   if (!doLarge) {
     env <- new.env()
     env$cellSize = res(Sum_of_species)[1]
