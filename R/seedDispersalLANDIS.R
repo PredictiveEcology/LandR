@@ -144,9 +144,16 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       dtSrc <- data.table::copy(dtSrc)
       dtRcv <- data.table::copy(dtRcv)
       speciesTable <- data.table::copy(speciesTable)
-      dtSrc[, speciesCode := as.integer(speciesCode)]
-      dtRcv[, speciesCode := as.integer(speciesCode)]
-      speciesTable[, speciesCode := as.integer(speciesCode)]
+      dtSrc[, speciesCode2 := as.integer(speciesCode)]
+      dtRcv[, speciesCode2 := as.integer(speciesCode)]
+      speciesTable[, speciesCode2 := as.integer(speciesCode)]
+      set(dtSrc, NULL, "speciesCode", NULL)
+      set(dtRcv, NULL, "speciesCode", NULL)
+      set(speciesTable, NULL, "speciesCode", NULL)
+      setnames(dtSrc, "speciesCode2", "speciesCode")
+      setnames(dtRcv, "speciesCode2", "speciesCode")
+      setnames(speciesTable, "speciesCode2", "speciesCode")
+
     }
 
     if (is.character(dtSrc$speciesCode)) {
