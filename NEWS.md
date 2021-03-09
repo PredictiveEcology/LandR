@@ -4,6 +4,9 @@ version 0.0.9
 =============
 * add new function `prepSpeciesLayers_ONFRI`
 
+## Bugfixes
+* `LANDISDisp` did not correctly handle `speciesCode` when it is a factor. This is a common possibility. It now handles these correctly.
+
 version 0.0.5
 =============
 * new function `updateSpeciesTable` (moved from `LandWebUtils`) to allow user to update species parameters by passing a named list.
