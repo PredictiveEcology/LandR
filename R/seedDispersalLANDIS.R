@@ -129,17 +129,27 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     # Setup Rcv components cellCoords and rcvSpeciesByIndex
 
     ####### Assertions #############
-    if (!identical(class(dtSrc$speciesCode), class(dtRcv$speciesCode)))
+    if (!( (is.numeric(dtSrc$speciesCode) && is.numeric(dtRcv$speciesCode) && is.numeric(speciesTable$speciesCode)) ||
+          (is.factor(dtSrc$speciesCode) && is.factor(dtRcv$speciesCode) && is.factor(speciesTable$speciesCode))))
       stop("In LANDISDisp, dtSrc and dtRcv must each have columns for speciesCode which ",
              "must be both integer or both factor; they are not. Please correct this.")
 
     if (is.factor(dtSrc$speciesCode)) {
-      if (!identical(levels(dtSrc$speciesCode), levels(dtRcv$speciesCode)))
+      if (!identical(levels(dtSrc$speciesCode), levels(dtRcv$speciesCode)) &&
+           identical(levels(dtSrc$speciesCode), levels(speciesTable$speciesCode)))
         stop("In LANDISDisp, dtSrc$speciesCode and dtRcv$speciesCode are both factors (good), ",
              "but they have different levels (bad). They must have the same factor levels.")
       origLevels <- levels(dtSrc$speciesCode)
-      dtSrc[, speciesCode := as.integer(speciesCode)]
-      dtRcv[, speciesCode := as.integer(speciesCode)]
+      speciesCodeLabel <- "speciesCode"
+      speciesCodeLabelOrig <- "speciesCodeOrig"
+      setnames(dtSrc, speciesCodeLabel, speciesCodeLabelOrig)
+      setnames(dtRcv, speciesCodeLabel, speciesCodeLabelOrig)
+      setnames(speciesTable, speciesCodeLabel, speciesCodeLabelOrig)
+
+      dtSrc[, speciesCode := as.integer(get(..speciesCodeLabelOrig))]
+      dtRcv[, speciesCode := as.integer(get(..speciesCodeLabelOrig))]
+      speciesTable[, speciesCode := as.integer(get(..speciesCodeLabelOrig))]
+
     }
 
     if (is.character(dtSrc$speciesCode)) {
@@ -216,11 +226,11 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
 
     # rcvSpeciesByIndex
     #  Remove any species in dtRcv that are not available in dtSrc
-    dtRcv <- dtRcv[unique(dtSrc[, "speciesCode"], by = "speciesCode"), on = "speciesCode"]
-    cellsCanRcv <- which(pgv %in% dtRcv$pixelGroup)
-    rcvSpeciesCodes <- sort(unique(dtRcv$speciesCode))
+    dtRcvNew <- dtRcv[unique(dtSrc[, "speciesCode"], by = "speciesCode"), on = "speciesCode"]
+    cellsCanRcv <- which(pgv %in% dtRcvNew$pixelGroup)
+    rcvSpeciesCodes <- sort(unique(dtRcvNew$speciesCode))
     dt <- data.table(pixelGroup = pgv[cellsCanRcv], pixelIndex = cellsCanRcv)
-    dtRcvSmall <- dtRcv[, c("pixelGroup", "speciesCode")]
+    dtRcvSmall <- dtRcvNew[, c("pixelGroup", "speciesCode")]
     dtSrcUniqueSP <- unique(dtSrc[, "speciesCode"], by = "speciesCode")
     dtRcvSmall1 <- dtRcvSmall[dtSrcUniqueSP, on = "speciesCode"]
     dt <- dt[dtRcvSmall, on = "pixelGroup", allow.cartesian = TRUE] # $speciesCode
@@ -299,6 +309,16 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
           function(x) rep(x, length(seedsArrivedList[[x]]))
         ))
       )
+      if (exists("origLevels", inherits = FALSE)) {
+        set(dtSrc, NULL, speciesCodeLabel, NULL)
+        set(dtRcv, NULL, speciesCodeLabel, NULL)
+        set(speciesTable, NULL, speciesCodeLabel, NULL)
+
+        setnames(dtSrc, speciesCodeLabelOrig, speciesCodeLabel)
+        setnames(dtRcv, speciesCodeLabelOrig, speciesCodeLabel)
+        setnames(speciesTable, speciesCodeLabelOrig, speciesCodeLabel)
+        seedsArrived[, speciesCode := factor(origLevels[speciesCode], levels = origLevels)]
+      }
     } else {
       seedsArrived <- data.table(
         pixelIndex = integer(),
