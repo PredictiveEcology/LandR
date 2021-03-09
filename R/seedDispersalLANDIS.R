@@ -140,7 +140,6 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         stop("In LANDISDisp, dtSrc$speciesCode and dtRcv$speciesCode are both factors (good), ",
              "but they have different levels (bad). They must have the same factor levels.")
       origLevels <- levels(dtSrc$speciesCode)
-      browser()
       dtSrc <- data.table::copy(dtSrc)
       dtRcv <- data.table::copy(dtRcv)
       speciesTable <- data.table::copy(speciesTable)
@@ -282,7 +281,6 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       if (!is.numeric(k)) stop()
       if (!is.numeric(b)) stop()
       if (!is.numeric(successionTimestep)) stop()
-      if (!is.numeric(verbose)) stop()
 
       out <- spiralSeedDispersal(
         cellCoords = cellCoords, # [ind,, drop = FALSE],
@@ -310,13 +308,13 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         ))
       )
       if (exists("origLevels", inherits = FALSE)) {
-        set(dtSrc, NULL, speciesCodeLabel, NULL)
-        set(dtRcv, NULL, speciesCodeLabel, NULL)
-        set(speciesTable, NULL, speciesCodeLabel, NULL)
-
-        setnames(dtSrc, speciesCodeLabelOrig, speciesCodeLabel)
-        setnames(dtRcv, speciesCodeLabelOrig, speciesCodeLabel)
-        setnames(speciesTable, speciesCodeLabelOrig, speciesCodeLabel)
+        # set(dtSrc, NULL, speciesCodeLabel, NULL)
+        # set(dtRcv, NULL, speciesCodeLabel, NULL)
+        # set(speciesTable, NULL, speciesCodeLabel, NULL)
+        #
+        # setnames(dtSrc, speciesCodeLabelOrig, speciesCodeLabel)
+        # setnames(dtRcv, speciesCodeLabelOrig, speciesCodeLabel)
+        # setnames(speciesTable, speciesCodeLabelOrig, speciesCodeLabel)
         seedsArrived[, speciesCode := factor(origLevels[speciesCode], levels = origLevels)]
       }
     } else {
