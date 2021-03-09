@@ -128,6 +128,25 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
   if (TRUE) { # This is rewrite and MASSIVE simplification for spiralSeedDispersal
     # Setup Rcv components cellCoords and rcvSpeciesByIndex
 
+    ####### Assertions #############
+    if (!identical(class(dtSrc$speciesCode), class(dtRcv$speciesCode)))
+      stop("In LANDISDisp, dtSrc and dtRcv must each have columns for speciesCode which ",
+             "must be both integer or both factor; they are not. Please correct this.")
+
+    if (is.factor(dtSrc$speciesCode)) {
+      if (!identical(levels(dtSrc$speciesCode), levels(dtRcv$speciesCode)))
+        stop("In LANDISDisp, dtSrc$speciesCode and dtRcv$speciesCode are both factors (good), ",
+             "but they have different levels (bad). They must have the same factor levels.")
+      origLevels <- levels(dtSrc$speciesCode)
+      dtSrc[, speciesCode := as.integer(speciesCode)]
+      dtRcv[, speciesCode := as.integer(speciesCode)]
+    }
+
+    if (is.character(dtSrc$speciesCode)) {
+      stop("LANDISDisp expects that dtSrc$speciesCode and dtRcv$speciesCode are either factor or integer")
+    }
+    ####### End Assertions #############
+
     pgv <- pixelGroupMap[]
 
     # speciesSrcRasterVecList
