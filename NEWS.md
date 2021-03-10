@@ -1,8 +1,12 @@
 bug reports https://github.com/PredictiveEcology/LandR/issues
 
-version 0.0.9
+version 1.0.0
 =============
+* `LANDISDisp` now accommodates sub-cellSize dispersal distances, using the original Ward Dispersal equation. Previously, the sub-pixel dispersal was treated as if it was starting from the centre of the pixel. So, if less than a full pixel, then very little horizontal transfer. This has the effect that there will be a large increase in horizontal transfer for the species that have small `seeddistance_max` (i.e., less than cell size)
 * add new function `prepSpeciesLayers_ONFRI`
+
+## Bugfixes
+* `LANDISDisp` did not correctly handle `speciesCode` when it is a factor. This is a common possibility. It now handles these correctly.
 
 version 0.0.5
 =============
