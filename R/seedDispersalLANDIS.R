@@ -120,6 +120,47 @@ utils::globalVariables(c(
 #' )
 #' # Summarize
 #' output[, .N, by = speciesCode]
+#'
+#'  ## Plot the maps
+#'  library(quickPlot)
+#' clearPlot()
+#' spMap <- list()
+#' spMap$pixelGroupMap <- pixelGroupMap
+#' for (sppp in unique(output$speciesCode)) {
+#'   spppChar <- paste0("Sp_", sppp)
+#'   spMap[[spppChar]] <- raster(pixelGroupMap)
+#'   ss <- unique(seedSource[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
+#'   spMap[[spppChar]][pixelGroupMap[] %in% ss$pixelGroup] <- 1
+#'
+#'   receivable <- raster(pixelGroupMap)
+#'   srf <- unique(seedReceiveFull[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
+#'   receivable[pixelGroupMap[] %in% srf$pixelGroup] <- 1
+#'
+#'   forest <- which(!is.na(pixelGroupMap[]))
+#'   src <- which(!is.na(spMap[[spppChar]][]))
+#'   recvable <- which(!is.na(receivable[]))
+#'   rcvd <- output[speciesCode == sppp]$pixelIndex
+#'
+#'   spMap[[spppChar]][forest] <- 0
+#'   spMap[[spppChar]][recvable] <- 2
+#'   spMap[[spppChar]][src] <- 1
+#'   spMap[[spppChar]][rcvd] <- 3
+#'   spMap[[spppChar]][intersect(src, rcvd)] <- 4
+#'
+#'   levels(spMap[[spppChar]]) <- data.frame(ID = 0:4,
+#'                                           type = c("OtherForest", "Source", "Didn't receive",
+#'                                                    "Received", "Src&Rcvd"))
+#' }
+#' Plot(spMap, cols = "Set2")
+#'
+#' # A summary
+#' rr <- apply(raster::stack(spMap)[[-1]][] + 1, 2, tabulate) # tabulate accommodate missing levels
+#' rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"][1:NROW(rr)]
+#' # This next line only works if there are some places that are both source and potential to receive
+#' # rr <- rbind(rr, propSrcRcved = round(rr[5,]/ (rr[5,]+rr[2,]), 2))
+#'
+#'
+#'
 LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                        dispersalFn = WardFast, b = 0.01, k = 0.95, plot.it = FALSE,
                        successionTimestep,
