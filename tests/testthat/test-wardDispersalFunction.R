@@ -175,7 +175,7 @@ test_that("test Ward dispersal seeding algorithm", {
       })
       output <- rbindlist(output)
       joined <- output[species, on = "speciesCode"]
-      tooFar <- joined$seeddistance_max < dis * res(ras2)[1]
+      tooFar <- pmax(res(ras2)[1], joined$seeddistance_max) < dis * res(ras2)[1]
       expect_true(all(is.na(joined$pixelIndex[tooFar])))
 
       testDists[[dis]] <- sapply(unique(output$speciesCode), function(spCode) {
