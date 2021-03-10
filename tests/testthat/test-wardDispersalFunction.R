@@ -204,3 +204,74 @@ test_that("test Ward dispersal seeding algorithm", {
   }
 })
 
+test_that("test large files", {
+  if (interactive()) {
+    library(reproducible)
+    library(quickPlot)
+    dp <- "~/tmp"
+    dtSrc <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
+                        targetFile = "dtSrc.rds",
+                        fun = "readRDS",
+                        destinationPath = dp, overwrite = TRUE)
+    dtRcv <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
+                        targetFile = "dtRcv.rds",
+                        fun = "readRDS",
+                        destinationPath = dp)
+    pixelGroupMap <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
+                                targetFile = "pixelGroupMap.rds",
+                                fun = "readRDS",
+                                destinationPath = dp)
+    speciesTable <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
+                               targetFile = "speciesTable.rds",
+                               fun = "readRDS",
+                               destinationPath = dp)
+    seed <- 1234
+    set.seed(seed)
+    dtSrc1 <- data.table::copy(dtSrc)
+    dtRcv1 <- data.table::copy(dtRcv)
+    # dtSrc1 <- dtSrc1[speciesCode == "Pice_eng"]
+    # dtRcv1 <- dtRcv1[speciesCode == "Pice_eng"]
+    speciesTable1 <- data.table::copy(speciesTable)
+    # speciesTable1 <- speciesTable1[speciesCode == "Pice_eng"]
+
+    out <- LANDISDisp(dtSrc = dtSrc1,
+                      dtRcv = dtRcv1,
+                      pixelGroupMap = pixelGroupMap,
+                      successionTimestep = 1,
+                      speciesTable = speciesTable1)
+
+    clearPlot()
+    spMap <- list()
+    spMap$pixelGroupMap <- pixelGroupMap
+    for (sppp in unique(out$speciesCode)) {
+      spMap[[sppp]] <- SpaDES.tools::rasterizeReduced(fullRaster = pixelGroupMap,
+                                                      unique(dtSrc[speciesCode == sppp], on = c("pixelGroup", "speciesCode")),
+                                                      newRasterCols = c("seeddistance_eff"))
+      receivable <- SpaDES.tools::rasterizeReduced(fullRaster = pixelGroupMap,
+                                                   unique(dtRcv[speciesCode == sppp], on = c("pixelGroup", "speciesCode")),
+                                                   newRasterCols = c("seeddistance_eff"))
+
+      forest <- which(!is.na(pixelGroupMap[]))
+      src <- which(!is.na(spMap[[sppp]][]))
+      recvable <- which(!is.na(receivable[]))
+      rcvd <- out[speciesCode == sppp]
+      intersect(src, recvable)
+
+      spMap[[sppp]][forest] <- 0
+      spMap[[sppp]][recvable] <- 2
+      spMap[[sppp]][src] <- 1
+      spMap[[sppp]][rcvd] <- 3
+      spMap[[sppp]][intersect(src, rcvd)] <- 4
+
+      levels(spMap[[sppp]]) <- data.frame(ID = 0:4, type = c("OtherForest", "Source", "Didn't receive", "Received", "Src&Rcvd"))
+    }
+    Plot(spMap, new = TRUE, cols = "Set2")
+
+    rr <- apply(raster::stack(spMap)[[-1]][], 2, table)
+    rownames(rr) <- levels(spMap[[2]])[[1]][,"type"]
+    rr <- rbind(rr, propSrcRcved = round(rr[5,]/ (rr[5,]+rr[2,]), 2))
+    speciesTable[,c(1,5)]
+
+
+  }
+})
