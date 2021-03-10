@@ -257,11 +257,11 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         if (any(hasRow)) {
           speciesTableInner[hasRow, ]
         } else {
-          as.matrix(t(rep(NA, NCOL(speciesTableInner))))
+          as.matrix(t(c(ind, rep(0, NCOL(speciesTableInner) - 1))))
         }
       })
       speciesTableInner <- do.call(rbind, speciesTableInner2)
-      speciesTableInner <- na.omit(speciesTableInner)
+      # speciesTableInner <- na.omit(speciesTableInner)
 
       ind <- seq(NROW(cellCoords))
 
