@@ -175,7 +175,7 @@ test_that("test Ward dispersal seeding algorithm", {
       })
       output <- rbindlist(output)
       joined <- output[species, on = "speciesCode"]
-      tooFar <- joined$seeddistance_max < dis * res(ras2)[1]
+      tooFar <- pmax(res(ras2)[1], joined$seeddistance_max) < dis * res(ras2)[1]
       expect_true(all(is.na(joined$pixelIndex[tooFar])))
 
       testDists[[dis]] <- sapply(unique(output$speciesCode), function(spCode) {
@@ -229,16 +229,37 @@ test_that("test large files", {
     set.seed(seed)
     dtSrc1 <- data.table::copy(dtSrc)
     dtRcv1 <- data.table::copy(dtRcv)
-
     sppKeep <- unique(dtRcv1$speciesCode)
     dtSrc1 <- dtSrc1[speciesCode %in% sppKeep]
-    #dtSrc1 <- dtSrc1[pixelGroup == 159061]
-    #dtRcv1 <- dtRcv1[pixelGroup == 159061]
-
     dtRcv1 <- dtRcv1[speciesCode %in% sppKeep]
+
+    #dtSrc1 <- dtSrc1[pixelGroup == 159061] # Pice_eng
+    #dtRcv1 <- dtRcv1[pixelGroup == 159061]
     speciesTable1 <- data.table::copy(speciesTable)
     speciesTable1 <- speciesTable1[speciesCode %in% sppKeep]
 
+
+    testOnlySmallCase <- FALSE
+    if (testOnlySmallCase) {
+
+      both <- dtSrc1[dtRcv1, on = c("speciesCode", "pixelGroup"), nomatch = 0]
+
+      pixelsWithSrcAndRcv <- which(pixelGroupMap[] %in% both$pixelGroup)
+
+      pixelsWithSrcAndRcv <- pixelsWithSrcAndRcv[diff(pixelsWithSrcAndRcv) == 1 & c(FALSE, diff(diff(pixelsWithSrcAndRcv) == 1) == 0)]
+      pix <- pixelsWithSrcAndRcv[4]
+      pixGr <- pixelGroupMap[pix]
+      pixGrs <- pixelGroupMap[pix + (-1:1)]
+
+      dtSrc1 <- dtSrc1[pixelGroup %in% pixGr] # Abie_bal
+      dtRcv1 <- dtRcv1[pixelGroup %in% (pixGrs)]
+
+      # verify
+      rcv <- which(pixelGroupMap[] %in% dtRcv1$pixelGroup)
+      src <- which(pixelGroupMap[] %in% dtSrc1$pixelGroup)
+      expect_true(src %in% rcv) # src is one of the rcv
+      expect_true(sum(diff(rcv) == 1) > 1) # there are 3 adjacent cells
+    }
     out <- LANDISDisp(dtSrc = dtSrc1,
                       dtRcv = dtRcv1,
                       pixelGroupMap = pixelGroupMap,
