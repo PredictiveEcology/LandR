@@ -203,7 +203,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
                 rcvSpeciesByIndex[cellRcvInd] = speciesPixelRcvPool;
 
               } else { // within the square
-                if (dis1[0] <= maxDist[0]) { // make sure to omit the corners of the square due to circle
+                if (dis1[0] <= ( maxDist[0] + cellSize / 2 ) ) { // make sure to omit the corners of the square due to circle
                   alreadyReceived = seedsArrivedMat(cellRcvInd, *speciesPixelRcv - 1);
                   if (!alreadyReceived) {
 
@@ -230,7 +230,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix cellCoords,
                     if (pixelVal >= 0) { // covers NA which is -2147483648
                       effDist = effDistsSpV[*speciesPixelRcv - 1];
                       dis = dis1[0];
-                      if (is_true(all(dis <= maxDist))) {
+                      if (is_true(all(dis <= ( maxDist + cellSize / 2 ) ))) {
                         if (dis[0] == 0) {
                           inequ = 1;
                         } else {
