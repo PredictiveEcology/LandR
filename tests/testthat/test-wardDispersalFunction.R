@@ -229,10 +229,15 @@ test_that("test large files", {
     set.seed(seed)
     dtSrc1 <- data.table::copy(dtSrc)
     dtRcv1 <- data.table::copy(dtRcv)
-    # dtSrc1 <- dtSrc1[speciesCode == "Pice_eng"]
-    # dtRcv1 <- dtRcv1[speciesCode == "Pice_eng"]
+
+    sppKeep <- unique(dtRcv1$speciesCode)
+    dtSrc1 <- dtSrc1[speciesCode %in% sppKeep]
+    #dtSrc1 <- dtSrc1[pixelGroup == 159061]
+    #dtRcv1 <- dtRcv1[pixelGroup == 159061]
+
+    dtRcv1 <- dtRcv1[speciesCode %in% sppKeep]
     speciesTable1 <- data.table::copy(speciesTable)
-    # speciesTable1 <- speciesTable1[speciesCode == "Pice_eng"]
+    speciesTable1 <- speciesTable1[speciesCode %in% sppKeep]
 
     out <- LANDISDisp(dtSrc = dtSrc1,
                       dtRcv = dtRcv1,
@@ -254,8 +259,7 @@ test_that("test large files", {
       forest <- which(!is.na(pixelGroupMap[]))
       src <- which(!is.na(spMap[[sppp]][]))
       recvable <- which(!is.na(receivable[]))
-      rcvd <- out[speciesCode == sppp]
-      intersect(src, recvable)
+      rcvd <- out[speciesCode == sppp]$pixelIndex
 
       spMap[[sppp]][forest] <- 0
       spMap[[sppp]][recvable] <- 2
@@ -265,10 +269,10 @@ test_that("test large files", {
 
       levels(spMap[[sppp]]) <- data.frame(ID = 0:4, type = c("OtherForest", "Source", "Didn't receive", "Received", "Src&Rcvd"))
     }
-    Plot(spMap, new = TRUE, cols = "Set2")
+    Plot(spMap, cols = "Set2")
 
-    rr <- apply(raster::stack(spMap)[[-1]][], 2, table)
-    rownames(rr) <- levels(spMap[[2]])[[1]][,"type"]
+    rr <- apply(raster::stack(spMap)[[-1]][] + 1, 2, tabulate)
+    rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"]
     rr <- rbind(rr, propSrcRcved = round(rr[5,]/ (rr[5,]+rr[2,]), 2))
     speciesTable[,c(1,5)]
 
