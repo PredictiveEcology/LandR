@@ -206,97 +206,122 @@ test_that("test Ward dispersal seeding algorithm", {
 
 test_that("test large files", {
   if (interactive()) {
-    library(reproducible)
-    library(quickPlot)
+    whichTest <- 0 # 0 for full test (slow), 1 (manual interactive) or 2 (medium)
     dp <- "~/tmp"
-    dtSrc <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
+  } else {
+    whichTest <- 2
+    dp <- tempdir()
+  }
+  library(reproducible)
+  library(quickPlot)
+  dtSrc <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
                         targetFile = "dtSrc.rds",
                         fun = "readRDS",
                         destinationPath = dp, overwrite = TRUE)
-    dtRcv <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
-                        targetFile = "dtRcv.rds",
-                        fun = "readRDS",
-                        destinationPath = dp)
-    pixelGroupMap <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
-                                targetFile = "pixelGroupMap.rds",
-                                fun = "readRDS",
-                                destinationPath = dp)
-    speciesTable <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
-                               targetFile = "speciesTable.rds",
-                               fun = "readRDS",
-                               destinationPath = dp)
-    seed <- 1234
-    set.seed(seed)
-    dtSrc1 <- data.table::copy(dtSrc)
-    dtRcv1 <- data.table::copy(dtRcv)
-    sppKeep <- unique(dtRcv1$speciesCode)
-    dtSrc1 <- dtSrc1[speciesCode %in% sppKeep]
-    dtRcv1 <- dtRcv1[speciesCode %in% sppKeep]
+  dtRcv <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
+                      targetFile = "dtRcv.rds",
+                      fun = "readRDS",
+                      destinationPath = dp)
+  pixelGroupMap <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
+                              targetFile = "pixelGroupMap.rds",
+                              fun = "readRDS",
+                              destinationPath = dp)
+  speciesTable <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
+                             targetFile = "speciesTable.rds",
+                             fun = "readRDS",
+                             destinationPath = dp)
+  seed <- 1234
+  set.seed(seed)
+  dtSrc1 <- data.table::copy(dtSrc)
+  dtRcv1 <- data.table::copy(dtRcv)
+  sppKeep <- unique(dtRcv1$speciesCode)
+  dtSrc1 <- dtSrc1[speciesCode %in% sppKeep]
+  dtRcv1 <- dtRcv1[speciesCode %in% sppKeep]
 
-    #dtSrc1 <- dtSrc1[pixelGroup == 159061] # Pice_eng
-    #dtRcv1 <- dtRcv1[pixelGroup == 159061]
-    speciesTable1 <- data.table::copy(speciesTable)
-    speciesTable1 <- speciesTable1[speciesCode %in% sppKeep]
+  speciesTable1 <- data.table::copy(speciesTable)
+  speciesTable1 <- speciesTable1[speciesCode %in% sppKeep]
 
 
-    testOnlySmallCase <- FALSE
-    if (testOnlySmallCase) {
+  if (whichTest == 1) { # 1 is for manual, interactive testing
 
-      both <- dtSrc1[dtRcv1, on = c("speciesCode", "pixelGroup"), nomatch = 0]
+    both <- dtSrc1[dtRcv1, on = c("speciesCode", "pixelGroup"), nomatch = 0]
 
-      pixelsWithSrcAndRcv <- which(pixelGroupMap[] %in% both$pixelGroup)
+    pixelsWithSrcAndRcv <- which(pixelGroupMap[] %in% both$pixelGroup)
 
-      pixelsWithSrcAndRcv <- pixelsWithSrcAndRcv[diff(pixelsWithSrcAndRcv) == 1 & c(FALSE, diff(diff(pixelsWithSrcAndRcv) == 1) == 0)]
-      pix <- pixelsWithSrcAndRcv[4]
-      pixGr <- pixelGroupMap[pix]
-      pixGrs <- pixelGroupMap[pix + (-1:1)]
+    pixelsWithSrcAndRcv <- pixelsWithSrcAndRcv[diff(pixelsWithSrcAndRcv) == 1 & c(FALSE, diff(diff(pixelsWithSrcAndRcv) == 1) == 0)]
+    pix <- pixelsWithSrcAndRcv[4]
+    pixGr <- pixelGroupMap[pix]
+    pixGrs <- pixelGroupMap[pix + (-1:1)]
 
-      dtSrc1 <- dtSrc1[pixelGroup %in% pixGr] # Abie_bal
-      dtRcv1 <- dtRcv1[pixelGroup %in% (pixGrs)]
+    dtSrc1 <- dtSrc1[pixelGroup %in% pixGr] # Abie_bal
+    dtRcv2 <- dtRcv1[pixelGroup %in% (pixGrs)]
 
-      # verify
-      rcv <- which(pixelGroupMap[] %in% dtRcv1$pixelGroup)
-      src <- which(pixelGroupMap[] %in% dtSrc1$pixelGroup)
-      expect_true(src %in% rcv) # src is one of the rcv
-      expect_true(sum(diff(rcv) == 1) > 1) # there are 3 adjacent cells
-    }
-    out <- LANDISDisp(dtSrc = dtSrc1,
-                      dtRcv = dtRcv1,
-                      pixelGroupMap = pixelGroupMap,
-                      successionTimestep = 1,
-                      speciesTable = speciesTable1)
-
-    clearPlot()
-    spMap <- list()
-    spMap$pixelGroupMap <- pixelGroupMap
-    for (sppp in unique(out$speciesCode)) {
-      spMap[[sppp]] <- SpaDES.tools::rasterizeReduced(fullRaster = pixelGroupMap,
-                                                      unique(dtSrc[speciesCode == sppp], on = c("pixelGroup", "speciesCode")),
-                                                      newRasterCols = c("seeddistance_eff"))
-      receivable <- SpaDES.tools::rasterizeReduced(fullRaster = pixelGroupMap,
-                                                   unique(dtRcv[speciesCode == sppp], on = c("pixelGroup", "speciesCode")),
-                                                   newRasterCols = c("seeddistance_eff"))
-
-      forest <- which(!is.na(pixelGroupMap[]))
-      src <- which(!is.na(spMap[[sppp]][]))
-      recvable <- which(!is.na(receivable[]))
-      rcvd <- out[speciesCode == sppp]$pixelIndex
-
-      spMap[[sppp]][forest] <- 0
-      spMap[[sppp]][recvable] <- 2
-      spMap[[sppp]][src] <- 1
-      spMap[[sppp]][rcvd] <- 3
-      spMap[[sppp]][intersect(src, rcvd)] <- 4
-
-      levels(spMap[[sppp]]) <- data.frame(ID = 0:4, type = c("OtherForest", "Source", "Didn't receive", "Received", "Src&Rcvd"))
-    }
-    Plot(spMap, cols = "Set2")
-
-    rr <- apply(raster::stack(spMap)[[-1]][] + 1, 2, tabulate)
-    rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"]
-    rr <- rbind(rr, propSrcRcved = round(rr[5,]/ (rr[5,]+rr[2,]), 2))
-    speciesTable[,c(1,5)]
-
-
+    # verify
+    rcv <- which(pixelGroupMap[] %in% dtRcv2$pixelGroup)
+    src <- which(pixelGroupMap[] %in% dtSrc1$pixelGroup)
+    expect_true(src %in% rcv) # src is one of the rcv
+    expect_true(sum(diff(rcv) == 1) > 1) # there are 3 adjacent cells
+  } else if (whichTest == 2) {
+    # subsetting -- but it doesn't seem to work for final test
+    dtRcv2 <- dtRcv1[, .SD[sample(NROW(.SD), size = min(NROW(.SD), 300))], by = "speciesCode"]
+  } else {
+    dtRcv2 <- dtRcv1
   }
+  st <- system.time(out <- LANDISDisp(dtSrc = dtSrc1,
+                    dtRcv = dtRcv2,
+                    pixelGroupMap = pixelGroupMap,
+                    successionTimestep = 1,
+                    speciesTable = speciesTable1))
+  print(st)
+
+  clearPlot()
+  spMap <- list()
+  spMap$pixelGroupMap <- pixelGroupMap
+  for (sppp in unique(out$speciesCode)) {
+    spMap[[sppp]] <- SpaDES.tools::rasterizeReduced(fullRaster = pixelGroupMap,
+                                                    unique(dtSrc[speciesCode == sppp], on = c("pixelGroup", "speciesCode")),
+                                                    newRasterCols = c("seeddistance_eff"))
+    receivable <- SpaDES.tools::rasterizeReduced(fullRaster = pixelGroupMap,
+                                                 unique(dtRcv[speciesCode == sppp], on = c("pixelGroup", "speciesCode")),
+                                                 newRasterCols = c("seeddistance_eff"))
+
+    forest <- which(!is.na(pixelGroupMap[]))
+    src <- which(!is.na(spMap[[sppp]][]))
+    recvable <- which(!is.na(receivable[]))
+    rcvd <- out[speciesCode == sppp]$pixelIndex
+
+    spMap[[sppp]][forest] <- 0
+    spMap[[sppp]][recvable] <- 2
+    spMap[[sppp]][src] <- 1
+    spMap[[sppp]][rcvd] <- 3
+    spMap[[sppp]][intersect(src, rcvd)] <- 4
+
+    levels(spMap[[sppp]]) <- data.frame(ID = 0:4, type = c("OtherForest", "Source", "Didn't receive", "Received", "Src&Rcvd"))
+  }
+  if (interactive()) {
+    clearPlot()
+    sp <- spMap[-1]
+    Plot(sp, cols = "Set2")
+  }
+
+  rr <- apply(raster::stack(spMap)[[-1]][] + 1, 2, function(x) {
+    oo <- tabulate(x)
+    if (length(oo) < 5)
+      oo <- c(oo, rep(0, 5 - length(oo)))
+    oo
+    })
+  rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"]
+  rr <- t(rr)
+  rr <- as.data.frame(rr)
+  rr <- cbind(rr, propSrcRcved = round(rr[,5]/ (rr[,5]+rr[,2]), 5))
+  speciesTable[,c(1,5)]
+  if (!(whichTest %in% 1:2)) {
+    # This is a weak test -- that is often wrong with small samples -- seems to only
+    #   work with full dataset
+    corr <- cor(speciesTable[match(rownames(rr), species)]$shadetolerance, rr[, "propSrcRcved" ],
+              method = "spearman")
+    expect_true(corr > 0.8)
+  }
+
+
 })
