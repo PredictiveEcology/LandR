@@ -272,7 +272,6 @@ test_that("test large files", {
                     pixelGroupMap = pixelGroupMap,
                     successionTimestep = 1,
                     speciesTable = speciesTable1))
-  print(st)
 
   clearPlot()
   spMap <- list()
@@ -322,6 +321,8 @@ test_that("test large files", {
               method = "spearman")
     expect_true(corr > 0.8)
   }
+  print(rr)
+  print(st)
 
 
 })
