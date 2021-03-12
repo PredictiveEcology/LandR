@@ -11,38 +11,38 @@ rmElem <- function(x, toRm) {
 
 #' Ward seed dispersal using Rcpp
 #'
-#' This uses a spiral pattern outwards from the \code{cellCoords} cells on
+#' This uses a spiral pattern outwards from the \code{receiveCellCoords} cells on
 #' a raster with the dimensions \code{numCols}, \code{numCells}, \code{xmin},
-#' \code{ymin}, and \code{cellSize}. For each cell in \code{cellCoords},
+#' \code{ymin}, and \code{cellSize}. For each cell in \code{receiveCellCoords},
 #' it evaluates whether there is a successful "dispersal" \code{to} that cell
 #' for the species that can disperse there as identified by \code{rcvSpeciesByIndex}.
 #' It will search outwards testing each and every cell in the spiral until
 #' the maximum distance is reached as specified in the 3rd column (named or unnamed)
 #' of \code{speciesTable}.
 #'
-#' @param cellCoords Matrix, 2 columns, of x-y coordinates of the Receive cells
-#' @param speciesVectorsList A list, where each element is a vector of NA and the speciesCode
+#' @param receiveCellCoords Matrix, 2 columns, of x-y coordinates of the Receive cells
+#' @param srcListVectorBySp A list, where each element is a vector of NA and the speciesCode
 #'   value of the list. The length of each vector MUST be the number of cells in the
-#'   raster whose \code{cellCoords} are provided.
-#' @param rcvSpeciesByIndex A list of length \code{NROW(cellCoords)} where each element
+#'   raster whose \code{receiveCellCoords} are provided.
+#' @param rcvSpeciesByIndex A list of length \code{NROW(receiveCellCoords)} where each element
 #'   is the vector of speciesCodes that are capable of being received in the
-#'   corresponding \code{cellCoords}
+#'   corresponding \code{receiveCellCoords}
 #' @param speciesTable A numeric matrix with species traits. Must have column 3 be
 #'   \code{seeddistance_max}, column 2 be \code{seeddistance_eff}, and sorted in
 #'   increasing order on the first column, speciesCode. The speciesCode values must
 #'   be \code{seq(1, NROW(speciesTable))}. The names of these columns is not important,
 #'   only the position in the matrix
-#' @param numCols Integer, number of columns in the raster whose \code{cellCoords}
+#' @param numCols Integer, number of columns in the raster whose \code{receiveCellCoords}
 #'   were provided
-#' @param numRows Integer, number of rows in the raster whose \code{cellCoords}
+#' @param numRows Integer, number of rows in the raster whose \code{receiveCellCoords}
 #'   were provided
-#' @param numCells Integer, number of cells in the raster whose \code{cellCoords}
+#' @param numCells Integer, number of cells in the raster whose \code{receiveCellCoords}
 #'   were provided
-#' @param cellSize Integer, the \code{res(ras)[1]} of the raster whose \code{cellCoords}
+#' @param cellSize Integer, the \code{res(ras)[1]} of the raster whose \code{receiveCellCoords}
 #'   were provided
-#' @param xmin Integer, the \code{xmin(ras)} of the raster whose \code{cellCoords}
+#' @param xmin Integer, the \code{xmin(ras)} of the raster whose \code{receiveCellCoords}
 #'   were provided
-#' @param ymin Integer, the \code{ymin(ras)} of the raster whose \code{cellCoords}
+#' @param ymin Integer, the \code{ymin(ras)} of the raster whose \code{receiveCellCoords}
 #'   were provided
 #' @param k Numeric, parameter passed to Ward dispersal kernel
 #' @param b Numeric, parameter passed to Ward dispersal kernel
@@ -50,12 +50,12 @@ rmElem <- function(x, toRm) {
 #' @param verbose Numeric, length 1. Currently \code{0} (no messaging), the fastest option,
 #'   \code{1} (some messaging) and \code{2} or greater (more messaging) are active. Default is
 #'   \code{getOption("LandR.verbose", TRUE)}.
-#' @return A logical matrix with ncols = \code{length(speciesVectorsList)} and nrows =
-#'   \code{NROW(cellCoords)}, indicating whether that cellCoords successfully
+#' @return A logical matrix with ncols = \code{length(srcListVectorBySp)} and nrows =
+#'   \code{NROW(receiveCellCoords)}, indicating whether that receiveCellCoords successfully
 #'   received seeds from each species.
 #' @author Eliot McIntire
 #' @export
-spiralSeedDispersal <- function(cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose = 0.0) {
-    .Call('_LandR_spiralSeedDispersal', PACKAGE = 'LandR', cellCoords, speciesVectorsList, rcvSpeciesByIndex, speciesTable, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose)
+spiralSeedDispersal <- function(receiveCellCoords, srcListVectorBySp, rcvSpeciesByIndex, speciesTable, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose = 0.0) {
+    .Call('_LandR_spiralSeedDispersal', PACKAGE = 'LandR', receiveCellCoords, srcListVectorBySp, rcvSpeciesByIndex, speciesTable, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose)
 }
 

@@ -167,18 +167,19 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                        verbose = getOption("LandR.verbose", TRUE),
                        ...) {
   if (TRUE) { # This is rewrite and MASSIVE simplification for spiralSeedDispersal
-    # Setup Rcv components cellCoords and rcvSpeciesByIndex
+    # Setup Rcv components receiveCellCoords and rcvSpeciesByIndex
 
     ####### Assertions #############
     if (!( (is.numeric(dtSrc$speciesCode) && is.numeric(dtRcv$speciesCode) && is.numeric(speciesTable$speciesCode)) ||
           (is.factor(dtSrc$speciesCode) && is.factor(dtRcv$speciesCode) && is.factor(speciesTable$speciesCode))))
-      stop("In LANDISDisp, dtSrc and dtRcv must each have columns for speciesCode which ",
+      stop("In LANDISDisp, dtSrc and dtRcv and speciesTable must each have columns for speciesCode which ",
              "must be both integer or both factor; they are not. Please correct this.")
 
     if (is.factor(dtSrc$speciesCode)) {
       if (!identical(levels(dtSrc$speciesCode), levels(dtRcv$speciesCode)) &&
            identical(levels(dtSrc$speciesCode), levels(speciesTable$speciesCode)))
-        stop("In LANDISDisp, dtSrc$speciesCode and dtRcv$speciesCode are both factors (good), ",
+        stop("In LANDISDisp, dtSrc$speciesCode and dtRcv$speciesCode and speciesTable$speciesCode ",
+             "are all factors (good), ",
              "but they have different levels (bad). They must have the same factor levels.")
       origLevels <- levels(dtSrc$speciesCode)
       dtSrc <- data.table::copy(dtSrc)
@@ -221,7 +222,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         speciesSrcRasterVecList[[as.character(ind)]]
       }
     })
-    speciesVectorsList <- speciesSrcRasterVecList
+    srcListVectorBySp <- speciesSrcRasterVecList
 
     # Raster metadata
     e <- pixelGroupMap@extent
@@ -262,8 +263,8 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     setorderv(dt, c("pixelIndex", "speciesCode"))
     rcvSpeciesByIndex <- split(dt$speciesCode, dt$pixelIndex)
 
-    # cellCoords
-    cellCoords <- matrix(as.integer(xyFromCell(pixelGroupMap, cellsCanRcv)), ncol = 2)
+    # receiveCellCoords
+    receiveCellCoords <- matrix(as.integer(xyFromCell(pixelGroupMap, cellsCanRcv)), ncol = 2)
 
     # Removing cases ## 2 stages
     # 1st stage -- keep is for "keeping" only rcv pixels where at least 1 species is in the src pixels
@@ -273,7 +274,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       }))
       rcvSpeciesByIndex <- rcvSpeciesByIndex[keep]
 
-      cellCoords <- cellCoords[keep, , drop = FALSE]
+      receiveCellCoords <- receiveCellCoords[keep, , drop = FALSE]
     } else {
       keep <- rep(TRUE, length(rcvSpeciesByIndex))
     }
@@ -304,11 +305,11 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       speciesTableInner <- do.call(rbind, speciesTableInner2)
       # speciesTableInner <- na.omit(speciesTableInner)
 
-      ind <- seq(NROW(cellCoords))
+      ind <- seq(NROW(receiveCellCoords))
 
       # Assertions
-      if (!is(cellCoords, "matrix")) stop()
-      if (!is(cellCoords[,1], "integer")) stop()
+      if (!is(receiveCellCoords, "matrix")) stop()
+      if (!is(receiveCellCoords[,1], "integer")) stop()
       if (!is.list(rcvSpeciesByIndex)) stop()
       if (!is.matrix(speciesTableInner)) stop()
       if (!is.numeric(speciesTableInner[,1])) stop()
@@ -324,10 +325,10 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       if (!is.numeric(successionTimestep)) stop()
 
       out <- spiralSeedDispersal(
-        cellCoords = cellCoords, # [ind,, drop = FALSE],
+        receiveCellCoords = receiveCellCoords, # [ind,, drop = FALSE],
         rcvSpeciesByIndex = rcvSpeciesByIndex, # [ind],
         speciesTable = speciesTableInner,
-        speciesVectorsList = speciesSrcRasterVecList,
+        srcListVectorBySp = speciesSrcRasterVecList,
         cellSize = cellSize, numCells = numCells, xmin = xmin,
         ymin = ymin, numCols = numCols, numRows = numRows, b = b, k = k,
         successionTimestep = successionTimestep,
@@ -464,7 +465,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
   }
 
   # setnames(seedsArrived, "fromInit", "pixelIndex")
-  return(seedsArrived)
+  return(seedsArrived[])
 }
 
 speciesCodeFromCommunity <- function(num) {
@@ -588,10 +589,10 @@ seedDispInnerFn <-
       speciesTableInner <- na.omit(speciesTableInner)
 
       out <- spiralSeedDispersal(
-        cellCoords = cellsXY,
+        receiveCellCoords = cellsXY,
         rcvSpeciesByIndex = rcvSpeciesByIndex,
         speciesTable = speciesTableInner,
-        speciesVectorsList = speciesSrcRasterVecList,
+        srcListVectorBySp = speciesSrcRasterVecList,
         cellSize = cellSize, numCells = numCells, xmin = xmin,
         ymin = ymin, numCols = numCols, b = b, k = k,
         successionTimestep = successionTimestep,

@@ -267,6 +267,7 @@ test_that("test large files", {
   } else {
     dtRcv2 <- dtRcv1
   }
+  suppressWarnings(rm(list = c("out")))
   st <- system.time(out <- LANDISDisp(dtSrc = dtSrc1,
                     dtRcv = dtRcv2,
                     pixelGroupMap = pixelGroupMap,
@@ -297,22 +298,25 @@ test_that("test large files", {
 
     levels(spMap[[sppp]]) <- data.frame(ID = 0:4, type = c("OtherForest", "Source", "Didn't receive", "Received", "Src&Rcvd"))
   }
-  if (interactive()) {
+  if (FALSE) {# (interactive()) {
     clearPlot()
     sp <- spMap[-1]
     Plot(sp, cols = "Set2")
   }
 
+  rrDidntExist <- if (!exists("rr")) TRUE else FALSE
+  suppressWarnings(rm(list = c("rr")))
   rr <- apply(raster::stack(spMap)[[-1]][] + 1, 2, function(x) {
     oo <- tabulate(x)
     if (length(oo) < 5)
       oo <- c(oo, rep(0, 5 - length(oo)))
     oo
-    })
+  })
   rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"]
   rr <- t(rr)
   rr <- as.data.frame(rr)
   rr <- cbind(rr, propSrcRcved = round(rr[,5]/ (rr[,5]+rr[,2]), 5))
+  if (rrDidntExist) rrOrig <- rr
   speciesTable[,c(1,5)]
   if (!(whichTest %in% 1:2)) {
     # This is a weak test -- that is often wrong with small samples -- seems to only
@@ -323,6 +327,129 @@ test_that("test large files", {
   }
   print(rr)
   print(st)
+  try(identical(rrOrig, rr), silent = TRUE) # for
+
 
 
 })
+
+test_that("test Ward 4 immediate neighbours", {
+  library(raster); library(data.table)
+  pixelGroupMap <- raster(extent(0, 1500, 0, 1500), res = 250, vals = 0)
+  mp <- SpaDES.tools::middlePixel(pixelGroupMap)
+  rc <- rowColFromCell(pixelGroupMap, mp)
+
+  pixelGroupMap[rc] <- 1
+
+  # 4 immediate neighbours
+  pixelGroupMap[rc+c(1,0)] <- 2
+  pixelGroupMap[rc+c(0,1)] <- 2
+  pixelGroupMap[rc+c(-1,0)] <- 2
+  pixelGroupMap[rc+c(0,-1)] <- 2
+
+  dtSrc <- data.table(pixelGroup = 1,
+                      speciesCode =
+                        structure(1:7,
+                                  .Label = c("Abie_las", "Betu_pap", "Pice_eng",
+                                             "Pice_gla", "Pice_mar", "Pinu_con", "Popu_tre"),
+                                  class = "factor"))
+  dtRcv <- data.table(pixelGroup = rep(1:2, each = 7),
+                      speciesCode =
+                        structure(1:7,
+                                  .Label = c("Abie_las", "Betu_pap", "Pice_eng",
+                                             "Pice_gla", "Pice_mar", "Pinu_con", "Popu_tre"),
+                                  class = "factor"))
+  # seeddistance_eff = c(75L, 400L, 30L, 100L, 80L, 60L, 400L),
+  # seeddistance_max = c(100L, 5000L, 250L, 303L, 200L, 200L, 5000L)
+  cc <- xyFromCell(pixelGroupMap, 15)
+  plot(pixelGroupMap)
+  for (i in 1:100) {
+    speciesTab <-
+      structure(
+        list(
+          speciesCode = unique(dtRcv$speciesCode),
+          seeddistance_eff = sample(1L:round((res(pixelGroupMap)[1]/2.1)), size = 7),
+          seeddistance_max = sample(round(res(pixelGroupMap)[1]/1.9):(res(pixelGroupMap)[1]), size = 7)
+        ),
+        row.names = c(NA,-7L),
+        class = c("data.table", "data.frame")
+      )
+    seed <- sample(1e6, 1)
+    # seed <- 163330
+    set.seed(seed)
+    out <- LANDISDisp(dtSrc, dtRcv = dtRcv, pixelGroupMap, speciesTable = speciesTab,
+                      successionTimestep = 1, verbose = 1)
+  #  if (NROW(out[pixelIndex == 23]) == 3) {
+  #    print(i); print(seed); out[, .N, by = "speciesCode"]; break}
+
+    pixSelf <- which(pixelGroupMap[] == 1)
+    expect_true(NROW(speciesTab) == sum(out$pixelIndex == pixSelf))
+    oo <- out[, .N, by = c("speciesCode")]
+    expect_true(sum(oo$N) >= 34) # This will fail once in 1e6 times! It is OK if VERY VERY infrequently
+  }
+
+})
+
+test_that("test Ward 8 immediate neighbours", {
+  library(raster); library(data.table)
+  pixelGroupMap <- raster(extent(0, 1500, 0, 1500), res = 250, vals = 0)
+  mp <- SpaDES.tools::middlePixel(pixelGroupMap)
+  rc <- rowColFromCell(pixelGroupMap, mp)
+
+  pixelGroupMap[rc] <- 1
+
+  # 4 immediate neighbours
+  # pixelGroupMap[rc+c(1,0)] <- 2
+  # pixelGroupMap[rc+c(0,1)] <- 2
+  # pixelGroupMap[rc+c(-1,0)] <- 2
+  # pixelGroupMap[rc+c(0,-1)] <- 2
+  #
+  # 4 diagonal neighbours
+  pixelGroupMap[rc+c(1,1)] <- 2
+  pixelGroupMap[rc+c(-1,1)] <- 2
+  pixelGroupMap[rc+c(-1,-1)] <- 2
+  pixelGroupMap[rc+c(1,-1)] <- 2
+
+  dtSrc <- data.table(pixelGroup = 1,
+                      speciesCode =
+                        structure(1:7,
+                                  .Label = c("Abie_las", "Betu_pap", "Pice_eng",
+                                             "Pice_gla", "Pice_mar", "Pinu_con", "Popu_tre"),
+                                  class = "factor"))
+  dtRcv <- data.table(pixelGroup = rep(1:2, each = 7),
+                      speciesCode =
+                        structure(1:7,
+                                  .Label = c("Abie_las", "Betu_pap", "Pice_eng",
+                                             "Pice_gla", "Pice_mar", "Pinu_con", "Popu_tre"),
+                                  class = "factor"))
+  # seeddistance_eff = c(75L, 400L, 30L, 100L, 80L, 60L, 400L),
+  # seeddistance_max = c(100L, 5000L, 250L, 303L, 200L, 200L, 5000L)
+  cc <- xyFromCell(pixelGroupMap, 15)
+  plot(pixelGroupMap)
+  for (i in 1:100) {
+    speciesTab <-
+      structure(
+        list(
+          speciesCode = unique(dtRcv$speciesCode),
+          seeddistance_eff = sample(1L:round((res(pixelGroupMap)[1]/2.1)), size = 7),
+          seeddistance_max = sample(round(res(pixelGroupMap)[1]/1.9):(res(pixelGroupMap)[1]), size = 7)
+        ),
+        row.names = c(NA,-7L),
+        class = c("data.table", "data.frame")
+      )
+    seed <- sample(1e6, 1)
+    # seed <- 163330
+    set.seed(seed)
+    out <- LANDISDisp(dtSrc, dtRcv = dtRcv, pixelGroupMap, speciesTable = speciesTab,
+                      successionTimestep = 1, verbose = 2)
+    #  if (NROW(out[pixelIndex == 23]) == 3) {
+    #    print(i); print(seed); out[, .N, by = "speciesCode"]; break}
+
+    pixSelf <- which(pixelGroupMap[] == 1)
+    expect_true(NROW(speciesTab) == sum(out$pixelIndex == pixSelf))
+    oo <- out[, .N, by = c("speciesCode")]
+    expect_true(sum(oo$N) == 7) # This will fail once in 1e6 times! It is OK if VERY VERY infrequently
+  }
+
+})
+
