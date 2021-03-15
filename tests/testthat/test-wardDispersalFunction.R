@@ -418,7 +418,7 @@ test_that("test Ward 8 immediate neighbours", {
   # seeddistance_max = c(100L, 5000L, 250L, 303L, 200L, 200L, 5000L)
   cc <- xyFromCell(pixelGroupMap, 15)
   plot(pixelGroupMap)
-  for (i in 1:100) {
+  for (i in 1:1) {
     speciesTab <-
       data.table(
         speciesCode = as.factor(LETTERS[1:10]),
