@@ -215,9 +215,9 @@ test_that("test large files", {
   library(reproducible)
   library(quickPlot)
   dtSrc <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
-                        targetFile = "dtSrc.rds",
-                        fun = "readRDS",
-                        destinationPath = dp, overwrite = TRUE)
+                      targetFile = "dtSrc.rds",
+                      fun = "readRDS",
+                      destinationPath = dp, overwrite = TRUE)
   dtRcv <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
                       targetFile = "dtRcv.rds",
                       fun = "readRDS",
@@ -269,10 +269,10 @@ test_that("test large files", {
   }
   suppressWarnings(rm(list = c("out")))
   st <- system.time(out <- LANDISDisp(dtSrc = dtSrc1,
-                    dtRcv = dtRcv2,
-                    pixelGroupMap = pixelGroupMap,
-                    successionTimestep = 1,
-                    speciesTable = speciesTable1))
+                                      dtRcv = dtRcv2,
+                                      pixelGroupMap = pixelGroupMap,
+                                      successionTimestep = 1,
+                                      speciesTable = speciesTable1))
 
   clearPlot()
   spMap <- list()
@@ -322,7 +322,7 @@ test_that("test large files", {
     # This is a weak test -- that is often wrong with small samples -- seems to only
     #   work with full dataset
     corr <- cor(speciesTable[match(rownames(rr), species)]$shadetolerance, rr[, "propSrcRcved" ],
-              method = "spearman")
+                method = "spearman")
     expect_true(corr > 0.8)
   }
   print(rr)
@@ -335,7 +335,7 @@ test_that("test large files", {
 
 test_that("test Ward 4 immediate neighbours", {
   library(raster); library(data.table)
-  pixelGroupMap <- raster(extent(0, 1500, 0, 1500), res = 250, vals = 0)
+  pixelGroupMap <- raster(extent(0, 1250, 0, 1750), res = 250, vals = 0)
   mp <- SpaDES.tools::middlePixel(pixelGroupMap)
   rc <- rowColFromCell(pixelGroupMap, mp)
 
@@ -379,8 +379,8 @@ test_that("test Ward 4 immediate neighbours", {
     set.seed(seed)
     out <- LANDISDisp(dtSrc, dtRcv = dtRcv, pixelGroupMap, speciesTable = speciesTab,
                       successionTimestep = 1, verbose = 1)
-  #  if (NROW(out[pixelIndex == 23]) == 3) {
-  #    print(i); print(seed); out[, .N, by = "speciesCode"]; break}
+    #  if (NROW(out[pixelIndex == 23]) == 3) {
+    #    print(i); print(seed); out[, .N, by = "speciesCode"]; break}
 
     pixSelf <- which(pixelGroupMap[] == 1)
     expect_true(NROW(speciesTab) == sum(out$pixelIndex == pixSelf))
@@ -392,7 +392,7 @@ test_that("test Ward 4 immediate neighbours", {
 
 test_that("test Ward 8 immediate neighbours", {
   library(raster); library(data.table)
-  pixelGroupMap <- raster(extent(0, 1500, 0, 1500), res = 250, vals = 0)
+  pixelGroupMap <- raster(extent(0, 1250, 0, 1750), res = 250, vals = 0)
   mp <- SpaDES.tools::middlePixel(pixelGroupMap)
   rc <- rowColFromCell(pixelGroupMap, mp)
 
@@ -406,36 +406,24 @@ test_that("test Ward 8 immediate neighbours", {
   #
   # 4 diagonal neighbours
   pixelGroupMap[rc+c(1,1)] <- 2
-  pixelGroupMap[rc+c(-1,1)] <- 2
-  pixelGroupMap[rc+c(-1,-1)] <- 2
+  # pixelGroupMap[rc+c(-1,1)] <- 2
+  # pixelGroupMap[rc+c(-1,-1)] <- 2
   pixelGroupMap[rc+c(1,-1)] <- 2
 
   dtSrc <- data.table(pixelGroup = 1,
-                      speciesCode =
-                        structure(1:7,
-                                  .Label = c("Abie_las", "Betu_pap", "Pice_eng",
-                                             "Pice_gla", "Pice_mar", "Pinu_con", "Popu_tre"),
-                                  class = "factor"))
-  dtRcv <- data.table(pixelGroup = rep(1:2, each = 7),
-                      speciesCode =
-                        structure(1:7,
-                                  .Label = c("Abie_las", "Betu_pap", "Pice_eng",
-                                             "Pice_gla", "Pice_mar", "Pinu_con", "Popu_tre"),
-                                  class = "factor"))
+                      speciesCode = as.factor(LETTERS[1:10]))
+  dtRcv <- data.table(pixelGroup = rep(1:2, each = 10),
+                      speciesCode =as.factor(LETTERS[1:10]))
   # seeddistance_eff = c(75L, 400L, 30L, 100L, 80L, 60L, 400L),
   # seeddistance_max = c(100L, 5000L, 250L, 303L, 200L, 200L, 5000L)
   cc <- xyFromCell(pixelGroupMap, 15)
   plot(pixelGroupMap)
   for (i in 1:100) {
     speciesTab <-
-      structure(
-        list(
-          speciesCode = unique(dtRcv$speciesCode),
-          seeddistance_eff = sample(1L:round((res(pixelGroupMap)[1]/2.1)), size = 7),
-          seeddistance_max = sample(round(res(pixelGroupMap)[1]/1.9):(res(pixelGroupMap)[1]), size = 7)
-        ),
-        row.names = c(NA,-7L),
-        class = c("data.table", "data.frame")
+      data.table(
+        speciesCode = as.factor(LETTERS[1:10]),
+        seeddistance_eff = c(100, 100, 100, 100, 250, 250, 250, 250, 300, 300),
+        seeddistance_max = c(100, 200, 250, 300, 250, 300, 500, 740, 400, 500)
       )
     seed <- sample(1e6, 1)
     # seed <- 163330
@@ -448,7 +436,7 @@ test_that("test Ward 8 immediate neighbours", {
     pixSelf <- which(pixelGroupMap[] == 1)
     expect_true(NROW(speciesTab) == sum(out$pixelIndex == pixSelf))
     oo <- out[, .N, by = c("speciesCode")]
-    expect_true(sum(oo$N) == 7) # This will fail once in 1e6 times! It is OK if VERY VERY infrequently
+    expect_true(sum(oo$N) == 10) # This will fail once in 1e6 times! It is OK if VERY VERY infrequently
   }
 
 })
