@@ -5,10 +5,11 @@
 \title{Ward seed dispersal using Rcpp}
 \usage{
 spiralSeedDispersal(
-  cellCoords,
-  speciesVectorsList,
+  receiveCellCoords,
+  srcListVectorBySp,
   rcvSpeciesByIndex,
   speciesTable,
+  numRcvSpeciesVec,
   numCols,
   numRows,
   numCells,
@@ -22,15 +23,15 @@ spiralSeedDispersal(
 )
 }
 \arguments{
-\item{cellCoords}{Matrix, 2 columns, of x-y coordinates of the Receive cells}
+\item{receiveCellCoords}{Matrix, 2 columns, of x-y coordinates of the Receive cells}
 
-\item{speciesVectorsList}{A list, where each element is a vector of NA and the speciesCode
+\item{srcListVectorBySp}{A list, where each element is a vector of NA and the speciesCode
 value of the list. The length of each vector MUST be the number of cells in the
-raster whose \code{cellCoords} are provided.}
+raster whose \code{receiveCellCoords} are provided.}
 
-\item{rcvSpeciesByIndex}{A list of length \code{NROW(cellCoords)} where each element
+\item{rcvSpeciesByIndex}{A list of length \code{NROW(receiveCellCoords)} where each element
 is the vector of speciesCodes that are capable of being received in the
-corresponding \code{cellCoords}}
+corresponding \code{receiveCellCoords}}
 
 \item{speciesTable}{A numeric matrix with species traits. Must have column 3 be
 \code{seeddistance_max}, column 2 be \code{seeddistance_eff}, and sorted in
@@ -38,22 +39,26 @@ increasing order on the first column, speciesCode. The speciesCode values must
 be \code{seq(1, NROW(speciesTable))}. The names of these columns is not important,
 only the position in the matrix}
 
-\item{numCols}{Integer, number of columns in the raster whose \code{cellCoords}
+\item{numRcvSpeciesVec}{A vector of length and order of NROW(speciesTable) indicating
+how many of each receiving species there are. This will be decremented. If it reaches
+0, it will allow shortcutting of that species.}
+
+\item{numCols}{Integer, number of columns in the raster whose \code{receiveCellCoords}
 were provided}
 
-\item{numRows}{Integer, number of rows in the raster whose \code{cellCoords}
+\item{numRows}{Integer, number of rows in the raster whose \code{receiveCellCoords}
 were provided}
 
-\item{numCells}{Integer, number of cells in the raster whose \code{cellCoords}
+\item{numCells}{Integer, number of cells in the raster whose \code{receiveCellCoords}
 were provided}
 
-\item{cellSize}{Integer, the \code{res(ras)[1]} of the raster whose \code{cellCoords}
+\item{cellSize}{Integer, the \code{res(ras)[1]} of the raster whose \code{receiveCellCoords}
 were provided}
 
-\item{xmin}{Integer, the \code{xmin(ras)} of the raster whose \code{cellCoords}
+\item{xmin}{Integer, the \code{xmin(ras)} of the raster whose \code{receiveCellCoords}
 were provided}
 
-\item{ymin}{Integer, the \code{ymin(ras)} of the raster whose \code{cellCoords}
+\item{ymin}{Integer, the \code{ymin(ras)} of the raster whose \code{receiveCellCoords}
 were provided}
 
 \item{k}{Numeric, parameter passed to Ward dispersal kernel}
@@ -67,14 +72,14 @@ were provided}
 \code{getOption("LandR.verbose", TRUE)}.}
 }
 \value{
-A logical matrix with ncols = \code{length(speciesVectorsList)} and nrows =
-  \code{NROW(cellCoords)}, indicating whether that cellCoords successfully
+A logical matrix with ncols = \code{length(srcListVectorBySp)} and nrows =
+  \code{NROW(receiveCellCoords)}, indicating whether that receiveCellCoords successfully
   received seeds from each species.
 }
 \description{
-This uses a spiral pattern outwards from the \code{cellCoords} cells on
+This uses a spiral pattern outwards from the \code{receiveCellCoords} cells on
 a raster with the dimensions \code{numCols}, \code{numCells}, \code{xmin},
-\code{ymin}, and \code{cellSize}. For each cell in \code{cellCoords},
+\code{ymin}, and \code{cellSize}. For each cell in \code{receiveCellCoords},
 it evaluates whether there is a successful "dispersal" \code{to} that cell
 for the species that can disperse there as identified by \code{rcvSpeciesByIndex}.
 It will search outwards testing each and every cell in the spiral until

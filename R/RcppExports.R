@@ -32,6 +32,9 @@ rmElem <- function(x, toRm) {
 #'   increasing order on the first column, speciesCode. The speciesCode values must
 #'   be \code{seq(1, NROW(speciesTable))}. The names of these columns is not important,
 #'   only the position in the matrix
+#' @param numRcvSpeciesVec A vector of length and order of NROW(speciesTable) indicating
+#'   how many of each receiving species there are. This will be decremented. If it reaches
+#'   0, it will allow shortcutting of that species.
 #' @param numCols Integer, number of columns in the raster whose \code{receiveCellCoords}
 #'   were provided
 #' @param numRows Integer, number of rows in the raster whose \code{receiveCellCoords}
@@ -55,7 +58,7 @@ rmElem <- function(x, toRm) {
 #'   received seeds from each species.
 #' @author Eliot McIntire
 #' @export
-spiralSeedDispersal <- function(receiveCellCoords, srcListVectorBySp, rcvSpeciesByIndex, speciesTable, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose = 0.0) {
-    .Call('_LandR_spiralSeedDispersal', PACKAGE = 'LandR', receiveCellCoords, srcListVectorBySp, rcvSpeciesByIndex, speciesTable, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose)
+spiralSeedDispersal <- function(receiveCellCoords, srcListVectorBySp, rcvSpeciesByIndex, speciesTable, numRcvSpeciesVec, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose = 0.0) {
+    .Call('_LandR_spiralSeedDispersal', PACKAGE = 'LandR', receiveCellCoords, srcListVectorBySp, rcvSpeciesByIndex, speciesTable, numRcvSpeciesVec, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose)
 }
 

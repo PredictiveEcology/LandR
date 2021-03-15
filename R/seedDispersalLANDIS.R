@@ -308,50 +308,57 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
 
       ind <- seq(NROW(receiveCellCoords))
 
-      ras <- raster(pixelGroupMap)
-      distsToRcv <- lapply(speciesSrcRasterVecList, rasTemplate = rasTemplate, receiveCellCoords = receiveCellCoords,
-             function(spVec, rasTemplate, receiveCellCoords) {
-        ras <- raster(rasTemplate)
-        ras[] <- spVec
-        distanceFromPoints(ras,  receiveCellCoords)
-        })
-      distsToRcv <- setNames(distsToRcv, paste0("sp_", seq_along(distsToRcv)))
+      omitTooFar = FALSE
+      if (omitTooFar) {
+        ras <- raster(pixelGroupMap)
+        distsToRcv <- lapply(speciesSrcRasterVecList, rasTemplate = rasTemplate, receiveCellCoords = receiveCellCoords,
+                             function(spVec, rasTemplate, receiveCellCoords) {
+                               ras <- raster(rasTemplate)
+                               ras[] <- spVec
+                               distanceFromPoints(ras,  receiveCellCoords)
+                             })
+        distsToRcv <- setNames(distsToRcv, paste0("sp_", seq_along(distsToRcv)))
 
-      srcSpeciesByIndex <- Map(srcSpeciesByInd = srcSpeciesByIndex, dist = distsToRcv,
-          spTableInnInd = seq_len(NROW(speciesTableInner)),
-          MoreArgs = list(spTable = speciesTableInner),
-          function(srcSpeciesByInd, dist, spTableInnInd, spTable) {
-            srcSpeciesByInd[dist[][srcSpeciesByInd] < spTable[spTableInnInd, "seeddistance_max"]]
-      })
+        srcSpeciesByIndex <- Map(srcSpeciesByInd = srcSpeciesByIndex, dist = distsToRcv,
+                                 spTableInnInd = seq_len(NROW(speciesTableInner)),
+                                 MoreArgs = list(spTable = speciesTableInner),
+                                 function(srcSpeciesByInd, dist, spTableInnInd, spTable) {
+                                   srcSpeciesByInd[dist[][srcSpeciesByInd] < spTable[spTableInnInd, "seeddistance_max"]]
+                                 })
 
 
-      cellsCanSrc <- rbindlist(lapply(srcSpeciesByIndex, function(pixelIndex)
-        data.table(pixelIndex = pixelIndex)), use.names = T, idcol = "species")
+        cellsCanSrc <- rbindlist(lapply(srcSpeciesByIndex, function(pixelIndex)
+          data.table(pixelIndex = pixelIndex)), use.names = T, idcol = "species")
 
-      srcCellCoords <- as.data.table(matrix(as.integer(xyFromCell(pixelGroupMap, cellsCanSrc$pixelIndex)), ncol = 2))
-      srcCellCoords <- split(srcCellCoords, f = cellsCanSrc$species)
-      srcCellCoords <- srcCellCoords[names(srcSpeciesByIndex)] # it needs to keep order of original which may have been lost with split e.g., 1, 2, 3... 10 will have become 1, 10, 2, 3
+        srcCellCoords <- as.data.table(matrix(as.integer(xyFromCell(pixelGroupMap, cellsCanSrc$pixelIndex)), ncol = 2))
+        srcCellCoords <- split(srcCellCoords, f = cellsCanSrc$species)
+        srcCellCoords <- srcCellCoords[names(srcSpeciesByIndex)] # it needs to keep order of original which may have been lost with split e.g., 1, 2, 3... 10 will have become 1, 10, 2, 3
 
-      distsToSrc <- lapply(srcCellCoords, rasTemplate = rasTemplate,
-                      function(srcCellCoord, rasTemplate) {
-                        ras <- raster(rasTemplate)
-                        distanceFromPoints(ras,  srcCellCoord)
-                      })
-      distsToSrc <- setNames(distsToSrc, paste0("sp_", seq_along(distsToSrc)))
-      distsToSrc <- raster::stack(distsToSrc)
-      pixes <- as.integer(names(rcvSpeciesByIndex))
-      seeddistance_max <- pmax(cellSize, speciesTableInner[, "seeddistance_max"])
-      withinDist <- apply(t(distsToSrc[pixes]) <= seeddistance_max, 2, which)
+        distsToSrc <- lapply(srcCellCoords, rasTemplate = rasTemplate,
+                             function(srcCellCoord, rasTemplate) {
+                               ras <- raster(rasTemplate)
+                               distanceFromPoints(ras,  srcCellCoord)
+                             })
+        distsToSrc <- setNames(distsToSrc, paste0("sp_", seq_along(distsToSrc)))
+        distsToSrc <- raster::stack(distsToSrc)
+        pixes <- as.integer(names(rcvSpeciesByIndex))
+        seeddistance_max <- pmax(cellSize, speciesTableInner[, "seeddistance_max"])
+        withinDist <- apply(t(distsToSrc[pixes]) <= seeddistance_max, 2, which)
 
-      rcvSpeciesByIndex <- Map(rcvSpeciesByInd = rcvSpeciesByIndex, withnDist = withinDist,
-          function(rcvSpeciesByInd, withnDist) {
-            intersect(rcvSpeciesByInd, withnDist)
-          })
+        rcvSpeciesByIndex <- Map(rcvSpeciesByInd = rcvSpeciesByIndex, withnDist = withinDist,
+                                 function(rcvSpeciesByInd, withnDist) {
+                                   intersect(rcvSpeciesByInd, withnDist)
+                                 })
+      }
 
+      numRcvSpeciesVec <- as.integer(tabulate(unlist(rcvSpeciesByIndex)))
+      if (length(numRcvSpeciesVec) < length(srcSpeciesByIndex))
+        numRcvSpeciesVec <- c(numRcvSpeciesVec, rep(0, length(srcSpeciesByIndex) - length(numRcvSpeciesVec)))
 
       # Assertions
       if (!is(receiveCellCoords, "matrix")) stop()
       if (!is(receiveCellCoords[,1], "integer")) stop()
+      if (!is(numRcvSpeciesVec, "integer")) stop()
       if (!is.list(rcvSpeciesByIndex)) stop()
       if (!is.matrix(speciesTableInner)) stop()
       if (!is.numeric(speciesTableInner[,1])) stop()
@@ -372,6 +379,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         rcvSpeciesByIndex = rcvSpeciesByIndex, # [ind],
         speciesTable = speciesTableInner,
         srcListVectorBySp = speciesSrcRasterVecList,
+        numRcvSpeciesVec = numRcvSpeciesVec,
         cellSize = cellSize, numCells = numCells, xmin = xmin,
         ymin = ymin, numCols = numCols, numRows = numRows, b = b, k = k,
         successionTimestep = successionTimestep,
