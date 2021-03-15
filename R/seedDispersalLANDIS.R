@@ -205,16 +205,19 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     pgv <- pixelGroupMap[]
 
     # speciesSrcRasterVecList
-    rasTemplate <- rep(NA_integer_, ncell(pixelGroupMap))
+    rasVectorTemplate <- rep(NA_integer_, ncell(pixelGroupMap))
+    rasTemplate <- raster(pixelGroupMap)
     srcSpeciesCodes <- sort(unique(dtSrc$speciesCode))
     names(srcSpeciesCodes) <- as.character(srcSpeciesCodes)
     cellsCanSrc <- which(pgv %in% dtSrc$pixelGroup)
-    dt <- data.table(pixelGroup = pgv[cellsCanSrc], pixelIndex = cellsCanSrc)
-    dt <- dtSrc[, c("pixelGroup", "speciesCode")][dt, on = "pixelGroup", allow.cartesian = TRUE] # $speciesCode
-    srcSpeciesByIndex <- split(dt$pixelIndex, dt$speciesCode)
+    dtSrcLong <- data.table(pixelGroup = pgv[cellsCanSrc], pixelIndex = cellsCanSrc)
+    dtSrcLong <- dtSrc[, c("pixelGroup", "speciesCode")][dtSrcLong, on = "pixelGroup", allow.cartesian = TRUE] # $speciesCode
+    srcSpeciesByIndex <- split(dtSrcLong$pixelIndex, dtSrcLong$speciesCode)
+
+
     speciesSrcRasterVecList <- lapply(srcSpeciesCodes, function(sc) {
-      rasTemplate[srcSpeciesByIndex[[as.character(sc)]]] <- sc
-      rasTemplate
+      rasVectorTemplate[srcSpeciesByIndex[[as.character(sc)]]] <- sc
+      rasVectorTemplate
     })
     maxSpCode <- max(as.integer(srcSpeciesCodes))
     speciesSrcRasterVecList <- lapply(seq_len(maxSpCode), function(ind) {
@@ -222,7 +225,6 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         speciesSrcRasterVecList[[as.character(ind)]]
       }
     })
-    srcListVectorBySp <- speciesSrcRasterVecList
 
     # Raster metadata
     e <- pixelGroupMap@extent
@@ -255,13 +257,13 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     dtRcvNew <- dtRcv[unique(dtSrc[, "speciesCode"], by = "speciesCode"), on = "speciesCode"]
     cellsCanRcv <- which(pgv %in% dtRcvNew$pixelGroup)
     rcvSpeciesCodes <- sort(unique(dtRcvNew$speciesCode))
-    dt <- data.table(pixelGroup = pgv[cellsCanRcv], pixelIndex = cellsCanRcv)
+    dtRcvLong <- data.table(pixelGroup = pgv[cellsCanRcv], pixelIndex = cellsCanRcv)
     dtRcvSmall <- dtRcvNew[, c("pixelGroup", "speciesCode")]
     dtSrcUniqueSP <- unique(dtSrc[, "speciesCode"], by = "speciesCode")
     dtRcvSmall1 <- dtRcvSmall[dtSrcUniqueSP, on = "speciesCode"]
-    dt <- dt[dtRcvSmall, on = "pixelGroup", allow.cartesian = TRUE] # $speciesCode
-    setorderv(dt, c("pixelIndex", "speciesCode"))
-    rcvSpeciesByIndex <- split(dt$speciesCode, dt$pixelIndex)
+    dtRcvLong <- dtRcvLong[dtRcvSmall, on = "pixelGroup", allow.cartesian = TRUE] # $speciesCode
+    setorderv(dtRcvLong, c("pixelIndex", "speciesCode"))
+    rcvSpeciesByIndex <- split(dtRcvLong$speciesCode, dtRcvLong$pixelIndex)
 
     # receiveCellCoords
     receiveCellCoords <- matrix(as.integer(xyFromCell(pixelGroupMap, cellsCanRcv)), ncol = 2)
@@ -303,9 +305,49 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         }
       })
       speciesTableInner <- do.call(rbind, speciesTableInner2)
-      # speciesTableInner <- na.omit(speciesTableInner)
 
       ind <- seq(NROW(receiveCellCoords))
+
+      ras <- raster(pixelGroupMap)
+      distsToRcv <- lapply(speciesSrcRasterVecList, rasTemplate = rasTemplate, receiveCellCoords = receiveCellCoords,
+             function(spVec, rasTemplate, receiveCellCoords) {
+        ras <- raster(rasTemplate)
+        ras[] <- spVec
+        distanceFromPoints(ras,  receiveCellCoords)
+        })
+      distsToRcv <- setNames(distsToRcv, paste0("sp_", seq_along(distsToRcv)))
+
+      srcSpeciesByIndex <- Map(srcSpeciesByInd = srcSpeciesByIndex, dist = distsToRcv,
+          spTableInnInd = seq_len(NROW(speciesTableInner)),
+          MoreArgs = list(spTable = speciesTableInner),
+          function(srcSpeciesByInd, dist, spTableInnInd, spTable) {
+            srcSpeciesByInd[dist[][srcSpeciesByInd] < spTable[spTableInnInd, "seeddistance_max"]]
+      })
+
+
+      cellsCanSrc <- rbindlist(lapply(srcSpeciesByIndex, function(pixelIndex)
+        data.table(pixelIndex = pixelIndex)), use.names = T, idcol = "species")
+
+      srcCellCoords <- as.data.table(matrix(as.integer(xyFromCell(pixelGroupMap, cellsCanSrc$pixelIndex)), ncol = 2))
+      srcCellCoords <- split(srcCellCoords, f = cellsCanSrc$species)
+      srcCellCoords <- srcCellCoords[names(srcSpeciesByIndex)] # it needs to keep order of original which may have been lost with split e.g., 1, 2, 3... 10 will have become 1, 10, 2, 3
+
+      distsToSrc <- lapply(srcCellCoords, rasTemplate = rasTemplate,
+                      function(srcCellCoord, rasTemplate) {
+                        ras <- raster(rasTemplate)
+                        distanceFromPoints(ras,  srcCellCoord)
+                      })
+      distsToSrc <- setNames(distsToSrc, paste0("sp_", seq_along(distsToSrc)))
+      distsToSrc <- raster::stack(distsToSrc)
+      pixes <- as.integer(names(rcvSpeciesByIndex))
+      seeddistance_max <- pmax(cellSize, speciesTableInner[, "seeddistance_max"])
+      withinDist <- apply(t(distsToSrc[pixes]) <= seeddistance_max, 2, which)
+
+      rcvSpeciesByIndex <- Map(rcvSpeciesByInd = rcvSpeciesByIndex, withnDist = withinDist,
+          function(rcvSpeciesByInd, withnDist) {
+            intersect(rcvSpeciesByInd, withnDist)
+          })
+
 
       # Assertions
       if (!is(receiveCellCoords, "matrix")) stop()
@@ -323,6 +365,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       if (!is.numeric(k)) stop()
       if (!is.numeric(b)) stop()
       if (!is.numeric(successionTimestep)) stop()
+
 
       out <- spiralSeedDispersal(
         receiveCellCoords = receiveCellCoords, # [ind,, drop = FALSE],

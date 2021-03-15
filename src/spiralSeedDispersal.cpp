@@ -238,9 +238,9 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix receiveCellCoords,
 
               maxDist = maxDistsSpV[*speciesPixelRcv - 1];
               maxDistMinCellSize = maxDistsSpVMinCellSize[*speciesPixelRcv - 1];
-              if (verbose >= 2) {
-                Rcpp::Rcout << "speciesPixelRcv " << *speciesPixelRcv  <<  " speciesPixelRcvPool.length() " << speciesPixelRcvPool.length() << std::endl;
-              }
+              // if (verbose >= 2) {
+              //   Rcpp::Rcout << "speciesPixelRcv " << *speciesPixelRcv  <<  " speciesPixelRcvPool.length() " << speciesPixelRcvPool.length() << std::endl;
+              // }
               if (dis1[0] > ( maxDistMinCellSize[0] * sqrt(2) ) ) {
                 // if (verbose >= 1 & *speciesPixelRcv == 1) {
                 //   Rcpp::Rcout << "  out of Square " << maxDist[0] * sqrt(2) + cellSize << " maxDistMinCellSize[0] * sqrt(2) " << maxDistMinCellSize[0] * sqrt(2) << std::endl;

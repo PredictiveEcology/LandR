@@ -408,12 +408,22 @@ test_that("test Ward 8 immediate neighbours", {
   pixelGroupMap[rc+c(1,1)] <- 2
   # pixelGroupMap[rc+c(-1,1)] <- 2
   # pixelGroupMap[rc+c(-1,-1)] <- 2
-  pixelGroupMap[rc+c(1,-1)] <- 2
+  pixelGroupMap[rc+c(1,0)] <- 2
+  # pixelGroupMap[rc+c(2,0)] <- 2
+  pixelGroupMap[rc+c(2,1)] <- 2
+  pixelGroupMap[rc+c(0,2)] <- 3
+  pixelGroupMap[rc+c(-1, 1)] <- 4
 
+  lets <- as.factor(LETTERS[10:1])
   dtSrc <- data.table(pixelGroup = 1,
-                      speciesCode = as.factor(LETTERS[1:10]))
+                      speciesCode = lets)
+  dtSrc <- rbindlist(list(dtSrc, data.table(pixelGroup = 4,
+                      speciesCode = lets[4:10])))
   dtRcv <- data.table(pixelGroup = rep(1:2, each = 10),
-                      speciesCode =as.factor(LETTERS[1:10]))
+                      speciesCode =lets)
+  dtRcv <- rbindlist(list(dtRcv, data.table(pixelGroup = 3,
+                      speciesCode =lets[1:7])))
+
   # seeddistance_eff = c(75L, 400L, 30L, 100L, 80L, 60L, 400L),
   # seeddistance_max = c(100L, 5000L, 250L, 303L, 200L, 200L, 5000L)
   cc <- xyFromCell(pixelGroupMap, 15)
@@ -423,7 +433,7 @@ test_that("test Ward 8 immediate neighbours", {
       data.table(
         speciesCode = as.factor(LETTERS[1:10]),
         seeddistance_eff = c(100, 100, 100, 100, 250, 250, 250, 250, 300, 300),
-        seeddistance_max = c(100, 200, 250, 300, 250, 300, 500, 740, 400, 500)
+        seeddistance_max = c(100, 200, 250, 300, 250, 300, 490, 740, 400, 500)
       )
     seed <- sample(1e6, 1)
     # seed <- 163330
@@ -435,8 +445,8 @@ test_that("test Ward 8 immediate neighbours", {
 
     pixSelf <- which(pixelGroupMap[] == 1)
     expect_true(NROW(speciesTab) == sum(out$pixelIndex == pixSelf))
-    oo <- out[, .N, by = c("speciesCode")]
-    expect_true(sum(oo$N) == 10) # This will fail once in 1e6 times! It is OK if VERY VERY infrequently
+    (oo <- out[, .N, by = c("speciesCode")])
+
   }
 
 })
