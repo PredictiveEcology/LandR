@@ -138,6 +138,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix receiveCellCoords,
   // messaging
   int floorOverallMaxDist = floor(overallMaxDist / 10);
   int moduloVal;
+  int cellRcvCounter = 0;
   if (cellSize < floorOverallMaxDist) {
     moduloVal = floorOverallMaxDist;
   } else {
@@ -303,9 +304,9 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix receiveCellCoords,
 
                           numRcvSpeciesVec[*speciesPixelRcv - 1] = numRcvSpeciesVec[*speciesPixelRcv - 1] - 1;
 
-                            if (verbose >= 4) {
-                              Rcpp::Rcout << "&&&&&&&&&&&&& numRcvSpeciesVec " << numRcvSpeciesVec << std::endl;
-                            }
+                          if (verbose >= 4) {
+                            Rcpp::Rcout << "&&&&&&&&&&&&& numRcvSpeciesVec " << numRcvSpeciesVec << std::endl;
+                          }
 
                           // numActiveCellsByRcvSp[*speciesPixelRcv - 1] = numActiveCellsByRcvSp[*speciesPixelRcv - 1] - 1;
                           // Remove this one as it is no longer needed
@@ -345,16 +346,18 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix receiveCellCoords,
         }
 
 
-        if (speciesPixelRcvPool.length() == 0L) {
-          if (verbose >= 3) {
-            if (*cellRcvIt % 10000 == 0L) {
-              Rcpp::Rcout << "- erasing a cellRcvPool " << *cellRcvIt << " leaving cellRcvPool.length() " << cellRcvPool.length() << std::endl;
-            }
-          }
-          cellRcvIt = cellRcvPool.erase(cellRcvIt);
-        } else {
-          ++cellRcvIt;
+        // if (speciesPixelRcvPool.length() == 0L) {
+        //   if (verbose >= 3) {
+        cellRcvCounter += 1;
+        if (cellRcvCounter % 10000 == 0L) {
+          Rcpp::checkUserInterrupt();
+          //       Rcpp::Rcout << "- erasing a cellRcvPool " << *cellRcvIt << " leaving cellRcvPool.length() " << cellRcvPool.length() << std::endl;
         }
+        //   }
+        //   cellRcvIt = cellRcvPool.erase(cellRcvIt);
+        // } else {
+        ++cellRcvIt;
+        // }
 
 
       }
