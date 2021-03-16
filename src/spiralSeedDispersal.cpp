@@ -213,7 +213,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix receiveCellCoords,
       for (IntegerVector::iterator cellRcvIt = cellRcvPool.begin();
            cellRcvIt != cellRcvPool.end(); ) {
         IntegerVector speciesPixelRcvPool = rcvSpeciesByIndex[*cellRcvIt];
-        if (verbose >= 3) {
+        if (verbose >= 4) {
           Rcpp::Rcout << "               *cellRcvIt: " << *cellRcvIt << " speciesPixelRcvPool: " << speciesPixelRcvPool << std::endl;
         }
 
@@ -222,18 +222,18 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix receiveCellCoords,
 
           bool onMap = (xCoord[*cellRcvIt] < numCols * cellSize + xmin) && (xCoord[*cellRcvIt] > xmin) &&
             (yCoord[*cellRcvIt] < numRows * cellSize + ymin) && (yCoord[*cellRcvIt] > ymin);
-          if (verbose >= 3) {
+          if (verbose >= 4) {
             Rcpp::Rcout << "onMap " << onMap << std::endl;
           }
 
           if (onMap) {
             nCellsVisitedOnMap += 1;
-            if (verbose >= 3) {
+            if (verbose >= 4) {
               Rcpp::Rcout << "#### nCellsVisitedOnMap " << nCellsVisitedOnMap  << std::endl;
             }
             pixelSrc = (numRows - (yCoord[*cellRcvIt] - ymin - cellSize/2)/cellSize - 1) * numCols +
               (xCoord[*cellRcvIt] - xmin - cellSize/2)/cellSize + 1;
-            if (verbose >= 3) {
+            if (verbose >= 4) {
               Rcpp::Rcout << "pixelSrc " << pixelSrc << std::endl;
             }
 
@@ -243,18 +243,18 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix receiveCellCoords,
 
               maxDist = maxDistsSpV[*speciesPixelRcv - 1];
               maxDistMinCellSize = maxDistsSpVMinCellSize[*speciesPixelRcv - 1];
-              if (verbose >= 3) {
+              if (verbose >= 4) {
                 Rcpp::Rcout << "maxDist " << maxDist << " *speciesPixelRcv " << *speciesPixelRcv << std::endl;
               }
 
               if (dis1[0] > ( maxDistMinCellSize[0] * sqrt(2) ) ) {
                 // remove that species from the species pool for that Rcv cell
-                if (verbose >= 3) {
+                if (verbose >= 4) {
                   Rcpp::Rcout << "Removing *cellRcvIt: "  << *cellRcvIt << "  *speciesPixelRcv " << *speciesPixelRcv << " speciesPixelRcvPool " << speciesPixelRcvPool << std::endl;
                 }
                 speciesPixelRcv = speciesPixelRcvPool.erase(speciesPixelRcv);
                 rcvSpeciesByIndex[*cellRcvIt] = speciesPixelRcvPool;
-                if (verbose >= 3) {
+                if (verbose >= 4) {
                   Rcpp::Rcout << "Removed *cellRcvIt: "  << *cellRcvIt << "  *speciesPixelRcv " << *speciesPixelRcv << " speciesPixelRcvPool " << speciesPixelRcvPool << std::endl;
                 }
 
@@ -266,7 +266,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix receiveCellCoords,
 
                     IntegerVector speciesVector = srcListVectorBySp[*speciesPixelRcv - 1];
                     pixelVal = speciesVector[pixelSrc - 1];
-                    if (verbose >= 3) {
+                    if (verbose >= 4) {
                       Rcpp::Rcout << "pixelVal: "  << pixelVal << std::endl;
                     }
 
@@ -297,7 +297,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix receiveCellCoords,
                         seedsArrivedMat(*cellRcvIt, *speciesPixelRcv - 1) = inequ || seedsArrivedMat(*cellRcvIt, *speciesPixelRcv - 1);
 
                         if (inequ) {
-                          if (verbose >= 3) {
+                          if (verbose >= 4) {
                             Rcpp::Rcout << "  Success! " << " speciesPixelRcv " << *speciesPixelRcv  << std::endl;
                           }
 
@@ -309,11 +309,11 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix receiveCellCoords,
 
                           // numActiveCellsByRcvSp[*speciesPixelRcv - 1] = numActiveCellsByRcvSp[*speciesPixelRcv - 1] - 1;
                           // Remove this one as it is no longer needed
-                          if (verbose >= 3) {
+                          if (verbose >= 4) {
                             Rcpp::Rcout << "speciesPixelRcvPool - BEFORE " << speciesPixelRcvPool << "   speciesPixelRcv " << *speciesPixelRcv << std::endl;
                           }
                           speciesPixelRcv = speciesPixelRcvPool.erase(speciesPixelRcv);
-                          if (verbose >= 3) {
+                          if (verbose >= 4) {
                             Rcpp::Rcout << "speciesPixelRcvPool - AFTER " << speciesPixelRcvPool  << "   speciesPixelRcv " << *speciesPixelRcv << std::endl;
                           }
                           rcvSpeciesByIndex[*cellRcvIt] = speciesPixelRcvPool;
@@ -347,7 +347,9 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix receiveCellCoords,
 
         if (speciesPixelRcvPool.length() == 0L) {
           if (verbose >= 3) {
-            Rcpp::Rcout << "- erasing a cellRcvPool " << *cellRcvIt << std::endl;
+            if (*cellRcvIt % 10000 == 0L) {
+              Rcpp::Rcout << "- erasing a cellRcvPool " << *cellRcvIt << std::endl;
+            }
           }
           cellRcvIt = cellRcvPool.erase(cellRcvIt);
         } else {

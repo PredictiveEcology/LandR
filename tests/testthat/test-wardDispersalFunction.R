@@ -271,7 +271,7 @@ test_that("test large files", {
   st <- system.time(out <- LANDISDisp(dtSrc = dtSrc1,
                                       dtRcv = dtRcv2,
                                       pixelGroupMap = pixelGroupMap,
-                                      successionTimestep = 1,
+                                      successionTimestep = 1, verbose = 3,
                                       speciesTable = speciesTable1))
 
   clearPlot()
@@ -439,7 +439,7 @@ test_that("test Ward 8 immediate neighbours", {
     # seed <- 163330
     set.seed(seed)
     out <- LANDISDisp(dtSrc, dtRcv = dtRcv, pixelGroupMap, speciesTable = speciesTab,
-                      successionTimestep = 1, verbose = 1)
+                      successionTimestep = 1, verbose = 2)
     #  if (NROW(out[pixelIndex == 23]) == 3) {
     #    print(i); print(seed); out[, .N, by = "speciesCode"]; break}
 
