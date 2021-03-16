@@ -433,13 +433,13 @@ test_that("test Ward 8 immediate neighbours", {
       data.table(
         speciesCode = as.factor(LETTERS[1:10]),
         seeddistance_eff = c(100, 100, 100, 100, 250, 250, 250, 250, 300, 300),
-        seeddistance_max = c(100, 200, 250, 300, 250, 300, 490, 740, 400, 500)
+        seeddistance_max = c(100, 200, 250, 300, 250, 300, 490, 1240, 400, 500)
       )
     seed <- sample(1e6, 1)
     # seed <- 163330
     set.seed(seed)
     out <- LANDISDisp(dtSrc, dtRcv = dtRcv, pixelGroupMap, speciesTable = speciesTab,
-                      successionTimestep = 1, verbose = 2)
+                      successionTimestep = 1, verbose = 1)
     #  if (NROW(out[pixelIndex == 23]) == 3) {
     #    print(i); print(seed); out[, .N, by = "speciesCode"]; break}
 
