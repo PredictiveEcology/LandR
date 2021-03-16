@@ -271,7 +271,7 @@ test_that("test large files", {
   st <- system.time(out <- LANDISDisp(dtSrc = dtSrc1,
                     dtRcv = dtRcv2,
                     pixelGroupMap = pixelGroupMap,
-                    successionTimestep = 1, verbose = 3,
+                    successionTimestep = 1, verbose = 1,
                     speciesTable = speciesTable1))
 
   clearPlot()
