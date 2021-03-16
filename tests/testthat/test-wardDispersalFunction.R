@@ -269,10 +269,10 @@ test_that("test large files", {
   }
   suppressWarnings(rm(list = c("out")))
   st <- system.time(out <- LANDISDisp(dtSrc = dtSrc1,
-                                      dtRcv = dtRcv2,
-                                      pixelGroupMap = pixelGroupMap,
-                                      successionTimestep = 1, verbose = 3,
-                                      speciesTable = speciesTable1))
+                    dtRcv = dtRcv2,
+                    pixelGroupMap = pixelGroupMap,
+                    successionTimestep = 1, verbose = 3,
+                    speciesTable = speciesTable1))
 
   clearPlot()
   spMap <- list()
