@@ -348,7 +348,7 @@ LogicalMatrix spiralSeedDispersal( IntegerMatrix receiveCellCoords,
         if (speciesPixelRcvPool.length() == 0L) {
           if (verbose >= 3) {
             if (*cellRcvIt % 10000 == 0L) {
-              Rcpp::Rcout << "- erasing a cellRcvPool " << *cellRcvIt << std::endl;
+              Rcpp::Rcout << "- erasing a cellRcvPool " << *cellRcvIt << " leaving cellRcvPool.length() " << cellRcvPool.length() << std::endl;
             }
           }
           cellRcvIt = cellRcvPool.erase(cellRcvIt);
