@@ -62,11 +62,3 @@ spiralSeedDispersal <- function(receiveCellCoords, srcListVectorBySp, rcvSpecies
     .Call('_LandR_spiralSeedDispersal', PACKAGE = 'LandR', receiveCellCoords, srcListVectorBySp, rcvSpeciesByIndex, speciesTable, numRcvSpeciesVec, numCols, numRows, numCells, cellSize, xmin, ymin, k, b, successionTimestep, verbose)
 }
 
-timesTwo <- function(x) {
-    .Call('_LandR_timesTwo', PACKAGE = 'LandR', x)
-}
-
-main <- function() {
-    .Call('_LandR_main', PACKAGE = 'LandR')
-}
-
