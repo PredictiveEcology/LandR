@@ -271,8 +271,9 @@ test_that("test large files", {
   st <- system.time(out <- LANDISDisp(dtSrc = dtSrc1,
                     dtRcv = dtRcv2,
                     pixelGroupMap = pixelGroupMap,
-                    successionTimestep = 1, verbose = 3,
-                    speciesTable = speciesTable1))
+                    successionTimestep = 1, verbose = 1,
+                    speciesTable = speciesTable1,
+                    fast = TRUE, maxSpiralIndex = 1e9))
 
   clearPlot()
   spMap <- list()

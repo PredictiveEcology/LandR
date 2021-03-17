@@ -164,20 +164,20 @@ utils::globalVariables(c(
 LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                        dispersalFn = WardFast, b = 0.01, k = 0.95, plot.it = FALSE,
                        successionTimestep,
-                       verbose = getOption("LandR.verbose", TRUE),
+                       verbose = getOption("LandR.verbose", TRUE), fast = TRUE, maxSpiralIndex = 1e9,
                        ...) {
   if (TRUE) { # This is rewrite and MASSIVE simplification for spiralSeedDispersal
     # Setup Rcv components receiveCellCoords and rcvSpeciesByIndex
 
     ####### Assertions #############
     if (!( (is.numeric(dtSrc$speciesCode) && is.numeric(dtRcv$speciesCode) && is.numeric(speciesTable$speciesCode)) ||
-          (is.factor(dtSrc$speciesCode) && is.factor(dtRcv$speciesCode) && is.factor(speciesTable$speciesCode))))
+           (is.factor(dtSrc$speciesCode) && is.factor(dtRcv$speciesCode) && is.factor(speciesTable$speciesCode))))
       stop("In LANDISDisp, dtSrc and dtRcv and speciesTable must each have columns for speciesCode which ",
-             "must be both integer or both factor; they are not. Please correct this.")
+           "must be both integer or both factor; they are not. Please correct this.")
 
     if (is.factor(dtSrc$speciesCode)) {
       if (!identical(levels(dtSrc$speciesCode), levels(dtRcv$speciesCode)) &&
-           identical(levels(dtSrc$speciesCode), levels(speciesTable$speciesCode)))
+          identical(levels(dtSrc$speciesCode), levels(speciesTable$speciesCode)))
         stop("In LANDISDisp, dtSrc$speciesCode and dtRcv$speciesCode and speciesTable$speciesCode ",
              "are all factors (good), ",
              "but they have different levels (bad). They must have the same factor levels.")
@@ -308,14 +308,18 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
 
       ind <- seq(NROW(receiveCellCoords))
 
-      omitTooFar = FALSE
+      omitTooFar <- FALSE
       if (omitTooFar) {
         ras <- raster(pixelGroupMap)
+        hh <- 0
+        message("DistanceFromPoints for Rcv Start")
         distsToRcv <- lapply(speciesSrcRasterVecList, rasTemplate = rasTemplate, receiveCellCoords = receiveCellCoords,
                              function(spVec, rasTemplate, receiveCellCoords) {
                                ras <- raster(rasTemplate)
                                ras[] <- spVec
-                               distanceFromPoints(ras,  receiveCellCoords)
+                               message("Species ", hh)
+                               hh <<- hh + 1
+                               raster::distanceFromPoints(ras,  receiveCellCoords)
                              })
         distsToRcv <- setNames(distsToRcv, paste0("sp_", seq_along(distsToRcv)))
 
@@ -325,7 +329,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                                  function(srcSpeciesByInd, dist, spTableInnInd, spTable) {
                                    srcSpeciesByInd[dist[][srcSpeciesByInd] < spTable[spTableInnInd, "seeddistance_max"]]
                                  })
-
+        message("DistanceFromPoints for Rcv End")
 
         cellsCanSrc <- rbindlist(lapply(srcSpeciesByIndex, function(pixelIndex)
           data.table(pixelIndex = pixelIndex)), use.names = T, idcol = "species")
@@ -337,7 +341,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         distsToSrc <- lapply(srcCellCoords, rasTemplate = rasTemplate,
                              function(srcCellCoord, rasTemplate) {
                                ras <- raster(rasTemplate)
-                               distanceFromPoints(ras,  srcCellCoord)
+                               raster::distanceFromPoints(ras,  srcCellCoord)
                              })
         distsToSrc <- setNames(distsToSrc, paste0("sp_", seq_along(distsToSrc)))
         distsToSrc <- raster::stack(distsToSrc)
@@ -382,8 +386,10 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         numRcvSpeciesVec = numRcvSpeciesVec,
         cellSize = cellSize, numCells = numCells, xmin = xmin,
         ymin = ymin, numCols = numCols, numRows = numRows, b = b, k = k,
+        fast = fast, maxSpiralIndex = maxSpiralIndex,
         successionTimestep = successionTimestep,
         verbose = as.numeric(verbose)
+
       )
 
       colNum <- seq(ncol(out))
@@ -671,7 +677,7 @@ seedDispInnerFn <-
     }
 
     return(seedsArrived)
-}
+  }
 
 #' Ward Seed Dispersal kernel
 #'
@@ -714,22 +720,22 @@ Ward <- expression(if (cellSize <= effDist) {
 #' @name WardFast
 #' @rdname WardFast
 WardFast <- expression(ifelse(cellSize <= effDist, {
-    ifelse(
-      dis <= effDist,
-      exp((dis - cellSize) * log(1 - k) / effDist) -
-        exp(dis * log(1 - k) / effDist),
-      (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
-        (1 - k) * exp((dis - effDist) * log(b) / maxDist)
-    )
-  }, {
-    ifelse(
-      dis <= cellSize,
-      exp((dis - cellSize) * log(1 - k) / effDist) - (1 - k) *
-        exp((dis - effDist) * log(b) / maxDist),
-      (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
-        (1 - k) * exp((dis - effDist) * log(b) / maxDist)
-    )
-  }
+  ifelse(
+    dis <= effDist,
+    exp((dis - cellSize) * log(1 - k) / effDist) -
+      exp(dis * log(1 - k) / effDist),
+    (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
+      (1 - k) * exp((dis - effDist) * log(b) / maxDist)
+  )
+}, {
+  ifelse(
+    dis <= cellSize,
+    exp((dis - cellSize) * log(1 - k) / effDist) - (1 - k) *
+      exp((dis - effDist) * log(b) / maxDist),
+    (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
+      (1 - k) * exp((dis - effDist) * log(b) / maxDist)
+  )
+}
 ))
 
 intToBin2 <- function(x) {
