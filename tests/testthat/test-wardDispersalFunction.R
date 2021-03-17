@@ -235,6 +235,8 @@ test_that("test large files", {
   dtSrc1 <- data.table::copy(dtSrc)
   dtRcv1 <- data.table::copy(dtRcv)
   sppKeep <- unique(dtRcv1$speciesCode)
+  #sppKeep <- "Popu_tre"
+
   dtSrc1 <- dtSrc1[speciesCode %in% sppKeep]
   dtRcv1 <- dtRcv1[speciesCode %in% sppKeep]
 
@@ -299,7 +301,7 @@ test_that("test large files", {
 
     levels(spMap[[sppp]]) <- data.frame(ID = 0:4, type = c("OtherForest", "Source", "Didn't receive", "Received", "Src&Rcvd"))
   }
-  if (FALSE) {# (interactive()) {
+  if (TRUE) {# (interactive()) {
     clearPlot()
     sp <- spMap[-1]
     Plot(sp, cols = "Set2")
@@ -379,7 +381,7 @@ test_that("test Ward 4 immediate neighbours", {
     # seed <- 163330
     set.seed(seed)
     out <- LANDISDisp(dtSrc, dtRcv = dtRcv, pixelGroupMap, speciesTable = speciesTab,
-                      successionTimestep = 1, verbose = 1)
+                      successionTimestep = 1, verbose = 1, fast = FALSE)
     #  if (NROW(out[pixelIndex == 23]) == 3) {
     #    print(i); print(seed); out[, .N, by = "speciesCode"]; break}
 

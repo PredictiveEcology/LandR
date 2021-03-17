@@ -377,7 +377,6 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       if (!is.numeric(b)) stop()
       if (!is.numeric(successionTimestep)) stop()
 
-
       out <- spiralSeedDispersal(
         receiveCellCoords = receiveCellCoords, # [ind,, drop = FALSE],
         rcvSpeciesByIndex = rcvSpeciesByIndex, # [ind],
