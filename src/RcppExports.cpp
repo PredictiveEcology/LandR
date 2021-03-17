@@ -59,13 +59,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_LandR_which2", (DL_FUNC) &_LandR_which2, 1},
     {"_LandR_rmElem", (DL_FUNC) &_LandR_rmElem, 2},
-<<<<<<< HEAD
     {"_LandR_spiralSeedDispersal", (DL_FUNC) &_LandR_spiralSeedDispersal, 17},
-    {"_LandR_timesTwo", (DL_FUNC) &_LandR_timesTwo, 1},
-    {"_LandR_main", (DL_FUNC) &_LandR_main, 0},
-=======
-    {"_LandR_spiralSeedDispersal", (DL_FUNC) &_LandR_spiralSeedDispersal, 15},
->>>>>>> 7b790b25750360d6b75e2a8df57406fdb6dbb3a6
     {NULL, NULL, 0}
 };
 
