@@ -354,6 +354,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                                    intersect(rcvSpeciesByInd, withnDist)
                                  })
       }
+      speciesPixelRcvPoolLengths <- lengths(rcvSpeciesByIndex)
 
       numRcvSpeciesVec <- as.integer(tabulate(unlist(rcvSpeciesByIndex)))
       if (length(numRcvSpeciesVec) < length(srcSpeciesByIndex))
@@ -380,6 +381,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       out <- spiralSeedDispersal(
         receiveCellCoords = receiveCellCoords, # [ind,, drop = FALSE],
         rcvSpeciesByIndex = rcvSpeciesByIndex, # [ind],
+        speciesPixelRcvPoolLengths = speciesPixelRcvPoolLengths,
         speciesTable = speciesTableInner,
         srcListVectorBySp = speciesSrcRasterVecList,
         numRcvSpeciesVec = numRcvSpeciesVec,
