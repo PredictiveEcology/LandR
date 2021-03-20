@@ -279,17 +279,27 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       rcvFull <- copy(rcvLong)
       notActive <- integer()
       activeFullIndex <- seq.int(NROW(rcvFull))
-      mm <- as.matrix(setDT(speciesSrcRasterVecList))
+      srcPixelMatrix <- as.matrix(setDT(speciesSrcRasterVecList))
       rcvLongM <- as.matrix(rcvLong)
+      rcvLongM <- cbind(rcvLongM, newPixelIndex = 0L)
+      rc1 <- rowColFromCell(pixelGroupMap, rcvLongM[, "pixelIndex"])
+      rcvLongM <- cbind(rcvLongM, row = rc1[, "row"], col = rc1[, "col"])
       for (i in 1:NROW(spiral)) {
         if (i > 1) {
           rcvLongM <- rcvLongM[-notActiveSubIndex, ]
         }
+        rcvLongM[, "row"] <- rcvLongM[, "row"] + spiral[i, "row"]
+        rcvLongM[, "col"] <- rcvLongM[, "col"] + spiral[i, "col"]
 
-        nn <- mm[rcvLongM[, 1:2]]
+        newPixelIndex <- cellFromRowCol(row = rcvLongM[, "row"], col = rcvLongM[, "col"],
+                                        object = pixelGroupMap)
+        rcvLongM[, "newPixelIndex"] <- newPixelIndex
+
+        nn <- srcPixelMatrix[rcvLongM[, c("newPixelIndex", "speciesCode")]]
         hasSp <- !is.na(nn)
         ran <- runif(sum(hasSp))
-        oo <- ran < WardVec(k = k, b = b, dist = drop(spiral[i, 3]) * cellSize, cellSize = cellSize,
+        oo <- ran < WardVec(k = k, b = b, dist = drop(spiral[i, 3]) * cellSize,
+                            cellSize = cellSize,
                             effDist = rcvLongM[hasSp,"seeddistance_eff"],
                             maxDist = rcvLongM[hasSp, "seeddistance_max"]
         )
