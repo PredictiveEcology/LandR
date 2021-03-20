@@ -302,7 +302,7 @@ test_that("test large files", {
 
     levels(spMap[[sppp]]) <- data.frame(ID = 0:4, type = c("OtherForest", "Source", "Didn't receive", "Received", "Src&Rcvd"))
   }
-  if (TRUE) {# (interactive()) {
+  if (FALSE) {# (interactive()) {
     clearPlot()
     sp <- spMap[-1]
     Plot(sp, cols = "Set2")

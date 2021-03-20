@@ -292,6 +292,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
           tooLong <- curDist > ( pmax(cellSize, rcvLongM[, "seeddistance_max"]) * sqrt(2))
           if (any(tooLong)) {
             rcvLongM <- rcvLongM[!tooLong,]
+            activeFullIndex <- activeFullIndex[!tooLong]
           }
 
         }
