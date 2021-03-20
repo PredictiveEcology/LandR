@@ -263,7 +263,76 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     dtRcvSmall1 <- dtRcvSmall[dtSrcUniqueSP, on = "speciesCode"]
     dtRcvLong <- dtRcvLong[dtRcvSmall, on = "pixelGroup", allow.cartesian = TRUE] # $speciesCode
     setorderv(dtRcvLong, c("pixelIndex", "speciesCode"))
-    rcvSpeciesByIndex <- split(dtRcvLong$speciesCode, dtRcvLong$pixelIndex)
+    # rcvSpeciesByIndex <- split(dtRcvLong$speciesCode, dtRcvLong$pixelIndex)
+
+    # trying again with distance
+
+    if (TRUE) {
+      maxDis <- max(speciesTable[, seeddistance_max])
+      spiral <- which(focalWeight(pixelGroupMap, maxDis, type = "circle")>0, arr.ind = TRUE) -
+        (maxDis/cellSize) - 1
+      spiral <- spiral[order(apply(abs(spiral), 1, sum), abs(spiral[, 1]), abs(spiral[, 2])),]
+      spiral <- cbind(spiral, dists = sqrt( (0 - spiral[,1]) ^ 2 + (0 - spiral[, 2]) ^ 2))
+      rcvLong <- dtRcvLong[, c("pixelIndex", "speciesCode")]
+      rcvLong <- rcvLong[speciesTable[, c("seeddistance_max", "seeddistance_eff", "speciesCode")],
+                         on = "speciesCode"]
+      rcvFull <- copy(rcvLong)
+      notActive <- integer()
+      activeFullIndex <- seq.int(NROW(rcvFull))
+      mm <- as.matrix(setDT(speciesSrcRasterVecList))
+      rcvLongM <- as.matrix(rcvLong)
+      for (i in 1:NROW(spiral)) {
+        if (i > 1) {
+          rcvLongM <- rcvLongM[-notActiveSubIndex, ]
+        }
+
+        nn <- mm[rcvLongM[, 1:2]]
+        hasSp <- !is.na(nn)
+        ran <- runif(sum(hasSp))
+        oo <- ran < WardVec(k = k, b = b, dist = drop(spiral[i, 3]) * cellSize, cellSize = cellSize,
+                            effDist = rcvLongM[hasSp,"seeddistance_eff"],
+                            maxDist = rcvLongM[hasSp, "seeddistance_max"]
+        )
+        notActiveSubIndex <- which(hasSp)[oo]
+        notActiveFullIndex <- activeFullIndex[notActiveSubIndex] # which(hasSp)[oo]
+        activeFullIndex <- activeFullIndex[-notActiveSubIndex]
+        set(rcvFull, notActiveFullIndex, "Success", TRUE)
+      }
+      set(rcvFull, NULL, c("seeddistance_max", "seeddistance_eff"), NULL)
+      rcvFull <- na.omit(rcvFull, on = "Success")
+      set(rcvFull, NULL, c("Success"), NULL)
+      rcvFull <- rcvFull[speciesTable[, c("species", "speciesCode")], on = "speciesCode"]
+      set(rcvFull, NULL, "speciesCode", as.character(rcvFull$speciesCode))
+      return(rcvFull)
+
+
+      #srcSp <- srcSpeciesByIndex
+      #rcvSp <- split(dtRcvLong$pixelIndex, dtRcvLong$speciesCode)
+      rcvPI <- unique(dtRcvLong$pixelIndex)
+      srcPI <- unique(dtSrcLong$pixelIndex)
+      #for( i in seq_along(rcvSp)) {
+        #srcCoords <- xyFromCell(pixelGroupMap, srcSp[[i]])
+        #rcvCoords <- xyFromCell(pixelGroupMap, rcvSp[[i]])
+      srcCoords <- xyFromCell(pixelGroupMap, srcPI)
+      rcvCoords <- xyFromCell(pixelGroupMap, rcvPI)
+        system.time(
+          out <-
+            distanceFromEachPoint(srcCoords[1:2000,], rcvCoords,
+                                  # Can't remove the next argument because of partial matching with maxDist in fn
+                                  maxDistance = max(cellSize, maxDis)#,
+                                  #distFn = WardEqn,
+                                  #cellSize = cellSize,
+                                  #effDist = speciesTable[7, seeddistance_eff],
+                                  #maxDist = speciesTable[7, seeddistance_max],
+                                  #k = k, b = b, cumulativeFn = "+", landscape = pixelGroupMap
+                                  ))#,
+      #}
+        #)#,
+          #                      )
+      raster::distance()
+
+
+    }
 
     # receiveCellCoords
     receiveCellCoords <- matrix(as.integer(xyFromCell(pixelGroupMap, cellsCanRcv)), ncol = 2)
@@ -545,22 +614,22 @@ speciesComm <- function(num, sc) {
 }
 
 #' @importFrom fpCompare %<=%
-WardEqn <- function(dis, cellSize, effDist, maxDist, k, b) {
+WardEqn <- function(dist, cellSize, effDist, maxDist, k, b) {
   if (cellSize %<=% effDist) {
     ifelse(
-      dis %<=% effDist,
-      exp((dis - cellSize) * log(1 - k) / effDist) -
-        exp(dis * log(1 - k) / effDist),
-      (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
-        (1 - k) * exp((dis - effDist) * log(b) / maxDist)
+      dist %<=% effDist,
+      exp((dist - cellSize) * log(1 - k) / effDist) -
+        exp(dist * log(1 - k) / effDist),
+      (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
+        (1 - k) * exp((dist - effDist) * log(b) / maxDist)
     )
   } else {
     ifelse(
-      dis %<=% cellSize,
-      exp((dis - cellSize) * log(1 - k) / effDist) - (1 - k) *
-        exp((dis - effDist) * log(b) / maxDist),
-      (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
-        (1 - k) * exp((dis - effDist) * log(b) / maxDist)
+      dist %<=% cellSize,
+      exp((dist - cellSize) * log(1 - k) / effDist) - (1 - k) *
+        exp((dist - effDist) * log(b) / maxDist),
+      (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
+        (1 - k) * exp((dist - effDist) * log(b) / maxDist)
     )
   }
 }
@@ -738,6 +807,34 @@ WardFast <- expression(ifelse(cellSize <= effDist, {
   )
 }
 ))
+
+#' @export
+#' @docType methods
+#'
+#' @author Eliot McIntire
+#'
+#' @name WardFast
+#' @rdname WardFast
+WardVec <- function(dist, cellSize, effDist, maxDist, k, b) {
+  ifelse(cellSize <= effDist, {
+    ifelse(
+      dis <= effDist,
+      exp((dis - cellSize) * log(1 - k) / effDist) -
+        exp(dis * log(1 - k) / effDist),
+      (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
+        (1 - k) * exp((dis - effDist) * log(b) / maxDist)
+    )
+  }, {
+    ifelse(
+      dis <= cellSize,
+      exp((dis - cellSize) * log(1 - k) / effDist) - (1 - k) *
+        exp((dis - effDist) * log(b) / maxDist),
+      (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
+        (1 - k) * exp((dis - effDist) * log(b) / maxDist)
+    )
+  }
+  )
+}
 
 intToBin2 <- function(x) {
   y <- as.integer(x)

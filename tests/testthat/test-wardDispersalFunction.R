@@ -277,6 +277,7 @@ test_that("test large files", {
                     speciesTable = speciesTable1,
                     fast = TRUE, maxSpiralIndex = 1e9))
 
+  setnames(out, old = c("speciesCode", "species"), new = c("speciesNum", "speciesCode"))
   clearPlot()
   spMap <- list()
   spMap$pixelGroupMap <- pixelGroupMap
