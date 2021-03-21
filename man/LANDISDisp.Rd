@@ -16,6 +16,8 @@ LANDISDisp(
   plot.it = FALSE,
   successionTimestep,
   verbose = getOption("LandR.verbose", TRUE),
+  fast = TRUE,
+  maxSpiralIndex = 1e+09,
   ...
 )
 }

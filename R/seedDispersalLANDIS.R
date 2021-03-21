@@ -61,8 +61,9 @@ utils::globalVariables(c(
 #' \code{seedSrc} raster.
 #'
 #' @importFrom magrittr %>%
-#' @importFrom raster xyFromCell
+#' @importFrom raster xyFromCell focalWeight rowColFromCell cellFromRowCol
 #' @importFrom stats na.omit
+#' @importFrom data.table setDT
 #' @export
 #' @docType methods
 #'
@@ -271,8 +272,8 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       maxDis <- max(speciesTable[, seeddistance_max])
       spiral <- which(focalWeight(pixelGroupMap, maxDis, type = "circle")>0, arr.ind = TRUE) -
         (maxDis/cellSize) - 1
-      spiral <- spiral[order(apply(abs(spiral), 1, sum), abs(spiral[, 1]), abs(spiral[, 2])),]
       spiral <- cbind(spiral, dists = sqrt( (0 - spiral[,1]) ^ 2 + (0 - spiral[, 2]) ^ 2))
+      spiral <- spiral[order(spiral[, "dists"], apply(abs(spiral), 1, sum), abs(spiral[, 1]), abs(spiral[, 2])),]
       rcvLong <- dtRcvLong[, c("pixelIndex", "speciesCode")]
       rcvLong <- rcvLong[speciesTable[, c("seeddistance_max", "seeddistance_eff", "speciesCode")],
                          on = "speciesCode"]
@@ -280,31 +281,45 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       notActive <- integer()
       activeFullIndex <- seq.int(NROW(rcvFull))
       srcPixelMatrix <- as.matrix(setDT(speciesSrcRasterVecList))
+      # bb <- rowSums(srcPixelMatrix, na.rm = TRUE)
+      # seqWData <- setDT(list(pixelIndex = seq.int(NROW(srcPixelMatrix))))
+      # seqWData[bb > 0, hasData := (1:sum(bb>0))]
+      # srcPixelMatrix2 <- srcPixelMatrix[na.omit(seqWData[["hasData"]]),]
       rcvLongM <- as.matrix(rcvLong)
       rcvLongM <- cbind(rcvLongM, newPixelIndex = 0L)
       rc1 <- rowColFromCell(pixelGroupMap, rcvLongM[, "pixelIndex"])
+      rcvLongM <- cbind(rcvLongM, rowOrig = rc1[, "row"], colOrig = rc1[, "col"])
       rcvLongM <- cbind(rcvLongM, row = rc1[, "row"], col = rc1[, "col"])
+      activeSpecies <- speciesTable[, c("seeddistance_max", "seeddistance_eff", "speciesCode")]
+
       for (i in 1:NROW(spiral)) {
         curDist <- drop(spiral[i, 3]) * cellSize
 
-        if (i > 1) {
-          rcvLongM <- rcvLongM[-notActiveSubIndex, ]
-          tooLong <- curDist > ( pmax(cellSize, rcvLongM[, "seeddistance_max"]) * sqrt(2))
-          if (any(tooLong)) {
-            rcvLongM <- rcvLongM[!tooLong,]
-            activeFullIndex <- activeFullIndex[!tooLong]
+        if (i > 1 && i < 10) {
+          if (length(notActiveSubIndex))
+            rcvLongM <- rcvLongM[-notActiveSubIndex, ]
+          spTooLong <- curDist > pmax(cellSize, activeSpecies[["seeddistance_max"]])
+          if (any(spTooLong)) {
+            tooLong <- curDist > ( pmax(cellSize, rcvLongM[, "seeddistance_max"]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
+            if (any(tooLong)) {
+              rcvLongM <- rcvLongM[!tooLong,]
+              activeFullIndex <- activeFullIndex[!tooLong]
+              activeSpecies <- activeSpecies[!spTooLong]
+            }
           }
 
         }
-        rcvLongM[, "row"] <- rcvLongM[, "row"] + spiral[i, "row"]
-        rcvLongM[, "col"] <- rcvLongM[, "col"] + spiral[i, "col"]
+        rcvLongM[, "row"] <- rcvLongM[, "rowOrig"] + spiral[i, "row"]
+        rcvLongM[, "col"] <- rcvLongM[, "colOrig"] + spiral[i, "col"]
 
         newPixelIndex <- cellFromRowCol(row = rcvLongM[, "row"], col = rcvLongM[, "col"],
                                         object = pixelGroupMap)
         rcvLongM[, "newPixelIndex"] <- newPixelIndex
 
         # lookup on src rasters
+        browser()
         nn <- srcPixelMatrix[rcvLongM[, c("newPixelIndex", "speciesCode")]]
+        #nn2 <- srcPixelMatrix2[cbind(seqWData[rcvLongM[, c("newPixelIndex")]]$hasData, rcvLongM[, c("speciesCode")])]
         hasSp <- !is.na(nn)
         ran <- runif(sum(hasSp))
         oo <- ran < WardVec(k = k, b = b, dist = curDist,
@@ -312,6 +327,9 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                             effDist = rcvLongM[hasSp,"seeddistance_eff"],
                             maxDist = rcvLongM[hasSp, "seeddistance_max"]
         )
+        # print(paste0(i, "; NumSuccesses: ", sum(oo), "; NumRows: ", NROW(rcvLongM),
+        #              "; NumSp: ", length(unique(rcvLongM[, "speciesCode"]))))
+
         notActiveSubIndex <- which(hasSp)[oo]
         notActiveFullIndex <- activeFullIndex[notActiveSubIndex] # which(hasSp)[oo]
         activeFullIndex <- activeFullIndex[-notActiveSubIndex]
@@ -837,19 +855,19 @@ WardFast <- expression(ifelse(cellSize <= effDist, {
 WardVec <- function(dist, cellSize, effDist, maxDist, k, b) {
   ifelse(cellSize <= effDist, {
     ifelse(
-      dis <= effDist,
-      exp((dis - cellSize) * log(1 - k) / effDist) -
-        exp(dis * log(1 - k) / effDist),
-      (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
-        (1 - k) * exp((dis - effDist) * log(b) / maxDist)
+      dist <= effDist,
+      exp((dist - cellSize) * log(1 - k) / effDist) -
+        exp(dist * log(1 - k) / effDist),
+      (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
+        (1 - k) * exp((dist - effDist) * log(b) / maxDist)
     )
   }, {
     ifelse(
-      dis <= cellSize,
-      exp((dis - cellSize) * log(1 - k) / effDist) - (1 - k) *
-        exp((dis - effDist) * log(b) / maxDist),
-      (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
-        (1 - k) * exp((dis - effDist) * log(b) / maxDist)
+      dist <= cellSize,
+      exp((dist - cellSize) * log(1 - k) / effDist) - (1 - k) *
+        exp((dist - effDist) * log(b) / maxDist),
+      (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
+        (1 - k) * exp((dist - effDist) * log(b) / maxDist)
     )
   }
   )
