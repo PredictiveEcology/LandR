@@ -18,6 +18,7 @@ LANDISDisp(
   verbose = getOption("LandR.verbose", TRUE),
   fast = TRUE,
   maxSpiralIndex = 1e+09,
+  debug = TRUE,
   ...
 )
 }

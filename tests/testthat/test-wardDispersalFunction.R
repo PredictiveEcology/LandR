@@ -277,6 +277,13 @@ test_that("test large files", {
                     speciesTable = speciesTable1,
                     fast = TRUE, maxSpiralIndex = 1e9))
 
+  par(mfrow = c(3,3));
+  out[, list(a={a = hist(DistOfSuccess,
+#                         breaks = -125 + seq(0, max(DistOfSuccess) + 250, by = res(pixelGroupMap)[1]),
+                         main = speciesTable[as.numeric(.BY)]$species);
+                 speciesTable[as.numeric(.BY)]$species},
+             maxDist = max(DistOfSuccess)), by = "speciesCode"]
+
   setnames(out, old = c("speciesCode", "species"), new = c("speciesNum", "speciesCode"))
   clearPlot()
   spMap <- list()
