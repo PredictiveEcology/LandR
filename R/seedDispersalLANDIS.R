@@ -323,32 +323,35 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
           #   was an empirically derived point where it becomes faster to no longer shrink the
           #   rcvLongDT
           # browser()
-          if (length(notActiveSubIndex))
-            rcvLongDT <- rcvLongDT[-notActiveSubIndex]
+          # if (length(notActiveSubIndex))
+          #   rcvLongDT <- rcvLongDT[-notActiveSubIndex]
           spTooLong <- curDist > pmax(cellSize, activeSpecies[["seeddistance_max"]])
           if (any(spTooLong)) {
-            tooLong <- curDist > ( pmax(cellSize, rcvLongDT[["seeddistance_max"]]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
+            tooLong <- curDist > ( pmax(cellSize, rcvLongDT[activeFullIndex][["seeddistance_max"]]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
             if (any(tooLong)) {
               if (debug) {
                 tooLongFull <- curDist > rcvFull[["seeddistance_max"]]
                 set(rcvFull, which(tooLongFull & is.na(rcvFull$ReasonForStop)), "ReasonForStop", "NoneRecdBeforeMaxDistReached")
               }
-              rcvLongDT <- rcvLongDT[!tooLong]
+              # rcvLongDT <- rcvLongDT[!tooLong]
               activeFullIndex <- activeFullIndex[!tooLong]
               activeSpecies <- activeSpecies[!spTooLong]
             }
           }
 
         }
-        set(rcvLongDT, NULL, "row", rcvLongDT[["rowOrig"]] + spiral[i, "row"])
-        set(rcvLongDT, NULL, "col", rcvLongDT[["colOrig"]] + spiral[i, "col"])
+        #browser()
+        #row <- rcvLongDT[["rowOrig"]][activeFullIndex] + spiral[i, "row"]
+        #col <- rcvLongDT[["colOrig"]][activeFullIndex] + spiral[i, "col"]
+        set(rcvLongDT, activeFullIndex, "row", rcvLongDT[["rowOrig"]][activeFullIndex] + spiral[i, "row"])
+        set(rcvLongDT, activeFullIndex, "col", rcvLongDT[["colOrig"]][activeFullIndex] + spiral[i, "col"])
 
-        newPixelIndex <- cellFromRowCol(row = rcvLongDT[["row"]], col = rcvLongDT[["col"]],
+        newPixelIndex <- cellFromRowCol(row = rcvLongDT[["row"]][activeFullIndex], col = rcvLongDT[["col"]][activeFullIndex],
                                         object = pixelGroupMap)
-        set(rcvLongDT, NULL, "newPixelIndex", newPixelIndex)
+        set(rcvLongDT, activeFullIndex, "newPixelIndex", newPixelIndex)
 
         # lookup on src rasters
-        nn <- srcPixelMatrix[cbind(rcvLongDT[["newPixelIndex"]], rcvLongDT[["speciesCode"]])]
+        nn <- srcPixelMatrix[cbind(rcvLongDT[["newPixelIndex"]][activeFullIndex], rcvLongDT[["speciesCode"]][activeFullIndex])]
         #nn2 <- srcPixelMatrix2[cbind(seqWData[rcvLongDT[, c("newPixelIndex")]]$hasData, rcvLongDT[, c("speciesCode")])]
         hasSp <- !is.na(nn)
         ran <- runifC(sum(hasSp))
@@ -360,7 +363,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
 
         #if (curDist > overallMaxDist / 5) {
         if (length(over0.01)) {
-          wardRes <- ff[rcvLongDT$speciesCode[hasSp==TRUE][over0.01]]$wardProb
+          wardRes <- ff[rcvLongDT$speciesCode[activeFullIndex][hasSp==TRUE][over0.01]]$wardProb
           # wardRes <- WardVec(k = k, b = b, dist = curDist,
           #                    cellSize = cellSize,
           #                    effDist = rcvLongDT[["seeddistance_eff"]][hasSp == TRUE][over0.01],
@@ -387,8 +390,8 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
           #   numSuccesses <- sum(oo)
           # }
           if (debug)
-            print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ", numSuccesses, "; NumRows: ", NROW(rcvLongDT),
-                         "; NumSp: ", length(unique(rcvLongDT[["speciesCode"]]))))
+            print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ", numSuccesses, "; NumRows: ", NROW(rcvLongDT[activeFullIndex]),
+                         "; NumSp: ", length(unique(rcvLongDT[["speciesCode"]][activeFullIndex]))))
           notActiveSubIndex <- which(hasSp)[oo]
           if (length(notActiveSubIndex)) {
             notActiveFullIndex <- activeFullIndex[notActiveSubIndex] # which(hasSp)[oo]
