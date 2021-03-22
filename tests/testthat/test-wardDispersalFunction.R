@@ -12,7 +12,7 @@ test_that("test Ward dispersal seeding algorithm", {
   library(quickPlot)
 
   # keep this here for interactive testing with a larger raster
-  doLarge <- if (interactive()) TRUE else FALSE
+  doLarge <- if (interactive()) FALSE else FALSE
   if (doLarge) {
     set.seed(1234)
     print("Doing LARGE raster test -- should take more than 4 minutes")
