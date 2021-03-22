@@ -303,12 +303,13 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       # seqWData <- setDT(list(pixelIndex = seq.int(NROW(srcPixelMatrix))))
       # seqWData[bb > 0, hasData := (1:sum(bb>0))]
       # srcPixelMatrix2 <- srcPixelMatrix[na.omit(seqWData[["hasData"]]),]
-      rcvLongDT <- copy(rcvLong)
+      # rcvLongDT <- copy(rcvLong)
       # set(rcvLongDT, NULL, c("seeddistance_eff", "seeddistance_max"), NULL)
-      set(rcvLongDT, NULL, "newPixelIndex", 0L)
-      rc1 <- rowColFromCell(pixelGroupMap, rcvLongDT[["pixelIndex"]])
+      # set(rcvLongDT, NULL, "newPixelIndex", 0L)
+      rc1 <- rowColFromCell(pixelGroupMap, rcvLong[["pixelIndex"]])
       rowOrig <- rc1[, "row"]
       colOrig <- rc1[, "col"]
+      speciesCode <- rcvLong[["speciesCode"]]
       # set(rcvLongDT, NULL, "rowOrig", rc1[, "row"])
       # set(rcvLongDT, NULL, "colOrig", rc1[, "col"])
       # set(rcvLongDT, NULL, "row", rc1[, "row"])
@@ -331,7 +332,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
           #   rcvLongDT <- rcvLongDT[-notActiveSubIndex]
           spTooLong <- curDist > pmax(cellSize, activeSpecies[["seeddistance_max"]])
           if (any(spTooLong)) {
-            tooLong <- curDist > ( pmax(cellSize, rcvLongDT[activeFullIndex][["seeddistance_max"]]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
+            tooLong <- curDist > ( pmax(cellSize, rcvLong[activeFullIndex][["seeddistance_max"]]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
             if (any(tooLong)) {
               if (verbose >= 1) {
                 tooLongFull <- curDist > rcvFull[["seeddistance_max"]]
@@ -358,7 +359,8 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         # set(rcvLongDT, activeFullIndex, "newPixelIndex", newPixelIndex)
 
         # lookup on src rasters
-        activeSpeciesCode <- rcvLongDT[["speciesCode"]][activeFullIndex]
+        activeSpeciesCode <- speciesCode[activeFullIndex]
+        # activeSpeciesCode <- rcvLongDT[["speciesCode"]][activeFullIndex]
         nn <- srcPixelMatrix[cbind(newPixelIndex, activeSpeciesCode)]
         hasSp <- !is.na(nn)
         ran <- runifC(sum(hasSp))
@@ -388,8 +390,8 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
           # }
           if (verbose >= 2)
             print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ",
-                         numSuccesses, "; NumRows: ", NROW(rcvLongDT[activeFullIndex]),
-                         "; NumSp: ", length(unique(rcvLongDT[["speciesCode"]][activeFullIndex]))))
+                         numSuccesses, "; NumRows: ", NROW(activeFullIndex),
+                         "; NumSp: ", length(unique(speciesCode[activeFullIndex]))))
           notActiveSubIndex <- which(hasSp)[oo]
           if (length(notActiveSubIndex)) {
             notActiveFullIndex <- activeFullIndex[notActiveSubIndex] # which(hasSp)[oo]
