@@ -175,6 +175,24 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     stop("In LANDISDisp, dtSrc and dtRcv and speciesTable must each have columns for speciesCode which ",
          "must be both integer or both factor; they are not. Please correct this.")
 
+  dtSrc <- data.table::copy(dtSrc)
+  dtRcv <- data.table::copy(dtRcv)
+  speciesTable <- data.table::copy(speciesTable)
+
+  origClassWasNumeric <- is.numeric(speciesTable[["speciesCode"]])
+  if (is(dtSrc$speciesCode, "numeric")) {
+    if (length(unique(dtSrc$speciesCode)) != max(dtSrc$speciesCode)) {
+      # This is "numerics" that are no contiguous from 1
+      set(dtSrc, NULL, c("speciesCode"), factor(dtSrc[["speciesCode"]]))
+      origLevels <- levels(dtSrc[["speciesCode"]])
+      speciesTable <- speciesTable[as.numeric(origLevels), ]
+      set(speciesTable, NULL, c("speciesCode"),
+          factor(speciesTable[["speciesCode"]], levels = origLevels))
+      set(dtRcv, NULL, c("speciesCode"),
+          factor(dtRcv[["speciesCode"]], levels = origLevels))
+    }
+  }
+
   if (is.factor(dtSrc$speciesCode)) {
     if (!identical(levels(dtSrc$speciesCode), levels(dtRcv$speciesCode)) &&
         identical(levels(dtSrc$speciesCode), levels(speciesTable$speciesCode)))
@@ -182,9 +200,6 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
            "are all factors (good), ",
            "but they have different levels (bad). They must have the same factor levels.")
     origLevels <- levels(dtSrc$speciesCode)
-    dtSrc <- data.table::copy(dtSrc)
-    dtRcv <- data.table::copy(dtRcv)
-    speciesTable <- data.table::copy(speciesTable)
     dtSrc[, speciesCode2 := as.integer(speciesCode)]
     dtRcv[, speciesCode2 := as.integer(speciesCode)]
     speciesTable[, speciesCode2 := as.integer(speciesCode)]
@@ -214,11 +229,16 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
   names(srcSpeciesCodes) <- as.character(srcSpeciesCodes)
   cellsCanSrc <- which(pgv %in% dtSrc$pixelGroup)
   dtSrcLong <- data.table(pixelGroup = pgv[cellsCanSrc], pixelIndex = cellsCanSrc)
-  dtSrcLong <- dtSrc[, c("pixelGroup", "speciesCode")][dtSrcLong, on = "pixelGroup", allow.cartesian = TRUE] # $speciesCode
-  srcSpeciesByIndex <- split(dtSrcLong$pixelIndex, dtSrcLong$speciesCode)
+  dtSrcLong <- dtSrc[, c("pixelGroup", "speciesCode")][dtSrcLong, on = "pixelGroup", allow.cartesian = TRUE]
+  set(dtSrcLong, NULL, "pixelGroup", NULL)
+  setkeyv(dtSrcLong, "speciesCode") # sort ascending
+  srcSpeciesByIndex <- split(dtSrcLong, by = "speciesCode")
+  # srcPixelMatrix <- matrix(rep(NA_integer_, ncell(pixelGroupMap) * length(srcSpeciesCodes)),
+  #                          ncol = length(srcSpeciesCodes))
+  # srcPixelMatrix(as.matrix())
 
   speciesSrcRasterVecList <- lapply(srcSpeciesCodes, function(sc) {
-    rasVectorTemplate[srcSpeciesByIndex[[as.character(sc)]]] <- sc
+    rasVectorTemplate[srcSpeciesByIndex[[as.character(sc)]][["pixelIndex"]]] <- sc
     rasVectorTemplate
   })
   maxSpCode <- max(as.integer(srcSpeciesCodes))
@@ -260,6 +280,9 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                                   verbose)
   if (exists("origLevels", inherits = FALSE)) {
     rcvFull[, speciesCode := factor(origLevels[speciesCode], levels = origLevels)]
+    if (origClassWasNumeric) {
+      set(rcvFull, NULL, "speciesCode", as.integer(as.character(rcvFull[["speciesCode"]])))
+    }
   }
   return(rcvFull[])
 
@@ -529,11 +552,17 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   # Remove the unsuccessful ones
   whSuccess <- which(!is.na(rcvFull[["Success"]]))
   if (verbose >= 1) {
-    ReasonForStop <- rcvFull[-whSuccess]
+    fails <- which(is.na(rcvFull[["DistOfSuccess"]]))
+    if (length(fails)) {
+      set(rcvFull, fails, "ReasonForStop", "RanOutOfDistance")
+    }
+    whFails <- sort(c(fails, whSuccess))
+    ReasonForStop <- rcvFull[whFails]
   }
   rcvFull <- rcvFull[whSuccess]
   set(rcvFull, NULL, c("Success"), NULL)
-  rcvFull <- rcvFull[speciesTable[, c("species", "speciesCode")], on = "speciesCode"]
+  speciesCodeCols <- intersect(c("species", "speciesCode"), colnames(speciesTable))
+  rcvFull <- rcvFull[speciesTable[, ..speciesCodeCols], on = "speciesCode"]
 
   if (verbose >= 1) {
     setattr(rcvFull, "ReasonForStop", ReasonForStop)

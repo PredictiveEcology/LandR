@@ -12,7 +12,7 @@ test_that("test Ward dispersal seeding algorithm", {
   library(quickPlot)
 
   # keep this here for interactive testing with a larger raster
-  doLarge <- if (interactive()) TRUE else FALSE
+  doLarge <- if (interactive()) FALSE else FALSE
   if (doLarge) {
     set.seed(1234)
     print("Doing LARGE raster test -- should take more than 4 minutes")
@@ -381,7 +381,7 @@ test_that("test Ward 4 immediate neighbours", {
   # seeddistance_eff = c(75L, 400L, 30L, 100L, 80L, 60L, 400L),
   # seeddistance_max = c(100L, 5000L, 250L, 303L, 200L, 200L, 5000L)
   cc <- xyFromCell(pixelGroupMap, 15)
-  plot(pixelGroupMap)
+  raster::plot(pixelGroupMap)
   for (i in 1:100) {
     speciesTab <-
       structure(
