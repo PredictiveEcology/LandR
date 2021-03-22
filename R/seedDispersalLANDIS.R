@@ -341,44 +341,34 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
 
         }
         #browser()
-        #row <- rcvLongDT[["rowOrig"]][activeFullIndex] + spiral[i, "row"]
-        #col <- rcvLongDT[["colOrig"]][activeFullIndex] + spiral[i, "col"]
-        set(rcvLongDT, activeFullIndex, "row", rcvLongDT[["rowOrig"]][activeFullIndex] + spiral[i, "row"])
-        set(rcvLongDT, activeFullIndex, "col", rcvLongDT[["colOrig"]][activeFullIndex] + spiral[i, "col"])
+        row <- rcvLongDT[["rowOrig"]][activeFullIndex] + spiral[i, "row"]
+        col <- rcvLongDT[["colOrig"]][activeFullIndex] + spiral[i, "col"]
+        #set(rcvLongDT, activeFullIndex, "row", rcvLongDT[["rowOrig"]][activeFullIndex] + spiral[i, "row"])
+        #set(rcvLongDT, activeFullIndex, "col", rcvLongDT[["colOrig"]][activeFullIndex] + spiral[i, "col"])
 
-        newPixelIndex <- cellFromRowCol(row = rcvLongDT[["row"]][activeFullIndex], col = rcvLongDT[["col"]][activeFullIndex],
+        newPixelIndex <- cellFromRowCol(row = row, col = col,
                                         object = pixelGroupMap)
-        set(rcvLongDT, activeFullIndex, "newPixelIndex", newPixelIndex)
+        # set(rcvLongDT, activeFullIndex, "newPixelIndex", newPixelIndex)
 
         # lookup on src rasters
-        nn <- srcPixelMatrix[cbind(rcvLongDT[["newPixelIndex"]][activeFullIndex], rcvLongDT[["speciesCode"]][activeFullIndex])]
-        #nn2 <- srcPixelMatrix2[cbind(seqWData[rcvLongDT[, c("newPixelIndex")]]$hasData, rcvLongDT[, c("speciesCode")])]
+        activeSpeciesCode <- rcvLongDT[["speciesCode"]][activeFullIndex]
+        nn <- srcPixelMatrix[cbind(newPixelIndex, activeSpeciesCode)]
         hasSp <- !is.na(nn)
         ran <- runifC(sum(hasSp))
 
         ff <- distsBySpCode[distsBySpCode$dists == curDist]#, c("speciesCode", "wardProb")]
         over0.01 <- which(ran < lastWardMaxProb)
 
-
-
-        #if (curDist > overallMaxDist / 5) {
         if (length(over0.01)) {
-          wardRes <- ff[rcvLongDT$speciesCode[activeFullIndex][hasSp==TRUE][over0.01]]$wardProb
-          # wardRes <- WardVec(k = k, b = b, dist = curDist,
-          #                    cellSize = cellSize,
-          #                    effDist = rcvLongDT[["seeddistance_eff"]][hasSp == TRUE][over0.01],
-          #                    maxDist = rcvLongDT[["seeddistance_max"]][hasSp == TRUE][over0.01]
-          # )
-          # if (!identical(wardRes, wardRes1)) browser()
-          # if (length(wardRes) == 0) browser()
-          lastWardMaxProb <- min(1, max(wardRes))
-          #if (all(wardRes > 0.01)) {
-          #cantDoShortcutYet <- FALSE
-          #}
-          oo <- ran[over0.01] < wardRes
-          numSuccesses <- sum(oo)
-          # if (numSuccesses == 0) browser()
-          oo <- over0.01[oo]
+          if (i == 1) {
+            oo <- seq.int(length(ran))
+          } else {
+            wardRes <- ff[activeSpeciesCode[hasSp==TRUE][over0.01]]$wardProb
+            lastWardMaxProb <- min(1, max(wardRes))
+            oo <- ran[over0.01] < wardRes
+            numSuccesses <- sum(oo)
+            oo <- over0.01[oo]
+          }
           #}
 
           # if (cantDoShortcutYet) {
