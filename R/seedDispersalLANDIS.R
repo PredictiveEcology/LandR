@@ -290,6 +290,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       set(distsBySpCode, NULL, "wardProb",
           WardVec(dist = distsBySpCode$dists, cellSize = cellSize, effDist = distsBySpCode$seeddistance_eff,
               maxDist = distsBySpCode$seeddistance_max, k = k, b = b))
+      setorderv(distsBySpCode, c("dists", "speciesCode"))
 
       rcvLong <- dtRcvLong[, c("pixelIndex", "speciesCode")]
       rcvLong <- rcvLong[speciesTable[, c("seeddistance_max", # "seeddistance_eff",
@@ -361,18 +362,23 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         # lookup on src rasters
         activeSpeciesCode <- speciesCode[activeFullIndex]
         # activeSpeciesCode <- rcvLongDT[["speciesCode"]][activeFullIndex]
-        nn <- srcPixelMatrix[cbind(newPixelIndex, activeSpeciesCode)]
-        hasSp <- !is.na(nn)
+        srcPixelMatrixInd <- (activeSpeciesCode - 1) * NROW(srcPixelMatrix) + newPixelIndex
+        srcPixelValues <- srcPixelMatrix[srcPixelMatrixInd]
+        # srcPixelValues <- srcPixelMatrix[cbind(newPixelIndex, activeSpeciesCode)]
+
+        # if (!identical(srcPixelValues1, srcPixelValues)) browser()
+        hasSp <- !is.na(srcPixelValues)
         ran <- runifC(sum(hasSp))
 
-        ff <- distsBySpCode[distsBySpCode$dists == curDist]#, c("speciesCode", "wardProb")]
+        ff <- distsBySpCode$wardProb[distsBySpCode$dists == curDist]#, c("speciesCode", "wardProb")]
+
         over0.01 <- which(ran < lastWardMaxProb)
 
         if (length(over0.01)) {
           if (i == 1) {
             oo <- seq.int(length(ran))
           } else {
-            wardRes <- ff[activeSpeciesCode[hasSp==TRUE][over0.01]]$wardProb
+            wardRes <- ff[activeSpeciesCode[hasSp==TRUE][over0.01]]
             lastWardMaxProb <- min(1, max(wardRes))
             oo <- ran[over0.01] < wardRes
             oo <- over0.01[oo]

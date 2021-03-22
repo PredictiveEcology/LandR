@@ -271,9 +271,15 @@ test_that("test large files", {
   }
   suppressWarnings(rm(list = c("out")))
   st <- system.time(out <- LANDISDisp(dtSrc = dtSrc1,
+                                      dtRcv = dtRcv2,
+                                      pixelGroupMap = pixelGroupMap,
+                                      successionTimestep = 1, verbose = 2,
+                                      speciesTable = speciesTable1,
+                                      fast = TRUE, maxSpiralIndex = 1e9))
+  st <- system.time(out <- LANDISDisp(dtSrc = dtSrc1,
                     dtRcv = dtRcv2,
                     pixelGroupMap = pixelGroupMap,
-                    successionTimestep = 1, verbose = 2,
+                    successionTimestep = 1, verbose = 0,
                     speciesTable = speciesTable1,
                     fast = TRUE, maxSpiralIndex = 1e9))
 
