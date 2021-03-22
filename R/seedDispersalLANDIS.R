@@ -232,11 +232,8 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
   dtSrcLong <- dtSrc[, c("pixelGroup", "speciesCode")][dtSrcLong, on = "pixelGroup", allow.cartesian = TRUE]
   set(dtSrcLong, NULL, "pixelGroup", NULL)
   setkeyv(dtSrcLong, "speciesCode") # sort ascending
-  srcSpeciesByIndex <- split(dtSrcLong, by = "speciesCode")
-  # srcPixelMatrix <- matrix(rep(NA_integer_, ncell(pixelGroupMap) * length(srcSpeciesCodes)),
-  #                          ncol = length(srcSpeciesCodes))
-  # srcPixelMatrix(as.matrix())
 
+  srcSpeciesByIndex <- split(dtSrcLong, by = "speciesCode")
   speciesSrcRasterVecList <- lapply(srcSpeciesCodes, function(sc) {
     rasVectorTemplate[srcSpeciesByIndex[[as.character(sc)]][["pixelIndex"]]] <- sc
     rasVectorTemplate
@@ -275,6 +272,10 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
   dtRcvLong <- dtRcvLong[dtRcvSmall, on = "pixelGroup", allow.cartesian = TRUE] # $speciesCode
   setorderv(dtRcvLong, c("pixelIndex", "speciesCode"))
 
+  if (verbose >= 3) {
+    message("numRcvPixels: ", length(unique(dtRcvLong$pixelIndex)),
+            "; numSrcPixels: ", max(apply(srcPixelMatrix, 2, function(x) sum(!is.na(x)))))
+  }
   rcvFull <- spiralSeedDispersalR(speciesTable, pixelGroupMap, dtRcvLong,
                                   srcPixelMatrix, cellSize, k, b, successionTimestep,
                                   verbose)
