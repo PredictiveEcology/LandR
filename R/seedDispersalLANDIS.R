@@ -292,7 +292,8 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
               maxDist = distsBySpCode$seeddistance_max, k = k, b = b))
 
       rcvLong <- dtRcvLong[, c("pixelIndex", "speciesCode")]
-      rcvLong <- rcvLong[speciesTable[, c("seeddistance_max", "seeddistance_eff", "speciesCode")],
+      rcvLong <- rcvLong[speciesTable[, c("seeddistance_max", # "seeddistance_eff",
+                                          "speciesCode")],
                          on = "speciesCode"]
       rcvFull <- copy(rcvLong)
       notActive <- integer()
@@ -303,12 +304,13 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       # seqWData[bb > 0, hasData := (1:sum(bb>0))]
       # srcPixelMatrix2 <- srcPixelMatrix[na.omit(seqWData[["hasData"]]),]
       rcvLongDT <- copy(rcvLong)
+      # set(rcvLongDT, NULL, c("seeddistance_eff", "seeddistance_max"), NULL)
       set(rcvLongDT, NULL, "newPixelIndex", 0L)
       rc1 <- rowColFromCell(pixelGroupMap, rcvLongDT[["pixelIndex"]])
       set(rcvLongDT, NULL, "rowOrig", rc1[, "row"])
       set(rcvLongDT, NULL, "colOrig", rc1[, "col"])
-      set(rcvLongDT, NULL, "row", rc1[, "row"])
-      set(rcvLongDT, NULL, "col", rc1[, "col"])
+      # set(rcvLongDT, NULL, "row", rc1[, "row"])
+      # set(rcvLongDT, NULL, "col", rc1[, "col"])
       activeSpecies <- speciesTable[, c("seeddistance_max", "seeddistance_eff", "speciesCode")]
       overallMaxDist <- max(speciesTable[["seeddistance_max"]])
       cantDoShortcutYet <- TRUE
@@ -366,9 +368,9 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
             wardRes <- ff[activeSpeciesCode[hasSp==TRUE][over0.01]]$wardProb
             lastWardMaxProb <- min(1, max(wardRes))
             oo <- ran[over0.01] < wardRes
-            numSuccesses <- sum(oo)
             oo <- over0.01[oo]
           }
+          numSuccesses <- length(oo)
           #}
 
           # if (cantDoShortcutYet) {
@@ -380,7 +382,8 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
           #   numSuccesses <- sum(oo)
           # }
           if (debug)
-            print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ", numSuccesses, "; NumRows: ", NROW(rcvLongDT[activeFullIndex]),
+            print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ",
+                         numSuccesses, "; NumRows: ", NROW(rcvLongDT[activeFullIndex]),
                          "; NumSp: ", length(unique(rcvLongDT[["speciesCode"]][activeFullIndex]))))
           notActiveSubIndex <- which(hasSp)[oo]
           if (length(notActiveSubIndex)) {
@@ -397,7 +400,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         }
 
       }
-      set(rcvFull, NULL, c("seeddistance_max", "seeddistance_eff"), NULL)
+      set(rcvFull, NULL, c("seeddistance_max"), NULL)
       rcvFull <- na.omit(rcvFull, on = "Success")
       set(rcvFull, NULL, c("Success"), NULL)
       rcvFull <- rcvFull[speciesTable[, c("species", "speciesCode")], on = "speciesCode"]
