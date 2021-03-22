@@ -112,7 +112,7 @@ utils::globalVariables(c(
 #' speciesTable <- speciesTable
 #' speciesTable <- data.table(speciesTable)[, speciesCode := seq_along(LandisCode)]
 #' seedReceiveFull <- speciesTable[seedReceive, on = "speciesCode"]
-#' output <- LANDISDisp(
+#' output <- LANDISDisp(4
 #'   dtRcv = seedReceiveFull, plot.it = interactive(),
 #'   dtSrc = seedSource,
 #'   speciesTable = speciesTable,
@@ -167,7 +167,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                        dispersalFn = WardFast, b = 0.01, k = 0.95, plot.it = FALSE,
                        successionTimestep,
                        verbose = getOption("LandR.verbose", TRUE), fast = TRUE,
-                       maxSpiralIndex = 1e9, debug = TRUE,
+                       maxSpiralIndex = 1e9,
                        ...) {
   if (TRUE) { # This is rewrite and MASSIVE simplification for spiralSeedDispersal
     # Setup Rcv components receiveCellCoords and rcvSpeciesByIndex
@@ -307,8 +307,10 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       # set(rcvLongDT, NULL, c("seeddistance_eff", "seeddistance_max"), NULL)
       set(rcvLongDT, NULL, "newPixelIndex", 0L)
       rc1 <- rowColFromCell(pixelGroupMap, rcvLongDT[["pixelIndex"]])
-      set(rcvLongDT, NULL, "rowOrig", rc1[, "row"])
-      set(rcvLongDT, NULL, "colOrig", rc1[, "col"])
+      rowOrig <- rc1[, "row"]
+      colOrig <- rc1[, "col"]
+      # set(rcvLongDT, NULL, "rowOrig", rc1[, "row"])
+      # set(rcvLongDT, NULL, "colOrig", rc1[, "col"])
       # set(rcvLongDT, NULL, "row", rc1[, "row"])
       # set(rcvLongDT, NULL, "col", rc1[, "col"])
       activeSpecies <- speciesTable[, c("seeddistance_max", "seeddistance_eff", "speciesCode")]
@@ -331,7 +333,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
           if (any(spTooLong)) {
             tooLong <- curDist > ( pmax(cellSize, rcvLongDT[activeFullIndex][["seeddistance_max"]]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
             if (any(tooLong)) {
-              if (debug) {
+              if (verbose >= 1) {
                 tooLongFull <- curDist > rcvFull[["seeddistance_max"]]
                 set(rcvFull, which(tooLongFull & is.na(rcvFull$ReasonForStop)), "ReasonForStop", "NoneRecdBeforeMaxDistReached")
               }
@@ -342,9 +344,12 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
           }
 
         }
-        #browser()
-        row <- rcvLongDT[["rowOrig"]][activeFullIndex] + spiral[i, "row"]
-        col <- rcvLongDT[["colOrig"]][activeFullIndex] + spiral[i, "col"]
+
+        row <- rowOrig[activeFullIndex] + spiral[i, "row"]
+        col <- colOrig[activeFullIndex] + spiral[i, "col"]
+
+        # row <- rcvLongDT[["rowOrig"]][activeFullIndex] + spiral[i, "row"]
+        # col <- rcvLongDT[["colOrig"]][activeFullIndex] + spiral[i, "col"]
         #set(rcvLongDT, activeFullIndex, "row", rcvLongDT[["rowOrig"]][activeFullIndex] + spiral[i, "row"])
         #set(rcvLongDT, activeFullIndex, "col", rcvLongDT[["colOrig"]][activeFullIndex] + spiral[i, "col"])
 
@@ -381,7 +386,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
           #   )
           #   numSuccesses <- sum(oo)
           # }
-          if (debug)
+          if (verbose >= 2)
             print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ",
                          numSuccesses, "; NumRows: ", NROW(rcvLongDT[activeFullIndex]),
                          "; NumSp: ", length(unique(rcvLongDT[["speciesCode"]][activeFullIndex]))))
@@ -390,7 +395,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
             notActiveFullIndex <- activeFullIndex[notActiveSubIndex] # which(hasSp)[oo]
             activeFullIndex <- activeFullIndex[-notActiveSubIndex]
             set(rcvFull, notActiveFullIndex, "Success", TRUE)
-            if (debug) {
+            if (verbose >= 1) {
               set(rcvFull, notActiveFullIndex, "DistOfSuccess", curDist)
               set(rcvFull, notActiveFullIndex, "ReasonForStop", "SuccessFullSeedRcvd")
             }
