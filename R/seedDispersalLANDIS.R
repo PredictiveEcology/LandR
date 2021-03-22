@@ -276,6 +276,21 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         (maxDis/cellSize) - 1
       spiral <- cbind(spiral, dists = sqrt( (0 - spiral[,1]) ^ 2 + (0 - spiral[, 2]) ^ 2))
       spiral <- spiral[order(spiral[, "dists"], apply(abs(spiral), 1, sum), abs(spiral[, 1]), abs(spiral[, 2])),]
+      speciesTableSmall <- speciesTable[, c("speciesCode", "seeddistance_eff", "seeddistance_max")]
+      set(speciesTableSmall, NULL, "seeddistance_maxMinCellSize", pmax(cellSize, speciesTableSmall$seeddistance_max))
+      uniqueDists <- unique(spiral[, "dists"]) * cellSize
+      distsBySpCode <- as.data.table(expand.grid(dists = uniqueDists, speciesCode = speciesTable[["speciesCode"]]))
+      set(distsBySpCode, NULL, "seeddistance_maxMinCellSize", speciesTableSmall[distsBySpCode[["speciesCode"]],
+                                                                     "seeddistance_maxMinCellSize"])
+      set(distsBySpCode, NULL, "seeddistance_max", speciesTableSmall[distsBySpCode[["speciesCode"]],
+                                                                                "seeddistance_max"])
+      set(distsBySpCode, NULL, "seeddistance_eff", speciesTableSmall[distsBySpCode[["speciesCode"]],
+                                                                     "seeddistance_eff"])
+      # distsBySpCode <- distsBySpCode[dists <= seeddistance_maxMinCellSize]
+      set(distsBySpCode, NULL, "wardProb",
+          WardVec(dist = distsBySpCode$dists, cellSize = cellSize, effDist = distsBySpCode$seeddistance_eff,
+              maxDist = distsBySpCode$seeddistance_max, k = k, b = b))
+
       rcvLong <- dtRcvLong[, c("pixelIndex", "speciesCode")]
       rcvLong <- rcvLong[speciesTable[, c("seeddistance_max", "seeddistance_eff", "speciesCode")],
                          on = "speciesCode"]
@@ -296,13 +311,18 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       set(rcvLongDT, NULL, "col", rc1[, "col"])
       activeSpecies <- speciesTable[, c("seeddistance_max", "seeddistance_eff", "speciesCode")]
       overallMaxDist <- max(speciesTable[["seeddistance_max"]])
+      cantDoShortcutYet <- TRUE
+      lastWardMaxProb <- 1
+
+
       for (i in 1:NROW(spiral)) {
         curDist <- drop(spiral[i, 3]) * cellSize
 
-        if (i > 1 && i < 11) { # after the first 10 distances, each iteration changes the
+        if (i > 1) {#} && i < 11) { # after the first 10 distances, each iteration changes the
           # number of active cells by very little because of low probabilities; this i < 11
           #   was an empirically derived point where it becomes faster to no longer shrink the
           #   rcvLongDT
+          # browser()
           if (length(notActiveSubIndex))
             rcvLongDT <- rcvLongDT[-notActiveSubIndex]
           spTooLong <- curDist > pmax(cellSize, activeSpecies[["seeddistance_max"]])
@@ -332,35 +352,57 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         #nn2 <- srcPixelMatrix2[cbind(seqWData[rcvLongDT[, c("newPixelIndex")]]$hasData, rcvLongDT[, c("speciesCode")])]
         hasSp <- !is.na(nn)
         ran <- runifC(sum(hasSp))
-        if (curDist > overallMaxDist / 4) {
-          over0.01 <- which(ran<0.01)
-          oo <- ran[over0.01] < WardVec(k = k, b = b, dist = curDist,
-                                        cellSize = cellSize,
-                                        effDist = rcvLongDT[["seeddistance_eff"]][hasSp == TRUE][over0.01],
-                                        maxDist = rcvLongDT[["seeddistance_max"]][hasSp == TRUE][over0.01]
-          )
-          oo <- over0.01[oo]
-        } else {
-          oo <- ran < WardVec(k = k, b = b, dist = curDist,
-                              cellSize = cellSize,
-                              effDist = rcvLongDT[["seeddistance_eff"]][hasSp == TRUE],
-                              maxDist = rcvLongDT[["seeddistance_max"]][hasSp == TRUE]
-          )
-        }
-        if (debug)
-        print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ", sum(oo), "; NumRows: ", NROW(rcvLongDT),
-                     "; NumSp: ", length(unique(rcvLongDT[["speciesCode"]]))))
 
-        notActiveSubIndex <- which(hasSp)[oo]
-        if (length(notActiveSubIndex)) {
-          notActiveFullIndex <- activeFullIndex[notActiveSubIndex] # which(hasSp)[oo]
-          activeFullIndex <- activeFullIndex[-notActiveSubIndex]
-          set(rcvFull, notActiveFullIndex, "Success", TRUE)
-          if (debug) {
-            set(rcvFull, notActiveFullIndex, "DistOfSuccess", curDist)
-            set(rcvFull, notActiveFullIndex, "ReasonForStop", "SuccessFullSeedRcvd")
+        ff <- distsBySpCode[dists == curDist, c("speciesCode", "wardProb")]
+        over0.01 <- which(ran < lastWardMaxProb)
+
+
+
+        #if (curDist > overallMaxDist / 5) {
+        if (length(over0.01)) {
+          # wardRes <- ff[rcvLongDT$speciesCode[hasSp==TRUE][over0.01]]$wardProb
+          wardRes <- WardVec(k = k, b = b, dist = curDist,
+                             cellSize = cellSize,
+                             effDist = rcvLongDT[["seeddistance_eff"]][hasSp == TRUE][over0.01],
+                             maxDist = rcvLongDT[["seeddistance_max"]][hasSp == TRUE][over0.01]
+          )
+          # if (!identical(wardRes, wardRes1)) browser()
+          # if (length(wardRes) == 0) browser()
+          lastWardMaxProb <- min(1, max(wardRes))
+          #if (all(wardRes > 0.01)) {
+          #cantDoShortcutYet <- FALSE
+          #}
+          oo <- ran[over0.01] < wardRes
+          numSuccesses <- sum(oo)
+          # if (numSuccesses == 0) browser()
+          oo <- over0.01[oo]
+          #}
+
+          # if (cantDoShortcutYet) {
+          #   oo <- ran < WardVec(k = k, b = b, dist = curDist,
+          #                       cellSize = cellSize,
+          #                       effDist = rcvLongDT[["seeddistance_eff"]][hasSp == TRUE],
+          #                       maxDist = rcvLongDT[["seeddistance_max"]][hasSp == TRUE]
+          #   )
+          #   numSuccesses <- sum(oo)
+          # }
+          if (debug)
+            print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ", numSuccesses, "; NumRows: ", NROW(rcvLongDT),
+                         "; NumSp: ", length(unique(rcvLongDT[["speciesCode"]]))))
+          notActiveSubIndex <- which(hasSp)[oo]
+          if (length(notActiveSubIndex)) {
+            notActiveFullIndex <- activeFullIndex[notActiveSubIndex] # which(hasSp)[oo]
+            activeFullIndex <- activeFullIndex[-notActiveSubIndex]
+            set(rcvFull, notActiveFullIndex, "Success", TRUE)
+            if (debug) {
+              set(rcvFull, notActiveFullIndex, "DistOfSuccess", curDist)
+              set(rcvFull, notActiveFullIndex, "ReasonForStop", "SuccessFullSeedRcvd")
+            }
+          } else {
+            notActiveSubIndex <- integer()
           }
         }
+
       }
       set(rcvFull, NULL, c("seeddistance_max", "seeddistance_eff"), NULL)
       rcvFull <- na.omit(rcvFull, on = "Success")
@@ -880,6 +922,8 @@ WardFast <- expression(ifelse(cellSize <= effDist, {
 #' @name WardFast
 #' @rdname WardFast
 WardVec <- function(dist, cellSize, effDist, maxDist, k, b) {
+
+  if (length(dist) == 1) dist <- rep(dist, length(maxDist))
   ifelse(cellSize <= effDist, {
     ifelse(
       dist <= effDist,
