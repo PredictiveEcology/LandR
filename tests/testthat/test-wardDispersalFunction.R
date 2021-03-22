@@ -270,13 +270,15 @@ test_that("test large files", {
     dtRcv2 <- dtRcv1
   }
   suppressWarnings(rm(list = c("out")))
+
+  # Run this 2x -- once with verbose -- to get extra stuff
   st <- system.time(out <- LANDISDisp(dtSrc = dtSrc1,
                                       dtRcv = dtRcv2,
                                       pixelGroupMap = pixelGroupMap,
-                                      successionTimestep = 1, verbose = 2,
+                                      successionTimestep = 1, verbose = 1,
                                       speciesTable = speciesTable1,
                                       fast = TRUE, maxSpiralIndex = 1e9))
-  st <- system.time(out <- LANDISDisp(dtSrc = dtSrc1,
+  st <- system.time(out1 <- LANDISDisp(dtSrc = dtSrc1,
                     dtRcv = dtRcv2,
                     pixelGroupMap = pixelGroupMap,
                     successionTimestep = 1, verbose = 0,
@@ -407,7 +409,7 @@ test_that("test Ward 4 immediate neighbours", {
 
 })
 
-test_that("test Ward 8 immediate neighbours", {
+test_that("test Ward random collection of neighbours", {
   library(raster); library(data.table)
   pixelGroupMap <- raster(extent(0, 1250, 0, 1750), res = 250, vals = 0)
   mp <- SpaDES.tools::middlePixel(pixelGroupMap)
@@ -415,18 +417,9 @@ test_that("test Ward 8 immediate neighbours", {
 
   pixelGroupMap[rc] <- 1
 
-  # 4 immediate neighbours
-  # pixelGroupMap[rc+c(1,0)] <- 2
-  # pixelGroupMap[rc+c(0,1)] <- 2
-  # pixelGroupMap[rc+c(-1,0)] <- 2
-  # pixelGroupMap[rc+c(0,-1)] <- 2
-  #
   # 4 diagonal neighbours
   pixelGroupMap[rc+c(1,1)] <- 2
-  # pixelGroupMap[rc+c(-1,1)] <- 2
-  # pixelGroupMap[rc+c(-1,-1)] <- 2
   pixelGroupMap[rc+c(1,0)] <- 2
-  # pixelGroupMap[rc+c(2,0)] <- 2
   pixelGroupMap[rc+c(2,1)] <- 2
   pixelGroupMap[rc+c(0,2)] <- 3
   pixelGroupMap[rc+c(-1, 1)] <- 4
@@ -441,11 +434,9 @@ test_that("test Ward 8 immediate neighbours", {
   dtRcv <- rbindlist(list(dtRcv, data.table(pixelGroup = 3,
                       speciesCode =lets[1:7])))
 
-  # seeddistance_eff = c(75L, 400L, 30L, 100L, 80L, 60L, 400L),
-  # seeddistance_max = c(100L, 5000L, 250L, 303L, 200L, 200L, 5000L)
   cc <- xyFromCell(pixelGroupMap, 15)
   plot(pixelGroupMap)
-  for (i in 1:1) {
+  for (i in 1:100) {
     speciesTab <-
       data.table(
         speciesCode = as.factor(LETTERS[1:10]),
@@ -453,17 +444,16 @@ test_that("test Ward 8 immediate neighbours", {
         seeddistance_max = c(100, 200, 250, 300, 250, 300, 490, 1240, 400, 500)
       )
     seed <- sample(1e6, 1)
-    # seed <- 163330
     set.seed(seed)
     out <- LANDISDisp(dtSrc, dtRcv = dtRcv, pixelGroupMap, speciesTable = speciesTab,
-                      successionTimestep = 1, verbose = 2)
-    #  if (NROW(out[pixelIndex == 23]) == 3) {
-    #    print(i); print(seed); out[, .N, by = "speciesCode"]; break}
+                      successionTimestep = 1, verbose = 1)
 
     pixSelf <- which(pixelGroupMap[] == 1)
     expect_true(NROW(speciesTab) == sum(out$pixelIndex == pixSelf))
     (oo <- out[, .N, by = c("speciesCode")])
-
+    nn <- speciesTab[out, on = "speciesCode"]
+    expect_true(all(nn[, DistOfSuccess <= pmax(res(pixelGroupMap)[1], seeddistance_max)]))
+    expect_true(all(nn[, sum(DistOfSuccess == 0) == 1, by = "speciesCode"]$V1))
   }
 
 })

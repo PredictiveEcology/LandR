@@ -16,9 +16,6 @@ LANDISDisp(
   plot.it = FALSE,
   successionTimestep,
   verbose = getOption("LandR.verbose", TRUE),
-  fast = TRUE,
-  maxSpiralIndex = 1e+09,
-  debug = TRUE,
   ...
 )
 }
@@ -122,7 +119,7 @@ speciesTable[, seeddistance_max := SeedMaxDist]
 speciesTable <- speciesTable
 speciesTable <- data.table(speciesTable)[, speciesCode := seq_along(LandisCode)]
 seedReceiveFull <- speciesTable[seedReceive, on = "speciesCode"]
-output <- LANDISDisp(
+output <- LANDISDisp(4
   dtRcv = seedReceiveFull, plot.it = interactive(),
   dtSrc = seedSource,
   speciesTable = speciesTable,
