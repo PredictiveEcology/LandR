@@ -274,7 +274,7 @@ test_that("test large files", {
                     dtRcv = dtRcv2,
                     pixelGroupMap = pixelGroupMap,
                     successionTimestep = 1, verbose = 1,
-                    speciesTable = speciesTable1,
+                    speciesTable = speciesTable1, debug = TRUE,
                     fast = TRUE, maxSpiralIndex = 1e9))
 
   par(mfrow = c(3,3));

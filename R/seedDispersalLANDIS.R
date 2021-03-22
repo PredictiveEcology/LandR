@@ -318,7 +318,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       for (i in 1:NROW(spiral)) {
         curDist <- drop(spiral[i, 3]) * cellSize
 
-        if (i > 1) {#} && i < 11) { # after the first 10 distances, each iteration changes the
+        if (i > 1){#} && i < 11) { # after the first 10 distances, each iteration changes the
           # number of active cells by very little because of low probabilities; this i < 11
           #   was an empirically derived point where it becomes faster to no longer shrink the
           #   rcvLongDT
@@ -353,19 +353,19 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         hasSp <- !is.na(nn)
         ran <- runifC(sum(hasSp))
 
-        ff <- distsBySpCode[dists == curDist, c("speciesCode", "wardProb")]
+        ff <- distsBySpCode[distsBySpCode$dists == curDist]#, c("speciesCode", "wardProb")]
         over0.01 <- which(ran < lastWardMaxProb)
 
 
 
         #if (curDist > overallMaxDist / 5) {
         if (length(over0.01)) {
-          # wardRes <- ff[rcvLongDT$speciesCode[hasSp==TRUE][over0.01]]$wardProb
-          wardRes <- WardVec(k = k, b = b, dist = curDist,
-                             cellSize = cellSize,
-                             effDist = rcvLongDT[["seeddistance_eff"]][hasSp == TRUE][over0.01],
-                             maxDist = rcvLongDT[["seeddistance_max"]][hasSp == TRUE][over0.01]
-          )
+          wardRes <- ff[rcvLongDT$speciesCode[hasSp==TRUE][over0.01]]$wardProb
+          # wardRes <- WardVec(k = k, b = b, dist = curDist,
+          #                    cellSize = cellSize,
+          #                    effDist = rcvLongDT[["seeddistance_eff"]][hasSp == TRUE][over0.01],
+          #                    maxDist = rcvLongDT[["seeddistance_max"]][hasSp == TRUE][over0.01]
+          # )
           # if (!identical(wardRes, wardRes1)) browser()
           # if (length(wardRes) == 0) browser()
           lastWardMaxProb <- min(1, max(wardRes))
