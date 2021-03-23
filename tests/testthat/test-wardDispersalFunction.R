@@ -15,7 +15,7 @@ test_that("test Ward dispersal seeding algorithm", {
   doLarge <- if (interactive()) FALSE else FALSE
   if (doLarge) {
     set.seed(1234)
-    print("Doing LARGE raster test -- should take more than 4 minutes")
+    message("Doing LARGE raster test -- should take more than 4 minutes")
     reducedPixelGroupMap <- raster(xmn = 50, xmx = 50 + 99*18000,
                                    ymn = 50, ymx = 50 + 99*18000,
                                    res = c(250, 250), val = 2)
@@ -76,11 +76,6 @@ test_that("test Ward dispersal seeding algorithm", {
     seedSource[, pixelGroup := pixelGroup + pgs/2]
 
     seedReceiveFull <- species[seedReceive, on = "speciesCode"]
-    # objects <- list("species" = species)
-    # mb <- profvis::profvis(replicate(10,
-    #    interval = 0.2,
-    # set.seed(seedOuter)
-    # print(seedOuter)
 
     st1 <- system.time({
       output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
@@ -92,7 +87,7 @@ test_that("test Ward dispersal seeding algorithm", {
     })
 
     if (interactive()) {
-      print(output[, .N, by = speciesCode])
+      message(output[, .N, by = speciesCode])
       print(st1)
     }
 
@@ -345,7 +340,7 @@ test_that("test large files", {
                 method = "spearman")
     expect_true(corr > 0.8)
   }
-  print(rr)
+  messageDF(rr)
   print(st)
   try(identical(rrOrig, rr), silent = TRUE) # for
 
@@ -436,7 +431,7 @@ test_that("test Ward random collection of neighbours", {
                       speciesCode =lets[1:7])))
 
   cc <- xyFromCell(pixelGroupMap, 15)
-  plot(pixelGroupMap)
+  raster::plot(pixelGroupMap)
   for (i in 1:100) {
     speciesTab <-
       data.table(
