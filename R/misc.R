@@ -17,7 +17,14 @@ utils::globalVariables(c(
 #' @return  \code{newCohortData} with a \code{lightProb} column
 #'
 #' @export
-assignLightProb <- function(sufficientLight, newCohortData, interpolate = TRUE) {
+assignLightProb <- function(sufficientLight, newCohortData, interpolate = TRUE,
+                            doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    if (any(class(sufficientLight) != "data.frame")) {
+      stop("sufficientLight must be a data.frame")
+    }
+  }
+
   ## for each line, get the survival probability from sufficientLight table note
   ## that sufficentLight is a table of survival probs for each tolerance level
   ## (row) by and shade level (column) siteShade + 2 is necessary to skip the
