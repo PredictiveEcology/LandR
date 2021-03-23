@@ -181,7 +181,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
 
   origClassWasNumeric <- is.numeric(speciesTable[["speciesCode"]])
   if (is(dtSrc$speciesCode, "numeric")) {
-    if (length(unique(dtSrc$speciesCode)) != max(dtSrc$speciesCode)) {
+    #if (length(unique(dtSrc$speciesCode)) != max(dtSrc$speciesCode)) {
       # This is "numerics" that are no contiguous from 1
       set(dtSrc, NULL, c("speciesCode"), factor(dtSrc[["speciesCode"]]))
       origLevels <- levels(dtSrc[["speciesCode"]])
@@ -190,7 +190,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
           factor(speciesTable[["speciesCode"]], levels = origLevels))
       set(dtRcv, NULL, c("speciesCode"),
           factor(dtRcv[["speciesCode"]], levels = origLevels))
-    }
+    #}
   }
 
   if (is.factor(dtSrc$speciesCode)) {
@@ -211,6 +211,9 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     setnames(speciesTable, "speciesCode2", "speciesCode")
     if (!"species" %in% colnames(speciesTable))
       set(speciesTable, NULL, "species", paste0("Spp_", speciesTable[["speciesCode"]]))
+    setorderv(speciesTable, "speciesCode")
+    setorderv(dtSrc, "speciesCode")
+    setorderv(dtRcv, "speciesCode")
   }
 
   if (is.character(dtSrc$speciesCode)) {
@@ -262,34 +265,40 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
   }
 
   #  Remove any species in dtRcv that are not available in dtSrc
-  dtRcvNew <- dtRcv[unique(dtSrc[, "speciesCode"], by = "speciesCode"), on = "speciesCode"]
+  dtRcvNew <- dtRcv[unique(dtSrc[, "speciesCode"], by = "speciesCode"), on = "speciesCode",
+                    nomatch = NULL]
   cellsCanRcv <- which(pgv %in% dtRcvNew$pixelGroup)
   rcvSpeciesCodes <- sort(unique(dtRcvNew$speciesCode))
   dtRcvLong <- data.table(pixelGroup = pgv[cellsCanRcv], pixelIndex = cellsCanRcv)
   dtRcvSmall <- dtRcvNew[, c("pixelGroup", "speciesCode")]
   dtSrcUniqueSP <- unique(dtSrc[, "speciesCode"], by = "speciesCode")
-  dtRcvSmall1 <- dtRcvSmall[dtSrcUniqueSP, on = "speciesCode"]
-  dtRcvLong <- dtRcvLong[dtRcvSmall, on = "pixelGroup", allow.cartesian = TRUE]
+  dtRcvSmall1 <- dtRcvSmall[dtSrcUniqueSP, on = "speciesCode", nomatch = NULL]
+  dtRcvLong <- dtRcvLong[dtRcvSmall, on = "pixelGroup", allow.cartesian = TRUE,
+                         nomatch = NULL]
   setorderv(dtRcvLong, c("pixelIndex", "speciesCode"))
+  if (NROW(dtRcvLong)) {
 
-  # There can be a case where a pixelGroup exists on map, with a species that is in Rcv but not in Src
-  if (anyNA(dtRcvLong[["pixelIndex"]]))
-    dtRcvLong <- na.omit(dtRcvLong)
+    # There can be a case where a pixelGroup exists on map, with a species that is in Rcv but not in Src
+    if (anyNA(dtRcvLong[["pixelIndex"]]))
+      dtRcvLong <- na.omit(dtRcvLong)
 
-  if (verbose >= 3) {
-    message("numRcvPixels: ", length(unique(dtRcvLong$pixelIndex)),
-            "; numSrcPixels: ", max(apply(srcPixelMatrix, 2, function(x) sum(!is.na(x)))))
-  }
-  rcvFull <- spiralSeedDispersalR(speciesTable, pixelGroupMap, dtRcvLong,
-                                  srcPixelMatrix, cellSize, k, b, successionTimestep,
-                                  verbose)
-  if (exists("origLevels", inherits = FALSE)) {
-    rcvFull[, speciesCode := factor(origLevels[speciesCode], levels = origLevels)]
-    if (origClassWasNumeric) {
-      set(rcvFull, NULL, "speciesCode", as.integer(as.character(rcvFull[["speciesCode"]])))
+    if (verbose >= 3) {
+      message("numRcvPixels: ", length(unique(dtRcvLong$pixelIndex)),
+              "; numSrcPixels: ", max(apply(srcPixelMatrix, 2, function(x) sum(!is.na(x)))))
     }
+    dtRcvLong <- spiralSeedDispersalR(speciesTable, pixelGroupMap, dtRcvLong,
+                                    srcPixelMatrix, cellSize, k, b, successionTimestep,
+                                    verbose)
+    if (exists("origLevels", inherits = FALSE)) {
+      dtRcvLong[, speciesCode := factor(origLevels[speciesCode], levels = origLevels)]
+      if (origClassWasNumeric) {
+        set(dtRcvLong, NULL, "speciesCode", as.integer(as.character(dtRcvLong[["speciesCode"]])))
+      }
+    }
+  } else {
+
   }
-  return(rcvFull[])
+  return(dtRcvLong[])
 
 
 }
@@ -518,9 +527,8 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     wardProbActual <- distsBySpCode$wardProb[distsBySpCode$dists == curDist]
 
     if (successionTimestep > 1) {
-        wardProbActual = 1 - (1 - wardProbActual) ^ successionTimestep
+      wardProbActual = 1 - (1 - wardProbActual) ^ successionTimestep
     }
-
 
     whRanLTprevMaxProb <- which(ran <= lastWardMaxProb)
 
