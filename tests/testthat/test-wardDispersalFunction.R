@@ -129,6 +129,7 @@ test_that("test Ward dispersal seeding algorithm", {
       ras
     })
 
+
     bigDispersers <- species$speciesCode[which(species$SeedMaxDist == 5000 & species$SeedEffDist == 1000)]
     lapply(spsOut, function(x) table(x[]))
     if (interactive()) {

@@ -269,8 +269,12 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
   dtRcvSmall <- dtRcvNew[, c("pixelGroup", "speciesCode")]
   dtSrcUniqueSP <- unique(dtSrc[, "speciesCode"], by = "speciesCode")
   dtRcvSmall1 <- dtRcvSmall[dtSrcUniqueSP, on = "speciesCode"]
-  dtRcvLong <- dtRcvLong[dtRcvSmall, on = "pixelGroup", allow.cartesian = TRUE] # $speciesCode
+  dtRcvLong <- dtRcvLong[dtRcvSmall, on = "pixelGroup", allow.cartesian = TRUE]
   setorderv(dtRcvLong, c("pixelIndex", "speciesCode"))
+
+  # There can be a case where a pixelGroup exists on map, with a species that is in Rcv but not in Src
+  if (anyNA(dtRcvLong[["pixelIndex"]]))
+    dtRcvLong <- na.omit(dtRcvLong)
 
   if (verbose >= 3) {
     message("numRcvPixels: ", length(unique(dtRcvLong$pixelIndex)),
@@ -454,15 +458,14 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   set(distsBySpCode, NULL, "seeddistance_eff", speciesTableSmall[distsBySpCode[["speciesCode"]],
                                                                  "seeddistance_eff"])
   set(distsBySpCode, NULL, "wardProb",
-      WardVec(dist = distsBySpCode$dists, cellSize = cellSize, effDist = distsBySpCode$seeddistance_eff,
-              maxDist = distsBySpCode$seeddistance_max, k = k, b = b))
+      pmin(1, WardVec(dist = distsBySpCode$dists, cellSize = cellSize, effDist = distsBySpCode$seeddistance_eff,
+              maxDist = distsBySpCode$seeddistance_max, k = k, b = b)))
   set(distsBySpCode, NULL, c("seeddistance_max", "seeddistance_eff"), NULL)
   setorderv(distsBySpCode, c("dists", "speciesCode"))
 
   rcvFull <- dtRcvLong[, c("pixelIndex", "speciesCode")]
-  rcvFull <- rcvFull[speciesTable[, c("seeddistance_max", # "seeddistance_eff",
-                                      "speciesCode")],
-                     on = "speciesCode"]
+  rcvFull <- rcvFull[speciesTable[, c("seeddistance_max", "speciesCode")],
+                     on = "speciesCode", nomatch = NULL]
   activeFullIndex <- seq.int(NROW(rcvFull))
   rc1 <- rowColFromCell(pixelGroupMap, rcvFull[["pixelIndex"]])
   rowOrig <- rc1[, "row"]
@@ -477,9 +480,9 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   nrowSrcPixelMatrix <- NROW(srcPixelMatrix)
 
   ## Assertions for inputs to spiral
-  if (!is.numeric(k)) stop()
-  if (!is.numeric(b)) stop()
-  if (!is.numeric(successionTimestep)) stop()
+  if (!is.numeric(k)) stop("not numeric k")
+  if (!is.numeric(b)) stop("not numeric b")
+  if (!is.numeric(successionTimestep)) stop("not numeric successTimestep")
 
   for (i in 1:NROW(spiral)) {
     curDist <- drop(spiral[i, 3]) * cellSize
@@ -487,14 +490,14 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     if (i > 1) {
       spTooLong <- curDist > activeSpecies[["seeddistance_maxMinCellSize"]]
       if (any(spTooLong)) {
-        tooLong <- curDist > ( pmax(cellSize, rcvFull[activeFullIndex][["seeddistance_max"]]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
+        activeSpecies <- activeSpecies[!spTooLong]
+        tooLong <- curDist > ( pmax(cellSize, rcvFull[["seeddistance_max"]][activeFullIndex]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
         if (any(tooLong)) {
           if (verbose >= 1) {
             tooLongFull <- curDist > rcvFull[["seeddistance_max"]]
             set(rcvFull, which(tooLongFull & is.na(rcvFull$ReasonForStop)), "ReasonForStop", "NoneRecdBeforeMaxDistReached")
           }
           activeFullIndex <- activeFullIndex[!tooLong]
-          activeSpecies <- activeSpecies[!spTooLong]
         }
       }
 
@@ -514,8 +517,10 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 
     wardProbActual <- distsBySpCode$wardProb[distsBySpCode$dists == curDist]
 
-    if (successionTimestep > 1)
-      wardProbActual = 1 - (1 - wardProbActual) ^ successionTimestep
+    if (successionTimestep > 1) {
+        wardProbActual = 1 - (1 - wardProbActual) ^ successionTimestep
+    }
+
 
     whRanLTprevMaxProb <- which(ran <= lastWardMaxProb)
 
@@ -547,23 +552,37 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
       }
     }
 
+    if (length(activeFullIndex) == 0) {
+      break
+    }
   }
+
   set(rcvFull, NULL, c("seeddistance_max"), NULL)
 
-  # Remove the unsuccessful ones
-  whSuccess <- which(!is.na(rcvFull[["Success"]]))
-  if (verbose >= 1) {
-    fails <- which(is.na(rcvFull[["DistOfSuccess"]]))
-    if (length(fails)) {
-      set(rcvFull, fails, "ReasonForStop", "RanOutOfDistance")
+  if (!"Success" %in% colnames(rcvFull)) {
+    if (verbose >= 1) {
+      set(rcvFull, NULL, "ReasonForStop", "NoSuccesses")
+      ReasonForStop <- rcvFull
     }
-    whFails <- sort(c(fails, whSuccess))
-    ReasonForStop <- rcvFull[whFails]
+    rcvFull <- rcvFull[0]
+  } else {
+    # Remove the unsuccessful ones
+    whSuccess <- which(!is.na(rcvFull[["Success"]]))
+    if (verbose >= 1) {
+      fails <- which(is.na(rcvFull[["DistOfSuccess"]]))
+      if (length(fails)) {
+        set(rcvFull, fails, "ReasonForStop", "RanOutOfDistance")
+      }
+      whFails <- sort(c(fails, whSuccess))
+      ReasonForStop <- rcvFull[whFails]
+    }
+    rcvFull <- rcvFull[whSuccess]
+    set(rcvFull, NULL, c("Success"), NULL)
   }
-  rcvFull <- rcvFull[whSuccess]
-  set(rcvFull, NULL, c("Success"), NULL)
+
   speciesCodeCols <- intersect(c("species", "speciesCode"), colnames(speciesTable))
-  rcvFull <- rcvFull[speciesTable[, ..speciesCodeCols], on = "speciesCode"]
+  rcvFull <- rcvFull[speciesTable[, ..speciesCodeCols], on = "speciesCode",
+                     nomatch = NULL]
 
   if (verbose >= 1) {
     setattr(rcvFull, "ReasonForStop", ReasonForStop)
