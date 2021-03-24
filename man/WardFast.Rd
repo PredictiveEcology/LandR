@@ -3,17 +3,22 @@
 \docType{methods}
 \name{WardFast}
 \alias{WardFast}
+\alias{WardVec}
 \title{WardFast Seed Dispersal kernel}
 \format{
 An object of class \code{expression} of length 1.
 }
 \usage{
 WardFast
+
+WardVec(dist, cellSize, effDist, maxDist, k, b)
 }
 \description{
 A probability distribution used in LANDIS-II.
 }
 \author{
+Eliot McIntire
+
 Eliot McIntire
 }
 \keyword{datasets}
