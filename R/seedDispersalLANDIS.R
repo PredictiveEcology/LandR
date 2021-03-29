@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "..colnamesST", "RcvCommunity", "speciesCode2"
+  "..colnamesST", "RcvCommunity", "speciesCode2", "..speciesCodeCols"
 ))
 
 #' Simulate a LANDIS-II dispersal process on a landscape.

@@ -22,6 +22,10 @@ of a species shade tolerance (\code{1}-\code{5}).}
 any two values of shade tolerance in the sufficient light table, allowing species shade tolerance
 trait values to take any decimal value between 1 and 5 (inclusively). If false, species shade tolerances
 can only take integer values between 1 and 5  (inclusively).}
+
+\item{doAssertion}{A logical indicating whether some internal tests should be run to
+ensure the function is running correctly.
+Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \value{
 \code{newCohortData} with a \code{lightProb} column

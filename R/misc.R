@@ -13,6 +13,7 @@ utils::globalVariables(c(
 #'   any two values of shade tolerance in the sufficient light table, allowing species shade tolerance
 #'   trait values to take any decimal value between 1 and 5 (inclusively). If false, species shade tolerances
 #'   can only take integer values between 1 and 5  (inclusively).
+#' @template doAssertion
 #'
 #' @return  \code{newCohortData} with a \code{lightProb} column
 #'
