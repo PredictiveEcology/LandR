@@ -94,7 +94,16 @@ makeDummyEcoregionFiles <- function(ecoregionMap, rstLCC, rasterToMatch) {
   return(ecoregionFiles)
 }
 
+#' Rescale function (as in \code{scales::rescale})
+#'
+#' This is a simple function copied from the scales package (almost the same). Too heavy
+#'    to use one simple function
+#'
+#' @param x a \code{numeric} vector
+#' @param to a \code{numeric} vector of length 2. The new range of values.
 #' @importFrom fpCompare %==%
+#' @export
+
 rescale <- function(x, to) {
   # This is a simple function copied from the scales package. Too heavy
   #   to use one simple function
