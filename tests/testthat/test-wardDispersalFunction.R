@@ -210,6 +210,7 @@ test_that("test large files", {
   }
   library(reproducible)
   library(quickPlot)
+  if (!requireNamespace("googledrive")) skip("Need: install.packages('googledrive')")
   dtSrc <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
                       targetFile = "dtSrc.rds",
                       fun = "readRDS",

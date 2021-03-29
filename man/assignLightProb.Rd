@@ -4,11 +4,17 @@
 \alias{assignLightProb}
 \title{Assign light probability}
 \usage{
-assignLightProb(sufficientLight, newCohortData, interpolate = TRUE)
+assignLightProb(
+  sufficientLight,
+  newCohortData,
+  interpolate = TRUE,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 }
 \arguments{
-\item{sufficientLight}{a \code{data.table} containing probability of establishment, given a
-site's light conditions (\code{X0}-\code{X5}) for each level of a species' shade tolerance (1-5).}
+\item{sufficientLight}{a \code{data.frame} (not \code{data.table}!) containing probability
+of establishment, given a site's light conditions (\code{X0}-\code{X5}) for each level
+of a species shade tolerance (\code{1}-\code{5}).}
 
 \item{newCohortData}{a modified version of \code{cohortData} that contains new cohorts.}
 
