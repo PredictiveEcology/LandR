@@ -112,7 +112,7 @@ utils::globalVariables(c(
 #' speciesTable <- speciesTable
 #' speciesTable <- data.table(speciesTable)[, speciesCode := seq_along(LandisCode)]
 #' seedReceiveFull <- speciesTable[seedReceive, on = "speciesCode"]
-#' output <- LANDISDisp(4
+#' output <- LANDISDisp(
 #'   dtRcv = seedReceiveFull, plot.it = interactive(),
 #'   dtSrc = seedSource,
 #'   speciesTable = speciesTable,
