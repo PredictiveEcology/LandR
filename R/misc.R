@@ -35,8 +35,8 @@ assignLightProb <- function(sufficientLight, newCohortData, interpolate = TRUE,
                                    siteShade = siteShade,
                                    lowShadetol = floor(shadetolerance),
                                    highShadetol = ceiling(shadetolerance))]
-    tempDT[, `:=`(lowProb = sufficientLight[cbind(lowShadetol + 1, siteShade + 2)],
-                  highProb = sufficientLight[cbind(highShadetol + 1, siteShade + 2)])]
+    tempDT[, `:=`(lowProb = sufficientLight[cbind(lowShadetol, siteShade + 2)],
+                  highProb = sufficientLight[cbind(highShadetol, siteShade + 2)])]
 
     ## interpolate between floor/ceiling to find prob, then add to newCohortData
     tempDT[, lightProb := .interpolateLightProb(x = shadetolerance, x0 = lowShadetol, x1 = highShadetol,
