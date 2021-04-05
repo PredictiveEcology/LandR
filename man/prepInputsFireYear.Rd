@@ -4,7 +4,7 @@
 \alias{prepInputsFireYear}
 \title{Create a raster of fire polygons}
 \usage{
-prepInputsFireYear(..., rasterToMatch, field = "YEAR", earliestYear = 1950)
+prepInputsFireYear(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950)
 }
 \arguments{
 \item{...}{Additional arguments passed to \code{prepInputs}}
@@ -12,7 +12,7 @@ prepInputsFireYear(..., rasterToMatch, field = "YEAR", earliestYear = 1950)
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
 
-\item{field}{field used to rasterize fire polys}
+\item{fireField}{field used to rasterize fire polys}
 
 \item{earliestYear}{the earliest fire date to allow}
 }
