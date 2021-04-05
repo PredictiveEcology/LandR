@@ -107,14 +107,14 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
   }
 
   #pixelTable <- data.table(#age = asInteger(ceiling(asInteger(standAgeMap[]) /
-                          #                           pixelGroupAgeClass) * pixelGroupAgeClass),
-                          # logAge = .logFloor(standAgeMap[]),
-                          # initialEcoregionCode = factor(initialEcoregionCodeVals),
-                          # totalBiomass = asInteger(biomassMap[] * 100), # change units
-                          # cover = coverMatrix,
-                          # pixelIndex = seq(ncell(rasterToMatch)),
-                          # lcc = rstLCC[],
-                          # rasterToMatch = rasterToMatch[])
+  #                           pixelGroupAgeClass) * pixelGroupAgeClass),
+  # logAge = .logFloor(standAgeMap[]),
+  # initialEcoregionCode = factor(initialEcoregionCodeVals),
+  # totalBiomass = asInteger(biomassMap[] * 100), # change units
+  # cover = coverMatrix,
+  # pixelIndex = seq(ncell(rasterToMatch)),
+  # lcc = rstLCC[],
+  # rasterToMatch = rasterToMatch[])
 
   # Remove NAs from pixelTable
   ## 1) If in rasterToMatch
@@ -211,7 +211,7 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
     modelCover
   } else {
     predict(modelCover$mod, newdata = cohortDataShort,
-                                type = "response")
+            type = "response")
   }
   establishprobBySuccessionTimestep <- 1 - (1 - predictedCoverVals)^successionTimestep
   cohortDataShort[, establishprob := establishprobBySuccessionTimestep]
@@ -238,14 +238,14 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
   if (needRescaleModelB) {
     speciesEcoregion2 <- copy(speciesEcoregion)
     speciesEcoregion2[, `:=`(logAge = scale(logAge,
-                                        center = attr(scaledVarsModelB$logAge, "scaled:center"),
-                                        scale = attr(scaledVarsModelB$logAge, "scaled:scale")),
+                                            center = attr(scaledVarsModelB$logAge, "scaled:center"),
+                                            scale = attr(scaledVarsModelB$logAge, "scaled:scale")),
                              cover = scale(cover,
                                            center = attr(scaledVarsModelB$cover, "scaled:center"),
                                            scale = attr(scaledVarsModelB$cover, "scaled:scale")))]
     speciesEcoregion2[ , maxB := asInteger(predict(modelBiomass$mod,
-                                                  newdata = speciesEcoregion2,
-                                                  type = "response"))]
+                                                   newdata = speciesEcoregion2,
+                                                   type = "response"))]
     speciesEcoregion[, maxB := speciesEcoregion2$maxB]
   } else {
     speciesEcoregion[ , maxB := asInteger(predict(modelBiomass$mod,
