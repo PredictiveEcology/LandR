@@ -394,7 +394,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'
 #' @param ... Additional arguments passed to \code{prepInputs}
 #' @template rasterToMatch
-#' @param field field used to rasterize fire polys
+#' @param fireField field used to rasterize fire polys
 #' @param earliestYear the earliest fire date to allow
 #'
 #' @export
@@ -402,12 +402,12 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @importFrom raster crs
 #' @importFrom reproducible Cache prepInputs
 #' @importFrom sf st_cast st_transform
-prepInputsFireYear <- function(..., rasterToMatch, field = 'YEAR', earliestYear = 1950) {
+prepInputsFireYear <- function(..., rasterToMatch, fireField = 'YEAR', earliestYear = 1950) {
   a <- Cache(prepInputs, ...)
   if (nrow(a) > 0) {
     gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon
     d <- st_transform(gg, crs(rasterToMatch))
-    fireRas <- fasterize(d, raster = rasterToMatch, field = field)
+    fireRas <- fasterize(d, raster = rasterToMatch, field = fireField)
     fireRas[!is.na(getValues(fireRas)) & getValues(fireRas) < earliestYear] <- NA
     return(fireRas)
   } else {
