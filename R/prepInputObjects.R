@@ -436,19 +436,25 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @importFrom raster crs
 #' @importFrom reproducible Cache prepInputs
 #' @importFrom sf st_cast st_transform
+#' @importFrom magrittr %>%
 prepInputsFireYear <- function(..., rasterToMatch, fireField = 'YEAR', earliestYear = 1950) {
   dots <- list(...)
   if (!is.null(dots$fun)) {
     a <- if (grepl("st_read", dots$fun)) {
       Cache(prepInputs, ...)
     } else {
-      Cache(prepInputs, rasterToMatch = rasterToMatch, ...)
+      Cache(prepInputs, rasterToMatch = rasterToMatch, ...) %>%
+        st_as_sf(.)
     }
   }
 
   if (nrow(a) > 0) {
     gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon
     d <- st_transform(gg, crs(rasterToMatch))
+    if (class(d[[fireField]]) != "numeric") {
+      warning("Chosen fireField will be coerced to numeric")
+      d[[fireField]] <- as.numeric(as.factor(d[[fireField]]))
+    }
     fireRas <- fasterize(d, raster = rasterToMatch, field = fireField)
     fireRas[!is.na(getValues(fireRas)) & getValues(fireRas) < earliestYear] <- NA
     return(fireRas)
