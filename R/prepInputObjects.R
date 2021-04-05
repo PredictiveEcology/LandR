@@ -107,14 +107,14 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
   }
 
   #pixelTable <- data.table(#age = asInteger(ceiling(asInteger(standAgeMap[]) /
-                          #                           pixelGroupAgeClass) * pixelGroupAgeClass),
-                          # logAge = .logFloor(standAgeMap[]),
-                          # initialEcoregionCode = factor(initialEcoregionCodeVals),
-                          # totalBiomass = asInteger(biomassMap[] * 100), # change units
-                          # cover = coverMatrix,
-                          # pixelIndex = seq(ncell(rasterToMatch)),
-                          # lcc = rstLCC[],
-                          # rasterToMatch = rasterToMatch[])
+  #                           pixelGroupAgeClass) * pixelGroupAgeClass),
+  # logAge = .logFloor(standAgeMap[]),
+  # initialEcoregionCode = factor(initialEcoregionCodeVals),
+  # totalBiomass = asInteger(biomassMap[] * 100), # change units
+  # cover = coverMatrix,
+  # pixelIndex = seq(ncell(rasterToMatch)),
+  # lcc = rstLCC[],
+  # rasterToMatch = rasterToMatch[])
 
   # Remove NAs from pixelTable
   ## 1) If in rasterToMatch
@@ -194,7 +194,7 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
     modelCover
   } else {
     predict(modelCover$mod, newdata = cohortDataShort,
-                                type = "response")
+            type = "response")
   }
   establishprobBySuccessionTimestep <- 1 - (1 - predictedCoverVals)^successionTimestep
   cohortDataShort[, establishprob := establishprobBySuccessionTimestep]
