@@ -403,7 +403,15 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @importFrom reproducible Cache prepInputs
 #' @importFrom sf st_cast st_transform
 prepInputsFireYear <- function(..., rasterToMatch, fireField = 'YEAR', earliestYear = 1950) {
-  a <- Cache(prepInputs, rasterToMatch = rasterToMatch, ...)
+  dots <- list(...)
+  if (!is.null(dots$fun)) {
+    a <- if (grepl("st_read", dots$fun)) {
+      Cache(prepInputs, ...)
+    } else {
+      Cache(prepInputs, rasterToMatch = rasterToMatch, ...)
+    }
+  }
+
   if (nrow(a) > 0) {
     gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon
     d <- st_transform(gg, crs(rasterToMatch))
