@@ -204,6 +204,9 @@ test_that("test Ward dispersal seeding algorithm", {
 })
 
 test_that("test large files", {
+  if (!requireNamespace("googledrive"))
+    skip("Need: install.packages('googledrive')")
+
   if (interactive()) {
     whichTest <- 0 # 0 for full test (slow), 1 (manual interactive) or 2 (medium)
     dp <- "~/tmp"
@@ -214,7 +217,7 @@ test_that("test large files", {
   }
   library(reproducible)
   library(quickPlot)
-  if (!requireNamespace("googledrive")) skip("Need: install.packages('googledrive')")
+
   dtSrc <- prepInputs(url = "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI",
                       targetFile = "dtSrc.rds",
                       fun = "readRDS",
