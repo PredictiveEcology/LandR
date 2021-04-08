@@ -213,7 +213,7 @@ test_that("test large files", {
   } else {
     whichTest <- 2
     dp <- tempdir()
-    drive_deauth()
+    googledrive::drive_deauth()
   }
   library(reproducible)
   library(quickPlot)
