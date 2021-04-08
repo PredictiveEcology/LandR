@@ -210,23 +210,24 @@ test_that("test large files", {
   } else {
     whichTest <- 2
     dp <- tempdir()
+    drive_deauth()
   }
   library(reproducible)
   library(quickPlot)
   if (!requireNamespace("googledrive")) skip("Need: install.packages('googledrive')")
-  dtSrc <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI',
+  dtSrc <- prepInputs(url = "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI",
                       targetFile = "dtSrc.rds",
                       fun = "readRDS",
                       destinationPath = dp, overwrite = TRUE)
-  dtRcv <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI',
+  dtRcv <- prepInputs(url = "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI",
                       targetFile = "dtRcv.rds",
                       fun = "readRDS",
                       destinationPath = dp)
-  pixelGroupMap <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI',
+  pixelGroupMap <- prepInputs(url = "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI",
                               targetFile = "pixelGroupMap.rds",
                               fun = "readRDS",
                               destinationPath = dp)
-  speciesTable <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI',
+  speciesTable <- prepInputs(url = "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI",
                              targetFile = "speciesTable.rds",
                              fun = "readRDS",
                              destinationPath = dp)
