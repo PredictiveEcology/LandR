@@ -1,5 +1,4 @@
 test_that("test Ward dispersal seeding algorithm", {
-
   verbose <- 0
 
   if (FALSE) {
@@ -201,29 +200,33 @@ test_that("test Ward dispersal seeding algorithm", {
 })
 
 test_that("test large files", {
+  if (!requireNamespace("googledrive"))
+    skip("Need: install.packages('googledrive')")
+
   if (interactive()) {
     whichTest <- 0 # 0 for full test (slow), 1 (manual interactive) or 2 (medium)
     dp <- "~/tmp"
   } else {
     whichTest <- 2
     dp <- tempdir()
+    googledrive::drive_deauth()
   }
   library(reproducible)
   library(quickPlot)
-  if (!requireNamespace("googledrive")) skip("Need: install.packages('googledrive')")
-  dtSrc <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
+
+  dtSrc <- prepInputs(url = "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI",
                       targetFile = "dtSrc.rds",
                       fun = "readRDS",
                       destinationPath = dp, overwrite = TRUE)
-  dtRcv <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
+  dtRcv <- prepInputs(url = "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI",
                       targetFile = "dtRcv.rds",
                       fun = "readRDS",
                       destinationPath = dp)
-  pixelGroupMap <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
+  pixelGroupMap <- prepInputs(url = "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI",
                               targetFile = "pixelGroupMap.rds",
                               fun = "readRDS",
                               destinationPath = dp)
-  speciesTable <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
+  speciesTable <- prepInputs(url = "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI",
                              targetFile = "speciesTable.rds",
                              fun = "readRDS",
                              destinationPath = dp)
@@ -240,9 +243,7 @@ test_that("test large files", {
   speciesTable1 <- data.table::copy(speciesTable)
   speciesTable1 <- speciesTable1[speciesCode %in% sppKeep]
 
-
   if (whichTest == 1) { # 1 is for manual, interactive testing
-
     both <- dtSrc1[dtRcv1, on = c("speciesCode", "pixelGroup"), nomatch = 0]
 
     pixelsWithSrcAndRcv <- which(pixelGroupMap[] %in% both$pixelGroup)
@@ -266,21 +267,14 @@ test_that("test large files", {
   } else {
     dtRcv2 <- dtRcv1
   }
-  suppressWarnings(rm(list = c("out")))
-
-  # Run this 2x -- once with verbose -- to get extra stuff
-  st <- system.time(out <- LANDISDisp(dtSrc = dtSrc1,
-                                      dtRcv = dtRcv2,
-                                      pixelGroupMap = pixelGroupMap,
-                                      successionTimestep = 1, verbose = 1,
-                                      speciesTable = speciesTable1,
-                                      fast = TRUE, maxSpiralIndex = 1e9))
-  st <- system.time(out1 <- LANDISDisp(dtSrc = dtSrc1,
-                    dtRcv = dtRcv2,
-                    pixelGroupMap = pixelGroupMap,
-                    successionTimestep = 1, verbose = 0,
-                    speciesTable = speciesTable1,
-                    fast = TRUE, maxSpiralIndex = 1e9))
+  st <- system.time({
+    out <- LANDISDisp(dtSrc = dtSrc1,
+                      dtRcv = dtRcv2,
+                      pixelGroupMap = pixelGroupMap,
+                      successionTimestep = 1,
+                      speciesTable = speciesTable1)
+  })
+  print(st)
 
   par(mfrow = c(3,3));
   out[, list(a={a = hist(DistOfSuccess,
@@ -328,11 +322,10 @@ test_that("test large files", {
       oo <- c(oo, rep(0, 5 - length(oo)))
     oo
   })
-  rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"]
+  rownames(rr) <- raster::levels(spMap[[2]])[[1]][, "type"]
   rr <- t(rr)
   rr <- as.data.frame(rr)
-  rr <- cbind(rr, propSrcRcved = round(rr[,5]/ (rr[,5]+rr[,2]), 5))
-  if (rrDidntExist) rrOrig <- rr
+  rr <- cbind(rr, propSrcRcved = round(rr[, 5] / (rr[, 5] + rr[, 2]), 5))
   speciesTable[,c(1,5)]
   if (!(whichTest %in% 1:2)) {
     # This is a weak test -- that is often wrong with small samples -- seems to only
@@ -341,12 +334,6 @@ test_that("test large files", {
                 method = "spearman")
     expect_true(corr > 0.8)
   }
-  messageDF(rr)
-  print(st)
-  try(identical(rrOrig, rr), silent = TRUE) # for
-
-
-
 })
 
 test_that("test Ward 4 immediate neighbours", {

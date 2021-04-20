@@ -50,6 +50,7 @@ Imports:
     XML
 Suggests:
     covr,
+    googledrive,
     knitr,
     RandomFields,
     roxygen2,
