@@ -112,7 +112,7 @@ utils::globalVariables(c(
 #' speciesTable <- speciesTable
 #' speciesTable <- data.table(speciesTable)[, speciesCode := seq_along(LandisCode)]
 #' seedReceiveFull <- speciesTable[seedReceive, on = "speciesCode"]
-#' output <- LANDISDisp(4
+#' output <- LANDISDisp(
 #'   dtRcv = seedReceiveFull, plot.it = interactive(),
 #'   dtSrc = seedSource,
 #'   speciesTable = speciesTable,
@@ -408,14 +408,85 @@ WardFast <- expression(ifelse(cellSize <= effDist, {
 #' @docType methods
 #'
 #' @author Eliot McIntire
+#' @param algo Either 1 or 2. 2 is faster and is default. 1 is "simpler code" as it
+#'   uses `ifelse`
 #'
 #' @name WardFast
 #' @rdname WardFast
-WardVec <- function(dist, cellSize, effDist, maxDist, k, b) {
+WardVec <- function(dist, cellSize, effDist, maxDist, k, b, algo = 2) {
 
+  if (length(maxDist) == 1) {
+    if (length(dist) != 1)
+      maxDist <- rep(maxDist, length(dist))
+    else if (length(effDist) != 1)
+      maxDist <- rep(maxDist, length(effDist))
+  }
   if (length(dist) == 1) dist <- rep(dist, length(maxDist))
-  ifelse(cellSize <= effDist, {
-    ifelse(
+  if (length(effDist) == 1) effDist <- rep(effDist, length(maxDist))
+
+  if (algo == 2) {
+    # This is a 4 part ifelse statement
+    # This is 3x faster, but less clear algorithm that uses 4 explicit logicals
+    #   to create 4 indices, then evaluate each of the 4 expressions that go
+    #   with the logicals
+    out <- numeric(length(maxDist))
+
+    # here are the expressions
+    #  where a1, a2, b1, b2 are the 4 parts
+    expra1 <- expression(
+      exp((dista1wh - cellSize) * log(1 - k) / effDista1wh) -
+        exp(dista1wh * log(1 - k) / effDista1wh))
+    expra2 <- expression(
+      (1 - k) * exp((dista2wh - cellSize - effDista2wh) * log(b) / maxDista2wh) -
+        (1 - k) * exp((dista2wh - effDista2wh) * log(b) / maxDista2wh))
+    exprb1 <- expression(
+      exp((distb1wh - cellSize) * log(1 - k) / effDistb1wh) - (1 - k) *
+        exp((distb1wh - effDistb1wh) * log(b) / maxDistb1wh))
+    exprb2 <- expression(
+      (1 - k) * exp((distb2wh - cellSize - effDistb2wh) * log(b) / maxDistb2wh) -
+        (1 - k) * exp((distb2wh - effDistb2wh) * log(b) / maxDistb2wh))
+
+
+    # Determine the indices for each one
+    # Here are the 3 logicals, toplevel, then 2 nested
+    a <- cellSize <= effDist
+    awh <- which(a)
+    bwh <- which(!a)
+    a1 <- dist[awh] <= effDist[awh]
+    b1 <- dist[bwh] <= cellSize
+
+    a1wh <- awh[a1]
+    a2wh <- awh[!a1]
+
+    b1wh <- bwh[b1]
+    b2wh <- bwh[!b1]
+
+    # Build objects that are the dist, effDist, maxDist for each of the 4 subsets
+    dista1wh <- dist[a1wh]
+    effDista1wh <- effDist[a1wh]
+
+    dista2wh <- dist[a2wh]
+    effDista2wh <- effDist[a2wh]
+    maxDista2wh <- maxDist[a2wh]
+
+    distb1wh <- dist[b1wh]
+    effDistb1wh <- effDist[b1wh]
+    maxDistb1wh <- maxDist[b1wh]
+
+    distb2wh <- dist[b2wh]
+    effDistb2wh <- effDist[b2wh]
+    maxDistb2wh <- maxDist[b2wh]
+
+    # Create the content
+    out[a1wh] <- eval(expra1)
+    out[a2wh] <- eval(expra2)
+    out[b1wh] <- eval(exprb1)
+    out[b2wh] <- eval(exprb2)
+
+    out
+  } else {
+    ifelse(cellSize <= effDist, {
+      ifelse(
       dist <= effDist,
       exp((dist - cellSize) * log(1 - k) / effDist) -
         exp(dist * log(1 - k) / effDist),
@@ -430,7 +501,7 @@ WardVec <- function(dist, cellSize, effDist, maxDist, k, b) {
       (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
         (1 - k) * exp((dist - effDist) * log(b) / maxDist)
     )
-  }
+    }
   )
 }
 

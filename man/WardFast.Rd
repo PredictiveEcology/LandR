@@ -11,7 +11,11 @@ An object of class \code{expression} of length 1.
 \usage{
 WardFast
 
-WardVec(dist, cellSize, effDist, maxDist, k, b)
+WardVec(dist, cellSize, effDist, maxDist, k, b, algo = 2)
+}
+\arguments{
+\item{algo}{Either 1 or 2. 2 is faster and is default. 1 is "simpler code" as it
+uses `ifelse`}
 }
 \description{
 A probability distribution used in LANDIS-II.
