@@ -480,9 +480,13 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   rcvFull <- rcvFull[speciesTable[, c("seeddistance_max", "speciesCode")],
                      on = "speciesCode", nomatch = NULL]
   activeFullIndex <- seq.int(NROW(rcvFull))
+  activeIndexShrinking <- activeFullIndex
   rc1 <- rowColFromCell(pixelGroupMap, rcvFull[["pixelIndex"]])
   rowOrig <- rc1[, "row"]
   colOrig <- rc1[, "col"]
+  rowShrinking <- rowOrig
+  colShrinking <- colOrig
+
   speciesCode <- rcvFull[["speciesCode"]]
 
   activeSpecies <- speciesTable[, c("seeddistance_max", "seeddistance_eff", "speciesCode", "seeddistance_maxMinCellSize")]
@@ -521,6 +525,9 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
               set(rcvFull, which(tooLongFull & is.na(rcvFull$ReasonForStop)), "ReasonForStop", "NoneRecdBeforeMaxDistReached")
             }
             activeFullIndex <- activeFullIndex[!tooLong]
+            rowShrinking <- rowShrinking[!tooLong]
+            colShrinking <- colShrinking[!tooLong]
+            activeIndexShrinking <- activeIndexShrinking[activeFullIndex]
           }
         }
       } else {
@@ -529,8 +536,13 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 
     }
 
-    row <- rowOrig[activeFullIndex] + spiralRow[i] #spiral[i, "row"] # faster?
-    col <- colOrig[activeFullIndex] + spiralCol[i] #spiral[i, "col"] # faster?
+    #row <- rowOrig[activeFullIndex] + spiralRow[i] #spiral[i, "row"] # faster?
+    #col <- colOrig[activeFullIndex] + spiralCol[i] #spiral[i, "col"] # faster?
+    row <- rowShrinking + spiralRow[i] #spiral[i, "row"] # faster?
+    col <- colShrinking + spiralCol[i] #spiral[i, "col"] # faster?
+
+    #if (!identical(row, row1))
+    #  browser()
 
     # I tried to get this faster; but the problem is omitting all the
     #   row/col combinations that are "off" raster. cellFromRowCol does this
@@ -577,6 +589,9 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
         if (length(notActiveSubIndex)) {
           notActiveFullIndex <- activeFullIndex[notActiveSubIndex] # which(hasSp)[oo]
           activeFullIndex <- activeFullIndex[-notActiveSubIndex]
+          rowShrinking <- rowShrinking[-notActiveSubIndex]
+          colShrinking <- colShrinking[-notActiveSubIndex]
+
           set(rcvFull, notActiveFullIndex, "Success", TRUE)
           if (verbose >= 1) {
             set(rcvFull, notActiveFullIndex, "DistOfSuccess", curDist)
