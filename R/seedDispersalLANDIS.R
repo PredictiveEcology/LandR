@@ -487,22 +487,23 @@ WardVec <- function(dist, cellSize, effDist, maxDist, k, b, algo = 2) {
   } else {
     ifelse(cellSize <= effDist, {
       ifelse(
-      dist <= effDist,
-      exp((dist - cellSize) * log(1 - k) / effDist) -
-        exp(dist * log(1 - k) / effDist),
-      (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
-        (1 - k) * exp((dist - effDist) * log(b) / maxDist)
-    )
-  }, {
-    ifelse(
-      dist <= cellSize,
-      exp((dist - cellSize) * log(1 - k) / effDist) - (1 - k) *
-        exp((dist - effDist) * log(b) / maxDist),
-      (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
-        (1 - k) * exp((dist - effDist) * log(b) / maxDist)
-    )
+        dist <= effDist,
+        exp((dist - cellSize) * log(1 - k) / effDist) -
+          exp(dist * log(1 - k) / effDist),
+        (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
+          (1 - k) * exp((dist - effDist) * log(b) / maxDist)
+      )
+    }, {
+      ifelse(
+        dist <= cellSize,
+        exp((dist - cellSize) * log(1 - k) / effDist) - (1 - k) *
+          exp((dist - effDist) * log(b) / maxDist),
+        (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
+          (1 - k) * exp((dist - effDist) * log(b) / maxDist)
+      )
     }
-  )
+    )
+  }
 }
 
 intToBin2 <- function(x) {
@@ -564,21 +565,29 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   if (!is.numeric(b)) stop("not numeric b")
   if (!is.numeric(successionTimestep)) stop("not numeric successTimestep")
 
+  prevCurDist <- spiral[1, 3]
+  newCurDist <- TRUE
   for (i in 1:NROW(spiral)) {
     curDist <- drop(spiral[i, 3]) * cellSize
 
     if (i > 1) {
-      spTooLong <- curDist > activeSpecies[["seeddistance_maxMinCellSize"]]
-      if (any(spTooLong)) {
-        activeSpecies <- activeSpecies[!spTooLong]
-        tooLong <- curDist > ( pmax(cellSize, rcvFull[["seeddistance_max"]][activeFullIndex]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
-        if (any(tooLong)) {
-          if (verbose >= 1) {
-            tooLongFull <- curDist > rcvFull[["seeddistance_max"]]
-            set(rcvFull, which(tooLongFull & is.na(rcvFull$ReasonForStop)), "ReasonForStop", "NoneRecdBeforeMaxDistReached")
+      if (curDist > prevCurDist) {
+        newCurDist <- TRUE
+        prevCurDist <- curDist
+        spTooLong <- curDist > activeSpecies$seeddistance_maxMinCellSize
+        if (any(spTooLong)) {
+          activeSpecies <- activeSpecies[!spTooLong]
+          tooLong <- curDist > ( pmax(cellSize, rcvFull[["seeddistance_max"]][activeFullIndex]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
+          if (any(tooLong)) {
+            if (verbose >= 1) {
+              tooLongFull <- curDist > rcvFull[["seeddistance_max"]]
+              set(rcvFull, which(tooLongFull & is.na(rcvFull$ReasonForStop)), "ReasonForStop", "NoneRecdBeforeMaxDistReached")
+            }
+            activeFullIndex <- activeFullIndex[!tooLong]
           }
-          activeFullIndex <- activeFullIndex[!tooLong]
         }
+      } else {
+        newCurDist <- FALSE
       }
 
     }
@@ -595,10 +604,14 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     hasSp <- !is.na(srcPixelValues)
     ran <- runifC(sum(hasSp))
 
-    wardProbActual <- distsBySpCode$wardProb[distsBySpCode$dists == curDist]
+    if (newCurDist) {
+      wardProbActual <- distsBySpCode$wardProb[distsBySpCode$dists == curDist]
 
-    if (successionTimestep > 1) {
-      wardProbActual = 1 - (1 - wardProbActual) ^ successionTimestep
+      # The calculations for dispersal kernal are annual --
+      #   so exponentiate for any other time step
+      if (successionTimestep > 1) {
+        wardProbActual = 1 - (1 - wardProbActual) ^ successionTimestep
+      }
     }
 
     whRanLTprevMaxProb <- which(ran <= lastWardMaxProb)
