@@ -491,6 +491,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   lastWardMaxProb <- 1
 
   nrowSrcPixelMatrix <- NROW(srcPixelMatrix)
+  dim(srcPixelMatrix) <- NULL # make a single vector -- a bit faster
 
   ## Assertions for inputs to spiral
   if (!is.numeric(k)) stop("not numeric k")
