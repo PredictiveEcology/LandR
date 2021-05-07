@@ -465,6 +465,8 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 
   speciesTableSmall <- speciesTable[, c("speciesCode", "seeddistance_eff", "seeddistance_max")]
   uniqueDists <- unique(spiral[, "dists", drop = FALSE]) * cellSize
+  numSp <- NROW(speciesTable)
+  spSeq <- seq(numSp)
   distsBySpCode <- as.data.table(expand.grid(dists = uniqueDists, speciesCode = speciesTable[["speciesCode"]]))
   set(distsBySpCode, NULL, "seeddistance_max", speciesTableSmall[distsBySpCode[["speciesCode"]],
                                                                  "seeddistance_max"])
@@ -507,6 +509,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   spiralCol <- spiral[, "col"]
   newCurDist <- TRUE
   curDists <- drop(spiral[, 3]) * cellSize
+  uniqueDistCounter <- 0
 
   for (i in 1:NROW(spiral)) {
     curDist <- curDists[i]
@@ -514,6 +517,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     if (i > 1) {
       if (curDist > prevCurDist) {
         newCurDist <- TRUE
+        uniqueDistCounter <- uniqueDistCounter + 1
         prevCurDist <- curDist
         spTooLong <- curDist > activeSpecies$seeddistance_maxMinCellSize
         if (any(spTooLong)) {
@@ -541,9 +545,6 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     row <- rowShrinking + spiralRow[i] #spiral[i, "row"] # faster?
     col <- colShrinking + spiralCol[i] #spiral[i, "col"] # faster?
 
-    #if (!identical(row, row1))
-    #  browser()
-
     # I tried to get this faster; but the problem is omitting all the
     #   row/col combinations that are "off" raster. cellFromRowCol does this
     #   internally and is fast
@@ -556,7 +557,9 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     srcPixelValues <- srcPixelMatrix[srcPixelMatrixInd]
     hasSp <- !is.na(srcPixelValues)
     if (newCurDist) {
-      wardProbActual <- distsBySpCode$wardProb[distsBySpCode$dists == curDist]
+      rowsForDistsBySpCode <- as.integer(uniqueDistCounter * numSp + spSeq)
+      # whUse <- which(distsBySpCode$dists == curDist) # old slower
+      wardProbActual <- distsBySpCode$wardProb[rowsForDistsBySpCode]
 
       # The calculations for dispersal kernal are annual --
       #   so exponentiate for any other time step
