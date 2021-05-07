@@ -107,14 +107,14 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
   }
 
   #pixelTable <- data.table(#age = asInteger(ceiling(asInteger(standAgeMap[]) /
-                          #                           pixelGroupAgeClass) * pixelGroupAgeClass),
-                          # logAge = .logFloor(standAgeMap[]),
-                          # initialEcoregionCode = factor(initialEcoregionCodeVals),
-                          # totalBiomass = asInteger(biomassMap[] * 100), # change units
-                          # cover = coverMatrix,
-                          # pixelIndex = seq(ncell(rasterToMatch)),
-                          # lcc = rstLCC[],
-                          # rasterToMatch = rasterToMatch[])
+  #                           pixelGroupAgeClass) * pixelGroupAgeClass),
+  # logAge = .logFloor(standAgeMap[]),
+  # initialEcoregionCode = factor(initialEcoregionCodeVals),
+  # totalBiomass = asInteger(biomassMap[] * 100), # change units
+  # cover = coverMatrix,
+  # pixelIndex = seq(ncell(rasterToMatch)),
+  # lcc = rstLCC[],
+  # rasterToMatch = rasterToMatch[])
 
   # Remove NAs from pixelTable
   ## 1) If in rasterToMatch
@@ -194,7 +194,7 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
     modelCover
   } else {
     predict(modelCover$mod, newdata = cohortDataShort,
-                                type = "response")
+            type = "response")
   }
   establishprobBySuccessionTimestep <- 1 - (1 - predictedCoverVals)^successionTimestep
   cohortDataShort[, establishprob := establishprobBySuccessionTimestep]
@@ -394,7 +394,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'
 #' @param ... Additional arguments passed to \code{prepInputs}
 #' @template rasterToMatch
-#' @param field field used to rasterize fire polys
+#' @param fireField field used to rasterize fire polys
 #' @param earliestYear the earliest fire date to allow
 #'
 #' @export
@@ -402,12 +402,26 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @importFrom raster crs
 #' @importFrom reproducible Cache prepInputs
 #' @importFrom sf st_cast st_transform
-prepInputsFireYear <- function(..., rasterToMatch, field = 'YEAR', earliestYear = 1950) {
-  a <- Cache(prepInputs, ...)
+#' @importFrom magrittr %>%
+prepInputsFireYear <- function(..., rasterToMatch, fireField = 'YEAR', earliestYear = 1950) {
+  dots <- list(...)
+  if (!is.null(dots$fun)) {
+    a <- if (grepl("st_read", dots$fun)) {
+      Cache(prepInputs, ...)
+    } else {
+      Cache(prepInputs, rasterToMatch = rasterToMatch, ...) %>%
+        st_as_sf(.)
+    }
+  }
+
   if (nrow(a) > 0) {
     gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon
     d <- st_transform(gg, crs(rasterToMatch))
-    fireRas <- fasterize(d, raster = rasterToMatch, field = field)
+    if (class(d[[fireField]]) != "numeric") {
+      warning("Chosen fireField will be coerced to numeric")
+      d[[fireField]] <- as.numeric(as.factor(d[[fireField]]))
+    }
+    fireRas <- fasterize(d, raster = rasterToMatch, field = fireField)
     fireRas[!is.na(getValues(fireRas)) & getValues(fireRas) < earliestYear] <- NA
     return(fireRas)
   } else {

@@ -1,5 +1,4 @@
 test_that("test Ward dispersal seeding algorithm", {
-
   verbose <- 0
 
   if (FALSE) {
@@ -201,12 +200,16 @@ test_that("test Ward dispersal seeding algorithm", {
 })
 
 test_that("test large files", {
+  if (!requireNamespace("googledrive"))
+    skip("Need: install.packages('googledrive')")
+
   if (interactive()) {
     whichTest <- 0 # 0 for full test (slow), 1 (manual interactive) or 2 (medium)
     dp <- "~/tmp"
   } else {
     whichTest <- 2
     dp <- tempdir()
+    googledrive::drive_deauth()
   }
   library(reproducible)
   library(quickPlot)
@@ -219,11 +222,11 @@ test_that("test large files", {
                       targetFile = "dtRcv.rds",
                       fun = "readRDS",
                       destinationPath = dp)
-  pixelGroupMap <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
+  pixelGroupMap <- prepInputs(url = "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI",
                               targetFile = "pixelGroupMap.rds",
                               fun = "readRDS",
                               destinationPath = dp)
-  speciesTable <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
+  speciesTable <- prepInputs(url = "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI",
                              targetFile = "speciesTable.rds",
                              fun = "readRDS",
                              destinationPath = dp)
@@ -240,9 +243,7 @@ test_that("test large files", {
   speciesTable1 <- data.table::copy(speciesTable)
   speciesTable1 <- speciesTable1[speciesCode %in% sppKeep]
 
-
   if (whichTest == 1) { # 1 is for manual, interactive testing
-
     both <- dtSrc1[dtRcv1, on = c("speciesCode", "pixelGroup"), nomatch = 0]
 
     pixelsWithSrcAndRcv <- which(pixelGroupMap[] %in% both$pixelGroup)
