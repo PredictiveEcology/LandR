@@ -288,7 +288,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     }
     dtRcvLong <- spiralSeedDispersalR(speciesTable, pixelGroupMap, dtRcvLong,
                                     srcPixelMatrix, cellSize, k, b, successionTimestep,
-                                    verbose)
+                                    verbose, dispersalFn = dispersalFn)
     if (exists("origLevels", inherits = FALSE)) {
       dtRcvLong[, speciesCode := factor(origLevels[speciesCode], levels = origLevels)]
       if (origClassWasNumeric) {
@@ -449,7 +449,7 @@ intToBin2 <- function(x) {
 
 spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
                                  srcPixelMatrix, cellSize, k, b,
-                                 successionTimestep, verbose) {
+                                 successionTimestep, verbose, dispersalFn) {
 
   speciesTable <- copy(speciesTable)
   set(speciesTable, NULL, "seeddistance_maxMinCellSize",
