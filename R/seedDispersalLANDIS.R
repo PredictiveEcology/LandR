@@ -555,9 +555,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 
     sumHasSp <- sum(hasSp)
     if (sumHasSp) {
-      tot <<- tot + sumHasSp
       ran <- runifC(sumHasSp)
-
 
       whRanLTprevMaxProb <- which(ran <= lastWardMaxProb)
 
