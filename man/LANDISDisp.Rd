@@ -10,7 +10,7 @@ LANDISDisp(
   dtRcv,
   pixelGroupMap,
   speciesTable,
-  dispersalFn = WardFast,
+  dispersalFn = Ward,
   b = 0.01,
   k = 0.95,
   plot.it = FALSE,
@@ -41,7 +41,7 @@ Default is "Ward" (temporarily unused, as it is hard coded inside Rcpp function)
 \item{k}{Landis Ward seed dispersal the probability that seed will disperse within
 the effective distance (eg., 0.95)}
 
-\item{plot.it}{If TRUE, then plot the raster at every interaction, so one can watch the
+\item{plot.it}{Deprecated. If TRUE, then plot the raster at every interaction, so one can watch the
 LANDISDisp event grow.}
 
 \item{successionTimestep}{integer. The time in timeunits between succession (i.e., dispersal) events.}

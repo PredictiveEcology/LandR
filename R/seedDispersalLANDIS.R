@@ -43,7 +43,7 @@ utils::globalVariables(c(
 #' @param dispersalFn  An expression that can take a "dis" argument. See details.
 #'   Default is "Ward" (temporarily unused, as it is hard coded inside Rcpp function)
 #'
-#' @param plot.it  If TRUE, then plot the raster at every interaction, so one can watch the
+#' @param plot.it  Deprecated. If TRUE, then plot the raster at every interaction, so one can watch the
 #' LANDISDisp event grow.
 #' @param b  Landis Ward seed dispersal calibration coefficient (set to 0.01 in Landis)
 #'
@@ -164,7 +164,7 @@ utils::globalVariables(c(
 #'
 #'
 LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
-                       dispersalFn = WardFast, b = 0.01, k = 0.95, plot.it = FALSE,
+                       dispersalFn = Ward, b = 0.01, k = 0.95, plot.it = FALSE,
                        successionTimestep,
                        verbose = getOption("LandR.verbose", TRUE),
                        ...) {
@@ -322,30 +322,9 @@ speciesComm <- function(num, sc) {
     sc[.]
 }
 
-#' @importFrom fpCompare %<=%
-WardEqn <- function(dist, cellSize, effDist, maxDist, k, b) {
-  if (cellSize %<=% effDist) {
-    ifelse(
-      dist %<=% effDist,
-      exp((dist - cellSize) * log(1 - k) / effDist) -
-        exp(dist * log(1 - k) / effDist),
-      (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
-        (1 - k) * exp((dist - effDist) * log(b) / maxDist)
-    )
-  } else {
-    ifelse(
-      dist %<=% cellSize,
-      exp((dist - cellSize) * log(1 - k) / effDist) - (1 - k) *
-        exp((dist - effDist) * log(b) / maxDist),
-      (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
-        (1 - k) * exp((dist - effDist) * log(b) / maxDist)
-    )
-  }
-}
 
 
-
-#' Ward Seed Dispersal kernel
+#' Ward Dispersal Kernel -- vectorized, optimized for speed
 #'
 #' A probability distribution used in LANDIS-II.
 #'
@@ -353,67 +332,20 @@ WardEqn <- function(dist, cellSize, effDist, maxDist, k, b) {
 #' @docType methods
 #'
 #' @author Eliot McIntire
-#'
-#' @name Ward
-#' @rdname Ward
-Ward <- expression(if (cellSize <= effDist) {
-  ifelse(
-    dis <= effDist,
-    exp((dis - cellSize) * log(1 - k) / effDist) -
-      exp(dis * log(1 - k) / effDist),
-    (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
-      (1 - k) * exp((dis - effDist) * log(b) / maxDist)
-  )
-} else {
-  ifelse(
-    dis <= cellSize,
-    exp((dis - cellSize) * log(1 - k) / effDist) - (1 - k) *
-      exp((dis - effDist) * log(b) / maxDist),
-    (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
-      (1 - k) * exp((dis - effDist) * log(b) / maxDist)
-  )
-})
-
-#' WardFast Seed Dispersal kernel
-#'
-#' A probability distribution used in LANDIS-II.
-#'
-#' @export
-#' @docType methods
-#'
-#' @author Eliot McIntire
-#'
-#' @name WardFast
-#' @rdname WardFast
-WardFast <- expression(ifelse(cellSize <= effDist, {
-  ifelse(
-    dis <= effDist,
-    exp((dis - cellSize) * log(1 - k) / effDist) -
-      exp(dis * log(1 - k) / effDist),
-    (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
-      (1 - k) * exp((dis - effDist) * log(b) / maxDist)
-  )
-}, {
-  ifelse(
-    dis <= cellSize,
-    exp((dis - cellSize) * log(1 - k) / effDist) - (1 - k) *
-      exp((dis - effDist) * log(b) / maxDist),
-    (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
-      (1 - k) * exp((dis - effDist) * log(b) / maxDist)
-  )
-}
-))
-
-#' @export
-#' @docType methods
-#'
-#' @author Eliot McIntire
+#' @param dist A vector of distances to evaluate kernel against
+#' @param cellDize A numeric, length 1, of the cell resolution (e.g., res(raster))
+#' @param effDist A vector of effective distance (parameter in kernel),
+#'   with same length as \code{dist}
+#' @param maxDist A vector of maximum distance (parameter in kernel),
+#'   with same length as \code{dist}
+#' @param k A parameter in the kernel
+#' @param b A parameter in the kernel
 #' @param algo Either 1 or 2. 2 is faster and is default. 1 is "simpler code" as it
 #'   uses `ifelse`
 #'
-#' @name WardFast
-#' @rdname WardFast
-WardVec <- function(dist, cellSize, effDist, maxDist, k, b, algo = 2) {
+#' @name WardKernel
+#' @rdname WardKernel
+Ward <- function(dist, cellSize, effDist, maxDist, k, b, algo = 2) {
 
   if (length(maxDist) == 1) {
     if (length(dist) != 1)
@@ -539,7 +471,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   set(distsBySpCode, NULL, "seeddistance_eff", speciesTableSmall[distsBySpCode[["speciesCode"]],
                                                                  "seeddistance_eff"])
   set(distsBySpCode, NULL, "wardProb",
-      pmin(1, WardVec(dist = distsBySpCode$dists, cellSize = cellSize, effDist = distsBySpCode$seeddistance_eff,
+      pmin(1, dispersalFn(dist = distsBySpCode$dists, cellSize = cellSize, effDist = distsBySpCode$seeddistance_eff,
               maxDist = distsBySpCode$seeddistance_max, k = k, b = b)))
   set(distsBySpCode, NULL, c("seeddistance_max", "seeddistance_eff"), NULL)
   setorderv(distsBySpCode, c("dists", "speciesCode"))
