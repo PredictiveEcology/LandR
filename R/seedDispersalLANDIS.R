@@ -596,8 +596,8 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 
     }
 
-    row <- rowOrig[activeFullIndex] + spiralRow[i]#spiral[i, "row"]
-    col <- colOrig[activeFullIndex] + spiralCol[i]#spiral[i, "col"]
+    row <- rowOrig[activeFullIndex] + spiralRow[i] #spiral[i, "row"] # faster?
+    col <- colOrig[activeFullIndex] + spiralCol[i] #spiral[i, "col"] # faster?
 
     # I tried to get this faster; but the problem is omitting all the
     #   row/col combinations that are "off" raster. cellFromRowCol does this
@@ -610,8 +610,6 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     srcPixelMatrixInd <- (activeSpeciesCode - 1) * nrowSrcPixelMatrix + newPixelIndex
     srcPixelValues <- srcPixelMatrix[srcPixelMatrixInd]
     hasSp <- !is.na(srcPixelValues)
-    ran <- runifC(sum(hasSp))
-
     if (newCurDist) {
       wardProbActual <- distsBySpCode$wardProb[distsBySpCode$dists == curDist]
 
@@ -622,33 +620,41 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
       }
     }
 
-    whRanLTprevMaxProb <- which(ran <= lastWardMaxProb)
+    sumHasSp <- sum(hasSp)
+    if (sumHasSp) {
+      tot <<- tot + sumHasSp
+      ran <- runifC(sumHasSp)
 
-    if (length(whRanLTprevMaxProb)) {
-      if (i == 1) { # self pixels are 100%
-        oo <- seq.int(length(ran))
-      } else {
-        wardRes <- wardProbActual[activeSpeciesCode[hasSp==TRUE][whRanLTprevMaxProb]]
-        lastWardMaxProb <- min(1, max(wardRes))
-        oo <- ran[whRanLTprevMaxProb] < wardRes
-        oo <- whRanLTprevMaxProb[oo]
-      }
-      numSuccesses <- length(oo)
-      if (verbose >= 2)
-        print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ",
-                     numSuccesses, "; NumRows: ", NROW(activeFullIndex),
-                     "; NumSp: ", length(unique(speciesCode[activeFullIndex]))))
-      notActiveSubIndex <- which(hasSp)[oo]
-      if (length(notActiveSubIndex)) {
-        notActiveFullIndex <- activeFullIndex[notActiveSubIndex] # which(hasSp)[oo]
-        activeFullIndex <- activeFullIndex[-notActiveSubIndex]
-        set(rcvFull, notActiveFullIndex, "Success", TRUE)
-        if (verbose >= 1) {
-          set(rcvFull, notActiveFullIndex, "DistOfSuccess", curDist)
-          set(rcvFull, notActiveFullIndex, "ReasonForStop", "SuccessFullSeedRcvd")
+
+      whRanLTprevMaxProb <- which(ran <= lastWardMaxProb)
+
+      if (length(whRanLTprevMaxProb)) {
+        if (i == 1) { # self pixels are 100%
+          oo <- seq.int(length(ran))
+        } else {
+          wardRes <- wardProbActual[activeSpeciesCode[hasSp==TRUE][whRanLTprevMaxProb]]
+          lastWardMaxProb <- min(1, max(wardRes))
+          oo <- ran[whRanLTprevMaxProb] < wardRes
+          oo <- whRanLTprevMaxProb[oo]
         }
-      } else {
-        notActiveSubIndex <- integer()
+        numSuccesses <- length(oo)
+        if (verbose >= 2)
+          print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ",
+                       numSuccesses, "; NumRows: ", NROW(activeFullIndex),
+                       "; NumSp: ", length(unique(speciesCode[activeFullIndex]))))
+        notActiveSubIndex <- which(hasSp)[oo]
+        if (length(notActiveSubIndex)) {
+          notActiveFullIndex <- activeFullIndex[notActiveSubIndex] # which(hasSp)[oo]
+          activeFullIndex <- activeFullIndex[-notActiveSubIndex]
+          set(rcvFull, notActiveFullIndex, "Success", TRUE)
+          if (verbose >= 1) {
+            set(rcvFull, notActiveFullIndex, "DistOfSuccess", curDist)
+            set(rcvFull, notActiveFullIndex, "ReasonForStop", "SuccessFullSeedRcvd")
+          }
+        } else {
+          notActiveSubIndex <- integer()
+        }
+
       }
     }
 
