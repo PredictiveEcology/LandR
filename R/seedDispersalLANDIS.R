@@ -566,9 +566,13 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   if (!is.numeric(successionTimestep)) stop("not numeric successTimestep")
 
   prevCurDist <- spiral[1, 3]
+  spiralRow <- spiral[, "row"]
+  spiralCol <- spiral[, "col"]
   newCurDist <- TRUE
+  curDists <- drop(spiral[, 3]) * cellSize
+
   for (i in 1:NROW(spiral)) {
-    curDist <- drop(spiral[i, 3]) * cellSize
+    curDist <- curDists[i]
 
     if (i > 1) {
       if (curDist > prevCurDist) {
@@ -592,8 +596,12 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 
     }
 
-    row <- rowOrig[activeFullIndex] + spiral[i, "row"]
-    col <- colOrig[activeFullIndex] + spiral[i, "col"]
+    row <- rowOrig[activeFullIndex] + spiralRow[i]#spiral[i, "row"]
+    col <- colOrig[activeFullIndex] + spiralCol[i]#spiral[i, "col"]
+
+    # I tried to get this faster; but the problem is omitting all the
+    #   row/col combinations that are "off" raster. cellFromRowCol does this
+    #   internally and is fast
     newPixelIndex <-
       as.integer(cellFromRowCol(row = row, col = col, object = pixelGroupMap))
 
