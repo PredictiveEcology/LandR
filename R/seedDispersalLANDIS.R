@@ -43,7 +43,7 @@ utils::globalVariables(c(
 #' @param dispersalFn  An expression that can take a "dis" argument. See details.
 #'   Default is "Ward" (temporarily unused, as it is hard coded inside Rcpp function)
 #'
-#' @param plot.it  If TRUE, then plot the raster at every interaction, so one can watch the
+#' @param plot.it  Deprecated. If TRUE, then plot the raster at every interaction, so one can watch the
 #' LANDISDisp event grow.
 #' @param b  Landis Ward seed dispersal calibration coefficient (set to 0.01 in Landis)
 #'
@@ -164,7 +164,7 @@ utils::globalVariables(c(
 #'
 #'
 LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
-                       dispersalFn = WardFast, b = 0.01, k = 0.95, plot.it = FALSE,
+                       dispersalFn = Ward, b = 0.01, k = 0.95, plot.it = FALSE,
                        successionTimestep,
                        verbose = getOption("LandR.verbose", TRUE),
                        ...) {
@@ -288,7 +288,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     }
     dtRcvLong <- spiralSeedDispersalR(speciesTable, pixelGroupMap, dtRcvLong,
                                     srcPixelMatrix, cellSize, k, b, successionTimestep,
-                                    verbose)
+                                    verbose, dispersalFn = dispersalFn)
     if (exists("origLevels", inherits = FALSE)) {
       dtRcvLong[, speciesCode := factor(origLevels[speciesCode], levels = origLevels)]
       if (origClassWasNumeric) {
@@ -322,116 +322,120 @@ speciesComm <- function(num, sc) {
     sc[.]
 }
 
-#' @importFrom fpCompare %<=%
-WardEqn <- function(dist, cellSize, effDist, maxDist, k, b) {
-  if (cellSize %<=% effDist) {
-    ifelse(
-      dist %<=% effDist,
-      exp((dist - cellSize) * log(1 - k) / effDist) -
-        exp(dist * log(1 - k) / effDist),
-      (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
-        (1 - k) * exp((dist - effDist) * log(b) / maxDist)
-    )
-  } else {
-    ifelse(
-      dist %<=% cellSize,
-      exp((dist - cellSize) * log(1 - k) / effDist) - (1 - k) *
-        exp((dist - effDist) * log(b) / maxDist),
-      (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
-        (1 - k) * exp((dist - effDist) * log(b) / maxDist)
-    )
+
+
+#' Ward Dispersal Kernel -- vectorized, optimized for speed
+#'
+#' A probability distribution used in LANDIS-II.
+#'
+#' @export
+#' @docType methods
+#'
+#' @author Eliot McIntire
+#' @param dist A vector of distances to evaluate kernel against
+#' @param cellDize A numeric, length 1, of the cell resolution (e.g., res(raster))
+#' @param effDist A vector of effective distance (parameter in kernel),
+#'   with same length as \code{dist}
+#' @param maxDist A vector of maximum distance (parameter in kernel),
+#'   with same length as \code{dist}
+#' @param k A parameter in the kernel
+#' @param b A parameter in the kernel
+#' @param algo Either 1 or 2. 2 is faster and is default. 1 is "simpler code" as it
+#'   uses `ifelse`
+#'
+#' @name WardKernel
+#' @rdname WardKernel
+Ward <- function(dist, cellSize, effDist, maxDist, k, b, algo = 2) {
+
+  if (length(maxDist) == 1) {
+    if (length(dist) != 1)
+      maxDist <- rep(maxDist, length(dist))
+    else if (length(effDist) != 1)
+      maxDist <- rep(maxDist, length(effDist))
   }
-}
-
-
-
-#' Ward Seed Dispersal kernel
-#'
-#' A probability distribution used in LANDIS-II.
-#'
-#' @export
-#' @docType methods
-#'
-#' @author Eliot McIntire
-#'
-#' @name Ward
-#' @rdname Ward
-Ward <- expression(if (cellSize <= effDist) {
-  ifelse(
-    dis <= effDist,
-    exp((dis - cellSize) * log(1 - k) / effDist) -
-      exp(dis * log(1 - k) / effDist),
-    (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
-      (1 - k) * exp((dis - effDist) * log(b) / maxDist)
-  )
-} else {
-  ifelse(
-    dis <= cellSize,
-    exp((dis - cellSize) * log(1 - k) / effDist) - (1 - k) *
-      exp((dis - effDist) * log(b) / maxDist),
-    (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
-      (1 - k) * exp((dis - effDist) * log(b) / maxDist)
-  )
-})
-
-#' WardFast Seed Dispersal kernel
-#'
-#' A probability distribution used in LANDIS-II.
-#'
-#' @export
-#' @docType methods
-#'
-#' @author Eliot McIntire
-#'
-#' @name WardFast
-#' @rdname WardFast
-WardFast <- expression(ifelse(cellSize <= effDist, {
-  ifelse(
-    dis <= effDist,
-    exp((dis - cellSize) * log(1 - k) / effDist) -
-      exp(dis * log(1 - k) / effDist),
-    (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
-      (1 - k) * exp((dis - effDist) * log(b) / maxDist)
-  )
-}, {
-  ifelse(
-    dis <= cellSize,
-    exp((dis - cellSize) * log(1 - k) / effDist) - (1 - k) *
-      exp((dis - effDist) * log(b) / maxDist),
-    (1 - k) * exp((dis - cellSize - effDist) * log(b) / maxDist) -
-      (1 - k) * exp((dis - effDist) * log(b) / maxDist)
-  )
-}
-))
-
-#' @export
-#' @docType methods
-#'
-#' @author Eliot McIntire
-#'
-#' @name WardFast
-#' @rdname WardFast
-WardVec <- function(dist, cellSize, effDist, maxDist, k, b) {
-
   if (length(dist) == 1) dist <- rep(dist, length(maxDist))
-  ifelse(cellSize <= effDist, {
-    ifelse(
-      dist <= effDist,
-      exp((dist - cellSize) * log(1 - k) / effDist) -
-        exp(dist * log(1 - k) / effDist),
-      (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
-        (1 - k) * exp((dist - effDist) * log(b) / maxDist)
-    )
-  }, {
-    ifelse(
-      dist <= cellSize,
-      exp((dist - cellSize) * log(1 - k) / effDist) - (1 - k) *
-        exp((dist - effDist) * log(b) / maxDist),
-      (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
-        (1 - k) * exp((dist - effDist) * log(b) / maxDist)
+  if (length(effDist) == 1) effDist <- rep(effDist, length(maxDist))
+
+  if (algo == 2) {
+    # This is a 4 part ifelse statement
+    # This is 3x faster, but less clear algorithm that uses 4 explicit logicals
+    #   to create 4 indices, then evaluate each of the 4 expressions that go
+    #   with the logicals
+    out <- numeric(length(maxDist))
+
+    # here are the expressions
+    #  where a1, a2, b1, b2 are the 4 parts
+    expra1 <- expression(
+      exp((dista1wh - cellSize) * log(1 - k) / effDista1wh) -
+        exp(dista1wh * log(1 - k) / effDista1wh))
+    expra2 <- expression(
+      (1 - k) * exp((dista2wh - cellSize - effDista2wh) * log(b) / maxDista2wh) -
+        (1 - k) * exp((dista2wh - effDista2wh) * log(b) / maxDista2wh))
+    exprb1 <- expression(
+      exp((distb1wh - cellSize) * log(1 - k) / effDistb1wh) - (1 - k) *
+        exp((distb1wh - effDistb1wh) * log(b) / maxDistb1wh))
+    exprb2 <- expression(
+      (1 - k) * exp((distb2wh - cellSize - effDistb2wh) * log(b) / maxDistb2wh) -
+        (1 - k) * exp((distb2wh - effDistb2wh) * log(b) / maxDistb2wh))
+
+
+    # Determine the indices for each one
+    # Here are the 3 logicals, toplevel, then 2 nested
+    a <- cellSize <= effDist
+    awh <- which(a)
+    bwh <- which(!a)
+    a1 <- dist[awh] <= effDist[awh]
+    b1 <- dist[bwh] <= cellSize
+
+    a1wh <- awh[a1]
+    a2wh <- awh[!a1]
+
+    b1wh <- bwh[b1]
+    b2wh <- bwh[!b1]
+
+    # Build objects that are the dist, effDist, maxDist for each of the 4 subsets
+    dista1wh <- dist[a1wh]
+    effDista1wh <- effDist[a1wh]
+
+    dista2wh <- dist[a2wh]
+    effDista2wh <- effDist[a2wh]
+    maxDista2wh <- maxDist[a2wh]
+
+    distb1wh <- dist[b1wh]
+    effDistb1wh <- effDist[b1wh]
+    maxDistb1wh <- maxDist[b1wh]
+
+    distb2wh <- dist[b2wh]
+    effDistb2wh <- effDist[b2wh]
+    maxDistb2wh <- maxDist[b2wh]
+
+    # Create the content
+    out[a1wh] <- eval(expra1)
+    out[a2wh] <- eval(expra2)
+    out[b1wh] <- eval(exprb1)
+    out[b2wh] <- eval(exprb2)
+
+    out
+  } else {
+    ifelse(cellSize <= effDist, {
+      ifelse(
+        dist <= effDist,
+        exp((dist - cellSize) * log(1 - k) / effDist) -
+          exp(dist * log(1 - k) / effDist),
+        (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
+          (1 - k) * exp((dist - effDist) * log(b) / maxDist)
+      )
+    }, {
+      ifelse(
+        dist <= cellSize,
+        exp((dist - cellSize) * log(1 - k) / effDist) - (1 - k) *
+          exp((dist - effDist) * log(b) / maxDist),
+        (1 - k) * exp((dist - cellSize - effDist) * log(b) / maxDist) -
+          (1 - k) * exp((dist - effDist) * log(b) / maxDist)
+      )
+    }
     )
   }
-  )
 }
 
 intToBin2 <- function(x) {
@@ -445,7 +449,7 @@ intToBin2 <- function(x) {
 
 spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
                                  srcPixelMatrix, cellSize, k, b,
-                                 successionTimestep, verbose) {
+                                 successionTimestep, verbose, dispersalFn) {
 
   speciesTable <- copy(speciesTable)
   set(speciesTable, NULL, "seeddistance_maxMinCellSize",
@@ -461,13 +465,15 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 
   speciesTableSmall <- speciesTable[, c("speciesCode", "seeddistance_eff", "seeddistance_max")]
   uniqueDists <- unique(spiral[, "dists", drop = FALSE]) * cellSize
+  numSp <- NROW(speciesTable)
+  spSeq <- seq(numSp)
   distsBySpCode <- as.data.table(expand.grid(dists = uniqueDists, speciesCode = speciesTable[["speciesCode"]]))
   set(distsBySpCode, NULL, "seeddistance_max", speciesTableSmall[distsBySpCode[["speciesCode"]],
                                                                  "seeddistance_max"])
   set(distsBySpCode, NULL, "seeddistance_eff", speciesTableSmall[distsBySpCode[["speciesCode"]],
                                                                  "seeddistance_eff"])
   set(distsBySpCode, NULL, "wardProb",
-      pmin(1, WardVec(dist = distsBySpCode$dists, cellSize = cellSize, effDist = distsBySpCode$seeddistance_eff,
+      pmin(1, dispersalFn(dist = distsBySpCode$dists, cellSize = cellSize, effDist = distsBySpCode$seeddistance_eff,
               maxDist = distsBySpCode$seeddistance_max, k = k, b = b)))
   set(distsBySpCode, NULL, c("seeddistance_max", "seeddistance_eff"), NULL)
   setorderv(distsBySpCode, c("dists", "speciesCode"))
@@ -476,9 +482,13 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   rcvFull <- rcvFull[speciesTable[, c("seeddistance_max", "speciesCode")],
                      on = "speciesCode", nomatch = NULL]
   activeFullIndex <- seq.int(NROW(rcvFull))
+  activeIndexShrinking <- activeFullIndex
   rc1 <- rowColFromCell(pixelGroupMap, rcvFull[["pixelIndex"]])
   rowOrig <- rc1[, "row"]
   colOrig <- rc1[, "col"]
+  rowShrinking <- rowOrig
+  colShrinking <- colOrig
+
   speciesCode <- rcvFull[["speciesCode"]]
 
   activeSpecies <- speciesTable[, c("seeddistance_max", "seeddistance_eff", "speciesCode", "seeddistance_maxMinCellSize")]
@@ -487,33 +497,57 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   lastWardMaxProb <- 1
 
   nrowSrcPixelMatrix <- NROW(srcPixelMatrix)
+  dim(srcPixelMatrix) <- NULL # make a single vector -- a bit faster
 
   ## Assertions for inputs to spiral
   if (!is.numeric(k)) stop("not numeric k")
   if (!is.numeric(b)) stop("not numeric b")
   if (!is.numeric(successionTimestep)) stop("not numeric successTimestep")
 
+  prevCurDist <- spiral[1, 3]
+  spiralRow <- spiral[, "row"]
+  spiralCol <- spiral[, "col"]
+  newCurDist <- TRUE
+  curDists <- drop(spiral[, 3]) * cellSize
+  uniqueDistCounter <- 0
+
   for (i in 1:NROW(spiral)) {
-    curDist <- drop(spiral[i, 3]) * cellSize
+    curDist <- curDists[i]
 
     if (i > 1) {
-      spTooLong <- curDist > activeSpecies[["seeddistance_maxMinCellSize"]]
-      if (any(spTooLong)) {
-        activeSpecies <- activeSpecies[!spTooLong]
-        tooLong <- curDist > ( pmax(cellSize, rcvFull[["seeddistance_max"]][activeFullIndex]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
-        if (any(tooLong)) {
-          if (verbose >= 1) {
-            tooLongFull <- curDist > rcvFull[["seeddistance_max"]]
-            set(rcvFull, which(tooLongFull & is.na(rcvFull$ReasonForStop)), "ReasonForStop", "NoneRecdBeforeMaxDistReached")
+      if (curDist > prevCurDist) {
+        newCurDist <- TRUE
+        uniqueDistCounter <- uniqueDistCounter + 1
+        prevCurDist <- curDist
+        spTooLong <- curDist > activeSpecies$seeddistance_maxMinCellSize
+        if (any(spTooLong)) {
+          activeSpecies <- activeSpecies[!spTooLong]
+          tooLong <- curDist > ( pmax(cellSize, rcvFull[["seeddistance_max"]][activeFullIndex]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
+          if (any(tooLong)) {
+            if (verbose >= 1) {
+              tooLongFull <- curDist > rcvFull[["seeddistance_max"]]
+              set(rcvFull, which(tooLongFull & is.na(rcvFull$ReasonForStop)), "ReasonForStop", "NoneRecdBeforeMaxDistReached")
+            }
+            activeFullIndex <- activeFullIndex[!tooLong]
+            rowShrinking <- rowShrinking[!tooLong]
+            colShrinking <- colShrinking[!tooLong]
+            activeIndexShrinking <- activeIndexShrinking[activeFullIndex]
           }
-          activeFullIndex <- activeFullIndex[!tooLong]
         }
+      } else {
+        newCurDist <- FALSE
       }
 
     }
 
-    row <- rowOrig[activeFullIndex] + spiral[i, "row"]
-    col <- colOrig[activeFullIndex] + spiral[i, "col"]
+    #row <- rowOrig[activeFullIndex] + spiralRow[i] #spiral[i, "row"] # faster?
+    #col <- colOrig[activeFullIndex] + spiralCol[i] #spiral[i, "col"] # faster?
+    row <- rowShrinking + spiralRow[i] #spiral[i, "row"] # faster?
+    col <- colShrinking + spiralCol[i] #spiral[i, "col"] # faster?
+
+    # I tried to get this faster; but the problem is omitting all the
+    #   row/col combinations that are "off" raster. cellFromRowCol does this
+    #   internally and is fast
     newPixelIndex <-
       as.integer(cellFromRowCol(row = row, col = col, object = pixelGroupMap))
 
@@ -522,41 +556,54 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     srcPixelMatrixInd <- (activeSpeciesCode - 1) * nrowSrcPixelMatrix + newPixelIndex
     srcPixelValues <- srcPixelMatrix[srcPixelMatrixInd]
     hasSp <- !is.na(srcPixelValues)
-    ran <- runifC(sum(hasSp))
+    if (newCurDist) {
+      rowsForDistsBySpCode <- as.integer(uniqueDistCounter * numSp + spSeq)
+      # whUse <- which(distsBySpCode$dists == curDist) # old slower
+      wardProbActual <- distsBySpCode$wardProb[rowsForDistsBySpCode]
 
-    wardProbActual <- distsBySpCode$wardProb[distsBySpCode$dists == curDist]
-
-    if (successionTimestep > 1) {
-      wardProbActual = 1 - (1 - wardProbActual) ^ successionTimestep
+      # The calculations for dispersal kernal are annual --
+      #   so exponentiate for any other time step
+      if (successionTimestep > 1) {
+        wardProbActual = 1 - (1 - wardProbActual) ^ successionTimestep
+      }
     }
 
-    whRanLTprevMaxProb <- which(ran <= lastWardMaxProb)
+    sumHasSp <- sum(hasSp)
+    if (sumHasSp) {
+      ran <- runifC(sumHasSp)
 
-    if (length(whRanLTprevMaxProb)) {
-      if (i == 1) { # self pixels are 100%
-        oo <- seq.int(length(ran))
-      } else {
-        wardRes <- wardProbActual[activeSpeciesCode[hasSp==TRUE][whRanLTprevMaxProb]]
-        lastWardMaxProb <- min(1, max(wardRes))
-        oo <- ran[whRanLTprevMaxProb] < wardRes
-        oo <- whRanLTprevMaxProb[oo]
-      }
-      numSuccesses <- length(oo)
-      if (verbose >= 2)
-        print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ",
-                     numSuccesses, "; NumRows: ", NROW(activeFullIndex),
-                     "; NumSp: ", length(unique(speciesCode[activeFullIndex]))))
-      notActiveSubIndex <- which(hasSp)[oo]
-      if (length(notActiveSubIndex)) {
-        notActiveFullIndex <- activeFullIndex[notActiveSubIndex] # which(hasSp)[oo]
-        activeFullIndex <- activeFullIndex[-notActiveSubIndex]
-        set(rcvFull, notActiveFullIndex, "Success", TRUE)
-        if (verbose >= 1) {
-          set(rcvFull, notActiveFullIndex, "DistOfSuccess", curDist)
-          set(rcvFull, notActiveFullIndex, "ReasonForStop", "SuccessFullSeedRcvd")
+      whRanLTprevMaxProb <- which(ran <= lastWardMaxProb)
+
+      if (length(whRanLTprevMaxProb)) {
+        if (i == 1) { # self pixels are 100%
+          oo <- seq.int(length(ran))
+        } else {
+          wardRes <- wardProbActual[activeSpeciesCode[hasSp==TRUE][whRanLTprevMaxProb]]
+          lastWardMaxProb <- min(1, max(wardRes))
+          oo <- ran[whRanLTprevMaxProb] < wardRes
+          oo <- whRanLTprevMaxProb[oo]
         }
-      } else {
-        notActiveSubIndex <- integer()
+        numSuccesses <- length(oo)
+        if (verbose >= 2)
+          print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ",
+                       numSuccesses, "; NumRows: ", NROW(activeFullIndex),
+                       "; NumSp: ", length(unique(speciesCode[activeFullIndex]))))
+        notActiveSubIndex <- which(hasSp)[oo]
+        if (length(notActiveSubIndex)) {
+          notActiveFullIndex <- activeFullIndex[notActiveSubIndex] # which(hasSp)[oo]
+          activeFullIndex <- activeFullIndex[-notActiveSubIndex]
+          rowShrinking <- rowShrinking[-notActiveSubIndex]
+          colShrinking <- colShrinking[-notActiveSubIndex]
+
+          set(rcvFull, notActiveFullIndex, "Success", TRUE)
+          if (verbose >= 1) {
+            set(rcvFull, notActiveFullIndex, "DistOfSuccess", curDist)
+            set(rcvFull, notActiveFullIndex, "ReasonForStop", "SuccessFullSeedRcvd")
+          }
+        } else {
+          notActiveSubIndex <- integer()
+        }
+
       }
     }
 
