@@ -5,20 +5,20 @@
 
 using namespace Rcpp;
 
-// is_naInteger
-LogicalVector is_naInteger(IntegerVector x);
-RcppExport SEXP _LandR_is_naInteger(SEXP xSEXP) {
+// is_naIntegerNot
+LogicalVector is_naIntegerNot(IntegerVector x);
+RcppExport SEXP _LandR_is_naIntegerNot(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< IntegerVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(is_naInteger(x));
+    rcpp_result_gen = Rcpp::wrap(is_naIntegerNot(x));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_LandR_is_naInteger", (DL_FUNC) &_LandR_is_naInteger, 1},
+    {"_LandR_is_naIntegerNot", (DL_FUNC) &_LandR_is_naIntegerNot, 1},
     {NULL, NULL, 0}
 };
 
