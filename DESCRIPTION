@@ -40,6 +40,7 @@ Imports:
     quickPlot,
     raster,
     RColorBrewer,
+    Rcpp,
     RCurl,
     reproducible (>= 1.2.6.9003),
     sf,
@@ -61,6 +62,7 @@ Remotes:
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/reproducible@development
+LinkingTo: Rcpp
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
@@ -72,11 +74,13 @@ RoxygenNote: 7.1.1
 Collate: 
     'LANDIS-II-tables.R'
     'LandR-package.R'
+    'RcppExports.R'
     'assertions.R'
     'chooseName.R'
     'cleanLandWebStudyArea.R'
     'cohorts.R'
     'ecoregions.R'
+    'is_naInteger.R'
     'light-shade.R'
     'makeDummyInputs.R'
     'maps.R'

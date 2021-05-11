@@ -81,6 +81,8 @@ utils::globalVariables(c(
 #' library(raster)
 #' # keep this here for interactive testing with a larger raster
 #' rasterTemplate <- raster(extent(0, 2500, 0, 2500), res = 100)
+#' # Try a big one?
+#' rasterTemplate <- raster(extent(0, 150000, 0, 150000), res = 100)
 #'
 #' # make a pixelGroupMap
 #' pgs <- 4 # make even just because of approach below requires even
@@ -482,12 +484,13 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   rcvFull <- rcvFull[speciesTable[, c("seeddistance_max", "speciesCode")],
                      on = "speciesCode", nomatch = NULL]
   activeFullIndex <- seq.int(NROW(rcvFull))
-  activeIndexShrinking <- activeFullIndex
+
+  # activeIndexShrinking <- activeFullIndex
   rc1 <- rowColFromCell(pixelGroupMap, rcvFull[["pixelIndex"]])
   rowOrig <- rc1[, "row"]
   colOrig <- rc1[, "col"]
-  rowShrinking <- rowOrig
-  colShrinking <- colOrig
+  # rowShrinking <- rowOrig
+  # colShrinking <- colOrig
 
   speciesCode <- rcvFull[["speciesCode"]]
 
@@ -507,10 +510,16 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   prevCurDist <- spiral[1, 3]
   spiralRow <- spiral[, "row"]
   spiralCol <- spiral[, "col"]
+  prevSpiralRow <- spiralRow[1]
+  prevSpiralCol <- spiralCol[1]
   newCurDist <- TRUE
+  newActiveIndex <- TRUE
+  tooLong <- FALSE
+
   curDists <- drop(spiral[, 3]) * cellSize
   uniqueDistCounter <- 0
 
+  startTime <- Sys.time()
   for (i in 1:NROW(spiral)) {
     curDist <- curDists[i]
 
@@ -529,9 +538,11 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
               set(rcvFull, which(tooLongFull & is.na(rcvFull$ReasonForStop)), "ReasonForStop", "NoneRecdBeforeMaxDistReached")
             }
             activeFullIndex <- activeFullIndex[!tooLong]
-            rowShrinking <- rowShrinking[!tooLong]
-            colShrinking <- colShrinking[!tooLong]
-            activeIndexShrinking <- activeIndexShrinking[activeFullIndex]
+            rowOrig <- rowOrig[!tooLong]
+            colOrig <- colOrig[!tooLong]
+            speciesCode <- speciesCode[!tooLong]
+            newActiveIndex <- TRUE
+            kk <<- kk + 1
           }
         }
       } else {
@@ -540,10 +551,32 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 
     }
 
-    #row <- rowOrig[activeFullIndex] + spiralRow[i] #spiral[i, "row"] # faster?
-    #col <- colOrig[activeFullIndex] + spiralCol[i] #spiral[i, "col"] # faster?
-    row <- rowShrinking + spiralRow[i] #spiral[i, "row"] # faster?
-    col <- colShrinking + spiralCol[i] #spiral[i, "col"] # faster?
+    needNewCol <- TRUE
+    if (newActiveIndex) {
+      # if (i >3) browser()
+      rowNow <- rowOrig#[activeFullIndex]
+      colNow <-  colOrig#[activeFullIndex]
+      ooo <<- ooo + 1
+    } else {
+      nn <<- nn + 1
+      if (identical(prevSpiralCol, spiralCol[i])) {
+        needNewCol <- FALSE
+        mm <<- mm + 1
+      }
+    }
+
+    rowi <<- rowi + 1
+    row <- if (spiralRow[i] == 0) rowNow else rowNow + spiralRow[i] #spiral[i, "row"] # faster?
+    if (needNewCol) {
+      coli <<- coli + 1
+      col <- if (spiralCol[i] == 0) colNow else colNow + spiralCol[i]
+    }
+
+
+    prevSpiralRow <- spiralRow[i]
+    prevSpiralCol <- spiralCol[i]
+    # row <- rowShrinking + spiralRow[i] #spiral[i, "row"] # faster?
+    # col <- colShrinking + spiralCol[i] #spiral[i, "col"] # faster?
 
     # I tried to get this faster; but the problem is omitting all the
     #   row/col combinations that are "off" raster. cellFromRowCol does this
@@ -552,10 +585,13 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
       as.integer(cellFromRowCol(row = row, col = col, object = pixelGroupMap))
 
     # lookup on src rasters
-    activeSpeciesCode <- speciesCode[activeFullIndex]
+    if (newActiveIndex) {
+      activeSpeciesCode <- speciesCode#[activeFullIndex]
+    }
     srcPixelMatrixInd <- (activeSpeciesCode - 1) * nrowSrcPixelMatrix + newPixelIndex
+    jj <<- jj + 1
     srcPixelValues <- srcPixelMatrix[srcPixelMatrixInd]
-    hasSp <- !is.na(srcPixelValues)
+    hasSp <- !is_naInteger(srcPixelValues)
     if (newCurDist) {
       rowsForDistsBySpCode <- as.integer(uniqueDistCounter * numSp + spSeq)
       # whUse <- which(distsBySpCode$dists == curDist) # old slower
@@ -590,10 +626,28 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
                        "; NumSp: ", length(unique(speciesCode[activeFullIndex]))))
         notActiveSubIndex <- which(hasSp)[oo]
         if (length(notActiveSubIndex)) {
-          notActiveFullIndex <- activeFullIndex[notActiveSubIndex] # which(hasSp)[oo]
-          activeFullIndex <- activeFullIndex[-notActiveSubIndex]
-          rowShrinking <- rowShrinking[-notActiveSubIndex]
-          colShrinking <- colShrinking[-notActiveSubIndex]
+          ii <<- ii + 1
+          notActiveFullIndex <- activeFullIndex[notActiveSubIndex]
+          if (i %% 20 == 0) {
+            elapsedTime <- Sys.time() - startTime
+            print(paste(i, " ", NROW(activeFullIndex), " ", NROW(rowOrig), " ",
+                        NROW(colOrig), " ", format(elapsedTime, units = "auto")))
+            ss <- seq(activeFullIndex)
+            ss <- ss[-notActiveSubIndex]
+            activeFullIndexNAs <- is.na(activeFullIndex)
+            ss <- ss[!activeFullIndexNAs[-notActiveSubIndex]]
+            activeFullIndex <- activeFullIndex[ss]
+            rowOrig <- rowOrig[ss]
+            colOrig <- colOrig[ss]
+            speciesCode <- speciesCode[ss]
+          } else {
+            activeFullIndex[notActiveSubIndex] <- NA
+            rowOrig[notActiveSubIndex] <- NA
+            # colOrig[notActiveSubIndex] <- NA
+            # speciesCode[notActiveSubIndex] <- NA
+          }
+
+          newActiveIndex <- TRUE
 
           set(rcvFull, notActiveFullIndex, "Success", TRUE)
           if (verbose >= 1) {
@@ -602,8 +656,11 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
           }
         } else {
           notActiveSubIndex <- integer()
+          newActiveIndex <- FALSE
         }
 
+      } else {
+        newActiveIndex <- FALSE
       }
     }
 

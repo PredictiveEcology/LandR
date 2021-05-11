@@ -88,6 +88,8 @@ library(data.table)
 library(raster)
 # keep this here for interactive testing with a larger raster
 rasterTemplate <- raster(extent(0, 2500, 0, 2500), res = 100)
+# Try a big one?
+rasterTemplate <- raster(extent(0, 150000, 0, 150000), res = 100)
 
 # make a pixelGroupMap
 pgs <- 4 # make even just because of approach below requires even
