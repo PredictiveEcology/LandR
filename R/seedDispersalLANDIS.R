@@ -75,7 +75,7 @@ utils::globalVariables(c(
 #'
 #' @examples
 #' seed <- sample(1e6, 1)
-#' seed <- 532597
+#' seed <- 53259
 #' set.seed(seed)
 #' library(data.table)
 #' library(raster)
@@ -505,8 +505,15 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     srcPixelMatrixNAs <- rowSums(srcPixelMatrix, na.rm = TRUE)
     numInitialNAs <- which(srcPixelMatrixNAs > 0)[1] - 1
     numColsPGM <- ncol(pixelGroupMap)
+    newExtent <- extent(pixelGroupMap)
     rowsToRm <- floor(numInitialNAs / numColsPGM)
-    srcPixelMatrix <- srcPixelMatrix[-(1:(rowsToRm * numColsPGM)),]
+    if (!rowsToRm) {
+      initialNAs <- FALSE
+    } else {
+      cellsToRm <- rowsToRm * numColsPGM
+      newExtent@xmax <- newExtent@xmax - ( rowsToRm * res(pixelGroupMap)[1])
+      srcPixelMatrix <- srcPixelMatrix[-(1:cellsToRm),]
+    }
   }
 
   nrowSrcPixelMatrix <- NROW(srcPixelMatrix)
@@ -542,7 +549,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
         if (any(spTooLong)) {
           activeSpecies <- activeSpecies[!spTooLong]
           tooLong <- curDist > ( pmax(cellSize, rcvFull[["seeddistance_max"]][activeFullIndex]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
-          if (any(tooLong)) {
+          if (any(tooLong, na.rm = TRUE)) {
             if (verbose >= 1) {
               tooLongFull <- curDist > rcvFull[["seeddistance_max"]]
               set(rcvFull, which(tooLongFull & is.na(rcvFull$ReasonForStop)), "ReasonForStop", "NoneRecdBeforeMaxDistReached")
@@ -584,15 +591,13 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     }
 
     if (initialNAs) {
-      # if (any(row > nrow(pixelGroupMap), na.rm = TRUE))
-      #   browser()
+      if (any(row > nrow(pixelGroupMap), na.rm = TRUE))
+         browser()
       row <- row - rowsToRm
     }
 
     prevSpiralRow <- spiralRow[i]
     prevSpiralCol <- spiralCol[i]
-    # row <- rowShrinking + spiralRow[i] #spiral[i, "row"] # faster?
-    # col <- colShrinking + spiralCol[i] #spiral[i, "col"] # faster?
 
     # I tried to get this faster; but the problem is omitting all the
     #   row/col combinations that are "off" raster. cellFromRowCol does this
