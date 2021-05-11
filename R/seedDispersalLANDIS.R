@@ -591,7 +591,9 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     srcPixelMatrixInd <- (activeSpeciesCode - 1) * nrowSrcPixelMatrix + newPixelIndex
     jj <<- jj + 1
     srcPixelValues <- srcPixelMatrix[srcPixelMatrixInd]
-    hasSp <- !is_naInteger(srcPixelValues)
+    # browser()
+    hasSpNot <- is.na(srcPixelValues)
+    # hasSp <- is.na(srcPixelValues)
     if (newCurDist) {
       rowsForDistsBySpCode <- as.integer(uniqueDistCounter * numSp + spSeq)
       # whUse <- which(distsBySpCode$dists == curDist) # old slower
@@ -604,17 +606,18 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
       }
     }
 
-    sumHasSp <- sum(hasSp)
+    sumHasSp <- length(hasSpNot) - sum(hasSpNot)
     if (sumHasSp) {
       ran <- runifC(sumHasSp)
 
       whRanLTprevMaxProb <- which(ran <= lastWardMaxProb)
 
       if (length(whRanLTprevMaxProb)) {
+        whHasSp <- which(!hasSpNot)
         if (i == 1) { # self pixels are 100%
           oo <- seq.int(length(ran))
         } else {
-          wardRes <- wardProbActual[activeSpeciesCode[hasSp==TRUE][whRanLTprevMaxProb]]
+          wardRes <- wardProbActual[activeSpeciesCode[whHasSp][whRanLTprevMaxProb]]
           lastWardMaxProb <- min(1, max(wardRes))
           oo <- ran[whRanLTprevMaxProb] < wardRes
           oo <- whRanLTprevMaxProb[oo]
@@ -624,7 +627,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
           print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ",
                        numSuccesses, "; NumRows: ", NROW(activeFullIndex),
                        "; NumSp: ", length(unique(speciesCode[activeFullIndex]))))
-        notActiveSubIndex <- which(hasSp)[oo]
+        notActiveSubIndex <- whHasSp[oo]
         if (length(notActiveSubIndex)) {
           ii <<- ii + 1
           notActiveFullIndex <- activeFullIndex[notActiveSubIndex]
