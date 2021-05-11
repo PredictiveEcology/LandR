@@ -75,7 +75,7 @@ utils::globalVariables(c(
 #'
 #' @examples
 #' seed <- sample(1e6, 1)
-#' seed <- 53259
+#' seed <- 5325
 #' set.seed(seed)
 #' library(data.table)
 #' library(raster)
@@ -454,6 +454,33 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
                                  srcPixelMatrix, cellSize, k, b,
                                  successionTimestep, verbose, dispersalFn) {
 
+  # quick test -- just first cell
+  initialNAs <- isTRUE(is.na(srcPixelMatrix[1]))
+
+  if (initialNAs) {
+    srcPixelMatrixNAs <- rowSums(srcPixelMatrix, na.rm = TRUE)
+    whNAs <- which(srcPixelMatrixNAs > 0)
+    numInitialNAs <- whNAs[1] - 1
+    numFinalNAs <- tail(whNAs, 1)
+    numColsPGM <- ncol(pixelGroupMap)
+    newExtent <- extent(pixelGroupMap)
+    rowsToRm <- floor(numInitialNAs / numColsPGM)
+    ncells <- ncell(pixelGroupMap)
+    rowsToRmEnd <- floor( (ncells - numFinalNAs) / numColsPGM)
+    if (rowsToRm == 0) {
+      initialNAs <- FALSE
+    } else {
+      cellsToRmInit <- rowsToRm * numColsPGM
+      cellsToRmEnd <- rowsToRmEnd * numColsPGM
+      cellsToRmInitInds <- seq(cellsToRmInit)
+      cellsToRmEndInds <- (ncells - cellsToRmEnd + 1):ncells
+      newExtent@xmax <- newExtent@xmax - ( rowsToRm * res(pixelGroupMap)[1]) - ( rowsToRmEnd * res(pixelGroupMap)[1])
+      srcPixelMatrix <- srcPixelMatrix[-c(cellsToRmInitInds, cellsToRmEndInds),]
+      pixelGroupMap <- crop(pixelGroupMap, newExtent)
+    }
+  }
+
+
   speciesTable <- copy(speciesTable)
   set(speciesTable, NULL, "seeddistance_maxMinCellSize",
       pmax(cellSize, speciesTable[["seeddistance_max"]]))
@@ -499,22 +526,6 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   overallMaxDist <- max(speciesTable[["seeddistance_max"]])
   cantDoShortcutYet <- TRUE
   lastWardMaxProb <- 1
-  initialNAs <- isTRUE(is.na(srcPixelMatrix[1]))
-
-  if (initialNAs) {
-    srcPixelMatrixNAs <- rowSums(srcPixelMatrix, na.rm = TRUE)
-    numInitialNAs <- which(srcPixelMatrixNAs > 0)[1] - 1
-    numColsPGM <- ncol(pixelGroupMap)
-    newExtent <- extent(pixelGroupMap)
-    rowsToRm <- floor(numInitialNAs / numColsPGM)
-    if (!rowsToRm) {
-      initialNAs <- FALSE
-    } else {
-      cellsToRm <- rowsToRm * numColsPGM
-      newExtent@xmax <- newExtent@xmax - ( rowsToRm * res(pixelGroupMap)[1])
-      srcPixelMatrix <- srcPixelMatrix[-(1:cellsToRm),]
-    }
-  }
 
   nrowSrcPixelMatrix <- NROW(srcPixelMatrix)
   dim(srcPixelMatrix) <- NULL # make a single vector -- a bit faster
@@ -590,11 +601,11 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
       col <- if (spiralCol[i] == 0) colNow else colNow + spiralCol[i]
     }
 
-    if (initialNAs) {
-      if (any(row > nrow(pixelGroupMap), na.rm = TRUE))
-         browser()
-      row <- row - rowsToRm
-    }
+    # if (initialNAs) {
+    #   if (any(row > nrow(pixelGroupMap), na.rm = TRUE))
+    #      browser()
+    #   row <- row - rowsToRm
+    # }
 
     prevSpiralRow <- spiralRow[i]
     prevSpiralCol <- spiralCol[i]
@@ -652,7 +663,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
         if (length(notActiveSubIndex)) {
           ii <<- ii + 1
           notActiveFullIndex <- activeFullIndex[notActiveSubIndex]
-          if (i %% 20 == 0) {
+          if (i %% 3 == 0) {
             elapsedTime <- Sys.time() - startTime
             print(paste(i, " ", NROW(activeFullIndex), " ", NROW(rowOrig), " ",
                         NROW(colOrig), " ", format(elapsedTime, units = "auto")))
