@@ -87,6 +87,7 @@ utils::globalVariables(c(
 #' # make a pixelGroupMap
 #' pgs <- 4 # make even just because of approach below requires even
 #' pixelGroupMap <- SpaDES.tools::randomPolygons(rasterTemplate, numTypes = pgs)
+#' pixelGroupMap[1:100] <- NA # emulate a mask at the start
 #'
 #' # Make a receive pixels table -- need pixelGroup and species
 #' nSpecies <- 3
@@ -498,6 +499,15 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   overallMaxDist <- max(speciesTable[["seeddistance_max"]])
   cantDoShortcutYet <- TRUE
   lastWardMaxProb <- 1
+  initialNAs <- isTRUE(is.na(srcPixelMatrix[1]))
+
+  if (initialNAs) {
+    srcPixelMatrixNAs <- rowSums(srcPixelMatrix, na.rm = TRUE)
+    numInitialNAs <- which(srcPixelMatrixNAs > 0)[1] - 1
+    numColsPGM <- ncol(pixelGroupMap)
+    rowsToRm <- floor(numInitialNAs / numColsPGM)
+    srcPixelMatrix <- srcPixelMatrix[-(1:(rowsToRm * numColsPGM)),]
+  }
 
   nrowSrcPixelMatrix <- NROW(srcPixelMatrix)
   dim(srcPixelMatrix) <- NULL # make a single vector -- a bit faster
@@ -566,12 +576,18 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     }
 
     rowi <<- rowi + 1
+
     row <- if (spiralRow[i] == 0) rowNow else rowNow + spiralRow[i] #spiral[i, "row"] # faster?
     if (needNewCol) {
       coli <<- coli + 1
       col <- if (spiralCol[i] == 0) colNow else colNow + spiralCol[i]
     }
 
+    if (initialNAs) {
+      # if (any(row > nrow(pixelGroupMap), na.rm = TRUE))
+      #   browser()
+      row <- row - rowsToRm
+    }
 
     prevSpiralRow <- spiralRow[i]
     prevSpiralCol <- spiralCol[i]
