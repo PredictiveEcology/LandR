@@ -177,7 +177,7 @@ test_that("test Ward dispersal seeding algorithm", {
         env$effDist <- unique(joined[speciesCode == spCode]$seeddistance_eff)
         env$maxDist <- unique(joined[speciesCode == spCode]$seeddistance_max)
         env$dis <- dis * env$cellSize
-        dispersalProb <- eval(Ward, envir = env)
+        dispersalProb <- do.call(Ward, as.list(env))
         dispersalProb = 1 - (1 - dispersalProb)^successionTimestep
         probOfThatNumber <- dbinom(x = NROW(output[speciesCode == spCode]), size = 100, prob = dispersalProb)
       })
