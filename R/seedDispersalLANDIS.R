@@ -663,7 +663,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
         if (length(notActiveSubIndex)) {
           ii <<- ii + 1
           notActiveFullIndex <- activeFullIndex[notActiveSubIndex]
-          if (i %% 3 == 0) {
+          if (i %% 37 == 0) {
             elapsedTime <- Sys.time() - startTime
             print(paste(i, " ", NROW(activeFullIndex), " ", NROW(rowOrig), " ",
                         NROW(colOrig), " ", format(elapsedTime, units = "auto")))
