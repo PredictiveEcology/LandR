@@ -75,16 +75,19 @@ utils::globalVariables(c(
 #'
 #' @examples
 #' seed <- sample(1e6, 1)
-#' seed <- 532597
-#' set.seed(seed)
+#' seed <- 535
+#  set.seed(seed)
 #' library(data.table)
 #' library(raster)
 #' # keep this here for interactive testing with a larger raster
 #' rasterTemplate <- raster(extent(0, 2500, 0, 2500), res = 100)
+#' # Try a big one?
+#' rasterTemplate <- raster(extent(0, 150000, 0, 150000), res = 100)
 #'
 #' # make a pixelGroupMap
 #' pgs <- 4 # make even just because of approach below requires even
 #' pixelGroupMap <- SpaDES.tools::randomPolygons(rasterTemplate, numTypes = pgs)
+#' pixelGroupMap[1:100] <- NA # emulate a mask at the start
 #'
 #' # Make a receive pixels table -- need pixelGroup and species
 #' nSpecies <- 3
@@ -449,7 +452,58 @@ intToBin2 <- function(x) {
 
 spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
                                  srcPixelMatrix, cellSize, k, b,
-                                 successionTimestep, verbose, dispersalFn) {
+                                 successionTimestep, verbose, dispersalFn, modulo = 19) {
+
+  # # quick test -- just first cell
+  # if (missing(useMask))
+  #   useMask <- isTRUE(is.na(srcPixelMatrix[1]) | is.na(all(tail(srcPixelMatrix, 1))))
+
+  rcvFull <- dtRcvLong[, c("pixelIndex", "speciesCode")]
+  rcvFull <- rcvFull[speciesTable[, c("seeddistance_max", "speciesCode")],
+                     on = "speciesCode", nomatch = NULL]
+
+  # # If there are entire rows that are NAs (quick test first -- just srcPixelMatrix --
+  # #    then correct slower test inside this protected block)
+  # #    then this section crops the pixelGroupMap and
+  # #    adjusts the srcPixelMatrix accordingly
+  # if (useMask) { # was an imprecise test, but quick test to get here; now reassess correct test
+  #   useMask <- FALSE
+  #   srcPixelMatrixNAs <- rowSums(srcPixelMatrix, na.rm = TRUE)
+  #   whNAs <- which(srcPixelMatrixNAs > 0)
+  #   numInitialNAs <- whNAs[1] - 1
+  #   numFinalNAs <- tail(whNAs, 1)
+  #   numColsPGM <- ncol(pixelGroupMap)
+  #   newExtent <- extent(pixelGroupMap)
+  #   rowsToRm <- floor(numInitialNAs / numColsPGM)
+  #   ncells <- ncell(pixelGroupMap)
+  #   rowsToRmEnd <- floor( (ncells - numFinalNAs) / numColsPGM)
+  #   if (rowsToRm > 0) {
+  #     cellsToRmInit <- rowsToRm * numColsPGM
+  #     cellsToRmEnd <- rowsToRmEnd * numColsPGM
+  #     cellsToRmInitInds <- seq(cellsToRmInit)
+  #     cellsToRmEndInds <- (ncells - cellsToRmEnd + 1):ncells
+  #     cellsToOmit <- c(cellsToRmInitInds, cellsToRmEndInds)
+  #     whKeep <- sort(union(setdiff(seq(ncells), cellsToOmit),
+  #                     unique(rcvFull$pixelIndex)))
+  #     rc22 <- rowFromCell(pixelGroupMap, whKeep)
+  #     rangeRC22 <- range(rc22)
+  #     numRowsNew <- diff(rangeRC22) + 1
+  #     if (numRowsNew < nrow(pixelGroupMap)) {
+  #       newExtent@ymax <- newExtent@ymin + numRowsNew * res(pixelGroupMap)[1]
+  #       srcPixelMatrix <- srcPixelMatrix[whKeep,]
+  #       if (min(rangeRC22) > 1) {
+  #         useMask <- TRUE
+  #         pixelIndexAdj <- (min(rangeRC22) - 1) * ncol(pixelGroupMap)
+  #         set(rcvFull, NULL, "pixelIndex", rcvFull$pixelIndex - pixelIndexAdj)
+  #       }
+  #       pixelGroupMap <- crop(pixelGroupMap, newExtent)
+  #
+  #     }
+  #   }
+  # }
+  # print(paste0("number cells in pixelGroupMap: ", ncell(pixelGroupMap)))
+  # print(paste0("number rows in srcPixelMatrix: ", NROW(srcPixelMatrix)))
+  # print(paste0("number cols in srcPixelMatrix: ", NCOL(srcPixelMatrix)))
 
   speciesTable <- copy(speciesTable)
   set(speciesTable, NULL, "seeddistance_maxMinCellSize",
@@ -482,12 +536,11 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   rcvFull <- rcvFull[speciesTable[, c("seeddistance_max", "speciesCode")],
                      on = "speciesCode", nomatch = NULL]
   activeFullIndex <- seq.int(NROW(rcvFull))
-  activeIndexShrinking <- activeFullIndex
+
+  # activeIndexShrinking <- activeFullIndex
   rc1 <- rowColFromCell(pixelGroupMap, rcvFull[["pixelIndex"]])
   rowOrig <- rc1[, "row"]
   colOrig <- rc1[, "col"]
-  rowShrinking <- rowOrig
-  colShrinking <- colOrig
 
   speciesCode <- rcvFull[["speciesCode"]]
 
@@ -497,7 +550,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   lastWardMaxProb <- 1
 
   nrowSrcPixelMatrix <- NROW(srcPixelMatrix)
-  dim(srcPixelMatrix) <- NULL # make a single vector -- a bit faster
+  # dim(srcPixelMatrix) <- NULL # make a single vector -- a bit faster
 
   ## Assertions for inputs to spiral
   if (!is.numeric(k)) stop("not numeric k")
@@ -507,10 +560,16 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   prevCurDist <- spiral[1, 3]
   spiralRow <- spiral[, "row"]
   spiralCol <- spiral[, "col"]
+  prevSpiralRow <- spiralRow[1]
+  prevSpiralCol <- spiralCol[1]
   newCurDist <- TRUE
+  newActiveIndex <- TRUE
+  tooLong <- FALSE
+
   curDists <- drop(spiral[, 3]) * cellSize
   uniqueDistCounter <- 0
 
+  startTime <- Sys.time()
   for (i in 1:NROW(spiral)) {
     curDist <- curDists[i]
 
@@ -523,15 +582,16 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
         if (any(spTooLong)) {
           activeSpecies <- activeSpecies[!spTooLong]
           tooLong <- curDist > ( pmax(cellSize, rcvFull[["seeddistance_max"]][activeFullIndex]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
-          if (any(tooLong)) {
+          if (any(tooLong, na.rm = TRUE)) {
             if (verbose >= 1) {
               tooLongFull <- curDist > rcvFull[["seeddistance_max"]]
               set(rcvFull, which(tooLongFull & is.na(rcvFull$ReasonForStop)), "ReasonForStop", "NoneRecdBeforeMaxDistReached")
             }
             activeFullIndex <- activeFullIndex[!tooLong]
-            rowShrinking <- rowShrinking[!tooLong]
-            colShrinking <- colShrinking[!tooLong]
-            activeIndexShrinking <- activeIndexShrinking[activeFullIndex]
+            rowOrig <- rowOrig[!tooLong]
+            colOrig <- colOrig[!tooLong]
+            speciesCode <- speciesCode[!tooLong]
+            newActiveIndex <- TRUE
           }
         }
       } else {
@@ -540,10 +600,23 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 
     }
 
-    #row <- rowOrig[activeFullIndex] + spiralRow[i] #spiral[i, "row"] # faster?
-    #col <- colOrig[activeFullIndex] + spiralCol[i] #spiral[i, "col"] # faster?
-    row <- rowShrinking + spiralRow[i] #spiral[i, "row"] # faster?
-    col <- colShrinking + spiralCol[i] #spiral[i, "col"] # faster?
+    needNewCol <- TRUE
+    if (newActiveIndex) {
+      rowNow <- rowOrig
+      colNow <-  colOrig
+    } else {
+      if (identical(prevSpiralCol, spiralCol[i])) {
+        needNewCol <- FALSE
+      }
+    }
+
+    row <- if (spiralRow[i] == 0) rowNow else rowNow + spiralRow[i] #spiral[i, "row"] # faster?
+    if (needNewCol) {
+      col <- if (spiralCol[i] == 0) colNow else colNow + spiralCol[i]
+    }
+
+    prevSpiralRow <- spiralRow[i]
+    prevSpiralCol <- spiralCol[i]
 
     # I tried to get this faster; but the problem is omitting all the
     #   row/col combinations that are "off" raster. cellFromRowCol does this
@@ -552,10 +625,14 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
       as.integer(cellFromRowCol(row = row, col = col, object = pixelGroupMap))
 
     # lookup on src rasters
-    activeSpeciesCode <- speciesCode[activeFullIndex]
+    if (newActiveIndex) {
+      activeSpeciesCode <- speciesCode#[activeFullIndex]
+    }
     srcPixelMatrixInd <- (activeSpeciesCode - 1) * nrowSrcPixelMatrix + newPixelIndex
     srcPixelValues <- srcPixelMatrix[srcPixelMatrixInd]
-    hasSp <- !is.na(srcPixelValues)
+    # browser()
+    hasSpNot <- is.na(srcPixelValues)
+    # hasSp <- is.na(srcPixelValues)
     if (newCurDist) {
       rowsForDistsBySpCode <- as.integer(uniqueDistCounter * numSp + spSeq)
       # whUse <- which(distsBySpCode$dists == curDist) # old slower
@@ -568,17 +645,18 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
       }
     }
 
-    sumHasSp <- sum(hasSp)
+    sumHasSp <- length(hasSpNot) - sum(hasSpNot)
     if (sumHasSp) {
       ran <- runifC(sumHasSp)
 
       whRanLTprevMaxProb <- which(ran <= lastWardMaxProb)
 
       if (length(whRanLTprevMaxProb)) {
+        whHasSp <- which(!hasSpNot)
         if (i == 1) { # self pixels are 100%
           oo <- seq.int(length(ran))
         } else {
-          wardRes <- wardProbActual[activeSpeciesCode[hasSp==TRUE][whRanLTprevMaxProb]]
+          wardRes <- wardProbActual[activeSpeciesCode[whHasSp][whRanLTprevMaxProb]]
           lastWardMaxProb <- min(1, max(wardRes))
           oo <- ran[whRanLTprevMaxProb] < wardRes
           oo <- whRanLTprevMaxProb[oo]
@@ -588,12 +666,29 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
           print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ",
                        numSuccesses, "; NumRows: ", NROW(activeFullIndex),
                        "; NumSp: ", length(unique(speciesCode[activeFullIndex]))))
-        notActiveSubIndex <- which(hasSp)[oo]
+        notActiveSubIndex <- whHasSp[oo]
         if (length(notActiveSubIndex)) {
-          notActiveFullIndex <- activeFullIndex[notActiveSubIndex] # which(hasSp)[oo]
-          activeFullIndex <- activeFullIndex[-notActiveSubIndex]
-          rowShrinking <- rowShrinking[-notActiveSubIndex]
-          colShrinking <- colShrinking[-notActiveSubIndex]
+          notActiveFullIndex <- activeFullIndex[notActiveSubIndex]
+          if (i %% modulo == 0) {
+            elapsedTime <- Sys.time() - startTime
+            #print(paste(i, " ", NROW(activeFullIndex), " ", NROW(rowOrig), " ",
+            #            NROW(colOrig), " ", format(elapsedTime, units = "auto")))
+            ss <- seq(activeFullIndex)
+            ss <- ss[-notActiveSubIndex]
+            activeFullIndexNAs <- is.na(activeFullIndex)
+            ss <- ss[!activeFullIndexNAs[-notActiveSubIndex]]
+            activeFullIndex <- activeFullIndex[ss]
+            rowOrig <- rowOrig[ss]
+            colOrig <- colOrig[ss]
+            speciesCode <- speciesCode[ss]
+          } else {
+            activeFullIndex[notActiveSubIndex] <- NA
+            rowOrig[notActiveSubIndex] <- NA
+            # colOrig[notActiveSubIndex] <- NA
+            # speciesCode[notActiveSubIndex] <- NA
+          }
+
+          newActiveIndex <- TRUE
 
           set(rcvFull, notActiveFullIndex, "Success", TRUE)
           if (verbose >= 1) {
@@ -602,8 +697,11 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
           }
         } else {
           notActiveSubIndex <- integer()
+          newActiveIndex <- FALSE
         }
 
+      } else {
+        newActiveIndex <- FALSE
       }
     }
 
@@ -642,6 +740,10 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   if (verbose >= 1) {
     setattr(rcvFull, "ReasonForStop", ReasonForStop)
   }
+  # if (useMask) {
+  #   # pixelIndexAdj <- (min(rangeRC22) - 1) * ncol(pixelGroupMap)
+  #   set(rcvFull, NULL, "pixelIndex", rcvFull$pixelIndex + pixelIndexAdj)
+  # }
   rcvFull
 }
 
