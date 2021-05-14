@@ -452,7 +452,7 @@ intToBin2 <- function(x) {
 
 spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
                                  srcPixelMatrix, cellSize, k, b,
-                                 successionTimestep, verbose, dispersalFn, modulo = 19) {
+                                 successionTimestep, verbose, dispersalFn) {
 
   # # quick test -- just first cell
   # if (missing(useMask))
@@ -570,6 +570,8 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   uniqueDistCounter <- 0
 
   startTime <- Sys.time()
+  cumSuccesses <- 0
+
   for (i in 1:NROW(spiral)) {
     curDist <- curDists[i]
 
@@ -675,10 +677,11 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
           #    (rowOrig, colOrig, speciesCode, activeFullIndex), or just set the
           #    values that are not active to NA. Apparently, setting NA is quite a
           #    bit faster, up to a point. So, only resize objects every once in a while
-          if (i %% modulo == 0) {
+          cumSuccesses <- cumSuccesses + numSuccesses
+          if (cumSuccesses > 2000) {
+            cumSuccesses <- 0
+            # if (i %% modulo == 0) {
             elapsedTime <- Sys.time() - startTime
-            #print(paste(i, " ", NROW(activeFullIndex), " ", NROW(rowOrig), " ",
-            #            NROW(colOrig), " ", format(elapsedTime, units = "auto")))
             ss <- seq(activeFullIndex)
             ss <- ss[-notActiveSubIndex]
             activeFullIndexNAs <- is.na(activeFullIndex)
@@ -688,10 +691,10 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
             colOrig <- colOrig[ss]
             speciesCode <- speciesCode[ss]
           } else {
+            # Don't need to do colOrig or speciesCode as these are automatically NAs
+            #   downstream because rowOrig is NA -- cuts off 10% of computation time
             activeFullIndex[notActiveSubIndex] <- NA
             rowOrig[notActiveSubIndex] <- NA
-            # colOrig[notActiveSubIndex] <- NA
-            # speciesCode[notActiveSubIndex] <- NA
           }
 
           newActiveIndex <- TRUE
