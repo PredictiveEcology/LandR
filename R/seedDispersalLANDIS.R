@@ -662,13 +662,19 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
           oo <- whRanLTprevMaxProb[oo]
         }
         numSuccesses <- length(oo)
-        if (verbose >= 2)
+        if (verbose >= 2) {
           print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ",
-                       numSuccesses, "; NumRows: ", NROW(activeFullIndex),
+                       numSuccesses, "; NumRows: ", NROW(na.omit(activeFullIndex)),
                        "; NumSp: ", length(unique(speciesCode[activeFullIndex]))))
+        }
         notActiveSubIndex <- whHasSp[oo]
         if (length(notActiveSubIndex)) {
           notActiveFullIndex <- activeFullIndex[notActiveSubIndex]
+
+          # This next block does 1 of 2 things: either resize the vectors
+          #    (rowOrig, colOrig, speciesCode, activeFullIndex), or just set the
+          #    values that are not active to NA. Apparently, setting NA is quite a
+          #    bit faster, up to a point. So, only resize objects every once in a while
           if (i %% modulo == 0) {
             elapsedTime <- Sys.time() - startTime
             #print(paste(i, " ", NROW(activeFullIndex), " ", NROW(rowOrig), " ",
