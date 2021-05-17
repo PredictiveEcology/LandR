@@ -336,7 +336,7 @@ speciesComm <- function(num, sc) {
 #'
 #' @author Eliot McIntire
 #' @param dist A vector of distances to evaluate kernel against
-#' @param cellDize A numeric, length 1, of the cell resolution (e.g., res(raster))
+#' @param cellSize A numeric, length 1, of the cell resolution (e.g., res(raster))
 #' @param effDist A vector of effective distance (parameter in kernel),
 #'   with same length as \code{dist}
 #' @param maxDist A vector of maximum distance (parameter in kernel),

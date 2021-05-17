@@ -82,8 +82,7 @@ defined in the LANDIS-II documentation.
 }
 \examples{
 seed <- sample(1e6, 1)
-seed <- 532597
-set.seed(seed)
+seed <- 535
 library(data.table)
 library(raster)
 # keep this here for interactive testing with a larger raster
@@ -94,6 +93,7 @@ rasterTemplate <- raster(extent(0, 150000, 0, 150000), res = 100)
 # make a pixelGroupMap
 pgs <- 4 # make even just because of approach below requires even
 pixelGroupMap <- SpaDES.tools::randomPolygons(rasterTemplate, numTypes = pgs)
+pixelGroupMap[1:100] <- NA # emulate a mask at the start
 
 # Make a receive pixels table -- need pixelGroup and species
 nSpecies <- 3
