@@ -10,7 +10,7 @@ LANDISDisp(
   dtRcv,
   pixelGroupMap,
   speciesTable,
-  dispersalFn = WardFast,
+  dispersalFn = Ward,
   b = 0.01,
   k = 0.95,
   plot.it = FALSE,
@@ -41,7 +41,7 @@ Default is "Ward" (temporarily unused, as it is hard coded inside Rcpp function)
 \item{k}{Landis Ward seed dispersal the probability that seed will disperse within
 the effective distance (eg., 0.95)}
 
-\item{plot.it}{If TRUE, then plot the raster at every interaction, so one can watch the
+\item{plot.it}{Deprecated. If TRUE, then plot the raster at every interaction, so one can watch the
 LANDISDisp event grow.}
 
 \item{successionTimestep}{integer. The time in timeunits between succession (i.e., dispersal) events.}
@@ -82,7 +82,6 @@ defined in the LANDIS-II documentation.
 }
 \examples{
 seed <- sample(1e6, 1)
-seed <- 532597
 set.seed(seed)
 library(data.table)
 library(raster)
@@ -92,6 +91,7 @@ rasterTemplate <- raster(extent(0, 2500, 0, 2500), res = 100)
 # make a pixelGroupMap
 pgs <- 4 # make even just because of approach below requires even
 pixelGroupMap <- SpaDES.tools::randomPolygons(rasterTemplate, numTypes = pgs)
+pixelGroupMap[1:100] <- NA # emulate a mask at the start
 
 # Make a receive pixels table -- need pixelGroup and species
 nSpecies <- 3
@@ -130,45 +130,45 @@ output <- LANDISDisp(
 # Summarize
 output[, .N, by = speciesCode]
 
- ## Plot the maps
- library(quickPlot)
-clearPlot()
-spMap <- list()
-spMap$pixelGroupMap <- pixelGroupMap
-for (sppp in unique(output$speciesCode)) {
-  spppChar <- paste0("Sp_", sppp)
-  spMap[[spppChar]] <- raster(pixelGroupMap)
-  ss <- unique(seedSource[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
-  spMap[[spppChar]][pixelGroupMap[] \%in\% ss$pixelGroup] <- 1
+## Plot the maps
+if (interactive()) {
+  library(quickPlot)
+  clearPlot()
+  spMap <- list()
+  spMap$pixelGroupMap <- pixelGroupMap
+  for (sppp in unique(output$speciesCode)) {
+    spppChar <- paste0("Sp_", sppp)
+    spMap[[spppChar]] <- raster(pixelGroupMap)
+    ss <- unique(seedSource[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
+    spMap[[spppChar]][pixelGroupMap[] \%in\% ss$pixelGroup] <- 1
 
-  receivable <- raster(pixelGroupMap)
-  srf <- unique(seedReceiveFull[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
-  receivable[pixelGroupMap[] \%in\% srf$pixelGroup] <- 1
+    receivable <- raster(pixelGroupMap)
+    srf <- unique(seedReceiveFull[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
+    receivable[pixelGroupMap[] \%in\% srf$pixelGroup] <- 1
 
-  forest <- which(!is.na(pixelGroupMap[]))
-  src <- which(!is.na(spMap[[spppChar]][]))
-  recvable <- which(!is.na(receivable[]))
-  rcvd <- output[speciesCode == sppp]$pixelIndex
+    forest <- which(!is.na(pixelGroupMap[]))
+    src <- which(!is.na(spMap[[spppChar]][]))
+    recvable <- which(!is.na(receivable[]))
+    rcvd <- output[speciesCode == sppp]$pixelIndex
 
-  spMap[[spppChar]][forest] <- 0
-  spMap[[spppChar]][recvable] <- 2
-  spMap[[spppChar]][src] <- 1
-  spMap[[spppChar]][rcvd] <- 3
-  spMap[[spppChar]][intersect(src, rcvd)] <- 4
+    spMap[[spppChar]][forest] <- 0
+    spMap[[spppChar]][recvable] <- 2
+    spMap[[spppChar]][src] <- 1
+    spMap[[spppChar]][rcvd] <- 3
+    spMap[[spppChar]][intersect(src, rcvd)] <- 4
 
-  levels(spMap[[spppChar]]) <- data.frame(ID = 0:4,
-                                          type = c("OtherForest", "Source", "Didn't receive",
-                                                   "Received", "Src&Rcvd"))
+    levels(spMap[[spppChar]]) <- data.frame(ID = 0:4,
+                                            type = c("OtherForest", "Source", "Didn't receive",
+                                                     "Received", "Src&Rcvd"))
+  }
+  Plot(spMap, cols = "Set2")
+
+  # A summary
+  rr <- apply(raster::stack(spMap)[[-1]][] + 1, 2, tabulate) # tabulate accommodate missing levels
+  rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"][1:NROW(rr)]
+  # This next line only works if there are some places that are both source and potential to receive
+  # rr <- rbind(rr, propSrcRcved = round(rr[5,]/ (rr[5,]+rr[2,]), 2))
 }
-Plot(spMap, cols = "Set2")
-
-# A summary
-rr <- apply(raster::stack(spMap)[[-1]][] + 1, 2, tabulate) # tabulate accommodate missing levels
-rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"][1:NROW(rr)]
-# This next line only works if there are some places that are both source and potential to receive
-# rr <- rbind(rr, propSrcRcved = round(rr[5,]/ (rr[5,]+rr[2,]), 2))
-
-
 
 }
 \author{

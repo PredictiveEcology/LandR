@@ -14,7 +14,7 @@ test_that("test Ward dispersal seeding algorithm", {
   doLarge <- if (interactive()) FALSE else FALSE
   if (doLarge) {
     set.seed(1234)
-    print("Doing LARGE raster test -- should take more than 4 minutes")
+    message("Doing LARGE raster test -- should take more than 4 minutes")
     reducedPixelGroupMap <- raster(xmn = 50, xmx = 50 + 99*18000,
                                    ymn = 50, ymx = 50 + 99*18000,
                                    res = c(250, 250), val = 2)
@@ -75,11 +75,6 @@ test_that("test Ward dispersal seeding algorithm", {
     seedSource[, pixelGroup := pixelGroup + pgs/2]
 
     seedReceiveFull <- species[seedReceive, on = "speciesCode"]
-    # objects <- list("species" = species)
-    # mb <- profvis::profvis(replicate(10,
-    #    interval = 0.2,
-    # set.seed(seedOuter)
-    # print(seedOuter)
 
     st1 <- system.time({
       output <- LANDISDisp(dtRcv = seedReceiveFull, plot.it = FALSE,
@@ -91,7 +86,7 @@ test_that("test Ward dispersal seeding algorithm", {
     })
 
     if (interactive()) {
-      print(output[, .N, by = speciesCode])
+      message(output[, .N, by = speciesCode])
       print(st1)
     }
 
@@ -127,6 +122,7 @@ test_that("test Ward dispersal seeding algorithm", {
       levels(ras) <- data.frame(ID = 1:3, c("Receive", "Source", "Successful"))
       ras
     })
+
 
     bigDispersers <- species$speciesCode[which(species$SeedMaxDist == 5000 & species$SeedEffDist == 1000)]
     lapply(spsOut, function(x) table(x[]))
@@ -181,7 +177,7 @@ test_that("test Ward dispersal seeding algorithm", {
         env$effDist <- unique(joined[speciesCode == spCode]$seeddistance_eff)
         env$maxDist <- unique(joined[speciesCode == spCode]$seeddistance_max)
         env$dis <- dis * env$cellSize
-        dispersalProb <- eval(Ward, envir = env)
+        dispersalProb <- do.call(Ward, as.list(env))
         dispersalProb = 1 - (1 - dispersalProb)^successionTimestep
         probOfThatNumber <- dbinom(x = NROW(output[speciesCode == spCode]), size = 100, prob = dispersalProb)
       })
@@ -217,12 +213,12 @@ test_that("test large files", {
   }
   library(reproducible)
   library(quickPlot)
-
-  dtSrc <- prepInputs(url = "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI",
+  if (!requireNamespace("googledrive")) skip("Need: install.packages('googledrive')")
+  dtSrc <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
                       targetFile = "dtSrc.rds",
                       fun = "readRDS",
                       destinationPath = dp, overwrite = TRUE)
-  dtRcv <- prepInputs(url = "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI",
+  dtRcv <- prepInputs(url = 'https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI/view?usp=sharing',
                       targetFile = "dtRcv.rds",
                       fun = "readRDS",
                       destinationPath = dp)
@@ -239,6 +235,8 @@ test_that("test large files", {
   dtSrc1 <- data.table::copy(dtSrc)
   dtRcv1 <- data.table::copy(dtRcv)
   sppKeep <- unique(dtRcv1$speciesCode)
+  #sppKeep <- "Popu_tre"
+
   dtSrc1 <- dtSrc1[speciesCode %in% sppKeep]
   dtRcv1 <- dtRcv1[speciesCode %in% sppKeep]
 
@@ -269,15 +267,30 @@ test_that("test large files", {
   } else {
     dtRcv2 <- dtRcv1
   }
-  st <- system.time({
-    out <- LANDISDisp(dtSrc = dtSrc1,
-                      dtRcv = dtRcv2,
-                      pixelGroupMap = pixelGroupMap,
-                      successionTimestep = 1,
-                      speciesTable = speciesTable1)
-  })
-  print(st)
+  suppressWarnings(rm(list = c("out")))
 
+  # Run this 2x -- once with verbose -- to get extra stuff
+  st <- system.time(out <- LANDISDisp(dtSrc = dtSrc1,
+                                      dtRcv = dtRcv2,
+                                      pixelGroupMap = pixelGroupMap,
+                                      successionTimestep = 1, verbose = 1,
+                                      speciesTable = speciesTable1,
+                                      fast = TRUE, maxSpiralIndex = 1e9))
+  st <- system.time(out1 <- LANDISDisp(dtSrc = dtSrc1,
+                    dtRcv = dtRcv2,
+                    pixelGroupMap = pixelGroupMap,
+                    successionTimestep = 1, verbose = 0,
+                    speciesTable = speciesTable1,
+                    fast = TRUE, maxSpiralIndex = 1e9))
+
+  par(mfrow = c(3,3));
+  out[, list(a={a = hist(DistOfSuccess,
+#                         breaks = -125 + seq(0, max(DistOfSuccess) + 250, by = res(pixelGroupMap)[1]),
+                         main = speciesTable[as.numeric(.BY)]$species);
+                 speciesTable[as.numeric(.BY)]$species},
+             maxDist = max(DistOfSuccess)), by = "speciesCode"]
+
+  setnames(out, old = c("speciesCode", "species"), new = c("speciesNum", "speciesCode"))
   clearPlot()
   spMap <- list()
   spMap$pixelGroupMap <- pixelGroupMap
@@ -302,22 +315,25 @@ test_that("test large files", {
 
     levels(spMap[[sppp]]) <- data.frame(ID = 0:4, type = c("OtherForest", "Source", "Didn't receive", "Received", "Src&Rcvd"))
   }
-  if (interactive()) {
+  if (FALSE) {# (interactive()) {
     clearPlot()
     sp <- spMap[-1]
     Plot(sp, cols = "Set2")
   }
 
+  rrDidntExist <- if (!exists("rr")) TRUE else FALSE
+  suppressWarnings(rm(list = c("rr")))
   rr <- apply(raster::stack(spMap)[[-1]][] + 1, 2, function(x) {
     oo <- tabulate(x)
     if (length(oo) < 5)
       oo <- c(oo, rep(0, 5 - length(oo)))
     oo
   })
-  rownames(rr) <- raster::levels(spMap[[2]])[[1]][, "type"]
+  rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"]
   rr <- t(rr)
   rr <- as.data.frame(rr)
-  rr <- cbind(rr, propSrcRcved = round(rr[, 5] / (rr[, 5] + rr[, 2]), 5))
+  rr <- cbind(rr, propSrcRcved = round(rr[,5]/ (rr[,5]+rr[,2]), 5))
+  if (rrDidntExist) rrOrig <- rr
   speciesTable[,c(1,5)]
   if (!(whichTest %in% 1:2)) {
     # This is a weak test -- that is often wrong with small samples -- seems to only
@@ -326,4 +342,118 @@ test_that("test large files", {
                 method = "spearman")
     expect_true(corr > 0.8)
   }
+  messageDF(rr)
+  print(st)
+  try(identical(rrOrig, rr), silent = TRUE) # for
+
+
+
 })
+
+test_that("test Ward 4 immediate neighbours", {
+  library(raster); library(data.table)
+  pixelGroupMap <- raster(extent(0, 1250, 0, 1750), res = 250, vals = 0)
+  mp <- SpaDES.tools::middlePixel(pixelGroupMap)
+  rc <- rowColFromCell(pixelGroupMap, mp)
+
+  pixelGroupMap[rc] <- 1
+
+  # 4 immediate neighbours
+  pixelGroupMap[rc+c(1,0)] <- 2
+  pixelGroupMap[rc+c(0,1)] <- 2
+  pixelGroupMap[rc+c(-1,0)] <- 2
+  pixelGroupMap[rc+c(0,-1)] <- 2
+
+  dtSrc <- data.table(pixelGroup = 1,
+                      speciesCode =
+                        structure(1:7,
+                                  .Label = c("Abie_las", "Betu_pap", "Pice_eng",
+                                             "Pice_gla", "Pice_mar", "Pinu_con", "Popu_tre"),
+                                  class = "factor"))
+  dtRcv <- data.table(pixelGroup = rep(1:2, each = 7),
+                      speciesCode =
+                        structure(1:7,
+                                  .Label = c("Abie_las", "Betu_pap", "Pice_eng",
+                                             "Pice_gla", "Pice_mar", "Pinu_con", "Popu_tre"),
+                                  class = "factor"))
+  # seeddistance_eff = c(75L, 400L, 30L, 100L, 80L, 60L, 400L),
+  # seeddistance_max = c(100L, 5000L, 250L, 303L, 200L, 200L, 5000L)
+  cc <- xyFromCell(pixelGroupMap, 15)
+  raster::plot(pixelGroupMap)
+  for (i in 1:100) {
+    speciesTab <-
+      structure(
+        list(
+          speciesCode = unique(dtRcv$speciesCode),
+          seeddistance_eff = sample(1L:round((res(pixelGroupMap)[1]/2.1)), size = 7),
+          seeddistance_max = sample(round(res(pixelGroupMap)[1]/1.9):(res(pixelGroupMap)[1]), size = 7)
+        ),
+        row.names = c(NA,-7L),
+        class = c("data.table", "data.frame")
+      )
+    seed <- sample(1e6, 1)
+    # seed <- 163330
+    set.seed(seed)
+    out <- LANDISDisp(dtSrc, dtRcv = dtRcv, pixelGroupMap, speciesTable = speciesTab,
+                      successionTimestep = 1, verbose = 1, fast = FALSE)
+    #  if (NROW(out[pixelIndex == 23]) == 3) {
+    #    print(i); print(seed); out[, .N, by = "speciesCode"]; break}
+
+    pixSelf <- which(pixelGroupMap[] == 1)
+    expect_true(NROW(speciesTab) == sum(out$pixelIndex == pixSelf))
+    oo <- out[, .N, by = c("speciesCode")]
+    expect_true(sum(oo$N) >= 34) # This will fail once in 1e6 times! It is OK if VERY VERY infrequently
+  }
+
+})
+
+test_that("test Ward random collection of neighbours", {
+  library(raster); library(data.table)
+  pixelGroupMap <- raster(extent(0, 1250, 0, 1750), res = 250, vals = 0)
+  mp <- SpaDES.tools::middlePixel(pixelGroupMap)
+  rc <- rowColFromCell(pixelGroupMap, mp)
+
+  pixelGroupMap[rc] <- 1
+
+  # 4 diagonal neighbours
+  pixelGroupMap[rc+c(1,1)] <- 2
+  pixelGroupMap[rc+c(1,0)] <- 2
+  pixelGroupMap[rc+c(2,1)] <- 2
+  pixelGroupMap[rc+c(0,2)] <- 3
+  pixelGroupMap[rc+c(-1, 1)] <- 4
+
+  lets <- as.factor(LETTERS[10:1])
+  dtSrc <- data.table(pixelGroup = 1,
+                      speciesCode = lets)
+  dtSrc <- rbindlist(list(dtSrc, data.table(pixelGroup = 4,
+                      speciesCode = lets[4:10])))
+  dtRcv <- data.table(pixelGroup = rep(1:2, each = 10),
+                      speciesCode =lets)
+  dtRcv <- rbindlist(list(dtRcv, data.table(pixelGroup = 3,
+                      speciesCode =lets[1:7])))
+
+  cc <- xyFromCell(pixelGroupMap, 15)
+  raster::plot(pixelGroupMap)
+  for (i in 1:100) {
+    speciesTab <-
+      data.table(
+        speciesCode = as.factor(LETTERS[1:10]),
+        seeddistance_eff = c(100, 100, 100, 100, 250, 250, 250, 250, 300, 300),
+        seeddistance_max = c(100, 200, 250, 300, 250, 300, 490, 1240, 400, 500)
+      )
+    seed <- sample(1e6, 1)
+    set.seed(seed)
+    out <- LANDISDisp(dtSrc, dtRcv = dtRcv, pixelGroupMap, speciesTable = speciesTab,
+                      successionTimestep = 1, verbose = 1)
+
+    pixSelf <- which(pixelGroupMap[] == 1)
+    expect_true(NROW(speciesTab) == sum(out$pixelIndex == pixSelf))
+    (oo <- out[, .N, by = c("speciesCode")])
+    nn <- speciesTab[out, on = "speciesCode"]
+    expect_true(all(nn[, DistOfSuccess <= pmax(res(pixelGroupMap)[1], seeddistance_max)]))
+    expect_true(all(nn[, sum(DistOfSuccess == 0) == 1, by = "speciesCode"]$V1))
+  }
+
+
+})
+

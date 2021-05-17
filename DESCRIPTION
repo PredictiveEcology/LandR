@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2021-03-30
-Version: 1.0.0.9003
+Version: 1.0.2
+Date: 2021-05-11
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -40,7 +40,6 @@ Imports:
     quickPlot,
     raster,
     RColorBrewer,
-    Rcpp,
     RCurl,
     reproducible (>= 1.2.6.9003),
     sf,
@@ -62,7 +61,6 @@ Remotes:
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/reproducible@development
-LinkingTo: Rcpp
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
@@ -74,7 +72,6 @@ RoxygenNote: 7.1.1
 Collate: 
     'LANDIS-II-tables.R'
     'LandR-package.R'
-    'RcppExports.R'
     'assertions.R'
     'chooseName.R'
     'cleanLandWebStudyArea.R'
