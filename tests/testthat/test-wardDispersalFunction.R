@@ -454,5 +454,6 @@ test_that("test Ward random collection of neighbours", {
     expect_true(all(nn[, sum(DistOfSuccess == 0) == 1, by = "speciesCode"]$V1))
   }
 
+
 })
 

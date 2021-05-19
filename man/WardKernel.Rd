@@ -11,6 +11,8 @@ Ward(dist, cellSize, effDist, maxDist, k, b, algo = 2)
 \arguments{
 \item{dist}{A vector of distances to evaluate kernel against}
 
+\item{cellSize}{A numeric, length 1, of the cell resolution (e.g., res(raster))}
+
 \item{effDist}{A vector of effective distance (parameter in kernel),
 with same length as \code{dist}}
 
@@ -23,8 +25,6 @@ with same length as \code{dist}}
 
 \item{algo}{Either 1 or 2. 2 is faster and is default. 1 is "simpler code" as it
 uses `ifelse`}
-
-\item{cellDize}{A numeric, length 1, of the cell resolution (e.g., res(raster))}
 }
 \description{
 A probability distribution used in LANDIS-II.
