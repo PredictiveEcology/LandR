@@ -107,8 +107,13 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
     pixelIndex <- which(pixelGroupMap[] %in% cohortData$pixelGroup)
 
     # remove unnecessary columns before making cohortDataLong
-    cohortData[, prevMortality := NULL]
-    newPixelCohortData[, year := NULL]
+    if ("prevMortality" %in% names(cohortData)) {
+      cohortData[, prevMortality := NULL]
+    }
+
+    if ("year" %in% names(newPixelCohortData)) {
+      newPixelCohortData[, year := NULL]
+    }
 
     cohortDataPixelIndex <- data.table(
       pixelIndex = pixelIndex,
