@@ -40,3 +40,5 @@ rsconnect/
 *.dll
 *.so
 *.o
+
+inputs/
