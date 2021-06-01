@@ -2,7 +2,7 @@
 % Please edit documentation in R/maps.R
 \name{prepInputsLCC}
 \alias{prepInputsLCC}
-\title{Simple \code{prepInputs} for LCC2005 or LCC2010 data}
+\title{Simple \code{prepInputs} for Canadian LCC data}
 \usage{
 prepInputsLCC(
   year = 2005,
@@ -14,7 +14,7 @@ prepInputsLCC(
 )
 }
 \arguments{
-\item{year}{Numeric, either 2005 or 2010}
+\item{year}{Numeric, either 2010 or 2015. See note re: backwards compatibility for 2005.}
 
 \item{destinationPath}{Character string of a directory in which to download
 and save the file that comes from \code{url} and is also where the function
@@ -43,8 +43,13 @@ for writing the object to disk. If
 a character string, it will use this as its file name. See
 \code{\link[reproducible]{determineFilename}}.}
 
-\item{...}{Passed to raster::crop}
+\item{...}{Passed to \code{raster::crop}}
 }
 \description{
 A wrapper around \code{prepInputs} for the Canadian Land Cover Classification product(s).
+}
+\note{
+As of May 2021, NRCAN no longer provides/hosts the LCC2005 data.
+A privately hosted version of the data is available to maintain backwards compatibility,
+but new users/projects should use the 2010 (or newer) data.
 }
