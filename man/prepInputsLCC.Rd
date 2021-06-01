@@ -5,7 +5,7 @@
 \title{Simple \code{prepInputs} for Canadian LCC data}
 \usage{
 prepInputsLCC(
-  year = 2005,
+  year = 2010,
   destinationPath = asPath("."),
   studyArea = NULL,
   rasterToMatch = NULL,
@@ -43,7 +43,7 @@ for writing the object to disk. If
 a character string, it will use this as its file name. See
 \code{\link[reproducible]{determineFilename}}.}
 
-\item{...}{Passed to \code{raster::crop}}
+\item{...}{Passed to raster::crop}
 }
 \description{
 A wrapper around \code{prepInputs} for the Canadian Land Cover Classification product(s).
