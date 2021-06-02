@@ -347,7 +347,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
                                   filename2 = NULL,
                                   fireURL = NULL,
                                   fireFun = "sf::st_read",
-                                  rasterToMatch, fireField = "YEAR",
+                                  rasterToMatch = NULL, fireField = "YEAR",
                                   startTime) {
   if (is.null(ageURL))
     ageURL <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
