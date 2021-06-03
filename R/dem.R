@@ -24,5 +24,5 @@ prepInputsCanDEM <- function(studyArea, rasterToMatch, destinationPath) {
     fun = "raster::raster", method = "bilinear"
   )
   crs(dem) <- lonlat
-  dem <- postProcess(dem, studyArea = studyArea_lonlat, rasterToMatch = rasterToMatch, useSAcrs = TRUE)
+  dem <- postProcess(dem, studyArea = studyArea_lonlat, rasterToMatch = rasterToMatch)
 }
