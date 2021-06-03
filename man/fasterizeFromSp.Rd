@@ -14,7 +14,7 @@ fasterizeFromSp(sp, raster, fieldName)
 \item{fieldName}{the field to use (will be ignored if the shapefile has no fields)}
 }
 \value{
-TODO: is it a \code{RasterLayer}?
+\code{RasterLayer}
 }
 \description{
 Rasterize polygons using \code{fasterize}

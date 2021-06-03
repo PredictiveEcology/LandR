@@ -1,7 +1,7 @@
 utils::globalVariables(c(
   ".", "..pgdAndScAndLeading", ":=", "B", "HQ", "leading", "LQ", "mixed", "N",
   "pixelGroup", "pure", "speciesCode", "speciesGroupB", "speciesProportion", "SPP",
-  "totalB", "totalcover", "Type"
+  "totalB", "totalcover", "Type", "vals"
 ))
 
 #' Define flammability map
@@ -1191,7 +1191,7 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
 #' @param raster the template raster to use
 #' @param fieldName the field to use (will be ignored if the shapefile has no fields)
 #'
-#' @return TODO: is it a \code{RasterLayer}?
+#' @return \code{RasterLayer}
 #'
 #' @export
 #' @importFrom fasterize fasterize
@@ -1208,4 +1208,35 @@ fasterizeFromSp <- function(sp, raster, fieldName) {
     fasterize::fasterize(tempSf, raster)
   } else
     fasterize::fasterize(tempSf, raster, field = fieldName)
+}
+
+#' Aggregate a raster
+#'
+#' Uses \pkg{data.table} to perform aggregation calculations, which is faster than
+#' \code{raster::aggregate}.
+#'
+#' @param ras \code{RasterLayer} to aggregate
+#' @param newRas \code{RasterLayer} to match
+#' @param fn function to use to aggregate pixel values
+#'
+#' @return \code{RasterLayer}
+#'
+#' @export
+#' @importFrom data.table data.table
+#' @importFrom raster cellFromRowCol raster res rowColFromCell
+aggregateRasByDT <- function(ras, newRas, fn = sum) {
+  whNonNA <- which(!is.na(ras[]))
+  rc2 <- rowColFromCell(ras, whNonNA)
+
+  if (!all(((res(newRas) / res(ras)) %% 1) == 0))
+    stop("The resolutions of the original raster and new raster are not integer multiples")
+
+  disaggregateFactor <- unique(res(newRas) / res(ras))
+  dt <- data.table(vals = ras[][whNonNA], ceiling(rc2 / disaggregateFactor))
+  dt2 <- dt[, list(vals = fn(vals)), by = c("row", "col")]
+  pixels <- cellFromRowCol(newRas, row = dt2$row, col = dt2$col)
+  newRasOut <- raster(newRas)
+  newRasOut[pixels] <- dt2$vals
+  names(newRasOut) <- names(ras)
+  newRasOut
 }
