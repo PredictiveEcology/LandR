@@ -60,7 +60,7 @@ BioSIM_getWind <- function(dem, years, climModel = "GCM4", rcp = "RCP45") {
 
     # Do call to BioSIM using "ClimaticWind_Annual"
     windModel <- Cache(BioSIM::getModelList)[16] ## TODO: until this gets fixed in J4R, need to init java server here
-    stWind <- system.time({
+    st <- system.time({
       ## TODO: need to split, apply, and recombine when nrow(locations) > 5000
       wind <- Cache(
         BioSIM::getModelOutput,
@@ -76,7 +76,7 @@ BioSIM_getWind <- function(dem, years, climModel = "GCM4", rcp = "RCP45") {
       )
     })
 
-    message("Fetched ", NROW(wind), " locations in ", stWind[3], "s.")
+    message("Fetched ", NROW(wind), " locations in ", st[3], "s.")
 
     # Make RasterStack
     setDT(wind)
