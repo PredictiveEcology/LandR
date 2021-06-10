@@ -107,13 +107,28 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 
 #' Change species table of parameters/traits
 #'
-#' Changes longevity values in the species table according to Burton & Cumming (1995).
-#' Only the species and values present in Boreal Shield West (BSW), Boreal Plains (BP) and
-#' Montane Cordillera (MC) \code{speciesTable$Area} are being changed.
-#' All others follow Dominic Cyr and Yan Boulanger's trait values
-#' (\url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
+#' Changes longevity and shade tolerance values in the species table.
+#' Longevity values are changed to follow Burton & Cumming (1995) for the following species:
+#' Abies balsamea , Abies lasiocarpa, Betula papyrifera, Larix laricina, Larix occidentalis,
+#' Picea engelmannii, Picea glauca, Picea mariana, Pinus banksiana, Pinus contorta, Pinus resinosa,
+#' Pinus strobus,  Populus balsamifera v. balsamifera, Populus tremuloides, Pseudotsuga menziesii var. glauca,
+#' Pseudotsuga menziesii,, Thuja plicata, Tsuga heterophylla, Tsuga mertensiana x heterophylla
+#' and only for the  Boreal Shield West (BSW), Boreal Plains (BP) and Montane Cordillera (MC)
+#' \code{speciesTable$Area}s.
 #' Note that BSW and BP areas correspond more closely to the region considered in Table 2 of
 #' Burton & Cumming (1995), while MC will correspond to both tables.
+#'
+#' Of the above species, shade tolerance values are changed for Abies sp, Picea sp, and Tsuga sp.
+#' to reflect western boreal shade tolerances better.
+#'
+#' ATTENTION: this function overrides longevity and shade tolerance values
+#' even if none of the species in the \code{species} table are from the BSW, BP or MC areas.
+#'
+#' When different trait values exist for a given species, the minimum value across \code{Area}'s is kept.
+#'
+#' All other species/Area trait values follow Dominic Cyr and Yan Boulanger's trait values available at:
+#' (\url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
+#'
 #'
 #' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
 #'
