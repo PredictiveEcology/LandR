@@ -55,7 +55,7 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
                            "wooddecayrate", "mortalityshape", "growthcurve", "leafLignin",
                            "hardsoft")
 
-#' @param speciesTable  A raw species traits table
+#' @template speciesTable
 #'
 #' @param speciesLayers Deprecated.
 #' @param areas A character vector of areas to use. Can be one or more of
@@ -113,12 +113,13 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #'
 #' Changes longevity and shade tolerance values in the species table.
 #' Longevity values are changed to follow Burton & Cumming (1995) for the following species:
-#' Abies balsamea , Abies lasiocarpa, Betula papyrifera, Larix laricina, Larix occidentalis,
-#' Picea engelmannii, Picea glauca, Picea mariana, Pinus banksiana, Pinus contorta, Pinus resinosa,
-#' Pinus strobus,  Populus balsamifera v. balsamifera, Populus tremuloides, Pseudotsuga menziesii var. glauca,
-#' Pseudotsuga menziesii,, Thuja plicata, Tsuga heterophylla, Tsuga mertensiana x heterophylla
-#' and only for the  Boreal Shield West (BSW), Boreal Plains (BP) and Montane Cordillera (MC)
-#' \code{speciesTable$Area}s.
+#' \emph{Abies balsamea}, \emph{Abies lasiocarpa}, \emph{Betula papyrifera}, \emph{Larix laricina},
+#' \emph{Larix occidentalis}, \emph{Picea engelmannii}, \emph{Picea glauca}, \emph{Picea mariana},
+#' \emph{Pinus banksiana}, \emph{Pinus contorta}, \emph{Pinus resinosa}, \emph{Pinus strobus},
+#' \emph{Populus balsamifera v. balsamifera}, \emph{Populus tremuloides}, \emph{Pseudotsuga menziesii var. glauca},
+#' \emph{Pseudotsuga menziesii}, \emph{Thuja plicata}, \emph{Tsuga heterophylla},
+#' \emph{Tsuga mertensiana x heterophylla}, and only for the  Boreal Shield West (BSW), Boreal Plains (BP)
+#'  and Montane Cordillera (MC) \code{speciesTable$Area}s.
 #' Note that BSW and BP areas correspond more closely to the region considered in Table 2 of
 #' Burton & Cumming (1995), while MC will correspond to both tables.
 #'
@@ -135,9 +136,9 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #' (\url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
 #'
 #'
-#' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
+#' @template species
 #'
-#' @param speciesTable TODO: DESCRIPTION NEEDED
+#' @template speciesTable
 #'
 #' @template sppEquiv
 #'

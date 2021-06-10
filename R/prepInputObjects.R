@@ -6,7 +6,7 @@ utils::globalVariables(c(
 #' Check if all species in have trait values
 #'
 #' @param speciesLayers stack of species layers rasters
-#' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
+#' @template species
 #' @param sppColorVect A named vector of colours to use for plotting.
 #'                     The names must conform with \code{names(speciesLayers)} and should also
 #'                     contain a colour for 'Mixed'.
@@ -150,7 +150,7 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
 #' @param cohortDataBiomass a subset of \code{cohortData}
 #' @param cohortDataShort a subset of \code{cohortData}
 #' @param cohortDataShortNoCover a subset of \code{cohortData}
-#' @param species a \code{data.table} of species traits, e.g., longevity, shade tolerance, etc.
+#' @template species
 #' @param modelCover statistical model of species presence/absence
 #' @param modelBiomass statistical model of species biomass
 #' @param successionTimestep The time between successive seed dispersal events.

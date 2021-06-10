@@ -73,7 +73,7 @@ makeDummyRstLCC <- function(rasterToMatch) {
 #' information per \code{pixelID}.
 #' See \code{ecoregionProducer} (it uses \code{ecoregionProducer} internally).
 #'
-#' @param ecoregionMap a raster of all the unique groupings.
+#' @template ecoregionMap
 #' @param rstLCC a raster land-cover class per pixel,
 #'
 #' @export
