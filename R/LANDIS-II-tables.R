@@ -75,6 +75,10 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
 prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
                              sppEquiv = NULL, sppEquivCol = "LandR",
                              areas = c("BSW", "BP", "MC")) {
+  if (!"Area" %in% names(speciesTable)) {
+    stop("Please add an 'Area' column of ecoprovinces to 'sim$speciesTable'")
+  }
+
   if (is.null(sppEquiv))
     sppEquiv <- data.table(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
 
