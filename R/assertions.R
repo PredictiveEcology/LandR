@@ -91,7 +91,7 @@ assert2 <- function(cohortDataNo34to36, classesToReplace = 34:36,
 #'
 #' Assert that all species have maxB and maxANPP values in the landscape
 #'
-#' @param speciesEcoregion A \code{speciesEcoregion} object
+#' @template speciesEcoregion
 #'
 #' @template cohortData
 #' @template doAssertion
@@ -140,7 +140,7 @@ assertUniqueCohortData <- function(cohortData, columns,
 
 #' Assert that \code{ecoregionGroups} match across different objects
 #'
-#' @param ecoregionMap The \code{ecoregionMap}, a raster of all the unique groupings
+#' @template ecoregionMap
 #' @template speciesEcoregion
 #' @param minRelativeB TODO: add description
 #'
@@ -425,7 +425,7 @@ assertRstLCChange <- function(rstLCChange, rasterToMatch,
 #'
 #' @param cohortData A \code{cohortData} object
 #'
-#' @param speciesEcoregion A \code{speciesEcoregion} object
+#' @template speciesEcoregion
 #'
 #' @template doAssertion
 #'

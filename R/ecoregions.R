@@ -137,8 +137,8 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
 #' @rawNamespace import(data.table, except = getNamespaceExports("data.table"))
 #' @importFrom pemisc factorValues2
 #' @importFrom raster stack raster
-#' @param ecoregionMap The Factor RasterLayer of the ecoregionMap
-#' @param speciesEcoregion The data.table with the speciesEcoregion information
+#' @template ecoregionMap
+#' @template speciesEcoregion
 #' @param columns The columns to use in the \code{speciesEcoregion} data.table.
 #'   Default is \code{c("establishprob", "maxB", "maxANPP")}
 speciesEcoregionStack <- function(ecoregionMap, speciesEcoregion,
