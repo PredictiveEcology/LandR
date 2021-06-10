@@ -127,7 +127,10 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #'
 #' @export
 #' @importFrom data.table data.table
+#' @importFrom crayon red
+#'
 #' @rdname speciesTableUpdate
+
 speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   if (is.null(sppEquiv))
     sppEquiv <- data.table(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
@@ -167,8 +170,24 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
                                              shadetolerance = min(shadetolerance)), by = "species"]
 
   ## join and replace
-  species <- species[, c("longevity", "shadetolerance") := .(speciesTableShort[, longevity],
-                                                             speciesTableShort[, shadetolerance])]
+  ## if "Area"is a column in the (final) traits table, then check and warn the user for area
+  ## mismatches
+    if ("Area" %in% names(species)) {
+      test <- !any(unique(species$Area) %in% c("BSW", "BP", "MC"))
+      if (test) {
+        message(red("/!\\ Areas in 'species$Area' do not match 'BSW', 'BP' or 'MC',",
+                    "\nLongevity and shadetolerance will be changed for matching species.",
+                    "\nsee ?LandR::speciesTableUpdate for more info and check if this is okay."))
+      }
+    }
+
+  ## join to dealt with eventual non-matching species ordering
+  ## subset species table to common species, then add missing species lines
+  ## (which did not have traits changed above)
+  cols <- setdiff(names(species), c("longevity", "shadetolerance"))
+  speciesTemp <- species[, ..cols]
+  speciesTemp <- speciesTableShort[speciesTemp, on = "species", nomatch = 0]
+  species <- rbind(species[!species %in% speciesTemp$species], speciesTemp)[order(species)]
 
   ## make sure updated columns have the correct class
   species[, `:=`(longevity = asInteger(longevity),
