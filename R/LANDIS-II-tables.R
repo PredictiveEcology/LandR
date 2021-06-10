@@ -107,13 +107,28 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 
 #' Change species table of parameters/traits
 #'
-#' Changes longevity values in the species table according to Burton & Cumming (1995).
-#' Only the species and values present in Boreal Shield West (BSW), Boreal Plains (BP) and
-#' Montane Cordillera (MC) \code{speciesTable$Area} are being changed.
-#' All others follow Dominic Cyr and Yan Boulanger's trait values
-#' (\url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
+#' Changes longevity and shade tolerance values in the species table.
+#' Longevity values are changed to follow Burton & Cumming (1995) for the following species:
+#' Abies balsamea , Abies lasiocarpa, Betula papyrifera, Larix laricina, Larix occidentalis,
+#' Picea engelmannii, Picea glauca, Picea mariana, Pinus banksiana, Pinus contorta, Pinus resinosa,
+#' Pinus strobus,  Populus balsamifera v. balsamifera, Populus tremuloides, Pseudotsuga menziesii var. glauca,
+#' Pseudotsuga menziesii,, Thuja plicata, Tsuga heterophylla, Tsuga mertensiana x heterophylla
+#' and only for the  Boreal Shield West (BSW), Boreal Plains (BP) and Montane Cordillera (MC)
+#' \code{speciesTable$Area}s.
 #' Note that BSW and BP areas correspond more closely to the region considered in Table 2 of
 #' Burton & Cumming (1995), while MC will correspond to both tables.
+#'
+#' Of the above species, shade tolerance values are changed for Abies sp, Picea sp, and Tsuga sp.
+#' to reflect western boreal shade tolerances better.
+#'
+#' ATTENTION: this function overrides longevity and shade tolerance values
+#' even if none of the species in the \code{species} table are from the BSW, BP or MC areas.
+#'
+#' When different trait values exist for a given species, the minimum value across \code{Area}'s is kept.
+#'
+#' All other species/Area trait values follow Dominic Cyr and Yan Boulanger's trait values available at:
+#' (\url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
+#'
 #'
 #' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
 #'
@@ -127,7 +142,10 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #'
 #' @export
 #' @importFrom data.table data.table
+#' @importFrom crayon red
+#'
 #' @rdname speciesTableUpdate
+
 speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   if (is.null(sppEquiv))
     sppEquiv <- data.table(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
@@ -138,24 +156,33 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   names(speciesTable) <- .speciesTableColNames
 
   ## make temporary table that will have new parameters for Boreal spp.
+  ## longevity values from Burton & Cumming (1995)
   speciesTableShort <- speciesTable[Area %in% c("BSW", "BP", "MC"), .(species, longevity, shadetolerance)]
-  speciesTableShort[species == "ABIE.BAL", c("longevity", "shadetolerance") := .(200, 3)] #default 150, 5
-  speciesTableShort[species == "ABIE.LAS", c("longevity", "shadetolerance") := .(240, 3)] #default 250, 4
+  speciesTableShort[species == "ABIE.BAL", longevity := 200] #default 150
+  speciesTableShort[species == "ABIE.LAS", longevity := 240] #default 250
   speciesTableShort[species == "BETU.PAP", longevity := 140] #default 150
   speciesTableShort[species == "LARI.LAR", longevity := 350] #default 150
   speciesTableShort[species == "LARI.OCC", longevity := 450] #default 900!
-  speciesTableShort[species == "PICE.ENG", c("longevity", "shadetolerance") := .(460, 3)] #default 450, 4
-  speciesTableShort[species == "PICE.GLA", c("longevity", "shadetolerance") := .(400, 2)] #default 250, 3
-  speciesTableShort[species == "PICE.MAR", c("longevity", "shadetolerance") := .(250, 3)] #default 200, 4
-  speciesTableShort[species == "PINU.BAN", longevity := 150]
+  speciesTableShort[species == "PICE.ENG", longevity := 460] #default 450
+  speciesTableShort[species == "PICE.GLA", longevity := 400] #default 250
+  speciesTableShort[species == "PICE.MAR", longevity := 250] #default 200
+  speciesTableShort[species == "PINU.BAN", longevity := 150]  #default 150 - no change
   speciesTableShort[species == "PINU.CON.LAT", longevity := 335] #default 300
   speciesTableShort[species == "PINU.PON", longevity := 575] #default 500
   speciesTableShort[species == "POPU.BAL", longevity := 200] #default 130
   speciesTableShort[species == "POPU.TRE", longevity := 200] #default 150
   speciesTableShort[species == "PSEU.MEN", longevity := 525] ## default 600, only in MC area, corresponding to var. glauca
   speciesTableShort[species == "THUJ.PLI", longevity := 1500] ##default 700, 1500 may be incorrect for MC
-  speciesTableShort[species == "TSUG.HET", c("longevity", "shadetolerance") := .(500, 4)] #default 475, 5
-  speciesTableShort[species == "TSUG.MER", c("longevity", "shadetolerance") := .(800, 3)] #default 700, 4
+  speciesTableShort[species == "TSUG.HET", longevity := 500] #default 475
+  speciesTableShort[species == "TSUG.MER", longevity := 800] #default 700
+
+  speciesTableShort[species == "ABIE.BAL", shadetolerance := 3] #default 5
+  speciesTableShort[species == "ABIE.LAS", shadetolerance := 3] #default 4
+  speciesTableShort[species == "PICE.ENG", shadetolerance := 3] #default 4
+  speciesTableShort[species == "PICE.GLA", shadetolerance := 2] #default 3
+  speciesTableShort[species == "PICE.MAR", shadetolerance := 3] #default 4
+  speciesTableShort[species == "TSUG.HET", shadetolerance := 4] #default 5
+  speciesTableShort[species == "TSUG.MER", shadetolerance := 3] #default 4
 
   ## subset, rename and "merge" species by using the minimum value
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
@@ -167,8 +194,24 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
                                              shadetolerance = min(shadetolerance)), by = "species"]
 
   ## join and replace
-  species <- species[, c("longevity", "shadetolerance") := .(speciesTableShort[, longevity],
-                                                             speciesTableShort[, shadetolerance])]
+  ## if "Area"is a column in the (final) traits table, then check and warn the user for area
+  ## mismatches
+    if ("Area" %in% names(species)) {
+      test <- !any(unique(species$Area) %in% c("BSW", "BP", "MC"))
+      if (test) {
+        message(red("/!\\ Areas in 'species$Area' do not match 'BSW', 'BP' or 'MC',",
+                    "\nLongevity and shadetolerance will be changed for matching species.",
+                    "\nsee ?LandR::speciesTableUpdate for more info and check if this is okay."))
+      }
+    }
+
+  ## join to dealt with eventual non-matching species ordering
+  ## subset species table to common species, then add missing species lines
+  ## (which did not have traits changed above)
+  cols <- setdiff(names(species), c("longevity", "shadetolerance"))
+  speciesTemp <- species[, ..cols]
+  speciesTemp <- speciesTableShort[speciesTemp, on = "species", nomatch = 0]
+  species <- rbind(species[!species %in% speciesTemp$species], speciesTemp)[order(species)]
 
   ## make sure updated columns have the correct class
   species[, `:=`(longevity = asInteger(longevity),

@@ -381,7 +381,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
                                   filename2 = NULL,
                                   fireURL = NULL,
                                   fireFun = "sf::st_read",
-                                  rasterToMatch, fireField = "YEAR",
+                                  rasterToMatch = NULL, fireField = "YEAR",
                                   startTime) {
   if (is.null(ageURL))
     ageURL <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
@@ -393,31 +393,40 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
     fireURL <- paste0("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/",
                       "current_version/NFDB_poly.zip")
 
+  if (is.null(rasterToMatch))
+    maskWithRTM <- FALSE
+
   with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
-    standAgeMap <- Cache(prepInputs, ...,
-                         maskWithRTM = maskWithRTM,
-                         method = method,
-                         datatype = datatype,
-                         filename2 = filename2,
-                         destinationPath = destinationPath,
-                         url = ageURL,
-                         fun = ageFun,
-                         rasterToMatch = rasterToMatch)
+    standAgeMap <- Cache(
+      prepInputs, ...,
+      maskWithRTM = maskWithRTM,
+      method = method,
+      datatype = datatype,
+      filename2 = filename2,
+      destinationPath = destinationPath,
+      url = ageURL,
+      fun = ageFun,
+      rasterToMatch = rasterToMatch
+    )
   })
   standAgeMap[] <- asInteger(standAgeMap[])
 
-  if (!(is.null(fireURL) || is.na(fireURL))) {
-    fireYear <- Cache(prepInputsFireYear, ...,
-                      url = fireURL,
-                      fun = fireFun,
-                      destinationPath = destinationPath,
-                      rasterToMatch = rasterToMatch)
+  if (!is.null(rasterToMatch)) {
+    if (!(is.null(fireURL) || is.na(fireURL))) {
+      fireYear <- Cache(prepInputsFireYear, ...,
+                        url = fireURL,
+                        fun = fireFun,
+                        destinationPath = destinationPath,
+                        rasterToMatch = rasterToMatch)
 
-    if (!is.null(fireYear)) {
-      toChange <- !is.na(fireYear[]) & fireYear[] <= asInteger(startTime)
-      standAgeMap[] <- asInteger(standAgeMap[])
-      standAgeMap[toChange] <- asInteger(startTime) - asInteger(fireYear[][toChange])
+      if (!is.null(fireYear)) {
+        toChange <- !is.na(fireYear[]) & fireYear[] <= asInteger(startTime)
+        standAgeMap[] <- asInteger(standAgeMap[])
+        standAgeMap[toChange] <- asInteger(startTime) - asInteger(fireYear[][toChange])
+      }
     }
+  } else {
+    message("No rasterToMatch supplied, so ages NOT adjusted using fire data.")
   }
   standAgeMap
 }
@@ -437,7 +446,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @importFrom reproducible Cache prepInputs
 #' @importFrom sf st_cast st_transform
 #' @importFrom magrittr %>%
-prepInputsFireYear <- function(..., rasterToMatch, fireField = 'YEAR', earliestYear = 1950) {
+prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950) {
   dots <- list(...)
   if (!is.null(dots$fun)) {
     a <- if (grepl("st_read", dots$fun)) {
