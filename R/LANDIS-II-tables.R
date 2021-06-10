@@ -55,7 +55,7 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
                            "wooddecayrate", "mortalityshape", "growthcurve", "leafLignin",
                            "hardsoft")
 
-#' @param speciesTable  A raw species traits table
+#' @template speciesTable
 #'
 #' @param speciesLayers Deprecated.
 #' @param areas A character vector of areas to use. Can be one or more of
@@ -75,6 +75,10 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
 prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
                              sppEquiv = NULL, sppEquivCol = "LandR",
                              areas = c("BSW", "BP", "MC")) {
+  if (!"Area" %in% names(speciesTable)) {
+    stop("Please add an 'Area' column of ecoprovinces to 'sim$speciesTable'")
+  }
+
   if (is.null(sppEquiv))
     sppEquiv <- data.table(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
 
@@ -109,30 +113,32 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #'
 #' Changes longevity and shade tolerance values in the species table.
 #' Longevity values are changed to follow Burton & Cumming (1995) for the following species:
-#' Abies balsamea , Abies lasiocarpa, Betula papyrifera, Larix laricina, Larix occidentalis,
-#' Picea engelmannii, Picea glauca, Picea mariana, Pinus banksiana, Pinus contorta, Pinus resinosa,
-#' Pinus strobus,  Populus balsamifera v. balsamifera, Populus tremuloides, Pseudotsuga menziesii var. glauca,
-#' Pseudotsuga menziesii,, Thuja plicata, Tsuga heterophylla, Tsuga mertensiana x heterophylla
-#' and only for the  Boreal Shield West (BSW), Boreal Plains (BP) and Montane Cordillera (MC)
-#' \code{speciesTable$Area}s.
+#' \emph{Abies balsamea}, \emph{Abies lasiocarpa}, \emph{Betula papyrifera}, \emph{Larix laricina},
+#' \emph{Larix occidentalis}, \emph{Picea engelmannii}, \emph{Picea glauca}, \emph{Picea mariana},
+#' \emph{Pinus banksiana}, \emph{Pinus contorta}, \emph{Pinus resinosa}, \emph{Pinus strobus},
+#' \emph{Populus balsamifera v. balsamifera}, \emph{Populus tremuloides}, \emph{Pseudotsuga menziesii var. glauca},
+#' \emph{Pseudotsuga menziesii}, \emph{Thuja plicata}, \emph{Tsuga heterophylla},
+#' \emph{Tsuga mertensiana x heterophylla}, and only for the  Boreal Shield West (BSW), Boreal Plains (BP)
+#'  and Montane Cordillera (MC) \code{speciesTable$Area}s.
 #' Note that BSW and BP areas correspond more closely to the region considered in Table 2 of
 #' Burton & Cumming (1995), while MC will correspond to both tables.
 #'
 #' Of the above species, shade tolerance values are changed for Abies sp, Picea sp, and Tsuga sp.
 #' to reflect western boreal shade tolerances better.
 #'
-#' ATTENTION: this function overrides longevity and shade tolerance values
-#' even if none of the species in the \code{species} table are from the BSW, BP or MC areas.
+#' When different longectivity/shade tolerance trait values exist for a given species, the minimum
+#' value across \code{Area}'s (BSW, BP, MC) is kept.
 #'
-#' When different trait values exist for a given species, the minimum value across \code{Area}'s is kept.
+#' ATTENTION: if none of species in \code{species} are from BSW, BP or MC area this function will not
+#' change any values.
 #'
 #' All other species/Area trait values follow Dominic Cyr and Yan Boulanger's trait values available at:
 #' (\url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
 #'
 #'
-#' @param species a \code{data.table} that has species traits such as longevity, shade tolerance, etc.
+#' @template species
 #'
-#' @param speciesTable TODO: DESCRIPTION NEEDED
+#' @template speciesTable
 #'
 #' @template sppEquiv
 #'
@@ -147,6 +153,19 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #' @rdname speciesTableUpdate
 
 speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
+  ## if "Area"is a column in the (final) traits table, then check and warn the user for area
+  ## mismatches
+  if (!"Area" %in% names(species)) {
+    stop("Can't find 'Area' column in 'sim$species'")
+
+    test <- !any(unique(species$Area) %in% c("BSW", "BP", "MC"))
+    if (test) {
+      message(red("Areas in 'species$Area' do not match any of 'BSW', 'BP' or 'MC',",
+                  "\nno changes made to 'sim$species'."))
+      return(species)
+    }
+  }
+
   if (is.null(sppEquiv))
     sppEquiv <- data.table(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
 
@@ -192,18 +211,6 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   speciesTableShort[, species := equivalentName(speciesTableShort$species, sppEquiv, sppEquivCol)]
   speciesTableShort <- speciesTableShort[, .(longevity = min(longevity),
                                              shadetolerance = min(shadetolerance)), by = "species"]
-
-  ## join and replace
-  ## if "Area"is a column in the (final) traits table, then check and warn the user for area
-  ## mismatches
-    if ("Area" %in% names(species)) {
-      test <- !any(unique(species$Area) %in% c("BSW", "BP", "MC"))
-      if (test) {
-        message(red("/!\\ Areas in 'species$Area' do not match 'BSW', 'BP' or 'MC',",
-                    "\nLongevity and shadetolerance will be changed for matching species.",
-                    "\nsee ?LandR::speciesTableUpdate for more info and check if this is okay."))
-      }
-    }
 
   ## join to dealt with eventual non-matching species ordering
   ## subset species table to common species, then add missing species lines
