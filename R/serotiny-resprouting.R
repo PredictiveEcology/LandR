@@ -11,7 +11,7 @@ utils::globalVariables(c(
 #' @param postFireRegenSummary a \code{data.table} summarizing for which species
 #'     serotiny/resprouting were activated and in how many pixels, for each year.
 #'     Only necessary if \code{calibrate = TRUE}.
-#' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
+#' @template species
 #' @template sufficientLight
 #' @template speciesEcoregion
 #' @param currentTime integer. The current simulation time obtained with \code{time(sim)}
@@ -125,7 +125,7 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
 #' @param postFireRegenSummary a data.table summarizing for which species serotiny/resprouting were
 #'    activated and in how many pixels, for each year. Only necessary if \code{calibrate = TRUE}.
 #' @param serotinyPixel a vector of pixels where serotiny was activated;
-#' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
+#' @template species
 #' @template sufficientLight
 #' @param currentTime integer. The current simulation time obtained with \code{time(sim)}
 #' @param treedFirePixelTableSinceLastDisp a vector of pixels that burnt and were forested in the previous time step.
