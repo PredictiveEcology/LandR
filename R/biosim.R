@@ -54,7 +54,7 @@ BioSIM_extractPoints <- function(x) {
 #' @importFrom reproducible Cache
 #' @importFrom sf st_as_sf st_coordinates st_crs st_transform
 #' @importFrom sp CRS SpatialPoints
-BioSIM_getWind <- function(dem, years, climModel = "GCM4", rcp = "RCP45") {
+BioSIM_getWindAnnual <- function(dem, years, climModel = "GCM4", rcp = "RCP45") {
   if (requireNamespace("BioSIM", quietly = TRUE)) {
     locations <- BioSIM_extractPoints(dem)
 
@@ -86,11 +86,11 @@ BioSIM_getWind <- function(dem, years, climModel = "GCM4", rcp = "RCP45") {
       windYr <- wind[Year == yr]
 
       # Convert BioSIM data to Vector dataset
-      spWind <- SpatialPoints(wind[Year == yr, c("Longitude", "Latitude")],
+      sfWind <- SpatialPoints(wind[Year == yr, c("Longitude", "Latitude")],
                               proj4string = CRS("+init=epsg:4326")) %>%
         sf::st_as_sf(.) %>%
         sf::st_transform(., crs = sf::st_crs(dem))
-      cells <- cellFromXY(dem, sf::st_coordinates(spWind))
+      cells <- cellFromXY(dem, sf::st_coordinates(sfWind))
       cols <- grep("^W[[:digit:]]", colnames(windYr), value = TRUE)
 
       # Convert to single main direction
@@ -102,6 +102,91 @@ BioSIM_getWind <- function(dem, years, climModel = "GCM4", rcp = "RCP45") {
       windStk[[yrChar]] <- windYrRas
     }
     windStk
+  } else {
+    stop("Package BioSIM not installed. Use `installBioSIM()` to install it.")
+  }
+}
+
+#' Get annual historic and projected MPB climate suitability maps from \code{BioSIM}
+#'
+#' Raster stacks for all 9 MPB climate indices. See \code{BioSIM::getModelHelp("MPB_SLR")}.
+#'
+#' @param dem \code{RasterLayer} of elevation data (m).
+#' @param years numeric vector corresponding to the years to retrieve.
+#' @param SLR character. Specifies which climate suitability index to extract.
+#'            Currently, one of \code{"S"}, \code{"L"}, \code{"R"}, or \code{"G"},
+#'            corresponding to Safranyik-P3P4, Logan-2b, Régnière Cold Tolerance Survival, or
+#'            their Geometric product (S\*L\*R), respectively.
+#' @param climModel climate model to use. one of \code{"GCM4"} or \code{"RCM4"}.
+#' @param rcp RCP scenario to use. one of \code{"RCP45"} or \code{"RCP85"}.
+#'
+#' @note Although the BioSIM MPB_SLR model provides several other indices
+#'       (see \code{BioSIM::getModelHelp("MPB_SLR")}), only 4 are currently used here.
+#'
+#' @return \code{RasterStack}
+#' @export
+#' @importFrom data.table setDT
+#' @importFrom raster cellFromXY raster stack
+#' @importFrom reproducible Cache
+#' @importFrom sf st_as_sf st_coordinates st_crs st_transform
+#' @importFrom sp CRS SpatialPoints
+BioSIM_getMPBSLR <- function(dem, years, SLR = "R", climModel = "GCM4", rcp = "RCP45") {
+  if (requireNamespace("BioSIM", quietly = TRUE)) {
+    SLR2use <- switch(SLR,
+                      S = "Safranyik_p_34",
+                      L = "Logan_P_2b",
+                      R = "CT_Survival",
+                      G = "Geo_prod_pL2b_pS34_pC",
+                      stop("SLR must be one of 'S', 'L', 'R', 'G'."))
+
+    locations <- BioSIM_extractPoints(dem)
+
+    # Do call to BioSIM using "MPB_SLR"
+    mpbSLRmodel <- Cache(BioSIM::getModelList)[46] ## TODO: until this gets fixed in J4R, need to init java server here
+    st <- system.time({
+      ## TODO: need to split, apply, and recombine when nrow(locations) > 5000
+      lapply(years, function(yr) { ## TODO: use future_lapply?
+        slr <- Cache(
+          BioSIM::getModelOutput,
+          fromYr = yr - 1,
+          toYr = yr,
+          id = locations$Name,
+          latDeg = locations$Lat,
+          longDeg = locations$Long,
+          elevM = locations$Elev,
+          modelName = mpbSLRmodel,
+          rep = 1, ## TODO: how many?
+          rcp = rcp,
+          climModel = climModel
+        )
+        setDT(slr)
+      }) %>%
+        rbindlist(.)
+    })
+
+    message("Fetched ", NROW(slr), " locations in ", st[3], "s.")
+
+    # Make RasterStack
+    slrStk <- stack(raster(dem))
+    for (yr in unique(slr$Year)) {
+      yrChar <- paste0("X", yr)
+      slrYr <- slr[Year == yr]
+
+      colID <- which(colnames(slrYr) == SLR2use)
+
+      # Convert BioSIM data to Vector dataset
+      sfSLR <- SpatialPoints(slr[Year == yr, c("Longitude", "Latitude")],
+                             proj4string = CRS("+init=epsg:4326")) %>%
+        sf::st_as_sf(.) %>%
+        sf::st_transform(., crs = sf::st_crs(dem))
+      cells <- cellFromXY(dem, sf::st_coordinates(sfSLR))
+
+      # Convert to Raster
+      slrYrRas <- raster(dem)
+      slrYrRas[cells] <- slrYr[[colID]]
+      slrStk[[yrChar]] <- slrYrRas
+    }
+    slrStk
   } else {
     stop("Package BioSIM not installed. Use `installBioSIM()` to install it.")
   }
