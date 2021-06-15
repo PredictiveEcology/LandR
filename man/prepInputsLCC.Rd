@@ -43,7 +43,7 @@ for writing the object to disk. If
 a character string, it will use this as its file name. See
 \code{\link[reproducible]{determineFilename}}.}
 
-\item{...}{Passed to raster::crop}
+\item{...}{Passed to \code{raster::crop}}
 }
 \description{
 A wrapper around \code{prepInputs} for the Canadian Land Cover Classification product(s).

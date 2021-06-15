@@ -25,7 +25,8 @@ raster operations (i.e., the one used throughout the simulation).}
 \item{rawBiomassMap}{a \code{rawBiomassMap} (e.g. the one used
 throughout the simulation)}
 
-\item{ecoregionMap}{a raster of all the unique groupings.}
+\item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique ecoregion groupings,
+which group together pixels of similar biophysical characteristics.}
 
 \item{rstLCC}{a raster land-cover class per pixel,}
 }

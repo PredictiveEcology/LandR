@@ -24,7 +24,7 @@ makeSpeciesEcoregion(
 
 \item{cohortDataShortNoCover}{a subset of \code{cohortData}}
 
-\item{species}{a \code{data.table} of species traits, e.g., longevity, shade tolerance, etc.}
+\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
 
 \item{modelCover}{statistical model of species presence/absence}
 
