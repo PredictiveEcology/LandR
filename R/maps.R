@@ -1,7 +1,7 @@
 utils::globalVariables(c(
   ".", "..pgdAndScAndLeading", ":=", "B", "HQ", "leading", "LQ", "mixed", "N",
   "pixelGroup", "pure", "speciesCode", "speciesGroupB", "speciesProportion", "SPP",
-  "totalB", "totalcover", "Type"
+  "totalB", "totalcover", "Type", "prefireB", "postfireB", "severityB"
 ))
 
 #' Define flammability map
@@ -1199,4 +1199,38 @@ fasterizeFromSp <- function(sp, raster, fieldName) {
     fasterize::fasterize(tempSf, raster)
   } else
     fasterize::fasterize(tempSf, raster, field = fieldName)
+}
+
+#' Calculate fire severity
+#'
+#' Calculates fire severity as the loss of pre-fire to
+#'   post-fire biomass.
+#'
+#' @template cohortData
+#' @template burnedPixelCohortData
+#'
+#' @export
+#' @return \code{data.table} with columns \code{pixelIndex},
+#'   \code{pixelGroup} and  \code{severityB}
+calcSeverityB <- function(cohortData, burnedPixelCohortData) {
+  severityData <- burnedPixelCohortData[, .(pixelIndex, pixelGroup)]
+
+  ## add initial and post-fire B to severityData
+  severityData <- cohortData[, .(speciesCode, B, pixelGroup)][severityData, on = "pixelGroup"]
+  setnames(severityData, "B", "prefireB")
+
+  severityData <- burnedPixelCohortData[, .(speciesCode, B, pixelIndex)][severityData, on = .(speciesCode, pixelIndex)]
+  setnames(severityData, "B", "postfireB")
+
+  ## sum B's across species, and drop species
+  severityData[, `:=`(prefireB = sum(prefireB),
+                      postfireB = sum(postfireB)), by = pixelIndex]
+  set(severityData, j = "speciesCode", value = NULL)
+  severityData <- unique(severityData)
+
+  ## calculate severity in terms of biomass
+  severityData[, severityB := prefireB - postfireB]
+
+  ## keep only certain columns
+  return(severityData[, .(pixelGroup, pixelIndex, severityB)])
 }
