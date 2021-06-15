@@ -29,8 +29,7 @@ installBioSIM <- function(lib) {
 BioSIM_extractPoints <- function(x) {
   nonNA <- which(!is.na(x[]))
   xy <- xyFromCell(x, cell = nonNA)
-  spxy <- SpatialPoints(xy)
-  crs(spxy) <- crs(x)
+  spxy <- SpatialPoints(xy, proj4string = crs(x))
   sfxy <- sf::st_as_sf(spxy)
   sfxy <- sf::st_transform(sfxy, crs = 4326)
 
@@ -107,6 +106,54 @@ BioSIM_getWindAnnual <- function(dem, years, climModel = "GCM4", rcp = "RCP45") 
   }
 }
 
+#' Get monthly historic and projected wind maps from \code{BioSIM}
+#'
+#' @param dem \code{RasterLayer} of elevation data (m).
+#' @param years numeric vector corresponding to the years to retrieve.
+#' @param months numeric vector corresponding to the months to retrieve
+#'               (e.g., \code{6:8} for June through August).
+#' @param climModel climate model to use. one of \code{"GCM4"} or \code{"RCM4"}.
+#' @param rcp RCP scenario to use. one of \code{"RCP45"} or \code{"RCP85"}.
+#'
+#' @return \code{RasterStack}
+#' @export
+#' @importFrom data.table setDT
+#' @importFrom raster cellFromXY raster stack
+#' @importFrom reproducible Cache
+#' @importFrom sf st_as_sf st_coordinates st_crs st_transform
+#' @importFrom sp CRS SpatialPoints
+BioSIM_getWindMonthly <- function(dem, years, months, climModel = "GCM4", rcp = "RCP45") {
+  if (requireNamespace("BioSIM", quietly = TRUE)) {
+    locations <- BioSIM_extractPoints(dem)
+
+    # Do call to BioSIM using "ClimaticWind_Annual"
+    windModel <- Cache(BioSIM::getModelList)[16] ## TODO: until this gets fixed in J4R, need to init java server here
+    st <- system.time({
+      ## TODO: need to split, apply, and recombine when nrow(locations) > 5000
+      wind <- Cache(
+        BioSIM::getModelOutput,
+        fromYr = years[1],
+        toYr = rev(years)[1],
+        id = locations$Name,
+        latDeg = locations$Lat,
+        longDeg = locations$Long,
+        elevM = locations$Elev,
+        modelName = windModel,
+        rcp = rcp,
+        climModel = climModel
+      )
+    })
+
+    message("Fetched ", NROW(wind), " locations in ", st[3], "s.")
+
+    # Make RasterStack
+    browser() ## TODO: pull in Eliot's code from mpbClimateData
+
+  } else {
+    stop("Package BioSIM not installed. Use `installBioSIM()` to install it.")
+  }
+}
+
 #' Get annual historic and projected MPB climate suitability maps from \code{BioSIM}
 #'
 #' Raster stacks for all 9 MPB climate indices. See \code{BioSIM::getModelHelp("MPB_SLR")}.
@@ -145,8 +192,8 @@ BioSIM_getMPBSLR <- function(dem, years, SLR = "R", climModel = "GCM4", rcp = "R
     mpbSLRmodel <- Cache(BioSIM::getModelList)[46] ## TODO: until this gets fixed in J4R, need to init java server here
     st <- system.time({
       ## TODO: need to split, apply, and recombine when nrow(locations) > 5000
-      lapply(years, function(yr) { ## TODO: use future_lapply?
-        slr <- Cache(
+      slr <- lapply(years, function(yr) { ## TODO: use future_lapply?
+        Cache(
           BioSIM::getModelOutput,
           fromYr = yr - 1,
           toYr = yr,
