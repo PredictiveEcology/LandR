@@ -11,9 +11,15 @@ speciesEcoregionStack(
 )
 }
 \arguments{
-\item{ecoregionMap}{The Factor RasterLayer of the ecoregionMap}
+\item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique ecoregion groupings,
+which group together pixels of similar biophysical characteristics.}
 
-\item{speciesEcoregion}{The data.table with the speciesEcoregion information}
+\item{speciesEcoregion}{A \code{data.table} with \code{species}-{ecoregion}-specific species
+trait values. Ecoregion refers to "ecolocation", a categorical variable grouping sites with similar
+biophysical characteristics. The table should have at least the following columns: \code{speciesCode} and
+\code{ecoregionGroup}, character representation of species and ecoregion groups respectively,
+\code{maxB} the maximum biomass for the species in a given 'ecoregion', \code{maxANPP} the maximum
+aboveground net primary productivity and \code{SEP} the species establishment probability.}
 
 \item{columns}{The columns to use in the \code{speciesEcoregion} data.table.
 Default is \code{c("establishprob", "maxB", "maxANPP")}}
