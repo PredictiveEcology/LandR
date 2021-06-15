@@ -29,8 +29,7 @@ installBioSIM <- function(lib) {
 BioSIM_extractPoints <- function(x) {
   nonNA <- which(!is.na(x[]))
   xy <- xyFromCell(x, cell = nonNA)
-  spxy <- SpatialPoints(xy)
-  crs(spxy) <- crs(x)
+  spxy <- SpatialPoints(xy, proj4string = crs(x))
   sfxy <- sf::st_as_sf(spxy)
   sfxy <- sf::st_transform(sfxy, crs = 4326)
 
@@ -145,8 +144,8 @@ BioSIM_getMPBSLR <- function(dem, years, SLR = "R", climModel = "GCM4", rcp = "R
     mpbSLRmodel <- Cache(BioSIM::getModelList)[46] ## TODO: until this gets fixed in J4R, need to init java server here
     st <- system.time({
       ## TODO: need to split, apply, and recombine when nrow(locations) > 5000
-      lapply(years, function(yr) { ## TODO: use future_lapply?
-        slr <- Cache(
+      slr <- lapply(years, function(yr) { ## TODO: use future_lapply?
+        Cache(
           BioSIM::getModelOutput,
           fromYr = yr - 1,
           toYr = yr,
