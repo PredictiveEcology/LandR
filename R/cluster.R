@@ -100,7 +100,7 @@ clusterSetup <- function(workers, objsToExport, reqdPkgs,
                          # fn = ".allObjs.rda",
                          numCoresNeeded = ceiling(detectCores() * 0.8),
                          adjustments = rep(1, length(workers))) {
-  fn <- tempfile(fileext = ".rda")
+  fn <- reproducible::.suffix(paste0(".allObjs.rda"), paste0("_", amc::rndstr(1)))
   clusterIPs <- clusterSetupSingles(workers = workers, objsToExport = objsToExport,
                                     reqdPkgs = reqdPkgs, fn = fn,
                                     libPaths = libPaths, doSpeedTest = doSpeedTest,
