@@ -102,7 +102,7 @@ clusterSetup <- function(workers, objsToExport, reqdPkgs,
                          adjustments = rep(1, length(workers))) {
   fn <- tempfile(fileext = ".rda")
   clusterIPs <- clusterSetupSingles(workers = workers, objsToExport = objsToExport,
-                                    reqdPkgs = reqdPkgs, # fn = fn,
+                                    reqdPkgs = reqdPkgs, fn = fn,
                                     libPaths = libPaths, doSpeedTest = doSpeedTest,
                                     numCoresNeeded = numCoresNeeded)#, adjustments = adjustments)
 
