@@ -100,13 +100,7 @@ clusterSetup <- function(workers, objsToExport, reqdPkgs,
                          # fn = ".allObjs.rda",
                          numCoresNeeded = ceiling(detectCores() * 0.8),
                          adjustments = rep(1, length(workers))) {
-  fn <- reproducible::.suffix(paste0(".allObjs.rda"), paste0("_", amc::rndstr(1)))
-  clusterIPs <- clusterSetupSingles(workers = workers, objsToExport = objsToExport,
-                                    reqdPkgs = reqdPkgs, fn = fn,
-                                    libPaths = libPaths, doSpeedTest = doSpeedTest,
-                                    numCoresNeeded = numCoresNeeded)#, adjustments = adjustments)
 
-  message("Starting cluster with all cores per machine")
   workersInLocalhost <- workers %in% "localhost"
   if (packageVersion("parallelly") == "1.26.0" &&
       ( any(workersInLocalhost) && !all( workersInLocalhost) ) )  {
@@ -114,6 +108,13 @@ clusterSetup <- function(workers, objsToExport, reqdPkgs,
          "please install an older version: \n",
          "install.packages('https://cran.r-project.org/src/contrib/Archive/parallelly/parallelly_1.25.0.tar.gz', repos = NULL)")
   }
+  fn <- reproducible::.suffix(paste0(".allObjs.rda"), paste0("_", amc::rndstr(1)))
+  clusterIPs <- clusterSetupSingles(workers = workers, objsToExport = objsToExport,
+                                    reqdPkgs = reqdPkgs, fn = fn,
+                                    libPaths = libPaths, doSpeedTest = doSpeedTest,
+                                    numCoresNeeded = numCoresNeeded)#, adjustments = adjustments)
+
+  message("Starting cluster with all cores per machine")
   cl <- parallelly::makeClusterPSOCK(clusterIPs, revtunnel = TRUE)
   # cl <- parallelly::makeClusterPSOCK(workers = clusterIPs, revtunnel = TRUE)
   # on.exit(try(parallel::stopCluster(cl)), add = TRUE)
