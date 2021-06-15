@@ -107,6 +107,13 @@ clusterSetup <- function(workers, objsToExport, reqdPkgs,
                                     numCoresNeeded = numCoresNeeded)#, adjustments = adjustments)
 
   message("Starting cluster with all cores per machine")
+  workersInLocalhost <- workers %in% "localhost"
+  if (packageVersion("parallelly") == "1.26.0" &&
+      ( any(workersInLocalhost) && !all( workersInLocalhost) ) )  {
+    stop("package parallelly version 1.26.0 has a bug when mixing 'localhost' with other ips; ",
+         "please install an older version: \n",
+         "install.packages('https://cran.r-project.org/src/contrib/Archive/parallelly/parallelly_1.25.0.tar.gz', repos = NULL)")
+  }
   cl <- parallelly::makeClusterPSOCK(clusterIPs, revtunnel = TRUE)
   # cl <- parallelly::makeClusterPSOCK(workers = clusterIPs, revtunnel = TRUE)
   # on.exit(try(parallel::stopCluster(cl)), add = TRUE)
