@@ -29,7 +29,7 @@ calcSeverityB <- function(cohortData, burnedPixelCohortData) {
 
   severityData <- burnedPixelCohortData[, .(pixelIndex, pixelGroup)]
 
-  ## add initial and post-fire B to severityData
+  ## add initial and post-fire B to severityData - this expands cohortData's B to pixels.
   severityData <- cohortData[, .(speciesCode, B, pixelGroup)][severityData, on = "pixelGroup"]
   setnames(severityData, "B", "prefireB")
 
