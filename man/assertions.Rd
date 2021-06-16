@@ -115,11 +115,17 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 \item{cohortDataNo34to36}{A \code{cohortData} \code{data.table} with only the
 pixels what were LCC 34:36}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
+\item{speciesEcoregion}{A \code{data.table} with \code{species}-{ecoregion}-specific species
+trait values. Ecoregion refers to "ecolocation", a categorical variable grouping sites with similar
+biophysical characteristics. The table should have at least the following columns: \code{speciesCode} and
+\code{ecoregionGroup}, character representation of species and ecoregion groups respectively,
+\code{maxB} the maximum biomass for the species in a given 'ecoregion', \code{maxANPP} the maximum
+aboveground net primary productivity and \code{SEP} the species establishment probability.}
 
 \item{columns}{Vector of column names on which to test for unique \code{cohortData}}
 
-\item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique groupings}
+\item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique ecoregion groupings,
+which group together pixels of similar biophysical characteristics.}
 
 \item{minRelativeB}{TODO: add description}
 

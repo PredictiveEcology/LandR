@@ -45,7 +45,12 @@ number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}
 
 \item{currentTime}{The current simulation time e.g., \code{time(sim)}.}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
+\item{speciesEcoregion}{A \code{data.table} with \code{species}-{ecoregion}-specific species
+trait values. Ecoregion refers to "ecolocation", a categorical variable grouping sites with similar
+biophysical characteristics. The table should have at least the following columns: \code{speciesCode} and
+\code{ecoregionGroup}, character representation of species and ecoregion groups respectively,
+\code{maxB} the maximum biomass for the species in a given 'ecoregion', \code{maxANPP} the maximum
+aboveground net primary productivity and \code{SEP} the species establishment probability.}
 
 \item{treedFirePixelTableSinceLastDisp}{A data.table with at least 2 columns, \code{pixelIndex}
 and \code{pixelGroup}.

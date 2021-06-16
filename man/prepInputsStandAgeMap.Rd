@@ -15,7 +15,7 @@ prepInputsStandAgeMap(
   filename2 = NULL,
   fireURL = NULL,
   fireFun = "sf::st_read",
-  rasterToMatch,
+  rasterToMatch = NULL,
   fireField = "YEAR",
   startTime
 )
