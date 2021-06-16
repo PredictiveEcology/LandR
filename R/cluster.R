@@ -201,7 +201,7 @@ clusterSetupSingles <- function(workers, objsToExport, reqdPkgs,
 
 determineClusters <- function(clSingle, doSpeedTest, uniqueWorkers, numCoresNeeded, adjustments) {
 
-  if (isTRUE(doSpeedTest) && length(unique(workers)) > 1) {
+  if (isTRUE(doSpeedTest) && length(uniqueWorkers) > 1) {
     message("testing speed on each to estimate number cores to use")
     out <- clusterEvalQ(clSingle, {
       ss <- system.time({
