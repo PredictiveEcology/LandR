@@ -166,7 +166,7 @@ clusterSetupSingles <- function(workers, objsToExport, reqdPkgs, quotedExtra,
       sample(workers, size = numCoresNeeded)
     else
       workers
-    reproducible::messageDF(as.data.frame(table(ips)))
+    reproducible::messageDF(as.data.frame(table(clusterIPs)))
   }
   # parallel::stopCluster(clSingle)
 
