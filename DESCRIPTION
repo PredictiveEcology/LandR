@@ -84,6 +84,7 @@ Collate:
     'cohorts.R'
     'dem.R'
     'ecoregions.R'
+    'fireSeverity.R'
     'light-shade.R'
     'makeDummyInputs.R'
     'maps.R'
