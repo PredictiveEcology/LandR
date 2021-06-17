@@ -8,6 +8,7 @@ clusterSetup(
   workers,
   objsToExport,
   reqdPkgs,
+  quotedExtra,
   libPaths = .libPaths()[1],
   doSpeedTest = FALSE,
   envir = parent.frame(),
@@ -26,6 +27,10 @@ to each worker in the cluster.}
 \item{reqdPkgs}{A character vector of packages (using `Require` formatting, so can
 specify GitHub packages and minimum version number) that should be (installed if necessary)
 and loaded (i.e., in a `require` call).}
+
+\item{quotedExtra}{An optional quoted command to run in single cluster (i.e., once per unique
+worker) after `.libPaths(libPath)` is run, e.g., forcing an `install.packages`. See
+example.}
 
 \item{libPaths}{The path in which the R packages should be installed and loaded from.}
 
@@ -108,6 +113,16 @@ parallel::clusterEvalQ(cl, rnorm(1))
 parallel::stopCluster(cl)
 
 # Installing some packages from source "once"
+cl <- clusterSetup(workers = ips, objsToExport = objsToExport,
+                   reqdPkgs = reqdPkgs,
+                   quotedExtra = quote(install.packages(c("rgdal", "rgeos", "sf",
+                                       "sp", "raster", "terra", "lwgeom"),
+                                       repos = "https://cran.rstudio.com")),
+                   numCoresNeeded = 4)
+# Now use the cl with parallel or DEoptim
+parallel::clusterEvalQ(cl, rnorm(1))
+parallel::stopCluster(cl)
+
 cl <- parallellly::makeClusterPSOCK(ips, revtunnel = TRUE)
 clusterEvalQ(cl,
   install.packages(c("rgdal", "rgeos", "sf", "sp", "raster", "terra", "lwgeom"), repos = "https://cran.rstudio.com")

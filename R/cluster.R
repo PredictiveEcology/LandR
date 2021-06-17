@@ -52,6 +52,9 @@
 #' @param reqdPkgs A character vector of packages (using `Require` formatting, so can
 #' specify GitHub packages and minimum version number) that should be (installed if necessary)
 #' and loaded (i.e., in a `require` call).
+#' @param quotedExtra An optional quoted command to run in single cluster (i.e., once per unique
+#'        worker) after `.libPaths(libPath)` is run, e.g., forcing an `install.packages`. See
+#'        example.
 #' @param libPaths The path in which the R packages should be installed and loaded from.
 #' @param doSpeedTest Logical. If \code{TRUE} (and \code{workers} is longer than 1), then
 #' a small (e.g., 6 second) test will be run on each worker to test the raw cpu speed using
@@ -87,6 +90,16 @@
 #' parallel::stopCluster(cl)
 #'
 #' # Installing some packages from source "once"
+#' cl <- clusterSetup(workers = ips, objsToExport = objsToExport,
+#'                    reqdPkgs = reqdPkgs,
+#'                    quotedExtra = quote(install.packages(c("rgdal", "rgeos", "sf",
+#'                                        "sp", "raster", "terra", "lwgeom"),
+#'                                        repos = "https://cran.rstudio.com")),
+#'                    numCoresNeeded = 4)
+#' # Now use the cl with parallel or DEoptim
+#' parallel::clusterEvalQ(cl, rnorm(1))
+#' parallel::stopCluster(cl)
+#'
 #' cl <- parallellly::makeClusterPSOCK(ips, revtunnel = TRUE)
 #' clusterEvalQ(cl,
 #'   install.packages(c("rgdal", "rgeos", "sf", "sp", "raster", "terra", "lwgeom"), repos = "https://cran.rstudio.com")
@@ -94,7 +107,7 @@
 #' parallel::stopCluster(cl)
 #'
 #' }
-clusterSetup <- function(workers, objsToExport, reqdPkgs,
+clusterSetup <- function(workers, objsToExport, reqdPkgs, quotedExtra,
                          libPaths = .libPaths()[1],
                          doSpeedTest = FALSE, envir = parent.frame(),
                          # fn = ".allObjs.rda",
@@ -135,7 +148,7 @@ clusterSetup <- function(workers, objsToExport, reqdPkgs,
 
 #' @importFrom parallel stopCluster clusterExport
 #' @importFrom reproducible messageDF
-clusterSetupSingles <- function(workers, objsToExport, reqdPkgs,
+clusterSetupSingles <- function(workers, objsToExport, reqdPkgs, quotedExtra,
                                 libPaths = .libPaths()[1], doSpeedTest = FALSE, envir = parent.frame(),
                                 fn = ".allObjs.rda", numCoresNeeded, adjustments = rep(1, length(workers))) {
 
@@ -158,6 +171,7 @@ clusterSetupSingles <- function(workers, objsToExport, reqdPkgs,
       sample(workers, size = numCoresNeeded)
     else
       workers
+    reproducible::messageDF(as.data.frame(table(ips)))
   }
   # parallel::stopCluster(clSingle)
 
@@ -190,6 +204,8 @@ clusterSetupSingles <- function(workers, objsToExport, reqdPkgs,
     if (!suppressWarnings(require("Require"))) {
       install.packages("Require")
     }
+    if (exists("quotedExtra"))
+      eval(quotedExtra)
     # install.packages(c("rgdal", "rgeos", "sf", "sp", "raster", "terra", "lwgeom"), repos = "https://cran.rstudio.com")
     suppressMessages(Require::Require(reqdPkgs, install = TRUE, require = FALSE))
     save(list = objsToExport, file = fn)
