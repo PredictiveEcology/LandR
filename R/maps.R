@@ -1211,6 +1211,21 @@ fasterizeFromSp <- function(sp, raster, fieldName) {
 }
 
 
+
+#' Calculate fire severity
+#'
+#' Calculates fire severity as the loss of pre-fire to
+#'   post-fire biomass.
+#'
+#' @template cohortData
+#' @template burnedPixelCohortData
+#'
+#' @export
+#' @return \code{data.table} with columns \code{pixelIndex},
+#'   \code{pixelGroup} and  \code{severityB}
+calcSeverityB <- function(cohortData, burnedPixelCohortData) {
+  severityData <- burnedPixelCohortData[, .(pixelIndex, pixelGroup)]
+
   ## add initial and post-fire B to severityData
   severityData <- cohortData[, .(speciesCode, B, pixelGroup)][severityData, on = "pixelGroup"]
   setnames(severityData, "B", "prefireB")
