@@ -1,5 +1,8 @@
 #' High level wrapper around parallelly::makeClusterPSOCK for many multi-core machines
 #'
+#' This is create to only work with machines that are successfully linked with ssh keys. It
+#' uses reverse tunnelling, so the keys are only needed in one direction (e.g., from the
+#' main to the workers).
 #' One common configuration for High Performance Clusters is several virtual machines (VM),
 #' each with multiple cores. Usually, 1/2 of those cores are hyperthreaded, which means
 #' that when all cores are utilized on a single VM, the per-core speed will be substantially
@@ -89,21 +92,13 @@
 #' parallel::clusterEvalQ(cl, rnorm(1))
 #' parallel::stopCluster(cl)
 #'
-#' # Installing some packages from source "once"
+#' # Installing some packages from source on linux (source is default)
 #' cl <- clusterSetup(workers = ips, objsToExport = objsToExport,
 #'                    reqdPkgs = reqdPkgs,
 #'                    quotedExtra = quote(install.packages(c("rgdal", "rgeos", "sf",
 #'                                        "sp", "raster", "terra", "lwgeom"),
 #'                                        repos = "https://cran.rstudio.com")),
 #'                    numCoresNeeded = 4)
-#' # Now use the cl with parallel or DEoptim
-#' parallel::clusterEvalQ(cl, rnorm(1))
-#' parallel::stopCluster(cl)
-#'
-#' cl <- parallellly::makeClusterPSOCK(ips, revtunnel = TRUE)
-#' clusterEvalQ(cl,
-#'   install.packages(c("rgdal", "rgeos", "sf", "sp", "raster", "terra", "lwgeom"), repos = "https://cran.rstudio.com")
-#' )
 #' parallel::stopCluster(cl)
 #'
 #' }
