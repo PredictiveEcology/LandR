@@ -141,9 +141,9 @@ clusterSetupSingles <- function(workers, objsToExport, reqdPkgs,
 
   message("Starting cluster with 1 core per machine -- install reqdPkgs; copy objects; write to disk")
   uniqueWorkers <- unique(workers)
+  clSingle <- parallelly::makeClusterPSOCK(workers = uniqueWorkers, revtunnel = TRUE)
   if (identical(workers, uniqueWorkers) && length(workers) < numCoresNeeded) {
 
-    clSingle <- parallelly::makeClusterPSOCK(workers = uniqueWorkers, revtunnel = TRUE)
     on.exit(try(parallel::stopCluster(clSingle), silent = TRUE), add = TRUE)
     # NumPopulations <- 118
 
