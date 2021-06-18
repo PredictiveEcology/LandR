@@ -59,9 +59,12 @@
 #'        worker) after `.libPaths(libPath)` is run, e.g., forcing an `install.packages`. See
 #'        example.
 #' @param libPaths The path in which the R packages should be installed and loaded from.
-#' @param doSpeedTest Logical. If \code{TRUE} (and \code{workers} is longer than 1), then
-#' a small (e.g., 6 second) test will be run on each worker to test the raw cpu speed using
-#' loops and \code{rnorm}.
+#' @param doSpeedTest Numeric. This should be a proportion of "all real cores". Thus,
+#' if set to 1, it will run a test on 28 cores on a 56 core machine. If not 0,
+#' a small (e.g., 10 second) test will be run \code{doSpeedTest * numberRealCores} times on
+#' each worker to test the raw cpu speed using loops and \code{rnorm}.
+#' If this number is large, then the test may take a >60 seconds simply because of
+#' the cost of setting up the PSOCK cluster.
 #' @param envir The environment in which to find the \code{objsToExport}, defaults to
 #'   \code{parent.frame()}
 #' @param numCoresNeeded A numeric of length 1, indicating the desired number of workers.
@@ -104,8 +107,9 @@
 #' }
 clusterSetup <- function(workers, objsToExport, reqdPkgs, quotedExtra,
                          libPaths = .libPaths()[1],
-                         doSpeedTest = FALSE, envir = parent.frame(),
+                         doSpeedTest = 0, envir = parent.frame(),
                          # fn = ".allObjs.rda",
+                         maxPerWorker = Inf,
                          numCoresNeeded = ceiling(detectCores() * 0.8),
                          adjustments = rep(1, length(workers))) {
 
@@ -117,10 +121,12 @@ clusterSetup <- function(workers, objsToExport, reqdPkgs, quotedExtra,
          "install.packages('https://cran.r-project.org/src/contrib/Archive/parallelly/parallelly_1.25.0.tar.gz', repos = NULL)")
   }
   fn <- reproducible::.suffix(paste0(".allObjs.rda"), paste0("_", amc::rndstr(1)))
+  if (doSpeedTest > 1) doSpeedTest <- 1
   clusterIPs <- clusterSetupSingles(workers = workers, objsToExport = objsToExport,
                                     reqdPkgs = reqdPkgs, fn = fn,
                                     libPaths = libPaths, doSpeedTest = doSpeedTest,
-                                    numCoresNeeded = numCoresNeeded)#, adjustments = adjustments)
+                                    maxPerWorker = maxPerWorker,
+                                    numCoresNeeded = numCoresNeeded, adjustments = adjustments)
 
   message("Starting cluster with all cores per machine")
   cl <- parallelly::makeClusterPSOCK(clusterIPs, revtunnel = TRUE)
@@ -144,22 +150,35 @@ clusterSetup <- function(workers, objsToExport, reqdPkgs, quotedExtra,
 #' @importFrom parallel stopCluster clusterExport
 #' @importFrom reproducible messageDF
 clusterSetupSingles <- function(workers, objsToExport, reqdPkgs, quotedExtra,
-                                libPaths = .libPaths()[1], doSpeedTest = FALSE, envir = parent.frame(),
-                                fn = ".allObjs.rda", numCoresNeeded, adjustments = rep(1, length(workers))) {
+                                libPaths = .libPaths()[1], doSpeedTest = 0, envir = parent.frame(),
+                                fn = ".allObjs.rda", maxPerWorker = Inf,
+                                numCoresNeeded, adjustments = rep(1, length(workers))) {
 
   message("Starting cluster with 1 core per machine -- install reqdPkgs; copy objects; write to disk")
   uniqueWorkers <- unique(workers)
+
+  oneWorkerPerIPRequested <- (identical(workers, uniqueWorkers) )
+  oneWorkerPerIPIsNotEnough <- oneWorkerPerIPRequested && (length(workers) < numCoresNeeded)
+
+  #if (!oneWorkerPerIPIsNotEnough) # close it if it isn't enough
+  on.exit(try(parallel::stopCluster(clSingle), silent = TRUE), add = TRUE)
+
+
   clSingle <- parallelly::makeClusterPSOCK(workers = uniqueWorkers, revtunnel = TRUE)
-  if (identical(workers, uniqueWorkers) && length(workers) < numCoresNeeded) {
 
-    on.exit(try(parallel::stopCluster(clSingle), silent = TRUE), add = TRUE)
-    # NumPopulations <- 118
-
-    out2 <- determineClusters(clSingle = clSingle, doSpeedTest = doSpeedTest,
+  if (doSpeedTest > 0 || oneWorkerPerIPIsNotEnough )  {
+    detCores <- clusterEvalQ(clSingle, parallel::detectCores())
+    doSpeedTest <- ceiling(unlist(detCores) * doSpeedTest / 2)
+    names(doSpeedTest) <- uniqueWorkers
+    clus <- if (all(doSpeedTest == 1)) clSingle else workers
+    out2 <- determineClusters(clus = clus, doSpeedTest = doSpeedTest,
                               uniqueWorkers = uniqueWorkers, numCoresNeeded = numCoresNeeded,
-                              adjustments = adjustments)
+                              adjustments = adjustments, maxPerWorker = maxPerWorker)
     reproducible::messageDF(out2)
 
+  }
+
+  if (oneWorkerPerIPIsNotEnough) {
     clusterIPs <- rep(out2$.id, out2$cores)
   } else {
     clusterIPs <- if (length(workers) > numCoresNeeded)
@@ -205,40 +224,127 @@ clusterSetupSingles <- function(workers, objsToExport, reqdPkgs, quotedExtra,
     suppressMessages(Require::Require(reqdPkgs, install = TRUE, require = FALSE))
     save(list = objsToExport, file = fn)
   })
+  # if (!oneWorkerPerIPIsNotEnough)
   parallel::stopCluster(clSingle)
 
   return(clusterIPs)
 }
 
-determineClusters <- function(clSingle, doSpeedTest, uniqueWorkers, numCoresNeeded, adjustments) {
-
-  if (isTRUE(doSpeedTest) && length(uniqueWorkers) > 1) {
-    message("testing speed on each to estimate number cores to use")
-    out <- clusterEvalQ(clSingle, {
-      ss <- system.time({
-        for (i in 1:10000) rnorm(1e4)
-      })
-      data.table::data.table(elapsed = ss[3], trueCores = parallel::detectCores())
-    })
+determineClusters <- function(clus, doSpeedTest, uniqueWorkers, numCoresNeeded, adjustments, maxPerWorker) {
+  if (any(doSpeedTest > 1)) {
+    actualWorkers <- if (length(doSpeedTest) > 1) {
+      rep(names(doSpeedTest), doSpeedTest)
+    } else {
+      rep(uniqueWorkers, each = doSpeedTest)
+    }
+    message("Starting cluster with ", sum(doSpeedTest),
+            " cores -- to run tests. This may take 1 second per unique worker ",
+            " (est: ", length(actualWorkers), " secs.)")
+    out <- list()
+    groups <- if (length(actualWorkers) > 110) {
+      grp <- list()
+      i <- 0
+      doSpeedTestRunning <- doSpeedTest
+      while (length(doSpeedTestRunning)) {
+        i <- i + 1
+        grp[[i]] <- which(cumsum(doSpeedTestRunning) < 110)
+        doSpeedTestRunning <- doSpeedTestRunning[-grp[[i]]]
+        grp[[i]][] <- i
+      }
+      message("Testing more than 110 workers; doing in ", i, " batches")
+      whGroup <- do.call(c, grp)
+      groups <- rep(whGroup, doSpeedTest)
+      split(actualWorkers, groups)
+    } else {
+      list(actualWorkers)
+    }
+    for (grp in seq(groups)) {
+      clus <- parallelly::makeClusterPSOCK(workers = groups[[grp]], revtunnel = TRUE)
+      on.exit(try(stopCluster(clus), silent = TRUE), add = TRUE)
+      out[[grp]] <- runSpeedTest(clus)
+      names(out[[grp]]) <- groups[[grp]]
+      out[[grp]] <- data.table::rbindlist(out[[grp]], idcol = TRUE)
+      stopCluster(clus)
+    }
+    out2 <- data.table::rbindlist(out)
   } else {
-    out <- clusterEvalQ(clSingle, {
-      data.table::data.table(elapsed = 1, trueCores = parallel::detectCores())
-    })
+    if (doSpeedTest == 1 && length(uniqueWorkers) > 1) {
+      message("testing speed on each to estimate number cores to use")
+      out <- runSpeedTest(clus)
+    } else {
+      out <- clusterEvalQ(clus, {
+        data.table::data.table(elapsed = 1, trueCores = parallel::detectCores())
+      })
+    }
+    names(out) <- sapply(clus, function(x) x$host)
+    out2 <- rbindlist(out, idcol = TRUE)
   }
 
-  # parallel::clusterEvalQ(clSingle, system("pkill -f workRSOCK"))
-  names(out) <- uniqueWorkers
-  out2 <- rbindlist(out, idcol = TRUE)
-  relSpeed <- out2$trueCores/out2$elapsed*numCoresNeeded
-  relSpeed <- relSpeed/numCoresNeeded
+  # parallel::clusterEvalQ(clus, system("pkill -f workRSOCK"))
+  if (length(adjustments) != length(uniqueWorkers))
+    adjustments <- rep(adjustments, length(uniqueWorkers))
+  out2 <- out2[, list(elapsedMax = max(elapsed),
+                      elapsed = mean(elapsed),
+                      trueCores = trueCores[1]), by = ".id"]
+  #relSpeed <- out2$trueCores/out2$elapsed*numCoresNeeded
+  relSpeed <- 1/out2$elapsedMax
   relSpeed <- relSpeed/max(relSpeed)
-  out2[, relSpeed := relSpeed]
+  relSpeedThresh <- 1/1.4 # this is Hyperthreading penalty -- 40% loss
   nonHTcores <- out2$trueCores/2
   out2[, nonHTcores := nonHTcores]
   sumNonHTcores <- sum(nonHTcores)
-  # needHTcores <- max(numCoresNeeded, numCoresNeeded - sumNonHTcores)
 
   out2[, cores := round(nonHTcores * adjustments / max(adjustments))]
+
+  out2[, maxPerWorker := maxPerWorker]
+  out2[, cores := pmin(maxPerWorker, cores)]
+
+  speedGoodEnoughToUse <- relSpeed > relSpeedThresh
+  if (any (!speedGoodEnoughToUse)) {
+    message("worker(s) ", paste(out2$.id[!speedGoodEnoughToUse], collapse = ", "), " too slow to use at all, given speed test")
+    if (sum(pmin(out2$maxPerWorker[speedGoodEnoughToUse], out2$trueCores[speedGoodEnoughToUse])) < numCoresNeeded) {
+      message("but, not enough cores without them; using them")
+      speedGoodEnoughToUse <- rep(TRUE, length(speedGoodEnoughToUse))
+    }
+    adjustments <- adjustments[speedGoodEnoughToUse]
+  }
+  #relSpeed <- relSpeed/numCoresNeeded
+  relSpeed[!speedGoodEnoughToUse] <- 0
+  out2[, relSpeed := round(relSpeed, 2)]
+  # out3 <- copy(out2)
+  if (any(relSpeed == 0))
+    didntUse <- out2[relSpeed == 0]
+  out2 <- out2[relSpeed > 0]
+
+
+  out2[, estCores := ceiling(cores * relSpeed)]
+  # Too many
+  if (sum(out2$estCores) > numCoresNeeded) {
+    out2[, estCores := ceiling(estCores * numCoresNeeded / sum(out2$estCores) ) ]
+  }
+  out2[, newRelSpeed := relSpeed]
+
+  while (isTRUE(max(out2[estCores < maxPerWorker]$newRelSpeed) >= min(out2$relSpeed)) && (sum(out2$estCores) < numCoresNeeded))  {
+    (toChangeUpNew <- out2[estCores < maxPerWorker][newRelSpeed == max(newRelSpeed)]$.id[1])
+    out2[toChangeUpNew == .id, estCores := estCores + 1L]
+    out2[toChangeUpNew == .id, newRelSpeed := relSpeed - max(0, estCores - nonHTcores)/nonHTcores * (1 - relSpeedThresh)   ]
+  }
+
+  # out4 <- copy(out2)
+  # out2 <- copy(out4)
+  while (sum(out2$estCores) > numCoresNeeded) {
+    (toChangeDownNew <- out2[newRelSpeed == min(newRelSpeed) ]$.id[1])
+    out2[toChangeDownNew == .id, estCores := estCores - 1L]
+    out2[toChangeDownNew == .id, newRelSpeed := relSpeed - max(0, estCores - nonHTcores)/nonHTcores  ]
+    if (any(out2$estCores == 0)) {
+      message("the raw speed of ", out2[estCores == 0]$.id, " is too slow to include")
+      out2 <- out2[estCores > 0]
+    }
+  }
+
+  out2[, cores := estCores]
+  out2[, estCores := NULL]
+
 
   # Increase ncores upwards
   m <- 0
@@ -267,6 +373,19 @@ determineClusters <- function(clSingle, doSpeedTest, uniqueWorkers, numCoresNeed
     }
   }
 
+  if (any(relSpeed == 0))
+    out2 <- rbindlist(list(out2, didntUse[, cores := 0]), fill = TRUE)
+
   return(out2)
 }
 
+
+runSpeedTest <- function(clus) {
+  out <- clusterEvalQ(clus, {
+    ss <- system.time({
+      for (i in 1:15000) rnorm(1e4)
+    })
+    data.table::data.table(elapsed = ss[3], trueCores = parallel::detectCores())
+  })
+  out
+}

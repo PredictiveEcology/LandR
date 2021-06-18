@@ -10,7 +10,7 @@ clusterSetup(
   reqdPkgs,
   quotedExtra,
   libPaths = .libPaths()[1],
-  doSpeedTest = FALSE,
+  doSpeedTest = 0,
   envir = parent.frame(),
   numCoresNeeded = ceiling(detectCores() * 0.8),
   adjustments = rep(1, length(workers))
@@ -34,9 +34,11 @@ example.}
 
 \item{libPaths}{The path in which the R packages should be installed and loaded from.}
 
-\item{doSpeedTest}{Logical. If \code{TRUE} (and \code{workers} is longer than 1), then
-a small (e.g., 6 second) test will be run on each worker to test the raw cpu speed using
-loops and \code{rnorm}.}
+\item{doSpeedTest}{Numeric. If \code{1} or more, then
+a small (e.g., 10 second) test will be run \code{doSpeedTest} times on each worker to
+test the raw cpu speed using loops and \code{rnorm}. If this number is large, then
+the test may take a >60 seconds simply because of the cost of setting up the
+PSOCK cluster.}
 
 \item{envir}{The environment in which to find the \code{objsToExport}, defaults to
 \code{parent.frame()}}
