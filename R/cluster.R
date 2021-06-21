@@ -78,14 +78,15 @@
 #' If working on Ubuntu machines, the default is to install binary packages from the
 #' Rstudio binary mirror of CRAN. If `source` packages are required (e.g., for compiling
 #' spatial R packages on a system that has recently updated its system spatial libraries,
-#' such as GDAL, GEOS etc.), then this will have to be done manually. See example.
+#' such as GDAL, GEOS etc.), then this will have to be done with `quotedExtra`. See example.
 #' @importFrom parallelly makeClusterPSOCK
 #' @importFrom parallel clusterEvalQ clusterExport
 #' @importFrom Require Require
 #' @examples
 #' \dontrun{
 #' largeObj <- rnorm(1e6)
-#' ips <- c("localhost", "10.20.0.213")
+#' # ips <- c("localhost", "10.20.0.213") # with parallelly 1.26.0, can't mix localhost with an ip
+#' ips <- c("10.20.0.189", "10.20.0.213") # with parallelly 1.26.0, can't mix localhost with an ip
 #' objsToExport <- "largeObj"
 #' reqdPkgs <- c("achubaty/amc@development", "raster (>= 3.4-5)")
 #' cl <- clusterSetup(workers = ips, objsToExport = objsToExport,
@@ -123,7 +124,7 @@ clusterSetup <- function(workers, objsToExport, reqdPkgs, quotedExtra,
   fn <- reproducible::.suffix(paste0(".allObjs.rda"), paste0("_", amc::rndstr(1)))
   if (doSpeedTest > 1) doSpeedTest <- 1
   clusterIPs <- clusterSetupSingles(workers = workers, objsToExport = objsToExport,
-                                    reqdPkgs = reqdPkgs, fn = fn,
+                                    reqdPkgs = reqdPkgs, fn = fn, quotedExtra = quotedExtra,
                                     libPaths = libPaths, doSpeedTest = doSpeedTest,
                                     maxPerWorker = maxPerWorker,
                                     numCoresNeeded = numCoresNeeded, adjustments = adjustments)
@@ -168,9 +169,9 @@ clusterSetupSingles <- function(workers, objsToExport, reqdPkgs, quotedExtra,
 
   if (doSpeedTest > 0 || oneWorkerPerIPIsNotEnough )  {
     detCores <- clusterEvalQ(clSingle, parallel::detectCores())
-    doSpeedTest <- ceiling(unlist(detCores) * doSpeedTest / 2)
+    doSpeedTest <- ceiling(unlist(detCores) * doSpeedTest / 2) # convert from decimal to # cores
     names(doSpeedTest) <- uniqueWorkers
-    clus <- if (all(doSpeedTest == 1)) clSingle else workers
+    clus <- if (all(doSpeedTest %in% 0:1)) clSingle else workers
     out2 <- determineClusters(clus = clus, doSpeedTest = doSpeedTest,
                               uniqueWorkers = uniqueWorkers, numCoresNeeded = numCoresNeeded,
                               adjustments = adjustments, maxPerWorker = maxPerWorker)
