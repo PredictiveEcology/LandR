@@ -46,3 +46,48 @@ equivalentNameAsList <- function(value, df, multi) {
     }
   })
 }
+
+
+#' Check and expand sppEquiv
+#'
+#' This will expand a \code{sppEquiv} object that is only a vector or only a one-column
+#' data.table into a many column data.table, if the columns that are present do not
+#' contain \codeP{ensureColumns}.
+#'
+#' @param sppEquiv A character vector or data.table with named column(s). If this
+#'   data.table does not have columns named \code{ensureColumns}, then it will
+#'   attempt to merge this data.table with LandR::sppEquivalencies_CA to get
+#'   \code{ensureColumns}.
+#' @param ensureColumns A character vector of column names that must be in \code{sppEquiv}.
+#'   If these are not present, then the function will attempt to merge with
+#'   LandR::sppEquivalencies_CA, so the column name(s) of \code{sppEquiv} must match
+#'   column names in LandR::sppEquivalencies_CA.
+#' @export
+#' @importFrom data.table setDT setnames data.table
+#' @return
+#' A data.table with potentially all columns in LandR::sppEquivalencies_CA.
+#'
+sppEquivCheck <- function(sppEquiv, ensureColumns = NULL) {
+  if (is.null(dim(sppEquiv))) {
+    sppEquiv <- equivalentName(sppEquiv, LandR::sppEquivalencies_CA,
+                               column = P(sim)$sppEquivCol, multi = TRUE)
+    sppEquiv <- data.table(tmp = sppEquiv)
+    setnames(sppEquiv, new = P(sim)$sppEquivCol)
+  }
+  if (is(sppEquiv, "data.frame")) {
+    if (!is.data.table(sppEquiv)) setDT(sppEquiv)
+    if (!all(c(ensureColumns) %in% colnames(sppEquiv) )) {
+      if (all(colnames(sppEquiv) %in% colnames(LandR::sppEquivalencies_CA))) {
+        sppEquiv <- LandR::sppEquivalencies_CA[
+          sppEquiv, on = intersect(colnames(sppEquiv), colnames(LandR::sppEquivalencies_CA))]
+      } else {
+        stop("Please provide sppEquiv as a data.table with at least one column of species names, ",
+             "that shares a column name and species naming convention as in LandR::sppEquivalencies_CA")
+      }
+    }
+  } else {
+    stop("sppEquiv must be a data.table")
+  }
+  sppEquiv[]
+
+}

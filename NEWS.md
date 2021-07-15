@@ -1,5 +1,11 @@
 bug reports https://github.com/PredictiveEcology/LandR/issues
 
+version 1.0.5
+=============
+
+## Enhancements
+* New function: `clusterSetup`. This is a high level wrapper around `future::makeClusterPSOCK` and various other `parallel` functions to correctly and efficiently setup a PSOCK cluster on a set of remote machines that are connected via `ssh` with ssh keys.
+
 version 1.0.1
 =============
 * Complete rewrite of `LANDISDisp` now (back to) native R. It is about 15x faster than the Rcpp implementation, and much simpler, with about 30% of the number of lines of code. It was inspired by the "spiral" approach as was used in the Rcpp in the pre-1.0.0 version of `LandR`, but much more efficiently as it is now correctly identifies *every* pixel outward from a center pixel using `raster::focalWeight`, with the maximum of the `seeddispersal_max` across all species. RAM use appears under control, even for large problems (tested on 50M pixel Raster with 8M potential Source pixels and 500,000 Receiving pixels, with a peak additional RAM of 3 GB during `LANDISDisp`)

@@ -168,7 +168,6 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                        successionTimestep,
                        verbose = getOption("LandR.verbose", TRUE),
                        ...) {
-
   ####### Assertions #############
   if (!( (is.numeric(dtSrc$speciesCode) && is.numeric(dtRcv$speciesCode) && is.numeric(speciesTable$speciesCode)) ||
          (is.factor(dtSrc$speciesCode) && is.factor(dtRcv$speciesCode) && is.factor(speciesTable$speciesCode))))
@@ -242,6 +241,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     rasVectorTemplate
   })
   maxSpCode <- max(as.integer(srcSpeciesCodes))
+  minSpCode <- min(as.integer(srcSpeciesCodes))
   speciesSrcRasterVecList <- lapply(seq_len(maxSpCode), function(ind) {
     if (as.character(ind) %in% names(speciesSrcRasterVecList)) {
       speciesSrcRasterVecList[[as.character(ind)]]
@@ -286,9 +286,21 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       message("numRcvPixels: ", length(unique(dtRcvLong$pixelIndex)),
               "; numSrcPixels: ", max(apply(srcPixelMatrix, 2, function(x) sum(!is.na(x)))))
     }
+
+    # the srcPixelMatrix is a matrix of dimension diff(c(minSpCode, maxSpCode))+1 ... so must
+    #   subtract minSpCode from the speciesCodes
+    if (minSpCode > 1) {
+      adjustment <- minSpCode - 1
+      dtRcvLong[, speciesCode := speciesCode - adjustment]
+      speciesTable <- speciesTable[minSpCode:maxSpCode, ][, speciesCode := speciesCode - adjustment]
+    }
+
     dtRcvLong <- spiralSeedDispersalR(speciesTable, pixelGroupMap, dtRcvLong,
                                     srcPixelMatrix, cellSize, k, b, successionTimestep,
                                     verbose, dispersalFn = dispersalFn)
+    if (exists("adjustment", inherits = FALSE)) {
+      dtRcvLong[, speciesCode := speciesCode + adjustment]
+    }
     if (exists("origLevels", inherits = FALSE)) {
       dtRcvLong[, speciesCode := factor(origLevels[speciesCode], levels = origLevels)]
       if (origClassWasNumeric) {
