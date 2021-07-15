@@ -14,7 +14,8 @@ utils::globalVariables(c(".", ":=", "X1", "X2", "X3", "X4", "X5", "maxMaxB", "pr
 #' @export
 #' @importFrom data.table data.table set setkey
 calcSiteShade <- function(currentTime, cohortData, speciesEcoregion, minRelativeB) {
-  if (is.null(speciesEcoregion)) stop("missing speciesEcoregion; required in calcSiteShade")
+  if (getOption("LandR.assertions", TRUE))
+    if (is.null(speciesEcoregion)) stop("missing speciesEcoregion; required in calcSiteShade")
   # the siteshade was calculated based on the code:
   # https://github.com/LANDIS-II-Foundation/Extensions-Succession/blob/master/biomass-succession/trunk/src/PlugIn.cs
   if (nrow(cohortData[age > 5,]) > 0) {
