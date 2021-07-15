@@ -476,6 +476,7 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
 #' @export
 speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
   spEco <- speciesEcoregion[year <= currentTime]
+  if (NROW(spEco) == 0) stop("speciesEcoregion does not have data for the current time")
   spEco[year == max(year)]
 }
 
