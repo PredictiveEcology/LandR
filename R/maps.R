@@ -612,8 +612,14 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
       sppNameVector <- allSpp
 
   ## Make sure spp names are compatible with kNN names
-  kNNnames <- as.character(equivalentName(sppNameVector, sppEquiv, column = knnNamesCol,
-                                          multi = TRUE))
+  kNNnames <- if ("knnNamesCol" %in% colnames(sppEquiv)) {
+    as.character(equivalentName(sppNameVector, sppEquiv, column = knnNamesCol,
+                                multi = TRUE))
+  } else {
+    as.character(equivalentName(sppNameVector, sppEquivalencies_CA,
+                                column = knnNamesCol, multi = TRUE,
+                                searchColumn = sppEquivCol))
+  }
   sppNameVector <- as.character(equivalentName(sppNameVector, sppEquiv, column = sppEquivCol,
                                                multi = TRUE))
 
