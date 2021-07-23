@@ -35,6 +35,9 @@
 #'   \item{Notes}{additional notes and information}
 #'   \item{Boreal}{Species present in the Boreal forests of Canada}
 #'   \item{Type}{Whether the species is a deciduous or conifer species}
+#'   \item{PSP}{species name from the module ianmseddy/PSP_Clean}
+#'   \item{BC_Forestry}{the species code adopted by the Government of British Columbia}
+#'   \item{FuelClass}{The fuel class used by the module PredictiveEcology/fireSense}#'
 #' }
 #'
 "sppEquivalencies_CA"
