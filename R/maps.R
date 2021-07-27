@@ -1,7 +1,8 @@
 utils::globalVariables(c(
   ".", "..pgdAndScAndLeading", ":=", "B", "HQ", "leading", "LQ", "mixed", "N",
-  "pixelGroup", "pure", "speciesCode", "speciesGroupB", "speciesProportion", "SPP",
-  "totalB", "totalcover", "Type", "vals"
+  "pixelGroup", "postfireB", "prefireB", "pure",
+  "severityB", "speciesCode", "speciesGroupB", "speciesProportion", "SPP",
+  "totalB", "totalcover", "Type"
 ))
 
 #' Define flammability map
@@ -621,8 +622,14 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
       sppNameVector <- allSpp
 
   ## Make sure spp names are compatible with kNN names
-  kNNnames <- as.character(equivalentName(sppNameVector, sppEquiv, column = knnNamesCol,
-                                          multi = TRUE))
+  kNNnames <- if ("knnNamesCol" %in% colnames(sppEquiv)) {
+    as.character(equivalentName(sppNameVector, sppEquiv, column = knnNamesCol,
+                                multi = TRUE))
+  } else {
+    as.character(equivalentName(sppNameVector, sppEquivalencies_CA,
+                                column = knnNamesCol, multi = TRUE,
+                                searchColumn = sppEquivCol))
+  }
   sppNameVector <- as.character(equivalentName(sppNameVector, sppEquiv, column = sppEquivCol,
                                                multi = TRUE))
 
@@ -1239,4 +1246,38 @@ aggregateRasByDT <- function(ras, newRas, fn = sum) {
   newRasOut[pixels] <- dt2$vals
   names(newRasOut) <- names(ras)
   newRasOut
+}
+
+#' Calculate fire severity
+#'
+#' Calculates fire severity as the loss of pre-fire to
+#'   post-fire biomass.
+#'
+#' @template cohortData
+#' @template burnedPixelCohortData
+#'
+#' @export
+#' @return \code{data.table} with columns \code{pixelIndex},
+#'   \code{pixelGroup} and  \code{severityB}
+calcSeverityB <- function(cohortData, burnedPixelCohortData) {
+  severityData <- burnedPixelCohortData[, .(pixelIndex, pixelGroup)]
+
+  ## add initial and post-fire B to severityData
+  severityData <- cohortData[, .(speciesCode, B, pixelGroup)][severityData, on = "pixelGroup"]
+  setnames(severityData, "B", "prefireB")
+
+  severityData <- burnedPixelCohortData[, .(speciesCode, B, pixelIndex)][severityData, on = .(speciesCode, pixelIndex)]
+  setnames(severityData, "B", "postfireB")
+
+  ## sum B's across species, and drop species
+  severityData[, `:=`(prefireB = sum(prefireB),
+                      postfireB = sum(postfireB)), by = pixelIndex]
+  set(severityData, j = "speciesCode", value = NULL)
+  severityData <- unique(severityData)
+
+  ## calculate severity in terms of biomass
+  severityData[, severityB := prefireB - postfireB]
+
+  ## keep only certain columns
+  return(severityData[, .(pixelGroup, pixelIndex, severityB)])
 }
