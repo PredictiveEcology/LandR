@@ -1,4 +1,19 @@
 bug reports https://github.com/PredictiveEcology/LandR/issues
+version 1.0.4
+=============
+* New assertion for validation data
+* New function `sppEquivCheck`
+* `loadKNNSpeciesLayers` can accept a `sppEquiv` table with one column
+* Improved documentation for `speciesEquivalencies_CA` data
+
+version 1.0.3
+=============
+* new function to calculate fire severity as biomass loss
+* bug fixes and improvements to to `speciesTableUpdate`
+
+version 1.0.2
+=============
+* Fixes and further speed improvements to seed dispersal functions and general code cleaning
 
 version 1.0.1
 =============
@@ -28,7 +43,6 @@ version 0.0.3
 
 version 0.0.2
 =============
-
 * Bug fixes in imports (DESCRIPTION)
 * new function `overlayLCCs` which will help with overlaying more than one land cover classification raster.
 * major revisions to `convertUnwantedLCC` to accommodate more cases and eliminate redundant arguments.
