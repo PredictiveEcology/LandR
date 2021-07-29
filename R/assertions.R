@@ -456,7 +456,7 @@ assertSpeciesEcoregionCohortDataMatch <- function(cohortData, speciesEcoregion,
 #' @export
 #'
 #' @importFrom magrittr %>%
-assertStandCohortData <- function(standCohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
+assertPixelCohortDataValid <- function(standCohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     test <- standCohortData[, vapply(.SD, FUN = function(x) any(is.na(x)), FUN.VALUE = logical(1))]
     if (any(test))
