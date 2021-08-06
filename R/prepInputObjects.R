@@ -1,6 +1,6 @@
 utils::globalVariables(c(
   "cover", "ecoregionGroup", "establishprob", "lcc", "longevity", "maxB", "maxANPP",
-  "postfireregen", "resproutprob", "speciesCode"
+  "postfireregen", "resproutprob", "speciesCode", "logAge"
 ))
 
 #' Check if all species in have trait values
@@ -155,6 +155,10 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
 #' @param modelBiomass statistical model of species biomass
 #' @param successionTimestep The time between successive seed dispersal events.
 #' @param currentYear \code{time(sim)}
+#' @param needRescaleModelB logical. indicates whether logAge and cover were scaled
+#'     prior to fitting \code{modelBiomass}. if TRUE, \code{scaledVarsModelB} needs to be supplied
+#' @param scaledVarsModelB a list with the scaled versions of \code{cover} and \code{logAge},
+#'     each obtained with \code{scale}
 #'
 #' @section \code{establishprob}:
 #' This section takes the cover as estimated from the mature tree cover and
@@ -179,7 +183,20 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
 #' @export
 #' @importFrom data.table rbindlist
 makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataShortNoCover,
-                                 species, modelCover, modelBiomass, successionTimestep, currentYear) {
+                                 species, modelCover, modelBiomass, successionTimestep, currentYear,
+                                 needRescaleModelB = FALSE, scaledVarsModelB = NULL) {
+  if (needRescaleModelB) {
+    if (is.null(scaledVarsModelB))
+      stop("needRescaleModelB is TRUE, but scaledVarsModelB is NULL.
+           Please supply list(cover = ..., logAge =...) with the scaled versions of these two variables")
+    if (class(scaledVarsModelB) != "list")
+      stop("scaledVarsModelB must be a list")
+
+    if (!all(names(scaledVarsModelB) %in% c("cover", "logAge")))
+      stop("scaledVarsModelB must be a list with 'cover' and 'logAge' entries")
+
+  }
+
   ## Create speciesEcoregion table
   joinOn <- c("ecoregionGroup", "speciesCode")
   speciesEcoregion <- unique(cohortDataBiomass, by = joinOn)
@@ -216,9 +233,26 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
   # maxB
   # Set age to the age of longevity and cover to 100%
   speciesEcoregion[, `:=`(logAge = .logFloor(longevity), cover = 100)]
-  speciesEcoregion[ , maxB := asInteger(predict(modelBiomass$mod,
-                                                newdata = speciesEcoregion,
-                                                type = "response"))]
+
+  ## rescale if need be (modelBiomass may have been fitted on scaled variables)
+  if (needRescaleModelB) {
+    speciesEcoregion2 <- copy(speciesEcoregion)
+    speciesEcoregion2[, `:=`(logAge = scale(logAge,
+                                            center = attr(scaledVarsModelB$logAge, "scaled:center"),
+                                            scale = attr(scaledVarsModelB$logAge, "scaled:scale")),
+                             cover = scale(cover,
+                                           center = attr(scaledVarsModelB$cover, "scaled:center"),
+                                           scale = attr(scaledVarsModelB$cover, "scaled:scale")))]
+    speciesEcoregion2[ , maxB := asInteger(predict(modelBiomass$mod,
+                                                   newdata = speciesEcoregion2,
+                                                   type = "response"))]
+    speciesEcoregion[, maxB := speciesEcoregion2$maxB]
+  } else {
+    speciesEcoregion[ , maxB := asInteger(predict(modelBiomass$mod,
+                                                  newdata = speciesEcoregion,
+                                                  type = "response"))]
+  }
+
   speciesEcoregion[maxB < 0L, maxB := 0L] # fix negative predictions
 
   ########################################################################

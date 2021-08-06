@@ -47,42 +47,51 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
   rstFlammable
 }
 
-#' Simple \code{prepInputs} for LCC2005 or LCC2010 data
+#' Simple \code{prepInputs} for Canadian LCC data
 #'
 #' A wrapper around \code{prepInputs} for the Canadian Land Cover Classification product(s).
+#'
+#' @note As of May 2021, NRCAN no longer provides/hosts the LCC2005 data.
+#' A privately hosted version of the data is available to maintain backwards compatibility,
+#' but new users/projects should use the 2010 (or newer) data.
 #'
 #' @inheritParams reproducible::cropInputs
 #' @inheritParams reproducible::postProcess
 #' @inheritParams reproducible::prepInputs
 #'
-#' @param year Numeric, either 2005 or 2010
+#' @param year Numeric, either 2010 or 2015. See note re: backwards compatibility for 2005.
 #'
 #' @export
 #' @importFrom reproducible asPath prepInputs
-prepInputsLCC <- function(year = 2005,
+prepInputsLCC <- function(year = 2010,
                           destinationPath = asPath("."),
                           studyArea = NULL,
                           rasterToMatch = NULL,
                           filename2 = NULL, ...) {
-
   dots <- list(...)
   if (is.null(dots$url)) {
     if (identical(as.integer(year), 2005L)) {
-      #url <- "https://drive.google.com/file/d/1g9jr0VrQxqxGjZ4ckF6ZkSMP-zuYzHQC/view?usp=sharing"
-      url <- paste0("ftp://ftp.ccrs.nrcan.gc.ca/ad/NLCCLandCover/",
-                    "LandcoverCanada2005_250m/LandCoverOfCanada2005_V1_4.zip")
+      ## May 2021: LCC2005 data no longer being hosted by NRCAN
+      # url <- paste0("ftp://ftp.ccrs.nrcan.gc.ca/ad/NLCCLandCover/",
+      #               "LandcoverCanada2005_250m/LandCoverOfCanada2005_V1_4.zip")
+      url <- "https://drive.google.com/file/d/1g9jr0VrQxqxGjZ4ckF6ZkSMP-zuYzHQC/"
+
       filename <- asPath("LCC2005_V1_4a.tif")
       archive <- asPath("LandCoverOfCanada2005_V1_4.zip")
-    } else {
-      if (identical(as.integer(year), 2010L)) {
+    } else if (identical(as.integer(year), 2010L)) {
         url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/",
                       "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
                       "CanadaLandcover2010.zip")
         filename <- asPath("CAN_LC_2010_CAL.tif")
         archive <- asPath("CanadaLandcover2010.zip")
-      } else {
-        stop("Other LCC covers don't exist yet.")
-      }
+    } else if (identical(as.integer(year), 2015L)) {
+      url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/",
+                    "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
+                    "CanadaLandcover2015.zip")
+      filename <- asPath("CAN_LC_2015_CAL.tif")
+      archive <- asPath("CanadaLandcover2015.zip")
+    } else {
+      stop("Other LCC covers don't exist yet.")
     }
   }
 
