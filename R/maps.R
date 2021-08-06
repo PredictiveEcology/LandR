@@ -1261,23 +1261,3 @@ aggregateRasByDT <- function(ras, newRas, fn = sum) {
 #'   \code{pixelGroup} and  \code{severityB}
 calcSeverityB <- function(cohortData, burnedPixelCohortData) {
   severityData <- burnedPixelCohortData[, .(pixelIndex, pixelGroup)]
-
-  ## add initial and post-fire B to severityData
-  severityData <- cohortData[, .(speciesCode, B, pixelGroup)][severityData, on = "pixelGroup"]
-  setnames(severityData, "B", "prefireB")
-
-  severityData <- burnedPixelCohortData[, .(speciesCode, B, pixelIndex)][severityData, on = .(speciesCode, pixelIndex)]
-  setnames(severityData, "B", "postfireB")
-
-  ## sum B's across species, and drop species
-  severityData[, `:=`(prefireB = sum(prefireB),
-                      postfireB = sum(postfireB)), by = pixelIndex]
-  set(severityData, j = "speciesCode", value = NULL)
-  severityData <- unique(severityData)
-
-  ## calculate severity in terms of biomass
-  severityData[, severityB := prefireB - postfireB]
-
-  ## keep only certain columns
-  return(severityData[, .(pixelGroup, pixelIndex, severityB)])
-}

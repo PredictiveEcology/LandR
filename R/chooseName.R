@@ -52,7 +52,7 @@ equivalentNameAsList <- function(value, df, multi) {
 #'
 #' This will expand a \code{sppEquiv} object that is only a vector or only a one-column
 #' data.table into a many column data.table, if the columns that are present do not
-#' contain \codeP{ensureColumns}.
+#' contain \code{ensureColumns}.
 #'
 #' @param sppEquiv A character vector or data.table with named column(s). If this
 #'   data.table does not have columns named \code{ensureColumns}, then it will

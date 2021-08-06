@@ -23,5 +23,5 @@ A data.table with potentially all columns in LandR::sppEquivalencies_CA.
 \description{
 This will expand a \code{sppEquiv} object that is only a vector or only a one-column
 data.table into a many column data.table, if the columns that are present do not
-contain \codeP{ensureColumns}.
+contain \code{ensureColumns}.
 }
