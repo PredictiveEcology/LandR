@@ -792,8 +792,12 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
 #' @importFrom XML getHTMLLinks
+#' @rdname LandR-deprecated
 loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                            knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
+  .Deprecated("loadkNNSpeciesLayers",
+              msg = paste("loadkNNSpeciesLayersValidation is deprecated.",
+                          "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers."))
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
 
@@ -812,11 +816,27 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   }
 
   ## get all online file names
-  fileURLs <- getURL(url, dirlistonly = TRUE,
-                     .opts = list(followlocation = TRUE,
-                                  ssl.verifypeer = 0L)) ## TODO: re-enable verify
-  fileNames <- getHTMLLinks(fileURLs)
-  fileNames <- grep("Species_.*.tif$", fileNames, value = TRUE)
+  if (url.exists(url)) {   ## ping the website first
+    if (grepl("drive.google.com", url)) { ## is it a google drive url?
+      fileURLs <- drive_link(drive_ls(url))
+      fileNames <- drive_ls(url)$name
+      names(fileURLs) <- fileNames
+    } else {
+      fileURLs <- getURL(url, dirlistonly = TRUE,
+                         .opts = list(followlocation = TRUE,
+                                      ssl.verifypeer = 0L)) ## TODO: re-enable verify
+      names(fileURLs) <- fileNames
+      fileNames <- getHTMLLinks(fileURLs)
+    }
+    fileNames <- grep("Species_.*.tif$", fileNames, value = TRUE)
+  } else {
+    ## for offline work or when website is not reachable try making these names
+    ## with "wild cards"
+    fileNames <- paste0("NFI_MODIS250m_.*_kNN_Species_",
+                        unique(sppEquivalencies_CA$KNN),
+                        "_v1.tif")
+    fileNames <- fileNames[!grepl("Species__v1", fileNames)]
+  }
 
   ## get all kNN species - names only
   allSpp <- fileNames %>%
@@ -887,20 +907,20 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
 
   speciesLayers <- list()
 
-    speciesLayers <- Cache(Map,
-                           targetFile = asPath(targetFiles),
-                           filename2 = postProcessedFilenamesWithStudyAreaName,
-                           url = paste0(url, targetFiles),
-                           MoreArgs = list(destinationPath = asPath(dPath),
-                                           fun = "raster::raster",
-                                           studyArea = studyArea,
-                                           rasterToMatch = rasterToMatch,
-                                           method = "bilinear",
-                                           datatype = "INT2U",
-                                           overwrite = TRUE,
-                                           userTags = dots$userTags
-                           ),
-                           prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
+  speciesLayers <- Cache(Map,
+                         targetFile = asPath(targetFiles),
+                         filename2 = postProcessedFilenamesWithStudyAreaName,
+                         url = paste0(url, targetFiles),
+                         MoreArgs = list(destinationPath = asPath(dPath),
+                                         fun = "raster::raster",
+                                         studyArea = studyArea,
+                                         rasterToMatch = rasterToMatch,
+                                         method = "bilinear",
+                                         datatype = "INT2U",
+                                         overwrite = TRUE,
+                                         userTags = dots$userTags
+                         ),
+                         prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
 
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
 

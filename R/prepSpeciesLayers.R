@@ -468,13 +468,16 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
 }
 
 #' @export
-#' @rdname prepSpeciesLayers
+#' @rdname LandR-deprecated
 prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath,
                                       url = NULL,
                                       studyArea, rasterToMatch,
                                       sppEquiv,
                                       sppEquivCol,
                                       thresh = 10, ...) {
+  .Deprecated("prepSpeciesLayers_KNN2011",
+              msg = paste("prepSpeciesLayers_KNN2011 is deprecated.",
+                          "Please use 'prepSpeciesLayers_KNN' and supply URL/year to validation layers."))
   dots <- list(...)
 
   if (is.null(url))
