@@ -729,13 +729,14 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
                          ),
                          prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
 
-  correctOrder <- sapply(unique(kNNnames), function(x) grep(pattern = x, x = names(speciesLayers), value = TRUE))
-  names(speciesLayers) <- names(correctOrder)[match(correctOrder, names(speciesLayers))]
+  correctOrder <- sapply(unique(kNNnames), function(x) grep(pattern = x, x = targetFiles, value = TRUE))
+  names(speciesLayers) <- names(correctOrder)[match(correctOrder, targetFiles)]
 
   # remove "no data" first
   noData <- sapply(speciesLayers, function(xx) is.na(maxValue(xx)))
   if (any(noData)) {
-    message(names(noData)[noData], " has no data in this study area; omitting it")
+    message(paste(paste(names(noData)[noData], collapse = " "),
+                  " has no data in this study area; omitting it"))
     speciesLayers <- speciesLayers[!noData]
   }
 
