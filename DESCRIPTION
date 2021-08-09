@@ -28,6 +28,7 @@ Imports:
     ggplot2,
     ggpubr,
     ggspatial,
+    googledrive,
     grDevices,
     httr,
     lme4,
@@ -49,7 +50,6 @@ Imports:
     XML
 Suggests:
     covr,
-    googledrive,
     knitr,
     RandomFields,
     roxygen2,
