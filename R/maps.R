@@ -615,7 +615,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
                          .opts = list(followlocation = TRUE))
       fileNames <- getHTMLLinks(fileURLs)
     }
-    fileNames <- grep("Species_.*\\.tif$", fileNames, value = TRUE)
+    fileNames <- grep("(Species|SpeciesGroups)_.*\\.tif$", fileNames, value = TRUE)
   } else {
     ## for offline work or when website is not reachable try making these names
     ## with "wild cards"
@@ -629,7 +629,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
   ## get all kNN species - names only
   allSpp <- fileNames %>%
     sub("_v1\\.tif", "", .) %>%
-    sub(".*Species_", "", .)
+    sub(".*(Species|SpeciesGroups)_", "", .)
 
   if (getRversion() < "4.0.0") {
     if (length(allSpp) == 0)
