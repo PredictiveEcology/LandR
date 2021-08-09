@@ -79,11 +79,11 @@ prepInputsLCC <- function(year = 2010,
       filename <- asPath("LCC2005_V1_4a.tif")
       archive <- asPath("LandCoverOfCanada2005_V1_4.zip")
     } else if (identical(as.integer(year), 2010L)) {
-        url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/",
-                      "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
-                      "CanadaLandcover2010.zip")
-        filename <- asPath("CAN_LC_2010_CAL.tif")
-        archive <- asPath("CanadaLandcover2010.zip")
+      url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/",
+                    "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
+                    "CanadaLandcover2010.zip")
+      filename <- asPath("CAN_LC_2010_CAL.tif")
+      archive <- asPath("CanadaLandcover2010.zip")
     } else if (identical(as.integer(year), 2015L)) {
       url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/",
                     "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
