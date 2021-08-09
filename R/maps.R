@@ -638,11 +638,6 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
     stopifnot("Incomplete file list retrieved from server." = length(allSpp) > 1)
   }
 
-  ## get all species layers from .tar
-  if (length(sppNameVector) == 1) ## avoids a warning in next if
-    if (sppNameVector == "all")
-      sppNameVector <- allSpp
-
   ## Make sure spp names are compatible with kNN names
   kNNnames <- if (knnNamesCol %in% colnames(sppEquiv)) {
     as.character(equivalentName(sppNameVector, sppEquiv, column = knnNamesCol,
