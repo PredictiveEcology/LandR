@@ -9,6 +9,7 @@ loadkNNSpeciesLayers(
   rasterToMatch,
   studyArea,
   sppEquiv,
+  year = 2001,
   knnNamesCol = "KNN",
   sppEquivCol,
   thresh = 1,

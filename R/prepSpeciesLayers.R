@@ -192,6 +192,8 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 #'
 #' @export
 #' @importFrom reproducible asPath Cache prepInputs
+#' @importFrom RCurl url.exists
+#' @importFrom googledrive with_drive_quiet drive_find as_id drive_link
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
                                   url = NULL,
@@ -201,9 +203,28 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
                                   thresh = 10, ...) {
   dots <- list(...)
 
-  if (is.null(url))
+  if ("year" %in% names(dots)) {
+    year <- dots[["year"]]
+  } else {
+    year <- 2001
+  }
+
+  if (is.null(url)) {
     url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                  "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/")
+                  "canada-forests-attributes_attributs-forests-canada/", year,
+                  "-attributes_attributs-", year, "/")
+  }
+
+  if (url.exists(url)) {  ## ping website and use gdrive if not available
+    shared_drive_url <- NULL
+  } else {
+    driveFolder <- paste0("kNNForestAttributes_", year)
+    url <- with_drive_quiet(
+      drive_link(drive_find(driveFolder, type = "folder",
+                                 shared_drive = as_id("https://drive.google.com/drive/folders/0ACLdFud2dAYIUk9PVA"),))
+      )
+    shared_drive_url <- "https://drive.google.com/drive/folders/0ACLdFud2dAYIUk9PVA"
+  }
 
   loadkNNSpeciesLayers(
     dPath = destinationPath,
@@ -216,6 +237,8 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
     sppEquivCol = sppEquivCol,
     thresh = thresh,
     url = url,
+    year = year,
+    shared_drive_url = shared_drive_url,
     userTags = c("speciesLayers", "KNN")
   )
 }

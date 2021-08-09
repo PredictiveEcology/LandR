@@ -573,15 +573,20 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @export
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
-#' @importFrom RCurl getURL
+#' @importFrom RCurl getURL url.exists
 #' @importFrom reproducible Cache .prefix preProcess basename2
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
 #' @importFrom XML getHTMLLinks
-loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
+#' @importFrom googledrive with_drive_quiet drive_ls as_id drive_link
+loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year = 2001,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
+
+  if ("shared_drive_url" %in% names(dots)) {
+    shared_drive_url <- dots[["shared_drive_url"]]
+  }
 
   sppEquiv <- sppEquiv[, lapply(.SD, as.character)]
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
@@ -597,14 +602,33 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
     cachePath <- getOption("reproducible.cachePath")
   }
 
-  ## get all files in url folder
-  fileURLs <- getURL(url, dirlistonly = TRUE,
-                     .opts = list(followlocation = TRUE,
-                                  ssl.verifypeer = 0L)) ## TODO: re-enable verify
-  fileNames <- getHTMLLinks(fileURLs)
+  ## get all online file names
+  if (url.exists(url)) {   ## ping the website first
+    if (grepl("drive.google.com", url)) { ## is it a google drive url?
+      fileURLs <- with_drive_quiet(
+        drive_link(drive_ls(url, shared_drive = as_id(shared_drive_url)))
+        )
+      fileNames <- with_drive_quiet(drive_ls(url)$name)
+      names(fileURLs) <- fileNames
+    } else {
+      fileURLs <- getURL(url, dirlistonly = TRUE,
+                         .opts = list(followlocation = TRUE))
+      fileNames <- getHTMLLinks(fileURLs)
+    }
+    fileNames <- grep("Species_.*\\.tif$", fileNames, value = TRUE)
+  } else {
+    ## for offline work or when website is not reachable try making these names
+    ## with "wild cards"
+    url <- NULL
+    fileNames <- paste0("NFI_MODIS250m_", year, "_kNN_Species_",
+                        unique(sppEquivalencies_CA$KNN),
+                        "_v1.tif")
+    fileNames <- fileNames[!grepl("Species__v1", fileNames)]
+  }
+
   ## get all kNN species - names only
-  allSpp <- grep("2001_kNN_Species_.*\\.tif$", fileNames, value = TRUE) %>%
-    sub("_v1.tif", "", .) %>%
+  allSpp <- fileNames %>%
+    sub("_v1\\.tif", "", .) %>%
     sub(".*Species_", "", .)
 
   if (getRversion() < "4.0.0") {
@@ -685,10 +709,20 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
             " in sppEquiv before passing here.")
   }
 
+  if (is.null(url)) {
+    URLs <- sapply(seq_along(targetFiles), FUN = function(x) NULL, simplify = FALSE)
+  } else {
+    if (grepl("drive.google.com", url)) {
+      URLs <- fileURLs[targetFiles]
+    } else {
+      URLs <- paste0(url, targetFiles)
+    }
+  }
+
   speciesLayers <- Cache(Map,
                          targetFile = targetFiles,
                          filename2 = postProcessedFilenamesWithStudyAreaName,
-                         url = paste0(url, targetFiles),
+                         url = URLs,
                          MoreArgs = list(destinationPath = dPath,
                                          fun = "raster::raster",
                                          studyArea = studyArea,
