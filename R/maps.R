@@ -571,7 +571,6 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @return A raster stack of percent cover layers by species.
 #'
 #' @export
-#' @importFrom httr config with_config
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
 #' @importFrom RCurl getURL
@@ -685,27 +684,24 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
             " You can use the list above to choose species, then select only those rows",
             " in sppEquiv before passing here.")
   }
-  with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
-    speciesLayers <- Cache(Map,
-                           targetFile = targetFiles,
-                           filename2 = postProcessedFilenamesWithStudyAreaName,
-                           url = paste0(url, targetFiles),
-                           MoreArgs = list(destinationPath = dPath,
-                                           fun = "raster::raster",
-                                           studyArea = studyArea,
-                                           rasterToMatch = rasterToMatch,
-                                           method = "bilinear",
-                                           datatype = "INT2U",
-                                           overwrite = TRUE,
-                                           userTags = dots$userTags
-                           ),
-                           prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
-  })
+
+  speciesLayers <- Cache(Map,
+                         targetFile = targetFiles,
+                         filename2 = postProcessedFilenamesWithStudyAreaName,
+                         url = paste0(url, targetFiles),
+                         MoreArgs = list(destinationPath = dPath,
+                                         fun = "raster::raster",
+                                         studyArea = studyArea,
+                                         rasterToMatch = rasterToMatch,
+                                         method = "bilinear",
+                                         datatype = "INT2U",
+                                         overwrite = TRUE,
+                                         userTags = dots$userTags
+                         ),
+                         prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
 
   correctOrder <- sapply(unique(kNNnames), function(x) grep(pattern = x, x = names(speciesLayers), value = TRUE))
   names(speciesLayers) <- names(correctOrder)[match(correctOrder, names(speciesLayers))]
-
-  # names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
 
   # remove "no data" first
   noData <- sapply(speciesLayers, function(xx) is.na(maxValue(xx)))
@@ -789,7 +785,6 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 #' @return A raster stack of percent cover layers by species.
 #'
 #' @export
-#' @importFrom httr config with_config
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
 #' @importFrom RCurl getURL
@@ -892,7 +887,6 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
 
   speciesLayers <- list()
 
-  with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
     speciesLayers <- Cache(Map,
                            targetFile = asPath(targetFiles),
                            filename2 = postProcessedFilenamesWithStudyAreaName,
@@ -907,7 +901,6 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
                                            userTags = dots$userTags
                            ),
                            prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
-  })
 
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
 
