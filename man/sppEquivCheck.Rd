@@ -2,26 +2,29 @@
 % Please edit documentation in R/chooseName.R
 \name{sppEquivCheck}
 \alias{sppEquivCheck}
-\title{Check and expand sppEquiv}
+\title{Check and expand \code{sppEquiv}}
 \usage{
-sppEquivCheck(sppEquiv, ensureColumns = NULL)
+sppEquivCheck(sppEquiv, ensureColumns = NULL, sppEquivCol = NULL)
 }
 \arguments{
-\item{sppEquiv}{A character vector or data.table with named column(s). If this
-data.table does not have columns named \code{ensureColumns}, then it will
-attempt to merge this data.table with LandR::sppEquivalencies_CA to get
-\code{ensureColumns}.}
+\item{sppEquiv}{A character vector or \code{data.table} with named column(s).
+If this \code{data.table} does not have columns named \code{ensureColumns},
+then it will attempt to merge this data.table with \code{sppEquivalencies_CA}
+to get \code{ensureColumns}.}
 
 \item{ensureColumns}{A character vector of column names that must be in \code{sppEquiv}.
 If these are not present, then the function will attempt to merge with
-LandR::sppEquivalencies_CA, so the column name(s) of \code{sppEquiv} must match
-column names in LandR::sppEquivalencies_CA.}
+\code{sppEquivalencies_CA}, so the column name(s) of \code{sppEquiv} must match
+column names in \code{sppEquivalencies_CA}.}
+
+\item{sppEquivCol}{Optional. Column in \code{sppEquivalencies_CA} to use for equivalent names
+when \code{sppEquiv} not provided (i.e., when \code{sppEquivalencies_CA} is used instead).}
 }
 \value{
-A data.table with potentially all columns in LandR::sppEquivalencies_CA.
+A \code{data.table} with potentially all columns in \code{sppEquivalencies_CA}.
 }
 \description{
 This will expand a \code{sppEquiv} object that is only a vector or only a one-column
-data.table into a many column data.table, if the columns that are present do not
+\code{data.table} into a many column \code{data.table}, if the columns that are present do not
 contain \code{ensureColumns}.
 }

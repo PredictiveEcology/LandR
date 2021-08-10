@@ -199,11 +199,38 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
                                   sppEquiv,
                                   sppEquivCol,
                                   thresh = 10, ...) {
+  stopifnot(requireNamespace("RCurl", quietly = TRUE))
+
   dots <- list(...)
 
-  if (is.null(url))
+  if ("year" %in% names(dots)) {
+    year <- dots[["year"]]
+  } else {
+    year <- 2001
+  }
+
+  if (is.null(url)) {
     url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                  "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/")
+                  "canada-forests-attributes_attributs-forests-canada/", year,
+                  "-attributes_attributs-", year, "/")
+  }
+
+  shared_drive_url <- NULL
+  if (!RCurl::url.exists(url)) {  ## ping website and use gdrive if not available
+    if (requireNamespace("googledrive", quietly = TRUE)) {
+      driveFolder <- paste0("kNNForestAttributes_", year)
+      url <- googledrive::with_drive_quiet(
+        googledrive::drive_link(
+          googledrive::drive_find(
+            driveFolder,
+            type = "folder",
+            shared_drive = googledrive::as_id("https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA")
+          )
+        )
+      )
+      shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
+    }
+  }
 
   loadkNNSpeciesLayers(
     dPath = destinationPath,
@@ -216,6 +243,8 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
     sppEquivCol = sppEquivCol,
     thresh = thresh,
     url = url,
+    year = year,
+    shared_drive_url = shared_drive_url,
     userTags = c("speciesLayers", "KNN")
   )
 }
@@ -228,7 +257,7 @@ prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
                                      sppEquiv,
                                      sppEquivCol, ...) {
   if (is.null(url))
-    url <- "https://drive.google.com/file/d/1y0ofr2H0c_IEMIpx19xf3_VTBheY0C9h/view?usp=sharing"
+    url <- "https://drive.google.com/file/d/1y0ofr2H0c_IEMIpx19xf3_VTBheY0C9h"
 
   CASFRItiffFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs.tif"))
   CASFRIattrFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs_attributes3.csv"))
@@ -284,7 +313,7 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
                                       sppEquiv,
                                       sppEquivCol, ...) {
   if (is.null(url))
-    url <- "https://drive.google.com/open?id=1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
+    url <- "https://drive.google.com/file/d/1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
 
   speciesLayers <- Cache(prepInputs,
                          targetFile = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.dat"),
@@ -467,14 +496,15 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   stack(CCstack) ## ensure it's still a stack
 }
 
+#' @param destinationPath path to data directory
+#' @param outputPath path to output directory
 #' @export
-#' @rdname prepSpeciesLayers
-prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath,
-                                      url = NULL,
-                                      studyArea, rasterToMatch,
-                                      sppEquiv,
-                                      sppEquivCol,
-                                      thresh = 10, ...) {
+#' @rdname LandR-deprecated
+prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, studyArea,
+                                      rasterToMatch, sppEquiv, sppEquivCol, thresh = 10, ...) {
+  .Deprecated("prepSpeciesLayers_KNN2011",
+              msg = paste("prepSpeciesLayers_KNN2011 is deprecated.",
+                          "Please use 'prepSpeciesLayers_KNN' and supply URL/year to validation layers."))
   dots <- list(...)
 
   if (is.null(url))

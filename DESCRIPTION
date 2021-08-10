@@ -8,7 +8,7 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Version: 1.0.5
+Version: 1.0.5.9002
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -39,23 +39,23 @@ Imports:
     quickPlot,
     raster,
     RColorBrewer,
-    RCurl,
-    reproducible (>= 1.2.6.9003),
+    reproducible (>= 1.2.7),
     sf,
     SpaDES.tools (>= 0.3.1.9000),
     stats,
     tools,
-    utils,
-    XML
+    utils
 Suggests:
     covr,
-    googledrive,
+    googledrive (>= 2.0.0),
     knitr,
     RandomFields,
+    RCurl,
     roxygen2,
     rmarkdown,
     spelling,
-    testthat
+    testthat,
+    XML
 Remotes:
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,

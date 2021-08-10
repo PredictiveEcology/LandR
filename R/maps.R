@@ -79,11 +79,11 @@ prepInputsLCC <- function(year = 2010,
       filename <- asPath("LCC2005_V1_4a.tif")
       archive <- asPath("LandCoverOfCanada2005_V1_4.zip")
     } else if (identical(as.integer(year), 2010L)) {
-        url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/",
-                      "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
-                      "CanadaLandcover2010.zip")
-        filename <- asPath("CAN_LC_2010_CAL.tif")
-        archive <- asPath("CanadaLandcover2010.zip")
+      url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/",
+                    "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
+                    "CanadaLandcover2010.zip")
+      filename <- asPath("CAN_LC_2010_CAL.tif")
+      archive <- asPath("CanadaLandcover2010.zip")
     } else if (identical(as.integer(year), 2015L)) {
       url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/",
                     "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
@@ -553,6 +553,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #'
 #' @template sppEquiv
 #'
+#' @param year which year's layers should be retrieved? One of 2001 (default) or 2011.
+#'
 #' @param knnNamesCol character string indicating the column in \code{sppEquiv}
 #'                    containing kNN species names.
 #'                    Default \code{"KNN"} for when \code{sppEquivalencies_CA} is used.
@@ -571,18 +573,24 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @return A raster stack of percent cover layers by species.
 #'
 #' @export
-#' @importFrom httr config with_config
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
-#' @importFrom RCurl getURL
 #' @importFrom reproducible Cache .prefix preProcess basename2
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
-#' @importFrom XML getHTMLLinks
-loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
+loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year = 2001,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
+  stopifnot(requireNamespace("RCurl", quietly = TRUE) && requireNamespace("XML", quietly = TRUE))
+
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
+
+  sppEquivalencies_CA <- get(data("sppEquivalencies_CA", package = "LandR",
+                                  envir = environment()), inherits = FALSE)
+
+  if ("shared_drive_url" %in% names(dots)) {
+    shared_drive_url <- dots[["shared_drive_url"]]
+  }
 
   sppEquiv <- sppEquiv[, lapply(.SD, as.character)]
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
@@ -598,15 +606,39 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
     cachePath <- getOption("reproducible.cachePath")
   }
 
-  ## get all files in url folder
-  fileURLs <- getURL(url, dirlistonly = TRUE,
-                     .opts = list(followlocation = TRUE,
-                                  ssl.verifypeer = 0L)) ## TODO: re-enable verify
-  fileNames <- getHTMLLinks(fileURLs)
+  ## get all online file names
+  if (RCurl::url.exists(url)) {   ## ping the website first
+    ## is it a google drive url?
+    if (grepl("drive.google.com", url)) {
+      if (requireNamespace("googledrive", quietly = TRUE)) {
+        fileURLs <- googledrive::with_drive_quiet(
+          googledrive::drive_link(
+            googledrive::drive_ls(url, shared_drive = googledrive::as_id(shared_drive_url))
+          )
+        )
+        fileNames <- googledrive::with_drive_quiet(googledrive::drive_ls(url)$name)
+        names(fileURLs) <- fileNames
+      } else {
+        stop("package 'googledrive' needs to be installed to access google drive files.")
+      }
+    } else {
+      fileURLs <- RCurl::getURL(url, dirlistonly = TRUE, .opts = list(followlocation = TRUE))
+      fileNames <- XML::getHTMLLinks(fileURLs)
+    }
+    fileNames <- grep("(Species|SpeciesGroups)_.*\\.tif$", fileNames, value = TRUE)
+  } else {
+    ## for offline work or when website is not reachable try making these names
+    ## with "wild cards"
+    url <- NULL
+    fileNames <- paste0("NFI_MODIS250m_", year, "_kNN_Species_",
+                        unique(sppEquivalencies_CA$KNN), "_v1.tif")
+    fileNames <- fileNames[!grepl("Species__v1", fileNames)]
+  }
+
   ## get all kNN species - names only
-  allSpp <- grep("2001_kNN_Species_.*\\.tif$", fileNames, value = TRUE) %>%
-    sub("_v1.tif", "", .) %>%
-    sub(".*Species_", "", .)
+  allSpp <- fileNames %>%
+    sub("_v1\\.tif", "", .) %>%
+    sub(".*(Species|SpeciesGroups)_", "", .)
 
   if (getRversion() < "4.0.0") {
     if (length(allSpp) == 0)
@@ -615,15 +647,9 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
     stopifnot("Incomplete file list retrieved from server." = length(allSpp) > 1)
   }
 
-  ## get all species layers from .tar
-  if (length(sppNameVector) == 1) ## avoids a warning in next if
-    if (sppNameVector == "all")
-      sppNameVector <- allSpp
-
   ## Make sure spp names are compatible with kNN names
-  kNNnames <- if ("knnNamesCol" %in% colnames(sppEquiv)) {
-    as.character(equivalentName(sppNameVector, sppEquiv, column = knnNamesCol,
-                                multi = TRUE))
+  kNNnames <- if (knnNamesCol %in% colnames(sppEquiv)) {
+    as.character(equivalentName(sppNameVector, sppEquiv, column = knnNamesCol, multi = TRUE))
   } else {
     as.character(equivalentName(sppNameVector, sppEquivalencies_CA,
                                 column = knnNamesCol, multi = TRUE,
@@ -658,6 +684,10 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
     kNNnames <- kNNnames[kNNnames %in% allSpp]
   }
 
+  if (!length(kNNnames)) {
+    stop("None of the selected species were found in the kNN database.")
+  }
+
   ## define suffix to append to file names
   suffix <- if (basename(cachePath) == "cache") {
     paste0(as.character(ncell(rasterToMatch)), "px")
@@ -685,32 +715,40 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
             " You can use the list above to choose species, then select only those rows",
             " in sppEquiv before passing here.")
   }
-  with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
-    speciesLayers <- Cache(Map,
-                           targetFile = targetFiles,
-                           filename2 = postProcessedFilenamesWithStudyAreaName,
-                           url = paste0(url, targetFiles),
-                           MoreArgs = list(destinationPath = dPath,
-                                           fun = "raster::raster",
-                                           studyArea = studyArea,
-                                           rasterToMatch = rasterToMatch,
-                                           method = "bilinear",
-                                           datatype = "INT2U",
-                                           overwrite = TRUE,
-                                           userTags = dots$userTags
-                           ),
-                           prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
-  })
 
-  correctOrder <- sapply(unique(kNNnames), function(x) grep(pattern = x, x = names(speciesLayers), value = TRUE))
-  names(speciesLayers) <- names(correctOrder)[match(correctOrder, names(speciesLayers))]
+  if (is.null(url)) {
+    URLs <- sapply(seq_along(targetFiles), FUN = function(x) NULL, simplify = FALSE)
+  } else {
+    if (grepl("drive.google.com", url)) {
+      URLs <- fileURLs[targetFiles]
+    } else {
+      URLs <- paste0(url, targetFiles)
+    }
+  }
 
-  # names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
+  speciesLayers <- Cache(Map,
+                         targetFile = targetFiles,
+                         filename2 = postProcessedFilenamesWithStudyAreaName,
+                         url = URLs,
+                         MoreArgs = list(destinationPath = dPath,
+                                         fun = "raster::raster",
+                                         studyArea = studyArea,
+                                         rasterToMatch = rasterToMatch,
+                                         method = "bilinear",
+                                         datatype = "INT2U",
+                                         overwrite = TRUE,
+                                         userTags = dots$userTags
+                         ),
+                         prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
+
+  correctOrder <- sapply(unique(kNNnames), function(x) grep(pattern = x, x = targetFiles, value = TRUE))
+  names(speciesLayers) <- names(correctOrder)[match(correctOrder, targetFiles)]
 
   # remove "no data" first
   noData <- sapply(speciesLayers, function(xx) is.na(maxValue(xx)))
   if (any(noData)) {
-    message(names(noData)[noData], " has no data in this study area; omitting it")
+    message(paste(paste(names(noData)[noData], collapse = " "),
+                  " has no data in this study area; omitting it"))
     speciesLayers <- speciesLayers[!noData]
   }
 
@@ -789,18 +827,25 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv,
 #' @return A raster stack of percent cover layers by species.
 #'
 #' @export
-#' @importFrom httr config with_config
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
-#' @importFrom RCurl getURL
 #' @importFrom reproducible basename2 Cache .prefix preProcess
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
-#' @importFrom XML getHTMLLinks
+#' @rdname LandR-deprecated
 loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                            knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
+  .Deprecated("loadkNNSpeciesLayers",
+              msg = paste("loadkNNSpeciesLayersValidation is deprecated.",
+                          "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers."))
+
+  stopifnot(requireNamespace("RCurl", quietly = TRUE) && requireNamespace("XML", quietly = TRUE))
+
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
+
+  sppEquivalencies_CA <- get(data("sppEquivalencies_CA", package = "LandR",
+                                  envir = environment()), inherits = FALSE)
 
   sppEquiv <- sppEquiv[, lapply(.SD, as.character)]
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
@@ -817,11 +862,31 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   }
 
   ## get all online file names
-  fileURLs <- getURL(url, dirlistonly = TRUE,
-                     .opts = list(followlocation = TRUE,
-                                  ssl.verifypeer = 0L)) ## TODO: re-enable verify
-  fileNames <- getHTMLLinks(fileURLs)
-  fileNames <- grep("Species_.*.tif$", fileNames, value = TRUE)
+  if (RCurl::url.exists(url)) {   ## ping the website first
+    if (grepl("drive.google.com", url)) { ## is it a google drive url?
+      if (requireNamespace("googledrive", quietly = TRUE)) {
+        fileURLs <- googledrive::drive_link(googledrive::drive_ls(url))
+        fileNames <- googledrive::drive_ls(url)$name
+        names(fileURLs) <- fileNames
+      } else {
+        stop("package 'googledrive' needs to be installed to access google drive files.")
+      }
+    } else {
+      fileURLs <- RCurl::getURL(url, dirlistonly = TRUE,
+                                .opts = list(followlocation = TRUE,
+                                             ssl.verifypeer = 0L)) ## TODO: re-enable verify
+      names(fileURLs) <- fileNames
+      fileNames <- XML::getHTMLLinks(fileURLs)
+    }
+    fileNames <- grep("Species_.*.tif$", fileNames, value = TRUE)
+  } else {
+    ## for offline work or when website is not reachable try making these names
+    ## with "wild cards"
+    fileNames <- paste0("NFI_MODIS250m_.*_kNN_Species_",
+                        unique(sppEquivalencies_CA$KNN),
+                        "_v1.tif")
+    fileNames <- fileNames[!grepl("Species__v1", fileNames)]
+  }
 
   ## get all kNN species - names only
   allSpp <- fileNames %>%
@@ -892,22 +957,20 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
 
   speciesLayers <- list()
 
-  with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
-    speciesLayers <- Cache(Map,
-                           targetFile = asPath(targetFiles),
-                           filename2 = postProcessedFilenamesWithStudyAreaName,
-                           url = paste0(url, targetFiles),
-                           MoreArgs = list(destinationPath = asPath(dPath),
-                                           fun = "raster::raster",
-                                           studyArea = studyArea,
-                                           rasterToMatch = rasterToMatch,
-                                           method = "bilinear",
-                                           datatype = "INT2U",
-                                           overwrite = TRUE,
-                                           userTags = dots$userTags
-                           ),
-                           prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
-  })
+  speciesLayers <- Cache(Map,
+                         targetFile = asPath(targetFiles),
+                         filename2 = postProcessedFilenamesWithStudyAreaName,
+                         url = paste0(url, targetFiles),
+                         MoreArgs = list(destinationPath = asPath(dPath),
+                                         fun = "raster::raster",
+                                         studyArea = studyArea,
+                                         rasterToMatch = rasterToMatch,
+                                         method = "bilinear",
+                                         datatype = "INT2U",
+                                         overwrite = TRUE,
+                                         userTags = dots$userTags
+                         ),
+                         prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
 
   names(speciesLayers) <- unique(kNNnames) ## TODO: see #10
 

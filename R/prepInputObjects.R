@@ -369,7 +369,6 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @return a stand age map corrected for fires
 #'
 #' @export
-#' @importFrom httr with_config
 #' @importFrom raster crs
 #' @importFrom reproducible Cache prepInputs
 prepInputsStandAgeMap <- function(..., ageURL = NULL,
@@ -396,7 +395,6 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
   if (is.null(rasterToMatch))
     maskWithRTM <- FALSE
 
-  with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
     standAgeMap <- Cache(
       prepInputs, ...,
       maskWithRTM = maskWithRTM,
@@ -408,7 +406,6 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
       fun = ageFun,
       rasterToMatch = rasterToMatch
     )
-  })
   standAgeMap[] <- asInteger(standAgeMap[])
 
   if (!is.null(rasterToMatch)) {
