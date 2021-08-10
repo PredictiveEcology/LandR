@@ -578,7 +578,6 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
 #' @importFrom XML getHTMLLinks
-#' @importFrom googledrive with_drive_quiet drive_ls as_id drive_link
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year = 2001,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   dots <- list(...)
@@ -604,15 +603,21 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
 
   ## get all online file names
   if (url.exists(url)) {   ## ping the website first
-    if (grepl("drive.google.com", url)) { ## is it a google drive url?
-      fileURLs <- with_drive_quiet(
-        drive_link(drive_ls(url, shared_drive = as_id(shared_drive_url)))
+    ## is it a google drive url?
+    if (grepl("drive.google.com", url)) {
+      if (requireNamespace("googledrive", quietly = TRUE)) {
+        fileURLs <- googledrive::with_drive_quiet(
+          googledrive::drive_link(
+            googledrive::drive_ls(url, shared_drive = googledrive::as_id(shared_drive_url))
+          )
         )
-      fileNames <- with_drive_quiet(drive_ls(url)$name)
-      names(fileURLs) <- fileNames
+        fileNames <- googledrive::with_drive_quiet(googledrive::drive_ls(url)$name)
+        names(fileURLs) <- fileNames
+      } else {
+        stop("package 'googledrive' needs to be installed to access google drive files.")
+      }
     } else {
-      fileURLs <- getURL(url, dirlistonly = TRUE,
-                         .opts = list(followlocation = TRUE))
+      fileURLs <- getURL(url, dirlistonly = TRUE, .opts = list(followlocation = TRUE))
       fileNames <- getHTMLLinks(fileURLs)
     }
     fileNames <- grep("(Species|SpeciesGroups)_.*\\.tif$", fileNames, value = TRUE)
@@ -852,9 +857,13 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   ## get all online file names
   if (url.exists(url)) {   ## ping the website first
     if (grepl("drive.google.com", url)) { ## is it a google drive url?
-      fileURLs <- drive_link(drive_ls(url))
-      fileNames <- drive_ls(url)$name
-      names(fileURLs) <- fileNames
+      if (requireNamespace("googledrive", quietly = TRUE)) {
+        fileURLs <- googledrive::drive_link(googledrive::drive_ls(url))
+        fileNames <- googledrive::drive_ls(url)$name
+        names(fileURLs) <- fileNames
+      } else {
+        stop("package 'googledrive' needs to be installed to access google drive files.")
+      }
     } else {
       fileURLs <- getURL(url, dirlistonly = TRUE,
                          .opts = list(followlocation = TRUE,

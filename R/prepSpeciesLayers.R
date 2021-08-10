@@ -193,7 +193,6 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 #' @export
 #' @importFrom reproducible asPath Cache prepInputs
 #' @importFrom RCurl url.exists
-#' @importFrom googledrive with_drive_quiet drive_find as_id drive_link
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
                                   url = NULL,
@@ -215,15 +214,21 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
                   "-attributes_attributs-", year, "/")
   }
 
-  if (url.exists(url)) {  ## ping website and use gdrive if not available
-    shared_drive_url <- NULL
-  } else {
-    driveFolder <- paste0("kNNForestAttributes_", year)
-    url <- with_drive_quiet(
-      drive_link(drive_find(driveFolder, type = "folder",
-                                 shared_drive = as_id("https://drive.google.com/drive/folders/0ACLdFud2dAYIUk9PVA"),))
+  shared_drive_url <- NULL
+  if (!url.exists(url)) {  ## ping website and use gdrive if not available
+    if (requireNamespace("googledrive", quietly = TRUE)) {
+      driveFolder <- paste0("kNNForestAttributes_", year)
+      url <- googledrive::with_drive_quiet(
+        googledrive::drive_link(
+          googledrive::drive_find(
+            driveFolder,
+            type = "folder",
+            shared_drive = googledrive::as_id("https://drive.google.com/drive/folders/0ACLdFud2dAYIUk9PVA")
+          )
+        )
       )
-    shared_drive_url <- "https://drive.google.com/drive/folders/0ACLdFud2dAYIUk9PVA"
+      shared_drive_url <- "https://drive.google.com/drive/folders/0ACLdFud2dAYIUk9PVA"
+    }
   }
 
   loadkNNSpeciesLayers(
@@ -251,7 +256,7 @@ prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
                                      sppEquiv,
                                      sppEquivCol, ...) {
   if (is.null(url))
-    url <- "https://drive.google.com/file/d/1y0ofr2H0c_IEMIpx19xf3_VTBheY0C9h/view?usp=sharing"
+    url <- "https://drive.google.com/file/d/1y0ofr2H0c_IEMIpx19xf3_VTBheY0C9h"
 
   CASFRItiffFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs.tif"))
   CASFRIattrFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs_attributes3.csv"))
@@ -307,7 +312,7 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
                                       sppEquiv,
                                       sppEquivCol, ...) {
   if (is.null(url))
-    url <- "https://drive.google.com/open?id=1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
+    url <- "https://drive.google.com/file/d/1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
 
   speciesLayers <- Cache(prepInputs,
                          targetFile = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.dat"),
