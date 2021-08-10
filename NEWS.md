@@ -5,6 +5,7 @@ version 1.0.5
 * Changes to `loadkNNSpeciesLayers` and `prepSpeciesLayers_KNN` prevent issues when default URL is down, or working offline (but layers are present locally)
 * Several changes to accommodate LCC2010
 * New columns to sppEquivalenciesCA (`PSP`, `BC_Forestry` and `FuelClass`)
+* Lowered values of dummy `rawBiomassMap`
 
 version 1.0.4
 =============
