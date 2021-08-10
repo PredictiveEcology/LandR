@@ -17,12 +17,13 @@ equivalentNameColumn(value, df, column, multi = FALSE, searchColumn = NULL)
 \item{column}{A character string or numeric of length 1, indicating the column
 in \code{df} to return names from.}
 
-\item{multi}{Logical. If \code{TRUE}, then all matches will be returned. Default
-is \code{FALSE} for backwards compatibility. This may result in more
-elements than were in \code{value}, as each \code{value} may be matched
-by more than one entry, returning more than one result each from \code{column}.
+\item{multi}{Logical. If \code{TRUE}, then all matches will be returned.
+Default \code{FALSE} for backwards compatibility.
+This may result in more elements than were in \code{value},
+as each \code{value} may be matched by more than one entry,
+returning more than one result each from \code{column}.
 If a species is found in the \code{df}, but there is no corresponding
-value in \code{column}, it will return \code{NA}}
+value in \code{column}, it will return \code{NA}.}
 
 \item{searchColumn}{Optionally, provide the name of a column in \code{df} that results
 must be found in. The return value will still be from \code{column}}

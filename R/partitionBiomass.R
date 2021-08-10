@@ -10,9 +10,9 @@ utils::globalVariables(c("Broadleaf", "cover", "cover2", "decid", "LandR", "tota
 partitionBiomass <- function(x = 1, pixelCohortData) {
   if (!"decid" %in% colnames(pixelCohortData)) {
     colName <- equivalentNameColumn(as.character(unique(pixelCohortData$speciesCode)),
-                                    LandR::sppEquivalencies_CA)
-    decidSp <- equivalentName(LandR::sppEquivalencies_CA[Broadleaf == TRUE, LandR],
-                              LandR::sppEquivalencies_CA, colName)
+                                    sppEquivalencies_CA)
+    decidSp <- equivalentName(sppEquivalencies_CA[Broadleaf == TRUE, LandR],
+                              sppEquivalencies_CA, colName)
     decidSp <- decidSp[nzchar(decidSp)]
     pixelCohortData[, decid := speciesCode %in% decidSp]
   }

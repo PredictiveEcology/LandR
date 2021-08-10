@@ -7,12 +7,13 @@
 #' @param df      A \code{data.frame} where every row is a set of equivalent names.
 #' @param column  A character string or numeric of length 1, indicating the column
 #'                in \code{df} to return names from.
-#' @param multi   Logical. If \code{TRUE}, then all matches will be returned. Default
-#'                is \code{FALSE} for backwards compatibility. This may result in more
-#'                elements than were in \code{value}, as each \code{value} may be matched
-#'                by more than one entry, returning more than one result each from \code{column}.
+#' @param multi   Logical. If \code{TRUE}, then all matches will be returned.
+#'                Default \code{FALSE} for backwards compatibility.
+#'                This may result in more elements than were in \code{value},
+#'                as each \code{value} may be matched by more than one entry,
+#'                returning more than one result each from \code{column}.
 #'                If a species is found in the \code{df}, but there is no corresponding
-#'                value in \code{column}, it will return \code{NA}
+#'                value in \code{column}, it will return \code{NA}.
 #' @param searchColumn Optionally, provide the name of a column in \code{df} that results
 #'                must be found in. The return value will still be from \code{column}
 #'
@@ -47,29 +48,29 @@ equivalentNameAsList <- function(value, df, multi) {
   })
 }
 
-
-#' Check and expand sppEquiv
+#' Check and expand \code{sppEquiv}
 #'
 #' This will expand a \code{sppEquiv} object that is only a vector or only a one-column
 #' data.table into a many column data.table, if the columns that are present do not
 #' contain \code{ensureColumns}.
 #'
-#' @param sppEquiv A character vector or data.table with named column(s). If this
-#'   data.table does not have columns named \code{ensureColumns}, then it will
-#'   attempt to merge this data.table with LandR::sppEquivalencies_CA to get
-#'   \code{ensureColumns}.
+#' @param sppEquiv A character vector or \code{data.table} with named column(s).
+#'   If this \code{data.table} does not have columns named \code{ensureColumns},
+#'   then it will attempt to merge this data.table with \code{sppEquivalencies_CA}
+#'   to get \code{ensureColumns}.
 #' @param ensureColumns A character vector of column names that must be in \code{sppEquiv}.
 #'   If these are not present, then the function will attempt to merge with
-#'   LandR::sppEquivalencies_CA, so the column name(s) of \code{sppEquiv} must match
-#'   column names in LandR::sppEquivalencies_CA.
+#'   \code{sppEquivalencies_CA}, so the column name(s) of \code{sppEquiv} must match
+#'   column names in \code{sppEquivalencies_CA}.
+#'
 #' @export
 #' @importFrom data.table setDT setnames data.table
-#' @return
-#' A data.table with potentially all columns in LandR::sppEquivalencies_CA.
+#'
+#' @return A \code{data.table} with potentially all columns in \code{sppEquivalencies_CA}.
 #'
 sppEquivCheck <- function(sppEquiv, ensureColumns = NULL) {
   if (is.null(dim(sppEquiv))) {
-    sppEquiv <- equivalentName(sppEquiv, LandR::sppEquivalencies_CA,
+    sppEquiv <- equivalentName(sppEquiv, sppEquivalencies_CA,
                                column = P(sim)$sppEquivCol, multi = TRUE)
     sppEquiv <- data.table(tmp = sppEquiv)
     setnames(sppEquiv, new = P(sim)$sppEquivCol)
@@ -77,9 +78,9 @@ sppEquivCheck <- function(sppEquiv, ensureColumns = NULL) {
   if (is(sppEquiv, "data.frame")) {
     if (!is.data.table(sppEquiv)) setDT(sppEquiv)
     if (!all(c(ensureColumns) %in% colnames(sppEquiv) )) {
-      if (all(colnames(sppEquiv) %in% colnames(LandR::sppEquivalencies_CA))) {
-        sppEquiv <- LandR::sppEquivalencies_CA[
-          sppEquiv, on = intersect(colnames(sppEquiv), colnames(LandR::sppEquivalencies_CA))]
+      if (all(colnames(sppEquiv) %in% colnames(sppEquivalencies_CA))) {
+        sppEquiv <- sppEquivalencies_CA[
+          sppEquiv, on = intersect(colnames(sppEquiv), colnames(sppEquivalencies_CA))]
       } else {
         stop("Please provide sppEquiv as a data.table with at least one column of species names, ",
              "that shares a column name and species naming convention as in LandR::sppEquivalencies_CA")
@@ -89,5 +90,4 @@ sppEquivCheck <- function(sppEquiv, ensureColumns = NULL) {
     stop("sppEquiv must be a data.table")
   }
   sppEquiv[]
-
 }
