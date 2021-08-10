@@ -39,23 +39,23 @@ Imports:
     quickPlot,
     raster,
     RColorBrewer,
-    RCurl,
-    reproducible (>= 1.2.6.9003),
+    reproducible (>= 1.2.7),
     sf,
     SpaDES.tools (>= 0.3.1.9000),
     stats,
     tools,
-    utils,
-    XML
+    utils
 Suggests:
     covr,
     googledrive (>= 2.0.0),
     knitr,
     RandomFields,
+    RCurl,
     roxygen2,
     rmarkdown,
     spelling,
-    testthat
+    testthat,
+    XML
 Remotes:
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,

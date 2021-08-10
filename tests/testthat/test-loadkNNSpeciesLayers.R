@@ -1,10 +1,12 @@
 test_that("test download kNN SpeciesLayers with kNN website - all species", {
-  skip_on_ci()
+  skip_if_not(interactive())
+  skip_if_not_installed(c("googledrive", "RCurl", "XML"))
+
   if (FALSE) {
     # devtools::load_all("../LandR")
   }
-  library(LandR)
   library(raster)
+
   mainDir <- tempdir()
   dPath <- file.path(mainDir, "inputs")
   cPath <- file.path(mainDir, "cache")
@@ -59,11 +61,13 @@ test_that("test download kNN SpeciesLayers with kNN website - all species", {
 })
 
 test_that("test download kNN SpeciesLayers with kNN website - three species", {
-  skip_on_ci()
+  skip_if_not(interactive())
+  skip_if_not_installed(c("googledrive", "RCurl", "XML"))
+
   if (FALSE) {
     # devtools::load_all("../LandR")
   }
-  library(LandR)
+
   library(raster)
   mainDir <- tempdir()
   dPath <- file.path(mainDir, "inputs")
@@ -107,11 +111,13 @@ test_that("test download kNN SpeciesLayers with kNN website - three species", {
 })
 
 test_that("test download kNN SpeciesLayers bad website - three species", {
-  skip_on_ci()
+  skip_if_not(interactive())
+  skip_if_not_installed(c("googledrive", "RCurl", "XML"))
+
   if (FALSE) {
     # devtools::load_all("../LandR")
   }
-  library(LandR)
+
   library(raster)
   googledrive::drive_deauth()
   mainDir <- tempdir()
@@ -139,7 +145,6 @@ test_that("test download kNN SpeciesLayers bad website - three species", {
   expect_true(all(sppEquiv$KNN %in% names(speciesLayers)))
   expect_true(compareRaster(RTM, speciesLayers, res = TRUE, orig = TRUE, stopiffalse = FALSE))
 
-
   ## get all available species for 2011
   speciesLayers2011 <- prepSpeciesLayers_KNN(destinationPath = dPath,
                                              outputPath = dPath,
@@ -153,4 +158,3 @@ test_that("test download kNN SpeciesLayers bad website - three species", {
   expect_true(all(sppEquiv$KNN %in% names(speciesLayers2011)))
   expect_true(compareRaster(RTM, speciesLayers2011, res = TRUE, orig = TRUE, stopiffalse = FALSE))
 })
-

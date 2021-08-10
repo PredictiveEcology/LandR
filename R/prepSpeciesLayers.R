@@ -192,7 +192,6 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 #'
 #' @export
 #' @importFrom reproducible asPath Cache prepInputs
-#' @importFrom RCurl url.exists
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
                                   url = NULL,
@@ -200,6 +199,8 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
                                   sppEquiv,
                                   sppEquivCol,
                                   thresh = 10, ...) {
+  stopifnot(requireNamespace("RCurl", quietly = TRUE))
+
   dots <- list(...)
 
   if ("year" %in% names(dots)) {
@@ -215,7 +216,7 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
   }
 
   shared_drive_url <- NULL
-  if (!url.exists(url)) {  ## ping website and use gdrive if not available
+  if (!RCurl::url.exists(url)) {  ## ping website and use gdrive if not available
     if (requireNamespace("googledrive", quietly = TRUE)) {
       driveFolder <- paste0("kNNForestAttributes_", year)
       url <- googledrive::with_drive_quiet(

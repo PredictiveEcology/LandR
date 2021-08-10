@@ -575,13 +575,13 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @export
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
-#' @importFrom RCurl getURL url.exists
 #' @importFrom reproducible Cache .prefix preProcess basename2
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
-#' @importFrom XML getHTMLLinks
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year = 2001,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
+  stopifnot(requireNamespace("RCurl", quietly = TRUE) && requireNamespace("XML", quietly = TRUE))
+
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
 
@@ -607,7 +607,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
   }
 
   ## get all online file names
-  if (url.exists(url)) {   ## ping the website first
+  if (RCurl::url.exists(url)) {   ## ping the website first
     ## is it a google drive url?
     if (grepl("drive.google.com", url)) {
       if (requireNamespace("googledrive", quietly = TRUE)) {
@@ -622,8 +622,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
         stop("package 'googledrive' needs to be installed to access google drive files.")
       }
     } else {
-      fileURLs <- getURL(url, dirlistonly = TRUE, .opts = list(followlocation = TRUE))
-      fileNames <- getHTMLLinks(fileURLs)
+      fileURLs <- RCurl::getURL(url, dirlistonly = TRUE, .opts = list(followlocation = TRUE))
+      fileNames <- XML::getHTMLLinks(fileURLs)
     }
     fileNames <- grep("(Species|SpeciesGroups)_.*\\.tif$", fileNames, value = TRUE)
   } else {
@@ -829,17 +829,18 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
 #' @export
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
-#' @importFrom RCurl getURL
 #' @importFrom reproducible basename2 Cache .prefix preProcess
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
-#' @importFrom XML getHTMLLinks
 #' @rdname LandR-deprecated
 loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                            knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   .Deprecated("loadkNNSpeciesLayers",
               msg = paste("loadkNNSpeciesLayersValidation is deprecated.",
                           "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers."))
+
+  stopifnot(requireNamespace("RCurl", quietly = TRUE) && requireNamespace("XML", quietly = TRUE))
+
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
 
@@ -861,7 +862,7 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   }
 
   ## get all online file names
-  if (url.exists(url)) {   ## ping the website first
+  if (RCurl::url.exists(url)) {   ## ping the website first
     if (grepl("drive.google.com", url)) { ## is it a google drive url?
       if (requireNamespace("googledrive", quietly = TRUE)) {
         fileURLs <- googledrive::drive_link(googledrive::drive_ls(url))
@@ -871,11 +872,11 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
         stop("package 'googledrive' needs to be installed to access google drive files.")
       }
     } else {
-      fileURLs <- getURL(url, dirlistonly = TRUE,
-                         .opts = list(followlocation = TRUE,
-                                      ssl.verifypeer = 0L)) ## TODO: re-enable verify
+      fileURLs <- RCurl::getURL(url, dirlistonly = TRUE,
+                                .opts = list(followlocation = TRUE,
+                                             ssl.verifypeer = 0L)) ## TODO: re-enable verify
       names(fileURLs) <- fileNames
-      fileNames <- getHTMLLinks(fileURLs)
+      fileNames <- XML::getHTMLLinks(fileURLs)
     }
     fileNames <- grep("Species_.*.tif$", fileNames, value = TRUE)
   } else {
