@@ -119,7 +119,7 @@ test_that("test download kNN SpeciesLayers bad website - three species", {
   }
 
   library(raster)
-  googledrive::drive_deauth()
+
   mainDir <- tempdir()
   dPath <- file.path(mainDir, "inputs")
   cPath <- file.path(mainDir, "cache")
