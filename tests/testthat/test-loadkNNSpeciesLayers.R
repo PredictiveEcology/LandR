@@ -19,6 +19,7 @@ test_that("test download kNN SpeciesLayers with kNN website - all species", {
   sppEquiv <- sppEquiv[KNN != ""]
 
   ## get all available species for 2001
+  opt_cachePath <- getOption("reproducible.cachePath")
   options(reproducible.cachePath = cPath)
   speciesLayers <- loadkNNSpeciesLayers(dPath = dPath,
                                         rasterToMatch = RTM,
@@ -58,6 +59,9 @@ test_that("test download kNN SpeciesLayers with kNN website - all species", {
                    "Pseu_Men", "Broadleaf_Spp", "Needleleaf_Spp")
   expect_true(all(expectedSpp %in% names(speciesLayers2011)))
   expect_true(compareRaster(RTM, speciesLayers2011, res = TRUE, orig = TRUE, stopiffalse = FALSE))
+
+  options(reproducible.cachePath = opt_cachePath)
+  unlink(mainDir, recursive = TRUE)
 })
 
 test_that("test download kNN SpeciesLayers with kNN website - three species", {
@@ -81,6 +85,7 @@ test_that("test download kNN SpeciesLayers with kNN website - three species", {
   sppEquiv <- sppEquiv[KNN %in% c("Pinu_Spp", "Popu_Tre", "Pice_Mar")]
 
   ## get all available species for 2001
+  opt_cachePath <- getOption("reproducible.cachePath")
   options(reproducible.cachePath = cPath)
   speciesLayers <- loadkNNSpeciesLayers(dPath = dPath,
                                         rasterToMatch = RTM,
@@ -108,6 +113,9 @@ test_that("test download kNN SpeciesLayers with kNN website - three species", {
                                             thresh = 0)
   expect_true(all(sppEquiv$KNN %in% names(speciesLayers2011)))
   expect_true(compareRaster(RTM, speciesLayers2011, res = TRUE, orig = TRUE, stopiffalse = FALSE))
+
+  options(reproducible.cachePath = opt_cachePath)
+  unlink(mainDir, recursive = TRUE)
 })
 
 test_that("test download kNN SpeciesLayers bad website - three species", {
@@ -132,6 +140,7 @@ test_that("test download kNN SpeciesLayers bad website - three species", {
   sppEquiv <- sppEquiv[KNN %in% c("Pinu_Spp", "Popu_Tre", "Pice_Mar")]
 
   ## get all available species for 2001
+  opt_cachePath <- getOption("reproducible.cachePath")
   options(reproducible.cachePath = cPath)
   speciesLayers <- prepSpeciesLayers_KNN(destinationPath = dPath,
                                          outputPath = dPath,
@@ -157,4 +166,7 @@ test_that("test download kNN SpeciesLayers bad website - three species", {
                                              thresh = 0)
   expect_true(all(sppEquiv$KNN %in% names(speciesLayers2011)))
   expect_true(compareRaster(RTM, speciesLayers2011, res = TRUE, orig = TRUE, stopiffalse = FALSE))
+
+  options(reproducible.cachePath = opt_cachePath)
+  unlink(mainDir, recursive = TRUE)
 })

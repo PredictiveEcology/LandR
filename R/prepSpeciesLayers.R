@@ -224,11 +224,11 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
           googledrive::drive_find(
             driveFolder,
             type = "folder",
-            shared_drive = googledrive::as_id("https://drive.google.com/drive/folders/0ACLdFud2dAYIUk9PVA")
+            shared_drive = googledrive::as_id("https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA")
           )
         )
       )
-      shared_drive_url <- "https://drive.google.com/drive/folders/0ACLdFud2dAYIUk9PVA"
+      shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
     }
   }
 
