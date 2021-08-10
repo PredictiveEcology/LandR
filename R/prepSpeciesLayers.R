@@ -495,14 +495,12 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   stack(CCstack) ## ensure it's still a stack
 }
 
+#' @param destinationPath path to data directory
+#' @param outputPath path to output directory
 #' @export
 #' @rdname LandR-deprecated
-prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath,
-                                      url = NULL,
-                                      studyArea, rasterToMatch,
-                                      sppEquiv,
-                                      sppEquivCol,
-                                      thresh = 10, ...) {
+prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, studyArea,
+                                      rasterToMatch, sppEquiv, sppEquivCol, thresh = 10, ...) {
   .Deprecated("prepSpeciesLayers_KNN2011",
               msg = paste("prepSpeciesLayers_KNN2011 is deprecated.",
                           "Please use 'prepSpeciesLayers_KNN' and supply URL/year to validation layers."))

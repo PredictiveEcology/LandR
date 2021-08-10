@@ -33,6 +33,8 @@ this only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use
 \code{data("sppEquivalencies_CA", "LandR")}.}
 
+\item{year}{which year's layers should be retrieved? One of 2001 (default) or 2011.}
+
 \item{knnNamesCol}{character string indicating the column in \code{sppEquiv}
 containing kNN species names.
 Default \code{"KNN"} for when \code{sppEquivalencies_CA} is used.}

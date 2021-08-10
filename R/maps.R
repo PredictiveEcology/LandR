@@ -553,6 +553,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #'
 #' @template sppEquiv
 #'
+#' @param year which year's layers should be retrieved? One of 2001 (default) or 2011.
+#'
 #' @param knnNamesCol character string indicating the column in \code{sppEquiv}
 #'                    containing kNN species names.
 #'                    Default \code{"KNN"} for when \code{sppEquivalencies_CA} is used.
@@ -582,6 +584,9 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
+
+  sppEquivalencies_CA <- get(data("sppEquivalencies_CA", package = "LandR",
+                                  envir = environment()), inherits = FALSE)
 
   if ("shared_drive_url" %in% names(dots)) {
     shared_drive_url <- dots[["shared_drive_url"]]
@@ -626,8 +631,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
     ## with "wild cards"
     url <- NULL
     fileNames <- paste0("NFI_MODIS250m_", year, "_kNN_Species_",
-                        unique(sppEquivalencies_CA$KNN),
-                        "_v1.tif")
+                        unique(sppEquivalencies_CA$KNN), "_v1.tif")
     fileNames <- fileNames[!grepl("Species__v1", fileNames)]
   }
 
@@ -645,8 +649,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
 
   ## Make sure spp names are compatible with kNN names
   kNNnames <- if (knnNamesCol %in% colnames(sppEquiv)) {
-    as.character(equivalentName(sppNameVector, sppEquiv, column = knnNamesCol,
-                                multi = TRUE))
+    as.character(equivalentName(sppNameVector, sppEquiv, column = knnNamesCol, multi = TRUE))
   } else {
     as.character(equivalentName(sppNameVector, sppEquivalencies_CA,
                                 column = knnNamesCol, multi = TRUE,
@@ -839,6 +842,9 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
                           "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers."))
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
+
+  sppEquivalencies_CA <- get(data("sppEquivalencies_CA", package = "LandR",
+                                  envir = environment()), inherits = FALSE)
 
   sppEquiv <- sppEquiv[, lapply(.SD, as.character)]
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]

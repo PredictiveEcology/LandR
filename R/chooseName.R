@@ -51,7 +51,7 @@ equivalentNameAsList <- function(value, df, multi) {
 #' Check and expand \code{sppEquiv}
 #'
 #' This will expand a \code{sppEquiv} object that is only a vector or only a one-column
-#' data.table into a many column data.table, if the columns that are present do not
+#' \code{data.table} into a many column \code{data.table}, if the columns that are present do not
 #' contain \code{ensureColumns}.
 #'
 #' @param sppEquiv A character vector or \code{data.table} with named column(s).
@@ -62,18 +62,23 @@ equivalentNameAsList <- function(value, df, multi) {
 #'   If these are not present, then the function will attempt to merge with
 #'   \code{sppEquivalencies_CA}, so the column name(s) of \code{sppEquiv} must match
 #'   column names in \code{sppEquivalencies_CA}.
+#' @param sppEquivCol Optional. Column in \code{sppEquivalencies_CA} to use for equivalent names
+#'   when \code{sppEquiv} not provided (i.e., when \code{sppEquivalencies_CA} is used instead).
 #'
 #' @export
 #' @importFrom data.table setDT setnames data.table
 #'
 #' @return A \code{data.table} with potentially all columns in \code{sppEquivalencies_CA}.
 #'
-sppEquivCheck <- function(sppEquiv, ensureColumns = NULL) {
+sppEquivCheck <- function(sppEquiv, ensureColumns = NULL, sppEquivCol = NULL) {
+  sppEquivalencies_CA <- get(data("sppEquivalencies_CA", package = "LandR",
+                                  envir = environment()), inherits = FALSE)
+
   if (is.null(dim(sppEquiv))) {
-    sppEquiv <- equivalentName(sppEquiv, sppEquivalencies_CA,
-                               column = P(sim)$sppEquivCol, multi = TRUE)
+    stopifnot(!is.null(sppEquivCol))
+    sppEquiv <- equivalentName(sppEquiv, sppEquivalencies_CA, column = sppEquivCol, multi = TRUE)
     sppEquiv <- data.table(tmp = sppEquiv)
-    setnames(sppEquiv, new = P(sim)$sppEquivCol)
+    setnames(sppEquiv, new = sppEquivCol)
   }
   if (is(sppEquiv, "data.frame")) {
     if (!is.data.table(sppEquiv)) setDT(sppEquiv)

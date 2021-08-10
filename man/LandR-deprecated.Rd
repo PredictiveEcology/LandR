@@ -72,6 +72,10 @@ If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 Defaults to 1.}
 
 \item{url}{the source url for the data, passed to \code{\link[reproducible]{prepInputs}}}
+
+\item{destinationPath}{path to data directory}
+
+\item{outputPath}{path to output directory}
 }
 \value{
 A factor raster
