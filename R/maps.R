@@ -676,6 +676,10 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
     kNNnames <- kNNnames[kNNnames %in% allSpp]
   }
 
+  if (!length(kNNnames)) {
+    stop("None of the selected species were found in the kNN database.")
+  }
+
   ## define suffix to append to file names
   suffix <- if (basename(cachePath) == "cache") {
     paste0(as.character(ncell(rasterToMatch)), "px")
