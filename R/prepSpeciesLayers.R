@@ -221,9 +221,8 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
       driveFolder <- paste0("kNNForestAttributes_", year)
       url <- googledrive::with_drive_quiet(
         googledrive::drive_link(
-          googledrive::drive_find(
+          googledrive::drive_ls(
             driveFolder,
-            type = "folder",
             shared_drive = googledrive::as_id("https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA")
           )
         )
