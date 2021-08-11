@@ -659,7 +659,12 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 
   numCharIEC <- max(nchar(availableERC_by_Sp$initialEcoregionCode), na.rm = TRUE)
   if (hasPreDash) {
-    numCharEcoregion <- max(nchar(availableERG2$ecoregion), na.rm = TRUE)
+    numCharEcoregion <- if (nrow(availableERG2) > 0) {
+      max(nchar(availableERG2$ecoregion), na.rm = TRUE)
+    } else {
+      ## above gives -Inf when no classes to replace, so use zero instead
+      0
+    }
     numCharLCCCodes <- numCharIEC - numCharEcoregion - 1 # minus 1 for the dash
     availableERG2[, `:=`(ecoregion = NULL)]
   } else {
