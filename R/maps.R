@@ -561,9 +561,9 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #'
 #' @template sppEquivCol
 #'
-#' @param thresh the minimum number of pixels where the species must have
-#'               \code{biomass > 0} to be considered present in the study area.
-#'               Defaults to 1.
+#' @param thresh the minimum percent cover a species must have (per pixel)
+#'               to be considered present in the study area.
+#'               Defaults to 10.
 #'
 #' @param url the source url for the data, passed to \code{\link[reproducible]{prepInputs}}
 #'
@@ -579,7 +579,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year = 2001,
-                                 knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
+                                 knnNamesCol = "KNN", sppEquivCol, thresh = 10, url, ...) {
   stopifnot(requireNamespace("RCurl", quietly = TRUE) && requireNamespace("XML", quietly = TRUE))
 
   dots <- list(...)
