@@ -502,28 +502,29 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
 #' @rdname LandR-deprecated
 prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, studyArea,
                                       rasterToMatch, sppEquiv, sppEquivCol, thresh = 10, ...) {
-  .Deprecated("prepSpeciesLayers_KNN2011",
+  .Deprecated("loadkNNSpeciesLayers",
               msg = paste("prepSpeciesLayers_KNN2011 is deprecated.",
-                          "Please use 'prepSpeciesLayers_KNN' and supply URL/year to validation layers."))
-  dots <- list(...)
+                          "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers."))
 
   if (is.null(url))
     url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
                   "canada-forests-attributes_attributs-forests-canada/2011-",
                   "attributes_attributs-2011/")
 
-  loadkNNSpeciesLayersValidation(
+  loadkNNSpeciesLayers(
     dPath = destinationPath,
-    knnNamesCol = "KNN",
-    outputPath = outputPath,
     rasterToMatch = rasterToMatch,
     studyArea = studyArea,
-    studyAreaName = dots$studyAreaName,
     sppEquiv = sppEquiv,
+    year = 2011,
+    knnNamesCol = "KNN",
     sppEquivCol = sppEquivCol,
     thresh = thresh,
     url = url,
-    userTags = c("speciesLayers", "KNN")
+    ## dots start here:
+    outputPath = outputPath,
+    userTags = c("speciesLayers", "KNN"),
+    ...
   )
 }
 
