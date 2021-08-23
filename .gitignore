@@ -40,3 +40,6 @@ rsconnect/
 *.dll
 *.so
 *.o
+
+inputs/
+J4RTmpFile
