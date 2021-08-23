@@ -2,7 +2,7 @@ utils::globalVariables(c(
   ".", "..pgdAndScAndLeading", ":=", "B", "HQ", "leading", "LQ", "mixed", "N",
   "pixelGroup", "postfireB", "prefireB", "pure",
   "severityB", "speciesCode", "speciesGroupB", "speciesProportion", "SPP",
-  "totalB", "totalcover", "Type"
+  "totalB", "totalcover", "Type", "vals"
 ))
 
 #' Define flammability map
