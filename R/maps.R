@@ -929,7 +929,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' @param HQ \code{data.table} column of whether \code{SPP} is present in HQ layers
 #' @param LQ \code{data.table} column of whether \code{SPP} is present in LQ layers
 #'
-#' @importFrom gdalUtils gdalwarp
+#' @importFrom gdalUtilities gdalwarp
 #' @importFrom raster compareRaster crs extent filename res projectExtent raster
 #' @importFrom raster writeRaster xmax xmin ymax ymin
 #' @keywords internal
@@ -975,15 +975,17 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
       if (hqLarger) {
         tmpHQName <- basename(tempfile(fileext = ".tif"))
 
-        gdalwarp(overwrite = TRUE,
-                 dstalpha = TRUE,
-                 s_srs = as.character(crs(highQualityStack[[SPP]])),
-                 t_srs = as.character(crs(highQualityStack[[SPP]])),
-                 multi = TRUE, of = "GTiff",
-                 tr = res(highQualityStack),
-                 te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
-                        xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
-                 filename(highQualityStack[[SPP]]), ot = "Byte", tmpHQName)
+        gdalUtilities::gdalwarp(overwrite = TRUE,
+                                dstalpha = TRUE,
+                                s_srs = as.character(crs(highQualityStack[[SPP]])),
+                                t_srs = as.character(crs(highQualityStack[[SPP]])),
+                                multi = TRUE, of = "GTiff",
+                                tr = res(highQualityStack),
+                                te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
+                                       xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
+                                ot = "Byte",
+                                srcfile = filename(highQualityStack[[SPP]]),
+                                dstfile = tmpHQName)
         HQRast <- raster(tmpHQName)
         HQRast[] <- HQRast[]
         HQRast[HQRast[] == 255] <- NA_integer_
