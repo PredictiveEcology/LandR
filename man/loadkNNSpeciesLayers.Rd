@@ -12,7 +12,7 @@ loadkNNSpeciesLayers(
   year = 2001,
   knnNamesCol = "KNN",
   sppEquivCol,
-  thresh = 1,
+  thresh = 10,
   url,
   ...
 )
@@ -44,9 +44,9 @@ For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
 Only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
-\item{thresh}{the minimum number of pixels where the species must have
-\code{biomass > 0} to be considered present in the study area.
-Defaults to 1.}
+\item{thresh}{the minimum percent cover a species must have (per pixel)
+to be considered present in the study area.
+Defaults to 10.}
 
 \item{url}{the source url for the data, passed to \code{\link[reproducible]{prepInputs}}}
 
