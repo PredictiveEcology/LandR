@@ -6,6 +6,7 @@ version 1.0.5
 * Several changes to accommodate LCC2010
 * New columns to sppEquivalenciesCA (`PSP`, `BC_Forestry` and `FuelClass`)
 * Lowered values of dummy `rawBiomassMap`
+* passing fireURL == NULL to `prepStandAgeMap` bypasses age imputation
 
 version 1.0.4
 =============
