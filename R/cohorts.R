@@ -1464,6 +1464,7 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
     pixelCohortData[!speciesEcoregion, on = cols][, ..cols][, list(numPixelsRemoved = .N), by = cols], # anti-join
   )
 
+  ## REMOVE PIXELS IN ECOREGION GROUPS THAT ENDED UP WITHOUT PARAMS
   # pixelCohortData <- pixelCohortData[ecoregionGroup %in% ecoregionsWeHaveParametersFor] # keep only ones we have params for
   pixelCohortData <- speciesEcoregion[, ..cols][pixelCohortData, on = cols, nomatch = 0]
 
