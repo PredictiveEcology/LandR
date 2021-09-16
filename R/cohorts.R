@@ -1371,6 +1371,8 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #'   If this is related to known ages from a high quality database, then use age of the oldest
 #'   trees in that database.
 #' @param pixelFateDT A \code{data.table} of \code{pixelFateDT}; if none provided, will make an empty one.
+#' @param rmImputedPix Should imputed pixels be removed
+#' @param imputedPixID a vector of IDs of pixels that suffered data imputation.
 #'
 #' @template speciesEcoregion
 #'
@@ -1383,7 +1385,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #' @importFrom utils tail
 makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesEcoregion,
                                 pixelGroupBiomassClass, pixelGroupAgeClass, minAgeForGrouping = 0,
-                                pixelFateDT) {
+                                rmImputedPix = FALSE, imputedPixID, pixelFateDT) {
   ## make ecoregioGroup a factor (again) and remove unnecessary cols.
   # refactor because the "_34" and "_35" ones are still levels
   pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
@@ -1465,6 +1467,21 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   # pixelCohortData <- pixelCohortData[ecoregionGroup %in% ecoregionsWeHaveParametersFor] # keep only ones we have params for
   pixelCohortData <- speciesEcoregion[, ..cols][pixelCohortData, on = cols, nomatch = 0]
 
+  pixelFateDT <- pixelFate(
+    pixelFateDT, "removing ecoregionGroups without enough data to est. maxBiomass",
+    tail(pixelFateDT$runningPixelTotal, 1) - NROW(unique(pixelCohortData$pixelIndex))
+  )
+
+  ## REMOVE IMPUTED PIXELS FROM THE SIMULATION IF NEED BE
+  if (rmImputedPix) {
+    pixelCohortData <- pixelCohortData[!pixelIndex %in% imputedPixID]
+
+    pixelFateDT <- pixelFate(
+      pixelFateDT, "removing pixels that suffered data imputation",
+      tail(pixelFateDT$runningPixelTotal, 1) - NROW(unique(pixelCohortData$pixelIndex))
+    )
+  }
+
   # Lost some ecoregionGroups -- refactor
   pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
 
@@ -1478,11 +1495,6 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 
   cohortData <- unique(pixelCohortData, by = c("pixelGroup", columnsForPixelGroups))
   cohortData[, `:=`(pixelIndex = NULL)]
-
-  pixelFateDT <- pixelFate(
-    pixelFateDT, "removing ecoregionGroups without enough data to est. maxBiomass",
-    tail(pixelFateDT$runningPixelTotal, 1) - NROW(unique(pixelCohortData$pixelIndex))
-  )
 
   assertUniqueCohortData(cohortData, c("pixelGroup", "ecoregionGroup", "speciesCode"))
   return(list(cohortData = cohortData, pixelCohortData = pixelCohortData, pixelFateDT = pixelFateDT))
