@@ -819,7 +819,12 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     "of", NROW(inputDataTable), "pixels)"
   ))
   message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
-  inputDataTable[whAgeEqZero, `:=`(totalBiomass = 0)]
+  ## correct B in a separate column to keep track of imputed pixels, then replace column
+  inputDataTable[, `:=`(totalBiomass2 = totalBiomass)]
+  inputDataTable[whAgeEqZero, `:=`(totalBiomass2 = 0)]
+  imputedPixID <- inputDataTable[totalBiomass != totalBiomass2, pixelIndex]
+  inputDataTable[, totalBiomass := totalBiomass2]
+  inputDataTable[, totalBiomass2 := NULL]
 
   whTotalBEqZero <- which(inputDataTable$totalBiomass == 0)
   message(green(
@@ -827,7 +832,12 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     "of", NROW(inputDataTable), "pixels)"
   ))
   message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
-  inputDataTable[whTotalBEqZero, `:=`(age = 0)]
+  ## correct age in a separate column to keep track of imputed pixels, then replace column
+  inputDataTable[, `:=`(age2 = age)]
+  inputDataTable[whTotalBEqZero, `:=`(age2 = 0)]
+  imputedPixID <- c(imputedPixID, inputDataTable[age != age2, pixelIndex])
+  inputDataTable[, age := age2]
+  inputDataTable[, age2 := NULL]
 
   cohortData <- data.table::melt(inputDataTable,
                                  value.name = "cover",
@@ -914,7 +924,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 
   # clean up
   set(cohortData, NULL, c("totalCover", "coverOrig"), NULL)
-  return(cohortData)
+  return(list("cohortData" = cohortData, "imputedPixID" = imputedPixID))
 }
 
 #' Generate initial \code{cohortData} table
@@ -947,6 +957,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @template doAssertion
 #'
 #' @param doSubset Turns on/off subsetting. Defaults to \code{TRUE}.
+#' @return a list with the the initial \code{cohortData}\code{data.table} and
+#'     a vector of pixel IDs tath suffered imputation
 #'
 #' @author Eliot McIntire
 #' @export
@@ -988,12 +1000,14 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
     }
   }
 
-  cohortData <- Cache(.createCohortData,
-                      inputDataTable = inputDataTable,
-                      # pixelGroupBiomassClass = pixelGroupBiomassClass,
-                      minCoverThreshold = minCoverThreshold,
-                      doAssertion = doAssertion
+  out <- Cache(.createCohortData,
+               inputDataTable = inputDataTable,
+               # pixelGroupBiomassClass = pixelGroupBiomassClass,
+               minCoverThreshold = minCoverThreshold,
+               doAssertion = doAssertion
   )
+  cohortData <- out$cohortData
+  imputedPixID <- out$imputedPixID
 
   ######################################################
   # Impute missing ages on poor age dataset
@@ -1073,6 +1087,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
       on = c("pixelIndex", "speciesCode")
     ]
     cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = .logFloor(imputedAge))]
+    imputedPixID <- c(imputedPixID, unique(cohortData[!is.na(imputedAge), pixelIndex]))
     cohortData[, `:=`(imputedAge = NULL)]
   }
   # # Round ages to nearest pixelGroupAgeClass
@@ -1094,7 +1109,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
   # https://stats.stackexchange.com/questions/31300/dealing-with-0-1-values-in-a-beta-regression
   # cohortData[ , coverProp := (cover/100 * (NROW(cohortData) - 1) + 0.5) / NROW(cohortData)]
 
-  return(cohortData)
+  return(list("cohortData" = cohortData, "imputedPixID" = unique(imputedPixID)))
 }
 
 #' Subset a \code{data.table} with random subsampling within \code{by} groups
