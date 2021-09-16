@@ -366,7 +366,8 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @template rasterToMatch
 #' @param fireField field used to rasterize fire polys
 #' @param startTime date of first fire year.
-#' @return a stand age map corrected for fires
+#' @return a list with a stand age map (potentially) corrected for fires and a vector of pixel IDs
+#'  for which ages were corrected. If no corrections were applied this vector is \code{integer(0)}.
 #'
 #' @export
 #' @importFrom raster crs
@@ -419,11 +420,13 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
         standAgeMap[] <- asInteger(standAgeMap[])
         standAgeMap[toChange] <- asInteger(startTime) - asInteger(fireYear[][toChange])
       }
+      imputedPixID <- which(toChange)
     }
   } else {
     message("No rasterToMatch supplied, so ages NOT adjusted using fire data.")
+    imputedPixID <- integer(0)
   }
-  standAgeMap
+  return(list(standAgeMap = standAgeMap, imputedPixID = imputedPixID))
 }
 
 #' Create a raster of fire polygons
