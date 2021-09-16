@@ -1,4 +1,9 @@
 bug reports https://github.com/PredictiveEcology/LandR/issues
+version 1.0.6
+=============
+* Several changes to accommodate the tracking and optional removal of pixels
+data suffered data imputation in `Biomass_borealDataPrep`
+
 version 1.0.5
 =============
 * Support for refitting `modelBiomass` (see `Biomass_boreaDataPrep`) with scaled data or different optimizer

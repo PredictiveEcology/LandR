@@ -12,6 +12,8 @@ makeCohortDataFiles(
   pixelGroupBiomassClass,
   pixelGroupAgeClass,
   minAgeForGrouping = 0,
+  rmImputedPix = FALSE,
+  imputedPixID,
   pixelFateDT
 )
 }
@@ -40,6 +42,10 @@ ages for young stands/trees that is very reliable, such as a fire database.
 Ages below this will not be grouped together. Defaults to -1, meaning treat all ages equally.
 If this is related to known ages from a high quality database, then use age of the oldest
 trees in that database.}
+
+\item{rmImputedPix}{Should imputed pixels be removed}
+
+\item{imputedPixID}{a vector of IDs of pixels that suffered data imputation.}
 
 \item{pixelFateDT}{A \code{data.table} of \code{pixelFateDT}; if none provided, will make an empty one.}
 }
