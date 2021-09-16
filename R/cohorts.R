@@ -944,15 +944,21 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #'   \item \code{coverOrig} (integer)
 #'   \item \code{B} (integer)
 #' }
+#'    Several data correction/imputation operations are also performed. Namely, age is imputed
+#'    in pixels where age data is missing (but not cover) and where cover == 0 but age > 0,
+#'    total biomass is zeroed if age == 0, and age is zeroed if biomass == 0.
+#'
 #'
 #' @param inputDataTable A \code{data.table} with columns described above.
 #'
 #' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
 #'   represent percent cover by species, rescaled to sum up to 100\%.
 #'
-#' @param imputeBadAgeModel DESCRIPTION NEEDED
+#' @param imputeBadAgeModel statistical model used to impute ages in pixels with missing
+#'  data or with cover == 0.
 #'
-#' @param minCoverThreshold DESCRIPTION NEEDED
+#' @param minCoverThreshold minimum total cover percentage necessary to consider the pixel
+#'  vegetated, or a cohort present in a pixel.
 #'
 #' @template doAssertion
 #'
