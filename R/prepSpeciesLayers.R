@@ -219,15 +219,20 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
   if (!RCurl::url.exists(url)) {  ## ping website and use gdrive if not available
     if (requireNamespace("googledrive", quietly = TRUE)) {
       driveFolder <- paste0("kNNForestAttributes_", year)
-      url <- googledrive::with_drive_quiet(
-        googledrive::drive_link(
-          googledrive::drive_ls(
-            driveFolder,
-            shared_drive = googledrive::as_id("https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA")
-          )
-        )
-      )
       shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
+      # url <- googledrive::with_drive_quiet(
+      #   googledrive::drive_link(
+      #     googledrive::drive_ls(
+      #       driveFolder,
+      #       shared_drive = googledrive::as_id(shared_drive_url)
+      #     )
+      #   )
+      # )
+
+      driveDT <- as.data.table(googledrive::drive_ls(googledrive::as_id(shared_drive_url)))
+      url <- googledrive::with_drive_quiet(
+        googledrive::drive_link(driveDT[name == driveFolder, id])
+      )
     }
   }
 
