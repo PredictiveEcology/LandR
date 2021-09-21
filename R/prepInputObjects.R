@@ -36,7 +36,7 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' Make \code{pixelTable} from biomass, age, land-cover and species cover data
 #'
 #' @param speciesLayers stack of species layers rasters
-#' @param standAgeMap raster of stand age
+#' @template standAgeMap
 #' @param ecoregionFiles A list with two objects: the \code{ecoregionMap} and a table summarizing
 #'   its information per \code{pixelID.} See \code{ecoregionProducer}.
 #' @param biomassMap raster of total stand biomass
@@ -361,12 +361,13 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @param datatype passed to \code{prepInputs} of stand age map
 #' @param destinationPath directory where  age and fire data will be downloaded
 #' @param filename2 passed to \code{prepInputs} of stand age map
-#' @param fireURL url to download fire polygons used to update age map
+#' @param fireURL url to download fire polygons used to update age map. If NULL or NA age imputation is bypassed.
 #' @param fireFun passed to \code{prepInputs} of fire data
 #' @template rasterToMatch
 #' @param fireField field used to rasterize fire polys
 #' @param startTime date of first fire year.
-#' @return a stand age map corrected for fires
+#' @return a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
+#'  for which ages were corrected. If no corrections were applied the attribute vector is \code{integer(0)}.
 #'
 #' @export
 #' @importFrom raster crs
@@ -378,7 +379,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
                                   datatype = "INT2U",
                                   destinationPath = NULL,
                                   filename2 = NULL,
-                                  fireURL = NULL,
+                                  fireURL = "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip",
                                   fireFun = "sf::st_read",
                                   rasterToMatch = NULL, fireField = "YEAR",
                                   startTime) {
@@ -388,9 +389,6 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
                      "2001-attributes_attributs-2001/",
                      "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif")
 
-  if (is.null(fireURL))
-    fireURL <- paste0("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/",
-                      "current_version/NFDB_poly.zip")
 
   if (is.null(rasterToMatch))
     maskWithRTM <- FALSE
@@ -410,6 +408,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 
   if (!is.null(rasterToMatch)) {
     if (!(is.null(fireURL) || is.na(fireURL))) {
+      message("No fireURL supplied, so ages NOT adjusted using fire data.")
       fireYear <- Cache(prepInputsFireYear, ...,
                         url = fireURL,
                         fun = fireFun,
@@ -421,11 +420,14 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
         standAgeMap[] <- asInteger(standAgeMap[])
         standAgeMap[toChange] <- asInteger(startTime) - asInteger(fireYear[][toChange])
       }
+      imputedPixID <- which(toChange)
     }
   } else {
     message("No rasterToMatch supplied, so ages NOT adjusted using fire data.")
+    imputedPixID <- integer(0)
   }
-  standAgeMap
+  attr(standAgeMap, "imputedPixID") <- imputedPixID
+  return(standAgeMap)
 }
 
 #' Create a raster of fire polygons
