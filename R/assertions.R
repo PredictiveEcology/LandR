@@ -490,7 +490,7 @@ assertPixelCohortDataValid <- function(standCohortData, doAssertion = getOption(
 #' @export
 assertRepsAllCohortData <- function(allCohortData, reps, years,
                                     doAssertion = getOption("LandR.assertions", TRUE)) {
-  if (getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
     test1 <- allCohortData[rep == reps[1] & year == years[1]]
     set(test1, NULL, "rep", NULL)
     out <- vapply(reps[-1], FUN = function(x, test1) {
