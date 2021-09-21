@@ -506,3 +506,47 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
     }, test1 = test1, FUN.VALUE = logical(1))
   }
 }
+
+
+#' Assert that standAgeMap is a rasterLayer with imputedPixID attribute
+#'
+#' @template standAgeMap
+#' @template doAssertion
+#'
+#' @export
+assertStandAgeMapAttr <- function(standAgeMap,
+                                  doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    if (!is(standAgeMap, "RasterLayer")) {
+      stop("standAgeMap should be a RasterLayer")
+    }
+    if (is.null(attr(standAgeMap, "imputedPixID"))) {
+      stop("standAgeMap should have a 'imputedPixID' attribute")
+    } else {
+      if (!(is(attr(standAgeMap, "imputedPixID"), "numeric") |
+            is(attr(standAgeMap, "imputedPixID"), "integer"))) {
+        stop("standAgeMap attribute 'imputedPixID' should be numeric/integer")
+      }
+    }
+  }
+}
+
+#' Assert that cohortData has imputedPixID attribute
+#'
+#' @template cohortData A \code{cohortData} object
+#' @template doAssertion
+#'
+#' @export
+assertCohortDataAttr <- function(cohortData,
+                                  doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    if (is.null(attr(cohortData, "imputedPixID"))) {
+      stop("cohortData should have a 'imputedPixID' attribute")
+    } else {
+      if (!(is(attr(cohortData, "imputedPixID"), "numeric") |
+            is(attr(cohortData, "imputedPixID"), "integer"))) {
+        stop("cohortData attribute 'imputedPixID' should be numeric/integer")
+      }
+    }
+  }
+}
