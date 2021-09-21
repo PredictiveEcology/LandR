@@ -791,6 +791,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @param rescale Logical. If \code{TRUE}, the default, cover for each species will be rescaled
 #'   so all cover in \code{pixelGroup} or pixel sums to 100.
 #'
+#' @return cohortData \code{data.table} with attribute "imputedPixID"
+#'
 #' @importFrom crayon blue
 #' @importFrom data.table melt setnames
 #' @keywords internal
@@ -924,7 +926,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 
   # clean up
   set(cohortData, NULL, c("totalCover", "coverOrig"), NULL)
-  return(list("cohortData" = cohortData, "imputedPixID" = imputedPixID))
+  attr(cohortData, "imputedPixID") <- imputedPixID
+  return(cohortData)
 }
 
 #' Generate initial \code{cohortData} table
@@ -963,8 +966,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @template doAssertion
 #'
 #' @param doSubset Turns on/off subsetting. Defaults to \code{TRUE}.
-#' @return a list with the the initial \code{cohortData}\code{data.table} and
-#'     a vector of pixel IDs tath suffered imputation
+#' @return a \code{cohortData} \code{data.table} with attribute "imputedPixID"
+#'     (a vector of pixel IDs that suffered imputation)
 #'
 #' @author Eliot McIntire
 #' @export
@@ -1006,14 +1009,14 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
     }
   }
 
-  out <- Cache(.createCohortData,
-               inputDataTable = inputDataTable,
-               # pixelGroupBiomassClass = pixelGroupBiomassClass,
-               minCoverThreshold = minCoverThreshold,
-               doAssertion = doAssertion
+  cohortData <- Cache(.createCohortData,
+                      inputDataTable = inputDataTable,
+                      # pixelGroupBiomassClass = pixelGroupBiomassClass,
+                      minCoverThreshold = minCoverThreshold,
+                      doAssertion = doAssertion
   )
-  cohortData <- out$cohortData
-  imputedPixID <- out$imputedPixID
+  assertCohortDataAttr(cohortData, doAssertion = doAssertion)
+  imputedPixID <- attr(cohortData, "imputedPixID")
 
   ######################################################
   # Impute missing ages on poor age dataset
@@ -1115,7 +1118,8 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
   # https://stats.stackexchange.com/questions/31300/dealing-with-0-1-values-in-a-beta-regression
   # cohortData[ , coverProp := (cover/100 * (NROW(cohortData) - 1) + 0.5) / NROW(cohortData)]
 
-  return(list("cohortData" = cohortData, "imputedPixID" = unique(imputedPixID)))
+  attr(cohortData, "imputedPixID") <- imputedPixID
+  return(cohortData)
 }
 
 #' Subset a \code{data.table} with random subsampling within \code{by} groups
