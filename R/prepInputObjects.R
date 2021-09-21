@@ -36,7 +36,7 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' Make \code{pixelTable} from biomass, age, land-cover and species cover data
 #'
 #' @param speciesLayers stack of species layers rasters
-#' @param standAgeMap raster of stand age
+#' @template standAgeMap
 #' @param ecoregionFiles A list with two objects: the \code{ecoregionMap} and a table summarizing
 #'   its information per \code{pixelID.} See \code{ecoregionProducer}.
 #' @param biomassMap raster of total stand biomass
@@ -366,8 +366,8 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @template rasterToMatch
 #' @param fireField field used to rasterize fire polys
 #' @param startTime date of first fire year.
-#' @return a list with a stand age map (potentially) corrected for fires and a vector of pixel IDs
-#'  for which ages were corrected. If no corrections were applied this vector is \code{integer(0)}.
+#' @return a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
+#'  for which ages were corrected. If no corrections were applied the attribute vector is \code{integer(0)}.
 #'
 #' @export
 #' @importFrom raster crs
@@ -426,7 +426,8 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
     message("No rasterToMatch supplied, so ages NOT adjusted using fire data.")
     imputedPixID <- integer(0)
   }
-  return(list(standAgeMap = standAgeMap, imputedPixID = imputedPixID))
+  attr(standAgeMap, "imputedPixID") <- imputedPixID
+  return(standAgeMap)
 }
 
 #' Create a raster of fire polygons
