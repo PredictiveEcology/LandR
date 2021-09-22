@@ -481,7 +481,8 @@ assertPixelCohortDataValid <- function(standCohortData, doAssertion = getOption(
 
 #' Assert that the \code{allCohortData} has the expected years and reps combinations
 #'
-#' @param allCohortData A \code{data.table} with all simulated cohortData to use for validaton
+#' @param allCohortData A \code{data.table} with all simulated \code{cohortData} to use for
+#'                      validation
 #' @param reps repetition ids
 #' @param years years
 #'
@@ -508,7 +509,7 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
 }
 
 
-#' Assert that standAgeMap is a rasterLayer with imputedPixID attribute
+#' Assert that \code{standAgeMap} is a \code{RasterLayer} with attribute \code{imputedPixID}
 #'
 #' @template standAgeMap
 #' @template doAssertion
@@ -531,9 +532,9 @@ assertStandAgeMapAttr <- function(standAgeMap,
   }
 }
 
-#' Assert that cohortData has imputedPixID attribute
+#' Assert that \code{cohortData} has attribute \code{imputedPixID}
 #'
-#' @template cohortData A \code{cohortData} object
+#' @template cohortData
 #' @template doAssertion
 #'
 #' @export

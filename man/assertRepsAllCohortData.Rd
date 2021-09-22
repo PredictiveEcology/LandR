@@ -12,7 +12,8 @@ assertRepsAllCohortData(
 )
 }
 \arguments{
-\item{allCohortData}{A \code{data.table} with all simulated cohortData to use for validaton}
+\item{allCohortData}{A \code{data.table} with all simulated \code{cohortData} to use for
+validation}
 
 \item{reps}{repetition ids}
 
