@@ -794,7 +794,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @return cohortData \code{data.table} with attribute "imputedPixID"
 #'
 #' @importFrom crayon blue
-#' @importFrom data.table melt setnames
+#' @importFrom data.table melt setnames setattr
 #' @keywords internal
 .createCohortData <- function(inputDataTable, # pixelGroupBiomassClass,
                               doAssertion = getOption("LandR.assertions", TRUE), rescale = TRUE,
@@ -926,7 +926,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 
   # clean up
   set(cohortData, NULL, c("totalCover", "coverOrig"), NULL)
-  attr(cohortData, "imputedPixID") <- imputedPixID
+  setattr(cohortData, "imputedPixID", imputedPixID)
   return(cohortData)
 }
 
@@ -972,7 +972,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @author Eliot McIntire
 #' @export
 #' @importFrom crayon blue green
-#' @importFrom data.table melt setnames
+#' @importFrom data.table melt setnames setattr
 #' @importFrom reproducible Cache .sortDotsUnderscoreFirst messageDF
 #' @importFrom pemisc termsInData
 #' @rdname makeAndCleanInitialCohortData
@@ -1118,7 +1118,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
   # https://stats.stackexchange.com/questions/31300/dealing-with-0-1-values-in-a-beta-regression
   # cohortData[ , coverProp := (cover/100 * (NROW(cohortData) - 1) + 0.5) / NROW(cohortData)]
 
-  attr(cohortData, "imputedPixID") <- imputedPixID
+  setattr(cohortData, "imputedPixID", imputedPixID)
   return(cohortData)
 }
 
