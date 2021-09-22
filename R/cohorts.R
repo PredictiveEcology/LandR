@@ -794,7 +794,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @return cohortData \code{data.table} with attribute "imputedPixID"
 #'
 #' @importFrom crayon blue
-#' @importFrom data.table melt setnames setattr
+#' @importFrom data.table melt setattr setnames
 #' @keywords internal
 .createCohortData <- function(inputDataTable, # pixelGroupBiomassClass,
                               doAssertion = getOption("LandR.assertions", TRUE), rescale = TRUE,
@@ -972,7 +972,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @author Eliot McIntire
 #' @export
 #' @importFrom crayon blue green
-#' @importFrom data.table melt setnames setattr
+#' @importFrom data.table melt setattr setnames
 #' @importFrom reproducible Cache .sortDotsUnderscoreFirst messageDF
 #' @importFrom pemisc termsInData
 #' @rdname makeAndCleanInitialCohortData
