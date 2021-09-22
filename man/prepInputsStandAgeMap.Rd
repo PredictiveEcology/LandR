@@ -13,8 +13,8 @@ prepInputsStandAgeMap(
   datatype = "INT2U",
   destinationPath = NULL,
   filename2 = NULL,
- 
-    fireURL = "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip",
+  fireURL = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/",
+    "fire_poly/current_version/NFDB_poly.zip"),
   fireFun = "sf::st_read",
   rasterToMatch = NULL,
   fireField = "YEAR",

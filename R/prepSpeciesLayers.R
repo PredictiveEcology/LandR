@@ -1,4 +1,6 @@
-utils::globalVariables(c("AGE", "CC", "GID", "keepSpecies", "layerName", "pct", "value"))
+utils::globalVariables(c(
+  "AGE", "CC", "GID", "id", "keepSpecies", "layerName", "name", "pct", "value"
+))
 
 #' Load CASFRI data
 #'
