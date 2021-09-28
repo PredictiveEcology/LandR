@@ -24,7 +24,6 @@ Imports:
     data.table,
     fasterize,
     fpCompare,
-    gdalUtils,
     ggplot2,
     ggpubr,
     ggspatial,
@@ -49,6 +48,7 @@ Imports:
 Suggests:
     BioSIM,
     covr,
+    gdalUtilities,
     googledrive (>= 2.0.0),
     knitr,
     RandomFields,
