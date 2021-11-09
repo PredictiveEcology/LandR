@@ -38,10 +38,9 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
   speciesTable <- Cache(prepInputs, "speciesTraits.csv",
                         destinationPath = asPath(dPath),
                         url = url,
-                        fun = "utils::read.csv",
+                        fun = "data.table::fread",
                         header = TRUE, stringsAsFactors = FALSE,
-                        userTags = c(cacheTags, "speciesTable")) %>%
-    data.table()
+                        userTags = c(cacheTags, "speciesTable"))
 
   return(speciesTable)
 }
