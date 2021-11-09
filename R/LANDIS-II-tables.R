@@ -61,8 +61,8 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
 #' @param areas A character vector of areas to use. Can be one or more of
 #'   \code{c("Acadian", "AM", "NorthShore", "BP", "BSE", "BSW", "LSJ", "MC", "PM", "WestON")}.
 #'   If it is more than one, this function will take the minimum value, within a species.
-#'   These are short versions of the Canada Ecoprovinces. Currently defaults to
-#'   \code{c("BSW", "BP", "MC")} for historical reasons.
+#'   These are short versions of the Canada Ecoprovinces.
+#'   Currently defaults to \code{c("BSW", "BP", "MC")} for historical reasons.
 #'
 #' @template sppEquiv
 #'
