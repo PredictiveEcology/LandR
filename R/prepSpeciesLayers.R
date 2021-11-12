@@ -384,29 +384,29 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   dt <- rbindlist(dts)
   new_ext <- extent(max(dt$xmin), min(dt$xmax), max(dt$ymin), min(dt$ymax))
   lr2 <- lapply(lr, `origin<-`, value = origin(lr[[1]]))
-  lr3 <- lapply(lr2, crop, y = new_ext)
-  lr4 <- lapply(lr3, extend, y = new_ext)
+  lr3 <- lapply(lr2, crop, y = new_ext, filename = tempfile())
+  lr4 <- lapply(lr3, extend, y = new_ext, filename = tempfile())
   ## stack(lr4) ## confirm it works
 
   ## loop/apply doesn't work here???
   ml <- mapAdd(lr4[[1]], map = ml, layerName = CClayerNames[1], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = NULL, leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(lr4[[2]], map = ml, layerName = CClayerNames[2], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = NULL, leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(lr4[[3]], map = ml, layerName = CClayerNames[3], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = NULL, leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(lr4[[4]], map = ml, layerName = CClayerNames[4], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = NULL, leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(lr4[[5]], map = ml, layerName = CClayerNames[5], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = NULL, leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(lr4[[6]], map = ml, layerName = CClayerNames[6], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = NULL, leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
   ## END WORKAROUND
 
   # ml <- mapAdd(map = ml, url = url, layerName = CClayerNames, CC = TRUE,
