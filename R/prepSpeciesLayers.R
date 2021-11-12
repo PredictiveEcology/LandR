@@ -384,8 +384,12 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   dt <- rbindlist(dts)
   new_ext <- extent(max(dt$xmin), min(dt$xmax), max(dt$ymin), min(dt$ymax))
   lr2 <- lapply(lr, `origin<-`, value = origin(lr[[1]]))
-  lr3 <- lapply(lr2, crop, y = new_ext, filename = tempfile())
-  lr4 <- lapply(lr3, extend, y = new_ext, filename = tempfile())
+  lr3 <- lapply(lr2, function(r) {
+    crop(r, y = new_ext, filename = tempfile())
+  })
+  lr4 <- lapply(lr3, function(r) {
+    extend(r, y = new_ext, filename = tempfile())
+  })
   ## stack(lr4) ## confirm it works
 
   ## loop/apply doesn't work here???
