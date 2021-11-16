@@ -343,8 +343,9 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
 }
 
 #' @export
+#' @importFrom data.table data.table rbindlist
 #' @importFrom map mapAdd maps
-#' @importFrom raster maxValue minValue stack unstack
+#' @importFrom raster crop extend maxValue minValue origin origin<- stack unstack
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
                                               url = NULL,
@@ -372,10 +373,50 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   ml <- mapAdd(studyArea, map = ml, isStudyArea = TRUE, layerName = "studyArea",
                useSAcrs = TRUE, filename2 = NULL)
 
-  ml <- mapAdd(map = ml, url = url, layerName = CClayerNames, CC = TRUE,
+  ## TODO: avoid this workaround for stack not liking rasters with different origns and extents
+  lr <- lapply(CClayerNamesFiles, prepInputs, url = url, alsoExtract = "similar",
+               destinationPath = destinationPath, fun = "raster::raster")
+  le <- lapply(lr, extent)
+  dts <- lapply(lr, function(r) {
+    e <- extent(r)
+    data.table(xmin = e[1], xmax = e[2], ymin = e[3], ymax = e[4])
+  })
+  dt <- rbindlist(dts)
+  new_ext <- extent(max(dt$xmin), min(dt$xmax), max(dt$ymin), min(dt$ymax))
+  lr2 <- lapply(lr, `origin<-`, value = origin(lr[[1]]))
+  lr3 <- lapply(lr2, function(r) {
+    crop(r, y = new_ext, filename = tempfile())
+  })
+  lr4 <- lapply(lr3, function(r) {
+    extend(r, y = new_ext, filename = tempfile())
+  })
+  ## stack(lr4) ## confirm it works
+
+  ## loop/apply doesn't work here???
+  ml <- mapAdd(lr4[[1]], map = ml, layerName = CClayerNames[1], CC = TRUE,
                destinationPath = destinationPath,
-               targetFile = CClayerNamesFiles, filename2 = NULL,
-               alsoExtract = "similar", leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[2]], map = ml, layerName = CClayerNames[2], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[3]], map = ml, layerName = CClayerNames[3], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[4]], map = ml, layerName = CClayerNames[4], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[5]], map = ml, layerName = CClayerNames[5], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[6]], map = ml, layerName = CClayerNames[6], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ## END WORKAROUND
+
+  # ml <- mapAdd(map = ml, url = url, layerName = CClayerNames, CC = TRUE,
+  #              destinationPath = destinationPath,
+  #              targetFile = CClayerNamesFiles, filename2 = NULL,
+  #              alsoExtract = "similar", leaflet = FALSE, method = "ngb") ## TODO: fix error due to different extent
 
   ccs <- ml@metadata[CC == TRUE & !(layerName == "LandType"), ]
   CCs <- maps(ml, layerName = ccs$layerName)
@@ -385,8 +426,6 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   if (!all(raster::minValue(CCstack) >= 0)) stop("problem with minValue of CCstack (< 0)")
   if (!all(raster::maxValue(CCstack) <= 10)) stop("problem with maxValue of CCstack (> 10)")
 
-  CCstack[CCstack[] < 0] <- 0  ## turns stack into brick, so need to restack later
-  CCstack[CCstack[] > 10] <- 10
   CCstack <- CCstack * 10 # convert back to percent
   NA_ids <- which(is.na(ml$LandType[]) |  # outside of studyArea polygon
                     ml$LandType[] == 1)   # 1 is cities -- NA it here -- will be filled in with another veg layer if available (e.g. Pickell)
