@@ -805,6 +805,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   message(blue("Create initial cohortData object, with no pixelGroups yet"))
   message(green("-- Begin reconciling data inconsistencies"))
 
+  imputedPixID <- integer(0)
+
   inputDataTable[, totalCover := rowSums(.SD), .SDcols = newCoverColNames]
   whEnoughCover <- inputDataTable$totalCover > minCoverThreshold
   message(green(
@@ -816,30 +818,33 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   inputDataTable <- inputDataTable[whEnoughCover]
 
   whAgeEqZero <- which(inputDataTable$age == 0)
-  message(green(
-    "  -- Setting TotalBiomass in pixel to 0 where age == 0 (affects", length(whAgeEqZero),
-    "of", NROW(inputDataTable), "pixels)"
-  ))
-  message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
-  ## correct B in a separate column to keep track of imputed pixels, then replace column
-  inputDataTable[, `:=`(totalBiomass2 = totalBiomass)]
-  inputDataTable[whAgeEqZero, `:=`(totalBiomass2 = 0)]
-  imputedPixID <- inputDataTable[totalBiomass != totalBiomass2, pixelIndex]
-  inputDataTable[, totalBiomass := totalBiomass2]
-  inputDataTable[, totalBiomass2 := NULL]
 
-  whTotalBEqZero <- which(inputDataTable$totalBiomass == 0)
-  message(green(
-    "  -- Setting age in pixel to 0 where totalBiomass == 0 (affects", length(whTotalBEqZero),
-    "of", NROW(inputDataTable), "pixels)"
-  ))
-  message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
-  ## correct age in a separate column to keep track of imputed pixels, then replace column
-  inputDataTable[, `:=`(age2 = age)]
-  inputDataTable[whTotalBEqZero, `:=`(age2 = 0)]
-  imputedPixID <- c(imputedPixID, inputDataTable[age != age2, pixelIndex])
-  inputDataTable[, age := age2]
-  inputDataTable[, age2 := NULL]
+  if (!is.null(inputDataTable[["totalBiomass"]])) {
+    message(green(
+      "  -- Setting TotalBiomass in pixel to 0 where age == 0 (affects", length(whAgeEqZero),
+      "of", NROW(inputDataTable), "pixels)"
+    ))
+    message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
+    ## correct B in a separate column to keep track of imputed pixels, then replace column
+    inputDataTable[, `:=`(totalBiomass2 = totalBiomass)]
+    inputDataTable[whAgeEqZero, `:=`(totalBiomass2 = 0)]
+    imputedPixID <- inputDataTable[totalBiomass != totalBiomass2, pixelIndex]
+    inputDataTable[, totalBiomass := totalBiomass2]
+    inputDataTable[, totalBiomass2 := NULL]
+
+    whTotalBEqZero <- which(inputDataTable$totalBiomass == 0)
+    message(green(
+      "  -- Setting age in pixel to 0 where totalBiomass == 0 (affects", length(whTotalBEqZero),
+      "of", NROW(inputDataTable), "pixels)"
+    ))
+    message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
+    ## correct age in a separate column to keep track of imputed pixels, then replace column
+    inputDataTable[, `:=`(age2 = age)]
+    inputDataTable[whTotalBEqZero, `:=`(age2 = 0)]
+    imputedPixID <- c(imputedPixID, inputDataTable[age != age2, pixelIndex])
+    inputDataTable[, age := age2]
+    inputDataTable[, age2 := NULL]
+  }
 
   cohortData <- data.table::melt(inputDataTable,
                                  value.name = "cover",
@@ -2041,14 +2046,11 @@ vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
   return(xx)
 }
 
-
-
 #' @importFrom SpaDES.tools inRange
 preambleVTG <- function(x, vegLeadingProportion, doAssertion, nrowCohortData) {
   if (!inRange(vegLeadingProportion, 0, 1)) {
     stop("vegLeadingProportion must be a proportion")
   }
-
 
   leadingBasedOn <- if ("B" %in% colnames(x)) {
     message("Using B to derive leading type")
