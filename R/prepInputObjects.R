@@ -407,6 +407,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
     )
   standAgeMap[] <- asInteger(standAgeMap[])
 
+  imputedPixID <- integer(0)
   if (!is.null(rasterToMatch)) {
     if (!(is.null(fireURL) || is.na(fireURL))) {
       message("No fireURL supplied, so ages NOT adjusted using fire data.")
@@ -420,12 +421,11 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
         toChange <- !is.na(fireYear[]) & fireYear[] <= asInteger(startTime)
         standAgeMap[] <- asInteger(standAgeMap[])
         standAgeMap[toChange] <- asInteger(startTime) - asInteger(fireYear[][toChange])
+        imputedPixID <- which(toChange)
       }
-      imputedPixID <- which(toChange)
     }
   } else {
     message("No rasterToMatch supplied, so ages NOT adjusted using fire data.")
-    imputedPixID <- integer(0)
   }
   attr(standAgeMap, "imputedPixID") <- imputedPixID
   return(standAgeMap)
