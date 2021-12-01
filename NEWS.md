@@ -4,6 +4,7 @@ version 1.0.6
 * Several changes to accommodate the tracking and optional removal of pixels
 data suffered data imputation in `Biomass_borealDataPrep`
 * `assertColumns` gives better message for which columns are incorrect/missing
+* `minRelativeBDefaults` is now a function so they are more easily accessible 
 
 version 1.0.5
 =============
