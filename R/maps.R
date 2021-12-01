@@ -581,7 +581,11 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @importFrom utils capture.output untar
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year = 2001,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 10, url, ...) {
-  stopifnot(requireNamespace("RCurl", quietly = TRUE) && requireNamespace("XML", quietly = TRUE))
+  rcurl <- requireNamespace("RCurl", quietly = TRUE)
+  xml <- requireNamespace("XML", quietly = TRUE)
+  if (!rcurl || !xml) {
+    Require(c("RCurl", "XML"), require = FALSE)
+  }
 
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
