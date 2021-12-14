@@ -1202,7 +1202,7 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
   fun <- modelArgs[[1]]
 
   ## get formula and check
-  form <- tryCatch(as.formula(modelArgs[2]),
+  form <- tryCatch(as.formula(modelArgs[2], env = .GlobalEnv), # .GlobalEnv keeps object small
                    error = function(e) {
                      stop(paste(
                        "Could not convert '", modelArgs[2], "'to formula.",
