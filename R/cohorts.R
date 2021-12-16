@@ -1218,7 +1218,7 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
 
     if (!keepGrouping) {
       form <- sub("\\+ \\(.*\\|.*\\)", "", modelArgs[2])
-      form <- as.formula(form)
+      form <- as.formula(form, env = .GlobalEnv)
 
       ## change to glm if dropping random effects
       fun <- "stats::glm"
