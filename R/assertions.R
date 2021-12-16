@@ -206,7 +206,7 @@ assertColumns <- function(obj, colClasses,
     mess1 <- character()
     if (!test1)
       mess1 <- paste0("obj has missing column(s): ", paste(collapse = ", ", colNames[!test1Indiv]))
-    colClasses2 <- colClasses[match(names(obj), names(colClasses))]
+    colClasses2 <- colClasses[na.omit(match(names(obj), names(colClasses)))]
     colNames2 <- names(colClasses2)
     test2Indiv <- vapply(seq(NCOL(obj[, colNames2, with = FALSE])),
                          function(colNum) {

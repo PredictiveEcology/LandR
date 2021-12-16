@@ -314,14 +314,25 @@ makeMinRelativeB <- function(pixelCohortData) {
   ##
   ## Adjusted values for western forests:
   minRelativeB <- data.frame(ecoregionGroup = as.factor(levels(pixelData$ecoregionGroup)),
-                             X1 = 0.15, ## 0.2
-                             X2 = 0.25, ## 0.4
-                             X3 = 0.50, ## 0.5
-                             X4 = 0.75, ## 0.7
-                             X5 = 0.85) ## 0.9
+                             minRelativeBDefaults()
+                             # X1 = 0.15, ## 0.2
+                             # X2 = 0.25, ## 0.4
+                             # X3 = 0.50, ## 0.5
+                             # X4 = 0.75, ## 0.7
+                             # X5 = 0.85
+                             ) ## 0.9
 
   return(minRelativeB)
 }
+
+#' minRelativeB defaults for Western Boreal Forest Canada
+#'
+#' @export
+minRelativeBDefaults <- function() data.frame(X1 = 0.15, ## 0.2
+                                              X2 = 0.25, ## 0.4
+                                              X3 = 0.50, ## 0.5
+                                              X4 = 0.75, ## 0.7
+                                              X5 = 0.85)
 
 #' Create \code{makePixelGroupMap}
 #'
