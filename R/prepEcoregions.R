@@ -10,12 +10,12 @@
 #' @param cacheTags \code{UserTags} to pass to cache
 #' @param pixelsToRm a vector of pixels to remove
 #'
+#' @export
 #' @importFrom data.table as.data.table data.table
 #' @importFrom fasterize fasterize
 #' @importFrom raster getValues levels raster
 #' @importFrom reproducible Cache fixErrors paddedFloatToChar
 #' @importFrom sf st_as_sf st_crs st_transform
-#' @export
 prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerField = NULL,
                            rasterToMatchLarge, rstLCCAdj, pixelsToRm, cacheTags) {
 
