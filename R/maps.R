@@ -63,7 +63,7 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #' @param year Numeric, either 2010 or 2015. See note re: backwards compatibility for 2005.
 #'
 #' @export
-#' @importFrom reproducible asPath prepInputs
+#' @importFrom reproducible asPath Cache prepInputs
 prepInputsLCC <- function(year = 2010,
                           destinationPath = asPath("."),
                           studyArea = NULL,
