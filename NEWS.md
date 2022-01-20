@@ -1,5 +1,10 @@
 bug reports https://github.com/PredictiveEcology/LandR/issues
 
+version 1.0.7.9000
+=============
+* drop support for R 3.6
+* update Eliot's email address
+* remove undeclared dependency package `Require`
 
 version 1.0.7
 =============

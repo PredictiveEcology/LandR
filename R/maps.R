@@ -584,7 +584,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
   rcurl <- requireNamespace("RCurl", quietly = TRUE)
   xml <- requireNamespace("XML", quietly = TRUE)
   if (!rcurl || !xml) {
-    Require(c("RCurl", "XML"), require = FALSE)
+    stop("Suggested packages 'RCurl' and 'XML' required to download kNN species layers.\n",
+         "Install using `install.packages(c('RCurl', 'XML'))`.")
   }
 
   dots <- list(...)
