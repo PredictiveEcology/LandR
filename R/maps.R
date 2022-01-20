@@ -96,7 +96,8 @@ prepInputsLCC <- function(year = 2010,
     }
   }
 
-  Cache(prepInputs, targetFile = filename,
+  Cache(prepInputs,
+        targetFile = filename,
         archive = archive,
         url = url,
         destinationPath = asPath(destinationPath),
