@@ -794,9 +794,6 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #'
 #' @template doAssertion
 #'
-#' @param rescale Logical. If \code{TRUE}, the default, cover for each species will be rescaled
-#'   so all cover in \code{pixelGroup} or pixel sums to 100.
-#'
 #' @return cohortData \code{data.table} with attribute "imputedPixID"
 #'
 #' @importFrom crayon blue
