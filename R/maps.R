@@ -63,7 +63,7 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #' @param year Numeric, either 2010 or 2015. See note re: backwards compatibility for 2005.
 #'
 #' @export
-#' @importFrom reproducible asPath prepInputs
+#' @importFrom reproducible asPath Cache prepInputs
 prepInputsLCC <- function(year = 2010,
                           destinationPath = asPath("."),
                           studyArea = NULL,
@@ -96,7 +96,8 @@ prepInputsLCC <- function(year = 2010,
     }
   }
 
-  Cache(prepInputs, targetFile = filename,
+  Cache(prepInputs,
+        targetFile = filename,
         archive = archive,
         url = url,
         destinationPath = asPath(destinationPath),
@@ -581,7 +582,12 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @importFrom utils capture.output untar
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year = 2001,
                                  knnNamesCol = "KNN", sppEquivCol, thresh = 10, url, ...) {
-  stopifnot(requireNamespace("RCurl", quietly = TRUE) && requireNamespace("XML", quietly = TRUE))
+  rcurl <- requireNamespace("RCurl", quietly = TRUE)
+  xml <- requireNamespace("XML", quietly = TRUE)
+  if (!rcurl || !xml) {
+    stop("Suggested packages 'RCurl' and 'XML' required to download kNN species layers.\n",
+         "Install using `install.packages(c('RCurl', 'XML'))`.")
+  }
 
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
@@ -929,103 +935,108 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' @param HQ \code{data.table} column of whether \code{SPP} is present in HQ layers
 #' @param LQ \code{data.table} column of whether \code{SPP} is present in LQ layers
 #'
-#' @importFrom gdalUtils gdalwarp
 #' @importFrom raster compareRaster crs extent filename res projectExtent raster
 #' @importFrom raster writeRaster xmax xmin ymax ymin
 #' @keywords internal
 .overlay <- function(SPP, HQ, LQ, hqLarger, highQualityStack, lowQualityStack, #nolint
                      outputFilenameSuffix = "overlay", destinationPath) {
-  ## if HQ & LQ have data, pool
-  if (HQ & LQ) {
-    ## check equality of raster attributes and correct if necessary
-    if (!all(
-      isTRUE(all.equal(extent(lowQualityStack), extent(highQualityStack))),
-      isTRUE(all.equal(crs(lowQualityStack), crs(highQualityStack))),
-      isTRUE(all.equal(res(lowQualityStack), res(highQualityStack))))) {
-      message("  ", SPP, " extents, or resolution, or projection did not match; ",
-              "using gdalwarp to make them overlap")
-      LQRastName <- basename(tempfile(fileext = ".tif"))
-      if (!nzchar(filename(lowQualityStack[[SPP]]))) {
-        LQCurName <- basename(tempfile(fileext = ".tif"))
-        lowQualityStack[[SPP]][] <- as.integer(lowQualityStack[[SPP]][])
-        lowQualityStack[[SPP]] <- writeRaster(lowQualityStack[[SPP]],
-                                              filename = LQCurName,
-                                              datatype = "INT2U")
-      }
+  if (requireNamespace("gdalUtilities", quietly = TRUE)) {
+    ## if HQ & LQ have data, pool
+    if (HQ & LQ) {
+      ## check equality of raster attributes and correct if necessary
+      if (!all(
+        isTRUE(all.equal(extent(lowQualityStack), extent(highQualityStack))),
+        isTRUE(all.equal(crs(lowQualityStack), crs(highQualityStack))),
+        isTRUE(all.equal(res(lowQualityStack), res(highQualityStack))))) {
+        message("  ", SPP, " extents, or resolution, or projection did not match; ",
+                "using gdalwarp to make them overlap")
+        LQRastName <- basename(tempfile(fileext = ".tif"))
+        if (!nzchar(filename(lowQualityStack[[SPP]]))) {
+          LQCurName <- basename(tempfile(fileext = ".tif"))
+          lowQualityStack[[SPP]][] <- as.integer(lowQualityStack[[SPP]][])
+          lowQualityStack[[SPP]] <- writeRaster(lowQualityStack[[SPP]],
+                                                filename = LQCurName,
+                                                datatype = "INT2U")
+        }
 
-      LQRastInHQcrs <- projectExtent(lowQualityStack, crs = crs(highQualityStack))
-      # project LQ raster into HQ dimensions
-      gdalwarp(overwrite = TRUE,
-               dstalpha = TRUE,
-               s_srs = as.character(crs(lowQualityStack[[SPP]])),
-               t_srs = as.character(crs(highQualityStack[[SPP]])),
-               multi = TRUE, of = "GTiff",
-               tr = res(highQualityStack),
-               te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
-                      xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
-               filename(lowQualityStack[[SPP]]), ot = "Byte",
-               LQRastName)
+        LQRastInHQcrs <- projectExtent(lowQualityStack, crs = crs(highQualityStack))
+        # project LQ raster into HQ dimensions
+        gdalUtilities::gdalwarp(overwrite = TRUE,
+                                dstalpha = TRUE,
+                                s_srs = as.character(crs(lowQualityStack[[SPP]])),
+                                t_srs = as.character(crs(highQualityStack[[SPP]])),
+                                multi = TRUE, of = "GTiff",
+                                tr = res(highQualityStack),
+                                te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
+                                       xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
+                                filename(lowQualityStack[[SPP]]), ot = "Byte",
+                                LQRastName)
 
-      LQRast <- raster(LQRastName)
-      LQRast[] <- LQRast[]
-      unlink(LQRastName)
+        LQRast <- raster(LQRastName)
+        LQRast[] <- LQRast[]
+        unlink(LQRastName)
 
-      try(unlink(LQCurName), silent = TRUE)
+        try(unlink(LQCurName), silent = TRUE)
 
-      if (hqLarger) {
-        tmpHQName <- basename(tempfile(fileext = ".tif"))
+        if (hqLarger) {
+          tmpHQName <- basename(tempfile(fileext = ".tif"))
 
-        gdalwarp(overwrite = TRUE,
-                 dstalpha = TRUE,
-                 s_srs = as.character(crs(highQualityStack[[SPP]])),
-                 t_srs = as.character(crs(highQualityStack[[SPP]])),
-                 multi = TRUE, of = "GTiff",
-                 tr = res(highQualityStack),
-                 te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
-                        xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
-                 filename(highQualityStack[[SPP]]), ot = "Byte", tmpHQName)
-        HQRast <- raster(tmpHQName)
-        HQRast[] <- HQRast[]
-        HQRast[HQRast[] == 255] <- NA_integer_
-        unlink(tmpHQName)
+          gdalUtilities::gdalwarp(overwrite = TRUE,
+                                  dstalpha = TRUE,
+                                  s_srs = as.character(crs(highQualityStack[[SPP]])),
+                                  t_srs = as.character(crs(highQualityStack[[SPP]])),
+                                  multi = TRUE, of = "GTiff",
+                                  tr = res(highQualityStack),
+                                  te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
+                                         xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
+                                  ot = "Byte",
+                                  srcfile = filename(highQualityStack[[SPP]]),
+                                  dstfile = tmpHQName)
+          HQRast <- raster(tmpHQName)
+          HQRast[] <- HQRast[]
+          HQRast[HQRast[] == 255] <- NA_integer_
+          unlink(tmpHQName)
+        } else {
+          HQRast <- highQualityStack[[SPP]]
+        }
       } else {
+        LQRast <- lowQualityStack[[SPP]]
         HQRast <- highQualityStack[[SPP]]
       }
+
+      message("  Writing new, overlaid ", SPP, " raster to disk.")
+      if (!compareRaster(LQRast, HQRast))
+        stop("Stacks not identical, something is wrong with overlayStacks function.")
+
+      NAs <- is.na(HQRast[])
+
+      ## complete missing HQ data with LQ data
+      HQRast[NAs] <- LQRast[][NAs]
+      HQRast <- writeRaster(HQRast, datatype = "INT1U",
+                            filename = file.path(destinationPath,
+                                                 paste0(SPP, "_", outputFilenameSuffix, ".tif")),
+                            overwrite = TRUE)
+      names(HQRast) <- SPP
+      return(HQRast)
     } else {
-      LQRast <- lowQualityStack[[SPP]]
-      HQRast <- highQualityStack[[SPP]]
+      ## if only HQ/LQ exist return one of them
+      ## if none have data return one of the empty to keep all layers
+      if (HQ) {
+        HQRast <- highQualityStack[[SPP]]
+        names(HQRast) <- SPP
+        return(HQRast)
+      } else if (LQ) {
+        LQRast <- lowQualityStack[[SPP]]
+        names(LQRast) <- SPP
+        return(LQRast)
+      } else {
+        HQRast <- highQualityStack[[SPP]]
+        names(HQRast) <- SPP
+        return(HQRast)
+      }
     }
-
-    message("  Writing new, overlaid ", SPP, " raster to disk.")
-    if (!compareRaster(LQRast, HQRast))
-      stop("Stacks not identical, something is wrong with overlayStacks function.")
-
-    NAs <- is.na(HQRast[])
-
-    ## complete missing HQ data with LQ data
-    HQRast[NAs] <- LQRast[][NAs]
-    HQRast <- writeRaster(HQRast, datatype = "INT1U",
-                          filename = file.path(destinationPath,
-                                               paste0(SPP, "_", outputFilenameSuffix, ".tif")),
-                          overwrite = TRUE)
-    names(HQRast) <- SPP
-    return(HQRast)
   } else {
-    ## if only HQ/LQ exist return one of them
-    ## if none have data return one of the empty to keep all layers
-    if (HQ) {
-      HQRast <- highQualityStack[[SPP]]
-      names(HQRast) <- SPP
-      return(HQRast)
-    } else if (LQ) {
-      LQRast <- lowQualityStack[[SPP]]
-      names(LQRast) <- SPP
-      return(LQRast)
-    } else {
-      HQRast <- highQualityStack[[SPP]]
-      names(HQRast) <- SPP
-      return(HQRast)
-    }
+    stop("Package 'gdalUtilities' is required but not installed.")
   }
 }
 

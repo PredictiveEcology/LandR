@@ -1,5 +1,5 @@
 LANDIS_test,LANDIS_traits,LandR,KNN,CASFRI,Latin_full,EN_generic_short,EN_generic_full,Leading,Notes,Boreal,Broadleaf,Type,PSP,BC_Forestry,FuelClass
-abieamab,ABIE.AMA,Abie_ama,Abie_Ama,Abie amab,Abies amabilis,,,,,,FALSE,Conifer,amabilis fir,Ba,class3
+abieamab,ABIE.AMA,Abie_ama,Abie_Ama,Abie amab,Abies amabilis,,,,,,FALSE,Conifer,pacific silver fir,Ba,class3
 abiebals,ABIE.BAL,Abie_bal,Abie_Bal,Abie bals,Abies balsamea,Ba Fir,Balsam Fir,Balsam fir leading,,Abie_Bal,FALSE,Conifer,balsam fir,Bb,class3
 ,,Abie_con,,Abie conc,Abies concolor,,,,,,FALSE,Conifer,,,
 abiegran,ABIE.GRA,Abie_gra,Abie_Gra,Abie gran,Abies grandis,,,,,,FALSE,Conifer,grand fir,Bg,
@@ -11,7 +11,7 @@ abielasi,ABIE.LAS,Abie_las,Abie_Las,Abie lasi,Abies lasiocarpa,Fir,Fir,Fir leadi
 ,,Acer_cir,Acer_Cir,Acer circ,Acer circinatum,,,,,,TRUE,Deciduous,vine maple,Mv,
 ,,Acer_fre,,Acer free,Acer X freemanii,,,,,,TRUE,Deciduous,,,
 ,,Acer_gla,,Acer glab,Acer glabrum,,,,,,TRUE,Deciduous,,,
-acermacr,ACER.MAC,Acer_mac,Acer_Mac,Acer macr,Acer macrophyllum,,,,,,TRUE,Deciduous,,Mb,
+acermacr,ACER.MAC,Acer_mac,Acer_Mac,Acer macr,Acer macrophyllum,,,,,,TRUE,Deciduous,bigleaf maple,Mb,
 ,,Acer_neg,Acer_Neg,Acer negu,Acer negundo,Bx maple,Boxelder maple,Boselder maple leading,,Acer_Neg,TRUE,Deciduous,manitoba maple,,class2
 ,,Acer_nig,,Acer nigr,Acer nigrum,,,,,,TRUE,Deciduous,,,
 ,,Acer_pen,Acer_Pen,Acer pens,Acer pensylvanicum,St maple,Striped maple,Striped maple leading,,Acer_Pen,TRUE,Deciduous,,,
@@ -55,7 +55,7 @@ betupapy,BETU.PAP,Betu_pap,Betu_Pap,Betu papy,Betula papyrifera,Pa birch,Paper b
 ,,Celt_occ,,Celt occi,Celtis occidentalis,,,,,,TRUE,Deciduous,,,
 ,,Cerc_can,,Cerci cana,Cercis canadensis,,,,,,TRUE,Deciduous,,,
 ,,Cham_law,,Cham laws,Chamaecyparis lawsoniana,,,,,,FALSE,Conifer,,,
-chamnoot,CHAM.NOO,Cham_noo,Cham_Noo,Cham noot,Chamaecyparis nootkatensis,,,,,,FALSE,Conifer,,,
+chamnoot,CHAM.NOO,Cham_noo,Cham_Noo,Cham noot,Chamaecyparis nootkatensis,,,,,,FALSE,Conifer,yellow cedar,,
 ,,Corn_nut,,Corn nutt,Cornus nuttallii,,,,,,TRUE,Deciduous,,,
 ,,Crat_sp,Crat_Spp,Crat spp,Crataegus spp,,,,,,TRUE,Deciduous,,,
 fagugran,FAGU.GRA,Fagu_gra,Fagu_Gra,Fagu gran,Fagus grandifolia,Am beech,American beech,American beech leading,,Fagu_Gra,TRUE,Deciduous,,,
@@ -100,8 +100,8 @@ piceglau,PICE.GLA,Pice_gla,Pice_Gla,Pice glau,Picea glauca,Wh Spruce,White.Spruc
 picemari,PICE.MAR,Pice_mar,Pice_Mar,Pice mari,Picea mariana,Bl Spruce,Black.Spruce,Black spruce leading,,Pice_Mar,FALSE,Conifer,black spruce,Sb,class3
 ,,Pice_pun,,Pice pung,Picea pungens,,,,,,FALSE,Conifer,,,
 picerube,PICE.RUB,Pice_rub,Pice_Rub,Pice rube,Picea rubens,,,,,,FALSE,Conifer,,,
-picesitc,PICE.SIT,Pice_sit,Pice_Sit,Pice sitc,Picea sitchensis,,,,,,FALSE,Conifer,,Ss,class3
-,,Pice_sit,,Pice sitx,Picea sitchensis x ?,,,,,,FALSE,Conifer,,,
+picesitc,PICE.SIT,Pice_sit,Pice_Sit,Pice sitc,Picea sitchensis,,,,,,FALSE,Conifer,sitka spruce,Ss,class3
+,,Pice_sit,,Pice sitx,Picea sitchensis x ?,,,,,,FALSE,Conifer,sitka spruce,,
 ,,Pice_sp,Pice_Spp,Pice spp,Picea spp.,Spruce,Spruce,Spruce leading,,Pice_Spp,FALSE,Conifer,spruce,,class3
 ,,Pice_sp,,Pice sppx,Picea spp x,,,,,,FALSE,Conifer,spruce,,class3
 pinualbi,,Pinu_alb,Pinu_Alb,Pinu albi,Pinus albicaulis,Wh pine,Whitebark pine,Whitebark pine leading,,Pinu_Alb,FALSE,Conifer,,Pa,class3
@@ -113,7 +113,7 @@ pinuflex,,Pinu_fle,Pinu_Fle,Pinu flex,Pinus flexilis,Pine,Pine,Pine leading,,,FA
 ,,Pinu_mon,Pinu_Mon,Pinu mont,Pinus monticola,Ww pine,Western white pine,Western white pine leading,,Pinu_Mon,FALSE,Conifer,,Pxj,class3
 ,,Pinu_mur,,Pinu murx,Pinus x murraybanksiana,Pine,Pine,Pine leading,,,FALSE,Conifer,,,
 ,,Pinu_nig,,Pinu nigr,Pinus nigra,Pine,Pine,Pine leading,,,FALSE,Conifer,,,
-pinupon,,Pinu_pon,Pinu_Pon,Pinu pond,Pinus ponderosa,Pine,Pine,Pine leading,,,FALSE,Conifer,ponderosa pine,Py,class3
+pinupon,PINU.PON,Pinu_pon,Pinu_Pon,Pinu pond,Pinus ponderosa,Pine,Pine,Pine leading,,,FALSE,Conifer,ponderosa pine,Py,class3
 ,,Pinu_rad,,Pinu radi,Pinus radiata,Pine,Pine,Pine leading,,,FALSE,Conifer,,,
 pinuresi,PINU.RES,Pinu_res,Pinu_Res,Pinu resi,Pinus resinosa,Rd pine,Red pine,Red pine leading,,Pinu_Res,FALSE,Conifer,,,
 ,,Pinu_rig,Pinu_Rig,Pinu rigi,Pinus rigida,Pine,Pine,Pine leading,,,FALSE,Conifer,,,

@@ -8,9 +8,10 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Version: 1.0.6
+Date: 2022-01-20
+Version: 1.0.7.9000
 Authors@R: c(
-    person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
+    person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
     person("Alex M", "Chubaty", email = "achubaty@for-cast.ca",
     role = c("aut"), comment = c(ORCID = "0000-0001-7146-8135")),
@@ -18,13 +19,12 @@ Authors@R: c(
     role = "cph")
     )
 Depends:
-    R (>= 3.6)
+    R (>= 4.0)
 Imports:
     crayon,
     data.table,
     fasterize,
     fpCompare,
-    gdalUtils,
     ggplot2,
     ggpubr,
     ggspatial,
@@ -49,6 +49,7 @@ Imports:
 Suggests:
     BioSIM,
     covr,
+    gdalUtilities,
     googledrive (>= 2.0.0),
     knitr,
     RandomFields,
@@ -70,7 +71,7 @@ VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Collate: 
     'LANDIS-II-tables.R'
     'LandR-package.R'

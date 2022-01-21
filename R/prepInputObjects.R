@@ -314,14 +314,25 @@ makeMinRelativeB <- function(pixelCohortData) {
   ##
   ## Adjusted values for western forests:
   minRelativeB <- data.frame(ecoregionGroup = as.factor(levels(pixelData$ecoregionGroup)),
-                             X1 = 0.15, ## 0.2
-                             X2 = 0.25, ## 0.4
-                             X3 = 0.50, ## 0.5
-                             X4 = 0.75, ## 0.7
-                             X5 = 0.85) ## 0.9
+                             minRelativeBDefaults()
+                             # X1 = 0.15, ## 0.2
+                             # X2 = 0.25, ## 0.4
+                             # X3 = 0.50, ## 0.5
+                             # X4 = 0.75, ## 0.7
+                             # X5 = 0.85
+                             ) ## 0.9
 
   return(minRelativeB)
 }
+
+#' minRelativeB defaults for Western Boreal Forest Canada
+#'
+#' @export
+minRelativeBDefaults <- function() data.frame(X1 = 0.15, ## 0.2
+                                              X2 = 0.25, ## 0.4
+                                              X3 = 0.50, ## 0.5
+                                              X4 = 0.75, ## 0.7
+                                              X5 = 0.85)
 
 #' Create \code{makePixelGroupMap}
 #'
@@ -379,7 +390,8 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
                                   datatype = "INT2U",
                                   destinationPath = NULL,
                                   filename2 = NULL,
-                                  fireURL = "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip",
+                                  fireURL = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/",
+                                                   "fire_poly/current_version/NFDB_poly.zip"),
                                   fireFun = "sf::st_read",
                                   rasterToMatch = NULL, fireField = "YEAR",
                                   startTime) {
@@ -406,6 +418,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
     )
   standAgeMap[] <- asInteger(standAgeMap[])
 
+  imputedPixID <- integer(0)
   if (!is.null(rasterToMatch)) {
     if (!(is.null(fireURL) || is.na(fireURL))) {
       message("No fireURL supplied, so ages NOT adjusted using fire data.")
@@ -419,12 +432,11 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
         toChange <- !is.na(fireYear[]) & fireYear[] <= asInteger(startTime)
         standAgeMap[] <- asInteger(standAgeMap[])
         standAgeMap[toChange] <- asInteger(startTime) - asInteger(fireYear[][toChange])
+        imputedPixID <- which(toChange)
       }
-      imputedPixID <- which(toChange)
     }
   } else {
     message("No rasterToMatch supplied, so ages NOT adjusted using fire data.")
-    imputedPixID <- integer(0)
   }
   attr(standAgeMap, "imputedPixID") <- imputedPixID
   return(standAgeMap)

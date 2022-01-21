@@ -33,8 +33,8 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 \item{doSubset}{Turns on/off subsetting. Defaults to \code{TRUE}.}
 }
 \value{
-a list with the the initial \code{cohortData}\code{data.table} and
-    a vector of pixel IDs tath suffered imputation
+a \code{cohortData} \code{data.table} with attribute "imputedPixID"
+    (a vector of pixel IDs that suffered imputation)
 }
 \description{
 Takes a single \code{data.table} input, which has the following columns in addition to

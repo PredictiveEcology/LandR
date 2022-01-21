@@ -1,17 +1,27 @@
 bug reports https://github.com/PredictiveEcology/LandR/issues
-version 1.0.6
+
+version 1.0.7.9000
+=============
+* drop support for R 3.6
+* update Eliot's email address
+* remove undeclared dependency package `Require`
+
+version 1.0.7
 =============
 * Several changes to accommodate the tracking and optional removal of pixels
 data suffered data imputation in `Biomass_borealDataPrep`
-
+* `assertColumns` gives better message for which columns are incorrect/missing
+* `minRelativeBDefaults` is now a function so they are more easily accessible 
+* `statsModel` was pulling along with it all the data, 5x. Now it does not. The Caching of this should be fast and small now.
+ 
 version 1.0.5
 =============
 * Support for refitting `modelBiomass` (see `Biomass_boreaDataPrep`) with scaled data or different optimizer
 * Changes to `loadkNNSpeciesLayers` and `prepSpeciesLayers_KNN` prevent issues when default URL is down, or working offline (but layers are present locally)
 * Several changes to accommodate LCC2010
-* New columns to sppEquivalenciesCA (`PSP`, `BC_Forestry` and `FuelClass`)
+* New columns to `sppEquivalenciesCA` (`PSP`, `BC_Forestry` and `FuelClass`)
 * Lowered values of dummy `rawBiomassMap`
-* passing fireURL == NULL to `prepStandAgeMap` bypasses age imputation
+* passing `fireURL = NULL` to `prepStandAgeMap()` bypasses age imputation
 
 version 1.0.4
 =============

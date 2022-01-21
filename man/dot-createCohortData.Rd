@@ -21,6 +21,9 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 \item{rescale}{Logical. If \code{TRUE}, the default, cover for each species will be rescaled
 so all cover in \code{pixelGroup} or pixel sums to 100.}
 }
+\value{
+cohortData \code{data.table} with attribute "imputedPixID"
+}
 \description{
 Internal function used by \code{\link{makeAndCleanInitialCohortData}}.
 }

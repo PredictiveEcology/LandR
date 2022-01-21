@@ -794,7 +794,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @return cohortData \code{data.table} with attribute "imputedPixID"
 #'
 #' @importFrom crayon blue
-#' @importFrom data.table melt setnames
+#' @importFrom data.table melt setattr setnames
 #' @keywords internal
 .createCohortData <- function(inputDataTable, # pixelGroupBiomassClass,
                               doAssertion = getOption("LandR.assertions", TRUE), rescale = TRUE,
@@ -804,6 +804,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
   message(blue("Create initial cohortData object, with no pixelGroups yet"))
   message(green("-- Begin reconciling data inconsistencies"))
+
+  imputedPixID <- integer(0)
 
   inputDataTable[, totalCover := rowSums(.SD), .SDcols = newCoverColNames]
   whEnoughCover <- inputDataTable$totalCover > minCoverThreshold
@@ -816,30 +818,33 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   inputDataTable <- inputDataTable[whEnoughCover]
 
   whAgeEqZero <- which(inputDataTable$age == 0)
-  message(green(
-    "  -- Setting TotalBiomass in pixel to 0 where age == 0 (affects", length(whAgeEqZero),
-    "of", NROW(inputDataTable), "pixels)"
-  ))
-  message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
-  ## correct B in a separate column to keep track of imputed pixels, then replace column
-  inputDataTable[, `:=`(totalBiomass2 = totalBiomass)]
-  inputDataTable[whAgeEqZero, `:=`(totalBiomass2 = 0)]
-  imputedPixID <- inputDataTable[totalBiomass != totalBiomass2, pixelIndex]
-  inputDataTable[, totalBiomass := totalBiomass2]
-  inputDataTable[, totalBiomass2 := NULL]
 
-  whTotalBEqZero <- which(inputDataTable$totalBiomass == 0)
-  message(green(
-    "  -- Setting age in pixel to 0 where totalBiomass == 0 (affects", length(whTotalBEqZero),
-    "of", NROW(inputDataTable), "pixels)"
-  ))
-  message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
-  ## correct age in a separate column to keep track of imputed pixels, then replace column
-  inputDataTable[, `:=`(age2 = age)]
-  inputDataTable[whTotalBEqZero, `:=`(age2 = 0)]
-  imputedPixID <- c(imputedPixID, inputDataTable[age != age2, pixelIndex])
-  inputDataTable[, age := age2]
-  inputDataTable[, age2 := NULL]
+  if (!is.null(inputDataTable[["totalBiomass"]])) {
+    message(green(
+      "  -- Setting TotalBiomass in pixel to 0 where age == 0 (affects", length(whAgeEqZero),
+      "of", NROW(inputDataTable), "pixels)"
+    ))
+    message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
+    ## correct B in a separate column to keep track of imputed pixels, then replace column
+    inputDataTable[, `:=`(totalBiomass2 = totalBiomass)]
+    inputDataTable[whAgeEqZero, `:=`(totalBiomass2 = 0)]
+    imputedPixID <- inputDataTable[totalBiomass != totalBiomass2, pixelIndex]
+    inputDataTable[, totalBiomass := totalBiomass2]
+    inputDataTable[, totalBiomass2 := NULL]
+
+    whTotalBEqZero <- which(inputDataTable$totalBiomass == 0)
+    message(green(
+      "  -- Setting age in pixel to 0 where totalBiomass == 0 (affects", length(whTotalBEqZero),
+      "of", NROW(inputDataTable), "pixels)"
+    ))
+    message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
+    ## correct age in a separate column to keep track of imputed pixels, then replace column
+    inputDataTable[, `:=`(age2 = age)]
+    inputDataTable[whTotalBEqZero, `:=`(age2 = 0)]
+    imputedPixID <- c(imputedPixID, inputDataTable[age != age2, pixelIndex])
+    inputDataTable[, age := age2]
+    inputDataTable[, age2 := NULL]
+  }
 
   cohortData <- data.table::melt(inputDataTable,
                                  value.name = "cover",
@@ -926,7 +931,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 
   # clean up
   set(cohortData, NULL, c("totalCover", "coverOrig"), NULL)
-  attr(cohortData, "imputedPixID") <- imputedPixID
+  setattr(cohortData, "imputedPixID", imputedPixID)
   return(cohortData)
 }
 
@@ -972,7 +977,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @author Eliot McIntire
 #' @export
 #' @importFrom crayon blue green
-#' @importFrom data.table melt setnames
+#' @importFrom data.table melt setattr setnames
 #' @importFrom reproducible Cache .sortDotsUnderscoreFirst messageDF
 #' @importFrom pemisc termsInData
 #' @rdname makeAndCleanInitialCohortData
@@ -1118,7 +1123,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
   # https://stats.stackexchange.com/questions/31300/dealing-with-0-1-values-in-a-beta-regression
   # cohortData[ , coverProp := (cover/100 * (NROW(cohortData) - 1) + 0.5) / NROW(cohortData)]
 
-  attr(cohortData, "imputedPixID") <- imputedPixID
+  setattr(cohortData, "imputedPixID", imputedPixID)
   return(cohortData)
 }
 
@@ -1197,7 +1202,7 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
   fun <- modelArgs[[1]]
 
   ## get formula and check
-  form <- tryCatch(as.formula(modelArgs[2]),
+  form <- tryCatch(as.formula(modelArgs[2], env = .GlobalEnv), # .GlobalEnv keeps object small
                    error = function(e) {
                      stop(paste(
                        "Could not convert '", modelArgs[2], "'to formula.",
@@ -1213,7 +1218,7 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
 
     if (!keepGrouping) {
       form <- sub("\\+ \\(.*\\|.*\\)", "", modelArgs[2])
-      form <- as.formula(form)
+      form <- as.formula(form, env = .GlobalEnv)
 
       ## change to glm if dropping random effects
       fun <- "stats::glm"
@@ -1236,7 +1241,7 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
   }
 
   ## get function and check
-  fun <- reproducible:::.extractFunction(fun)
+  fun <- reproducible:::.extractFunction(fun) ## TODO: don't use `:::`; export from reproducible ?
   if (!is.function(fun)) {
     stop(paste0(
       "Can't find the function '", modelArgs[1], "'.",
@@ -2041,14 +2046,11 @@ vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
   return(xx)
 }
 
-
-
 #' @importFrom SpaDES.tools inRange
 preambleVTG <- function(x, vegLeadingProportion, doAssertion, nrowCohortData) {
   if (!inRange(vegLeadingProportion, 0, 1)) {
     stop("vegLeadingProportion must be a proportion")
   }
-
 
   leadingBasedOn <- if ("B" %in% colnames(x)) {
     message("Using B to derive leading type")
