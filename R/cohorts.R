@@ -963,7 +963,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #'   represent percent cover by species, rescaled to sum up to 100\%.
 #'
 #' @param imputeBadAgeModel statistical model used to impute ages in pixels with missing
-#'  data or with cover == 0.
+#'  data or with cover == 0. If set to NULL no imputation will be attempted, and pixels with
+#'  missing age are excluded.
 #'
 #' @param minCoverThreshold minimum total cover percentage necessary to consider the pixel
 #'  vegetated, or a cohort present in a pixel.
@@ -1039,6 +1040,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
   ][hasBadAge == TRUE] # , by = "pixelIndex"]
 
   if (NROW(cohortDataMissingAge) > 0) {
+    if (!is.null(imputeBadAgeModel)) {
     cohortDataMissingAgeUnique <- unique(cohortDataMissingAge,
                                          by = c("initialEcoregionCode", "speciesCode")
     )[
@@ -1103,6 +1105,10 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
     cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = .logFloor(imputedAge))]
     imputedPixID <- c(imputedPixID, unique(cohortData[!is.na(imputedAge), pixelIndex]))
     cohortData[, `:=`(imputedAge = NULL)]
+    } else {
+      ## if not imputing bad ages, then exclude bad data entries.
+      cohortData <- cohortData[!cohortDataMissingAge[, .(pixelIndex, speciesCode)], on = c("pixelIndex", "speciesCode")]
+    }
   }
   # # Round ages to nearest pixelGroupAgeClass
   # set(cohortData, NULL, "age", asInteger(cohortData$age / pixelGroupAgeClass) *
