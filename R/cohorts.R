@@ -786,6 +786,12 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #'
 #' @param inputDataTable A \code{data.table} with columns described above.
 #'
+#' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
+#'   represent percent cover by species, rescaled to sum up to 100\%.
+#'
+#' @param minCoverThreshold minimum total cover percentage necessary to consider the pixel
+#'  vegetated, or a cohort present in a pixel.
+#'
 #' @template doAssertion
 #'
 #' @param rescale Logical. If \code{TRUE}, the default, cover for each species will be rescaled
@@ -797,11 +803,11 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @importFrom data.table melt setattr setnames
 #' @keywords internal
 .createCohortData <- function(inputDataTable, # pixelGroupBiomassClass,
-                              doAssertion = getOption("LandR.assertions", TRUE), rescale = TRUE,
-                              minCoverThreshold = 5) {
-  coverColNames <- grep(colnames(inputDataTable), pattern = "cover", value = TRUE)
-  newCoverColNames <- gsub("cover\\.", "", coverColNames)
-  setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
+                              sppColumns,
+                              minCoverThreshold = 5,
+                              doAssertion = getOption("LandR.assertions", TRUE), rescale = TRUE) {
+  newCoverColNames <- gsub("cover\\.", "", sppColumns)
+  setnames(inputDataTable, old = sppColumns, new = newCoverColNames)
   message(blue("Create initial cohortData object, with no pixelGroups yet"))
   message(green("-- Begin reconciling data inconsistencies"))
 
@@ -1019,6 +1025,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
                       inputDataTable = inputDataTable,
                       # pixelGroupBiomassClass = pixelGroupBiomassClass,
                       minCoverThreshold = minCoverThreshold,
+                      sppColumns = sppColumns,
                       doAssertion = doAssertion
   )
   assertCohortDataAttr(cohortData, doAssertion = doAssertion)
