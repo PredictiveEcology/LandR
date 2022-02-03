@@ -31,6 +31,7 @@ getWildfire_NFI <- function(dPath, rasterToMatch, url = NULL) {
   wildfireYear <- terra::rast(fireDL$targetFilePath)
   wildfireYear2 <- wildfireYear$CA_forest_wildfire_year_DNBR_Magnitude_1985_2015_2 ## only need year
 
+  ## TODO: Caching of postProcessTerra() directly is still experimental/inconsistent; avoid for now
   wildfire_SA <- postProcessTerra(wildfireYear2, to = rasterToMatch, method = "near")
   wildfire_SA[wildfire_SA == 0L] <- NA_integer_
   wildfire_SA <- wildfire_SA + 1900
