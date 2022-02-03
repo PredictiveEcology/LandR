@@ -16,16 +16,16 @@ getWildfire_NFI <- function(dPath, rasterToMatch, url = NULL) {
          "Install using `install.packages('terra')`.")
   }
 
-  if (is.null(NFIurl)) {
-    NFIurl <- paste0("https://opendata.nfis.org/downloads/forest_change/",
-                     "CA_forest_wildfire_year_DNBR_Magnitude_1985_2015.zip")
+  if (is.null(url)) {
+    url <- paste0("https://opendata.nfis.org/downloads/forest_change/",
+                  "CA_forest_wildfire_year_DNBR_Magnitude_1985_2015.zip")
   }
 
   ## this is an enormous raster - we want the second raster in the stack, wildfire year
   fireDL <- preProcess(
-    url = NFIurl,
+    url = url,
     destinationPath = dPath,
-    targetFile = raster::extension(basename(NFIurl), "tif"),
+    targetFile = raster::extension(basename(url), "tif"),
     alsoExtract = "similar"
   )
   wildfireYear <- terra::rast(fireDL$targetFilePath)
