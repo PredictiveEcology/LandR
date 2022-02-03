@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2022-01-20
-Version: 1.0.7.9000
+Date: 2022-02-03
+Version: 1.0.7.9001
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -57,12 +57,13 @@ Suggests:
     roxygen2,
     rmarkdown,
     spelling,
+    terra,
     testthat,
     XML
 Remotes:
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
-    PredictiveEcology/reproducible@development,
+    PredictiveEcology/reproducible@terraInProjectInputs,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
 Language: en-CA
@@ -99,4 +100,5 @@ Collate:
     'speciesTable.R'
     'sppEquivalencies_CA.R'
     'studyArea.R'
+    'wildfire.R'
     'zzz.R'
