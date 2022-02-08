@@ -14,6 +14,7 @@ updateCohortData(
   treedFirePixelTableSinceLastDisp = NULL,
   successionTimestep,
   cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+  initialB = 10,
   verbose = getOption("LandR.verbose", TRUE),
   doAssertion = getOption("LandR.assertions", TRUE)
 )
@@ -25,7 +26,8 @@ updateCohortData(
   currentTime,
   cohortDefinitionCols = c("pixelGroup", "speciesCode", "age"),
   speciesEcoregion,
-  successionTimestep
+  successionTimestep,
+  initialB = 10
 )
 }
 \arguments{
@@ -61,6 +63,8 @@ to ensure that everything matches correctly.}
 In LANDIS-II, this is called "Succession Timestep". This is used here}
 
 \item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
+
+\item{initialB}{the initial biomass of new cohorts. Defaults to ten.}
 
 \item{verbose}{Integer, where increasing number is increasing verbosity. Currently,
 only level 1 exists; but this may change.}
