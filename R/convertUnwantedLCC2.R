@@ -56,7 +56,7 @@ convertUnwantedLCC2 <- function(classesToReplace = 34:36, rstLCC, nIterations = 
 
     # sanity check -- don't let an infinite loop
 
-    if (repeatsOnSameUnwanted > nIterations) {
+    if (repeatsOnSameUnwanted >= nIterations) {
             message(
         "  reclassifying ", NROW(theUnwantedPixels), " pixels of class ",
         paste(unique(rstLCC[theUnwantedPixels]), collapse = ", "), " as class ", defaultNewValue,
