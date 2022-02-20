@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2022-02-03
-Version: 1.0.7.9004
+Date: 2022-02-19
+Version: 1.0.7.9005
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -52,7 +52,9 @@ Suggests:
     gdalUtilities,
     googledrive (>= 2.0.0),
     knitr,
+    qs,
     RandomFields,
+    rasterVis,
     RCurl,
     roxygen2,
     rmarkdown,
@@ -92,6 +94,7 @@ Collate:
     'nullClimate.R'
     'overlayLCCs.R'
     'partitionBiomass.R'
+    'plot_summaries.R'
     'plotting.R'
     'prepEcoregions.R'
     'prepInputObjects.R'
