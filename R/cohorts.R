@@ -1,12 +1,12 @@
 utils::globalVariables(c(
-  ".", "..cols", "..colsToSubset", ".I", ":=", "..groupVar", "age", "aNPPAct", "cover", "coverOrig",
-  "ecoregion", "ecoregionGroup", "hasBadAge",
+  ".", "..cols", "..colsToSubset", ".I", ":=", "..groupVar", "age", "age2", "aNPPAct",
+  "cover", "coverOrig", "ecoregion", "ecoregionGroup", "hasBadAge",
   "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
   "lcc", "maxANPP", "maxB", "maxB_eco", "mortality",
   "newPossLCC", "noPixels", "oldSumB", "ord", "outBiomass", "oldEcoregionGroup",
   "pixelGroup2", "pixelIndex", "pixels", "planted", "Provenance", "possERC",
   "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
-  "temppixelGroup", "toDelete", "totalBiomass", "totalCover",
+  "temppixelGroup", "toDelete", "totalBiomass", "totalBiomass2", "totalCover",
   "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
 ))
 
@@ -40,7 +40,7 @@ utils::globalVariables(c(
 #'   In LANDIS-II, this is called "Succession Timestep". This is used here
 #' @param verbose Integer, where increasing number is increasing verbosity. Currently,
 #'    only level 1 exists; but this may change.
-#'
+#' @param initialB the initial biomass of new cohorts. Defaults to ten.
 #' @template doAssertion
 #'
 #' @return
@@ -58,6 +58,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
                              speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
                              successionTimestep,
                              cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+                             initialB = 10,
                              verbose = getOption("LandR.verbose", TRUE),
                              doAssertion = getOption("LandR.assertions", TRUE)) {
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
@@ -168,7 +169,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
                                     pixelGroupMap,
                                     currentTime = currentTime,
                                     speciesEcoregion = speciesEcoregion,
-                                    successionTimestep = successionTimestep
+                                    successionTimestep = successionTimestep,
+                                    initialB = initialB
   )
 
   outs <- rmMissingCohorts(cohortData, pixelGroupMap, cohortDefinitionCols = cohortDefinitionCols)
@@ -234,6 +236,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 #' @template newPixelCohortData
 #' @template cohortData
 #' @template cohortDefinitionCols
+#' @param initialB the initial biomass of new cohorts. Defaults to ten.
 #'
 #' @return A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
 #'
@@ -243,7 +246,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 #' @rdname updateCohortData
 .initiateNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                                 cohortDefinitionCols = c("pixelGroup", "speciesCode", "age"),
-                                speciesEcoregion, successionTimestep) {
+                                speciesEcoregion, successionTimestep, initialB = 10) {
 
   ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum B per ecoregion, join to new cohort data
@@ -299,12 +302,14 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
   if ("B" %in% names(newPixelCohortData)) {
     newPixelCohortData[, B := NULL]
   }
-  set(
-    newPixelCohortData, NULL, "B",
-    asInteger(pmax(1, newPixelCohortData$maxANPP *
-                     exp(-1.6 * newPixelCohortData$sumB / newPixelCohortData$maxB_eco)))
-  )
-  set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
+  # set(
+  #   newPixelCohortData, NULL, "B",
+  #   asInteger(pmax(1, newPixelCohortData$maxANPP *
+  #                    exp(-1.6 * newPixelCohortData$sumB / newPixelCohortData$maxB_eco)))
+  # )
+  # set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
+  set(newPixelCohortData, NULL, "B", asInteger(initialB)) #Feb2022 change to 1 - maxANPP is unrealistic particularly with
+  # high maxANPP needed to produce realistic growth curves
 
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
                                                mortality = 0L, aNPPAct = 0L
@@ -661,7 +666,12 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 
   numCharIEC <- max(nchar(availableERC_by_Sp$initialEcoregionCode), na.rm = TRUE)
   if (hasPreDash) {
-    numCharEcoregion <- max(nchar(availableERG2$ecoregion), na.rm = TRUE)
+    numCharEcoregion <- if (nrow(availableERG2) > 0) {
+      max(nchar(availableERG2$ecoregion), na.rm = TRUE)
+    } else {
+      ## above gives -Inf when no classes to replace, so use zero instead
+      0
+    }
     numCharLCCCodes <- numCharIEC - numCharEcoregion - 1 # minus 1 for the dash
     availableERG2[, `:=`(ecoregion = NULL)]
   } else {
@@ -788,8 +798,10 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @param rescale Logical. If \code{TRUE}, the default, cover for each species will be rescaled
 #'   so all cover in \code{pixelGroup} or pixel sums to 100.
 #'
+#' @return cohortData \code{data.table} with attribute "imputedPixID"
+#'
 #' @importFrom crayon blue
-#' @importFrom data.table melt setnames
+#' @importFrom data.table melt setattr setnames
 #' @keywords internal
 .createCohortData <- function(inputDataTable, # pixelGroupBiomassClass,
                               doAssertion = getOption("LandR.assertions", TRUE), rescale = TRUE,
@@ -799,6 +811,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   setnames(inputDataTable, old = coverColNames, new = newCoverColNames)
   message(blue("Create initial cohortData object, with no pixelGroups yet"))
   message(green("-- Begin reconciling data inconsistencies"))
+
+  imputedPixID <- integer(0)
 
   inputDataTable[, totalCover := rowSums(.SD), .SDcols = newCoverColNames]
   whEnoughCover <- inputDataTable$totalCover > minCoverThreshold
@@ -811,20 +825,33 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   inputDataTable <- inputDataTable[whEnoughCover]
 
   whAgeEqZero <- which(inputDataTable$age == 0)
-  message(green(
-    "  -- Setting TotalBiomass in pixel to 0 where age == 0 (affects", length(whAgeEqZero),
-    "of", NROW(inputDataTable), "pixels)"
-  ))
-  message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
-  inputDataTable[whAgeEqZero, `:=`(totalBiomass = 0)]
 
-  whTotalBEqZero <- which(inputDataTable$totalBiomass == 0)
-  message(green(
-    "  -- Setting age in pixel to 0 where totalBiomass == 0 (affects", length(whTotalBEqZero),
-    "of", NROW(inputDataTable), "pixels)"
-  ))
-  message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
-  inputDataTable[whTotalBEqZero, `:=`(age = 0)]
+  if (!is.null(inputDataTable[["totalBiomass"]])) {
+    message(green(
+      "  -- Setting TotalBiomass in pixel to 0 where age == 0 (affects", length(whAgeEqZero),
+      "of", NROW(inputDataTable), "pixels)"
+    ))
+    message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
+    ## correct B in a separate column to keep track of imputed pixels, then replace column
+    inputDataTable[, `:=`(totalBiomass2 = totalBiomass)]
+    inputDataTable[whAgeEqZero, `:=`(totalBiomass2 = 0)]
+    imputedPixID <- inputDataTable[totalBiomass != totalBiomass2, pixelIndex]
+    inputDataTable[, totalBiomass := totalBiomass2]
+    inputDataTable[, totalBiomass2 := NULL]
+
+    whTotalBEqZero <- which(inputDataTable$totalBiomass == 0)
+    message(green(
+      "  -- Setting age in pixel to 0 where totalBiomass == 0 (affects", length(whTotalBEqZero),
+      "of", NROW(inputDataTable), "pixels)"
+    ))
+    message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
+    ## correct age in a separate column to keep track of imputed pixels, then replace column
+    inputDataTable[, `:=`(age2 = age)]
+    inputDataTable[whTotalBEqZero, `:=`(age2 = 0)]
+    imputedPixID <- c(imputedPixID, inputDataTable[age != age2, pixelIndex])
+    inputDataTable[, age := age2]
+    inputDataTable[, age2 := NULL]
+  }
 
   cohortData <- data.table::melt(inputDataTable,
                                  value.name = "cover",
@@ -911,6 +938,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 
   # clean up
   set(cohortData, NULL, c("totalCover", "coverOrig"), NULL)
+  setattr(cohortData, "imputedPixID", imputedPixID)
   return(cohortData)
 }
 
@@ -931,24 +959,32 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #'   \item \code{coverOrig} (integer)
 #'   \item \code{B} (integer)
 #' }
+#'    Several data correction/imputation operations are also performed. Namely, age is imputed
+#'    in pixels where age data is missing (but not cover) and where cover == 0 but age > 0,
+#'    total biomass is zeroed if age == 0, and age is zeroed if biomass == 0.
+#'
 #'
 #' @param inputDataTable A \code{data.table} with columns described above.
 #'
 #' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
 #'   represent percent cover by species, rescaled to sum up to 100\%.
 #'
-#' @param imputeBadAgeModel DESCRIPTION NEEDED
+#' @param imputeBadAgeModel statistical model used to impute ages in pixels with missing
+#'  data or with cover == 0.
 #'
-#' @param minCoverThreshold DESCRIPTION NEEDED
+#' @param minCoverThreshold minimum total cover percentage necessary to consider the pixel
+#'  vegetated, or a cohort present in a pixel.
 #'
 #' @template doAssertion
 #'
 #' @param doSubset Turns on/off subsetting. Defaults to \code{TRUE}.
+#' @return a \code{cohortData} \code{data.table} with attribute "imputedPixID"
+#'     (a vector of pixel IDs that suffered imputation)
 #'
 #' @author Eliot McIntire
 #' @export
 #' @importFrom crayon blue green
-#' @importFrom data.table melt setnames
+#' @importFrom data.table melt setattr setnames
 #' @importFrom reproducible Cache .sortDotsUnderscoreFirst messageDF
 #' @importFrom pemisc termsInData
 #' @rdname makeAndCleanInitialCohortData
@@ -991,6 +1027,8 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
                       minCoverThreshold = minCoverThreshold,
                       doAssertion = doAssertion
   )
+  assertCohortDataAttr(cohortData, doAssertion = doAssertion)
+  imputedPixID <- attr(cohortData, "imputedPixID")
 
   ######################################################
   # Impute missing ages on poor age dataset
@@ -1070,6 +1108,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
       on = c("pixelIndex", "speciesCode")
     ]
     cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = .logFloor(imputedAge))]
+    imputedPixID <- c(imputedPixID, unique(cohortData[!is.na(imputedAge), pixelIndex]))
     cohortData[, `:=`(imputedAge = NULL)]
   }
   # # Round ages to nearest pixelGroupAgeClass
@@ -1091,6 +1130,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
   # https://stats.stackexchange.com/questions/31300/dealing-with-0-1-values-in-a-beta-regression
   # cohortData[ , coverProp := (cover/100 * (NROW(cohortData) - 1) + 0.5) / NROW(cohortData)]
 
+  setattr(cohortData, "imputedPixID", imputedPixID)
   return(cohortData)
 }
 
@@ -1169,7 +1209,7 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
   fun <- modelArgs[[1]]
 
   ## get formula and check
-  form <- tryCatch(as.formula(modelArgs[2]),
+  form <- tryCatch(as.formula(modelArgs[2], env = .GlobalEnv), # .GlobalEnv keeps object small
                    error = function(e) {
                      stop(paste(
                        "Could not convert '", modelArgs[2], "'to formula.",
@@ -1185,7 +1225,7 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
 
     if (!keepGrouping) {
       form <- sub("\\+ \\(.*\\|.*\\)", "", modelArgs[2])
-      form <- as.formula(form)
+      form <- as.formula(form, env = .GlobalEnv)
 
       ## change to glm if dropping random effects
       fun <- "stats::glm"
@@ -1208,7 +1248,7 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
   }
 
   ## get function and check
-  fun <- reproducible:::.extractFunction(fun)
+  fun <- reproducible:::.extractFunction(fun) ## TODO: don't use `:::`; export from reproducible ?
   if (!is.function(fun)) {
     stop(paste0(
       "Can't find the function '", modelArgs[1], "'.",
@@ -1353,6 +1393,8 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #'   If this is related to known ages from a high quality database, then use age of the oldest
 #'   trees in that database.
 #' @param pixelFateDT A \code{data.table} of \code{pixelFateDT}; if none provided, will make an empty one.
+#' @param rmImputedPix Should imputed pixels be removed
+#' @param imputedPixID a vector of IDs of pixels that suffered data imputation.
 #'
 #' @template speciesEcoregion
 #'
@@ -1365,7 +1407,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #' @importFrom utils tail
 makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesEcoregion,
                                 pixelGroupBiomassClass, pixelGroupAgeClass, minAgeForGrouping = 0,
-                                pixelFateDT) {
+                                rmImputedPix = FALSE, imputedPixID, pixelFateDT) {
   ## make ecoregioGroup a factor (again) and remove unnecessary cols.
   # refactor because the "_34" and "_35" ones are still levels
   pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
@@ -1444,8 +1486,24 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
     pixelCohortData[!speciesEcoregion, on = cols][, ..cols][, list(numPixelsRemoved = .N), by = cols], # anti-join
   )
 
+  ## REMOVE PIXELS IN ECOREGION GROUPS THAT ENDED UP WITHOUT PARAMS
   # pixelCohortData <- pixelCohortData[ecoregionGroup %in% ecoregionsWeHaveParametersFor] # keep only ones we have params for
   pixelCohortData <- speciesEcoregion[, ..cols][pixelCohortData, on = cols, nomatch = 0]
+
+  pixelFateDT <- pixelFate(
+    pixelFateDT, "removing ecoregionGroups without enough data to est. maxBiomass",
+    tail(pixelFateDT$runningPixelTotal, 1) - NROW(unique(pixelCohortData$pixelIndex))
+  )
+
+  ## REMOVE IMPUTED PIXELS FROM THE SIMULATION IF NEED BE
+  if (rmImputedPix) {
+    pixelCohortData <- pixelCohortData[!pixelIndex %in% imputedPixID]
+
+    pixelFateDT <- pixelFate(
+      pixelFateDT, "removing pixels that suffered data imputation",
+      tail(pixelFateDT$runningPixelTotal, 1) - NROW(unique(pixelCohortData$pixelIndex))
+    )
+  }
 
   # Lost some ecoregionGroups -- refactor
   pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
@@ -1460,11 +1518,6 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 
   cohortData <- unique(pixelCohortData, by = c("pixelGroup", columnsForPixelGroups))
   cohortData[, `:=`(pixelIndex = NULL)]
-
-  pixelFateDT <- pixelFate(
-    pixelFateDT, "removing ecoregionGroups without enough data to est. maxBiomass",
-    tail(pixelFateDT$runningPixelTotal, 1) - NROW(unique(pixelCohortData$pixelIndex))
-  )
 
   assertUniqueCohortData(cohortData, c("pixelGroup", "ecoregionGroup", "speciesCode"))
   return(list(cohortData = cohortData, pixelCohortData = pixelCohortData, pixelFateDT = pixelFateDT))
@@ -2000,14 +2053,11 @@ vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
   return(xx)
 }
 
-
-
 #' @importFrom SpaDES.tools inRange
 preambleVTG <- function(x, vegLeadingProportion, doAssertion, nrowCohortData) {
   if (!inRange(vegLeadingProportion, 0, 1)) {
     stop("vegLeadingProportion must be a proportion")
   }
-
 
   leadingBasedOn <- if ("B" %in% colnames(x)) {
     message("Using B to derive leading type")

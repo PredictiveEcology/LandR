@@ -31,7 +31,7 @@ makeDummyEcoregionMap <- function(rasterToMatch) {
 makeDummyRawBiomassMap <- function(rasterToMatch) {
   rawBiomassMap <- gaussMap(rasterToMatch)
   rawBiomassMap <- setValues(rawBiomassMap,
-                             rescale(getValues(rawBiomassMap), c(100, 20000)))
+                             rescale(getValues(rawBiomassMap), c(10, 500)))
   rawBiomassMap <- mask(rawBiomassMap, rasterToMatch)
   return(rawBiomassMap)
 }

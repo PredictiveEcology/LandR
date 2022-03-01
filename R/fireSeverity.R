@@ -1,6 +1,5 @@
 utils::globalVariables(c(
-  ".", ":=", "B", "pixelGroup", "speciesCode",
-  "prefireB", "postfireB", "severityB"
+  ".", ":=", "B", "pixelGroup", "postfireB", "prefireB", "severityB", "speciesCode"
 ))
 
 #' Calculate fire severity
@@ -22,29 +21,26 @@ utils::globalVariables(c(
 #'
 #'
 calcSeverityB <- function(cohortData, burnedPixelCohortData) {
-  if (!"B" %in% names(burnedPixelCohortData)) {
+  ## start with post-fire B - depending on the module used B
+  ## may be present or not
+  severityData <- copy(burnedPixelCohortData)
+
+  if (!"B" %in% names(severityData)) {
     message("Assuming a stand replacing fire")
-    burnedPixelCohortData[, B := 0]
+    severityData[, B := 0]
   }
 
-  severityData <- burnedPixelCohortData[, .(pixelIndex, pixelGroup)]
+  ## calculate post-fire stand biomass, drop unnecessary columns
+  severityData <- severityData[, list(postfireB = sum(B),
+                                      pixelGroup = pixelGroup), by = pixelIndex] %>%
+    unique(.)
 
-  ## add initial and post-fire B to severityData - this expands cohortData's B to pixels.
-  severityData <- cohortData[, .(speciesCode, B, pixelGroup)][severityData, on = "pixelGroup"]
-  setnames(severityData, "B", "prefireB")
-
-  severityData <- burnedPixelCohortData[, .(speciesCode, B, pixelIndex)][severityData, on = .(speciesCode, pixelIndex)]
-  setnames(severityData, "B", "postfireB")
-
-  ## sum B's across species, and drop species
-  severityData[, `:=`(prefireB = sum(prefireB),
-                      postfireB = sum(postfireB)), by = pixelIndex]
-  set(severityData, j = "speciesCode", value = NULL)
-  severityData <- unique(severityData)
+  ## sum initial B to stand level and add to severityData - this expands cohortData's B to pixels.
+  severityData <- cohortData[, list(prefireB = sum(B)), by = pixelGroup][severityData, on = "pixelGroup"]
 
   ## calculate severity in terms of biomass
   severityData[, severityB := prefireB - postfireB]
 
-  ## keep only certain columns
+  ## drop prefireB and postfireB columns
   return(severityData[, .(pixelGroup, pixelIndex, severityB)])
 }

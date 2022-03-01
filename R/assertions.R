@@ -199,17 +199,45 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
 assertColumns <- function(obj, colClasses,
                           doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
+    #put them in order of the object
     colNames <- names(colClasses)
-    test1 <- all(colNames %in% colnames(obj))
-    test2 <- all(vapply(seq(NCOL(obj[, colNames, with = FALSE])),
-                        function(colNum) {
-                          is(obj[, colNames[colNum], with = FALSE][[1]],
-                             colClasses[colNum])
-                        }, FUN.VALUE = logical(1)))
-    if (!test1 || !test2)
-      stop("obj should be a data.table with at least ", NROW(colNames), " columns: ",
-           paste(colNames, collapse = ", "),
-           " ... of classes: ", paste(colClasses, collapse = ", "))
+    test1Indiv <- colNames %in% colnames(obj)
+    test1 <- all(test1Indiv)
+    mess1 <- character()
+    if (!test1)
+      mess1 <- paste0("obj has missing column(s): ", paste(collapse = ", ", colNames[!test1Indiv]))
+    colClasses2 <- colClasses[na.omit(match(names(obj), names(colClasses)))]
+    colNames2 <- names(colClasses2)
+    test2Indiv <- vapply(seq(NCOL(obj[, colNames2, with = FALSE])),
+                         function(colNum) {
+                           is(obj[, colNames2[colNum], with = FALSE][[1]],
+                              colClasses2[colNum])
+                         }, FUN.VALUE = logical(1))
+    test2 <- all(test2Indiv)
+    mess2 <- character()
+    if (!test2) {
+      wh <- which(!test2Indiv)
+      wrongCols <- colClasses2[wh]
+      mess2 <- paste0("obj column classes need correction. It should have the following class(es): ",
+        paste(names(wrongCols), "=", wrongCols, collapse = ", "))
+    }
+    if (!test1 || !test2) {
+      stop(paste(mess1, mess2, sep = "\n"))
+    }
+
+    # colNames <- names(colClasses)
+    # test1Indiv <- colNames %in% colnames(obj)
+    # test1 <- all(test1Indiv)
+    # test2Indiv <- vapply(seq(NCOL(obj[, colNames, with = FALSE])),
+    #                      function(colNum) {
+    #                        is(obj[, colNames[colNum], with = FALSE][[1]],
+    #                           colClasses[colNum])
+    #                      }, FUN.VALUE = logical(1))
+    # test2 <- all(test2Indiv)
+    # if (!test1 || !test2)
+    #   stop("obj should be a data.table with at least ", NROW(colNames), " columns: ",
+    #        paste(colNames, collapse = ", "),
+    #        " ... of classes: ", paste(colClasses, collapse = ", "))
   }
 }
 
@@ -456,7 +484,7 @@ assertSpeciesEcoregionCohortDataMatch <- function(cohortData, speciesEcoregion,
 #' @export
 #'
 #' @importFrom magrittr %>%
-assertStandCohortData <- function(standCohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
+assertPixelCohortDataValid <- function(standCohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     test <- standCohortData[, vapply(.SD, FUN = function(x) any(is.na(x)), FUN.VALUE = logical(1))]
     if (any(test))
@@ -481,7 +509,8 @@ assertStandCohortData <- function(standCohortData, doAssertion = getOption("Land
 
 #' Assert that the \code{allCohortData} has the expected years and reps combinations
 #'
-#' @param allCohortData A \code{data.table} with all simulated cohortData to use for validaton
+#' @param allCohortData A \code{data.table} with all simulated \code{cohortData} to use for
+#'                      validation
 #' @param reps repetition ids
 #' @param years years
 #'
@@ -490,7 +519,7 @@ assertStandCohortData <- function(standCohortData, doAssertion = getOption("Land
 #' @export
 assertRepsAllCohortData <- function(allCohortData, reps, years,
                                     doAssertion = getOption("LandR.assertions", TRUE)) {
-  if (getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
     test1 <- allCohortData[rep == reps[1] & year == years[1]]
     set(test1, NULL, "rep", NULL)
     out <- vapply(reps[-1], FUN = function(x, test1) {
@@ -504,5 +533,49 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
         TRUE
       }
     }, test1 = test1, FUN.VALUE = logical(1))
+  }
+}
+
+
+#' Assert that \code{standAgeMap} is a \code{RasterLayer} with attribute \code{imputedPixID}
+#'
+#' @template standAgeMap
+#' @template doAssertion
+#'
+#' @export
+assertStandAgeMapAttr <- function(standAgeMap,
+                                  doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    if (!is(standAgeMap, "RasterLayer")) {
+      stop("standAgeMap should be a RasterLayer")
+    }
+    if (is.null(attr(standAgeMap, "imputedPixID"))) {
+      stop("standAgeMap should have a 'imputedPixID' attribute")
+    } else {
+      if (!(is(attr(standAgeMap, "imputedPixID"), "numeric") |
+            is(attr(standAgeMap, "imputedPixID"), "integer"))) {
+        stop("standAgeMap attribute 'imputedPixID' should be numeric/integer")
+      }
+    }
+  }
+}
+
+#' Assert that \code{cohortData} has attribute \code{imputedPixID}
+#'
+#' @template cohortData
+#' @template doAssertion
+#'
+#' @export
+assertCohortDataAttr <- function(cohortData,
+                                  doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    if (is.null(attr(cohortData, "imputedPixID"))) {
+      stop("cohortData should have a 'imputedPixID' attribute")
+    } else {
+      if (!(is(attr(cohortData, "imputedPixID"), "numeric") |
+            is(attr(cohortData, "imputedPixID"), "integer"))) {
+        stop("cohortData attribute 'imputedPixID' should be numeric/integer")
+      }
+    }
   }
 }

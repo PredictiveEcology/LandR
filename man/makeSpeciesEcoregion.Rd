@@ -12,9 +12,7 @@ makeSpeciesEcoregion(
   modelCover,
   modelBiomass,
   successionTimestep,
-  currentYear,
-  needRescaleModelB = FALSE,
-  scaledVarsModelB = NULL
+  currentYear
 )
 }
 \arguments{
@@ -33,12 +31,6 @@ makeSpeciesEcoregion(
 \item{successionTimestep}{The time between successive seed dispersal events.}
 
 \item{currentYear}{\code{time(sim)}}
-
-\item{needRescaleModelB}{logical. indicates whether logAge and cover were scaled
-prior to fitting \code{modelBiomass}. if TRUE, \code{scaledVarsModelB} needs to be supplied}
-
-\item{scaledVarsModelB}{a list with the scaled versions of \code{cover} and \code{logAge},
-each obtained with \code{scale}}
 }
 \description{
 Use statistically estimated \code{maxB}, \code{maxANPP} and establishment probabilities

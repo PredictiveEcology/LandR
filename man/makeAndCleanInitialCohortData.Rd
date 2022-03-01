@@ -20,15 +20,21 @@ makeAndCleanInitialCohortData(
 \item{sppColumns}{A vector of the names of the columns in \code{inputDataTable} that
 represent percent cover by species, rescaled to sum up to 100\%.}
 
-\item{imputeBadAgeModel}{DESCRIPTION NEEDED}
+\item{imputeBadAgeModel}{statistical model used to impute ages in pixels with missing
+data or with cover == 0.}
 
-\item{minCoverThreshold}{DESCRIPTION NEEDED}
+\item{minCoverThreshold}{minimum total cover percentage necessary to consider the pixel
+vegetated, or a cohort present in a pixel.}
 
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
 
 \item{doSubset}{Turns on/off subsetting. Defaults to \code{TRUE}.}
+}
+\value{
+a \code{cohortData} \code{data.table} with attribute "imputedPixID"
+    (a vector of pixel IDs that suffered imputation)
 }
 \description{
 Takes a single \code{data.table} input, which has the following columns in addition to
@@ -46,6 +52,9 @@ Takes a single \code{data.table} input, which has the following columns in addit
   \item \code{coverOrig} (integer)
   \item \code{B} (integer)
 }
+   Several data correction/imputation operations are also performed. Namely, age is imputed
+   in pixels where age data is missing (but not cover) and where cover == 0 but age > 0,
+   total biomass is zeroed if age == 0, and age is zeroed if biomass == 0.
 }
 \author{
 Eliot McIntire

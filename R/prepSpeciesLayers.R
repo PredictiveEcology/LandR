@@ -1,4 +1,6 @@
-utils::globalVariables(c("AGE", "CC", "GID", "keepSpecies", "layerName", "pct", "value"))
+utils::globalVariables(c(
+  "AGE", "CC", "GID", "id", "keepSpecies", "layerName", "name", "pct", "value"
+))
 
 #' Load CASFRI data
 #'
@@ -199,11 +201,42 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
                                   sppEquiv,
                                   sppEquivCol,
                                   thresh = 10, ...) {
+  stopifnot(requireNamespace("RCurl", quietly = TRUE))
+
   dots <- list(...)
 
-  if (is.null(url))
+  if ("year" %in% names(dots)) {
+    year <- dots[["year"]]
+  } else {
+    year <- 2001
+  }
+
+  if (is.null(url)) {
     url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                  "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/")
+                  "canada-forests-attributes_attributs-forests-canada/", year,
+                  "-attributes_attributs-", year, "/")
+  }
+
+  shared_drive_url <- NULL
+  if (!RCurl::url.exists(url)) {  ## ping website and use gdrive if not available
+    if (requireNamespace("googledrive", quietly = TRUE)) {
+      driveFolder <- paste0("kNNForestAttributes_", year)
+      shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
+      # url <- googledrive::with_drive_quiet(
+      #   googledrive::drive_link(
+      #     googledrive::drive_ls(
+      #       driveFolder,
+      #       shared_drive = googledrive::as_id(shared_drive_url)
+      #     )
+      #   )
+      # )
+
+      driveDT <- as.data.table(googledrive::drive_ls(googledrive::as_id(shared_drive_url)))
+      url <- googledrive::with_drive_quiet(
+        googledrive::drive_link(driveDT[name == driveFolder, id])
+      )
+    }
+  }
 
   loadkNNSpeciesLayers(
     dPath = destinationPath,
@@ -216,6 +249,8 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
     sppEquivCol = sppEquivCol,
     thresh = thresh,
     url = url,
+    year = year,
+    shared_drive_url = shared_drive_url,
     userTags = c("speciesLayers", "KNN")
   )
 }
@@ -228,7 +263,7 @@ prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
                                      sppEquiv,
                                      sppEquivCol, ...) {
   if (is.null(url))
-    url <- "https://drive.google.com/file/d/1y0ofr2H0c_IEMIpx19xf3_VTBheY0C9h/view?usp=sharing"
+    url <- "https://drive.google.com/file/d/1y0ofr2H0c_IEMIpx19xf3_VTBheY0C9h"
 
   CASFRItiffFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs.tif"))
   CASFRIattrFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs_attributes3.csv"))
@@ -284,7 +319,7 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
                                       sppEquiv,
                                       sppEquivCol, ...) {
   if (is.null(url))
-    url <- "https://drive.google.com/open?id=1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
+    url <- "https://drive.google.com/file/d/1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
 
   speciesLayers <- Cache(prepInputs,
                          targetFile = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.dat"),
@@ -308,8 +343,9 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
 }
 
 #' @export
+#' @importFrom data.table data.table rbindlist
 #' @importFrom map mapAdd maps
-#' @importFrom raster maxValue minValue stack unstack
+#' @importFrom raster crop extend maxValue minValue origin origin<- stack unstack
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
                                               url = NULL,
@@ -337,10 +373,50 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   ml <- mapAdd(studyArea, map = ml, isStudyArea = TRUE, layerName = "studyArea",
                useSAcrs = TRUE, filename2 = NULL)
 
-  ml <- mapAdd(map = ml, url = url, layerName = CClayerNames, CC = TRUE,
+  ## TODO: avoid this workaround for stack not liking rasters with different origns and extents
+  lr <- lapply(CClayerNamesFiles, prepInputs, url = url, alsoExtract = "similar",
+               destinationPath = destinationPath, fun = "raster::raster")
+  le <- lapply(lr, extent)
+  dts <- lapply(lr, function(r) {
+    e <- extent(r)
+    data.table(xmin = e[1], xmax = e[2], ymin = e[3], ymax = e[4])
+  })
+  dt <- rbindlist(dts)
+  new_ext <- extent(max(dt$xmin), min(dt$xmax), max(dt$ymin), min(dt$ymax))
+  lr2 <- lapply(lr, `origin<-`, value = origin(lr[[1]]))
+  lr3 <- lapply(lr2, function(r) {
+    crop(r, y = new_ext, filename = tempfile())
+  })
+  lr4 <- lapply(lr3, function(r) {
+    extend(r, y = new_ext, filename = tempfile())
+  })
+  ## stack(lr4) ## confirm it works
+
+  ## loop/apply doesn't work here???
+  ml <- mapAdd(lr4[[1]], map = ml, layerName = CClayerNames[1], CC = TRUE,
                destinationPath = destinationPath,
-               targetFile = CClayerNamesFiles, filename2 = NULL,
-               alsoExtract = "similar", leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[2]], map = ml, layerName = CClayerNames[2], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[3]], map = ml, layerName = CClayerNames[3], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[4]], map = ml, layerName = CClayerNames[4], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[5]], map = ml, layerName = CClayerNames[5], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[6]], map = ml, layerName = CClayerNames[6], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ## END WORKAROUND
+
+  # ml <- mapAdd(map = ml, url = url, layerName = CClayerNames, CC = TRUE,
+  #              destinationPath = destinationPath,
+  #              targetFile = CClayerNamesFiles, filename2 = NULL,
+  #              alsoExtract = "similar", leaflet = FALSE, method = "ngb") ## TODO: fix error due to different extent
 
   ccs <- ml@metadata[CC == TRUE & !(layerName == "LandType"), ]
   CCs <- maps(ml, layerName = ccs$layerName)
@@ -350,8 +426,6 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   if (!all(raster::minValue(CCstack) >= 0)) stop("problem with minValue of CCstack (< 0)")
   if (!all(raster::maxValue(CCstack) <= 10)) stop("problem with maxValue of CCstack (> 10)")
 
-  CCstack[CCstack[] < 0] <- 0  ## turns stack into brick, so need to restack later
-  CCstack[CCstack[] > 10] <- 10
   CCstack <- CCstack * 10 # convert back to percent
   NA_ids <- which(is.na(ml$LandType[]) |  # outside of studyArea polygon
                     ml$LandType[] == 1)   # 1 is cities -- NA it here -- will be filled in with another veg layer if available (e.g. Pickell)
@@ -467,33 +541,30 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   stack(CCstack) ## ensure it's still a stack
 }
 
+#' @param destinationPath path to data directory
+#' @param outputPath path to output directory
 #' @export
-#' @rdname prepSpeciesLayers
-prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath,
-                                      url = NULL,
-                                      studyArea, rasterToMatch,
-                                      sppEquiv,
-                                      sppEquivCol,
-                                      thresh = 10, ...) {
-  dots <- list(...)
+#' @rdname LandR-deprecated
+prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, studyArea,
+                                      rasterToMatch, sppEquiv, sppEquivCol, thresh = 10, ...) {
+  .Deprecated("loadkNNSpeciesLayers",
+              msg = paste("prepSpeciesLayers_KNN2011 is deprecated.",
+                          "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers."))
 
-  if (is.null(url))
-    url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                  "canada-forests-attributes_attributs-forests-canada/2011-",
-                  "attributes_attributs-2011/")
-
-  loadkNNSpeciesLayersValidation(
+  loadkNNSpeciesLayers(
     dPath = destinationPath,
-    knnNamesCol = "KNN",
-    outputPath = outputPath,
     rasterToMatch = rasterToMatch,
     studyArea = studyArea,
-    studyAreaName = dots$studyAreaName,
     sppEquiv = sppEquiv,
+    year = 2011,
+    knnNamesCol = "KNN",
     sppEquivCol = sppEquivCol,
     thresh = thresh,
     url = url,
-    userTags = c("speciesLayers", "KNN")
+    ## dots start here:
+    outputPath = outputPath,
+    userTags = c("speciesLayers", "KNN"),
+    ...
   )
 }
 

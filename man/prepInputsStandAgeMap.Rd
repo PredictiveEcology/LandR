@@ -13,7 +13,8 @@ prepInputsStandAgeMap(
   datatype = "INT2U",
   destinationPath = NULL,
   filename2 = NULL,
-  fireURL = NULL,
+  fireURL = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/",
+    "fire_poly/current_version/NFDB_poly.zip"),
   fireFun = "sf::st_read",
   rasterToMatch = NULL,
   fireField = "YEAR",
@@ -37,7 +38,7 @@ prepInputsStandAgeMap(
 
 \item{filename2}{passed to \code{prepInputs} of stand age map}
 
-\item{fireURL}{url to download fire polygons used to update age map}
+\item{fireURL}{url to download fire polygons used to update age map. If NULL or NA age imputation is bypassed.}
 
 \item{fireFun}{passed to \code{prepInputs} of fire data}
 
@@ -49,7 +50,8 @@ raster operations (i.e., the one used throughout the simulation).}
 \item{startTime}{date of first fire year.}
 }
 \value{
-a stand age map corrected for fires
+a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
+ for which ages were corrected. If no corrections were applied the attribute vector is \code{integer(0)}.
 }
 \description{
 Create the \code{standAgeMap} raster containing age estimates for \code{pixelCohortData}.

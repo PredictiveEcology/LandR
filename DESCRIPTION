@@ -8,10 +8,10 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2021-07-15
-Version: 1.0.4.9024
+Date: 2022-02-28
+Version: 1.0.7.9007
 Authors@R: c(
-    person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
+    person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
     person("Alex M", "Chubaty", email = "achubaty@for-cast.ca",
     role = c("aut"), comment = c(ORCID = "0000-0001-7146-8135")),
@@ -19,13 +19,12 @@ Authors@R: c(
     role = "cph")
     )
 Depends:
-    R (>= 3.6)
+    R (>= 4.0)
 Imports:
     crayon,
     data.table,
     fasterize,
     fpCompare,
-    gdalUtils,
     ggplot2,
     ggpubr,
     ggspatial,
@@ -41,25 +40,29 @@ Imports:
     quickPlot,
     raster,
     RColorBrewer,
-    RCurl,
-    reproducible (>= 1.2.6.9003),
+    reproducible (>= 1.2.8.9040),
     sf,
     sp,
     SpaDES.tools (>= 0.3.1.9000),
     stats,
     tools,
-    utils,
-    XML
+    utils
 Suggests:
     BioSIM,
     covr,
-    googledrive,
+    gdalUtilities,
+    googledrive (>= 2.0.0),
     knitr,
+    qs,
     RandomFields,
+    rasterVis,
+    RCurl,
     roxygen2,
     rmarkdown,
     spelling,
-    testthat
+    terra,
+    testthat,
+    XML
 Remotes:
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
@@ -72,7 +75,7 @@ VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Collate: 
     'LANDIS-II-tables.R'
     'LandR-package.R'
@@ -82,6 +85,7 @@ Collate:
     'cleanLandWebStudyArea.R'
     'cluster.R'
     'cohorts.R'
+    'convertUnwantedLCC2.R'
     'dem.R'
     'ecoregions.R'
     'fireSeverity.R'
@@ -92,13 +96,16 @@ Collate:
     'nullClimate.R'
     'overlayLCCs.R'
     'partitionBiomass.R'
+    'plot_summaries.R'
     'plotting.R'
     'prepEcoregions.R'
     'prepInputObjects.R'
     'prepSpeciesLayers.R'
     'seedDispersalLANDIS.R'
     'serotiny-resprouting.R'
+    'speciesPresentFromKNN.R'
     'speciesTable.R'
     'sppEquivalencies_CA.R'
     'studyArea.R'
+    'wildfire.R'
     'zzz.R'

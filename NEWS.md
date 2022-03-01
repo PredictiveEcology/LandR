@@ -1,10 +1,46 @@
 bug reports https://github.com/PredictiveEcology/LandR/issues
 
+version 1.0.7.9000
+=============
+* New function: `clusterSetup`. This is a high level wrapper around `future::makeClusterPSOCK` and various other `parallel` functions to correctly and efficiently setup a PSOCK cluster on a set of remote machines that are connected via `ssh` with ssh keys.
+* drop support for R 3.6
+* update Eliot's email address
+* new functions: `speciesInStudyArea` and `species
+* remove undeclared dependency package `Require`
+
+version 1.0.7
+=============
+* Several changes to accommodate the tracking and optional removal of pixels
+data suffered data imputation in `Biomass_borealDataPrep`
+* `assertColumns` gives better message for which columns are incorrect/missing
+* `minRelativeBDefaults` is now a function so they are more easily accessible 
+* `statsModel` was pulling along with it all the data, 5x. Now it does not. The Caching of this should be fast and small now.
+ 
 version 1.0.5
 =============
+* Support for refitting `modelBiomass` (see `Biomass_boreaDataPrep`) with scaled data or different optimizer
+* Changes to `loadkNNSpeciesLayers` and `prepSpeciesLayers_KNN` prevent issues when default URL is down, or working offline (but layers are present locally)
+* Several changes to accommodate LCC2010
+* New columns to `sppEquivalenciesCA` (`PSP`, `BC_Forestry` and `FuelClass`)
+* Lowered values of dummy `rawBiomassMap`
+* passing `fireURL = NULL` to `prepStandAgeMap()` bypasses age imputation
 
-## Enhancements
-* New function: `clusterSetup`. This is a high level wrapper around `future::makeClusterPSOCK` and various other `parallel` functions to correctly and efficiently setup a PSOCK cluster on a set of remote machines that are connected via `ssh` with ssh keys.
+version 1.0.4
+=============
+* New assertion for validation data
+* New function `sppEquivCheck`
+* `loadKNNSpeciesLayers` can accept a `sppEquiv` table with one column
+* Improved documentation for `speciesEquivalencies_CA` data
+
+version 1.0.3
+=============
+* new function to calculate fire severity as biomass loss
+* bug fixes and improvements to to `speciesTableUpdate`
+
+version 1.0.2
+=============
+* Fixes and further speed improvements to seed dispersal functions and general code cleaning
+
 
 version 1.0.1
 =============
@@ -34,7 +70,6 @@ version 0.0.3
 
 version 0.0.2
 =============
-
 * Bug fixes in imports (DESCRIPTION)
 * new function `overlayLCCs` which will help with overlaying more than one land cover classification raster.
 * major revisions to `convertUnwantedLCC` to accommodate more cases and eliminate redundant arguments.

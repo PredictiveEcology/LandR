@@ -6,7 +6,6 @@
 \alias{prepSpeciesLayers_Pickell}
 \alias{prepSpeciesLayers_ForestInventory}
 \alias{prepSpeciesLayers_ONFRI}
-\alias{prepSpeciesLayers_KNN2011}
 \title{Prepare species layers}
 \usage{
 prepSpeciesLayers_KNN(
@@ -62,18 +61,6 @@ prepSpeciesLayers_ONFRI(
   rasterToMatch,
   sppEquiv,
   sppEquivCol,
-  ...
-)
-
-prepSpeciesLayers_KNN2011(
-  destinationPath,
-  outputPath,
-  url = NULL,
-  studyArea,
-  rasterToMatch,
-  sppEquiv,
-  sppEquivCol,
-  thresh = 10,
   ...
 )
 }

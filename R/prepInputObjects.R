@@ -36,7 +36,7 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' Make \code{pixelTable} from biomass, age, land-cover and species cover data
 #'
 #' @param speciesLayers stack of species layers rasters
-#' @param standAgeMap raster of stand age
+#' @template standAgeMap
 #' @param ecoregionFiles A list with two objects: the \code{ecoregionMap} and a table summarizing
 #'   its information per \code{pixelID.} See \code{ecoregionProducer}.
 #' @param biomassMap raster of total stand biomass
@@ -155,10 +155,6 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
 #' @param modelBiomass statistical model of species biomass
 #' @param successionTimestep The time between successive seed dispersal events.
 #' @param currentYear \code{time(sim)}
-#' @param needRescaleModelB logical. indicates whether logAge and cover were scaled
-#'     prior to fitting \code{modelBiomass}. if TRUE, \code{scaledVarsModelB} needs to be supplied
-#' @param scaledVarsModelB a list with the scaled versions of \code{cover} and \code{logAge},
-#'     each obtained with \code{scale}
 #'
 #' @section \code{establishprob}:
 #' This section takes the cover as estimated from the mature tree cover and
@@ -183,18 +179,13 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
 #' @export
 #' @importFrom data.table rbindlist
 makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataShortNoCover,
-                                 species, modelCover, modelBiomass, successionTimestep, currentYear,
-                                 needRescaleModelB = FALSE, scaledVarsModelB = NULL) {
-  if (needRescaleModelB) {
-    if (is.null(scaledVarsModelB))
-      stop("needRescaleModelB is TRUE, but scaledVarsModelB is NULL.
-           Please supply list(cover = ..., logAge =...) with the scaled versions of these two variables")
-    if (class(scaledVarsModelB) != "list")
-      stop("scaledVarsModelB must be a list")
+                                 species, modelCover, modelBiomass, successionTimestep, currentYear) {
+  if (!is.null(modelBiomass$scaledVarsModelB)) {
+    if (!is(modelBiomass$scaledVarsModelB, "list"))
+      stop("modelBiomass$scaledVarsModelB must be a list")
 
-    if (!all(names(scaledVarsModelB) %in% c("cover", "logAge")))
-      stop("scaledVarsModelB must be a list with 'cover' and 'logAge' entries")
-
+    if (!all(names(modelBiomass$scaledVarsModelB) %in% c("cover", "logAge")))
+      stop("modelBiomass$scaledVarsModelB must be a list with 'cover' and 'logAge' entries")
   }
 
   ## Create speciesEcoregion table
@@ -210,8 +201,7 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
   predictedCoverVals <- if (is(modelCover, "numeric")) {
     modelCover
   } else {
-    predict(modelCover$mod, newdata = cohortDataShort,
-            type = "response")
+    predict(modelCover$mod, newdata = cohortDataShort, type = "response")
   }
   establishprobBySuccessionTimestep <- 1 - (1 - predictedCoverVals)^successionTimestep
   cohortDataShort[, establishprob := establishprobBySuccessionTimestep]
@@ -235,14 +225,14 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
   speciesEcoregion[, `:=`(logAge = .logFloor(longevity), cover = 100)]
 
   ## rescale if need be (modelBiomass may have been fitted on scaled variables)
-  if (needRescaleModelB) {
+  if (!is.null(modelBiomass$scaledVarsModelB)) {
     speciesEcoregion2 <- copy(speciesEcoregion)
     speciesEcoregion2[, `:=`(logAge = scale(logAge,
-                                            center = attr(scaledVarsModelB$logAge, "scaled:center"),
-                                            scale = attr(scaledVarsModelB$logAge, "scaled:scale")),
+                                            center = attr(modelBiomass$scaledVarsModelB$logAge, "scaled:center"),
+                                            scale = attr(modelBiomass$scaledVarsModelB$logAge, "scaled:scale")),
                              cover = scale(cover,
-                                           center = attr(scaledVarsModelB$cover, "scaled:center"),
-                                           scale = attr(scaledVarsModelB$cover, "scaled:scale")))]
+                                           center = attr(modelBiomass$scaledVarsModelB$cover, "scaled:center"),
+                                           scale = attr(modelBiomass$scaledVarsModelB$cover, "scaled:scale")))]
     speciesEcoregion2[ , maxB := asInteger(predict(modelBiomass$mod,
                                                    newdata = speciesEcoregion2,
                                                    type = "response"))]
@@ -314,14 +304,25 @@ makeMinRelativeB <- function(pixelCohortData) {
   ##
   ## Adjusted values for western forests:
   minRelativeB <- data.frame(ecoregionGroup = as.factor(levels(pixelData$ecoregionGroup)),
-                             X1 = 0.15, ## 0.2
-                             X2 = 0.25, ## 0.4
-                             X3 = 0.50, ## 0.5
-                             X4 = 0.75, ## 0.7
-                             X5 = 0.85) ## 0.9
+                             minRelativeBDefaults()
+                             # X1 = 0.15, ## 0.2
+                             # X2 = 0.25, ## 0.4
+                             # X3 = 0.50, ## 0.5
+                             # X4 = 0.75, ## 0.7
+                             # X5 = 0.85
+                             ) ## 0.9
 
   return(minRelativeB)
 }
+
+#' minRelativeB defaults for Western Boreal Forest Canada
+#'
+#' @export
+minRelativeBDefaults <- function() data.frame(X1 = 0.15, ## 0.2
+                                              X2 = 0.25, ## 0.4
+                                              X3 = 0.50, ## 0.5
+                                              X4 = 0.75, ## 0.7
+                                              X5 = 0.85)
 
 #' Create \code{makePixelGroupMap}
 #'
@@ -361,15 +362,15 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @param datatype passed to \code{prepInputs} of stand age map
 #' @param destinationPath directory where  age and fire data will be downloaded
 #' @param filename2 passed to \code{prepInputs} of stand age map
-#' @param fireURL url to download fire polygons used to update age map
+#' @param fireURL url to download fire polygons used to update age map. If NULL or NA age imputation is bypassed.
 #' @param fireFun passed to \code{prepInputs} of fire data
 #' @template rasterToMatch
 #' @param fireField field used to rasterize fire polys
 #' @param startTime date of first fire year.
-#' @return a stand age map corrected for fires
+#' @return a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
+#'  for which ages were corrected. If no corrections were applied the attribute vector is \code{integer(0)}.
 #'
 #' @export
-#' @importFrom httr with_config
 #' @importFrom raster crs
 #' @importFrom reproducible Cache prepInputs
 prepInputsStandAgeMap <- function(..., ageURL = NULL,
@@ -379,7 +380,8 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
                                   datatype = "INT2U",
                                   destinationPath = NULL,
                                   filename2 = NULL,
-                                  fireURL = NULL,
+                                  fireURL = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/",
+                                                   "fire_poly/current_version/NFDB_poly.zip"),
                                   fireFun = "sf::st_read",
                                   rasterToMatch = NULL, fireField = "YEAR",
                                   startTime) {
@@ -389,14 +391,10 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
                      "2001-attributes_attributs-2001/",
                      "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif")
 
-  if (is.null(fireURL))
-    fireURL <- paste0("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/",
-                      "current_version/NFDB_poly.zip")
 
   if (is.null(rasterToMatch))
     maskWithRTM <- FALSE
 
-  with_config(config = config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
     standAgeMap <- Cache(
       prepInputs, ...,
       maskWithRTM = maskWithRTM,
@@ -408,11 +406,12 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
       fun = ageFun,
       rasterToMatch = rasterToMatch
     )
-  })
   standAgeMap[] <- asInteger(standAgeMap[])
 
+  imputedPixID <- integer(0)
   if (!is.null(rasterToMatch)) {
     if (!(is.null(fireURL) || is.na(fireURL))) {
+      message("No fireURL supplied, so ages NOT adjusted using fire data.")
       fireYear <- Cache(prepInputsFireYear, ...,
                         url = fireURL,
                         fun = fireFun,
@@ -423,12 +422,14 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
         toChange <- !is.na(fireYear[]) & fireYear[] <= asInteger(startTime)
         standAgeMap[] <- asInteger(standAgeMap[])
         standAgeMap[toChange] <- asInteger(startTime) - asInteger(fireYear[][toChange])
+        imputedPixID <- which(toChange)
       }
     }
   } else {
     message("No rasterToMatch supplied, so ages NOT adjusted using fire data.")
   }
-  standAgeMap
+  attr(standAgeMap, "imputedPixID") <- imputedPixID
+  return(standAgeMap)
 }
 
 #' Create a raster of fire polygons
