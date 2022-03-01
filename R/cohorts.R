@@ -40,7 +40,7 @@ utils::globalVariables(c(
 #'   In LANDIS-II, this is called "Succession Timestep". This is used here
 #' @param verbose Integer, where increasing number is increasing verbosity. Currently,
 #'    only level 1 exists; but this may change.
-#'
+#' @param initialB the initial biomass of new cohorts. Defaults to ten.
 #' @template doAssertion
 #'
 #' @return
@@ -58,6 +58,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
                              speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
                              successionTimestep,
                              cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+                             initialB = 10,
                              verbose = getOption("LandR.verbose", TRUE),
                              doAssertion = getOption("LandR.assertions", TRUE)) {
   maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
@@ -168,7 +169,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
                                     pixelGroupMap,
                                     currentTime = currentTime,
                                     speciesEcoregion = speciesEcoregion,
-                                    successionTimestep = successionTimestep
+                                    successionTimestep = successionTimestep,
+                                    initialB = initialB
   )
 
   outs <- rmMissingCohorts(cohortData, pixelGroupMap, cohortDefinitionCols = cohortDefinitionCols)
@@ -234,6 +236,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 #' @template newPixelCohortData
 #' @template cohortData
 #' @template cohortDefinitionCols
+#' @param initialB the initial biomass of new cohorts. Defaults to ten.
 #'
 #' @return A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
 #'
@@ -243,7 +246,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 #' @rdname updateCohortData
 .initiateNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                                 cohortDefinitionCols = c("pixelGroup", "speciesCode", "age"),
-                                speciesEcoregion, successionTimestep) {
+                                speciesEcoregion, successionTimestep, initialB = 10) {
 
   ## get spp "productivity traits" per ecoregion/present year
   ## calculate maximum B per ecoregion, join to new cohort data
@@ -299,12 +302,14 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
   if ("B" %in% names(newPixelCohortData)) {
     newPixelCohortData[, B := NULL]
   }
-  set(
-    newPixelCohortData, NULL, "B",
-    asInteger(pmax(1, newPixelCohortData$maxANPP *
-                     exp(-1.6 * newPixelCohortData$sumB / newPixelCohortData$maxB_eco)))
-  )
-  set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
+  # set(
+  #   newPixelCohortData, NULL, "B",
+  #   asInteger(pmax(1, newPixelCohortData$maxANPP *
+  #                    exp(-1.6 * newPixelCohortData$sumB / newPixelCohortData$maxB_eco)))
+  # )
+  # set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
+  set(newPixelCohortData, NULL, "B", asInteger(initialB)) #Feb2022 change to 1 - maxANPP is unrealistic particularly with
+  # high maxANPP needed to produce realistic growth curves
 
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
                                                mortality = 0L, aNPPAct = 0L

@@ -155,10 +155,6 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
 #' @param modelBiomass statistical model of species biomass
 #' @param successionTimestep The time between successive seed dispersal events.
 #' @param currentYear \code{time(sim)}
-#' @param needRescaleModelB logical. indicates whether logAge and cover were scaled
-#'     prior to fitting \code{modelBiomass}. if TRUE, \code{scaledVarsModelB} needs to be supplied
-#' @param scaledVarsModelB a list with the scaled versions of \code{cover} and \code{logAge},
-#'     each obtained with \code{scale}
 #'
 #' @section \code{establishprob}:
 #' This section takes the cover as estimated from the mature tree cover and
@@ -183,18 +179,13 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
 #' @export
 #' @importFrom data.table rbindlist
 makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataShortNoCover,
-                                 species, modelCover, modelBiomass, successionTimestep, currentYear,
-                                 needRescaleModelB = FALSE, scaledVarsModelB = NULL) {
-  if (needRescaleModelB) {
-    if (is.null(scaledVarsModelB))
-      stop("needRescaleModelB is TRUE, but scaledVarsModelB is NULL.
-           Please supply list(cover = ..., logAge =...) with the scaled versions of these two variables")
-    if (class(scaledVarsModelB) != "list")
-      stop("scaledVarsModelB must be a list")
+                                 species, modelCover, modelBiomass, successionTimestep, currentYear) {
+  if (!is.null(modelBiomass$scaledVarsModelB)) {
+    if (!is(modelBiomass$scaledVarsModelB, "list"))
+      stop("modelBiomass$scaledVarsModelB must be a list")
 
-    if (!all(names(scaledVarsModelB) %in% c("cover", "logAge")))
-      stop("scaledVarsModelB must be a list with 'cover' and 'logAge' entries")
-
+    if (!all(names(modelBiomass$scaledVarsModelB) %in% c("cover", "logAge")))
+      stop("modelBiomass$scaledVarsModelB must be a list with 'cover' and 'logAge' entries")
   }
 
   ## Create speciesEcoregion table
@@ -210,8 +201,7 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
   predictedCoverVals <- if (is(modelCover, "numeric")) {
     modelCover
   } else {
-    predict(modelCover$mod, newdata = cohortDataShort,
-            type = "response")
+    predict(modelCover$mod, newdata = cohortDataShort, type = "response")
   }
   establishprobBySuccessionTimestep <- 1 - (1 - predictedCoverVals)^successionTimestep
   cohortDataShort[, establishprob := establishprobBySuccessionTimestep]
@@ -235,14 +225,14 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
   speciesEcoregion[, `:=`(logAge = .logFloor(longevity), cover = 100)]
 
   ## rescale if need be (modelBiomass may have been fitted on scaled variables)
-  if (needRescaleModelB) {
+  if (!is.null(modelBiomass$scaledVarsModelB)) {
     speciesEcoregion2 <- copy(speciesEcoregion)
     speciesEcoregion2[, `:=`(logAge = scale(logAge,
-                                            center = attr(scaledVarsModelB$logAge, "scaled:center"),
-                                            scale = attr(scaledVarsModelB$logAge, "scaled:scale")),
+                                            center = attr(modelBiomass$scaledVarsModelB$logAge, "scaled:center"),
+                                            scale = attr(modelBiomass$scaledVarsModelB$logAge, "scaled:scale")),
                              cover = scale(cover,
-                                           center = attr(scaledVarsModelB$cover, "scaled:center"),
-                                           scale = attr(scaledVarsModelB$cover, "scaled:scale")))]
+                                           center = attr(modelBiomass$scaledVarsModelB$cover, "scaled:center"),
+                                           scale = attr(modelBiomass$scaledVarsModelB$cover, "scaled:scale")))]
     speciesEcoregion2[ , maxB := asInteger(predict(modelBiomass$mod,
                                                    newdata = speciesEcoregion2,
                                                    type = "response"))]
