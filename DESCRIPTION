@@ -39,7 +39,7 @@ Imports:
     quickPlot,
     raster,
     RColorBrewer,
-    reproducible (>= 1.2.7),
+    reproducible (>= 1.2.8.9040),
     sf,
     sp,
     SpaDES.tools (>= 0.3.1.9000),
