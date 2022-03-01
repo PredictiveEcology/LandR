@@ -2,6 +2,7 @@ bug reports https://github.com/PredictiveEcology/LandR/issues
 
 version 1.0.7.9000
 =============
+* New function: `clusterSetup`. This is a high level wrapper around `future::makeClusterPSOCK` and various other `parallel` functions to correctly and efficiently setup a PSOCK cluster on a set of remote machines that are connected via `ssh` with ssh keys.
 * drop support for R 3.6
 * update Eliot's email address
 * new functions: `speciesInStudyArea` and `species
@@ -39,6 +40,7 @@ version 1.0.3
 version 1.0.2
 =============
 * Fixes and further speed improvements to seed dispersal functions and general code cleaning
+
 
 version 1.0.1
 =============

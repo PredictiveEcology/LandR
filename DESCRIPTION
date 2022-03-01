@@ -35,6 +35,7 @@ Imports:
     map,
     methods,
     MuMIn (>= 1.42.5),
+    parallelly,
     pemisc,
     quickPlot,
     raster,
@@ -82,6 +83,7 @@ Collate:
     'biosim.R'
     'chooseName.R'
     'cleanLandWebStudyArea.R'
+    'cluster.R'
     'cohorts.R'
     'convertUnwantedLCC2.R'
     'dem.R'

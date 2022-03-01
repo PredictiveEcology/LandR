@@ -32,3 +32,5 @@ rsconnect/
 inputs/
 J4RTmpFile
 .secret
+
+.secret/
