@@ -9,7 +9,7 @@
 #'   in a pixel to be considered present in that pixel.
 #' @rdname speciesPresent
 #' @return
-#' A terra rast object with 2 layers, "speciesPresent" is a factor, with
+#' A terra rast object with 2 layers, "speciesPresent" is a factor rast, with
 #' a legend (i.e., it is numbers on a map, that correspond to a legend) and
 #' "numberSpecies" which represents the number of species in each pixel.
 #' @examples
@@ -26,10 +26,10 @@
 #' }
 #'
 #' # Get species list
-#' sa <- LandR::randomStudyArea(size = 5e9)
+#' sa <- LandR::randomStudyArea(size = 1e11)
 #' species <- LandR::speciesInStudyArea(sa)
+#'
 speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, minPctCover = 10) {
-  ll <- terra::rast(loadkNNSpeciesLayers(dPath))
   studyAreaED <- Cache(prepInputs, url =  "https://sis.agr.gc.ca/cansis/nsdb/ecostrat/district/ecodistrict_shp.zip",
                        destinationPath = dPath, #fun = quote(SA_ERIntersect(x = targetFilePath, studyArea)),
                        overwrite = FALSE)
@@ -40,24 +40,17 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
   on.exit(opts)
   studyAreaER <- Cache(prepInputs, url =  "https://sis.agr.gc.ca/cansis/nsdb/ecostrat/region/ecodistrict_shp.zip",
                        destinationPath = dPath, fun = "terra::vect",
-                       # fun = quote(SA_ERIntersect(x = targetFilePath, bf)),
-                       #maskTo = bf,
-                       #bf = bf,
                        overwrite = TRUE)
   sa <- reproducible:::maskTo(studyAreaER, bf)
+  sa <- reproducible:::projectTo(sa, sf::st_crs(bf))
 
-  # terra objs don't digest correctly yet
-  digs <- lapply(terra::sources(ll), reproducible::.robustDigest)
-  llCoarse <- Cache(terra::aggregate, ll, res/250, omitArgs = "x", .cacheExtra = digs)
+  allForestedStk <- Cache(loadAndAggregateKNN, dPath, res, sa)
+  allForestedStk <- round(allForestedStk, 0)
+  allForestedStk[allForestedStk <= minPctCover] <- 0
 
-  llForest2 <- Cache(postProcessTerra, from = llCoarse, to = sa, destinationPath = dPath,
-                    overwrite = TRUE)
-  llForest2 <- round(llForest2, 0)
-  llForest2[llForest2 <= minPctCover] <- 0
+  numSp <- sum(allForestedStk > 0)
 
-  numSp <- sum(llForest2 > 0)
-
-  mat <- terra::values(llForest2)
+  mat <- terra::values(allForestedStk)
   dt <- as.data.table(mat)
   dt[, pixel := 1:.N]
   dt2 <- melt(dt, measure.vars = setdiff(colnames(dt), "pixel"), na.rm = TRUE,
@@ -67,10 +60,13 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
   dt3 <- dt2[, list(allPres = paste(variable, collapse = "__")), by = "pixel"]
   dt3[, allPresFac := factor(allPres)]
 
-  speciesPres <- terra::rast(llForest2[[1]])
+  # Create a new empty rast
+  speciesPres <- terra::rast(allForestedStk[[1]])
+  # fill it with the integer values
   speciesPres[dt3$pixel] <- as.integer(dt3$allPresFac)
   names <- unique(dt3$allPresFac)
   numerics <- as.integer(names)
+  # assign the levels
   levels(speciesPres) <- data.frame(ID = numerics, spGroup = names)
 
   return(c(speciesPres, numSp))
@@ -84,6 +80,10 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 #' from \code{speciesPresentFromKNN}.
 #'
 #' @rdname speciesPresent
+#' @return
+#' A named list of length 2: \code{speciesRas} is a factor \code{RasterLayer}
+#' and \code{speciesList} is a character string containing the unique, sorted
+#' species on the \code{speciesRas}, for convenience.
 #' @export
 #' @param studyArea a vector map (e.g., SpatialPolygonsDataFrame)
 #' @param url A url to get a speciesPresence raster e.g., from \code{peciesPresentFromKNN}
@@ -128,3 +128,8 @@ SA_ERIntersect <- function(x, studyArea) {
 }
 
 
+loadAndAggregateKNN <- function(dPath, res, sa) {
+  ll <- terra::rast(loadkNNSpeciesLayers(dPath))
+  llCoarse <- terra::aggregate(ll, res/250)
+  postProcessTerra(from = llCoarse, to = sa, method = "near")
+}

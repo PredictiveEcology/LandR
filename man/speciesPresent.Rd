@@ -33,9 +33,13 @@ species names, separated by 2 underscores, sorted alphabetically. Can be produce
 with \code{speciesPresentFromKNN}}
 }
 \value{
-A terra rast object with 2 layers, "speciesPresent" is a factor, with
+A terra rast object with 2 layers, "speciesPresent" is a factor rast, with
 a legend (i.e., it is numbers on a map, that correspond to a legend) and
 "numberSpecies" which represents the number of species in each pixel.
+
+A named list of length 2: \code{speciesRas} is a factor \code{RasterLayer}
+and \code{speciesList} is a character string containing the unique, sorted
+species on the \code{speciesRas}, for convenience.
 }
 \description{
 This will download all KNN layers in (Boreal) Forest of Canada, and make
@@ -60,6 +64,7 @@ speciesPresent <- speciesPresentFromKNN("~/data/KNN")
 }
 
 # Get species list
-sa <- LandR::randomStudyArea(size = 5e9)
+sa <- LandR::randomStudyArea(size = 1e11)
 species <- LandR::speciesInStudyArea(sa)
+
 }
