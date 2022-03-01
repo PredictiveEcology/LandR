@@ -65,7 +65,7 @@ Suggests:
 Remotes:
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
-    PredictiveEcology/reproducible@terraInProjectInputs,
+    PredictiveEcology/reproducible@development,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
 Language: en-CA
