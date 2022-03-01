@@ -5,6 +5,7 @@ version 1.0.7.9000
 * drop support for R 3.6
 * update Eliot's email address
 * remove undeclared dependency package `Require`
+* age imputation in `makeAndCleanInitialCohortData` can now be turned off.
 
 version 1.0.7
 =============
