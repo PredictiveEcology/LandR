@@ -101,6 +101,7 @@ Collate:
     'prepSpeciesLayers.R'
     'seedDispersalLANDIS.R'
     'serotiny-resprouting.R'
+    'speciesPresentFromKNN.R'
     'speciesTable.R'
     'sppEquivalencies_CA.R'
     'studyArea.R'
