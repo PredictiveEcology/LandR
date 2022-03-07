@@ -21,8 +21,10 @@
 #'   speciesPresentRas <- raster::stack(speciesPresent)[[1]]
 #'   fn <- "SpeciesPresentInCanadianForests.tif"
 #'   writeRaster(speciesPresentRas, file = fn)
-#'   out <- googledrive::drive_put(fn)
-#'   driveID <- "1GrV5LjXS_N4iMwGYfBjUZ4elT2DkuKyJ"
+#'   zipFn <- gsub(".tif", ".zip", fn)
+#'   zip(files = dir(pattern = fn), zipFn)
+#'   out <- googledrive::drive_put(zipFn)
+#'   driveID <- "1Oj78jJBeha5L6XDBBdWDAfimgNjYc9UD"
 #' }
 #'
 #' # Get species list
@@ -94,7 +96,7 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL) {
   if (is.null(speciesPresentRas)) {
     if (is.null(url))
-      url <- "https://drive.google.com/file/d/1GrV5LjXS_N4iMwGYfBjUZ4elT2DkuKyJ"
+      url <- "https://drive.google.com/file/d/1Oj78jJBeha5L6XDBBdWDAfimgNjYc9UD"
     speciesPres <- preProcess(url = url)
     speciesPresRas <- raster::raster(speciesPres$targetFilePath)
   }
