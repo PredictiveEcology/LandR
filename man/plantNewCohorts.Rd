@@ -8,6 +8,7 @@ plantNewCohorts(
   newPixelCohortData,
   cohortData,
   pixelGroupMap,
+  initialB = 10,
   currentTime,
   successionTimestep,
   trackPlanting = FALSE
@@ -22,6 +23,8 @@ and \code{sumB}.}
 
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
 number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
+
+\item{initialB}{the initial biomass of new cohorts. Defaults to ten.}
 
 \item{currentTime}{The current simulation time e.g., \code{time(sim)}.}
 

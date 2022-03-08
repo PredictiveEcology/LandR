@@ -1529,6 +1529,7 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 #' @template currentTime
 #' @param successionTimestep succession timestep used in the simulation
 #' @param trackPlanting adds column that tracks planted cohorts if \code{TRUE}
+#' @param initialB the initial biomass of new cohorts. Defaults to ten.
 #'
 #' @return A \code{data.table} with a new \code{cohortData}
 #'
@@ -1536,7 +1537,7 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 #' @importFrom raster getValues
 #' @importFrom stats na.omit
 #' @export
-plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
+plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, initialB = 10,
                             currentTime, successionTimestep, trackPlanting = FALSE) {
   ## get spp "productivity traits" per ecoregion/present year
 
@@ -1559,8 +1560,8 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 
   # Plant trees
   newCohortData[, age := 2]
-  # Give the planted trees 2 * maxANPP - newly regenerating cohorts receive 1x maxANPP. 2x seems overkill
-  newCohortData[, B := asInteger(2 * maxANPP)]
+
+  newCohortData[, B := initialB]
 
   # Here we subset cohortData instead of setting added columns to NULL. However, as these are 'new' cohorts, this is okay
   newCohortData <- newCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B, Provenance,
@@ -1614,6 +1615,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 #' @param provenanceTable A \code{data.table} with three columns:
 #' New cohorts are initiated at the \code{ecoregionGroup} \code{speciesEcoregion} from the
 #' corresponding \code{speciesEcoregion} listed in the \code{Provenance} column
+#' @param initialB the initial biomass of new cohorts. Defaults to ten.
 #' @param trackPlanting if true, planted cohorts in \code{cohortData} are tracked with \code{TRUE}
 #' in column 'planted'
 #'
@@ -1636,7 +1638,9 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap,
 updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                                         speciesEcoregion, treedHarvestPixelTable = NULL,
                                         successionTimestep, provenanceTable, trackPlanting = FALSE,
+                                        initialB = 10,
                                         cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+
                                         verbose = getOption("LandR.verbose", TRUE),
                                         doAssertion = getOption("LandR.assertions", TRUE)) {
   cohortData <- copy(cohortData)
@@ -1710,6 +1714,7 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
                                 pixelGroupMap,
                                 currentTime = currentTime,
                                 successionTimestep = successionTimestep,
+                                initialB = initialB,
                                 trackPlanting = trackPlanting
   )
 
