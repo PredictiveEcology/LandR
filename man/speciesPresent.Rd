@@ -3,7 +3,7 @@
 \name{speciesPresentFromKNN}
 \alias{speciesPresentFromKNN}
 \alias{speciesInStudyArea}
-\title{Make a Species factor raster}
+\title{Make a species factor raster}
 \usage{
 speciesPresentFromKNN(
   year = 2011,
@@ -45,26 +45,27 @@ species on the \code{speciesRas}, for convenience.
 This will download all KNN layers in (Boreal) Forest of Canada, and make
 a factor raster at resolution provided by \code{res} (larger is faster).
 
-\code{speciesInStudyArea} defaults to use a url of a dataset uploaded
-to googledrive that is from
-Canadian Boreal Forests, but a different factor raster can be passed e.g.,
+\code{speciesInStudyArea} defaults to use a url of a dataset uploaded to Google Drive that is
+from Canadian Boreal Forests, but a different factor raster can be passed e.g.,
 from \code{speciesPresentFromKNN}.
 }
 \examples{
-# Make the dataset
-speciesPresent <- speciesPresentFromKNN("~/data/KNN")
-
 \dontrun{
+  # Make the dataset
+  speciesPresent <- speciesPresentFromKNN(dPath = "~/data/KNN")
+
   # To upload this:
   speciesPresentRas <- raster::stack(speciesPresent)[[1]]
   fn <- "SpeciesPresentInCanadianForests.tif"
   writeRaster(speciesPresentRas, file = fn)
-  out <- googledrive::drive_put(fn)
-  driveID <- "1GrV5LjXS_N4iMwGYfBjUZ4elT2DkuKyJ"
-}
+  zipFn <- gsub(".tif", ".zip", fn)
+  zip(files = dir(pattern = fn), zipFn)
+  out <- googledrive::drive_put(zipFn)
+  driveID <- "1Oj78jJBeha5L6XDBBdWDAfimgNjYc9UD"
 
-# Get species list
-sa <- LandR::randomStudyArea(size = 1e11)
-species <- LandR::speciesInStudyArea(sa)
+  # Get species list
+  sa <- LandR::randomStudyArea(size = 1e11)
+  species <- LandR::speciesInStudyArea(sa)
+}
 
 }

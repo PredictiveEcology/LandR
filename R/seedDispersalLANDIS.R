@@ -341,12 +341,11 @@ speciesComm <- function(num, sc) {
 #' @param k A parameter in the kernel
 #' @param b A parameter in the kernel
 #' @param algo Either 1 or 2. 2 is faster and is default. 1 is "simpler code" as it
-#'   uses `ifelse`
+#'   uses `ifelse`.
 #'
 #' @name WardKernel
 #' @rdname WardKernel
 Ward <- function(dist, cellSize, effDist, maxDist, k, b, algo = 2) {
-
   if (length(maxDist) == 1) {
     if (length(dist) != 1)
       maxDist <- rep(maxDist, length(dist))
