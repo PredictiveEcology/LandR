@@ -6,6 +6,7 @@ version 1.0.7.9000
 * update Eliot's email address
 * new functions: `speciesInStudyArea` and `species
 * remove undeclared dependency package `Require`
+* fix bug in `LANDISDisp()`: skip dispersal when src or rcv data.tables are empty
 
 version 1.0.7
 =============
