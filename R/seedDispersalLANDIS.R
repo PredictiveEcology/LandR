@@ -277,7 +277,6 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                          nomatch = NULL]
   setorderv(dtRcvLong, c("pixelIndex", "speciesCode"))
   if (NROW(dtRcvLong)) {
-
     # There can be a case where a pixelGroup exists on map, with a species that is in Rcv but not in Src
     if (anyNA(dtRcvLong[["pixelIndex"]]))
       dtRcvLong <- na.omit(dtRcvLong)
@@ -287,22 +286,17 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
               "; numSrcPixels: ", max(apply(srcPixelMatrix, 2, function(x) sum(!is.na(x)))))
     }
     dtRcvLong <- spiralSeedDispersalR(speciesTable, pixelGroupMap, dtRcvLong,
-                                    srcPixelMatrix, cellSize, k, b, successionTimestep,
-                                    verbose, dispersalFn = dispersalFn)
+                                      srcPixelMatrix, cellSize, k, b, successionTimestep,
+                                      verbose, dispersalFn = dispersalFn)
     if (exists("origLevels", inherits = FALSE)) {
       dtRcvLong[, speciesCode := factor(origLevels[speciesCode], levels = origLevels)]
       if (origClassWasNumeric) {
         set(dtRcvLong, NULL, "speciesCode", as.integer(as.character(dtRcvLong[["speciesCode"]])))
       }
     }
-  } else {
-
   }
   return(dtRcvLong[])
-
-
 }
-
 
 speciesCodeFromCommunity <- function(num) {
   indices <- lapply(strsplit(intToBin2(num), split = ""), function(x) {
@@ -322,8 +316,6 @@ speciesComm <- function(num, sc) {
     sc[.]
 }
 
-
-
 #' Ward Dispersal Kernel -- vectorized, optimized for speed
 #'
 #' A probability distribution used in LANDIS-II.
@@ -341,7 +333,7 @@ speciesComm <- function(num, sc) {
 #' @param k A parameter in the kernel
 #' @param b A parameter in the kernel
 #' @param algo Either 1 or 2. 2 is faster and is default. 1 is "simpler code" as it
-#'   uses `ifelse`.
+#'   uses `ifelse`
 #'
 #' @name WardKernel
 #' @rdname WardKernel
@@ -376,7 +368,6 @@ Ward <- function(dist, cellSize, effDist, maxDist, k, b, algo = 2) {
     exprb2 <- expression(
       (1 - k) * exp((distb2wh - cellSize - effDistb2wh) * log(b) / maxDistb2wh) -
         (1 - k) * exp((distb2wh - effDistb2wh) * log(b) / maxDistb2wh))
-
 
     # Determine the indices for each one
     # Here are the 3 logicals, toplevel, then 2 nested
@@ -445,11 +436,9 @@ intToBin2 <- function(x) {
   y
 }
 
-
 spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
                                  srcPixelMatrix, cellSize, k, b,
                                  successionTimestep, verbose, dispersalFn) {
-
   # # quick test -- just first cell
   # if (missing(useMask))
   #   useMask <- isTRUE(is.na(srcPixelMatrix[1]) | is.na(all(tail(srcPixelMatrix, 1))))
@@ -595,7 +584,6 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
       } else {
         newCurDist <- FALSE
       }
-
     }
 
     needNewCol <- TRUE
@@ -619,8 +607,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     # I tried to get this faster; but the problem is omitting all the
     #   row/col combinations that are "off" raster. cellFromRowCol does this
     #   internally and is fast
-    newPixelIndex <-
-      as.integer(cellFromRowCol(row = row, col = col, object = pixelGroupMap))
+    newPixelIndex <- as.integer(cellFromRowCol(row = row, col = col, object = pixelGroupMap))
 
     # lookup on src rasters
     if (newActiveIndex) {
@@ -753,10 +740,9 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 }
 
 spiralDistances <- function(pixelGroupMap, maxDis, cellSize) {
-  spiral <- which(focalWeight(pixelGroupMap, maxDis, type = "circle")>0, arr.ind = TRUE) -
+  spiral <- which(focalWeight(pixelGroupMap, maxDis, type = "circle") > 0, arr.ind = TRUE) -
     ceiling(maxDis/cellSize) - 1
   spiral <- cbind(spiral, dists = sqrt( (0 - spiral[,1]) ^ 2 + (0 - spiral[, 2]) ^ 2))
   spiral <- spiral[order(spiral[, "dists"], apply(abs(spiral), 1, sum),
                          abs(spiral[, 1]), abs(spiral[, 2])),, drop = FALSE]
 }
-
