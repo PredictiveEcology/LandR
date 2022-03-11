@@ -121,32 +121,35 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
     fmeanLeadingChange_gg <- file.path(outputDir, studyAreaName, "figures",
                                        paste0("leadingChange_", studyAreaName, "_", climateScenario, ".png"))
 
+    fig <- rasterVis::levelplot(
+      meanLeadingChange,
+      sub = list(
+        paste0("Proportional change in leading species\n",
+               " Red: conversion to conifer\n",
+               " Blue: conversion to deciduous."),
+        cex = 2
+      ),
+      margin = FALSE,
+      maxpixels = 7e6,
+      at = AT,
+      colorkey = list(
+        space = "bottom",
+        axis.line = list(col = "black"),
+        width = 0.75
+      ),
+      par.settings = list(
+        strip.border = list(col = "transparent"),
+        strip.background = list(col = "transparent"),
+        axis.line = list(col = "transparent")
+      ),
+      scales = list(draw = FALSE),
+      col.regions = pal,
+      par.strip.text = list(cex = 0.8, lines = 1, col = "black")
+    )
+
     ## levelplot (trellis grahpics more generally) won't plot correctly inside loop w/o print()
-    png(filename = fmeanLeadingChange_gg, width = 1000, height = 1000, res = 300)
-    print({
-      rasterVis::levelplot(
-        meanLeadingChange,
-        sub = paste0("Proportional change in leading species\n",
-                     " Red: conversion to conifer\n",
-                     " Blue: conversion to deciduous."),
-        margin = FALSE,
-        maxpixels = 7e6,
-        at = AT,
-        colorkey = list(
-          space = "bottom",
-          axis.line = list(col = "black"),
-          width = 0.75
-        ),
-        par.settings = list(
-          strip.border = list(col = "transparent"),
-          strip.background = list(col = "transparent"),
-          axis.line = list(col = "transparent")
-        ),
-        scales = list(draw = FALSE),
-        col.regions = pal,
-        par.strip.text = list(cex = 0.8, lines = 1, col = "black")
-      )
-    })
+    png(filename = fmeanLeadingChange_gg, width = 1000, height = 1000)
+    print(fig)
     dev.off()
 
     return(list(fmeanLeadingChange, fmeanLeadingChange_gg))
