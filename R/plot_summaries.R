@@ -103,7 +103,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
 
     fmeanLeadingChange <- file.path(outputDir, studyAreaName,
                                     paste0("leadingChange_", studyAreaName, "_", climateScenario, ".tif"))
-    if (length() > 1) {
+    if (length(allReps) > 1) {
       meanLeadingChange <- raster::calc(raster::stack(allReps), mean, na.rm = TRUE)
     } else {
       meanLeadingChange <- allReps[[1]]
