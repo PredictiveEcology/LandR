@@ -13,7 +13,7 @@
 #' Plot effects on conifer-to-deciduous or deciduous-to-conifer conversions.
 #'
 #' @template summary_plots
-#' @param Nreps TODO
+#' @template Nreps
 #' @param years TODO
 #' @param treeSpecies TODO
 #' @param defineLeading TODO
@@ -26,6 +26,7 @@
 #' @export
 #' @importFrom data.table data.table
 #' @importFrom grDevices dev.off png
+#' @importFrom parallel mclapply
 #' @importFrom raster calc maxValue minValue raster stack setValues writeRaster
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom SpaDES.tools rasterizeReduced
@@ -48,7 +49,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
     # 1. for each rep within a scenario, calculate difference -->
     #    if conifer to decid = 1, if decid to conifer = -1, otherwise 0
     # 2. Create one single map of "proportion net conversion" sum of difference / Nreps
-    allReps <- lapply(1:Nreps, function(rep) {
+    allReps <- parallel::mclapply(1:Nreps, function(rep) {
       runName <- sprintf("%s_%s_run%02d", studyAreaName, climateScenario, rep)
       resultsDir <- file.path(outputDir, runName)
 
@@ -103,7 +104,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
 
     fmeanLeadingChange <- file.path(outputDir, studyAreaName,
                                     paste0("leadingChange_", studyAreaName, "_", climateScenario, ".tif"))
-    if (length() > 1) {
+    if (length(allReps) > 1) {
       meanLeadingChange <- raster::calc(raster::stack(allReps), mean, na.rm = TRUE)
     } else {
       meanLeadingChange <- allReps[[1]]
@@ -117,11 +118,17 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
     pal <- RColorBrewer::brewer.pal(11, "RdYlBu")
     pal[6] <- "#f7f4f2"
 
-    b <- rasterVis::levelplot(
+    fmeanLeadingChange_gg <- file.path(outputDir, studyAreaName, "figures",
+                                       paste0("leadingChange_", studyAreaName, "_", climateScenario, ".png"))
+
+    fig <- rasterVis::levelplot(
       meanLeadingChange,
-      sub = paste0("Proportional change in leading species\n",
-                   " Red: conversion to conifer\n",
-                   " Blue: conversion to deciduous."),
+      sub = list(
+        paste0("Proportional change in leading species\n",
+               " Red: conversion to conifer\n",
+               " Blue: conversion to deciduous."),
+        cex = 2
+      ),
       margin = FALSE,
       maxpixels = 7e6,
       at = AT,
@@ -140,11 +147,9 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
       par.strip.text = list(cex = 0.8, lines = 1, col = "black")
     )
 
-    fmeanLeadingChange_gg <- file.path(outputDir, studyAreaName, "figures",
-                                       paste0("leadingChange_", studyAreaName, "_", climateScenario, ".png"))
-
-    png(filename = fmeanLeadingChange_gg, width = 1000, height = 1000, res = 300)
-    b
+    ## levelplot (trellis grahpics more generally) won't plot correctly inside loop w/o print()
+    png(filename = fmeanLeadingChange_gg, width = 1000, height = 1000)
+    print(fig)
     dev.off()
 
     return(list(fmeanLeadingChange, fmeanLeadingChange_gg))

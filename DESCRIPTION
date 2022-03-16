@@ -8,15 +8,15 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2022-02-28
-Version: 1.0.7.9007
+Date: 2022-03-11
+Version: 1.0.7.9012
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
-    role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
+           role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
     person("Alex M", "Chubaty", email = "achubaty@for-cast.ca",
-    role = c("aut"), comment = c(ORCID = "0000-0001-7146-8135")),
+           role = c("aut"), comment = c(ORCID = "0000-0001-7146-8135")),
     person("Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources Canada",
-    role = "cph")
+           role = "cph")
     )
 Depends:
     R (>= 4.0)
@@ -101,6 +101,7 @@ Collate:
     'prepSpeciesLayers.R'
     'seedDispersalLANDIS.R'
     'serotiny-resprouting.R'
+    'speciesPresentFromKNN.R'
     'speciesTable.R'
     'sppEquivalencies_CA.R'
     'studyArea.R'

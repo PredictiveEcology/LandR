@@ -567,7 +567,10 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #'               to be considered present in the study area.
 #'               Defaults to 10.
 #'
-#' @param url the source url for the data, passed to \code{\link[reproducible]{prepInputs}}
+#' @param url the source url for the data, default is KNN 2011 dataset
+#' \url{paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",}
+#' \url{"canada-forests-attributes_attributs-forests-canada/2011-",}
+#' \url{"attributes_attributs-2011/")}
 #'
 #' @param ... Additional arguments passed to \code{\link[reproducible]{Cache}}
 #'            and \code{\link{equivalentName}}. Also valid: \code{outputPath}, and \code{studyAreaName}.
@@ -580,8 +583,9 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @importFrom reproducible Cache .prefix preProcess basename2
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
-loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year = 2001,
-                                 knnNamesCol = "KNN", sppEquivCol, thresh = 10, url, ...) {
+loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, sppEquiv, year = 2001,
+                                 knnNamesCol = "KNN", sppEquivCol = "Boreal", thresh = 10, url = NULL,
+                                 ...) {
   rcurl <- requireNamespace("RCurl", quietly = TRUE)
   xml <- requireNamespace("XML", quietly = TRUE)
   if (!rcurl || !xml) {
@@ -598,6 +602,11 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
   if ("shared_drive_url" %in% names(dots)) {
     shared_drive_url <- dots[["shared_drive_url"]]
   }
+  if (missing(sppEquiv)) {
+    message("sppEquiv argument is missing, using LandR::sppEquivalencies_CA, with ",
+            sppEquivCol," column (taken from sppEquivCol arg value)")
+    sppEquiv <- sppEquivalencies_CA[get(sppEquivCol) != ""]
+  }
 
   sppEquiv <- sppEquiv[, lapply(.SD, as.character)]
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
@@ -612,6 +621,11 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
   } else {
     cachePath <- getOption("reproducible.cachePath")
   }
+
+  if (is.null(url))
+    url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                  "canada-forests-attributes_attributs-forests-canada/2011-",
+                  "attributes_attributs-2011/")
 
   ## get all online file names
   if (RCurl::url.exists(url)) {   ## ping the website first
@@ -697,7 +711,12 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
 
   ## define suffix to append to file names
   suffix <- if (basename(cachePath) == "cache") {
-    paste0(as.character(ncell(rasterToMatch)), "px")
+    if (is.null(rasterToMatch)) {
+      ""
+    } else {
+      paste0(as.character(ncell(rasterToMatch)), "px")
+    }
+
   } else {
     basename(cachePath)
   }
@@ -799,7 +818,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch, studyArea, sppEquiv, year
 
   ## return stack and updated species names vector
   if (length(speciesLayers)) {
-    stack(speciesLayers)
+    raster::stack(speciesLayers)
   }
 }
 

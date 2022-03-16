@@ -12,8 +12,8 @@
 getWildfire_NFI <- function(dPath, rasterToMatch, url = NULL) {
   if (!requireNamespace("terra", quietly = TRUE)) {
     ## since terra is dependency of raster, it should already be installed, but just in case...
-    stop("Suggested package 'terra' required to process wildfire layers.\n",
-         "Install using `install.packages('terra')`.")
+    stop("Suggested package 'terra' not installed.\n",
+         "Install it using `install.packages('terra')`.")
   }
 
   if (is.null(url)) {

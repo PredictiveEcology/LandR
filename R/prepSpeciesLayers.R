@@ -551,11 +551,6 @@ prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, s
               msg = paste("prepSpeciesLayers_KNN2011 is deprecated.",
                           "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers."))
 
-  if (is.null(url))
-    url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                  "canada-forests-attributes_attributs-forests-canada/2011-",
-                  "attributes_attributs-2011/")
-
   loadkNNSpeciesLayers(
     dPath = destinationPath,
     rasterToMatch = rasterToMatch,
