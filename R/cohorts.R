@@ -1023,6 +1023,11 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
     }
   }
 
+  ## .createCohortData deals with the following inconsistencies:
+  ## 1. Pixels with total cover (across all species) < 5% are removed;
+  ## 2. Pixels with 0 stand age, are assigned 0 stand biomass;
+  ## 3. Pixels with 0 stand biomass, are assigned 0 stand age.
+  ## 4. (after calcualting cohort B and age): if `cover > 0` and `age == 0`, `B` is set to 0
   cohortData <- Cache(.createCohortData,
                       inputDataTable = inputDataTable,
                       # pixelGroupBiomassClass = pixelGroupBiomassClass,
@@ -1038,6 +1043,7 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
   ######################################################
   # Cases:
   #  All species cover = 0 yet totalB > 0
+  # (see other age inconsistencies solved above)
 
   cohortDataMissingAge <- cohortData[
     , hasBadAge :=
