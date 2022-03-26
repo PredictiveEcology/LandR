@@ -23,16 +23,28 @@ utils::globalVariables(c(
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
                             nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
                             mask = NULL, filename2 = NULL) {
-  if (!is.null(mask))
-    if (!is(mask, "Raster")) stop("mask must be a raster layer")
+  if (!is.null(mask)) {
+    if (!is(mask, "Raster")) {
+      stop("mask must be a raster layer")
+    }
+  }
+
   if (!is(LandCoverClassifiedMap, "RasterLayer")) {
     stop("Need a classified land cover map. Currently only accepts 'LCC2005'")
   }
-  if (!is.integer(LandCoverClassifiedMap[]))
+
+  if (!is.integer(LandCoverClassifiedMap[])) {
     stop("LandCoverClassifiedMap must be an integer")
-  if (is.null(nonFlammClasses))
+  }
+
+  if (is.null(nonFlammClasses)) {
     stop("Need nonFlammClasses, which are the classes that cannot burn in",
          "the LandCoverClassifiedMap")
+  }
+
+  if (!is.integer(nonFlammClasses)) {
+    nonFlammClasses <- as.integer(nonFlammClasses)
+  }
 
   oldClass <- minValue(LandCoverClassifiedMap):maxValue(LandCoverClassifiedMap)
   newClass <- ifelse(oldClass %in% nonFlammClasses, 0L, 1L) ## NOTE: 0 codes for NON-flammable
