@@ -1061,70 +1061,70 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
 
   if (NROW(cohortDataMissingAge) > 0) {
     if (!is.null(imputeBadAgeModel)) {
-    cohortDataMissingAgeUnique <- unique(cohortDataMissingAge,
-                                         by = c("initialEcoregionCode", "speciesCode")
-    )[
-      , .(initialEcoregionCode, speciesCode)
-    ]
-    cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[
-      cohortData,
-      on = c("initialEcoregionCode", "speciesCode"), nomatch = 0
-    ]
-    cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[!is.na(cohortDataMissingAgeUnique$age)]
-    cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(
-      totalBiomass, age, speciesCode,
-      initialEcoregionCode, cover
-    )]
-    zeros <- sapply(cohortDataMissingAgeUnique, function(x) sum(x == 0))
-    if (sum(zeros, na.rm = TRUE)) {
-      hasZeros <- zeros[zeros > 0]
-      message(
-        " ", paste(names(hasZeros), collapse = ", "), " had ",
-        paste(hasZeros, collapse = ", "), " zeros, respectively"
+      cohortDataMissingAgeUnique <- unique(cohortDataMissingAge,
+                                           by = c("initialEcoregionCode", "speciesCode")
+      )[
+        , .(initialEcoregionCode, speciesCode)
+      ]
+      cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[
+        cohortData,
+        on = c("initialEcoregionCode", "speciesCode"), nomatch = 0
+      ]
+      cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[!is.na(cohortDataMissingAgeUnique$age)]
+      cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[, .(
+        totalBiomass, age, speciesCode,
+        initialEcoregionCode, cover
+      )]
+      zeros <- sapply(cohortDataMissingAgeUnique, function(x) sum(x == 0))
+      if (sum(zeros, na.rm = TRUE)) {
+        hasZeros <- zeros[zeros > 0]
+        message(
+          " ", paste(names(hasZeros), collapse = ", "), " had ",
+          paste(hasZeros, collapse = ", "), " zeros, respectively"
+        )
+        warning(" These are being removed from the dataset. If this is not desired; please fix.")
+        # terms <- strsplit(gsub(" ", "", as.character(imputeBadAgeModel)), split = "[[:punct:]]+")[[2]][-1] # remove response
+        # terms <- unique(terms)
+        # terms <- terms[terms %in% colnames(cohortDataMissingAgeUnique)]
+        terms <- termsInData(imputeBadAgeModel, cohortDataMissingAgeUnique)
+        lapply(terms, function(x) {
+          cohortDataMissingAgeUnique <<- cohortDataMissingAgeUnique[get(x) != 0]
+        })
+      }
+      cohortDataMissingAgeUnique <- subsetDT(cohortDataMissingAgeUnique,
+                                             by = c("initialEcoregionCode", "speciesCode"),
+                                             doSubset = doSubset
       )
-      warning(" These are being removed from the dataset. If this is not desired; please fix.")
-      # terms <- strsplit(gsub(" ", "", as.character(imputeBadAgeModel)), split = "[[:punct:]]+")[[2]][-1] # remove response
-      # terms <- unique(terms)
-      # terms <- terms[terms %in% colnames(cohortDataMissingAgeUnique)]
-      terms <- termsInData(imputeBadAgeModel, cohortDataMissingAgeUnique)
-      lapply(terms, function(x) {
-        cohortDataMissingAgeUnique <<- cohortDataMissingAgeUnique[get(x) != 0]
-      })
-    }
-    cohortDataMissingAgeUnique <- subsetDT(cohortDataMissingAgeUnique,
-                                           by = c("initialEcoregionCode", "speciesCode"),
-                                           doSubset = doSubset
-    )
-    message(blue("Impute missing age values: started", Sys.time()))
+      message(blue("Impute missing age values: started", Sys.time()))
 
-    outAge <- Cache(statsModel,
-                    modelFn = imputeBadAgeModel,
-                    uniqueEcoregionGroups = .sortDotsUnderscoreFirst(
-                      as.character(unique(cohortDataMissingAgeUnique$initialEcoregionCode))
-                    ),
-                    .specialData = cohortDataMissingAgeUnique,
-                    omitArgs = ".specialData"
-    )
-    message(blue("                           completed", Sys.time()))
+      outAge <- Cache(statsModel,
+                      modelFn = imputeBadAgeModel,
+                      uniqueEcoregionGroups = .sortDotsUnderscoreFirst(
+                        as.character(unique(cohortDataMissingAgeUnique$initialEcoregionCode))
+                      ),
+                      .specialData = cohortDataMissingAgeUnique,
+                      omitArgs = ".specialData"
+      )
+      message(blue("                           completed", Sys.time()))
 
-    # paste with capture.output keeps table structure intact
-    messageDF(outAge$rsq, 3, "blue")
+      # paste with capture.output keeps table structure intact
+      messageDF(outAge$rsq, 3, "blue")
 
-    ## allow.new.levels = TRUE because some groups will have only NA for age for all species
-    cohortDataMissingAge[
-      , imputedAge := pmax(0L, asInteger(predict(outAge$mod,
-                                                 newdata = cohortDataMissingAge,
-                                                 allow.new.levels = TRUE
-      )))
-    ]
+      ## allow.new.levels = TRUE because some groups will have only NA for age for all species
+      cohortDataMissingAge[
+        , imputedAge := pmax(0L, asInteger(predict(outAge$mod,
+                                                   newdata = cohortDataMissingAge,
+                                                   allow.new.levels = TRUE
+        )))
+      ]
 
-    cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
-      cohortData,
-      on = c("pixelIndex", "speciesCode")
-    ]
-    cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = .logFloor(imputedAge))]
-    imputedPixID <- c(imputedPixID, unique(cohortData[!is.na(imputedAge), pixelIndex]))
-    cohortData[, `:=`(imputedAge = NULL)]
+      cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
+        cohortData,
+        on = c("pixelIndex", "speciesCode")
+      ]
+      cohortData[!is.na(imputedAge), `:=`(age = imputedAge, logAge = .logFloor(imputedAge))]
+      imputedPixID <- c(imputedPixID, unique(cohortData[!is.na(imputedAge), pixelIndex]))
+      cohortData[, `:=`(imputedAge = NULL)]
     } else {
       ## if not imputing bad ages, then exclude bad data entries.
       cohortData <- cohortData[!cohortDataMissingAge[, .(pixelIndex, speciesCode)], on = c("pixelIndex", "speciesCode")]
