@@ -40,7 +40,7 @@ utils::globalVariables(c(
 #'   In LANDIS-II, this is called "Succession Timestep". This is used here
 #' @param verbose Integer, where increasing number is increasing verbosity. Currently,
 #'    only level 1 exists; but this may change.
-#' @param initialB the initial biomass of new cohorts. Defaults to ten.
+#' @template initialB
 #' @template doAssertion
 #'
 #' @return
@@ -236,7 +236,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 #' @template newPixelCohortData
 #' @template cohortData
 #' @template cohortDefinitionCols
-#' @param initialB the initial biomass of new cohorts. Defaults to ten.
+#' @template initialB
 #'
 #' @return A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
 #'
