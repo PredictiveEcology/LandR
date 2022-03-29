@@ -303,7 +303,6 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
     newPixelCohortData[, B := NULL]
   }
 
-  browser()
   if (is.na(initialB) || is.null(initialB)) {
     set(
       newPixelCohortData, NULL, "B",
