@@ -302,14 +302,19 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
   if ("B" %in% names(newPixelCohortData)) {
     newPixelCohortData[, B := NULL]
   }
-  # set(
-  #   newPixelCohortData, NULL, "B",
-  #   asInteger(pmax(1, newPixelCohortData$maxANPP *
-  #                    exp(-1.6 * newPixelCohortData$sumB / newPixelCohortData$maxB_eco)))
-  # )
-  # set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
-  set(newPixelCohortData, NULL, "B", asInteger(initialB)) #Feb2022 change to 1 - maxANPP is unrealistic particularly with
-  # high maxANPP needed to produce realistic growth curves
+
+  browser()
+  if (is.na(initialB) || is.null(initialB)) {
+    set(
+      newPixelCohortData, NULL, "B",
+      asInteger(pmax(1, newPixelCohortData$maxANPP *
+                       exp(-1.6 * newPixelCohortData$sumB / newPixelCohortData$maxB_eco)))
+    )
+    set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
+  } else {
+    set(newPixelCohortData, NULL, "B", asInteger(initialB)) #Feb2022 change to 1 - maxANPP is unrealistic particularly with
+    # high maxANPP needed to produce realistic growth curves
+  }
 
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
                                                mortality = 0L, aNPPAct = 0L
