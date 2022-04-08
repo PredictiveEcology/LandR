@@ -1581,6 +1581,11 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, initi
   # Plant trees
   newCohortData[, age := 2]
 
+  ## Ceres: temporary workaround to ensure the default value is used even
+  ## if LANDIS behaviour is being used to calculate initial B in non-planted cohorts
+  if (isTRUE(is.na(initialB)) || is.null(initialB)) {
+    initialB <- formals(plantNewCohorts)$initialB
+  }
   newCohortData[, B := initialB]
 
   # Here we subset cohortData instead of setting added columns to NULL. However, as these are 'new' cohorts, this is okay
@@ -1635,7 +1640,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, initi
 #' @param provenanceTable A \code{data.table} with three columns:
 #' New cohorts are initiated at the \code{ecoregionGroup} \code{speciesEcoregion} from the
 #' corresponding \code{speciesEcoregion} listed in the \code{Provenance} column
-#' @param initialB the initial biomass of new cohorts. Defaults to ten.
+#' @param initialB the initial biomass of new cohorts. Defaults to ten, even if NA/NULL is passed.
 #' @param trackPlanting if true, planted cohorts in \code{cohortData} are tracked with \code{TRUE}
 #' in column 'planted'
 #'
