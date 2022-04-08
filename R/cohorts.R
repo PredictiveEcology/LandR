@@ -303,7 +303,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
     newPixelCohortData[, B := NULL]
   }
 
-  if (is.na(initialB) || is.null(initialB)) {
+  if (isTRUE(is.na(initialB)) || is.null(initialB)) {
     set(
       newPixelCohortData, NULL, "B",
       asInteger(pmax(1, newPixelCohortData$maxANPP *
