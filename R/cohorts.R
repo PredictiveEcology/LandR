@@ -311,7 +311,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
     )
     set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
   } else {
-    set(newPixelCohortData, NULL, "B", asInteger(initialB)) #Feb2022 change to 1 - maxANPP is unrealistic particularly with
+    set(newPixelCohortData, NULL, "B", asInteger(initialB)) #Feb2022 change to 10 - maxANPP is unrealistic particularly with
     # high maxANPP needed to produce realistic growth curves
   }
 
