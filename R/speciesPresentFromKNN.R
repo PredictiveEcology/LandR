@@ -130,7 +130,12 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL) 
     speciesPresRas <- raster::raster(speciesPres$targetFilePath)
   }
 
-  bb <- postProcess(x = speciesPresRas, studyArea = studyArea)
+  if (getOption("reproducible.useTerra", TRUE) && requireNamespace("terra")) {
+    bb <- postProcessTerra(speciesPresRas, studyArea = studyArea)
+  } else {
+    bb <- postProcess(x = speciesPresRas, studyArea = studyArea)
+  }
+
   speciesCommunities <- na.omit(factorValues2(bb, bb[], att = "category"))
   species <- as.character(speciesCommunities)
   species <- unique(unlist(strsplit(species, "__")))
