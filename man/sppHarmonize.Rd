@@ -27,3 +27,10 @@ This function will attempt to harmonize many potential issues/conflicts that
 may arise under different combinations of supplied objects to the three
 arguments. See manual for details.
 }
+\examples{
+sppOuts <- sppHarmonize(sim$sppEquiv, sim$sppNameVector, P(sim)$sppEquivCol)
+sim$sppEquiv <- sppOuts$sppEquiv
+sim$sppNameVector <- sppOuts$sppNameVector
+P(sim)$sppEquivCol <- sppOuts$sppEquivCol
+
+}

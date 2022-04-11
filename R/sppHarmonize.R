@@ -14,6 +14,13 @@
 #'   it will default to `"Boreal"`.
 #' @return Returns a named list with the same names as the arguments. These should
 #'   likely be assigned to the `sim` object in the module following this function call.
+#' @export
+#' @examples
+#' sppOuts <- sppHarmonize(sim$sppEquiv, sim$sppNameVector, P(sim)$sppEquivCol)
+#' sim$sppEquiv <- sppOuts$sppEquiv
+#' sim$sppNameVector <- sppOuts$sppNameVector
+#' P(sim)$sppEquivCol <- sppOuts$sppEquivCol
+#'
 sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol) {
   if (is.null(sppEquiv) && is.null(sppNameVector)) {
     sppNameConvention <- "KNN"
