@@ -7,8 +7,9 @@
 #' @template sppEquiv
 #'
 #' @param sppNameVector A character vector of species to use. These species must all
-#'   be from one naming convention, i.e., from one column in the sppEquiv.
-#' @param sppEquivCol A character string normally provided from the P(sim)$sppEquivCol
+#'   be from one naming convention, i.e., from one column in the `sppEquiv`.
+#'
+#' @param sppEquivCol A character string normally provided from the `P(sim)$sppEquivCol`
 #'   (see manual). If `NA`, the default, then this will try to determine which
 #'   column the `sppNameVector` used and use that. If `sppNameVector` is NULL, then
 #'   it will default to `"Boreal"`.
@@ -34,8 +35,7 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
   }
 
   if (is.null(sppEquiv)) {
-    # can't use suppliedElsewhere because the sequence below needs this;
-    # can't specify where = "user" either because it could be supplied by another module prior to this
+    ## note that this step MUST come after the previous
     sppEquiv <- LandR::sppEquivalencies_CA
   }
 
@@ -67,8 +67,8 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
   if (!exists("sppNameConvention", inherits = FALSE)) {
     sppNameConvention <- sppEquivCol
   }
-  sppMissing <- sppNameVector %in% sppEquiv[[sppNameConvention]]
-  sppMissing <- sppNameVector[!(sppMissing)]
+  sppMissing <- !(sppNameVector %in% sppEquiv[[sppNameConvention]])
+  sppMissing <- sppNameVector[sppMissing]
 
   if (length(sppMissing)) {
     stop("Different naming convention detected for species (", paste(sppMissing, collapse = ", "), ")",
@@ -84,8 +84,8 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
     sppNameVector
   }
 
-  sppMissing <- sppNameVectorInSppEquivCol %in% sppEquiv[[sppEquivCol]]
-  sppMissing <- sppNameVector[!(sppMissing)]
+  sppMissing <- !(sppNameVectorInSppEquivCol %in% sppEquiv[[sppEquivCol]])
+  sppMissing <- sppNameVector[sppMissing]
 
   if (length(sppMissing)) {
     stop("Species missing (", paste(sppMissing, collapse = ", "), ")",
