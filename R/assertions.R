@@ -617,6 +617,7 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
 
     sppInSppEquiv <- unique(sppEquiv[[sppEquivCol]])
 
+    if (!missing(sppNameVector)) {
       test1 <- any(length(union(sppInSppEquiv, sppNameVector)) != length(sppInSppEquiv),
                    length(union(sppInSppEquiv, sppNameVector)) != length(sppNameVector))
 
@@ -625,7 +626,7 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
       }
     }
 
-    if (!is.null(sppColorVect)) {
+    if (!missing(sppColorVect)) {
       sppInColourV <- setdiff(names(sppColorVect), "Mixed")
       test2 <- any(length(union(sppInSppEquiv, sppInColourV)) != length(sppInColourV),
                    length(union(sppInSppEquiv, sppInColourV)) != length(sppInSppEquiv))
