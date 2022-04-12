@@ -12,8 +12,7 @@ utils::globalVariables(c(
 #' @param vtm An optional vegetation type map (\code{RasterLayer}).
 #'            If not supplied, will be produced internally by \code{makeVegTypeMap}.
 #'
-#' @param vegLeadingProportion The minimum proportion cover required to consider
-#'                             a species to be the "leading" one. Default 0.8.
+#' @template vegLeadingProportion
 #'
 #' @template sppEquiv
 #'

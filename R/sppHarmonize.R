@@ -4,8 +4,8 @@
 #' may arise under different combinations of supplied objects to the three
 #' arguments. See manual for details.
 #'
-#' @param sppEquiv A data.table or NULL representing the sppEquiv table (see manual).
-#'   If NULL, then it will use the `LandR::sppEquivalencies_CA`
+#' @template sppEquiv
+#'
 #' @param sppNameVector A character vector of species to use. These species must all
 #'   be from one naming convention, i.e., from one column in the sppEquiv.
 #' @param sppEquivCol A character string normally provided from the P(sim)$sppEquivCol
