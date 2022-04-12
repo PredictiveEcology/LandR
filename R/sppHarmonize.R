@@ -12,6 +12,11 @@
 #'   (see manual). If `NA`, the default, then this will try to determine which
 #'   column the `sppNameVector` used and use that. If `sppNameVector` is NULL, then
 #'   it will default to `"Boreal"`.
+#'
+#' @template sppColorVect
+#'
+#' @template vegLeadingProportion
+#'
 #' @return Returns a named list with the same names as the arguments. These should
 #'   likely be assigned to the `sim` object in the module following this function call.
 #' @export
@@ -21,7 +26,8 @@
 #' sim$sppNameVector <- sppOuts$sppNameVector
 #' P(sim)$sppEquivCol <- sppOuts$sppEquivCol
 #'
-sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol) {
+sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
+                         vegLeadingProportion = 0) {
   if (is.null(sppEquiv) && is.null(sppNameVector)) {
     sppNameConvention <- "KNN"
     sppNameVector <-  Cache(LandR::speciesInStudyArea, studyArea)$speciesList
@@ -82,4 +88,37 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol) {
   sppEquiv <- na.omit(sppEquiv, sppEquivCol)
 
   return(list(sppEquiv = sppEquiv, sppNameVector = sppNameVector, sppEquivCol = sppEquivCol))
+  ## add default colors for species used in model
+  if (is.null(sppColorVect)) {
+    sppColorVect <- sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
+    message("No 'sppColorVect' provided; making one with colour palette: Accent")
+  } else {
+    if (length(sppColorVect) != length(unique(sppEquiv[[sppEquivCol]])) ||
+        length(sppColorVect) != length(sppNameVector)) {
+      stop("Length of 'sppColorVect' differs from number species in final 'sppEquiv'.",
+           " Check species provided in 'sppColorVect', 'sppNameVector' and/or ",
+           "'sppEquiv[[sppEquivCol]]'")
+    }
+    if (!all(names(sppColorVect) %in% sppEquiv[[sppEquivCol]])) {
+      message("'sppColorVect' names do not match 'sppEquivCol' (", sppEquivCol, ")",
+              " and will be converted if possible.")
+      tempNames <-  LandR::equivalentName(names(sppColorVect), df = sppEquiv,
+                                          column = sppEquivCol)
+      if (any(is.na(tempNames))) {
+        missingNames <- names(sppColorVect)[is.na(tempNames)]
+        stop("Could not convert 'sppColorVect' names. The following are missing",
+             " from 'sppEquiv' in 'sppEquivCol' (", sppEquivCol, "):",
+             paste(missingNames, collapse = ", "))
+      }
+      names(sppColorVect) <- tempNames
+    }
+  }
+
+  if (vegLeadingProportion > 0 & is.na(sppColorVect['Mixed'])) {
+    stop("'vegLeadingProportion'  is > 0 but there is no 'Mixed' color in 'sppColorVect'. ",
+         "Please supply 'sppColorVect' with a 'Mixed' color or set 'vegLeadingProportion' to zero.")
+  }
+
+  return(list(sppEquiv = sppEquiv, sppNameVector = sppNameVector,
+              sppEquivCol = sppEquivCol, sppColorVect = sppColorVect))
 }
