@@ -579,3 +579,61 @@ assertCohortDataAttr <- function(cohortData,
     }
   }
 }
+
+
+
+#' Assert that vectors of species match
+#'
+#' This assertion compares the species listed in the `sppEquiv`
+#' table (under the `sppEquivCol` column), with species listed
+#' in the `sppNameVector` and `sppColorVect`.
+#' The comparison excludes the "Mixed" type, in case it exists.
+#'
+#' @param sppEquiv an table with a column containing species names
+#'
+#' @template sppNameVector
+#'
+#' @param sppEquivCol the column name to use from \code{sppEquiv}.
+#'
+#' @template sppColorVect
+#'
+#' @template doAssertion
+#'
+#' @export
+assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect = NULL,
+                             sppEquivCol = NULL, doAssertion) {
+  if (doAssertion) {
+    if (is.null(sppEquiv)) {
+      stop("Please provide 'sppEquiv' and at least one vector")
+    }
+    if (is.null(sppEquivCol)) {
+      stop("Please provide 'sppEquivCol'")
+    }
+
+    if (is.null(sppNameVector) &
+        is.null(sppColorVect)) {
+      stop("Please provide 'sppNameVector' and/or 'sppColorVect'")
+    }
+
+    if (!is.null(sppColorVect)) {
+      sppInSppEquiv <- unique(sppEquiv[[sppEquivCol]])
+      sppInColourV <- setdiff(names(sppColorVect), "Mixed")
+      test1 <- any(length(union(sppInSppEquiv, sppNameVector)) != length(sppInSppEquiv),
+                   length(union(sppInSppEquiv, sppNameVector)) != length(sppNameVector),)
+
+      if (test1) {
+        stop("Species listed in 'sppEquiv' and 'sppNameVector' differ.")
+      }
+    }
+
+    if (!is.null(sppColorVect)) {
+      sppInColourV <- setdiff(names(sppColorVect), "Mixed")
+      test2 <- any(length(union(sppInSppEquiv, sppInColourV)) != length(sppInColourV),
+                   length(union(sppInSppEquiv, sppInColourV)) != length(sppInSppEquiv))
+
+      if (test2) {
+        stop("Species listed in 'sppEquiv' and 'sppColorVect' differ (excluding 'Mixed' type).")
+      }
+    }
+  }
+}
