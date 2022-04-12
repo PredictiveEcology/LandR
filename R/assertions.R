@@ -219,7 +219,7 @@ assertColumns <- function(obj, colClasses,
       wh <- which(!test2Indiv)
       wrongCols <- colClasses2[wh]
       mess2 <- paste0("obj column classes need correction. It should have the following class(es): ",
-        paste(names(wrongCols), "=", wrongCols, collapse = ", "))
+                      paste(names(wrongCols), "=", wrongCols, collapse = ", "))
     }
     if (!test1 || !test2) {
       stop(paste(mess1, mess2, sep = "\n"))
@@ -567,7 +567,7 @@ assertStandAgeMapAttr <- function(standAgeMap,
 #'
 #' @export
 assertCohortDataAttr <- function(cohortData,
-                                  doAssertion = getOption("LandR.assertions", TRUE)) {
+                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     if (is.null(attr(cohortData, "imputedPixID"))) {
       stop("cohortData should have a 'imputedPixID' attribute")
