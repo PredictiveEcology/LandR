@@ -270,8 +270,10 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       sppColors(sppEquiv, sppEquivCol, palette = "Accent")
   }
 
-  assertSppVectors(sppEquiv = sppEquiv, sppEquivCol = sppEquivCol,
-                   sppColorVect = colours)
+  if (!is.null(sppEquiv) & !is.null(sppEquivCol)) {
+    assertSppVectors(sppEquiv = sppEquiv, sppEquivCol = sppEquivCol,
+                     sppColorVect = colours)
+  }
 
   if (mixedType == 2) {
     if (is.null(sppEquiv)) {
