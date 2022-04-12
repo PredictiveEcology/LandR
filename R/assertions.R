@@ -601,7 +601,7 @@ assertCohortDataAttr <- function(cohortData,
 #'
 #' @export
 assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect = NULL,
-                             sppEquivCol = NULL, doAssertion) {
+                             sppEquivCol = NULL, doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     if (is.null(sppEquiv)) {
       stop("Please provide 'sppEquiv' and at least one vector")
