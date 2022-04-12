@@ -89,7 +89,7 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
 
   if (length(sppMissing)) {
     stop("Species missing (", paste(sppMissing, collapse = ", "), ")",
-         " from sim$sppEquiv in P(sim)$sppEquivCol (", sppEquivCol, ")")
+         " from 'sppEquiv' in 'sppEquivCol' (", sppEquivCol, ")")
   }
 
   sppEquiv <- sppEquiv[get(sppEquivCol) %in% sppNameVectorInSppEquivCol]
