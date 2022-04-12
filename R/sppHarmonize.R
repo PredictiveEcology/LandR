@@ -22,10 +22,11 @@
 #'   likely be assigned to the `sim` object in the module following this function call.
 #' @export
 #' @examples
-#' sppOuts <- sppHarmonize(sim$sppEquiv, sim$sppNameVector, P(sim)$sppEquivCol)
-#' sim$sppEquiv <- sppOuts$sppEquiv
-#' sim$sppNameVector <- sppOuts$sppNameVector
-#' P(sim)$sppEquivCol <- sppOuts$sppEquivCol
+#' ## not run. usage example within module
+#' # sppOuts <- sppHarmonize(sim$sppEquiv, sim$sppNameVector, P(sim)$sppEquivCol)
+#' # sim$sppEquiv <- sppOuts$sppEquiv
+#' # sim$sppNameVector <- sppOuts$sppNameVector
+#' # P(sim)$sppEquivCol <- sppOuts$sppEquivCol
 #'
 sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
                          vegLeadingProportion = 0) {
