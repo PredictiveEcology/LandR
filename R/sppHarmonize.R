@@ -71,9 +71,11 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
   sppMissing <- sppNameVector[sppMissing]
 
   if (length(sppMissing)) {
-    stop("Different naming convention detected for species (", paste(sppMissing, collapse = ", "), ")",
-         " in sim$sppNameVector. Please ensure all species use a single column in spp$sppEquiv ",
-         "or LandR::sppEquivalencies_CA")
+    stop("Species in 'sppNameVector' (", paste(unique(sppMissing), collapse = ", "), ") ",
+         "not found in 'sppEquiv', or 'LandR::sppEquivalencies_CA'. This may be ",
+         "due to different species in each set, or same species with different ",
+         "naming conventions. Please ensure all species correspond to a column ",
+         "in 'sppEquiv' or 'LandR::sppEquivalencies_CA'.")
   }
 
 
