@@ -36,7 +36,8 @@ prepSpeciesLayers_KNN2011(
 \item{speciesStack}{A \code{RasterStack} of species abundances.
 This must be one \code{RasterLayer} per species.}
 
-\item{vegLeadingProportion}{See \code{vegTypeMapGenerator}.}
+\item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
+threshold a species needs to pass to be considered "leading".}
 
 \item{mixed}{Deprecated. See \code{mixedType} argument to \code{vegTypeMapGenerator}.}
 

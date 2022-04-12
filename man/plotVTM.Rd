@@ -20,8 +20,8 @@ plotVTM(
 \item{vtm}{An optional vegetation type map (\code{RasterLayer}).
 If not supplied, will be produced internally by \code{makeVegTypeMap}.}
 
-\item{vegLeadingProportion}{The minimum proportion cover required to consider
-a species to be the "leading" one. Default 0.8.}
+\item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
+threshold a species needs to pass to be considered "leading".}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
