@@ -6,8 +6,7 @@
 #'
 #' @template sppEquiv
 #'
-#' @param sppNameVector A character vector of species to use. These species must all
-#'   be from one naming convention, i.e., from one column in the `sppEquiv`.
+#' @template sppNameVector
 #'
 #' @param sppEquivCol A character string normally provided from the `P(sim)$sppEquivCol`
 #'   (see manual). If `NA`, the default, then this will try to determine which
