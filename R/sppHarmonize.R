@@ -133,7 +133,7 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
     }
   }
 
-  if (vegLeadingProportion > 0 & is.na(sppColorVect['Mixed'])) {
+  if (isTRUE(vegLeadingProportion > 0) && isTRUE(is.na(sppColorVect['Mixed']))) { # vegLeadingProportion can be NULL
     stop("'vegLeadingProportion'  is > 0 but there is no 'Mixed' color in 'sppColorVect'. ",
          "Please supply 'sppColorVect' with a 'Mixed' color or set 'vegLeadingProportion' to zero.")
   }
