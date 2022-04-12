@@ -46,6 +46,16 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
       sppNameConvention <- LandR::equivalentNameColumn(sppNameVector, sppEquiv)
       sppEquivCol <- sppNameConvention
     }
+  } else {
+    if (sppEquivCol %in% names(sppEquiv)) {
+      message(paste("Using species listed under", sppEquivCol,
+                    "column in the 'sppEquiv' table"))
+    } else {
+      stop("'sppEquivCol' is not a column in 'sppEquiv' or 'LandR::sppEquivalencies_CA'.",
+           " Please provide conforming 'sppEquivCol' and 'sppEquiv',",
+           " or a column that exists in 'LandR::sppEquivalencies_CA'")
+    }
+
   }
 
   if (is.null(sppNameVector)) {
@@ -87,7 +97,13 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
   sppEquiv <- sppEquiv[!"", on = sppEquivCol]
   sppEquiv <- na.omit(sppEquiv, sppEquivCol)
 
-  return(list(sppEquiv = sppEquiv, sppNameVector = sppNameVector, sppEquivCol = sppEquivCol))
+  ## sanity checks/warnings. the code above allows several species
+  ## from sppNameVector to match one spp in sppEquivCol (e.g. merged spp)
+  if (isFALSE(all(sppNameVector %in% sppEquiv[[sppEquivCol]]))) {
+    warning("Some species in 'sppNameVector' are not in 'sppEquiv[[sppEquivCol]]'.",
+            "This may be because species are being merged. Please verify.")
+  }
+
   ## add default colors for species used in model
   if (is.null(sppColorVect)) {
     sppColorVect <- sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
