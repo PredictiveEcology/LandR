@@ -615,9 +615,8 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
       stop("Please provide 'sppNameVector' and/or 'sppColorVect'")
     }
 
-    if (!is.null(sppColorVect)) {
-      sppInSppEquiv <- unique(sppEquiv[[sppEquivCol]])
-      sppInColourV <- setdiff(names(sppColorVect), "Mixed")
+    sppInSppEquiv <- unique(sppEquiv[[sppEquivCol]])
+
       test1 <- any(length(union(sppInSppEquiv, sppNameVector)) != length(sppInSppEquiv),
                    length(union(sppInSppEquiv, sppNameVector)) != length(sppNameVector))
 

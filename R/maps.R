@@ -505,7 +505,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
   }
 
   assertSppVectors(sppEquiv = sppEquiv, sppEquivCol = sppEquivCol,
-                   sppColorVect = colours)
+                   sppColorVect = colors)
 
   levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]],
                               colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
