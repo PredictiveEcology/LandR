@@ -262,19 +262,6 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
   nrowCohortData <- NROW(x)
   leadingBasedOn <- preambleVTG(x, vegLeadingProportion, doAssertion, nrowCohortData)
 
-  ## checks
-  if (missing(colors)) {
-    colors <- if (vegLeadingProportion > 0)
-      sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
-    else
-      sppColors(sppEquiv, sppEquivCol, palette = "Accent")
-  }
-
-  if (!is.null(sppEquiv) & !is.null(sppEquivCol)) {
-    assertSppVectors(sppEquiv = sppEquiv, sppEquivCol = sppEquivCol,
-                     sppColorVect = colours)
-  }
-
   if (mixedType == 2) {
     if (is.null(sppEquiv)) {
       sppEquiv <- get(data("sppEquivalencies_CA", package = "LandR", envir = environment()),
@@ -509,6 +496,16 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 
     vegTypeMap <- rasterizeReduced(pixelGroupData3, pixelGroupMap, "leading", pixelGroupColName)
   }
+
+  if (missing(colors)) {
+    colors <- if (vegLeadingProportion > 0)
+      sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
+    else
+      sppColors(sppEquiv, sppEquivCol, palette = "Accent")
+  }
+
+  assertSppVectors(sppEquiv = sppEquiv, sppEquivCol = sppEquivCol,
+                   sppColorVect = colours)
 
   levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]],
                               colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
