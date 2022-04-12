@@ -1,8 +1,9 @@
 bug reports https://github.com/PredictiveEcology/LandR/issues
 
-version 1.0.7.9000
+version 1.0.8
 =============
 * drop support for R 3.6
+* new function `sppHarmonize` that deals with the 3 potential ways for a user to input the `sim$sppEquiv`, `P(sim)$sppEquivCol`, and `sim$sppNameVector`
 * update Eliot's email address
 * new functions: `speciesInStudyArea` and `species
 * remove undeclared dependency package `Require`
