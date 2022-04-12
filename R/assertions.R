@@ -619,7 +619,7 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
       sppInSppEquiv <- unique(sppEquiv[[sppEquivCol]])
       sppInColourV <- setdiff(names(sppColorVect), "Mixed")
       test1 <- any(length(union(sppInSppEquiv, sppNameVector)) != length(sppInSppEquiv),
-                   length(union(sppInSppEquiv, sppNameVector)) != length(sppNameVector),)
+                   length(union(sppInSppEquiv, sppNameVector)) != length(sppNameVector))
 
       if (test1) {
         stop("Species listed in 'sppEquiv' and 'sppNameVector' differ.")
