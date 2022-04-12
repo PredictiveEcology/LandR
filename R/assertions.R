@@ -219,7 +219,7 @@ assertColumns <- function(obj, colClasses,
       wh <- which(!test2Indiv)
       wrongCols <- colClasses2[wh]
       mess2 <- paste0("obj column classes need correction. It should have the following class(es): ",
-        paste(names(wrongCols), "=", wrongCols, collapse = ", "))
+                      paste(names(wrongCols), "=", wrongCols, collapse = ", "))
     }
     if (!test1 || !test2) {
       stop(paste(mess1, mess2, sep = "\n"))
@@ -567,7 +567,7 @@ assertStandAgeMapAttr <- function(standAgeMap,
 #'
 #' @export
 assertCohortDataAttr <- function(cohortData,
-                                  doAssertion = getOption("LandR.assertions", TRUE)) {
+                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     if (is.null(attr(cohortData, "imputedPixID"))) {
       stop("cohortData should have a 'imputedPixID' attribute")
@@ -575,6 +575,64 @@ assertCohortDataAttr <- function(cohortData,
       if (!(is(attr(cohortData, "imputedPixID"), "numeric") |
             is(attr(cohortData, "imputedPixID"), "integer"))) {
         stop("cohortData attribute 'imputedPixID' should be numeric/integer")
+      }
+    }
+  }
+}
+
+
+
+#' Assert that vectors of species match
+#'
+#' This assertion compares the species listed in the `sppEquiv`
+#' table (under the `sppEquivCol` column), with species listed
+#' in the `sppNameVector` and `sppColorVect`.
+#' The comparison excludes the "Mixed" type, in case it exists.
+#'
+#' @param sppEquiv an table with a column containing species names
+#'
+#' @template sppNameVector
+#'
+#' @param sppEquivCol the column name to use from \code{sppEquiv}.
+#'
+#' @template sppColorVect
+#'
+#' @template doAssertion
+#'
+#' @export
+assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect = NULL,
+                             sppEquivCol = NULL, doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    if (is.null(sppEquiv)) {
+      stop("Please provide 'sppEquiv' and at least one vector")
+    }
+    if (is.null(sppEquivCol)) {
+      stop("Please provide 'sppEquivCol'")
+    }
+
+    if (is.null(sppNameVector) &
+        is.null(sppColorVect)) {
+      stop("Please provide 'sppNameVector' and/or 'sppColorVect'")
+    }
+
+    sppInSppEquiv <- unique(sppEquiv[[sppEquivCol]])
+
+    if (!missing(sppNameVector)) {
+      test1 <- any(length(union(sppInSppEquiv, sppNameVector)) != length(sppInSppEquiv),
+                   length(union(sppInSppEquiv, sppNameVector)) != length(sppNameVector))
+
+      if (test1) {
+        stop("Species listed in 'sppEquiv' and 'sppNameVector' differ.")
+      }
+    }
+
+    if (!missing(sppColorVect)) {
+      sppInColourV <- setdiff(names(sppColorVect), "Mixed")
+      test2 <- any(length(union(sppInSppEquiv, sppInColourV)) != length(sppInColourV),
+                   length(union(sppInSppEquiv, sppInColourV)) != length(sppInSppEquiv))
+
+      if (test2) {
+        stop("Species listed in 'sppEquiv' and 'sppColorVect' differ (excluding 'Mixed' type).")
       }
     }
   }

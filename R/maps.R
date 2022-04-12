@@ -498,11 +498,14 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
   }
 
   if (missing(colors)) {
-    colors <- if (!"Mixed" %in% sppEquiv[[sppEquivCol]])
+    colors <- if (vegLeadingProportion > 0)
       sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
     else
       sppColors(sppEquiv, sppEquivCol, palette = "Accent")
   }
+
+  assertSppVectors(sppEquiv = sppEquiv, sppEquivCol = sppEquivCol,
+                   sppColorVect = colors)
 
   levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]],
                               colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
