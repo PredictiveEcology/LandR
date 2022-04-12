@@ -22,10 +22,11 @@
 #'   likely be assigned to the `sim` object in the module following this function call.
 #' @export
 #' @examples
-#' sppOuts <- sppHarmonize(sim$sppEquiv, sim$sppNameVector, P(sim)$sppEquivCol)
-#' sim$sppEquiv <- sppOuts$sppEquiv
-#' sim$sppNameVector <- sppOuts$sppNameVector
-#' P(sim)$sppEquivCol <- sppOuts$sppEquivCol
+#' ## not run. usage example within module
+#' # sppOuts <- sppHarmonize(sim$sppEquiv, sim$sppNameVector, P(sim)$sppEquivCol)
+#' # sim$sppEquiv <- sppOuts$sppEquiv
+#' # sim$sppNameVector <- sppOuts$sppNameVector
+#' # P(sim)$sppEquivCol <- sppOuts$sppEquivCol
 #'
 sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
                          vegLeadingProportion = 0) {
@@ -132,7 +133,7 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
     }
   }
 
-  if (vegLeadingProportion > 0 & is.na(sppColorVect['Mixed'])) {
+  if (isTRUE(vegLeadingProportion > 0) && isTRUE(is.na(sppColorVect['Mixed']))) { # vegLeadingProportion can be NULL
     stop("'vegLeadingProportion'  is > 0 but there is no 'Mixed' color in 'sppColorVect'. ",
          "Please supply 'sppColorVect' with a 'Mixed' color or set 'vegLeadingProportion' to zero.")
   }
