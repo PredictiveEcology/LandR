@@ -7,9 +7,7 @@ utils::globalVariables(c(
 #'
 #' @param speciesLayers stack of species layers rasters
 #' @template species
-#' @param sppColorVect A named vector of colours to use for plotting.
-#'                     The names must conform with \code{names(speciesLayers)} and should also
-#'                     contain a colour for 'Mixed'.
+#' @template sppColorVect
 #'
 #' @return
 #' A \code{list} with the \code{speciesLayers} and \code{sppColorVect}

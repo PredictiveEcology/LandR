@@ -1829,8 +1829,7 @@ pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
 #'
 #' @param x A \code{cohortData} object
 #'
-#' @param vegLeadingProportion Numeric between 0-1, determining the relative biomass
-#'                             threshold a species needs to pass to be considered "leading".
+#' @template vegLeadingProportion
 #'
 #' @param mixedType An integer defining whether mixed stands are of any kind of species
 #'                  admixture (1), or only when deciduous mixed with conifer (2).

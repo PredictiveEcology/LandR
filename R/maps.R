@@ -129,7 +129,7 @@ prepInputsLCC <- function(year = 2010,
 #'
 #' @param speciesStack A \code{RasterStack} of species abundances.
 #'                     This must be one \code{RasterLayer} per species.
-#' @param vegLeadingProportion See \code{vegTypeMapGenerator}.
+#' @template vegLeadingProportion
 #' @param mixed Deprecated. See \code{mixedType} argument to \code{vegTypeMapGenerator}.
 #' @param ... Other arguments passed to \code{vegTypeMapGenerator}, i.e.,
 #'   \code{vegLeadingProportion}, \code{mixedType}, \code{sppEquiv},
@@ -157,8 +157,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 #'
 #' @template pixelGroupMap
 #'
-#' @param vegLeadingProportion Numeric between 0-1, determining the relative biomass
-#'               threshold a species needs to pass to be considered "leading".
+#' @template vegLeadingProportion
 #'
 #' @param mixedType An integer defining whether mixed stands are of any kind of species
 #'                  admixture (1), or only when deciduous mixed with conifer (2).
