@@ -363,8 +363,9 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @param fireURL url to download fire polygons used to update age map. If NULL or NA age imputation is bypassed.
 #' @param fireFun passed to \code{prepInputs} of fire data
 #' @template rasterToMatch
-#' @param fireField field used to rasterize fire polys
-#' @param startTime date of first fire year.
+#' @param startTime date of the last fire year to be considered (e.g., start of fire
+#'   period counting backwords). If missing, last fire year available will be used.
+#'
 #' @return a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
 #'  for which ages were corrected. If no corrections were applied the attribute vector is \code{integer(0)}.
 #'
@@ -414,6 +415,10 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
                         fun = fireFun,
                         destinationPath = destinationPath,
                         rasterToMatch = rasterToMatch)
+    if (missing(startTime)) {
+      message("'startTime' is missing, the most recent fire year will be used.")
+      startTime <- max(firePerimeters[], na.rm = TRUE)
+    }
 
       if (!is.null(fireYear)) {
         toChange <- !is.na(fireYear[]) & fireYear[] <= asInteger(startTime)
