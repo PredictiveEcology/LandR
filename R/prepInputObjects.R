@@ -378,6 +378,42 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @export
 #' @importFrom raster crs
 #' @importFrom reproducible Cache prepInputs
+#'
+#' @examples
+#' library(SpaDES.tools)
+#' library(raster)
+#' randomPoly <- randomStudyArea(size = 1e7)
+#' randomPoly
+#' ras2match <- raster(res = 250, ext = extent(randomPoly), crs = crs(randomPoly))
+#' ras2match <- rasterize(randomPoly, ras2match)
+#' tempDir <- tempdir()
+#'
+#' ## NOT USING FIRE PERIMETERS TO CORRECT STAND AGE
+#' ## rasterToMatch does not need to be provided, but can be for masking/cropping.
+#' standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
+#'                                   rasterToMatch = ras2match,
+#'                                   fireURL = NA)   ## or NULL
+#' attr(standAge, "imputedPixID")
+#'
+#' ## USING FIRE PERIMETERS TO CORRECT STAND AGE
+#' ## ideaally, get the firePerimenters layer first
+#' firePerimeters <- Cache(prepInputsFireYear,
+#'                         url = "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip",
+#'                         fun = "sf::st_read",
+#'                         destinationPath = tempDir,
+#'                         rasterToMatch = ras2match)
+#'
+#' standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
+#'                                   firePerimeters = firePerimeters,
+#'                                   rasterToMatch = ras2match)
+#' attr(standAge, "imputedPixID")
+#'
+#' ## not providing firePerimeters is still possible, but will be deprecated
+#' ## in this case 'rasterToMatch' MUST be provided
+#' standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
+#'                                   rasterToMatch = ras2match)
+#' attr(standAge, "imputedPixID")
+#'
 prepInputsStandAgeMap <- function(..., ageURL = NULL,
                                   ageFun = "raster::raster",
                                   maskWithRTM = TRUE,
@@ -469,6 +505,24 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @importFrom reproducible Cache prepInputs
 #' @importFrom sf st_cast st_transform
 #' @importFrom magrittr %>%
+#'
+#' @example
+#' library(SpaDES.tools)
+#' library(raster)
+#' randomPoly <- randomStudyArea()
+#' randomPoly
+#' ras2match <- raster(res = 10, ext = extent(randomPoly), crs = crs(randomPoly))
+#' ras2match <- rasterize(randomPoly, ras2match)
+#' tempDir <- tempdir()
+#' cacheRepo <- file.path(tempDir, "cache")
+#'
+#' ## ideaally, get the firePerimenters layer first
+#' firePerimeters <- Cache(prepInputsFireYear,
+#'                         url = "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip",
+#'                         fun = "sf::st_read",
+#'                         destinationPath = tempDir,
+#'                         rasterToMatch = ras2match)
+#'
 prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950) {
   dots <- list(...)
   if (!is.null(dots$fun)) {
