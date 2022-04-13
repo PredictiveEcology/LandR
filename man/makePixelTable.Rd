@@ -18,7 +18,7 @@ makePixelTable(
 \arguments{
 \item{speciesLayers}{stack of species layers rasters}
 
-\item{standAgeMap}{A \code{rasterLayer} with attribute "imputedPixID"}
+\item{standAgeMap}{A \code{rasterLayer} of stand ages with attribute "imputedPixID"}
 
 \item{ecoregionFiles}{A list with two objects: the \code{ecoregionMap} and a table summarizing
 its information per \code{pixelID.} See \code{ecoregionProducer}.}
