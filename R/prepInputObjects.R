@@ -475,15 +475,8 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
   }
 
   if (isFALSE(is.null(firePerimeters))) {
-    if (missing(startTime)) {
-      message("'startTime' is missing, the most recent fire year will be used.")
-      startTime <- max(firePerimeters[], na.rm = TRUE)
-    }
-
-    toChange <- !is.na(firePerimeters[]) & firePerimeters[] <= asInteger(startTime)
-    standAgeMap[] <- asInteger(standAgeMap[])
-    standAgeMap[toChange] <- asInteger(startTime) - asInteger(firePerimeters[][toChange])
-    imputedPixID <- which(toChange)
+    standAgeMap <- replaceAgeInFires(standAgeMap, firePerimeters, startTime)
+    imputedPixID <- attr(standAgeMap, "imputedPixID")
   }
 
   attr(standAgeMap, "imputedPixID") <- imputedPixID
@@ -498,6 +491,8 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @template rasterToMatch
 #' @param fireField field used to rasterize fire polys
 #' @param earliestYear the earliest fire date to allow
+#'
+#' @return a raster layer of fire perimeters with fire year values.
 #'
 #' @export
 #' @importFrom fasterize fasterize
@@ -547,4 +542,56 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
   } else {
     return(NULL)
   }
+}
+
+#' Replace stand age with time since last fire
+#'
+#' @param standAgeMap a raster layer stand age map
+#' @param firePerimeters the earliest fire date to allow
+#'
+#' @return a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
+#'  for which ages were corrected. If no corrections were applied the attribute vector is \code{integer(0)}.
+#'
+#' @export
+#' @importFrom fasterize fasterize
+#' @importFrom raster crs
+#' @importFrom reproducible Cache prepInputs
+#' @importFrom sf st_cast st_transform
+#' @importFrom magrittr %>%
+#'
+#' @example
+#' library(SpaDES.tools)
+#' library(raster)
+#' randomPoly <- randomStudyArea(size = 1e7)
+#' randomPoly
+#' ras2match <- raster(res = 250, ext = extent(randomPoly), crs = crs(randomPoly))
+#' ras2match <- rasterize(randomPoly, ras2match)
+#' tempDir <- tempdir()
+#'
+#' standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
+#'                                   rasterToMatch = ras2match,
+#'                                   fireURL = NA)   ## or NULL
+#' attr(standAge, "imputedPixID")
+#'
+#' firePerimeters <- Cache(prepInputsFireYear,
+#'                         url = "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip",
+#'                         fun = "sf::st_read",
+#'                         destinationPath = tempDir,
+#'                         rasterToMatch = ras2match)
+#' standAge <- replaceAgeInFires(standAge, firePerimeters)
+#' attr(standAge, "imputedPixID")
+#'
+replaceAgeInFires <- function(standAgeMap, firePerimeters, startTime) {
+  if (missing(startTime)) {
+    message("'startTime' is missing, the most recent fire year will be used.")
+    startTime <- max(firePerimeters[], na.rm = TRUE)
+  }
+
+  toChange <- !is.na(firePerimeters[]) & firePerimeters[] <= asInteger(startTime)
+  standAgeMap[] <- asInteger(standAgeMap[])
+  standAgeMap[toChange] <- asInteger(startTime) - asInteger(firePerimeters[][toChange])
+  imputedPixID <- which(toChange)
+
+  attr(standAgeMap, "imputedPixID") <- imputedPixID
+  return(standAgeMap)
 }
