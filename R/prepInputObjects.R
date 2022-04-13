@@ -307,8 +307,8 @@ makeMinRelativeB <- function(pixelCohortData) {
                              # X2 = 0.25, ## 0.4
                              # X3 = 0.50, ## 0.5
                              # X4 = 0.75, ## 0.7
-                             # X5 = 0.85
-                             ) ## 0.9
+                             # X5 = 0.85  ## 0.9
+  )
 
   return(minRelativeB)
 }
@@ -349,10 +349,10 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' Create \code{standAgeMap}
 #'
 #' Create the \code{standAgeMap} raster containing age estimates for \code{pixelCohortData}.
-#' A separate \code{prepInputs} call will source NDFB data used to update ages of recently burned
-#' pixels.
+#' A separate \code{prepInputs} call will source Canadian National Fire Data Base
+#' data to update ages of recently burned pixels. To suppress this, pass NULL/NA \code{fireURl}
 #'
-#' @param ... additional arguments passed to \code{prepInputs}
+#' @param ... additional arguments passed to \code{prepInputs}.
 #' @param ageURL url where age map is downloaded
 #' @param ageFun passed to 'fun' arg of \code{prepInputs} of stand age map
 #' @param maskWithRTM passed to \code{prepInputs} of stand age map
@@ -389,13 +389,16 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
                                   fireURL = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/",
                                                    "fire_poly/current_version/NFDB_poly.zip"),
                                   fireFun = "sf::st_read",
-                                  rasterToMatch = NULL, fireField = "YEAR",
+                                  fireField = "YEAR",
+                                  rasterToMatch = NULL,
                                   startTime) {
-  if (is.null(ageURL))
+
+  if (is.null(ageURL)) {
     ageURL <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
                      "canada-forests-attributes_attributs-forests-canada/",
                      "2001-attributes_attributs-2001/",
                      "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif")
+  }
 
   getFires <- if (is.null(firePerimeters) &&
                   (isFALSE(is.null(fireURL)) && isFALSE(is.na(fireURL)))) {
@@ -404,20 +407,21 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
     FALSE
   }
 
-  if (is.null(rasterToMatch))
+  if (is.null(rasterToMatch)) {
     maskWithRTM <- FALSE
+  }
 
-    standAgeMap <- Cache(
-      prepInputs, ...,
-      maskWithRTM = maskWithRTM,
-      method = method,
-      datatype = datatype,
-      filename2 = filename2,
-      destinationPath = destinationPath,
-      url = ageURL,
-      fun = ageFun,
-      rasterToMatch = rasterToMatch
-    )
+  standAgeMap <- Cache(
+    prepInputs, ...,
+    maskWithRTM = maskWithRTM,
+    method = method,
+    datatype = datatype,
+    filename2 = filename2,
+    destinationPath = destinationPath,
+    url = ageURL,
+    fun = ageFun,
+    rasterToMatch = rasterToMatch
+  )
   standAgeMap[] <- asInteger(standAgeMap[])
 
   imputedPixID <- integer(0)
