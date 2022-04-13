@@ -369,8 +369,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @param fireField field used to rasterize fire polys. Only used if \code{firePerimeters}
 #'   is missing.
 #' @template rasterToMatch
-#' @param startTime date of the last fire year to be considered (e.g., start of fire
-#'   period counting backwords). If missing, last fire year available will be used.
+#' @template startTime
 #'
 #' @return a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
 #'  for which ages were corrected. If no corrections were applied the attribute vector is \code{integer(0)}.
@@ -548,6 +547,7 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 #'
 #' @param standAgeMap a raster layer stand age map
 #' @param firePerimeters the earliest fire date to allow
+#' @template startTime
 #'
 #' @return a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
 #'  for which ages were corrected. If no corrections were applied the attribute vector is \code{integer(0)}.
