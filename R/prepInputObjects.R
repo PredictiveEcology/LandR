@@ -381,6 +381,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @examples
 #' library(SpaDES.tools)
 #' library(raster)
+#' library(reproducible)
 #' randomPoly <- randomStudyArea(size = 1e7)
 #' randomPoly
 #' ras2match <- raster(res = 250, ext = extent(randomPoly), crs = crs(randomPoly))
@@ -500,9 +501,10 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @importFrom sf st_cast st_transform
 #' @importFrom magrittr %>%
 #'
-#' @example
+#' @examples
 #' library(SpaDES.tools)
 #' library(raster)
+#' library(reproducible)
 #' randomPoly <- randomStudyArea()
 #' randomPoly
 #' ras2match <- raster(res = 10, ext = extent(randomPoly), crs = crs(randomPoly))
@@ -559,9 +561,10 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 #' @importFrom sf st_cast st_transform
 #' @importFrom magrittr %>%
 #'
-#' @example
+#' @examples
 #' library(SpaDES.tools)
 #' library(raster)
+#' library(reproducible)
 #' randomPoly <- randomStudyArea(size = 1e7)
 #' randomPoly
 #' ras2match <- raster(res = 250, ext = extent(randomPoly), crs = crs(randomPoly))
