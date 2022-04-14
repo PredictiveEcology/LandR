@@ -3,6 +3,7 @@ bug reports https://github.com/PredictiveEcology/LandR/issues
 version 1.0.8
 =============
 * drop support for R 3.6
+* `prepInputsStandAgeMap`can now accept `firePerimeters` layer, avoiding inner download if layer is present.
 * new assertion (`assertSppVectors`) to check that species mathc between vectors (e.g. tables, colours and species list vector)
 * new function `sppHarmonize` that deals with the 3 potential ways for a user to input the `sim$sppEquiv`, `P(sim)$sppEquivCol`, and `sim$sppNameVector`
 * update Eliot's email address
