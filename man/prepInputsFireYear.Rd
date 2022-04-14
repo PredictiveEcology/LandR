@@ -35,7 +35,8 @@ cacheRepo <- file.path(tempDir, "cache")
 
 ## ideaally, get the firePerimenters layer first
 firePerimeters <- Cache(prepInputsFireYear,
-                        url = "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip",
+                        url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
+                        "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
                         fun = "sf::st_read",
                         destinationPath = tempDir,
                         rasterToMatch = ras2match)

@@ -58,7 +58,7 @@ corresponding \code{speciesEcoregion} listed in the \code{Provenance} column}
 \item{trackPlanting}{if true, planted cohorts in \code{cohortData} are tracked with \code{TRUE}
 in column 'planted'}
 
-\item{initialB}{the initial biomass of new cohorts. Defaults to ten.}
+\item{initialB}{the initial biomass of new cohorts. Defaults to ten, even if NA/NULL is passed.}
 
 \item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
 
