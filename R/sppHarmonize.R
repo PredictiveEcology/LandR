@@ -17,6 +17,8 @@
 #'
 #' @template vegLeadingProportion
 #'
+#' @template studyArea
+#'
 #' @return Returns a named list with the same names as the arguments. These should
 #'   likely be assigned to the `sim` object in the module following this function call.
 #' @export
@@ -28,10 +30,14 @@
 #' # P(sim)$sppEquivCol <- sppOuts$sppEquivCol
 #'
 sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
-                         vegLeadingProportion = 0) {
+                         vegLeadingProportion = 0, studyArea) {
   if (is.null(sppEquiv) && is.null(sppNameVector)) {
     sppNameConvention <- "KNN"
-    sppNameVector <-  Cache(LandR::speciesInStudyArea, studyArea)$speciesList
+    if (!missing(studyArea)) {
+      sppNameVector <-  Cache(LandR::speciesInStudyArea, studyArea)$speciesList
+    } else {
+      stop("Please pass studyArea polygon if not passing sppEquiv/sppNameVector")
+    }
   }
 
   if (is.null(sppEquiv)) {
