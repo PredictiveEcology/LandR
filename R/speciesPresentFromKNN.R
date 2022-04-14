@@ -110,7 +110,7 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 #' and \code{speciesList} is a character string containing the unique, sorted
 #' species on the \code{speciesRas}, for convenience.
 #' @export
-#' @param studyArea a vector map (e.g., SpatialPolygonsDataFrame)
+#' @template studyArea
 #' @param url A url to get a speciesPresence raster e.g., from \code{peciesPresentFromKNN}
 #' @param speciesPresentRas A factor raster where the character string is a string of
 #'   species names, separated by 2 underscores, sorted alphabetically. Can be produced
