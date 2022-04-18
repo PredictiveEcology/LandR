@@ -123,9 +123,9 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
 
     fig <- rasterVis::levelplot(
       meanLeadingChange,
+      main = paste("Proportional change in leading species under", climateScenario),
       sub = list(
-        paste0("Proportional change in leading species\n",
-               " Red: conversion to conifer\n",
+        paste0(" Red: conversion to conifer\n",
                " Blue: conversion to deciduous."),
         cex = 2
       ),
@@ -147,7 +147,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
       par.strip.text = list(cex = 0.8, lines = 1, col = "black")
     )
 
-    ## levelplot (trellis grahpics more generally) won't plot correctly inside loop w/o print()
+    ## levelplot (trellis graphics more generally) won't plot correctly inside loop w/o print()
     png(filename = fmeanLeadingChange_gg, width = 1000, height = 1000)
     print(fig)
     dev.off()
