@@ -550,7 +550,8 @@ assertStandAgeMapAttr <- function(standAgeMap,
       stop("standAgeMap should be a RasterLayer")
     }
     if (is.null(attr(standAgeMap, "imputedPixID"))) {
-      stop("standAgeMap should have a 'imputedPixID' attribute")
+      stop("standAgeMap should have a 'imputedPixID' attribute.",
+           " If no pixel ages were imputed, please set attribute to `integer(0)`")
     } else {
       if (!(is(attr(standAgeMap, "imputedPixID"), "numeric") |
             is(attr(standAgeMap, "imputedPixID"), "integer"))) {
