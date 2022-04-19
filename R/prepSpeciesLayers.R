@@ -181,7 +181,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 #' @param destinationPath TODO: description needed
 #' @param outputPath TODO: description needed
 #' @param url TODO: description needed; if \code{NULL}, the default, use the default source url
-#' @param studyArea TODO: description needed
+#' @template studyArea
 #' @template rasterToMatch
 #' @template sppEquiv
 #' @template sppEquivCol
