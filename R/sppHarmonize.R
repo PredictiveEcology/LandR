@@ -40,7 +40,10 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
     }
   }
 
-  if (is.null(sppEquiv)) {
+  # Catch both cases of sppEquiv is NULL or is an object with NROW 0 e.g., NULL data.table
+  if (is.null(sppEquiv))
+    sppEquiv <- data.table()
+  if (NROW(sppEquiv) == 0) {
     ## note that this step MUST come after the previous
     sppEquiv <- LandR::sppEquivalencies_CA
   }
