@@ -1659,7 +1659,8 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
   setkey(newPixelCohortData, ecoregionGroup, speciesCode)
   setkey(provenanceTable, ecoregionGroup, speciesCode)
 
-  newPixelCohortData <- provenanceTable[newPixelCohortData]
+  newPixelCohortData[, Provenance := NULL]
+  newPixelCohortData <- provenanceTable[newPixelCohortData] #this creates i.Provenance if column is not removed
 
   # ecoregionGroup should remain the same, Provenance will be a newly added column
 
