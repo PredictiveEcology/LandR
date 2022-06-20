@@ -132,10 +132,13 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
   for (sp in NA_Sp) {
     message("  running ", sp, ". Assigning NA, because absent from CASFRI")
     spRasts[[sp]] <- spRas
+    NAval <- 65535L
     spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                            filename = asPath(file.path(destinationPath,
                                                        paste0("CASFRI_", sp, ".tif"))),
-                           overwrite = TRUE, datatype = "INT2U")
+                           overwrite = TRUE, datatype = "INT2U", NAflag = NAval)
+    ## NAval values need to be converted back to NAs -- this approach is compatible with both terra and raster
+    spRasts[[sp]][spRasts[[sp]][] == NAval] <- NA_integer_
   }
 
   sppTODO <- unique(names(sppListMergesCASFRI))
@@ -154,10 +157,11 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     message("  ", sp, " writing to disk")
 
     startCRS <- crs(spRasts[[sp]])
+    NAval <- 255L
     spRasts[[sp]] <- writeRaster(spRasts[[sp]],
                                  filename = asPath(file.path(destinationPath,
                                                              paste0("CASFRI_", sp, ".tif"))),
-                                 datatype = "INT1U", overwrite = TRUE)
+                                 datatype = "INT1U", overwrite = TRUE, NAflag = NAval)
 
     if (is(spRasts[[sp]], "Raster")) {
       # Rasters need to have their disk-backed value assigned, but not shapefiles
@@ -167,6 +171,9 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
       # +proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0
       if (!identical(startCRS, crs(spRasts[[sp]])))
         crs(spRasts[[sp]]) <- startCRS
+
+      ## NAvals need to be converted back to NAs -- this approach is compatible with both terra and raster
+      spRasts[[sp]][spRasts[[sp]][] == NAval] <- NA_integer_
     }
     message("  ", sp, " done")
   }
@@ -628,10 +635,13 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(41, 42, 43)] <- 60
         spRasts[[sp]][PickellRaster[] %in% c(44)] <- 80
         spRasts[[sp]][PickellRaster[] %in% c(14, 34)] <- 40
+        NAval <- 255L
         spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                                filename = asPath(file.path(destinationPath,
                                                            paste0("Pickell_", sp, ".tif"))),
-                               overwrite = TRUE, datatype = "INT1U")
+                               overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
+        ## NAvals need to be converted back to NAs -- this approach is compatible with both terra and raster
+        spRasts[[sp]][spRasts[[sp]] == NAval] <- NA_integer_
       }
     }
 
@@ -641,10 +651,14 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(23, 26)] <- 60
         spRasts[[sp]][PickellRaster[] %in% c(22)] <- 80
         spRasts[[sp]][PickellRaster[] %in% c(32, 42)] <- 40
+
+        NAval <- 255L
         spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                                filename = asPath(file.path(destinationPath,
                                                            paste0("Pickell_", sp, ".tif"))),
-                               overwrite = TRUE, datatype = "INT1U")
+                               overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
+        ## NAvals need to be converted back to NAs -- this approach is compatible with both terra and raster
+        spRasts[[sp]][spRasts[[sp]] == NAval] <- NA_integer_
       }
     }
 
@@ -658,10 +672,14 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(31, 32, 34)] <- 60
         spRasts[[sp]][PickellRaster[] %in% c(33)] <- 80
         spRasts[[sp]][PickellRaster[] %in% c(23, 43)] <- 40
+
+        NAval <- 255L
         spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                                filename = asPath(file.path(destinationPath,
                                                            paste0("Pickell_", sp, ".tif"))),
-                               overwrite = TRUE, datatype = "INT1U")
+                               overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
+        ## NAvals need to be converted back to NAs -- this approach is compatible with both terra and raster
+        spRasts[[sp]][spRasts[[sp]] == NAval] <- NA_integer_
       }
     }
 
@@ -671,10 +689,14 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(14)] <- 60
         spRasts[[sp]][PickellRaster[] %in% c(11)] <- 80
         spRasts[[sp]][PickellRaster[] %in% c(31, 41)] <- 40
+
+        NAval <- 65535L
         spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                                filename = asPath(file.path(destinationPath,
                                                            paste0("Pickell_", sp, ".tif"))),
-                               overwrite = TRUE, datatype = "INT2U")
+                               overwrite = TRUE, datatype = "INT2U", NAflag = NAval)
+        ## NAval values need to be converted back to NAs -- this approach is compatible with both terra and raster
+        spRasts[[sp]][spRasts[[sp]] == NAval] <- NA_integer_
       }
     }
   }
