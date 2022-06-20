@@ -78,7 +78,7 @@ VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 Collate: 
     'LANDIS-II-tables.R'
     'LandR-package.R'
