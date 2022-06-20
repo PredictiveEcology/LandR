@@ -968,7 +968,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' @param HQ \code{data.table} column of whether \code{SPP} is present in HQ layers
 #' @param LQ \code{data.table} column of whether \code{SPP} is present in LQ layers
 #'
-#' @importFrom raster compareRaster crs extent filename res projectExtent raster
+#' @importFrom raster compareRaster crs extent filename res projectExtent raster NAvalue
 #' @importFrom raster writeRaster xmax xmin ymax ymin
 #' @keywords internal
 .overlay <- function(SPP, HQ, LQ, hqLarger, highQualityStack, lowQualityStack, #nolint
@@ -992,8 +992,8 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
           lowQualityStack[[SPP]] <- writeRaster(lowQualityStack[[SPP]],
                                                 filename = LQCurName,
                                                 datatype = "INT2U", NAflag = NAval)
-          ## NAval values need to be converted back to NAs -- this approach is compatible with both terra and raster
-          lowQualityStack[[SPP]][lowQualityStack[[SPP]] == NAval] <- NA_integer_
+          ## NAvals need to be converted back to NAs
+          NAvalue(lowQualityStack[[SPP]]) <- NAval
         }
 
         LQRastInHQcrs <- projectExtent(lowQualityStack, crs = crs(highQualityStack))
@@ -1056,8 +1056,8 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
                             overwrite = TRUE, NAflag = NAval)
       names(HQRast) <- SPP
 
-      ## NAval values need to be converted back to NAs -- this approach is compatible with both terra and raster
-      HQRast[HQRast[] == NAval] <- NA_integer_
+      ## NAvals need to be converted back to NAs
+      NAvalue(HQRast) <- NAval
 
       return(HQRast)
     } else {
