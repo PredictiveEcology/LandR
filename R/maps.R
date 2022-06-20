@@ -1056,7 +1056,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
                             overwrite = TRUE, NAflag = NAval)
       names(HQRast) <- SPP
 
-      ## 255 values need to be converted back to NAs -- this approach is compatible with both terra and raster
+      ## NAval values need to be converted back to NAs -- this approach is compatible with both terra and raster
       HQRast[HQRast[] == NAval] <- NA_integer_
 
       return(HQRast)

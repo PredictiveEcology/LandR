@@ -172,7 +172,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
       if (!identical(startCRS, crs(spRasts[[sp]])))
         crs(spRasts[[sp]]) <- startCRS
 
-      ## 255 values need to be converted back to NAs -- this approach is compatible with both terra and raster
+      ## NAvals need to be converted back to NAs -- this approach is compatible with both terra and raster
       spRasts[[sp]][spRasts[[sp]][] == NAval] <- NA_integer_
     }
     message("  ", sp, " done")
@@ -640,7 +640,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
                                filename = asPath(file.path(destinationPath,
                                                            paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
-        ## 255 values need to be converted back to NAs -- this approach is compatible with both terra and raster
+        ## NAvals need to be converted back to NAs -- this approach is compatible with both terra and raster
         spRasts[[sp]][spRasts[[sp]] == NAval] <- NA_integer_
       }
     }
@@ -657,7 +657,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
                                filename = asPath(file.path(destinationPath,
                                                            paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
-        ## 255 values need to be converted back to NAs -- this approach is compatible with both terra and raster
+        ## NAvals need to be converted back to NAs -- this approach is compatible with both terra and raster
         spRasts[[sp]][spRasts[[sp]] == NAval] <- NA_integer_
       }
     }
@@ -678,7 +678,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
                                filename = asPath(file.path(destinationPath,
                                                            paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
-        ## 255 values need to be converted back to NAs -- this approach is compatible with both terra and raster
+        ## NAvals need to be converted back to NAs -- this approach is compatible with both terra and raster
         spRasts[[sp]][spRasts[[sp]] == NAval] <- NA_integer_
       }
     }
