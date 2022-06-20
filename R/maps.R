@@ -987,9 +987,13 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
         if (!nzchar(filename(lowQualityStack[[SPP]]))) {
           LQCurName <- basename(tempfile(fileext = ".tif"))
           lowQualityStack[[SPP]][] <- as.integer(lowQualityStack[[SPP]][])
+
+          NAval <- 65535L
           lowQualityStack[[SPP]] <- writeRaster(lowQualityStack[[SPP]],
                                                 filename = LQCurName,
-                                                datatype = "INT2U")
+                                                datatype = "INT2U", NAflag = NAval)
+          ## NAval values need to be converted back to NAs -- this approach is compatible with both terra and raster
+          lowQualityStack[[SPP]][lowQualityStack[[SPP]] == NAval] <- NA_integer_
         }
 
         LQRastInHQcrs <- projectExtent(lowQualityStack, crs = crs(highQualityStack))
@@ -1045,11 +1049,16 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 
       ## complete missing HQ data with LQ data
       HQRast[NAs] <- LQRast[][NAs]
+      NAval <- 255L
       HQRast <- writeRaster(HQRast, datatype = "INT1U",
                             filename = file.path(destinationPath,
                                                  paste0(SPP, "_", outputFilenameSuffix, ".tif")),
-                            overwrite = TRUE)
+                            overwrite = TRUE, NAflag = NAval)
       names(HQRast) <- SPP
+
+      ## 255 values need to be converted back to NAs -- this approach is compatible with both terra and raster
+      HQRast[HQRast[] == NAval] <- NA_integer_
+
       return(HQRast)
     } else {
       ## if only HQ/LQ exist return one of them
