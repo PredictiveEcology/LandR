@@ -134,7 +134,7 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
              "'sppEquiv[[sppEquivCol]]'")
       }
     }
-    if (!all(names(sppColorVect) %in% sppEquiv[[sppEquivCol]])) {
+    if (!all(names(sppColorVect)[names(sppColorVect) != "Mixed"] %in% sppEquiv[[sppEquivCol]])) {
       message("'sppColorVect' names do not match 'sppEquivCol' (", sppEquivCol, ")",
               " and will be converted if possible.")
       tempNames <-  LandR::equivalentName(names(sppColorVect), df = sppEquiv,
