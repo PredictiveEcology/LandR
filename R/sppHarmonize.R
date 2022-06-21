@@ -119,11 +119,20 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
     sppColorVect <- sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
     message("No 'sppColorVect' provided; making one with colour palette: Accent")
   } else {
-    if (length(sppColorVect) != length(unique(sppEquiv[[sppEquivCol]])) ||
-        length(sppColorVect) != length(sppNameVector)) {
-      stop("Length of 'sppColorVect' differs from number species in final 'sppEquiv'.",
-           " Check species provided in 'sppColorVect', 'sppNameVector' and/or ",
-           "'sppEquiv[[sppEquivCol]]'")
+    if (grepl("Mixed", sppColorVect)) {
+      if (length(sppColorVect) != (length(unique(sppEquiv[[sppEquivCol]])) + 1) ||
+          length(sppColorVect) != (length(sppNameVector) + 1)) {
+        stop("Length of 'sppColorVect' differs from number species in final 'sppEquiv'.",
+             " Check species provided in 'sppColorVect', 'sppNameVector' and/or ",
+             "'sppEquiv[[sppEquivCol]]'")
+      }
+    } else {
+      if (length(sppColorVect) != length(unique(sppEquiv[[sppEquivCol]])) ||
+          length(sppColorVect) != length(sppNameVector)) {
+        stop("Length of 'sppColorVect' differs from number species in final 'sppEquiv'.",
+             " Check species provided in 'sppColorVect', 'sppNameVector' and/or ",
+             "'sppEquiv[[sppEquivCol]]'")
+      }
     }
     if (!all(names(sppColorVect) %in% sppEquiv[[sppEquivCol]])) {
       message("'sppColorVect' names do not match 'sppEquivCol' (", sppEquivCol, ")",
