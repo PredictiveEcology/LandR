@@ -798,7 +798,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @param inputDataTable A \code{data.table} with columns described above.
 #'
 #' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
-#'   represent percent cover by species, rescaled to sum up to 100\%.
+#'   represent percent cover by species, rescaled to sum up to 100%%.
 #'
 #' @param minCoverThreshold minimum total cover percentage necessary to consider the pixel
 #'  vegetated, or a cohort present in a pixel.
@@ -975,7 +975,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @param inputDataTable A \code{data.table} with columns described above.
 #'
 #' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
-#'   represent percent cover by species, rescaled to sum up to 100\%.
+#'   represent percent cover by species, rescaled to sum up to 100%%.
 #'
 #' @param imputeBadAgeModel statistical model used to impute ages in pixels with missing
 #'  data or with cover == 0. If set to NULL no imputation will be attempted, and pixels with

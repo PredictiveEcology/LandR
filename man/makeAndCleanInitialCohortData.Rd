@@ -18,7 +18,7 @@ makeAndCleanInitialCohortData(
 \item{inputDataTable}{A \code{data.table} with columns described above.}
 
 \item{sppColumns}{A vector of the names of the columns in \code{inputDataTable} that
-represent percent cover by species, rescaled to sum up to 100\\%.}
+represent percent cover by species, rescaled to sum up to 100\%\%.}
 
 \item{imputeBadAgeModel}{statistical model used to impute ages in pixels with missing
 data or with cover == 0. If set to NULL no imputation will be attempted, and pixels with
