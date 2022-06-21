@@ -16,7 +16,7 @@ assertSppVectors(
 \item{sppEquiv}{an table with a column containing species names}
 
 \item{sppNameVector}{A character vector of species to use. These species must all
-be from one naming convention, i.e., from one column in the `sppEquiv`.}
+be from one naming convention, i.e., from one column in the \code{sppEquiv}.}
 
 \item{sppColorVect}{A named vector of colours to use for plotting.
 The names must conform with species name convention used
@@ -33,8 +33,8 @@ ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \description{
-This assertion compares the species listed in the `sppEquiv`
-table (under the `sppEquivCol` column), with species listed
-in the `sppNameVector` and `sppColorVect`.
+This assertion compares the species listed in the \code{sppEquiv}
+table (under the \code{sppEquivCol} column), with species listed
+in the \code{sppNameVector} and \code{sppColorVect}.
 The comparison excludes the "Mixed" type, in case it exists.
 }

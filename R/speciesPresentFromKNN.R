@@ -105,16 +105,16 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 #' from Canadian Boreal Forests, but a different factor raster can be passed e.g.,
 #' from \code{speciesPresentFromKNN}.
 #'
-#' @return
-#' A named list of length 2: \code{speciesRas} is a factor \code{RasterLayer}
-#' and \code{speciesList} is a character string containing the unique, sorted
-#' species on the \code{speciesRas}, for convenience.
-#' @export
 #' @template studyArea
 #' @param url A url to get a speciesPresence raster e.g., from \code{peciesPresentFromKNN}
 #' @param speciesPresentRas A factor raster where the character string is a string of
 #'   species names, separated by 2 underscores, sorted alphabetically. Can be produced
 #'   with \code{speciesPresentFromKNN}
+#'
+#' @return
+#' A named list of length 2: \code{speciesRas} is a factor \code{RasterLayer}
+#' and \code{speciesList} is a character string containing the unique, sorted
+#' species on the \code{speciesRas}, for convenience.
 #'
 #' @export
 #' @importFrom pemisc factorValues2

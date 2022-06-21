@@ -55,19 +55,19 @@ A list with a modified \code{pixelCohortData}, \code{cohortData}, and \code{pixe
 }
 \description{
 Takes a \code{pixelCohortData} table (see \code{makeAndCleanInitialCohortData}),
-  the \code{speciesEcoregion} list and returns a modified \code{pixelCohortData} and
-  the \code{cohortData} tables to be used in the simulation.
-  This function mainly removes unnecessary columns from \code{pixelCohortData},
-  subsets pixels with \code{biomass > 0}, generates \code{pixelGroups},
-  and adds \code{ecoregionGroup} and \code{totalBiomass} columns to \code{pixelCohortData}.
-  \code{cohortData} is then created by subsetting unique combinations of \code{pixelGroup} and
-  whatever columns are listed in \code{columnsForPixelGroups}.
-  The resulting \code{cohortData} table has the following columns:
+the \code{speciesEcoregion} list and returns a modified \code{pixelCohortData} and
+the \code{cohortData} tables to be used in the simulation.
+This function mainly removes unnecessary columns from \code{pixelCohortData},
+subsets pixels with \code{biomass > 0}, generates \code{pixelGroups},
+and adds \code{ecoregionGroup} and \code{totalBiomass} columns to \code{pixelCohortData}.
+\code{cohortData} is then created by subsetting unique combinations of \code{pixelGroup} and
+whatever columns are listed in \code{columnsForPixelGroups}.
+The resulting \code{cohortData} table has the following columns:
 \itemize{
-  \item \code{speciesCode} (factor)
-  \item \code{ecoregionGroup} (factor)
-  \item \code{pixelGroup} (integer)
-  \item \code{age} (integer)
-  \item \code{B} (integer)
+\item \code{speciesCode} (factor)
+\item \code{ecoregionGroup} (factor)
+\item \code{pixelGroup} (integer)
+\item \code{age} (integer)
+\item \code{B} (integer)
 }
 }

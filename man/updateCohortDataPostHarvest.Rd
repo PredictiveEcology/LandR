@@ -58,7 +58,7 @@ corresponding \code{speciesEcoregion} listed in the \code{Provenance} column}
 \item{trackPlanting}{if true, planted cohorts in \code{cohortData} are tracked with \code{TRUE}
 in column 'planted'}
 
-\item{initialB}{the initial biomass of new cohorts. Defaults to ten.}
+\item{initialB}{the initial biomass of new cohorts. Defaults to ten, even if NA/NULL is passed.}
 
 \item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
 
@@ -82,9 +82,9 @@ There are some checks internally for consistency.
 \details{
 Does the following:
 \enumerate{
-  \item add new cohort data into \code{cohortData};
-  \item assign initial \code{B} and \code{age} for new cohort;
-  \item assign the new \code{pixelGroup} to the pixels that have new cohort;
-  \item update the \code{pixelGroup} map.
+\item add new cohort data into \code{cohortData};
+\item assign initial \code{B} and \code{age} for new cohort;
+\item assign the new \code{pixelGroup} to the pixels that have new cohort;
+\item update the \code{pixelGroup} map.
 }
 }

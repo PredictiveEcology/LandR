@@ -25,16 +25,16 @@ e.g., 34, 35, 36 on LCC2005, which are burned young, burned 10 year, and cities.
 \code{speciesCode}, \code{initialEcoregionCode} and \code{pixelIndex}.
 \code{pixelIndex} is the pixel id for each line in the \code{data.table};
 \code{speciesCode} is the species name in the pixel (can have more than one
-  species per pixel, so multiple rows per pixel); and,
+species per pixel, so multiple rows per pixel); and,
 \code{initialEcoregionCode} is the unique codes that are "available" to be
-  used as a replacement for \code{classesToReplace}. \code{initialEcoregionCode}
-  must be a character vector, with one or no "_" used as a separator, with the last
-  component being the Land Cover Class that matches \code{classesToReplace}, e.g.,
-  \code{"242_18"}. If there is no "_" in this code, then the codes must match the
-  \code{classesToReplace} exactly, e.g., \code{"11"}.
-  If \code{pixelIndex} is missing, the function will fill it
-  with \code{seq(ncell(rstLCC))}. If \code{speciesCode} is missing, the function
-  will replace it with a dummy value (\code{"allSpecies"}).}
+used as a replacement for \code{classesToReplace}. \code{initialEcoregionCode}
+must be a character vector, with one or no "\emph{" used as a separator, with the last
+component being the Land Cover Class that matches \code{classesToReplace}, e.g.,
+\code{"242_18"}. If there is no "}" in this code, then the codes must match the
+\code{classesToReplace} exactly, e.g., \code{"11"}.
+If \code{pixelIndex} is missing, the function will fill it
+with \code{seq(ncell(rstLCC))}. If \code{speciesCode} is missing, the function
+will replace it with a dummy value (\code{"allSpecies"}).}
 
 \item{theUnwantedPixels}{An optional vector of pixel IDs that need to be changed.
 If not provided, then pixels to change will be taken from the match between

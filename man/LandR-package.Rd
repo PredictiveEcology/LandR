@@ -11,17 +11,14 @@ These models simulate forest vegetation dynamics based on LANDIS-II, and
 incorporate fire and insect disturbance, as well as other important ecological
 processes. Models are implemented as 'SpaDES' modules.
 }
-\details{
-------------------------------------------------------------------------------------------
-}
 \section{Package options}{
 
 
 \code{LandR} packages use the following \code{\link{options}} to configure behaviour:
 
 \itemize{
-  \item \code{LandR.assertions}: If \code{TRUE}, additional code checks are run
-        during function calls. Default \code{FALSE}.
+\item \code{LandR.assertions}: If \code{TRUE}, additional code checks are run
+during function calls. Default \code{FALSE}.
 }
 }
 
@@ -40,6 +37,8 @@ Useful links:
 Authors:
 \itemize{
   \item Alex M Chubaty \email{achubaty@for-cast.ca} (\href{https://orcid.org/0000-0001-7146-8135}{ORCID})
+  \item Ceres Barros \email{ceres.barros@ubc.ca} (\href{https://orcid.org/0000-0003-4036-977X}{ORCID})
+  \item Ian M S Eddy \email{ian.eddy@nrcan-rncan.gc.ca} (\href{https://orcid.org/0000-0001-7397-2116}{ORCID})
 }
 
 Other contributors:

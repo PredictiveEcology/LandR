@@ -86,7 +86,7 @@ A raster stack of percent cover layers by species.
 \description{
 \code{makeVegTypeMap} is a wrapper around \code{vegTypeMapGenerator}
 that works from a species stack of percent cover. These do not have
-to sum to 100%
+to sum to 100\%
 
 Downloads the 2011 kNN species cover layers from the Canadian Forestry Service,
 National Inventory System, for validation.

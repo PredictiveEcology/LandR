@@ -64,7 +64,6 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
            " Please provide conforming 'sppEquivCol' and 'sppEquiv',",
            " or a column that exists in 'LandR::sppEquivalencies_CA'")
     }
-
   }
 
   if (is.null(sppNameVector)) {

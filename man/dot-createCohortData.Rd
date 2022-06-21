@@ -16,7 +16,7 @@
 \item{inputDataTable}{A \code{data.table} with columns described above.}
 
 \item{sppColumns}{A vector of the names of the columns in \code{inputDataTable} that
-represent percent cover by species, rescaled to sum up to 100\%.}
+represent percent cover by species, rescaled to sum up to 100\\%.}
 
 \item{minCoverThreshold}{minimum total cover percentage necessary to consider the pixel
 vegetated, or a cohort present in a pixel.}
@@ -26,7 +26,7 @@ ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \value{
-cohortData \code{data.table} with attribute "imputedPixID"
+\code{cohortData} (\code{data.table}) with attribute \code{"imputedPixID"}
 }
 \description{
 Internal function used by \code{\link{makeAndCleanInitialCohortData}}.
