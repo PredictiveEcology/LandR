@@ -7,14 +7,14 @@ utils::globalVariables(c(
 
 #' Define flammability map
 #'
-#' @param LandCoverClassifiedMap A \code{Raster} that represents land cover
+#' @param LandCoverClassifiedMap A `Raster` that represents land cover
 #' (e.g., Land Cover Classified map from 2005 or 2010 from the Canadian Forest Service).
 #'
-#' @param nonFlammClasses numeric vector defining which classes in \code{LandCoverClassifiedMap}.
+#' @param nonFlammClasses numeric vector defining which classes in `LandCoverClassifiedMap`.
 #'
 #' @param mask A raster to use as a mask (see \code{\link[raster]{mask}}).
 #'
-#' @param filename2 See \code{\link[reproducible]{postProcess}}. Default \code{NULL}.
+#' @param filename2 See \code{\link[reproducible]{postProcess}}. Default `NULL`.
 #'
 #' @export
 #' @importFrom grDevices colorRampPalette
@@ -60,9 +60,9 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
   rstFlammable
 }
 
-#' Simple \code{prepInputs} for Canadian LCC data
+#' Simple `prepInputs` for Canadian LCC data
 #'
-#' A wrapper around \code{prepInputs} for the Canadian Land Cover Classification product(s).
+#' A wrapper around `prepInputs` for the Canadian Land Cover Classification product(s).
 #'
 #' @note As of May 2021, NRCAN no longer provides/hosts the LCC2005 data.
 #' A privately hosted version of the data is available to maintain backwards compatibility,
@@ -123,17 +123,17 @@ prepInputsLCC <- function(year = 2010,
 #' Make a vegetation type map from a stack of species abundances
 #'
 #' @description
-#' \code{makeVegTypeMap} is a wrapper around \code{vegTypeMapGenerator}
+#' `makeVegTypeMap` is a wrapper around `vegTypeMapGenerator`
 #' that works from a species stack of percent cover. These do not have
 #' to sum to 100%
 #'
-#' @param speciesStack A \code{RasterStack} of species abundances.
-#'                     This must be one \code{RasterLayer} per species.
+#' @param speciesStack A `RasterStack` of species abundances.
+#'                     This must be one `RasterLayer` per species.
 #' @template vegLeadingProportion
-#' @param mixed Deprecated. See \code{mixedType} argument to \code{vegTypeMapGenerator}.
-#' @param ... Other arguments passed to \code{vegTypeMapGenerator}, i.e.,
-#'   \code{vegLeadingProportion}, \code{mixedType}, \code{sppEquiv},
-#'   \code{sppEquivCol}, \code{colors}, \code{pixelGroupColName}, and \code{doAssertion}
+#' @param mixed Deprecated. See `mixedType` argument to `vegTypeMapGenerator`.
+#' @param ... Other arguments passed to `vegTypeMapGenerator`, i.e.,
+#'   `vegLeadingProportion`, `mixedType`, `sppEquiv`,
+#'   `sppEquivCol`, `colors`, `pixelGroupColName`, and `doAssertion`
 #'
 #' @return A factor raster
 #'
@@ -153,7 +153,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 
 #' Generate vegetation type map
 #'
-#' @param x Either a \code{cohortData} object or a \code{speciesCover} \code{RasterStack}
+#' @param x Either a `cohortData` object or a `speciesCover` `RasterStack`
 #'
 #' @template pixelGroupMap
 #'
@@ -168,9 +168,9 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 #' @template sppEquivCol
 #'
 #' @param colors A named vector of colour codes. The names MUST match the names of species
-#'               in \code{cohortData$speciesCode}, plus an optional "Mixed" colour.
+#'               in `cohortData$speciesCode`, plus an optional "Mixed" colour.
 #'
-#' @param pixelGroupColName Name of the column in \code{pixelGroup} to use.
+#' @param pixelGroupColName Name of the column in `pixelGroup` to use.
 #'
 #' @template doAssertion
 #'
@@ -571,9 +571,9 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #'
 #' @param year which year's layers should be retrieved? One of 2001 (default) or 2011.
 #'
-#' @param knnNamesCol character string indicating the column in \code{sppEquiv}
+#' @param knnNamesCol character string indicating the column in `sppEquiv`
 #'                    containing kNN species names.
-#'                    Default \code{"KNN"} for when \code{sppEquivalencies_CA} is used.
+#'                    Default `"KNN"` for when `sppEquivalencies_CA` is used.
 #'
 #' @template sppEquivCol
 #'
@@ -582,12 +582,12 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #'               Defaults to 10.
 #'
 #' @param url the source url for the data, default is KNN 2011 dataset
-#' \url{paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",}
-#' \url{"canada-forests-attributes_attributs-forests-canada/2011-",}
-#' \url{"attributes_attributs-2011/")}
+#' <paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",>
+#' <"canada-forests-attributes_attributs-forests-canada/2011-",>
+#' <"attributes_attributs-2011/")>
 #'
 #' @param ... Additional arguments passed to \code{\link[reproducible]{Cache}}
-#'            and \code{\link{equivalentName}}. Also valid: \code{outputPath}, and \code{studyAreaName}.
+#'            and \code{\link{equivalentName}}. Also valid: `outputPath`, and `studyAreaName`.
 #'
 #' @return A raster stack of percent cover layers by species.
 #'
@@ -849,14 +849,14 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
 #'
 #' @template sppEquiv
 #'
-#' @param knnNamesCol character string indicating the column in \code{sppEquiv}
+#' @param knnNamesCol character string indicating the column in `sppEquiv`
 #'                    containing kNN species names.
-#'                    Default \code{"KNN"} for when \code{sppEquivalencies_CA} is used.
+#'                    Default `"KNN"` for when `sppEquivalencies_CA` is used.
 #'
 #' @template sppEquivCol
 #'
 #' @param thresh the minimum number of pixels where the species must have
-#'               \code{biomass > 0} to be considered present in the study area.
+#'               `biomass > 0` to be considered present in the study area.
 #'               Defaults to 1.
 #'
 #' @param url the source url for the data, passed to \code{\link[reproducible]{prepInputs}}
@@ -910,9 +910,9 @@ sumRastersBySpecies <- function(speciesLayers, layersToSum, filenameToSave, newL
 #' @param highQualityStack      high quality list/stack of rasters
 #'                              (will be used preferentially)
 #' @param lowQualityStack       low quality list/stack of rasters
-#'                              (will be used to fill \code{NA}s in \code{highQualityStack})
+#'                              (will be used to fill `NA`s in `highQualityStack`)
 #' @param outputFilenameSuffix  file suffix to save raster if there was overlaying.
-#'                              Defaults to \code{"overlay"}.
+#'                              Defaults to `"overlay"`.
 #' @param destinationPath       directory for saved rasters
 #'
 #' @export
@@ -958,15 +958,15 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 
 #' Overlaying function
 #'
-#' Used internally in \code{overlayStacks}. Function to be applied to each row
-#' of a \code{data.table} containing information of whether the species layer
+#' Used internally in `overlayStacks`. Function to be applied to each row
+#' of a `data.table` containing information of whether the species layer
 #' exists in the HQ and LQ data.
 #' Only overlays if data exists in both layers, otherwise returns the layer with data.
 #'
 #' @inheritParams overlayStacks
-#' @param SPP \code{data.table} column of species layer name
-#' @param HQ \code{data.table} column of whether \code{SPP} is present in HQ layers
-#' @param LQ \code{data.table} column of whether \code{SPP} is present in LQ layers
+#' @param SPP `data.table` column of species layer name
+#' @param HQ `data.table` column of whether `SPP` is present in HQ layers
+#' @param LQ `data.table` column of whether `SPP` is present in LQ layers
 #'
 #' @importFrom raster compareRaster crs extent filename res projectExtent raster
 #' @importFrom raster writeRaster xmax xmin ymax ymin
@@ -1075,7 +1075,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 
 #' Merge species percent-cover rasters
 #'
-#' Used internally in \code{overlayStacks}.
+#' Used internally in `overlayStacks`.
 #'
 #' @param sppMerge TODO
 #' @param speciesLayers stack of species layers rasters
@@ -1119,13 +1119,13 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
   return(speciesLayers)
 }
 
-#' Rasterize polygons using \code{fasterize}
+#' Rasterize polygons using `fasterize`
 #'
 #' @param sp a shapefile to rasterize
 #' @param raster the template raster to use
 #' @param fieldName the field to use (will be ignored if the shapefile has no fields)
 #'
-#' @return \code{RasterLayer}
+#' @return `RasterLayer`
 #'
 #' @export
 #' @importFrom fasterize fasterize
@@ -1147,13 +1147,13 @@ fasterizeFromSp <- function(sp, raster, fieldName) {
 #' Aggregate a raster
 #'
 #' Uses \pkg{data.table} to perform aggregation calculations, which is faster than
-#' \code{raster::aggregate}.
+#' `raster::aggregate`.
 #'
-#' @param ras \code{RasterLayer} to aggregate
-#' @param newRas \code{RasterLayer} to match
+#' @param ras `RasterLayer` to aggregate
+#' @param newRas `RasterLayer` to match
 #' @param fn function to use to aggregate pixel values
 #'
-#' @return \code{RasterLayer}
+#' @return `RasterLayer`
 #'
 #' @export
 #' @importFrom data.table data.table

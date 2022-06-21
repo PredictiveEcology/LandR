@@ -11,18 +11,18 @@ landisIIrepo <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/"
                        "Extensions-Succession/master/biomass-succession-archive/",
                        "trunk/tests/v6.0-2.0/")
 
-#' Download and prepare a species traits table for use with \code{Biomass_core} module
+#' Download and prepare a species traits table for use with `Biomass_core` module
 #'
-#' \code{prepSpeciesTable}
+#' `prepSpeciesTable`
 #'
 #' @note This one is tailored to Canadian forests (?)
 #'
 #' @param url If NULL (the default), uses one from D. Cyr's LANDIS-II files:
-#' \url{https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
+#' <https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv>).
 #'
 #' @param dPath The destination path.
 #'
-#' @param cacheTags User tags to pass to \code{Cache}.
+#' @param cacheTags User tags to pass to `Cache`.
 #'
 #' @export
 #' @importFrom data.table data.table
@@ -58,16 +58,16 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
 #'
 #' @param speciesLayers Deprecated.
 #' @param areas A character vector of areas to use. Can be one or more of
-#'   \code{c("Acadian", "AM", "NorthShore", "BP", "BSE", "BSW", "LSJ", "MC", "PM", "WestON")}.
+#'   `c("Acadian", "AM", "NorthShore", "BP", "BSE", "BSW", "LSJ", "MC", "PM", "WestON")`.
 #'   If it is more than one, this function will take the minimum value, within a species.
 #'   These are short versions of the Canada Ecoprovinces.
-#'   Currently defaults to \code{c("BSW", "BP", "MC")} for historical reasons.
+#'   Currently defaults to `c("BSW", "BP", "MC")` for historical reasons.
 #'
 #' @template sppEquiv
 #'
 #' @template sppEquivCol
 #'
-#' @return A \code{data.table} with columns ... TODO
+#' @return A `data.table` with columns ... TODO
 #'
 #' @export
 #' @rdname speciesTable
@@ -112,13 +112,13 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #'
 #' Changes longevity and shade tolerance values in the species table.
 #' Longevity values are changed to follow Burton & Cumming (1995) for the following species:
-#' \emph{Abies balsamea}, \emph{Abies lasiocarpa}, \emph{Betula papyrifera}, \emph{Larix laricina},
-#' \emph{Larix occidentalis}, \emph{Picea engelmannii}, \emph{Picea glauca}, \emph{Picea mariana},
-#' \emph{Pinus banksiana}, \emph{Pinus contorta}, \emph{Pinus resinosa}, \emph{Pinus strobus},
-#' \emph{Populus balsamifera v. balsamifera}, \emph{Populus tremuloides}, \emph{Pseudotsuga menziesii var. glauca},
-#' \emph{Pseudotsuga menziesii}, \emph{Thuja plicata}, \emph{Tsuga heterophylla},
-#' \emph{Tsuga mertensiana x heterophylla}, and only for the  Boreal Shield West (BSW), Boreal Plains (BP)
-#'  and Montane Cordillera (MC) \code{speciesTable$Area}s.
+#' *Abies balsamea*, *Abies lasiocarpa*, *Betula papyrifera*, *Larix laricina*,
+#' *Larix occidentalis*, *Picea engelmannii*, *Picea glauca*, *Picea mariana*,
+#' *Pinus banksiana*, *Pinus contorta*, *Pinus resinosa*, *Pinus strobus*,
+#' *Populus balsamifera v. balsamifera*, *Populus tremuloides*, *Pseudotsuga menziesii var. glauca*,
+#' *Pseudotsuga menziesii*, *Thuja plicata*, *Tsuga heterophylla*,
+#' *Tsuga mertensiana x heterophylla*, and only for the  Boreal Shield West (BSW), Boreal Plains (BP)
+#'  and Montane Cordillera (MC) `speciesTable$Area`s.
 #' Note that BSW and BP areas correspond more closely to the region considered in Table 2 of
 #' Burton & Cumming (1995), while MC will correspond to both tables.
 #'
@@ -126,13 +126,13 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #' to reflect western boreal shade tolerances better.
 #'
 #' When different longectivity/shade tolerance trait values exist for a given species, the minimum
-#' value across \code{Area}'s (BSW, BP, MC) is kept.
+#' value across `Area`'s (BSW, BP, MC) is kept.
 #'
-#' ATTENTION: if none of species in \code{species} are from BSW, BP or MC area this function will not
+#' ATTENTION: if none of species in `species` are from BSW, BP or MC area this function will not
 #' change any values.
 #'
 #' All other species/Area trait values follow Dominic Cyr and Yan Boulanger's trait values available at:
-#' (\url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
+#' (<https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv>).
 #'
 #'
 #' @template species
@@ -143,7 +143,7 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #'
 #' @template sppEquivCol
 #'
-#' @return An updated species \code{data.table}
+#' @return An updated species `data.table`
 #'
 #' @export
 #' @importFrom data.table data.table
@@ -226,24 +226,24 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   return(species)
 }
 
-#' Download and prepare a species traits table for use with \code{Biomass_core} module
+#' Download and prepare a species traits table for use with `Biomass_core` module
 #'
 #' TODO: add detailed description
 #'
 #' @note This one is tailored to Canadian forests (?)
 #'
 #' @param url If NULL (the default), uses one from the LANDIS-II project:
-#' \url{https://github.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/biomass-succession_test.txt"}).
+#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/biomass-succession_test.txt">).
 #'
 #' @param dPath The destination path.
 #'
-#' @param cacheTags User tags to pass to \code{Cache}.
+#' @param cacheTags User tags to pass to `Cache`.
 #'
 #' @export
 #' @importFrom data.table data.table setcolorder
 #' @importFrom reproducible asPath Cache prepInputs
 #'
-#' @return A \code{data.table} with columns ... TODO
+#' @return A `data.table` with columns ... TODO
 #'
 #' @export
 #' @rdname prepInputsSpecies
@@ -341,13 +341,13 @@ prepInputsMainInput <- function(url = NULL, dPath = tempdir(), cacheTags = NULL)
 #' Get the dummy ecoregion table from LANDIS-II examples.
 #'
 #' @param url If NULL (the default), uses one from the LANDIS-II project:
-#' \url{https://github.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/ecoregion.txt"}).
+#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/ecoregion.txt">).
 #'
 #' @param dPath The destination path.
 #'
-#' @param cacheTags User tags to pass to \code{Cache}.
+#' @param cacheTags User tags to pass to `Cache`.
 #'
-#' @return A \code{data.table}
+#' @return A `data.table`
 #'
 #' @export
 #' @importFrom data.table data.table
@@ -387,13 +387,13 @@ prepInputsEcoregion <- function(url = NULL, dPath, cacheTags = NULL) {
 #' Get the dummy ecoregion table from LANDIS-II examples.
 #'
 #' @param url If NULL (the default), uses one from the LANDIS-II project:
-#' \url{https://github.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/biomass-succession-dynamic-inputs_test.txt"}).
+#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/biomass-succession-dynamic-inputs_test.txt">).
 #'
 #' @param dPath The destination path.
 #'
-#' @param cacheTags User tags to pass to \code{Cache}.
+#' @param cacheTags User tags to pass to `Cache`.
 #'
-#' @return A \code{data.table}
+#' @return A `data.table`
 #'
 #' @export
 #' @importFrom data.table data.table

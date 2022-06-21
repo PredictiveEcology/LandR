@@ -5,11 +5,11 @@ utils::globalVariables(c(".", ":=", "X1", "X2", "X3", "X4", "X5", "maxMaxB", "pr
 #' @template currentTime
 #' @template cohortData
 #' @template speciesEcoregion
-#' @param minRelativeB a \code{data.frame} with  the cut points to classify stand shadiness.
+#' @param minRelativeB a `data.frame` with  the cut points to classify stand shadiness.
 #'
 #' @seealso  \code{\link{makeMinRelativeB}}
 #'
-#' @return \code{cohortData} table with a \code{siteShade} column
+#' @return `cohortData` table with a `siteShade` column
 #'
 #' @export
 #' @importFrom data.table data.table set setkey

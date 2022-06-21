@@ -8,7 +8,7 @@ utils::globalVariables(c(
 #' dispersal approach.
 #' It is the "potentially receiving" cell that looks around itself for potential seed sources.
 #' If it finds a single seed source, that passes the probability function described by the
-#' \code{dispersalFn}.
+#' `dispersalFn`.
 #' If this passes a comparison to a uniform random draw, then the receiving cell is deemed to have
 #' a "successful" dispersal for that species.
 #' This function can therefore only be used for a relatively specific situation
@@ -17,14 +17,14 @@ utils::globalVariables(c(
 #' a receiving cell has lots of seed sources around it vs. a single seed source.
 #' The difference will come with a higher probability of successfully receiving a "seed".
 #'
-#' \code{dispersalFn} (temporarily unused as code is converted to Rcpp -- the
-#' default \code{dispersalFn} is hard coded within the \code{spiralSeedDispersal}
+#' `dispersalFn` (temporarily unused as code is converted to Rcpp -- the
+#' default `dispersalFn` is hard coded within the `spiralSeedDispersal`
 #' function that uses C++) must be an expression that returns a probability
 #' distribution. Because it is a dispersal kernel, it must be a probability
 #' distribution. The expression that can take an argument named "dis" (without
 #' quotes) as this will be calculated internally and represents the distance
 #' from the initial (receiving) pixel and all active pixels within that cluster
-#' of active pixels. \code{SpaDES} includes the \code{\link{Ward}} kernel as
+#' of active pixels. `SpaDES` includes the \code{\link{Ward}} kernel as
 #' defined in the LANDIS-II documentation.
 #'
 #' @param dtSrc data.table
@@ -34,11 +34,11 @@ utils::globalVariables(c(
 #' @param pixelGroupMap map
 #'
 #' @param speciesTable A data.table that should have at least 3 columns:
-#'   \code{speciesCode} an integer representation of species, \code{seeddistance_max}
-#'   a numeric with the maximum seed dispersal distance and \code{seeddistance_eff}
+#'   `speciesCode` an integer representation of species, `seeddistance_max`
+#'   a numeric with the maximum seed dispersal distance and `seeddistance_eff`
 #'   the "effective" seed dispersal distance. These latter two are
 #'   parameters passed to Ward dispersal kernel. This data.table can come from
-#'   a \code{species} table from a LANDIS project.
+#'   a `species` table from a LANDIS project.
 #'
 #' @param dispersalFn  An expression that can take a "dis" argument. See details.
 #'   Default is "Ward" (temporarily unused, as it is hard coded inside Rcpp function)
@@ -52,13 +52,13 @@ utils::globalVariables(c(
 #'
 #' @param successionTimestep integer. The time in timeunits between succession (i.e., dispersal) events.
 #'
-#' @param verbose Numeric. \code{0} is not verbose, with increasing numbers indicating
+#' @param verbose Numeric. `0` is not verbose, with increasing numbers indicating
 #'   increasing levels of verbosity (currently up to 2)
 #'
 #' @param ...   Additional parameters. Currently none
 #'
 #' @return A numeric vector of raster pixel indices, in the same resolution and extent as
-#' \code{seedSrc} raster.
+#' `seedSrc` raster.
 #'
 #' @importFrom magrittr %>%
 #' @importFrom raster xyFromCell focalWeight rowColFromCell cellFromRowCol
@@ -332,9 +332,9 @@ speciesComm <- function(num, sc) {
 #' @param dist A vector of distances to evaluate kernel against
 #' @param cellSize A numeric, length 1, of the cell resolution (e.g., res(raster))
 #' @param effDist A vector of effective distance (parameter in kernel),
-#'   with same length as \code{dist}
+#'   with same length as `dist`
 #' @param maxDist A vector of maximum distance (parameter in kernel),
-#'   with same length as \code{dist}
+#'   with same length as `dist`
 #' @param k A parameter in the kernel
 #' @param b A parameter in the kernel
 #' @param algo Either 1 or 2. 2 is faster and is default. 1 is "simpler code" as it

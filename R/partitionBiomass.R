@@ -2,10 +2,10 @@ utils::globalVariables(c("Broadleaf", "cover", "cover2", "decid", "LandR", "tota
 
 #' Partition biomass according to cover estimates
 #'
-#' This function will partition \code{totalBiomass} into each cohort.
-#' It will discount deciduous cover, if \code{x < 1}.
+#' This function will partition `totalBiomass` into each cohort.
+#' It will discount deciduous cover, if `x < 1`.
 #' @param x The ratio for deciduous cover:biomass, where conifer cover:biomass = 1
-#' @param pixelCohortData A full \code{pixelCohortData} object (i.e., not \code{cohortData})
+#' @param pixelCohortData A full `pixelCohortData` object (i.e., not `cohortData`)
 #' @export
 partitionBiomass <- function(x = 1, pixelCohortData) {
   if (!"decid" %in% colnames(pixelCohortData)) {

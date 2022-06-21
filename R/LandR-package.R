@@ -1,4 +1,4 @@
-#' \code{LandR} package
+#' `LandR` package
 #'
 #' Utilities for 'LandR' suite of landscape simulation models.
 #' These models simulate forest vegetation dynamics based on LANDIS-II, and
@@ -7,11 +7,11 @@
 #'
 #' @section Package options:
 #'
-#' \code{LandR} packages use the following \code{\link{options}} to configure behaviour:
+#' `LandR` packages use the following \code{\link{options}} to configure behaviour:
 #'
 #' \itemize{
-#'   \item \code{LandR.assertions}: If \code{TRUE}, additional code checks are run
-#'         during function calls. Default \code{FALSE}.
+#'   \item `LandR.assertions`: If `TRUE`, additional code checks are run
+#'         during function calls. Default `FALSE`.
 #' }
 #'
 #' @import methods
