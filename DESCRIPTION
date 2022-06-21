@@ -8,13 +8,17 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2022-04-12
-Version: 1.0.7.9017
+Date: 2022-06-20
+Version: 1.0.7.9019
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
     person("Alex M", "Chubaty", email = "achubaty@for-cast.ca",
            role = c("aut"), comment = c(ORCID = "0000-0001-7146-8135")),
+    person("Ceres", "Barros", email = "ceres.barros@ubc.ca",
+           role = c("aut"), comment = c(ORCID = "0000-0003-4036-977X")),
+    person("Ian M S", "Eddy", email = "ian.eddy@nrcan-rncan.gc.ca",
+           role = c("aut"), comment = c(ORCID = "0000-0001-7397-2116")),           
     person("Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources Canada",
            role = "cph")
     )
