@@ -24,7 +24,7 @@ utils::globalVariables(c(
 #' distribution. The expression that can take an argument named "dis" (without
 #' quotes) as this will be calculated internally and represents the distance
 #' from the initial (receiving) pixel and all active pixels within that cluster
-#' of active pixels. `SpaDES` includes the \code{\link{Ward}} kernel as
+#' of active pixels. `SpaDES` includes the [Ward()] kernel as
 #' defined in the LANDIS-II documentation.
 #'
 #' @param dtSrc data.table

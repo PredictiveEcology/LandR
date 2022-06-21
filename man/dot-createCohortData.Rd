@@ -29,6 +29,6 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 \code{cohortData} (\code{data.table}) with attribute \code{"imputedPixID"}
 }
 \description{
-Internal function used by \code{\link{makeAndCleanInitialCohortData}}.
+Internal function used by \code{\link[=makeAndCleanInitialCohortData]{makeAndCleanInitialCohortData()}}.
 }
 \keyword{internal}

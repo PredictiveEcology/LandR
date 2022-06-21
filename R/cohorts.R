@@ -793,7 +793,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 
 #' Generate template `cohortData` table
 #'
-#' Internal function used by \code{\link{makeAndCleanInitialCohortData}}.
+#' Internal function used by [makeAndCleanInitialCohortData()].
 #'
 #' @param inputDataTable A `data.table` with columns described above.
 #'

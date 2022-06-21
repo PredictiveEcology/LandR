@@ -12,9 +12,9 @@ utils::globalVariables(c(
 #'
 #' @param nonFlammClasses numeric vector defining which classes in `LandCoverClassifiedMap`.
 #'
-#' @param mask A raster to use as a mask (see \code{\link[raster]{mask}}).
+#' @param mask A raster to use as a mask (see [raster::mask()]).
 #'
-#' @param filename2 See \code{\link[reproducible]{postProcess}}. Default `NULL`.
+#' @param filename2 See [reproducible::postProcess()]. Default `NULL`.
 #'
 #' @export
 #' @importFrom grDevices colorRampPalette
@@ -586,8 +586,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' <"canada-forests-attributes_attributs-forests-canada/2011-",>
 #' <"attributes_attributs-2011/")>
 #'
-#' @param ... Additional arguments passed to \code{\link[reproducible]{Cache}}
-#'            and \code{\link{equivalentName}}. Also valid: `outputPath`, and `studyAreaName`.
+#' @param ... Additional arguments passed to [reproducible::Cache()]
+#'            and [equivalentName()]. Also valid: `outputPath`, and `studyAreaName`.
 #'
 #' @return A raster stack of percent cover layers by species.
 #'
@@ -859,10 +859,10 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
 #'               `biomass > 0` to be considered present in the study area.
 #'               Defaults to 1.
 #'
-#' @param url the source url for the data, passed to \code{\link[reproducible]{prepInputs}}
+#' @param url the source url for the data, passed to [reproducible::prepInputs()]
 #'
-#' @param ... Additional arguments passed to \code{\link[reproducible]{Cache}}
-#'            and \code{\link{equivalentName}}.
+#' @param ... Additional arguments passed to [reproducible::Cache()]
+#'            and [equivalentName()].
 #'
 #' @return A raster stack of percent cover layers by species.
 #'

@@ -14,7 +14,7 @@ processes. Models are implemented as 'SpaDES' modules.
 \section{Package options}{
 
 
-\code{LandR} packages use the following \code{\link{options}} to configure behaviour:
+\code{LandR} packages use the following \code{\link[=options]{options()}} to configure behaviour:
 
 \itemize{
 \item \code{LandR.assertions}: If \code{TRUE}, additional code checks are run

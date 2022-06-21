@@ -7,7 +7,7 @@
 #'
 #' @section Package options:
 #'
-#' `LandR` packages use the following \code{\link{options}} to configure behaviour:
+#' `LandR` packages use the following [options()] to configure behaviour:
 #'
 #' \itemize{
 #'   \item `LandR.assertions`: If `TRUE`, additional code checks are run

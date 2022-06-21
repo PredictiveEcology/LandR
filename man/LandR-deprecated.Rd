@@ -41,8 +41,8 @@ threshold a species needs to pass to be considered "leading".}
 
 \item{mixed}{Deprecated. See \code{mixedType} argument to \code{vegTypeMapGenerator}.}
 
-\item{...}{Additional arguments passed to \code{\link[reproducible]{Cache}}
-and \code{\link{equivalentName}}.}
+\item{...}{Additional arguments passed to \code{\link[reproducible:Cache]{reproducible::Cache()}}
+and \code{\link[=equivalentName]{equivalentName()}}.}
 
 \item{dPath}{path to the data directory}
 
@@ -72,7 +72,7 @@ If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 \code{biomass > 0} to be considered present in the study area.
 Defaults to 1.}
 
-\item{url}{the source url for the data, passed to \code{\link[reproducible]{prepInputs}}}
+\item{url}{the source url for the data, passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}}
 
 \item{destinationPath}{path to data directory}
 

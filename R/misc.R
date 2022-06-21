@@ -113,7 +113,7 @@ asInteger <- function(x)
 #' @importFrom utils getFromNamespace
 #' @keywords internal
 #' @rdname resample
-#' @seealso \code{\link[SpaDES.tools]{resample}}
+#' @seealso [SpaDES.tools::resample()]
 .resample <- getFromNamespace("resample", "SpaDES.tools")
 
 #' Test whether disturbance should be scheduled

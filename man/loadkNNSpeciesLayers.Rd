@@ -53,8 +53,8 @@ Defaults to 10.}
 <"canada-forests-attributes_attributs-forests-canada/2011-",>
 <"attributes_attributs-2011/")>}
 
-\item{...}{Additional arguments passed to \code{\link[reproducible]{Cache}}
-and \code{\link{equivalentName}}. Also valid: \code{outputPath}, and \code{studyAreaName}.}
+\item{...}{Additional arguments passed to \code{\link[reproducible:Cache]{reproducible::Cache()}}
+and \code{\link[=equivalentName]{equivalentName()}}. Also valid: \code{outputPath}, and \code{studyAreaName}.}
 }
 \value{
 A raster stack of percent cover layers by species.
