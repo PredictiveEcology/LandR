@@ -33,7 +33,6 @@ Imports:
     ggpubr,
     ggspatial,
     grDevices,
-    httr,
     lme4,
     magrittr,
     map,
