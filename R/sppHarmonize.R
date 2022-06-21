@@ -119,7 +119,7 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
     sppColorVect <- sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
     message("No 'sppColorVect' provided; making one with colour palette: Accent")
   } else {
-    if (grepl("Mixed", sppColorVect)) {
+    if (any(grepl("Mixed", names(sppColorVect)))) {
       if (length(sppColorVect) != (length(unique(sppEquiv[[sppEquivCol]])) + 1) ||
           length(sppColorVect) != (length(sppNameVector) + 1)) {
         stop("Length of 'sppColorVect' differs from number species in final 'sppEquiv'.",
