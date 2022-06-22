@@ -20,10 +20,12 @@ utils::globalVariables(c(
 #' @export
 assignLightProb <- function(sufficientLight, newCohortData, interpolate = TRUE,
                             doAssertion = getOption("LandR.assertions", TRUE)) {
-  if (doAssertion) {
-    if (any(class(sufficientLight) != "data.frame")) {
-      stop("sufficientLight must be a data.frame")
-    }
+
+  ## 2022-06-22 AMC removed the assertion and always coerce to data.frame as needed
+  if (!is(sufficientLight, "data.frame") | is(sufficientLight, "data.table")) {
+    warning("Coercing object 'sufficientLight' from ", is(sufficientLight)[1], " to data.frame.")
+    sufficientLight <- as.data.frame(sufficientLight)
+    stopifnot(is(sufficientLight, "data.frame"))
   }
 
   ## for each line, get the survival probability from sufficientLight table note
