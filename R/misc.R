@@ -46,10 +46,10 @@ assignLightProb <- function(sufficientLight, newCohortData, interpolate = TRUE,
   } else {
     ## are there any decimals in shade tolerance trait values?
     if (!all(newCohortData$shadetolerance == round(newCohortData$shadetolerance)))
-      stop("Species shade tolerance values (in sim$species) have decimals,
-           but interpolation of germination probabilities between
-           shade tolerance categories in sim$sufficientLight is FALSE. \n
-           Set interpolation to TRUE, or provide integer sim$species$shadetolerance values")
+      stop(paste("Species shade tolerance values (in sim$species) have decimals,",
+                 "but interpolation of germination probabilities between",
+                 "shade tolerance categories in sim$sufficientLight is FALSE.\n",
+                 "Set 'interpolate = TRUE', or provide integer shadetolerance values."))
 
     newCohortData[, lightProb := sufficientLight[cbind(shadetolerance, siteShade + 2)]]
   }
