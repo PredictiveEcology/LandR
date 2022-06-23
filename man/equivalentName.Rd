@@ -29,6 +29,6 @@ value in \code{column}, it will return \code{NA}.}
 must be found in. The return value will still be from \code{column}}
 }
 \description{
-This is simply a wrapper around \code{match} or \code{\%in\%} for
+This is simply a wrapper around \code{match} or \verb{\\\%in\\\%} for
 a specific \code{data.frame} of values.
 }

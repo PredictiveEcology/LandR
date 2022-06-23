@@ -1,6 +1,6 @@
 #' Create default study areas for use with LandR modules
 #'
-#' This simply re-exports \code{SpaDES.tools::randomStudyArea}
+#' This simply re-exports `SpaDES.tools::randomStudyArea`
 #'
 #' @inheritParams SpaDES.tools::randomStudyArea
 #'

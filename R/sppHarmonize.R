@@ -64,7 +64,6 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
            " Please provide conforming 'sppEquivCol' and 'sppEquiv',",
            " or a column that exists in 'LandR::sppEquivalencies_CA'")
     }
-
   }
 
   if (is.null(sppNameVector)) {
@@ -120,13 +119,22 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
     sppColorVect <- sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
     message("No 'sppColorVect' provided; making one with colour palette: Accent")
   } else {
-    if (length(sppColorVect) != length(unique(sppEquiv[[sppEquivCol]])) ||
-        length(sppColorVect) != length(sppNameVector)) {
-      stop("Length of 'sppColorVect' differs from number species in final 'sppEquiv'.",
-           " Check species provided in 'sppColorVect', 'sppNameVector' and/or ",
-           "'sppEquiv[[sppEquivCol]]'")
+    if (any(grepl("Mixed", names(sppColorVect)))) {
+      if (length(sppColorVect) != (length(unique(sppEquiv[[sppEquivCol]])) + 1) ||
+          length(sppColorVect) != (length(sppNameVector) + 1)) {
+        stop("Length of 'sppColorVect' differs from number species in final 'sppEquiv'.",
+             " Check species provided in 'sppColorVect', 'sppNameVector' and/or ",
+             "'sppEquiv[[sppEquivCol]]'")
+      }
+    } else {
+      if (length(sppColorVect) != length(unique(sppEquiv[[sppEquivCol]])) ||
+          length(sppColorVect) != length(sppNameVector)) {
+        stop("Length of 'sppColorVect' differs from number species in final 'sppEquiv'.",
+             " Check species provided in 'sppColorVect', 'sppNameVector' and/or ",
+             "'sppEquiv[[sppEquivCol]]'")
+      }
     }
-    if (!all(names(sppColorVect) %in% sppEquiv[[sppEquivCol]])) {
+    if (!all(names(sppColorVect)[names(sppColorVect) != "Mixed"] %in% sppEquiv[[sppEquivCol]])) {
       message("'sppColorVect' names do not match 'sppEquivCol' (", sppEquivCol, ")",
               " and will be converted if possible.")
       tempNames <-  LandR::equivalentName(names(sppColorVect), df = sppEquiv,

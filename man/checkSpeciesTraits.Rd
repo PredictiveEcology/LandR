@@ -21,7 +21,7 @@ fores types).}
 }
 \value{
 A \code{list} with the \code{speciesLayers} and \code{sppColorVect}
-  containing only the species that have trait values in \code{species}
+containing only the species that have trait values in \code{species}
 }
 \description{
 Check if all species in have trait values

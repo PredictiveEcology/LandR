@@ -2,7 +2,7 @@ utils::globalVariables(c(
   "Year"
 ))
 
-#' Install \pkg{BioSIM} to retrieve climate and other projections using \code{BioSIM}
+#' Install \pkg{BioSIM} to retrieve climate and other projections using `BioSIM`
 #'
 #' @inheritParams utils::install.packages
 #'
@@ -15,11 +15,11 @@ installBioSIM <- function(lib) {
                    lib, repos = NULL,  type = "source")
 }
 
-#' Extract point locations from DEM raster to pass to \code{BioSIM} functions
+#' Extract point locations from DEM raster to pass to `BioSIM` functions
 #'
-#' @param x A digital elevation model (DEM) \code{RasterLayer}.
+#' @param x A digital elevation model (DEM) `RasterLayer`.
 #'
-#' @return \code{data.table} with columns \code{Name}, \code{Long}, \code{Lat}, \code{Elev}.
+#' @return `data.table` with columns `Name`, `Long`, `Lat`, `Elev`.
 #' @export
 #' @importFrom data.table data.table setnames
 #' @importFrom raster crs xyFromCell
@@ -39,14 +39,14 @@ BioSIM_extractPoints <- function(x) {
   dt
 }
 
-#' Get annual historic and projected wind maps from \code{BioSIM}
+#' Get annual historic and projected wind maps from `BioSIM`
 #'
-#' @param dem \code{RasterLayer} of elevation data (m).
+#' @param dem `RasterLayer` of elevation data (m).
 #' @param years numeric vector corresponding to the years to retrieve.
-#' @param climModel climate model to use. one of \code{"GCM4"} or \code{"RCM4"}.
-#' @param rcp RCP scenario to use. one of \code{"RCP45"} or \code{"RCP85"}.
+#' @param climModel climate model to use. one of `"GCM4"` or `"RCM4"`.
+#' @param rcp RCP scenario to use. one of `"RCP45"` or `"RCP85"`.
 #'
-#' @return \code{RasterStack}
+#' @return `RasterStack`
 #' @export
 #' @importFrom data.table setDT
 #' @importFrom raster cellFromXY raster stack
@@ -106,16 +106,16 @@ BioSIM_getWindAnnual <- function(dem, years, climModel = "GCM4", rcp = "RCP45") 
   }
 }
 
-#' Get monthly historic and projected wind maps from \code{BioSIM}
+#' Get monthly historic and projected wind maps from `BioSIM`
 #'
-#' @param dem \code{RasterLayer} of elevation data (m).
+#' @param dem `RasterLayer` of elevation data (m).
 #' @param years numeric vector corresponding to the years to retrieve.
 #' @param months numeric vector corresponding to the months to retrieve
-#'               (e.g., \code{6:8} for June through August).
-#' @param climModel climate model to use. one of \code{"GCM4"} or \code{"RCM4"}.
-#' @param rcp RCP scenario to use. one of \code{"RCP45"} or \code{"RCP85"}.
+#'               (e.g., `6:8` for June through August).
+#' @param climModel climate model to use. one of `"GCM4"` or `"RCM4"`.
+#' @param rcp RCP scenario to use. one of `"RCP45"` or `"RCP85"`.
 #'
-#' @return \code{RasterStack}
+#' @return `RasterStack`
 #' @export
 #' @importFrom data.table setDT
 #' @importFrom raster cellFromXY raster stack
@@ -154,23 +154,23 @@ BioSIM_getWindMonthly <- function(dem, years, months, climModel = "GCM4", rcp = 
   }
 }
 
-#' Get annual historic and projected MPB climate suitability maps from \code{BioSIM}
+#' Get annual historic and projected MPB climate suitability maps from `BioSIM`
 #'
-#' Raster stacks for all 9 MPB climate indices. See \code{BioSIM::getModelHelp("MPB_SLR")}.
+#' Raster stacks for all 9 MPB climate indices. See `BioSIM::getModelHelp("MPB_SLR")`.
 #'
-#' @param dem \code{RasterLayer} of elevation data (m).
+#' @param dem `RasterLayer` of elevation data (m).
 #' @param years numeric vector corresponding to the years to retrieve.
 #' @param SLR character. Specifies which climate suitability index to extract.
-#'            Currently, one of \code{"S"}, \code{"L"}, \code{"R"}, or \code{"G"},
+#'            Currently, one of `"S"`, `"L"`, `"R"`, or `"G"`,
 #'            corresponding to Safranyik-P3P4, Logan-2b, Régnière Cold Tolerance Survival, or
 #'            their Geometric product (S\*L\*R), respectively.
-#' @param climModel climate model to use. one of \code{"GCM4"} or \code{"RCM4"}.
-#' @param rcp RCP scenario to use. one of \code{"RCP45"} or \code{"RCP85"}.
+#' @param climModel climate model to use. one of `"GCM4"` or `"RCM4"`.
+#' @param rcp RCP scenario to use. one of `"RCP45"` or `"RCP85"`.
 #'
 #' @note Although the BioSIM MPB_SLR model provides several other indices
-#'       (see \code{BioSIM::getModelHelp("MPB_SLR")}), only 4 are currently used here.
+#'       (see `BioSIM::getModelHelp("MPB_SLR")`), only 4 are currently used here.
 #'
-#' @return \code{RasterStack}
+#' @return `RasterStack`
 #' @export
 #' @importFrom data.table setDT
 #' @importFrom raster cellFromXY raster stack

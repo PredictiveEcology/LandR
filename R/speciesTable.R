@@ -2,7 +2,7 @@
 #'
 #' @template speciesTable
 #' @param params       A named list (of parameters) of named lists (by species), with species
-#'                     traits overrides (e.g., \code{list(seeddistance_eff = list(Abie_sp = 25))}).
+#'                     traits overrides (e.g., `list(seeddistance_eff = list(Abie_sp = 25))`).
 #'
 #' @author Alex Chubaty and Ceres Barros
 #' @export

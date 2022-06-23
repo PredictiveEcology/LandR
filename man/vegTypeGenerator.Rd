@@ -47,7 +47,7 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \value{
 \code{x} with a new column, 'leading', coding the vegetation type
-   of each group defined by \code{pixelGroupColName}
+of each group defined by \code{pixelGroupColName}
 }
 \description{
 This function is a simplification of \code{vegTypeMapGenerator}
