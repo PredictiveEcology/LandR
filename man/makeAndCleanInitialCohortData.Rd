@@ -18,7 +18,7 @@ makeAndCleanInitialCohortData(
 \item{inputDataTable}{A \code{data.table} with columns described above.}
 
 \item{sppColumns}{A vector of the names of the columns in \code{inputDataTable} that
-represent percent cover by species, rescaled to sum up to 100\%.}
+represent percent cover by species, rescaled to sum up to 100\%\%.}
 
 \item{imputeBadAgeModel}{statistical model used to impute ages in pixels with missing
 data or with cover == 0. If set to NULL no imputation will be attempted, and pixels with
@@ -34,28 +34,31 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 \item{doSubset}{Turns on/off subsetting. Defaults to \code{TRUE}.}
 }
 \value{
-a \code{cohortData} \code{data.table} with attribute "imputedPixID"
-    (a vector of pixel IDs that suffered imputation)
+a \code{cohortData} \code{data.table} with attribute \code{"imputedPixID"}
+(a vector of pixel IDs that suffered imputation).
 }
 \description{
 Takes a single \code{data.table} input, which has the following columns in addition to
-   others that will be labelled with species name, and contain percent cover of each:
-\itemize{
-  \item \code{pixelIndex} (integer)
-  \item \code{age} (integer)
-  \item \code{logAge} (numeric)
-  \item \code{initialEcoregionCode} (factor)
-  \item \code{totalBiomass} (integer)
-  \item \code{lcc} (integer)
-  \item \code{rasterToMatch} (integer)
-  \item \code{speciesCode} (factor)
-  \item \code{cover} (integer)
-  \item \code{coverOrig} (integer)
-  \item \code{B} (integer)
+others that will be labelled with species name, and contain percent cover of each:
 }
-   Several data correction/imputation operations are also performed. Namely, age is imputed
-   in pixels where age data is missing (but not cover) and where cover == 0 but age > 0,
-   total biomass is zeroed if age == 0, and age is zeroed if biomass == 0.
+\details{
+\itemize{
+\item \code{pixelIndex} (integer)
+\item \code{age} (integer)
+\item \code{logAge} (numeric)
+\item \code{initialEcoregionCode} (factor)
+\item \code{totalBiomass} (integer)
+\item \code{lcc} (integer)
+\item \code{rasterToMatch} (integer)
+\item \code{speciesCode} (factor)
+\item \code{cover} (integer)
+\item \code{coverOrig} (integer)
+\item \code{B} (integer)
+}
+
+Several data correction/imputation operations are also performed. Namely, age is imputed
+in pixels where age data is missing (but not cover) and where \code{cover == 0} but \code{age > 0},
+total biomass is zeroed if \code{age == 0}, and age is zeroed if \code{biomass == 0}.
 }
 \author{
 Eliot McIntire

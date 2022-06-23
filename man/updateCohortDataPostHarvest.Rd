@@ -82,9 +82,9 @@ There are some checks internally for consistency.
 \details{
 Does the following:
 \enumerate{
-  \item add new cohort data into \code{cohortData};
-  \item assign initial \code{B} and \code{age} for new cohort;
-  \item assign the new \code{pixelGroup} to the pixels that have new cohort;
-  \item update the \code{pixelGroup} map.
+\item add new cohort data into \code{cohortData};
+\item assign initial \code{B} and \code{age} for new cohort;
+\item assign the new \code{pixelGroup} to the pixels that have new cohort;
+\item update the \code{pixelGroup} map.
 }
 }

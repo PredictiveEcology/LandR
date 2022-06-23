@@ -59,7 +59,7 @@ period counting backwords). If missing, last fire year available will be used.}
 }
 \value{
 a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
- for which ages were corrected. If no corrections were applied the attribute vector is \code{integer(0)}.
+for which ages were corrected. If no corrections were applied the attribute vector is \code{integer(0)}.
 }
 \description{
 Create the \code{standAgeMap} raster containing age estimates for \code{pixelCohortData}.

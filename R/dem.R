@@ -6,7 +6,7 @@
 #' @template rasterToMatch
 #' @param destinationPath path to destination directory
 #'
-#' @return \code{RasterLayer}
+#' @return `RasterLayer`
 #'
 #' @export
 #' @importFrom raster raster

@@ -3,23 +3,23 @@ utils::globalVariables(c(
 ))
 #' Convert Land Cover Classes (LCC) to another value in its neighbourhood
 #'
-#' This will search around the pixels on \code{rstLCC} that have
-#' \code{classesToReplace}, and search in iteratively increasing
+#' This will search around the pixels on `rstLCC` that have
+#' `classesToReplace`, and search in iteratively increasing
 #' radii outwards for other Land Cover Classes than the those indicated in
-#' \code{classesToReplace}.
+#' `classesToReplace`.
 #'.
 #' @param classesToReplace Integer vector of classes that are are to be replaced,
 #'     e.g., 34, 35, 36 on LCC2005, which are burned young, burned 10 year, and cities.
 #' @param rstLCC LCC raster, e.g., LCC2005
 #' @param nIterations the number of iterations to perform
-#' @param defaultNewValue the value to assign a pixel in \code{classesToReplace} if no valid  pixel
-#'  is closer after \code{nIterations}
+#' @param defaultNewValue the value to assign a pixel in `classesToReplace` if no valid  pixel
+#'  is closer after `nIterations`
 #' @param invalidClasses classes that are not valid options
 #'
 #'
 #'
 #' @return
-#' A \code{rasterLayer} with values in classesToReplace converted to adjacent values or NA.
+#' A `rasterLayer` with values in classesToReplace converted to adjacent values or NA.
 #'
 #' @author Eliot McIntire Ian Eddy
 #' @export

@@ -3,7 +3,7 @@
 #' @param poly A polygon or character string identifying the path to polygon
 #' @param minFRI Numeric or integer, indicating the minimum fire return interval
 #'               that will be part of the cleanup of polygon. Anything below
-#'               this will be \code{NA}.
+#'               this will be `NA`.
 #' @export
 #' @importFrom pemisc createPrjFile
 #' @importFrom raster shapefile
@@ -35,10 +35,10 @@
 #' @param poly A polygon object, or a character string identifying the shapefile
 #'             path to load, and clean.
 #' @param fn   A function identifying the type of cleaning to do.
-#' @param type If \code{fn} is not known, an character string can be specified to
-#'             identify which \code{fn} to use.
+#' @param type If `fn` is not known, an character string can be specified to
+#'             identify which `fn` to use.
 #'             This MUST be a known type for this function.
-#' @param ...  Passed to \code{fn}
+#' @param ...  Passed to `fn`
 #'
 #' @export
 #' @importFrom stats na.omit

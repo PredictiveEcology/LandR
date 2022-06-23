@@ -21,7 +21,7 @@ A \code{data.table} with ecoregion codes and their active status per \code{pixel
 }
 \description{
 This function creates a table containing pixel-wise ecoregion codes and whether they
-  are "active" (have biomass > 0) or not for simulation. Unlike \code{ecoregionProducer},
-  this function creates the \code{ecoregion} table from pixel information contained in
-  \code{pixelCohortData}
+are "active" (have biomass > 0) or not for simulation. Unlike \code{ecoregionProducer},
+this function creates the \code{ecoregion} table from pixel information contained in
+\code{pixelCohortData}
 }

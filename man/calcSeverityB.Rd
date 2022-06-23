@@ -19,15 +19,15 @@ cohort information on burnt pixels and the following (optional) columns:
 }
 \value{
 \code{data.table} with columns \code{pixelIndex},
-  \code{pixelGroup} and  \code{severityB}
+\code{pixelGroup} and  \code{severityB}
 }
 \description{
 Calculates fire severity as the loss of pre-fire to
-  post-fire biomass.
+post-fire biomass.
 }
 \note{
 if \code{burnedPixelCohortData} does not have a \code{B}
-   column, the fire is assumed to be stand replacing (i.e.
-   we assume B to be 0 across all pixels/cohorts in
-   \code{burnedPixelCohortData})
+column, the fire is assumed to be stand replacing (i.e.
+we assume B to be 0 across all pixels/cohorts in
+\code{burnedPixelCohortData})
 }

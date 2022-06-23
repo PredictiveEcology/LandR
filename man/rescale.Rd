@@ -13,5 +13,5 @@ rescale(x, to)
 }
 \description{
 This is a simple function copied from the scales package (almost the same). Too heavy
-   to use one simple function
+to use one simple function
 }

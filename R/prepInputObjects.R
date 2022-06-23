@@ -10,8 +10,8 @@ utils::globalVariables(c(
 #' @template sppColorVect
 #'
 #' @return
-#' A \code{list} with the \code{speciesLayers} and \code{sppColorVect}
-#'   containing only the species that have trait values in \code{species}
+#' A `list` with the `speciesLayers` and `sppColorVect`
+#'   containing only the species that have trait values in `species`
 #'
 #' @export
 #' @importFrom crayon blue
@@ -31,21 +31,21 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
   return(list(speciesLayers = speciesLayers, sppColorVect = sppColorVect))
 }
 
-#' Make \code{pixelTable} from biomass, age, land-cover and species cover data
+#' Make `pixelTable` from biomass, age, land-cover and species cover data
 #'
 #' @param speciesLayers stack of species layers rasters
 #' @template standAgeMap
-#' @param ecoregionFiles A list with two objects: the \code{ecoregionMap} and a table summarizing
-#'   its information per \code{pixelID.} See \code{ecoregionProducer}.
+#' @param ecoregionFiles A list with two objects: the `ecoregionMap` and a table summarizing
+#'   its information per `pixelID.` See `ecoregionProducer`.
 #' @param biomassMap raster of total stand biomass
 #' @template rasterToMatch
 #' @param rstLCC raster of land-cover class
-#' @param printSummary Logical. If \code{TRUE}, the default, a print out of the
-#'   \code{summary(pixelTable)} will occur.
+#' @param printSummary Logical. If `TRUE`, the default, a print out of the
+#'   `summary(pixelTable)` will occur.
 #' @template doAssertion
 #'
 #' @return
-#' A \code{data.table} as many rows as non-NA pixels in \code{rasterToMath} and
+#' A `data.table` as many rows as non-NA pixels in `rasterToMath` and
 #'  the columns containing pixel data from the input raster layers.
 #'
 #' @export
@@ -138,31 +138,31 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
   return(pixelTable)
 }
 
-#' Create \code{speciesEcoregion}
+#' Create `speciesEcoregion`
 #'
-#' Use statistically estimated \code{maxB}, \code{maxANPP} and establishment probabilities
-#' to generate \code{specieEcoregion} table.
+#' Use statistically estimated `maxB`, `maxANPP` and establishment probabilities
+#' to generate `specieEcoregion` table.
 #'
 #' See Details.
 #'
-#' @param cohortDataBiomass a subset of \code{cohortData}
-#' @param cohortDataShort a subset of \code{cohortData}
-#' @param cohortDataShortNoCover a subset of \code{cohortData}
+#' @param cohortDataBiomass a subset of `cohortData`
+#' @param cohortDataShort a subset of `cohortData`
+#' @param cohortDataShortNoCover a subset of `cohortData`
 #' @template species
 #' @param modelCover statistical model of species presence/absence
 #' @param modelBiomass statistical model of species biomass
 #' @param successionTimestep The time between successive seed dispersal events.
-#' @param currentYear \code{time(sim)}
+#' @param currentYear `time(sim)`
 #'
-#' @section \code{establishprob}:
+#' @section `establishprob`:
 #' This section takes the cover as estimated from the mature tree cover and
 #' partitions it between resprouting and seeds Unfortunately, establishment by
 #' seed is not independent of resprouting, i.e., some pixels would have both
 #' Since we don't know the level of independence, we can't correctly assess how
 #' much to discount the two. If there is resprouting > 0, then this is the
 #' partitioning:
-#' \code{establishprob = f(establishprob + resproutprob + jointEstablishProbResproutProb)}
-#' If \code{jointEstablishProbResproutProb} is 0, then these are independent events
+#' `establishprob = f(establishprob + resproutprob + jointEstablishProbResproutProb)`
+#' If `jointEstablishProbResproutProb` is 0, then these are independent events
 #' and the total cover probability can be partitioned easily between seeds and
 #' resprout. This is unlikely ever to be the case. We are picking 50% overlap as
 #' a number that is better than 0 (totally independent probabilities, meaning no
@@ -171,8 +171,8 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
 #' a pixel with resprouting) This is expressed with the "* 0.5" in the code.
 #'
 #' #' @return
-#' A \code{speciesEcoregion} \code{data.table} with added columns for parameters
-#'   \code{maxB}, \code{maxANPP} and \code{establishprob}
+#' A `speciesEcoregion` `data.table` with added columns for parameters
+#'   `maxB`, `maxANPP` and `establishprob`
 #'
 #' @export
 #' @importFrom data.table rbindlist
@@ -256,16 +256,16 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
   return(speciesEcoregion)
 }
 
-#' Create \code{biomassMap}
+#' Create `biomassMap`
 #'
-#' This is a function that creates the \code{biomassMap} raster used  for simulations in
-#' \code{Biomass_core} module, using estimated data based on \code{rawBiomassMap} contained in
-#' \code{pixelCohortData}.
+#' This is a function that creates the `biomassMap` raster used  for simulations in
+#' `Biomass_core` module, using estimated data based on `rawBiomassMap` contained in
+#' `pixelCohortData`.
 #'
 #' @template pixelCohortData
 #' @template rasterToMatch
 #'
-#' @return The \code{biomassMap}, a raster of total stand biomass per pixel.
+#' @return The `biomassMap`, a raster of total stand biomass per pixel.
 #'
 #' @export
 #' @importFrom raster raster
@@ -281,7 +281,7 @@ makeBiomassMap <-  function(pixelCohortData, rasterToMatch) {
   return(biomassMap)
 }
 
-#' Create \code{minRelativeB} table
+#' Create `minRelativeB` table
 #'
 #' The table contains expert-based values for minimum relative biomass of each shade tolerance
 #' class (the minimum relative biomass a cohort with a given shade tolerance should have to be able
@@ -322,9 +322,9 @@ minRelativeBDefaults <- function() data.frame(X1 = 0.15, ## 0.2
                                               X4 = 0.75, ## 0.7
                                               X5 = 0.85)
 
-#' Create \code{makePixelGroupMap}
+#' Create `makePixelGroupMap`
 #'
-#' Create the \code{makePixelGroupMap} raster containing \code{pixelGroups} in \code{pixelCohortData}.
+#' Create the `makePixelGroupMap` raster containing `pixelGroups` in `pixelCohortData`.
 #'
 #' @template pixelCohortData
 #' @template rasterToMatch
@@ -346,33 +346,27 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
   return(pixelGroupMap)
 }
 
-#' Create \code{standAgeMap}
+#' Create `standAgeMap`
 #'
-#' Create the \code{standAgeMap} raster containing age estimates for \code{pixelCohortData}.
-#' A separate \code{prepInputs} call will source Canadian National Fire Data Base
-#' data to update ages of recently burned pixels. To suppress this, pass NULL/NA \code{fireURl}
+#' Create the `standAgeMap` raster containing age estimates for `pixelCohortData`.
+#' A separate `prepInputs` call will source NDFB data used to update ages of recently burned
+#' pixels.
 #'
-#' @param ... additional arguments passed to \code{prepInputs}.
+#' @param ... additional arguments passed to `prepInputs`
 #' @param ageURL url where age map is downloaded
-#' @param ageFun passed to 'fun' arg of \code{prepInputs} of stand age map
-#' @param maskWithRTM passed to \code{prepInputs} of stand age map
-#' @param method passed to \code{prepInputs} of stand age map
-#' @param datatype passed to \code{prepInputs} of stand age map
+#' @param ageFun passed to 'fun' arg of `prepInputs` of stand age map
+#' @param maskWithRTM passed to `prepInputs` of stand age map
+#' @param method passed to `prepInputs` of stand age map
+#' @param datatype passed to `prepInputs` of stand age map
 #' @param destinationPath directory where  age and fire data will be downloaded
-#' @param filename2 passed to \code{prepInputs} of stand age map
-#' @param firePerimeters fire raster layer fire year values.
-#' @param fireURL url to download fire polygons used to update age map. If NULL or NA age
-#'   imputation is bypassed. Requires passing `rasterToMatch`. Only used if \code{firePerimeters}
-#'   is missing.
-#' @param fireFun passed to \code{prepInputs} of fire data. Only used if \code{firePerimeters}
-#'   is missing.
-#' @param fireField field used to rasterize fire polys. Only used if \code{firePerimeters}
-#'   is missing.
+#' @param filename2 passed to `prepInputs` of stand age map
+#' @param fireURL url to download fire polygons used to update age map. If NULL or NA age imputation is bypassed.
+#' @param fireFun passed to `prepInputs` of fire data
 #' @template rasterToMatch
 #' @template startTime
 #'
 #' @return a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
-#'  for which ages were corrected. If no corrections were applied the attribute vector is \code{integer(0)}.
+#'  for which ages were corrected. If no corrections were applied the attribute vector is `integer(0)`.
 #'
 #' @export
 #' @importFrom raster crs
@@ -486,9 +480,9 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 
 #' Create a raster of fire polygons
 #'
-#' Wrapper on \code{prepInputs} that will rasterize fire polygons.
+#' Wrapper on `prepInputs` that will rasterize fire polygons.
 #'
-#' @param ... Additional arguments passed to \code{prepInputs}
+#' @param ... Additional arguments passed to `prepInputs`
 #' @template rasterToMatch
 #' @param fireField field used to rasterize fire polys
 #' @param earliestYear the earliest fire date to allow

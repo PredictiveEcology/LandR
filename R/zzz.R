@@ -12,7 +12,7 @@
   invisible()
 }
 
-#' The \code{LandR} package environment
+#' The `LandR` package environment
 #'
 #' Environment used internally to store internal package objects and methods.
 #'
