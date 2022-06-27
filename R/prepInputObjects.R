@@ -431,9 +431,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
   return(standAgeMap)
 }
 
-#' Create a raster of fire polygons
-#'
-#' Wrapper on `prepInputs` that will rasterize fire polygons.
+#' Create a raster of fire perimeters
 #'
 #' @param ... Additional arguments passed to `prepInputs`
 #' @template rasterToMatch
@@ -446,10 +444,14 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @importFrom reproducible Cache prepInputs
 #' @importFrom sf st_cast st_transform
 #' @importFrom magrittr %>%
-prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950) {
+#'
+prepInputsFireYear <- function(..., rasterToMatch = NULL, fireField = "YEAR", earliestYear = 1950) {
   dots <- list(...)
-  if (!is.null(dots$fun)) {
-    a <- if (grepl("st_read", dots$fun)) {
+  a <- if (is.null(dots$fun)) {
+    Cache(prepInputs, rasterToMatch = rasterToMatch, ...) %>%
+        st_as_sf(.)
+  } else {
+    if (grepl("st_read", dots$fun)) {
       Cache(prepInputs, ...)
     } else {
       Cache(prepInputs, rasterToMatch = rasterToMatch, ...) %>%
