@@ -68,6 +68,7 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
 
   if (is.null(sppNameVector)) {
     sppNameVector <- sort(unique(sppEquiv[[sppEquivCol]]))
+    sppNameVector[nzchar(sppNameVector)] ## drop empty strings, i.e., spp with no name in sppEquivCol
   } else {
     sppNameConvention <- LandR::equivalentNameColumn(sppNameVector, sppEquiv)
   }
