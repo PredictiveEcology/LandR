@@ -1199,6 +1199,29 @@ subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
   return(DT)
 }
 
+#' Drop factor term including interactions from a model formula
+#'
+#' Based on <https://stackoverflow.com/a/23382097/1380598>.
+#'
+#' @param form A model formula.
+#' @param term Character vector giving the name of the term to drop.
+#'
+#' @return An updated model formula.
+#'
+#' @export
+#' @importFrom stats terms update
+dropTerm <- function(form, term) {
+  fterms <- terms(form)
+  fac <- attr(fterms, "factors")
+
+  idx <- which(as.logical(fac[term, ]))
+  toDrop <- names(fac[term, ][idx])
+
+  new_form <- update(form, paste(". ~ . -", paste(toDrop, collapse = " - ")))
+
+  return(new_form)
+}
+
 #' The generic statistical model to run (`lmer` or `glmer`)
 #'
 #' This does a few things including R squared, gets the fitted values.
@@ -1290,6 +1313,12 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
     modelArgs[isChar] <- lapply(modelArgs[isChar], function(yyy) {
       eval(parse(text = yyy))
     })
+  }
+
+  ## drop factor terms with a single level
+  singles <- names(which(sapply(lapply(.specialData, unique), length) == 1))
+  if (length(singles) > 0) {
+    modelArgs$formula <- dropTerm(modelArgs$formula, singles)
   }
 
   mod <- do.call(fun, modelArgs)
