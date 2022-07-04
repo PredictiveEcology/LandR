@@ -462,7 +462,7 @@ prepInputsFireYear <- function(..., rasterToMatch = NULL, fireField = "YEAR", ea
   if (nrow(a) > 0) {
     gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon
     d <- st_transform(gg, crs(rasterToMatch))
-    if (class(d[[fireField]]) != "numeric") {
+    if (!is(d[[fireField]], "numeric")) {
       warning("Chosen fireField will be coerced to numeric")
       d[[fireField]] <- as.numeric(as.factor(d[[fireField]]))
     }
