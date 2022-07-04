@@ -1211,13 +1211,26 @@ subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
 #' @export
 #' @importFrom stats terms update
 dropTerm <- function(form, term) {
+  if (!is(form, "formula")) {
+    form <- as.formula(form)
+  }
+
   fterms <- terms(form)
   fac <- attr(fterms, "factors")
 
-  idx <- which(as.logical(fac[term, ]))
-  toDrop <- names(fac[term, ][idx])
+  new_form <- form
+  for (tt in term) {
+    idr <- grepl(tt, rownames(fac))
+    idc <- which(as.logical(fac[idr, ]))
+    toDrop <- names(fac[idr, ][idc])
+    needsParenth <- vapply(paste0("(", toDrop, ")"), FUN = grepl, FUN.VALUE = logical(1),
+                           x = as.character(new_form)[3], fixed = TRUE)
+    if (any(needsParenth)) {
+      toDrop[needsParenth] <- paste0("(", toDrop[needsParenth], ")")
+    }
 
-  new_form <- update(form, paste(". ~ . -", paste(toDrop, collapse = " - ")))
+    new_form <- update(new_form, paste0(". ~ . -", paste(toDrop, collapse = " - ")))
+  }
 
   return(new_form)
 }
