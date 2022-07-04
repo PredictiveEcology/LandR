@@ -1,4 +1,4 @@
-#' Harmonize the 3 components that bring species into Biomass_**
+#' Harmonize the three components that bring species into `Biomass_**` modules
 #'
 #' This function will attempt to harmonize many potential issues/conflicts that
 #' may arise under different combinations of supplied objects to the three

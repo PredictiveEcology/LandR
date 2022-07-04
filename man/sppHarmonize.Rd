@@ -2,7 +2,7 @@
 % Please edit documentation in R/sppHarmonize.R
 \name{sppHarmonize}
 \alias{sppHarmonize}
-\title{Harmonize the 3 components that bring species into Biomass_**}
+\title{Harmonize the three components that bring species into \verb{Biomass_**} modules}
 \usage{
 sppHarmonize(
   sppEquiv,

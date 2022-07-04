@@ -10,8 +10,8 @@ version 1.0.8
 * remove undeclared dependency package `Require`
 * age imputation in `makeAndCleanInitialCohortData` can now be turned off.
 * fix bug in `LANDISDisp()`: skip dispersal when `src` or `rcv` data.tables are empty.
-* initial cohort biomass (calculated in `.initiateNewCohorts`) can now be a fixed integer or, as before, calculated using the LANDIS-II Biomass Succession Extension v3.2.1 approach (Scheller & Miranda 2015),
-* fix bug in `prepInputsFireYear`,
+* initial cohort biomass (calculated in `.initiateNewCohorts`) can now be a fixed integer or, as before, calculated using the LANDIS-II Biomass Succession Extension v3.2.1 approach (Scheller & Miranda 2015).
+* fix bug in `prepInputsFireYear`.
 
 version 1.0.7
 =============
