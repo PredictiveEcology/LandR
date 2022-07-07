@@ -791,6 +791,36 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   out3
 }
 
+
+#' Assess non-forested pixels based on species cover data
+#' and land-cover
+#'
+#' @template speciesLayers
+#' @param omitNonTreedPixels logical. Should pixels with
+#'   classes in \code{forestedLCCClasses} be included as non-forested?
+#' @param forestedLCCClasses vector of non-forested land-cover classes in
+#'   \code{rstLCC}
+#' @template rstLCC
+#'
+#' @return a logical vector of length \code{ncell(rstLCC)}
+#'   where TRUEs indicate non-forested pixels where there is no
+#'   species cover data, or a non-forested land-cover class
+nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClasses,
+                              rstLCC) {
+  # pixelsToRm <- rowSums(!is.na(sim$speciesLayers[])) == 0 # keep
+  pixelsToRm <- is.na(speciesLayers[[1]][]) # seems to be OK because seem to be NA on each layer for a given pixel
+
+  ## remove non-forested if asked by user
+  if (omitNonTreedPixels) {
+    if (is.null(forestedLCCClasses))
+      stop("No P(sim)$forestedLCCClasses provided, but P(sim)$omitNonTreedPixels is TRUE.
+             \nPlease provide a vector of forested classes in P(sim)$forestedLCCClasses")
+    lccPixelsRemoveTF <- !(rstLCC[] %in% forestedLCCClasses)
+    pixelsToRm <- lccPixelsRemoveTF | pixelsToRm
+  }
+  pixelsToRm
+}
+
 #' Generate template `cohortData` table
 #'
 #' Internal function used by [makeAndCleanInitialCohortData()].
