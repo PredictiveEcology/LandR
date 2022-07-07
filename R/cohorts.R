@@ -1199,6 +1199,42 @@ subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
   return(DT)
 }
 
+#' Drop factor term including interactions from a model formula
+#'
+#' Based on <https://stackoverflow.com/a/23382097/1380598>.
+#'
+#' @param form A model formula.
+#' @param term Character vector giving the name of the term to drop.
+#'
+#' @return An updated model formula.
+#'
+#' @export
+#' @importFrom stats terms update
+dropTerm <- function(form, term) {
+  if (!is(form, "formula")) {
+    form <- as.formula(form)
+  }
+
+  fterms <- terms(form)
+  fac <- attr(fterms, "factors")
+
+  new_form <- form
+  for (tt in term) {
+    idr <- grepl(tt, rownames(fac))
+    idc <- which(as.logical(fac[idr, ]))
+    toDrop <- names(fac[idr, ][idc])
+    needsParenth <- vapply(paste0("(", toDrop, ")"), FUN = grepl, FUN.VALUE = logical(1),
+                           x = as.character(new_form)[3], fixed = TRUE)
+    if (any(needsParenth)) {
+      toDrop[needsParenth] <- paste0("(", toDrop[needsParenth], ")")
+    }
+
+    new_form <- update(new_form, paste0(". ~ . -", paste(toDrop, collapse = " - ")))
+  }
+
+  return(new_form)
+}
+
 #' The generic statistical model to run (`lmer` or `glmer`)
 #'
 #' This does a few things including R squared, gets the fitted values.
@@ -1290,6 +1326,12 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
     modelArgs[isChar] <- lapply(modelArgs[isChar], function(yyy) {
       eval(parse(text = yyy))
     })
+  }
+
+  ## drop factor terms with a single level
+  singles <- names(which(sapply(lapply(.specialData, unique), length) == 1))
+  if (length(singles) > 0) {
+    modelArgs$formula <- dropTerm(modelArgs$formula, singles)
   }
 
   mod <- do.call(fun, modelArgs)

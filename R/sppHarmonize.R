@@ -1,4 +1,4 @@
-#' Harmonize the 3 components that bring species into Biomass_**
+#' Harmonize the three components that bring species into `Biomass_**` modules
 #'
 #' This function will attempt to harmonize many potential issues/conflicts that
 #' may arise under different combinations of supplied objects to the three
@@ -68,6 +68,7 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
 
   if (is.null(sppNameVector)) {
     sppNameVector <- sort(unique(sppEquiv[[sppEquivCol]]))
+    sppNameVector <- sppNameVector[nzchar(sppNameVector)] ## drop empty strings
   } else {
     sppNameConvention <- LandR::equivalentNameColumn(sppNameVector, sppEquiv)
   }

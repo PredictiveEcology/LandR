@@ -923,7 +923,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
                           destinationPath) {
   ## check if there are any layers/values in the lowQualityStack
   ## if not return the HQ one
-  if (class(lowQualityStack) != "RasterStack" &
+  if (!is(lowQualityStack, "RasterStack") &
       all(is.na(getValues(lowQualityStack)))) {
     highQualityStack
   } else {

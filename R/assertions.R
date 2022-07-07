@@ -404,7 +404,7 @@ assertSpeciesLayers <- function(speciesLayers, thresh,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     ## covert to list if not a stack
-    if (class(speciesLayers) != "RasterStack") {
+    if (!is(speciesLayers, "RasterStack")) {
       speciesLayers <- list(speciesLayers)
 
       test1 <- vapply(speciesLayers, FUN = function(x)
