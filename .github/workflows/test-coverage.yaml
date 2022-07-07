@@ -42,6 +42,9 @@ jobs:
           remotes::install_github('PredictiveEcology/reproducible@development')
           remotes::install_github('PredictiveEcology/pemisc@development')
           remotes::install_github('PredictiveEcology/map@development')
+          install.packages("https://sourceforge.net/projects/repiceasource/files/latest", repos = NULL,  type = "source")
+          install.packages("https://sourceforge.net/projects/biosimclient.mrnfforesttools.p/files/latest", repos = NULL,  type = "source")
+
         shell: Rscript {0}
 
       - name: Cache R packages
