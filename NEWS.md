@@ -1,5 +1,10 @@
 bug reports https://github.com/PredictiveEcology/LandR/issues
 
+version 1.0.9
+=============
+* new function: `nonForestedPixels` used to detect pixels without species cover
+or a non-forested land-cover class
+
 version 1.0.8
 =============
 * drop support for R 3.6
