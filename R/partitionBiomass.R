@@ -23,5 +23,8 @@ partitionBiomass <- function(x = 1, pixelCohortData) {
   pixelCohortData[, cover2 := cover * c(1, x)[decid + 1]]
   pixelCohortData[, cover2 := cover2 / sum(cover2), by = "pixelIndex"]
   pixelCohortData[, B := totalBiomass * cover2]
+
+  set(pixelCohortData, NULL, c("decid", "cover2"), NULL)
+
   pixelCohortData
 }
