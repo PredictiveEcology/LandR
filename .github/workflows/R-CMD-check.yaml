@@ -24,16 +24,18 @@ jobs:
           - {os: macOS-latest,   r: 'release'}
           - {os: windows-latest, r: 'devel'}
           - {os: windows-latest, r: 'release'}
-          - {os: windows-latest, r: '4.0'}
-          - {os: ubuntu-20.04,   r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", http-user-agent: "R/4.2.0 (ubuntu-20.04) R (4.2.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
-          - {os: ubuntu-20.04,   r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
-          - {os: ubuntu-20.04,   r: 'oldrel',  rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+          - {os: windows-latest, r: '4.1'}
+          - {os: ubuntu-20.04, nosuggests: false, r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", http-user-agent: "R/4.3.0 (ubuntu-20.04) R (4.3.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions" }
+          - {os: ubuntu-20.04, nosuggests: false, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+          - {os: ubuntu-20.04, nosuggests: true, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+          - {os: ubuntu-20.04, nosuggests: false, r: 'oldrel',  rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+          - {os: ubuntu-20.04, nosuggests: false, r: '4.0',  rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
 
     env:
+      _R_CHECK_DEPENDS_ONLY_: ${{ matrix.config.nosuggests }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       RSPM: ${{ matrix.config.rspm }}
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      _R_CHECK_FORCE_SUGGESTS_: false
 
     steps:
       - uses: actions/checkout@v2
@@ -52,9 +54,33 @@ jobs:
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
         shell: Rscript {0}
 
+      - name: Install system dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install gdal udunits
+
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          while read -r cmd
+          do
+            eval sudo $cmd
+          done < <(Rscript -e 'cat(unique(c(remotes::system_requirements("ubuntu", "20.04"), remotes::system_requirements("ubuntu", "20.04", package = "sf"))), sep = "\n")')
+          sudo apt-get install -y hunspell-en-ca
+
       - name: Install additional dependencies
         run: |
+          options(install.packages.check.source = "no", install.packages.compile.from.source = FALSE)
+          install.packages(c("raster", "sf", "sp", "lwgeom", "terra", "rgdal", "rgeos"), repos = "https://cran.rstudio.com") ## need source on Linux, not RSPM binary
+          install.packages(c("foreach", "R.utils")) ## TEMPORARY: July 2022
+          install.packages("https://cran.r-project.org/src/contrib/Archive/gdalUtils/gdalUtils_2.0.3.2.tar.gz", repos = NULL) ## TEMPORARY: July 2022
+          install.packages("https://cran.r-project.org/src/contrib/Archive/RandomFieldsUtils/RandomFieldsUtils_1.2.3.tar.gz", repos = NULL) ## TEMPORARY: July 2022
+          install.packages("https://cran.r-project.org/src/contrib/Archive/RandomFields/RandomFields_3.3.14.tar.gz", repos = NULL) ## TEMPORARY: July 2022
+          install.packages("igraph", repos = 'https://cran.rstudio.com') ## need source on Linux, not RSPM binary
+          remotes::install_github('PredictiveEcology/Require@development')
           remotes::install_github('PredictiveEcology/reproducible@development')
+          remotes::install_github('PredictiveEcology/quickPlot@development')
+          remotes::install_github('PredictiveEcology/SpaDES.tools@development', build_opts = c("--no-resave-data", "--no-manual", "--no-build-vignettes", if (getRversion() >= "4.2.0") "--no-multiarch"))
           remotes::install_github('PredictiveEcology/pemisc@development')
           remotes::install_github('PredictiveEcology/map@development')
         shell: Rscript {0}
@@ -67,21 +93,9 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
           restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
 
-      - name: Install system dependencies
-        if: runner.os == 'Linux'
-        run: |
-          while read -r cmd
-          do
-            eval sudo $cmd
-          done < <(Rscript -e 'cat(remotes::system_requirements("ubuntu", "20.04"), sep = "\n")')
-          sudo apt-get install -y hunspell-en-ca
-
       - name: Install dependencies
         run: |
-          if (R.version$major < 4) {
-            remotes::install_cran("versions")
-            versions::install.versions("XML", "3.99-0.3")
-          }
+          options(install.packages.check.source = "no", install.packages.compile.from.source = FALSE)
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
@@ -96,7 +110,7 @@ jobs:
       - name: Check
         env:
           _R_CHECK_CRAN_INCOMING_: false
-        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", "--no-multiarch"), error_on = "warning", check_dir = "check")
+        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", if (getRversion() >= "4.2.0") "--no-multiarch"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
 
       - name: Show testthat output
