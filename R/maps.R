@@ -886,7 +886,7 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
 
 #' Function to sum rasters of species layers
 #'
-#' @param speciesLayers stack of species layers rasters
+#' @template speciesLayers
 #' @param layersToSum names/indices of layers to be summed - optional
 #' @param filenameToSave file path to save output raster
 #' @param newLayerName name of the output raster layer
@@ -1078,7 +1078,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' Used internally in `overlayStacks`.
 #'
 #' @param sppMerge TODO
-#' @param speciesLayers stack of species layers rasters
+#' @template speciesLayers
 #' @template sppEquiv
 #' @param column TODO
 #' @param dPath destination path TODO

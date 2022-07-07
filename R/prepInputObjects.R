@@ -5,7 +5,7 @@ utils::globalVariables(c(
 
 #' Check if all species in have trait values
 #'
-#' @param speciesLayers stack of species layers rasters
+#' @template speciesLayers
 #' @template species
 #' @template sppColorVect
 #'
@@ -33,13 +33,13 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 
 #' Make `pixelTable` from biomass, age, land-cover and species cover data
 #'
-#' @param speciesLayers stack of species layers rasters
+#' @template speciesLayers
 #' @template standAgeMap
 #' @param ecoregionFiles A list with two objects: the `ecoregionMap` and a table summarizing
 #'   its information per `pixelID.` See `ecoregionProducer`.
 #' @param biomassMap raster of total stand biomass
 #' @template rasterToMatch
-#' @param rstLCC raster of land-cover class
+#' @template rstLCC
 #' @param printSummary Logical. If `TRUE`, the default, a print out of the
 #'   `summary(pixelTable)` will occur.
 #' @template doAssertion
