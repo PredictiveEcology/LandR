@@ -42,7 +42,7 @@ prepInputsStandAgeMap(
 \item{firePerimeters}{fire raster layer fire year values.}
 
 \item{fireURL}{url to download fire polygons used to update age map. If NULL or NA age
-imputation is bypassed. Requires passing `rasterToMatch`. Only used if \code{firePerimeters}
+imputation is bypassed. Requires passing \code{rasterToMatch}. Only used if \code{firePerimeters}
 is missing.}
 
 \item{fireFun}{passed to \code{prepInputs} of fire data. Only used if \code{firePerimeters}
@@ -59,7 +59,7 @@ period counting backwords). If missing, last fire year available will be used.}
 }
 \value{
 a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
- for which ages were corrected. If no corrections were applied the attribute vector is \code{integer(0)}.
+for which ages were corrected. If no corrections were applied the attribute vector is \code{integer(0)}.
 }
 \description{
 Create the \code{standAgeMap} raster containing age estimates for \code{pixelCohortData}.

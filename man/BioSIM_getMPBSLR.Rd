@@ -28,5 +28,5 @@ Raster stacks for all 9 MPB climate indices. See \code{BioSIM::getModelHelp("MPB
 }
 \note{
 Although the BioSIM MPB_SLR model provides several other indices
-      (see \code{BioSIM::getModelHelp("MPB_SLR")}), only 4 are currently used here.
+(see \code{BioSIM::getModelHelp("MPB_SLR")}), only 4 are currently used here.
 }

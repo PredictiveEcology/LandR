@@ -8,7 +8,7 @@ projectTo <- utils::getFromNamespace("projectTo", "reproducible")
 #' Make a species factor raster
 #'
 #' This will download all KNN layers in (Boreal) Forest of Canada, and make
-#' a factor raster at resolution provided by \code{res} (larger is faster).
+#' a factor raster at resolution provided by `res` (larger is faster).
 #' @param year Default (and only implemented) is 2011. This will download the 2011 KNN data layers
 #' @param dPath A character string indicating where to download all the KNN layers
 #' @param res The resolution (one dimension, in m) for the resulting raster
@@ -101,20 +101,20 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 
 #' Get species list in a given study area for boreal forest of Canada
 #'
-#' \code{speciesInStudyArea} defaults to use a url of a dataset uploaded to Google Drive that is
+#' `speciesInStudyArea` defaults to use a url of a dataset uploaded to Google Drive that is
 #' from Canadian Boreal Forests, but a different factor raster can be passed e.g.,
-#' from \code{speciesPresentFromKNN}.
+#' from `speciesPresentFromKNN`.
 #'
 #' @return
-#' A named list of length 2: \code{speciesRas} is a factor \code{RasterLayer}
-#' and \code{speciesList} is a character string containing the unique, sorted
-#' species on the \code{speciesRas}, for convenience.
+#' A named list of length 2: `speciesRas` is a factor `RasterLayer`
+#' and `speciesList` is a character string containing the unique, sorted
+#' species on the `speciesRas`, for convenience.
 #' @export
 #' @param studyArea a vector map (e.g., SpatialPolygonsDataFrame)
-#' @param url A url to get a speciesPresence raster e.g., from \code{peciesPresentFromKNN}
+#' @param url A url to get a speciesPresence raster e.g., from `peciesPresentFromKNN`
 #' @param speciesPresentRas A factor raster where the character string is a string of
 #'   species names, separated by 2 underscores, sorted alphabetically. Can be produced
-#'   with \code{speciesPresentFromKNN}
+#'   with `speciesPresentFromKNN`
 #'
 #' @export
 #' @importFrom pemisc factorValues2

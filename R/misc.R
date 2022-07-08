@@ -7,7 +7,7 @@ utils::globalVariables(c(
 #'
 #' @template sufficientLight
 #'
-#' @param newCohortData  a modified version of \code{cohortData} that contains new cohorts.
+#' @param newCohortData  a modified version of `cohortData` that contains new cohorts.
 #'
 #' @param interpolate Logical. Activates interpolation of probabilities of establishment between
 #'   any two values of shade tolerance in the sufficient light table, allowing species shade tolerance
@@ -15,7 +15,7 @@ utils::globalVariables(c(
 #'   can only take integer values between 1 and 5  (inclusively).
 #' @template doAssertion
 #'
-#' @return  \code{newCohortData} with a \code{lightProb} column
+#' @return  `newCohortData` with a `lightProb` column
 #'
 #' @export
 assignLightProb <- function(sufficientLight, newCohortData, interpolate = TRUE,
@@ -60,19 +60,19 @@ assignLightProb <- function(sufficientLight, newCohortData, interpolate = TRUE,
 #' @param x the species shade tolerance trait value for which we want to find
 #'   the interpolated probability.
 #'
-#' @param x0 the \code{floor} of \code{x} corresponding to a class of shade
-#'   tolerance in the \code{sufficientLight} table.
+#' @param x0 the `floor` of `x` corresponding to a class of shade
+#'   tolerance in the `sufficientLight` table.
 #'
-#' @param x1 the \code{ceiling} of \code{x} corresponding to a class of shade
-#'   tolerance in the \code{sufficientLight} table.
+#' @param x1 the `ceiling` of `x` corresponding to a class of shade
+#'   tolerance in the `sufficientLight` table.
 #'
-#' @param y0 the probability of germination in the \code{sufficientLight} table
-#'   corresponding to \code{x0}.
+#' @param y0 the probability of germination in the `sufficientLight` table
+#'   corresponding to `x0`.
 #'
-#' @param y1 the probability of germination in the \code{sufficientLight} table
-#'   corresponding to \code{x1}.
+#' @param y1 the probability of germination in the `sufficientLight` table
+#'   corresponding to `x1`.
 #'
-#' @return  \code{vector} of the interpolated value
+#' @return  `vector` of the interpolated value
 
 .interpolateLightProb <- function(x, x0, x1, y0, y1) {
   ## if floor and ceiling are the same and equal to x, shade tolerances (x) are integers
@@ -88,16 +88,16 @@ assignLightProb <- function(sufficientLight, newCohortData, interpolate = TRUE,
 
 #' Convert numeric values to rounded integers
 #'
-#' Essentially a wrapper around \code{round}, rather than \code{truncate}, which is what \code{as.integer}
-#' does. Internally, this is simply \code{as.integer(floor(x + 0.5))}.
+#' Essentially a wrapper around `round`, rather than `truncate`, which is what `as.integer`
+#' does. Internally, this is simply `as.integer(floor(x + 0.5))`.
 #'
-#' @note Values ending in \code{.5} will be rounded up, whether positive or negative.
-#' This is different than \code{round}.
+#' @note Values ending in `.5` will be rounded up, whether positive or negative.
+#' This is different than `round`.
 #'
 #' @param x A numeric vector
 #'
-#' @return An integer vector of length \code{x}, rounded to zero decimal places
-#'   prior to \code{as.integer}
+#' @return An integer vector of length `x`, rounded to zero decimal places
+#'   prior to `as.integer`
 #'
 #' @export
 #' @examples
@@ -108,17 +108,17 @@ asInteger <- function(x)
 
 #' Resample
 #'
-#' Imports the non-exported function \code{SpaDES.tools:::resample}.
+#' Imports the non-exported function `SpaDES.tools:::resample`.
 #'
 #' @importFrom utils getFromNamespace
 #' @keywords internal
 #' @rdname resample
-#' @seealso \code{\link[SpaDES.tools]{resample}}
+#' @seealso [SpaDES.tools::resample()]
 .resample <- getFromNamespace("resample", "SpaDES.tools")
 
 #' Test whether disturbance should be scheduled
 #'
-#' @param disturbanceLayer a \code{RasterLayer} object
+#' @param disturbanceLayer a `RasterLayer` object
 #' @param currentYear time of simulation
 #'
 #' @return Logical indicating whether to schedule a disturbance event
@@ -140,12 +140,12 @@ scheduleDisturbance <- function(disturbanceLayer, currentYear) {
 
 #' Log-transformed values, with a floor (> 0)
 #'
-#' Avoid \code{-Inf} problems when \code{x == 0} by setting a non-zero floor value for \code{x}.
-#' This is preferred over using some \code{log(x + d)} transformation, as the choice of \code{d} is
+#' Avoid `-Inf` problems when `x == 0` by setting a non-zero floor value for `x`.
+#' This is preferred over using some `log(x + d)` transformation, as the choice of `d` is
 #' arbitrary, and will affect model fit.
 #'
 #' @param x     Numeric.
-#' @param floor Minimum age value boundary. Default \code{0.3}.
+#' @param floor Minimum age value boundary. Default `0.3`.
 #'
 #' @keywords internal
 #'

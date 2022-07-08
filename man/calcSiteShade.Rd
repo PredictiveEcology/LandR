@@ -29,5 +29,5 @@ aboveground net primary productivity and \code{SEP} the species establishment pr
 Calculate site shade
 }
 \seealso{
-\code{\link{makeMinRelativeB}}
+\code{\link[=makeMinRelativeB]{makeMinRelativeB()}}
 }

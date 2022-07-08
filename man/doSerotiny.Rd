@@ -54,9 +54,9 @@ Defaults to \code{FALSE}.}
 }
 \value{
 A list of objects:
-    \code{postFirePixelCohortData}, a \code{data.table} with the cohorts that undergo serotiny;
-    \code{serotinyPixel}, a vector of pixels where serotiny was activated;
-    \code{postFireRegenSummary}, the updated \code{postFireRegenSummary}, if \code{calibrate = TRUE}.
+\code{postFirePixelCohortData}, a \code{data.table} with the cohorts that undergo serotiny;
+\code{serotinyPixel}, a vector of pixels where serotiny was activated;
+\code{postFireRegenSummary}, the updated \code{postFireRegenSummary}, if \code{calibrate = TRUE}.
 }
 \description{
 Activate serotiny after a (fire) disturbance

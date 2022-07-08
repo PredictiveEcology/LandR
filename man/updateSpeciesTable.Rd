@@ -15,7 +15,7 @@ geographical area within a species range for which trait values are relevant,
 \code{seeddistance_eff} the "effective" seed dispersal distance, \code{seeddistance_max} a
 numeric with the maximum seed dispersal distance, and \code{mortalityshape} and \code{growthcureve} to growth
 curve shape parameters. Other columns (e.g. fire-related traits) can also be included depeding on LandR modules in use.
- Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015) for further detail.}
+Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015) for further detail.}
 
 \item{params}{A named list (of parameters) of named lists (by species), with species
 traits overrides (e.g., \code{list(seeddistance_eff = list(Abie_sp = 25))}).}

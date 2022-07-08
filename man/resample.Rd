@@ -10,6 +10,6 @@
 Imports the non-exported function \code{SpaDES.tools:::resample}.
 }
 \seealso{
-\code{\link[SpaDES.tools]{resample}}
+\code{\link[SpaDES.tools:resample]{SpaDES.tools::resample()}}
 }
 \keyword{internal}

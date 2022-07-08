@@ -10,19 +10,19 @@ utils::globalVariables(c(
   "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
 ))
 
-#' Add cohorts to \code{cohortData} and \code{pixelGroupMap}
+#' Add cohorts to `cohortData` and `pixelGroupMap`
 #'
-#' This is a wrapper for  \code{generatePixelGroups}, \code{initiateNewCohort} and updates to
-#' \code{pixelGroupMap} via assignment to new \code{pixelIndex} values in \code{newPixelCohortData}.
+#' This is a wrapper for  `generatePixelGroups`, `initiateNewCohort` and updates to
+#' `pixelGroupMap` via assignment to new `pixelIndex` values in `newPixelCohortData`.
 #' By running these all together, there is less chance that they will diverge.
 #' There are some checks internally for consistency.
 #'
 #' Does the following:
 #' \enumerate{
-#'   \item add new cohort data into \code{cohortData};
-#'   \item assign initial \code{B} and \code{age} for new cohort;
-#'   \item assign the new \code{pixelGroup} to the pixels that have new cohort;
-#'   \item update the \code{pixelGroup} map.
+#'   \item add new cohort data into `cohortData`;
+#'   \item assign initial `B` and `age` for new cohort;
+#'   \item assign the new `pixelGroup` to the pixels that have new cohort;
+#'   \item update the `pixelGroup` map.
 #' }
 #'
 #' @template newPixelCohortData
@@ -32,9 +32,9 @@ utils::globalVariables(c(
 #' @template speciesEcoregion
 #' @template cohortDefinitionCols
 #'
-#' @param treedFirePixelTableSinceLastDisp A data.table with at least 2 columns, \code{pixelIndex}
-#'   and \code{pixelGroup}.
-#'   This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
+#' @param treedFirePixelTableSinceLastDisp A data.table with at least 2 columns, `pixelIndex`
+#'   and `pixelGroup`.
+#'   This will be used in conjunction with `cohortData` and `pixelGroupMap`
 #'   to ensure that everything matches correctly.
 #' @param successionTimestep The time between successive seed dispersal events.
 #'   In LANDIS-II, this is called "Succession Timestep". This is used here
@@ -44,8 +44,8 @@ utils::globalVariables(c(
 #' @template doAssertion
 #'
 #' @return
-#' A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
-#' \code{newPixelCohortData} inserted.
+#' A list of length 2, `cohortData` and `pixelGroupMap`, with
+#' `newPixelCohortData` inserted.
 #'
 #' @export
 #' @rdname updateCohortData
@@ -230,15 +230,15 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 
 #' Initiate new cohorts
 #'
-#' Calculate new values for \code{B}, add \code{age}, then \code{rbindlist} this
-#' with \code{cohortData}.
+#' Calculate new values for `B`, add `age`, then `rbindlist` this
+#' with `cohortData`.
 #'
 #' @template newPixelCohortData
 #' @template cohortData
 #' @template cohortDefinitionCols
 #' @param initialB the initial biomass of new cohorts. Defaults to ten.
 #'
-#' @return A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
+#' @return A `data.table` with a new `rbindlist`ed `cohortData`
 #'
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
@@ -329,7 +329,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
   return(cohortData)
 }
 
-#' Remove missing cohorts from \code{cohortData} based on \code{pixelGroupMap}
+#' Remove missing cohorts from `cohortData` based on `pixelGroupMap`
 #'
 #' @template cohortData
 #' @template cohortDefinitionCols
@@ -338,8 +338,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 #' @template doAssertion
 #'
 #' @return
-#' A \code{list} with 2 \code{data.table} objects, \code{cohortData} and \code{pixelGroupMap},
-#' each updated based on missing \code{pixelGroups} in the other.
+#' A `list` with 2 `data.table` objects, `cohortData` and `pixelGroupMap`,
+#' each updated based on missing `pixelGroups` in the other.
 #'
 #' @export
 #' @importFrom data.table rbindlist set setkey
@@ -380,23 +380,23 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
   ))
 }
 
-#' Add the correct \code{pixelGroups} to a \code{pixelDataTable} object
+#' Add the correct `pixelGroups` to a `pixelDataTable` object
 #'
-#' Generates unique groupings of a \code{data.table} object where one or more rows can
-#' all belong to the same \code{pixelIndex}. Pixel groups will be identical pixels based
-#' on unique combinations of \code{columns}.
+#' Generates unique groupings of a `data.table` object where one or more rows can
+#' all belong to the same `pixelIndex`. Pixel groups will be identical pixels based
+#' on unique combinations of `columns`.
 #'
-#' @param pixelDataTable  A \code{data.table} with column-based descriptions.
-#'   Must have a column called \code{pixelIndex}, which allows for multiple rows to be associated
+#' @param pixelDataTable  A `data.table` with column-based descriptions.
+#'   Must have a column called `pixelIndex`, which allows for multiple rows to be associated
 #'   with a single pixel.
-#' @param maxPixelGroup A length 1 numeric indicating the current maximum \code{pixelGroup} value;
-#'    the \code{pixelGroup} numbers returned will start at \code{maxPixelGroup + 1}.
+#' @param maxPixelGroup A length 1 numeric indicating the current maximum `pixelGroup` value;
+#'    the `pixelGroup` numbers returned will start at `maxPixelGroup + 1`.
 #' @param columns A character vector of column names to use as part of the generation of unique
-#'   combinations of features. Default is \code{c("ecoregionGroup", "speciesCode", "age", "B")}
+#'   combinations of features. Default is `c("ecoregionGroup", "speciesCode", "age", "B")`
 #'
 #' @return
-#' Returns a vector of \code{pixelGroup} in the original order of the input \code{pixelDataTable}.
-#' This should likely be added to the \code{pixelDataTable} object immediately.
+#' Returns a vector of `pixelGroup` in the original order of the input `pixelDataTable`.
+#' This should likely be added to the `pixelDataTable` object immediately.
 #'
 #' @export
 #' @importFrom data.table setkey setorderv
@@ -469,14 +469,14 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
   return(pcd$pixelGroup)
 }
 
-#' Pull out the values from \code{speciesEcoregion} table for current time
+#' Pull out the values from `speciesEcoregion` table for current time
 #'
 #' @template speciesEcoregion
 #' @template currentTime
 #'
 #' @return
-#' The \code{speciesEcoregion} input object, but with data from only one year, the year
-#' that is less than or equal to the \code{currentTime}
+#' The `speciesEcoregion` input object, but with data from only one year, the year
+#' that is less than or equal to the `currentTime`
 #'
 #' @export
 speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
@@ -489,9 +489,9 @@ speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
   as.integer(ceiling(as.numeric(age) / successionTimestep) * successionTimestep)
 }
 
-#' The columns in a \code{cohortData} that define "unique"
+#' The columns in a `cohortData` that define "unique"
 #'
-#' If two pixels have identical values in all of these columns, they are the same \code{pixelGroup}.
+#' If two pixels have identical values in all of these columns, they are the same `pixelGroup`.
 #'
 #' @export
 #' @rdname uniqueDefinitions
@@ -501,7 +501,7 @@ uniqueCohortDefinition <- c("pixelGroup", "speciesCode", "age", "B")
 #' @rdname uniqueDefinitions
 uniqueSpeciesEcoregionDefinition <- c("speciesCode", "ecoregionGroup")
 
-#' Summary for \code{cohortData}
+#' Summary for `cohortData`
 #'
 #' @template cohortData
 #'
@@ -532,21 +532,21 @@ describeCohortData <- function(cohortData) {
 
 #' Convert Land Cover Classes (LCC) to another value in its neighbourhood
 #'
-#' This will search around the pixels on \code{rstLCC} that have
-#' \code{classesToReplace}, and search in iteratively increasing
+#' This will search around the pixels on `rstLCC` that have
+#' `classesToReplace`, and search in iteratively increasing
 #' radii outwards for other Land Cover Classes than the those indicated in
-#' \code{classesToReplace}. This will constrain
-#' It will then take the cohorts that were in pixels with \code{classesToReplace}
+#' `classesToReplace`. This will constrain
+#' It will then take the cohorts that were in pixels with `classesToReplace`
 #' and assign them new values in the output object. This function will
-#' also check that it must be an \code{ecoregionCode} that already exists in
-#' \code{cohortData}, i.e., not create new \code{ecoregionCode} values. See Details.
+#' also check that it must be an `ecoregionCode` that already exists in
+#' `cohortData`, i.e., not create new `ecoregionCode` values. See Details.
 #'
 #' @details
 #' This function is designed to be used in highly constrained situations, where it is not
 #' just replacing a Land Cover Class by a neighbouring Land Cover Class. But it can
 #' be used for the simpler cases of simply replacing a Land Cover Class.
 #'
-#' @param pixelClassesToReplace Deprecated. Use \code{classesToReplace}
+#' @param pixelClassesToReplace Deprecated. Use `classesToReplace`
 #'
 #' @param classesToReplace Integer vector of classes that are are to be replaced,
 #'     e.g., 34, 35, 36 on LCC2005, which are burned young, burned 10 year, and cities.
@@ -555,34 +555,34 @@ describeCohortData <- function(cohortData) {
 #'
 #' @param theUnwantedPixels An optional vector of pixel IDs that need to be changed.
 #'   If not provided, then pixels to change will be taken from the match between
-#'   \code{availableERC_by_Sp} and \code{classesToReplace}. Supplying this allows
+#'   `availableERC_by_Sp` and `classesToReplace`. Supplying this allows
 #'   the user to only replace some of the pixels with a given class.
 #'
-#' @param ecoregionGroupVec Deprecated. Use \code{availableERC_by_Sp}
+#' @param ecoregionGroupVec Deprecated. Use `availableERC_by_Sp`
 #'
-#' @param speciesEcoregion Deprecated. Use \code{availableERC_by_Sp}
+#' @param speciesEcoregion Deprecated. Use `availableERC_by_Sp`
 #'
-#' @param availableERC_by_Sp A \code{data.table} or \code{data.frame} with 3 columns:
-#'   \code{speciesCode}, \code{initialEcoregionCode} and \code{pixelIndex}.
-#'   \code{pixelIndex} is the pixel id for each line in the \code{data.table};
-#'   \code{speciesCode} is the species name in the pixel (can have more than one
+#' @param availableERC_by_Sp A `data.table` or `data.frame` with 3 columns:
+#'   `speciesCode`, `initialEcoregionCode` and `pixelIndex`.
+#'   `pixelIndex` is the pixel id for each line in the `data.table`;
+#'   `speciesCode` is the species name in the pixel (can have more than one
 #'     species per pixel, so multiple rows per pixel); and,
-#'   \code{initialEcoregionCode} is the unique codes that are "available" to be
-#'     used as a replacement for \code{classesToReplace}. \code{initialEcoregionCode}
+#'   `initialEcoregionCode` is the unique codes that are "available" to be
+#'     used as a replacement for `classesToReplace`. `initialEcoregionCode`
 #'     must be a character vector, with one or no "_" used as a separator, with the last
-#'     component being the Land Cover Class that matches \code{classesToReplace}, e.g.,
-#'     \code{"242_18"}. If there is no "_" in this code, then the codes must match the
-#'     \code{classesToReplace} exactly, e.g., \code{"11"}.
-#'     If \code{pixelIndex} is missing, the function will fill it
-#'     with \code{seq(ncell(rstLCC))}. If \code{speciesCode} is missing, the function
-#'     will replace it with a dummy value (\code{"allSpecies"}).
+#'     component being the Land Cover Class that matches `classesToReplace`, e.g.,
+#'     `"242_18"`. If there is no "_" in this code, then the codes must match the
+#'     `classesToReplace` exactly, e.g., `"11"`.
+#'     If `pixelIndex` is missing, the function will fill it
+#'     with `seq(ncell(rstLCC))`. If `speciesCode` is missing, the function
+#'     will replace it with a dummy value (`"allSpecies"`).
 #'
 #' @template doAssertion
 #'
 #' @return
-#' A \code{data.table} with two columns, \code{pixelIndex} and \code{ecoregionGroup}.
-#' This represents the new codes to used in the \code{pixelIndex} locations.
-#' These should have no values overlapping with \code{classesToReplace}.
+#' A `data.table` with two columns, `pixelIndex` and `ecoregionGroup`.
+#' This represents the new codes to used in the `pixelIndex` locations.
+#' These should have no values overlapping with `classesToReplace`.
 #'
 #' @author Eliot McIntire
 #' @export
@@ -785,18 +785,18 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   out3
 }
 
-#' Generate template \code{cohortData} table
+#' Generate template `cohortData` table
 #'
-#' Internal function used by \code{\link{makeAndCleanInitialCohortData}}.
+#' Internal function used by [makeAndCleanInitialCohortData()].
 #'
-#' @param inputDataTable A \code{data.table} with columns described above.
+#' @param inputDataTable A `data.table` with columns described above.
 #'
 #' @template doAssertion
 #'
-#' @param rescale Logical. If \code{TRUE}, the default, cover for each species will be rescaled
-#'   so all cover in \code{pixelGroup} or pixel sums to 100.
+#' @param rescale Logical. If `TRUE`, the default, cover for each species will be rescaled
+#'   so all cover in `pixelGroup` or pixel sums to 100.
 #'
-#' @return cohortData \code{data.table} with attribute "imputedPixID"
+#' @return cohortData `data.table` with attribute "imputedPixID"
 #'
 #' @importFrom crayon blue
 #' @importFrom data.table melt setattr setnames
@@ -940,31 +940,31 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
   return(cohortData)
 }
 
-#' Generate initial \code{cohortData} table
+#' Generate initial `cohortData` table
 #'
-#' Takes a single \code{data.table} input, which has the following columns in addition to
+#' Takes a single `data.table` input, which has the following columns in addition to
 #'    others that will be labelled with species name, and contain percent cover of each:
 #' \itemize{
-#'   \item \code{pixelIndex} (integer)
-#'   \item \code{age} (integer)
-#'   \item \code{logAge} (numeric)
-#'   \item \code{initialEcoregionCode} (factor)
-#'   \item \code{totalBiomass} (integer)
-#'   \item \code{lcc} (integer)
-#'   \item \code{rasterToMatch} (integer)
-#'   \item \code{speciesCode} (factor)
-#'   \item \code{cover} (integer)
-#'   \item \code{coverOrig} (integer)
-#'   \item \code{B} (integer)
+#'   \item `pixelIndex` (integer)
+#'   \item `age` (integer)
+#'   \item `logAge` (numeric)
+#'   \item `initialEcoregionCode` (factor)
+#'   \item `totalBiomass` (integer)
+#'   \item `lcc` (integer)
+#'   \item `rasterToMatch` (integer)
+#'   \item `speciesCode` (factor)
+#'   \item `cover` (integer)
+#'   \item `coverOrig` (integer)
+#'   \item `B` (integer)
 #' }
 #'    Several data correction/imputation operations are also performed. Namely, age is imputed
 #'    in pixels where age data is missing (but not cover) and where cover == 0 but age > 0,
 #'    total biomass is zeroed if age == 0, and age is zeroed if biomass == 0.
 #'
 #'
-#' @param inputDataTable A \code{data.table} with columns described above.
+#' @param inputDataTable A `data.table` with columns described above.
 #'
-#' @param sppColumns A vector of the names of the columns in \code{inputDataTable} that
+#' @param sppColumns A vector of the names of the columns in `inputDataTable` that
 #'   represent percent cover by species, rescaled to sum up to 100\%.
 #'
 #' @param imputeBadAgeModel statistical model used to impute ages in pixels with missing
@@ -975,8 +975,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #'
 #' @template doAssertion
 #'
-#' @param doSubset Turns on/off subsetting. Defaults to \code{TRUE}.
-#' @return a \code{cohortData} \code{data.table} with attribute "imputedPixID"
+#' @param doSubset Turns on/off subsetting. Defaults to `TRUE`.
+#' @return a `cohortData` `data.table` with attribute "imputedPixID"
 #'     (a vector of pixel IDs that suffered imputation)
 #'
 #' @author Eliot McIntire
@@ -1132,13 +1132,13 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
   return(cohortData)
 }
 
-#' Subset a \code{data.table} with random subsampling within \code{by} groups
+#' Subset a `data.table` with random subsampling within `by` groups
 #'
-#' @param DT A \code{data.table}
+#' @param DT A `data.table`
 #' @param by Character vector of column names to use for groups
 #' @param doSubset Logical or numeric indicating the number of subsamples to use
-#' @param indices Logical. If \code{TRUE}, this will return vector of row indices only. Defaults
-#'   to \code{FALSE}, i.e., return the subsampled \code{data.table}
+#' @param indices Logical. If `TRUE`, this will return vector of row indices only. Defaults
+#'   to `FALSE`, i.e., return the subsampled `data.table`
 #'
 #' @export
 #' @examples
@@ -1175,22 +1175,22 @@ subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
   return(DT)
 }
 
-#' The generic statistical model to run (\code{lmer} or \code{glmer})
+#' The generic statistical model to run (`lmer` or `glmer`)
 #'
 #' This does a few things including R squared, gets the fitted values.
-#' It appears that running the models "as is" without this wrapper does not work with \code{Cache}.
+#' It appears that running the models "as is" without this wrapper does not work with `Cache`.
 #' The return of the model in a list solves this problem.
-#' For Caching, the \code{.specialData} should be "omitted" via \code{omitArgs}, and
-#' \code{uniqueEcoregionGroups} should not be omitted.
+#' For Caching, the `.specialData` should be "omitted" via `omitArgs`, and
+#' `uniqueEcoregionGroups` should not be omitted.
 #'
-#' @param modelFn A quoted expression of type \code{package::model(Y ~ X, ...)}, omitting
-#'   the \code{data} argument. E.g. \code{lme4::glmer(Y ~ X + (X|G), family = poisson)}
-#' @param uniqueEcoregionGroups Unique values of \code{ecoregionGroups}.
+#' @param modelFn A quoted expression of type `package::model(Y ~ X, ...)`, omitting
+#'   the `data` argument. E.g. `lme4::glmer(Y ~ X + (X|G), family = poisson)`
+#' @param uniqueEcoregionGroups Unique values of `ecoregionGroups`.
 #'   This is the basis for the statistics, and can be used to optimize caching,
-#'   e.g. ignore \code{.specialData} in \code{.omitArgs}.
+#'   e.g. ignore `.specialData` in `.omitArgs`.
 #' @param sumResponse a sum of all the response variable values
-#'   Also to be used to optimize caching, e.g. ignore \code{.specialData}
-#'   in \code{.omitArgs}.
+#'   Also to be used to optimize caching, e.g. ignore `.specialData`
+#'   in `.omitArgs`.
 #' @param .specialData The custom dataset required for the model.
 #'
 #' @export
@@ -1278,7 +1278,7 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
 #' @export
 columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 
-#' Generate \code{cohortData} table per pixel:
+#' Generate `cohortData` table per pixel:
 #'
 #' @template cohortData
 #'
@@ -1289,7 +1289,7 @@ columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 #' @template doAssertion
 #'
 #' @return
-#' An expanded \code{cohortData} \code{data.table} with a new \code{pixelIndex} column.
+#' An expanded `cohortData` `data.table` with a new `pixelIndex` column.
 #'
 #' @export
 #' @importFrom raster getValues ncell
@@ -1315,7 +1315,7 @@ addPixels2CohortData <- function(cohortData, pixelGroupMap,
   return(pixelCohortData)
 }
 
-#' Add number of pixels per \code{pixelGroup} and add it has a new column to \code{cohortData}
+#' Add number of pixels per `pixelGroup` and add it has a new column to `cohortData`
 #'
 #' @template cohortData
 #'
@@ -1324,7 +1324,7 @@ addPixels2CohortData <- function(cohortData, pixelGroupMap,
 #' @template doAssertion
 #'
 #' @return
-#' An \code{cohortData} \code{dat.table} with a new \code{noPixels}
+#' An `cohortData` `dat.table` with a new `noPixels`
 #' column
 #'
 #' @export
@@ -1357,47 +1357,47 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
   return(pixelCohortData)
 }
 
-#' Make the \code{cohortData} table, while modifying the temporary
-#' \code{pixelCohortData} that will be used to prepare other files.
+#' Make the `cohortData` table, while modifying the temporary
+#' `pixelCohortData` that will be used to prepare other files.
 #'
-#' Takes a \code{pixelCohortData} table (see \code{makeAndCleanInitialCohortData}),
-#'   the \code{speciesEcoregion} list and returns a modified \code{pixelCohortData} and
-#'   the \code{cohortData} tables to be used in the simulation.
-#'   This function mainly removes unnecessary columns from \code{pixelCohortData},
-#'   subsets pixels with \code{biomass > 0}, generates \code{pixelGroups},
-#'   and adds \code{ecoregionGroup} and \code{totalBiomass} columns to \code{pixelCohortData}.
-#'   \code{cohortData} is then created by subsetting unique combinations of \code{pixelGroup} and
-#'   whatever columns are listed in \code{columnsForPixelGroups}.
-#'   The resulting \code{cohortData} table has the following columns:
+#' Takes a `pixelCohortData` table (see `makeAndCleanInitialCohortData`),
+#'   the `speciesEcoregion` list and returns a modified `pixelCohortData` and
+#'   the `cohortData` tables to be used in the simulation.
+#'   This function mainly removes unnecessary columns from `pixelCohortData`,
+#'   subsets pixels with `biomass > 0`, generates `pixelGroups`,
+#'   and adds `ecoregionGroup` and `totalBiomass` columns to `pixelCohortData`.
+#'   `cohortData` is then created by subsetting unique combinations of `pixelGroup` and
+#'   whatever columns are listed in `columnsForPixelGroups`.
+#'   The resulting `cohortData` table has the following columns:
 #' \itemize{
-#'   \item \code{speciesCode} (factor)
-#'   \item \code{ecoregionGroup} (factor)
-#'   \item \code{pixelGroup} (integer)
-#'   \item \code{age} (integer)
-#'   \item \code{B} (integer)
+#'   \item `speciesCode` (factor)
+#'   \item `ecoregionGroup` (factor)
+#'   \item `pixelGroup` (integer)
+#'   \item `age` (integer)
+#'   \item `B` (integer)
 #' }
 #'
 #' @template pixelCohortData
 #' @param columnsForPixelGroups Default columns that define pixel groups
-#' @param pixelGroupAgeClass Integer. When assigning \code{pixelGroup} membership, this defines the
-#'   resolution of ages that will be considered 'the same \code{pixelGroup}', e.g., if it is 10,
+#' @param pixelGroupAgeClass Integer. When assigning `pixelGroup` membership, this defines the
+#'   resolution of ages that will be considered 'the same `pixelGroup`', e.g., if it is 10,
 #'   then 6 and 14 will be the same.
-#' @param pixelGroupBiomassClass Integer. When assigning \code{pixelGroup} membership, this defines
-#'   the resolution of biomass that will be considered 'the same \code{pixelGroup}', e.g., if it is
+#' @param pixelGroupBiomassClass Integer. When assigning `pixelGroup` membership, this defines
+#'   the resolution of biomass that will be considered 'the same `pixelGroup`', e.g., if it is
 #'   100, then 5160 and 5240 will be the same
 #' @param minAgeForGrouping Minimum age for regrouping. This may be because there is a source of
 #'   ages for young stands/trees that is very reliable, such as a fire database.
 #'   Ages below this will not be grouped together. Defaults to -1, meaning treat all ages equally.
 #'   If this is related to known ages from a high quality database, then use age of the oldest
 #'   trees in that database.
-#' @param pixelFateDT A \code{data.table} of \code{pixelFateDT}; if none provided, will make an empty one.
+#' @param pixelFateDT A `data.table` of `pixelFateDT`; if none provided, will make an empty one.
 #' @param rmImputedPix Should imputed pixels be removed
 #' @param imputedPixID a vector of IDs of pixels that suffered data imputation.
 #'
 #' @template speciesEcoregion
 #'
-#' @return A list with a modified \code{pixelCohortData}, \code{cohortData}, and \code{pixelFateDT}
-#' \code{data.table}s.
+#' @return A list with a modified `pixelCohortData`, `cohortData`, and `pixelFateDT`
+#' `data.table`s.
 #'
 #' @export
 #' @importFrom data.table melt setnames set
@@ -1521,17 +1521,17 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
   return(list(cohortData = cohortData, pixelCohortData = pixelCohortData, pixelFateDT = pixelFateDT))
 }
 
-#' Create new cohorts based on provenance table with unique \code{pixelGroup} and add to \code{cohortData}
+#' Create new cohorts based on provenance table with unique `pixelGroup` and add to `cohortData`
 #'
 #' @param newPixelCohortData the cohorts that were harvested
 #' @template cohortData
 #' @template pixelGroupMap
 #' @template currentTime
 #' @param successionTimestep succession timestep used in the simulation
-#' @param trackPlanting adds column that tracks planted cohorts if \code{TRUE}
+#' @param trackPlanting adds column that tracks planted cohorts if `TRUE`
 #' @param initialB the initial biomass of new cohorts. Defaults to ten.
 #'
-#' @return A \code{data.table} with a new \code{cohortData}
+#' @return A `data.table` with a new `cohortData`
 #'
 #' @importFrom data.table copy rbindlist set setkey
 #' @importFrom raster getValues
@@ -1585,19 +1585,19 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, initi
   return(cohortData)
 }
 
-#' Add cohorts to \code{cohortData} and \code{pixelGroupMap}
+#' Add cohorts to `cohortData` and `pixelGroupMap`
 #'
-#' This is a wrapper for  \code{generatePixelGroups}, \code{initiateNewCohort} and updates to
-#' \code{pixelGroupMap} via assignment to new \code{pixelIndex} values in \code{newPixelCohortData}.
+#' This is a wrapper for  `generatePixelGroups`, `initiateNewCohort` and updates to
+#' `pixelGroupMap` via assignment to new `pixelIndex` values in `newPixelCohortData`.
 #' By running these all together, there is less chance that they will diverge.
 #' There are some checks internally for consistency.
 #'
 #' Does the following:
 #' \enumerate{
-#'   \item add new cohort data into \code{cohortData};
-#'   \item assign initial \code{B} and \code{age} for new cohort;
-#'   \item assign the new \code{pixelGroup} to the pixels that have new cohort;
-#'   \item update the \code{pixelGroup} map.
+#'   \item add new cohort data into `cohortData`;
+#'   \item assign initial `B` and `age` for new cohort;
+#'   \item assign the new `pixelGroup` to the pixels that have new cohort;
+#'   \item update the `pixelGroup` map.
 #' }
 #'
 #' @template newPixelCohortData
@@ -1607,16 +1607,16 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, initi
 #' @template currentTime
 #' @template speciesEcoregion
 #'
-#' @param treedHarvestPixelTable A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
-#'   This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
+#' @param treedHarvestPixelTable A data.table with at least 2 columns, `pixelIndex` and `pixelGroup`.
+#'   This will be used in conjunction with `cohortData` and `pixelGroupMap`
 #'   to ensure that everything matches correctly.
 #' @param successionTimestep The time between successive seed dispersal events.
 #'   In LANDIS-II, this is called "Succession Timestep". This is used here
-#' @param provenanceTable A \code{data.table} with three columns:
-#' New cohorts are initiated at the \code{ecoregionGroup} \code{speciesEcoregion} from the
-#' corresponding \code{speciesEcoregion} listed in the \code{Provenance} column
+#' @param provenanceTable A `data.table` with three columns:
+#' New cohorts are initiated at the `ecoregionGroup` `speciesEcoregion` from the
+#' corresponding `speciesEcoregion` listed in the `Provenance` column
 #' @param initialB the initial biomass of new cohorts. Defaults to ten.
-#' @param trackPlanting if true, planted cohorts in \code{cohortData} are tracked with \code{TRUE}
+#' @param trackPlanting if true, planted cohorts in `cohortData` are tracked with `TRUE`
 #' in column 'planted'
 #'
 #' @param verbose Integer, where increasing number is increasing verbosity. Currently,
@@ -1625,8 +1625,8 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, initi
 #' @template doAssertion
 #'
 #' @return
-#' A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
-#' \code{newPixelCohortData} inserted.
+#' A list of length 2, `cohortData` and `pixelGroupMap`, with
+#' `newPixelCohortData` inserted.
 #'
 #' @export
 #' @importFrom crayon green magenta
@@ -1768,17 +1768,17 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
   ))
 }
 
-#' Create or amend data to a \code{pixelFateDT} object
+#' Create or amend data to a `pixelFateDT` object
 #'
-#' @param pixelFateDT A \code{pixelFateDT} \code{data.table} with 3 columns: \code{fate},
-#'   \code{pixelsRemoted}, and \code{runningPixelTotal}.
+#' @param pixelFateDT A `pixelFateDT` `data.table` with 3 columns: `fate`,
+#'   `pixelsRemoted`, and `runningPixelTotal`.
 #' @param fate A character string (length 1) describing in words the change
-#' @param pixelsRemoved A numeric indicating how many pixels were removed due to the \code{fate}.
+#' @param pixelsRemoved A numeric indicating how many pixels were removed due to the `fate`.
 #' @param runningPixelTotal an optional numeric with new, running total. If not supplied,
-#'   it will be calculated from the last row of \code{pixelFateDT} \code{runningTotal} minus the
-#'   \code{pixelsRemoved}
+#'   it will be calculated from the last row of `pixelFateDT` `runningTotal` minus the
+#'   `pixelsRemoved`
 #'
-#' @return A \code{pixelFateDT} object, updated with one extra row.
+#' @return A `pixelFateDT` object, updated with one extra row.
 #'
 #' @export
 pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
@@ -1796,13 +1796,13 @@ pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
   pixelFateDT
 }
 
-#' Generate and add vegetation type column to \code{cohortData}
+#' Generate and add vegetation type column to `cohortData`
 #'
-#' This function is a simplification of \code{vegTypeMapGenerator}
+#' This function is a simplification of `vegTypeMapGenerator`
 #' and instead of generating a map, it adds the vegetation type column
-#' to the \code{cohortData} table.
+#' to the `cohortData` table.
 #'
-#' @param x A \code{cohortData} object
+#' @param x A `cohortData` object
 #'
 #' @template vegLeadingProportion
 #'
@@ -1814,14 +1814,14 @@ pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
 #'
 #' @template sppEquivCol
 #'
-#' @param pixelGroupColName Name of the column in \code{pixelGroup} to use.
+#' @param pixelGroupColName Name of the column in `pixelGroup` to use.
 #'
 #' @template doAssertion
 #'
 #' @param ... Additional arguments.
 #'
-#' @return \code{x} with a new column, 'leading', coding the vegetation type
-#'    of each group defined by \code{pixelGroupColName}
+#' @return `x` with a new column, 'leading', coding the vegetation type
+#'    of each group defined by `pixelGroupColName`
 #'
 #' @author Eliot McIntire, Ceres Barros, Alex Chubaty
 #' @export

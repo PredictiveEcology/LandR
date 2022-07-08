@@ -25,6 +25,6 @@ so all cover in \code{pixelGroup} or pixel sums to 100.}
 cohortData \code{data.table} with attribute "imputedPixID"
 }
 \description{
-Internal function used by \code{\link{makeAndCleanInitialCohortData}}.
+Internal function used by \code{\link[=makeAndCleanInitialCohortData]{makeAndCleanInitialCohortData()}}.
 }
 \keyword{internal}

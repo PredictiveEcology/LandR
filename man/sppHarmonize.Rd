@@ -21,12 +21,12 @@ If not provided and \code{mixedType == 2}, will attempt to use
 \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{sppNameVector}{A character vector of species to use. These species must all
-be from one naming convention, i.e., from one column in the `sppEquiv`.}
+be from one naming convention, i.e., from one column in the \code{sppEquiv}.}
 
-\item{sppEquivCol}{A character string normally provided from the `P(sim)$sppEquivCol`
-(see manual). If `NA`, the default, then this will try to determine which
-column the `sppNameVector` used and use that. If `sppNameVector` is NULL, then
-it will default to `"Boreal"`.}
+\item{sppEquivCol}{A character string normally provided from the \code{P(sim)$sppEquivCol}
+(see manual). If \code{NA}, the default, then this will try to determine which
+column the \code{sppNameVector} used and use that. If \code{sppNameVector} is NULL, then
+it will default to \code{"Boreal"}.}
 
 \item{sppColorVect}{A named vector of colours to use for plotting.
 The names must conform with species name convention used
@@ -41,7 +41,7 @@ threshold a species needs to pass to be considered "leading".}
 }
 \value{
 Returns a named list with the same names as the arguments. These should
-  likely be assigned to the `sim` object in the module following this function call.
+likely be assigned to the \code{sim} object in the module following this function call.
 }
 \description{
 This function will attempt to harmonize many potential issues/conflicts that
