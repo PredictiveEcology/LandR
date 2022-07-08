@@ -4,14 +4,9 @@
 \alias{prepRawBiomassMap}
 \title{Create \code{rawBiomassMap}}
 \usage{
-prepRawBiomassMap(year = 2001, studyAreaName, cacheTags, ...)
+prepRawBiomassMap(studyAreaName, cacheTags, ...)
 }
 \arguments{
-\item{year}{which year of kNN stand biomass maps should be downloaded
-from the NRCan National Forest Inventory? Only 2001 or 2011 are possible.
-This is overridden by passing a \code{url} argument to \code{prepInputs}.
-See \code{...}.}
-
 \item{studyAreaName}{character string giving the study area name.}
 
 \item{cacheTags}{a character vector of strings to pass to \code{Cache(userTags)}}
@@ -19,8 +14,8 @@ See \code{...}.}
 \item{...}{arguments passed to \code{prepInputs} and \code{Cache}. If the following arguments
 are not provided, the following values will be used:
 \itemize{
-\item{url: for year = 2001 or 2011, corresponding kNN stand biomass
-maps will be downloaded from the NRCan National Forest Inventory}
+\item{url: by default, the 2001 kNN stand biomass map is downloaded from
+the NRCan National Forest Inventory}
 \item{useSAcrs: FALSE}
 \item{method: "bilinear"}
 \item{datatype: "INT2U"}
