@@ -3,11 +3,11 @@ utils::globalVariables(c(".N", "V1", "V2", "relativeAbundObsrvd", "relativeAbund
 
 #' Assertions
 #'
-#' Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
+#' Assert that `ecoregionCodes` that were replaced, were correctly identified.
 #'
-#' @param cohortData34to36 A \code{cohortData} \code{data.table} with only the
+#' @param cohortData34to36 A `cohortData` `data.table` with only the
 #'                         pixels what were LCC 34:36
-#' @param rmZeroBiomassQuote  An expression to evaluate, in the form of \code{quote(B>0)},
+#' @param rmZeroBiomassQuote  An expression to evaluate, in the form of `quote(B>0)`,
 #'    used to select cohorts with biomass.
 #'
 #' @param classesToReplace Integer vector of classes that are are to be replaced,
@@ -63,9 +63,9 @@ assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote, classesToR
 
 #' Assertions
 #'
-#' Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
+#' Assert that `ecoregionCodes` that were replaced, were correctly identified.
 #'
-#' @param cohortDataNo34to36 A \code{cohortData} \code{data.table} with only the
+#' @param cohortDataNo34to36 A `cohortData` `data.table` with only the
 #'                         pixels what were LCC 34:36
 #'
 #' @param classesToReplace Integer vector of classes that are are to be replaced,
@@ -120,9 +120,9 @@ assertSppMaxBMaxANPP <- function(speciesEcoregion,
   }
 }
 
-#' Assert that \code{cohortData} has unique lines when subsetting for a given set of columns
+#' Assert that `cohortData` has unique lines when subsetting for a given set of columns
 #'
-#' @param columns Vector of column names on which to test for unique \code{cohortData}
+#' @param columns Vector of column names on which to test for unique `cohortData`
 #'
 #' @export
 #' @rdname assertions
@@ -138,7 +138,7 @@ assertUniqueCohortData <- function(cohortData, columns,
   }
 }
 
-#' Assert that \code{ecoregionGroups} match across different objects
+#' Assert that `ecoregionGroups` match across different objects
 #'
 #' @template ecoregionMap
 #' @template speciesEcoregion
@@ -241,13 +241,13 @@ assertColumns <- function(obj, colClasses,
   }
 }
 
-#' A test that \code{pixelGroupMap} and \code{cohortData} match
+#' A test that `pixelGroupMap` and `cohortData` match
 #'
 #' @template cohortData
 #'
 #' @template pixelGroupMap
 #' @template cohortDefinitionCols
-#' @param sim If the \code{simList} is included, then the \code{browser()} call will be more useful.
+#' @param sim If the `simList` is included, then the `browser()` call will be more useful.
 #'
 #' @param maxExpectedNumDiverge A numeric, length 1, indicating by how many they
 #'   can diverge. Default 1.
@@ -255,7 +255,7 @@ assertColumns <- function(obj, colClasses,
 #' @param message An optional message to print. This may help identify where this function
 #'   was called.
 #'
-#' @param verbose Controls message output. Defaults to \code{getOption("LandR.verbose")}
+#' @param verbose Controls message output. Defaults to `getOption("LandR.verbose")`
 #' @note
 #' TODO
 #'
@@ -300,9 +300,9 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
   }
 }
 
-#' A test that \code{pixelGroupMap} and \code{pixelCohortData} match \code{pixelIndex}
+#' A test that `pixelGroupMap` and `pixelCohortData` match `pixelIndex`
 #'
-#' This is the full \code{pixelCohortData}, not the collapsed one.
+#' This is the full `pixelCohortData`, not the collapsed one.
 #'
 #' @template pixelCohortData
 #' @template pixelGroupMap
@@ -336,7 +336,7 @@ assertPixelCohortData <- function(pixelCohortData, pixelGroupMap,
 }
 
 #' Check that each species as a unique label in the 'EN_generic_short' and 'Leading'
-#'   columns of the \code{sppEquiv} table.
+#'   columns of the `sppEquiv` table.
 #'
 #' @param speciesNames A vector of species names for which the labels will be checked
 #' @template sppEquiv
@@ -392,10 +392,9 @@ assertFireToleranceDif <- function(burnedPixelCohortData,
 
 #' Assert that species layers exist with species cover in the study area
 #'
-#' @param speciesLayers A \code{RasterStack} or \code{RasterLayer} that
-#'   should contain species cover data in the study area
+#' @template speciesLayers
 #' @param thresh the minimum number of pixels where the species must have
-#'   \code{biomass > 0} to be considered present in the study area.
+#'   `biomass > 0` to be considered present in the study area.
 #'   Defaults to 1.
 #'
 #' @export
@@ -404,7 +403,7 @@ assertSpeciesLayers <- function(speciesLayers, thresh,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     ## covert to list if not a stack
-    if (class(speciesLayers) != "RasterStack") {
+    if (!is(speciesLayers, "RasterStack")) {
       speciesLayers <- list(speciesLayers)
 
       test1 <- vapply(speciesLayers, FUN = function(x)
@@ -420,7 +419,7 @@ assertSpeciesLayers <- function(speciesLayers, thresh,
   }
 }
 
-#' Assert that \code{rstLCChange} is a mask-type raster layer and matches
+#' Assert that `rstLCChange` is a mask-type raster layer and matches
 #' rasterToMatch
 #'
 #' @param rstLCChange a raster layer indicating pixels were land-use change occurred as 1s
@@ -446,12 +445,12 @@ assertRstLCChange <- function(rstLCChange, rasterToMatch,
   }
 }
 
-#' Assert that the \code{cohortData} \code{speciesEcoregion} have matching classes
+#' Assert that the `cohortData` `speciesEcoregion` have matching classes
 #'
-#' Specifically, whether all combinations of \code{ecoregionGroup} and \code{speciesCode} are in
+#' Specifically, whether all combinations of `ecoregionGroup` and `speciesCode` are in
 #' both objects, no more no less.
 #'
-#' @param cohortData A \code{cohortData} object
+#' @param cohortData A `cohortData` object
 #'
 #' @template speciesEcoregion
 #'
@@ -475,9 +474,9 @@ assertSpeciesEcoregionCohortDataMatch <- function(cohortData, speciesEcoregion,
   }
 }
 
-#' Assert that the \code{standCohortData} has no NAs
+#' Assert that the `standCohortData` has no NAs
 #'
-#' @param standCohortData A \code{data.table} with simulated and observed stand data for validation
+#' @param standCohortData A `data.table` with simulated and observed stand data for validation
 #'
 #' @template doAssertion
 #'
@@ -507,9 +506,9 @@ assertPixelCohortDataValid <- function(standCohortData, doAssertion = getOption(
 }
 
 
-#' Assert that the \code{allCohortData} has the expected years and reps combinations
+#' Assert that the `allCohortData` has the expected years and reps combinations
 #'
-#' @param allCohortData A \code{data.table} with all simulated \code{cohortData} to use for
+#' @param allCohortData A `data.table` with all simulated `cohortData` to use for
 #'                      validation
 #' @param reps repetition ids
 #' @param years years
@@ -537,7 +536,7 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
 }
 
 
-#' Assert that \code{standAgeMap} is a \code{RasterLayer} with attribute \code{imputedPixID}
+#' Assert that `standAgeMap` is a `RasterLayer` with attribute `imputedPixID`
 #'
 #' @template standAgeMap
 #' @template doAssertion
@@ -561,7 +560,7 @@ assertStandAgeMapAttr <- function(standAgeMap,
   }
 }
 
-#' Assert that \code{cohortData} has attribute \code{imputedPixID}
+#' Assert that `cohortData` has attribute `imputedPixID`
 #'
 #' @template cohortData
 #' @template doAssertion
@@ -594,7 +593,7 @@ assertCohortDataAttr <- function(cohortData,
 #'
 #' @template sppNameVector
 #'
-#' @param sppEquivCol the column name to use from \code{sppEquiv}.
+#' @param sppEquivCol the column name to use from `sppEquiv`.
 #'
 #' @template sppColorVect
 #'

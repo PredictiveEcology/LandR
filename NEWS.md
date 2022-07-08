@@ -1,5 +1,12 @@
 bug reports https://github.com/PredictiveEcology/LandR/issues
 
+version 1.0.9
+=============
+* new function: `nonForestedPixels` used to detect pixels without species cover
+or a non-forested land-cover class
+* new function: `prepRawBiomassMap` used to create `rawBiomassMap`
+* new function: `prepRasterToMatch` used to create `RasterToMatch` and `RasterToMatchLarge`
+
 version 1.0.8
 =============
 * drop support for R 3.6
@@ -8,7 +15,11 @@ version 1.0.8
 * update Eliot's email address
 * new functions: `speciesInStudyArea` and `species
 * remove undeclared dependency package `Require`
-* fix bug in `LANDISDisp()`: skip dispersal when src or rcv data.tables are empty
+* age imputation in `makeAndCleanInitialCohortData` can now be turned off.
+* fix bug in `LANDISDisp()`: skip dispersal when `src` or `rcv` data.tables are empty.
+* initial cohort biomass (calculated in `.initiateNewCohorts`) can now be a fixed integer or, as before, calculated using the LANDIS-II Biomass Succession Extension v3.2.1 approach (Scheller & Miranda 2015).
+* fix bug in `prepInputsFireYear`.
+* drop single-level factor terms in `statsModel`.
 
 version 1.0.7
 =============

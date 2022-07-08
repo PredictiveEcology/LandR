@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2022-06-20
-Version: 1.0.7.9019
+Date: 2022-07-08
+Version: 1.0.7.9027
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -33,7 +33,6 @@ Imports:
     ggpubr,
     ggspatial,
     grDevices,
-    httr,
     lme4,
     magrittr,
     map,
@@ -78,7 +77,6 @@ VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
-RoxygenNote: 7.2.0
 Collate: 
     'LANDIS-II-tables.R'
     'LandR-package.R'
@@ -112,3 +110,5 @@ Collate:
     'studyArea.R'
     'wildfire.R'
     'zzz.R'
+RoxygenNote: 7.2.0
+Roxygen: list(markdown = TRUE)

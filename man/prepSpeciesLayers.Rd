@@ -65,7 +65,7 @@ prepSpeciesLayers_ONFRI(
 )
 }
 \arguments{
-\item{destinationPath}{TODO: description needed}
+\item{destinationPath}{path to data directory where objects will be downloaded or saved to}
 
 \item{outputPath}{TODO: description needed}
 
@@ -89,7 +89,7 @@ For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
 Only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
-\item{thresh}{threshold \% cover used to defined the species as "present" in the study area.
+\item{thresh}{threshold \\% cover used to defined the species as "present" in the study area.
 If at least one pixel has \code{cover >= thresh} , the species is considered "present".
 Otherwise the raster is excluded from the output. Defaults to 10.}
 

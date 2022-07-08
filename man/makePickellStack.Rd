@@ -21,7 +21,7 @@ For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
 Only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
-\item{destinationPath}{TODO: description needed}
+\item{destinationPath}{path to data directory where objects will be downloaded or saved to}
 }
 \value{
 TODO: description needed

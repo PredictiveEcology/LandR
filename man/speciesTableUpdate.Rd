@@ -17,7 +17,7 @@ geographical area within a species range for which trait values are relevant,
 \code{seeddistance_eff} the "effective" seed dispersal distance, \code{seeddistance_max} a
 numeric with the maximum seed dispersal distance, and \code{mortalityshape} and \code{growthcureve} to growth
 curve shape parameters. Other columns (e.g. fire-related traits) can also be included depeding on LandR modules in use.
- Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015) for further detail.}
+Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015) for further detail.}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
@@ -43,7 +43,7 @@ Longevity values are changed to follow Burton & Cumming (1995) for the following
 \emph{Populus balsamifera v. balsamifera}, \emph{Populus tremuloides}, \emph{Pseudotsuga menziesii var. glauca},
 \emph{Pseudotsuga menziesii}, \emph{Thuja plicata}, \emph{Tsuga heterophylla},
 \emph{Tsuga mertensiana x heterophylla}, and only for the  Boreal Shield West (BSW), Boreal Plains (BP)
- and Montane Cordillera (MC) \code{speciesTable$Area}s.
+and Montane Cordillera (MC) \code{speciesTable$Area}s.
 Note that BSW and BP areas correspond more closely to the region considered in Table 2 of
 Burton & Cumming (1995), while MC will correspond to both tables.
 }

@@ -16,7 +16,7 @@ convertUnwantedLCC2(
 \item{classesToReplace}{Integer vector of classes that are are to be replaced,
 e.g., 34, 35, 36 on LCC2005, which are burned young, burned 10 year, and cities.}
 
-\item{rstLCC}{LCC raster, e.g., LCC2005}
+\item{rstLCC}{raster of land-cover class, e.g., LCC2005}
 
 \item{nIterations}{the number of iterations to perform}
 

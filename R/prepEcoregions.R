@@ -2,12 +2,12 @@
 #'
 #' DESCRIPTION NEEDED
 #'
-#' @param ecoregionRst an optional raster object that could be passed to \code{sim}, representing ecoregions
+#' @param ecoregionRst an optional raster object that could be passed to `sim`, representing ecoregions
 #' @param ecoregionLayer a spatial polygons object representing ecoregions
-#' @param ecoregionLayerField optional. The field in \code{ecoregionLayer} that represents ecoregions.
-#' @param rasterToMatchLarge the \code{rasterToMatchLarge} object from \code{sim}
-#' @param rstLCCAdj \code{RasterLayer} representing land cover adjusted for non-forest classes
-#' @param cacheTags \code{UserTags} to pass to cache
+#' @param ecoregionLayerField optional. The field in `ecoregionLayer` that represents ecoregions.
+#' @template rasterToMatchLarge
+#' @param rstLCCAdj `RasterLayer` representing land cover adjusted for non-forest classes
+#' @param cacheTags `UserTags` to pass to cache
 #' @param pixelsToRm a vector of pixels to remove
 #'
 #' @export

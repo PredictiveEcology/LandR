@@ -41,8 +41,8 @@ threshold a species needs to pass to be considered "leading".}
 
 \item{mixed}{Deprecated. See \code{mixedType} argument to \code{vegTypeMapGenerator}.}
 
-\item{...}{Additional arguments passed to \code{\link[reproducible]{Cache}}
-and \code{\link{equivalentName}}.}
+\item{...}{Additional arguments passed to \code{\link[reproducible:Cache]{reproducible::Cache()}}
+and \code{\link[=equivalentName]{equivalentName()}}.}
 
 \item{dPath}{path to the data directory}
 
@@ -72,9 +72,9 @@ If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 \code{biomass > 0} to be considered present in the study area.
 Defaults to 1.}
 
-\item{url}{the source url for the data, passed to \code{\link[reproducible]{prepInputs}}}
+\item{url}{the source url for the data, passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}}
 
-\item{destinationPath}{path to data directory}
+\item{destinationPath}{path to data directory where objects will be downloaded or saved to}
 
 \item{outputPath}{path to output directory}
 }
@@ -86,7 +86,7 @@ A raster stack of percent cover layers by species.
 \description{
 \code{makeVegTypeMap} is a wrapper around \code{vegTypeMapGenerator}
 that works from a species stack of percent cover. These do not have
-to sum to 100%
+to sum to 100\%
 
 Downloads the 2011 kNN species cover layers from the Canadian Forestry Service,
 National Inventory System, for validation.

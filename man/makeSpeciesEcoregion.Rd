@@ -50,14 +50,14 @@ partitioning:
 \code{establishprob = f(establishprob + resproutprob + jointEstablishProbResproutProb)}
 If \code{jointEstablishProbResproutProb} is 0, then these are independent events
 and the total cover probability can be partitioned easily between seeds and
-resprout. This is unlikely ever to be the case. We are picking 50% overlap as
+resprout. This is unlikely ever to be the case. We are picking 50\% overlap as
 a number that is better than 0 (totally independent probabilities, meaning no
-pixel has both seeds and resprout potential) and  100% overlap (totally
+pixel has both seeds and resprout potential) and  100\% overlap (totally
 dependent probabilities, i.e., every pixel where there is seeds will also be
 a pixel with resprouting) This is expressed with the "* 0.5" in the code.
 
 #' @return
 A \code{speciesEcoregion} \code{data.table} with added columns for parameters
-  \code{maxB}, \code{maxANPP} and \code{establishprob}
+\code{maxB}, \code{maxANPP} and \code{establishprob}
 }
 

@@ -2,9 +2,14 @@
 % Please edit documentation in R/prepInputObjects.R
 \name{prepInputsFireYear}
 \alias{prepInputsFireYear}
-\title{Create a raster of fire polygons}
+\title{Create a raster of fire perimeters}
 \usage{
-prepInputsFireYear(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950)
+prepInputsFireYear(
+  ...,
+  rasterToMatch = NULL,
+  fireField = "YEAR",
+  earliestYear = 1950
+)
 }
 \arguments{
 \item{...}{Additional arguments passed to \code{prepInputs}}
@@ -17,5 +22,5 @@ raster operations (i.e., the one used throughout the simulation).}
 \item{earliestYear}{the earliest fire date to allow}
 }
 \description{
-Wrapper on \code{prepInputs} that will rasterize fire polygons.
+Create a raster of fire perimeters
 }

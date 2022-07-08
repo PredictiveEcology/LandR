@@ -64,7 +64,16 @@ In LANDIS-II, this is called "Succession Timestep". This is used here}
 
 \item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
 
-\item{initialB}{the initial biomass of new cohorts. Defaults to ten.}
+\item{initialB}{the initial biomass of new cohorts. Defaults to 10.
+If \code{NULL} or \code{NA}, initial cohort biomass is calculated as in LANDIS-II Biomass Succession
+Extension v3.2.1 (Scheller & Miranda, 2015):
+\code{initialB = asInteger(
+  pmin(maxANPP,
+  asInteger(pmax(1, maxANPP \* exp(-1.6 \* sumB / maxB_eco)))
+  ))}
+where \code{maxANPP} and \code{maxB_eco} are the maximum ANPP and B parameters of the species
+in question within the pixel's \code{ecolocation}, and \code{sumB} is the total stand biomass
+excluding cohorts with ages less than \code{successionTimestep}.}
 
 \item{verbose}{Integer, where increasing number is increasing verbosity. Currently,
 only level 1 exists; but this may change.}
@@ -91,9 +100,9 @@ with \code{cohortData}.
 \details{
 Does the following:
 \enumerate{
-  \item add new cohort data into \code{cohortData};
-  \item assign initial \code{B} and \code{age} for new cohort;
-  \item assign the new \code{pixelGroup} to the pixels that have new cohort;
-  \item update the \code{pixelGroup} map.
+\item add new cohort data into \code{cohortData};
+\item assign initial \code{B} and \code{age} for new cohort;
+\item assign the new \code{pixelGroup} to the pixels that have new cohort;
+\item update the \code{pixelGroup} map.
 }
 }

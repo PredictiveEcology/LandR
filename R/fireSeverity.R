@@ -10,14 +10,14 @@ utils::globalVariables(c(
 #' @template cohortData
 #' @template burnedPixelCohortData
 #'
-#' @note if \code{burnedPixelCohortData} does not have a \code{B}
+#' @note if `burnedPixelCohortData` does not have a `B`
 #'    column, the fire is assumed to be stand replacing (i.e.
 #'    we assume B to be 0 across all pixels/cohorts in
-#'    \code{burnedPixelCohortData})
+#'    `burnedPixelCohortData`)
 #'
 #' @export
-#' @return \code{data.table} with columns \code{pixelIndex},
-#'   \code{pixelGroup} and  \code{severityB}
+#' @return `data.table` with columns `pixelIndex`,
+#'   `pixelGroup` and  `severityB`
 #'
 #'
 calcSeverityB <- function(cohortData, burnedPixelCohortData) {
