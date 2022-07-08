@@ -34,7 +34,7 @@ prepInputsStandAgeMap(
 
 \item{datatype}{passed to \code{prepInputs} of stand age map}
 
-\item{destinationPath}{directory where  age and fire data will be downloaded}
+\item{destinationPath}{path to data directory where objects will be downloaded or saved to}
 
 \item{filename2}{passed to \code{prepInputs} of stand age map}
 

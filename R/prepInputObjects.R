@@ -439,8 +439,8 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @param year which year of kNN stand biomass maps should be downloaded
 #'   from the NRCan National Forest Inventory? Only 2001 or 2011 are possible.
 #'   This is overridden by passing a `url` argument to `prepInputs`.
-#' @template studyAreaName
 #'   See `...`.
+#' @template studyAreaName
 #' @template cacheTags
 #' @param ... arguments passed to `prepInputs` and `Cache`. If the following arguments
 #'   are not provided, the following values will be used:

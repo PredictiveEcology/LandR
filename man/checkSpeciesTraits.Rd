@@ -7,7 +7,8 @@
 checkSpeciesTraits(speciesLayers, species, sppColorVect)
 }
 \arguments{
-\item{speciesLayers}{stack of species layers rasters}
+\item{speciesLayers}{A \code{RasterStack} or \code{RasterLayer} that
+should contain species cover data in the study area}
 
 \item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
 

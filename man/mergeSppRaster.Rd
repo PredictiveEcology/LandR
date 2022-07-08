@@ -9,7 +9,8 @@ mergeSppRaster(sppMerge, speciesLayers, sppEquiv, column, suffix, dPath, ...)
 \arguments{
 \item{sppMerge}{TODO}
 
-\item{speciesLayers}{stack of species layers rasters}
+\item{speciesLayers}{A \code{RasterStack} or \code{RasterLayer} that
+should contain species cover data in the study area}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.

@@ -65,7 +65,7 @@ prepSpeciesLayers_ONFRI(
 )
 }
 \arguments{
-\item{destinationPath}{TODO: description needed}
+\item{destinationPath}{path to data directory where objects will be downloaded or saved to}
 
 \item{outputPath}{TODO: description needed}
 
