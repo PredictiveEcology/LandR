@@ -4,12 +4,7 @@
 \alias{prepInputsFireYear}
 \title{Create a raster of fire perimeters}
 \usage{
-prepInputsFireYear(
-  ...,
-  rasterToMatch = NULL,
-  fireField = "YEAR",
-  earliestYear = 1950
-)
+prepInputsFireYear(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950)
 }
 \arguments{
 \item{...}{Additional arguments passed to \code{prepInputs}}
@@ -38,7 +33,7 @@ ras2match <- rasterize(randomPoly, ras2match)
 tempDir <- tempdir()
 cacheRepo <- file.path(tempDir, "cache")
 
-## ideaally, get the firePerimenters layer first
+## ideally, get the firePerimenters layer first
 firePerimeters <- Cache(prepInputsFireYear,
                         url = "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip",
                         fun = "sf::st_read",

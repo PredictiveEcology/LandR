@@ -23,7 +23,7 @@ prepInputsStandAgeMap(
 )
 }
 \arguments{
-\item{...}{additional arguments passed to \code{prepInputs}.}
+\item{...}{additional arguments passed to \code{prepInputs}}
 
 \item{ageURL}{url where age map is downloaded}
 
@@ -64,7 +64,7 @@ for which ages were corrected. If no corrections were applied the attribute vect
 \description{
 Create the \code{standAgeMap} raster containing age estimates for \code{pixelCohortData}.
 A separate \code{prepInputs} call will source Canadian National Fire Data Base
-data to update ages of recently burned pixels. To suppress this, pass NULL/NA \code{fireURl}
+data to update ages of recently burned pixels. To suppress this, pass NULL/NA \code{fireURL}
 }
 \examples{
 library(SpaDES.tools)
