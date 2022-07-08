@@ -308,7 +308,7 @@ makeMinRelativeB <- function(pixelCohortData) {
                              # X3 = 0.50, ## 0.5
                              # X4 = 0.75, ## 0.7
                              # X5 = 0.85
-                             ) ## 0.9
+  ) ## 0.9
 
   return(minRelativeB)
 }
@@ -393,17 +393,17 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
   if (is.null(rasterToMatch))
     maskWithRTM <- FALSE
 
-    standAgeMap <- Cache(
-      prepInputs, ...,
-      maskWithRTM = maskWithRTM,
-      method = method,
-      datatype = datatype,
-      filename2 = filename2,
-      destinationPath = destinationPath,
-      url = ageURL,
-      fun = ageFun,
-      rasterToMatch = rasterToMatch
-    )
+  standAgeMap <- Cache(
+    prepInputs, ...,
+    maskWithRTM = maskWithRTM,
+    method = method,
+    datatype = datatype,
+    filename2 = filename2,
+    destinationPath = destinationPath,
+    url = ageURL,
+    fun = ageFun,
+    rasterToMatch = rasterToMatch
+  )
   standAgeMap[] <- asInteger(standAgeMap[])
 
   imputedPixID <- integer(0)
@@ -522,7 +522,7 @@ prepInputsFireYear <- function(..., rasterToMatch = NULL, fireField = "YEAR", ea
   dots <- list(...)
   a <- if (is.null(dots$fun)) {
     Cache(prepInputs, rasterToMatch = rasterToMatch, ...) %>%
-        st_as_sf(.)
+      st_as_sf(.)
   } else {
     if (grepl("st_read", dots$fun)) {
       Cache(prepInputs, ...)
