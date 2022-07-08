@@ -18,4 +18,3 @@
 #' @name LandR-package
 #' @rdname LandR-package
 "_PACKAGE"
-

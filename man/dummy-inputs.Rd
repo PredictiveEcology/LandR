@@ -28,7 +28,7 @@ throughout the simulation)}
 \item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique ecoregion groupings,
 which group together pixels of similar biophysical characteristics.}
 
-\item{rstLCC}{a raster land-cover class per pixel,}
+\item{rstLCC}{raster of land-cover class, e.g., LCC2005}
 }
 \value{
 a \code{RasterLayer} object or, in the case of \code{makeDummyEcoregionFiles}, a list.

@@ -16,7 +16,8 @@ makePixelTable(
 )
 }
 \arguments{
-\item{speciesLayers}{stack of species layers rasters}
+\item{speciesLayers}{A \code{RasterStack} or \code{RasterLayer} that
+should contain species cover data in the study area}
 
 \item{standAgeMap}{A \code{rasterLayer} of stand ages with attribute "imputedPixID"}
 
@@ -28,7 +29,7 @@ its information per \code{pixelID.} See \code{ecoregionProducer}.}
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
 
-\item{rstLCC}{raster of land-cover class}
+\item{rstLCC}{raster of land-cover class, e.g., LCC2005}
 
 \item{printSummary}{Logical. If \code{TRUE}, the default, a print out of the
 \code{summary(pixelTable)} will occur.}

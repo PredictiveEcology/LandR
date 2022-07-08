@@ -4,7 +4,7 @@
 #'
 #' @template studyArea
 #' @template rasterToMatch
-#' @param destinationPath path to destination directory
+#' @template destinationPath
 #'
 #' @return `RasterLayer`
 #'

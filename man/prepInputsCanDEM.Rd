@@ -13,7 +13,7 @@ passed to \code{\link[reproducible]{prepInputs}}.}
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
 
-\item{destinationPath}{path to destination directory}
+\item{destinationPath}{path to data directory where objects will be downloaded or saved to}
 }
 \value{
 \code{RasterLayer}

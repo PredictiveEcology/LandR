@@ -7,7 +7,8 @@
 sumRastersBySpecies(speciesLayers, layersToSum, filenameToSave, newLayerName)
 }
 \arguments{
-\item{speciesLayers}{stack of species layers rasters}
+\item{speciesLayers}{A \code{RasterStack} or \code{RasterLayer} that
+should contain species cover data in the study area}
 
 \item{layersToSum}{names/indices of layers to be summed - optional}
 

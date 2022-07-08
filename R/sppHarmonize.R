@@ -1,4 +1,4 @@
-#' Harmonize the 3 components that bring species into Biomass_**
+#' Harmonize the three components that bring species into `Biomass_**` modules
 #'
 #' This function will attempt to harmonize many potential issues/conflicts that
 #' may arise under different combinations of supplied objects to the three
@@ -17,6 +17,8 @@
 #'
 #' @template vegLeadingProportion
 #'
+#' @template studyArea
+#'
 #' @return Returns a named list with the same names as the arguments. These should
 #'   likely be assigned to the `sim` object in the module following this function call.
 #' @export
@@ -28,13 +30,20 @@
 #' # P(sim)$sppEquivCol <- sppOuts$sppEquivCol
 #'
 sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
-                         vegLeadingProportion = 0) {
+                         vegLeadingProportion = 0, studyArea) {
   if (is.null(sppEquiv) && is.null(sppNameVector)) {
     sppNameConvention <- "KNN"
-    sppNameVector <-  Cache(LandR::speciesInStudyArea, studyArea)$speciesList
+    if (!missing(studyArea)) {
+      sppNameVector <-  Cache(LandR::speciesInStudyArea, studyArea)$speciesList
+    } else {
+      stop("Please pass studyArea polygon if not passing sppEquiv/sppNameVector")
+    }
   }
 
-  if (is.null(sppEquiv)) {
+  # Catch both cases of sppEquiv is NULL or is an object with NROW 0 e.g., NULL data.table
+  if (is.null(sppEquiv))
+    sppEquiv <- data.table()
+  if (NROW(sppEquiv) == 0) {
     ## note that this step MUST come after the previous
     sppEquiv <- LandR::sppEquivalencies_CA
   }
@@ -55,11 +64,11 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
            " Please provide conforming 'sppEquivCol' and 'sppEquiv',",
            " or a column that exists in 'LandR::sppEquivalencies_CA'")
     }
-
   }
 
   if (is.null(sppNameVector)) {
     sppNameVector <- sort(unique(sppEquiv[[sppEquivCol]]))
+    sppNameVector <- sppNameVector[nzchar(sppNameVector)] ## drop empty strings
   } else {
     sppNameConvention <- LandR::equivalentNameColumn(sppNameVector, sppEquiv)
   }
@@ -111,13 +120,22 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
     sppColorVect <- sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
     message("No 'sppColorVect' provided; making one with colour palette: Accent")
   } else {
-    if (length(sppColorVect) != length(unique(sppEquiv[[sppEquivCol]])) ||
-        length(sppColorVect) != length(sppNameVector)) {
-      stop("Length of 'sppColorVect' differs from number species in final 'sppEquiv'.",
-           " Check species provided in 'sppColorVect', 'sppNameVector' and/or ",
-           "'sppEquiv[[sppEquivCol]]'")
+    if (any(grepl("Mixed", names(sppColorVect)))) {
+      if (length(sppColorVect) != (length(unique(sppEquiv[[sppEquivCol]])) + 1) ||
+          length(sppColorVect) != (length(sppNameVector) + 1)) {
+        stop("Length of 'sppColorVect' differs from number species in final 'sppEquiv'.",
+             " Check species provided in 'sppColorVect', 'sppNameVector' and/or ",
+             "'sppEquiv[[sppEquivCol]]'")
+      }
+    } else {
+      if (length(sppColorVect) != length(unique(sppEquiv[[sppEquivCol]])) ||
+          length(sppColorVect) != length(sppNameVector)) {
+        stop("Length of 'sppColorVect' differs from number species in final 'sppEquiv'.",
+             " Check species provided in 'sppColorVect', 'sppNameVector' and/or ",
+             "'sppEquiv[[sppEquivCol]]'")
+      }
     }
-    if (!all(names(sppColorVect) %in% sppEquiv[[sppEquivCol]])) {
+    if (!all(names(sppColorVect)[names(sppColorVect) != "Mixed"] %in% sppEquiv[[sppEquivCol]])) {
       message("'sppColorVect' names do not match 'sppEquivCol' (", sppEquivCol, ")",
               " and will be converted if possible.")
       tempNames <-  LandR::equivalentName(names(sppColorVect), df = sppEquiv,

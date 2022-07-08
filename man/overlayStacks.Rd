@@ -21,7 +21,7 @@ overlayStacks(
 \item{outputFilenameSuffix}{file suffix to save raster if there was overlaying.
 Defaults to \code{"overlay"}.}
 
-\item{destinationPath}{directory for saved rasters}
+\item{destinationPath}{path to data directory where objects will be downloaded or saved to}
 }
 \description{
 Overlays rasters of different data resolution by filling in gaps in the highest

@@ -74,7 +74,7 @@ makeDummyRstLCC <- function(rasterToMatch) {
 #' See `ecoregionProducer` (it uses `ecoregionProducer` internally).
 #'
 #' @template ecoregionMap
-#' @param rstLCC a raster land-cover class per pixel,
+#' @template rstLCC
 #'
 #' @export
 #' @importFrom data.table data.table

@@ -5,7 +5,7 @@ utils::globalVariables(c(
 
 #' Check if all species in have trait values
 #'
-#' @param speciesLayers stack of species layers rasters
+#' @template speciesLayers
 #' @template species
 #' @template sppColorVect
 #'
@@ -33,13 +33,13 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 
 #' Make `pixelTable` from biomass, age, land-cover and species cover data
 #'
-#' @param speciesLayers stack of species layers rasters
+#' @template speciesLayers
 #' @template standAgeMap
 #' @param ecoregionFiles A list with two objects: the `ecoregionMap` and a table summarizing
 #'   its information per `pixelID.` See `ecoregionProducer`.
 #' @param biomassMap raster of total stand biomass
 #' @template rasterToMatch
-#' @param rstLCC raster of land-cover class
+#' @template rstLCC
 #' @param printSummary Logical. If `TRUE`, the default, a print out of the
 #'   `summary(pixelTable)` will occur.
 #' @template doAssertion
@@ -350,15 +350,14 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #'
 #' Create the `standAgeMap` raster containing age estimates for `pixelCohortData`.
 #' A separate `prepInputs` call will source Canadian National Fire Data Base
-#' data to update ages of recently burned pixels. To suppress this, pass NULL/NA `fireURl`
+#' data to update ages of recently burned pixels. To suppress this, pass NULL/NA `fireURL`
 #'
-#' @param ... additional arguments passed to `prepInputs`.
+#' @param ... additional arguments passed to `prepInputs`
 #' @param ageURL url where age map is downloaded
 #' @param ageFun passed to 'fun' arg of `prepInputs` of stand age map
 #' @param maskWithRTM passed to `prepInputs` of stand age map
 #' @param method passed to `prepInputs` of stand age map
 #' @param datatype passed to `prepInputs` of stand age map
-#' @param destinationPath directory where  age and fire data will be downloaded
 #' @param filename2 passed to `prepInputs` of stand age map
 #' @param firePerimeters fire raster layer fire year values.
 #' @param fireURL url to download fire polygons used to update age map. If NULL or NA age
@@ -368,6 +367,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #'   is missing.
 #' @param fireField field used to rasterize fire polys. Only used if `firePerimeters`
 #'   is missing.
+#' @template destinationPath
 #' @template rasterToMatch
 #' @template startTime
 #'
@@ -483,9 +483,69 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
   return(standAgeMap)
 }
 
-#' Create a raster of fire polygons
+#' Create `rawBiomassMap`
 #'
+#' Create the `rawBiomassMap` raster containing biomass estimates for
+#' `pixelCohortData`.
 #' Wrapper on `prepInputs` that will rasterize fire polygons.
+#'
+#' @template studyAreaName
+#' @template cacheTags
+#' @param ... arguments passed to `prepInputs` and `Cache`. If the following arguments
+#'   are not provided, the following values will be used:
+#'   \itemize{
+#'     \item{url: by default, the 2001 kNN stand biomass map is downloaded from
+#'       the NRCan National Forest Inventory}
+#'     \item{useSAcrs: FALSE}
+#'     \item{method: "bilinear"}
+#'     \item{datatype: "INT2U"}
+#'     \item{filename2: `suffix("rawBiomassMap.tif", paste0("_", studyAreaName))`}
+#'     \item{overwrite: TRUE}
+#'     \item{userTags: `c(cacheTags, "rawBiomassMap")`}
+#'     \item{omitArgs: `c("destinationPath", "targetFile", "userTags", "stable")`}
+#'   }
+#'
+#' @return a rawBiomassMap raster
+#' @export
+#' @importFrom reproducible Cache prepInputs
+prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
+  Args <- list(...)
+  if (is.null(Args$url)) {
+    Args$url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                       "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
+                       "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
+  }
+  if (is.null(Args$useSAcrs)) {
+    Args$useSAcrs <- FALSE
+  }
+  if (is.null(Args$method)) {
+    Args$method <- "bilinear"
+  }
+  if (is.null(Args$datatype)) {
+    Args$datatype <- "INT2U"
+  }
+  if (is.null(Args$filename2)) {
+    Args$filename2 <- .suffix("rawBiomassMap.tif", paste0("_", studyAreaName))
+  }
+  if (is.null(Args$overwrite)) {
+    Args$overwrite <- TRUE
+  }
+  if (is.null(Args$userTags)) {
+    Args$userTags <- c(cacheTags, "rawBiomassMap")
+  }
+  if (is.null(Args$omitArgs)) {
+    Args$omitArgs <- c("destinationPath", "targetFile", "userTags", "stable")
+  }
+  Args$FUN <- prepInputs
+
+  # httr::with_config(config = httr::config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
+  #necessary for KNN
+  rawBiomassMap <- do.call(Cache, args = Args)
+  # })
+  return(rawBiomassMap)
+}
+
+#' Create a raster of fire perimeters
 #'
 #' @param ... Additional arguments passed to `prepInputs`
 #' @template rasterToMatch
@@ -512,7 +572,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' tempDir <- tempdir()
 #' cacheRepo <- file.path(tempDir, "cache")
 #'
-#' ## ideaally, get the firePerimenters layer first
+#' ## ideally, get the firePerimenters layer first
 #' firePerimeters <- Cache(prepInputsFireYear,
 #'                         url = "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip",
 #'                         fun = "sf::st_read",
@@ -521,8 +581,11 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'
 prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950) {
   dots <- list(...)
-  if (!is.null(dots$fun)) {
-    a <- if (grepl("st_read", dots$fun)) {
+  a <- if (is.null(dots$fun)) {
+    Cache(prepInputs, rasterToMatch = rasterToMatch, ...) %>%
+      st_as_sf(.)
+  } else {
+    if (grepl("st_read", dots$fun)) {
       Cache(prepInputs, ...)
     } else {
       Cache(prepInputs, rasterToMatch = rasterToMatch, ...) %>%
@@ -533,7 +596,7 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
   if (nrow(a) > 0) {
     gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon
     d <- st_transform(gg, crs(rasterToMatch))
-    if (class(d[[fireField]]) != "numeric") {
+    if (!is(d[[fireField]], "numeric")) {
       warning("Chosen fireField will be coerced to numeric")
       d[[fireField]] <- as.numeric(as.factor(d[[fireField]]))
     }
@@ -598,3 +661,112 @@ replaceAgeInFires <- function(standAgeMap, firePerimeters, startTime) {
   attr(standAgeMap, "imputedPixID") <- imputedPixID
   return(standAgeMap)
 }
+
+#' Create `rasterToMatch` and `rasterToMatchLarge`
+#'
+#' `rasterToMatch` and `rasterToMatchLarge` raster layers are created
+#'   from `studyArea` and `studyAreaLarge` polygons (respectively)
+#'   using a template raster (often `rawBiomassMap`)
+#'
+#' @template studyArea
+#' @param studyAreaLarge same as `studyArea`, but larger and completely
+#'   covering it.
+#' @template rasterToMatch
+#' @template rasterToMatchLarge
+#' @template destinationPath
+#' @param templateRas a template raster used to make `rasterToMatch`
+#'   and/or `rasterToMatchLarge`. Must match `studyAreaLarge`.
+#' @template studyAreaName
+#' @template cacheTags
+#'
+#' @export
+#'
+#' @importFrom reproducible Cache postProcessTerra fixErrors writeOutputs .suffix
+#' @importFrom raster compareRaster
+prepRasterToMatch <- function(studyArea, studyAreaLarge,
+                              rasterToMatch, rasterToMatchLarge,
+                              destinationPath,
+                              templateRas, studyAreaName, cacheTags) {
+
+  if (is.null(rasterToMatch) || is.null(rasterToMatchLarge)) {
+    ## if we need rasterToMatch/rasterToMatchLarge, that means a) we don't have it,
+    ## but b) we will have templateRas
+
+    if (is.null(rasterToMatchLarge) && !is.null(rasterToMatch)) {
+      rasterToMatchLarge <- rasterToMatch
+    } else if (is.null(rasterToMatchLarge) && is.null(rasterToMatch)) {
+      warning(paste0("rasterToMatch and rasterToMatchLarge are missing. Both will be created \n",
+                     "from templateRas and studyArea/studyAreaLarge.\n
+                     If this is wrong, provide both rasters"))
+
+      if (is.null(templateRas)) {
+        stop(paste("Please provide a template raster to make rasterToMatch(Large).",
+                   "An option is to use 'rawBiomassMap'"))
+      }
+      if (!compareRaster(templateRas, studyAreaLarge, orig = TRUE, stopiffalse = FALSE)) {
+        ## note that extents/origin may never align if the resolution and projection do not allow for it
+        templateRas <- Cache(postProcessTerra,
+                             templateRas,
+                             studyArea = studyAreaLarge,
+                             useSAcrs = TRUE,
+                             overwrite = TRUE,
+                             userTags = c("postRTMtemplate"))
+        templateRas <- fixErrors(templateRas)
+      }
+      rasterToMatchLarge <- templateRas
+    }
+
+    if (!anyNA(rasterToMatchLarge[])) {
+      whZeros <- rasterToMatchLarge[] == 0
+      if (sum(whZeros) > 0) {# means there are zeros instead of NAs for RTML --> change
+        rasterToMatchLarge[whZeros] <- NA
+        message("There were no NAs on the rasterToMatchLarge, but there were zeros; converting these zeros to NA")
+      }
+    }
+
+    RTMvals <- rasterToMatchLarge[]
+    rasterToMatchLarge[!is.na(RTMvals)] <- 1
+
+    rasterToMatchLarge <- Cache(
+      writeOutputs,
+      rasterToMatchLarge,
+      filename2 = .suffix(file.path(destinationPath, "rasterToMatchLarge.tif"),
+                          paste0("_", studyAreaName)),
+      datatype = "INT2U",
+      overwrite = TRUE,
+      userTags = c(cacheTags, "rasterToMatchLarge"),
+      omitArgs = c("userTags")
+    )
+    if (is.null(rasterToMatch)) {
+      rasterToMatch <- Cache(postProcessTerra,
+                             from = rasterToMatchLarge,
+                             studyArea = studyArea,
+                             # rasterToMatch = rasterToMatchLarge,   ## Ceres: this messes up the extent. if we are doing this it means BOTH RTMs come from biomassMap, so no need for RTMLarge here.
+                             useSAcrs = FALSE,
+                             # maskWithRTM = FALSE,   ## mask with SA
+                             method = "bilinear",
+                             datatype = "INT2U",
+                             filename2 = .suffix(file.path(destinationPath, "rasterToMatch.tif"),
+                                                 paste0("_", studyAreaName)),
+                             overwrite = TRUE,
+                             # useCache = "overwrite",
+                             userTags = c(cacheTags, "rasterToMatch"),
+                             omitArgs = c("destinationPath", "targetFile", "userTags", "stable", "filename2",
+                                          "overwrite"))
+    }
+    ## covert to 'mask'
+    if (!anyNA(rasterToMatch[])) {
+      whZeros <- rasterToMatch[] == 0
+      if (sum(whZeros) > 0) {# means there are zeros instead of NAs for RTML --> change
+        rasterToMatch[whZeros] <- NA
+        message("There were no NAs on the RTM, but there were zeros; converting these zeros to NA")
+      }
+    }
+
+    RTMvals <- rasterToMatch[]
+    rasterToMatch[!is.na(RTMvals)] <- 1
+  }
+
+  return(list(rasterToMatch = rasterToMatch, rasterToMatchLarge = rasterToMatchLarge))
+}
+

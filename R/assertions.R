@@ -392,8 +392,7 @@ assertFireToleranceDif <- function(burnedPixelCohortData,
 
 #' Assert that species layers exist with species cover in the study area
 #'
-#' @param speciesLayers A `RasterStack` or `RasterLayer` that
-#'   should contain species cover data in the study area
+#' @template speciesLayers
 #' @param thresh the minimum number of pixels where the species must have
 #'   `biomass > 0` to be considered present in the study area.
 #'   Defaults to 1.
@@ -404,7 +403,7 @@ assertSpeciesLayers <- function(speciesLayers, thresh,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     ## covert to list if not a stack
-    if (class(speciesLayers) != "RasterStack") {
+    if (!is(speciesLayers, "RasterStack")) {
       speciesLayers <- list(speciesLayers)
 
       test1 <- vapply(speciesLayers, FUN = function(x)
@@ -550,7 +549,8 @@ assertStandAgeMapAttr <- function(standAgeMap,
       stop("standAgeMap should be a RasterLayer")
     }
     if (is.null(attr(standAgeMap, "imputedPixID"))) {
-      stop("standAgeMap should have a 'imputedPixID' attribute")
+      stop("standAgeMap should have a 'imputedPixID' attribute.",
+           " If no pixel ages were imputed, please set attribute to `integer(0)`")
     } else {
       if (!(is(attr(standAgeMap, "imputedPixID"), "numeric") |
             is(attr(standAgeMap, "imputedPixID"), "integer"))) {

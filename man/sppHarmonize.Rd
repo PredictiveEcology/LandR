@@ -2,14 +2,15 @@
 % Please edit documentation in R/sppHarmonize.R
 \name{sppHarmonize}
 \alias{sppHarmonize}
-\title{Harmonize the 3 components that bring species into Biomass_**}
+\title{Harmonize the three components that bring species into \verb{Biomass_**} modules}
 \usage{
 sppHarmonize(
   sppEquiv,
   sppNameVector,
   sppEquivCol,
   sppColorVect,
-  vegLeadingProportion = 0
+  vegLeadingProportion = 0,
+  studyArea
 )
 }
 \arguments{
@@ -38,6 +39,9 @@ fores types).}
 
 \item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
 threshold a species needs to pass to be considered "leading".}
+
+\item{studyArea}{A \code{SpatialPolygons*} object used as the principle study region,
+passed to \code{\link[reproducible]{prepInputs}}.}
 }
 \value{
 Returns a named list with the same names as the arguments. These should

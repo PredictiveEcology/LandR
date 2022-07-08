@@ -153,13 +153,16 @@ doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
     availableToResprout <- copy(burnedPixelCohortData)    ## Ceres - fix
 
   } else {
-    # Replacing here -- ELiot -- THis was removing entire pixels that had successful serotiny -- now only species-pixel combos are removed
-    ## should be done by pixel and species -- Eliot: it works ok now because there are no serotinous species that are resprouters
-    full <- treedFirePixelTableSinceLastDisp[unique(burnedPixelCohortData, by = c("pixelGroup", "speciesCode")),
+    ## Replacing here -- Eliot -- This was removing entire pixels that had successful serotiny
+    ## -- now only species-pixel combos are removed.
+    ## should be done by pixel and species -- Eliot: it works ok now because there are no serotinous
+    ## species that are resprouters.
+    full <- treedFirePixelTableSinceLastDisp[unique(burnedPixelCohortData,
+                                                    by = c("pixelGroup", "speciesCode")),
                                              on = "pixelGroup", allow.cartesian = TRUE] #
 
-    # anti join to remove species-pixels that had successful serotiny/survivors
-    # Ceres: i don't know if I agree with this...
+    ## anti join to remove species-pixels that had successful serotiny/survivors
+    ## Ceres: i don't know if I agree with this...
     availableToResprout <- full[!postFirePixelCohortData, on = c("pixelIndex", "speciesCode")]
   }
 

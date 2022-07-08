@@ -10,7 +10,7 @@ utils::globalVariables(c(
 #'.
 #' @param classesToReplace Integer vector of classes that are are to be replaced,
 #'     e.g., 34, 35, 36 on LCC2005, which are burned young, burned 10 year, and cities.
-#' @param rstLCC LCC raster, e.g., LCC2005
+#' @template rstLCC
 #' @param nIterations the number of iterations to perform
 #' @param defaultNewValue the value to assign a pixel in `classesToReplace` if no valid  pixel
 #'  is closer after `nIterations`

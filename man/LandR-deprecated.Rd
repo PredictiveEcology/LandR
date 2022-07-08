@@ -74,7 +74,7 @@ Defaults to 1.}
 
 \item{url}{the source url for the data, passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}}
 
-\item{destinationPath}{path to data directory}
+\item{destinationPath}{path to data directory where objects will be downloaded or saved to}
 
 \item{outputPath}{path to output directory}
 }
