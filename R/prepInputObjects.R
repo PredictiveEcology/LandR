@@ -597,7 +597,7 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
       }
     }
 
-    RTMvals <- getValues(rasterToMatchLarge)
+    RTMvals <- rasterToMatchLarge[]
     rasterToMatchLarge[!is.na(RTMvals)] <- 1
 
     rasterToMatchLarge <- Cache(
