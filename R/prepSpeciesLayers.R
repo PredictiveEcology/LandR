@@ -682,3 +682,34 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
   ## species in Pickell's data
   raster::stack(spRasts)
 }
+
+
+#' Convert NA's in speciesLayers to zeros
+#'
+#' Pixels that have NAs but are inside `rasterToMatch`
+#' may need to be converted to 0s as they can could still potentially
+#' be forested
+#'
+#' @template speciesLayers
+#' @template rasterToMatch
+#'
+#' @return the `speciesLayers` with 0s in pixels that had NAs
+#'
+#' @export
+#'
+#' @importFrom terra cover rast
+#' @importFrom raster stack
+NAcover2zero <- function(speciesLayers, rasterToMatch) {
+  tempRas <- rasterToMatchLarge
+  tempRas[!is.na(tempRas[])] <- 0
+  namesLayers <- names(speciesLayers)
+
+  message("...making sure empty pixels inside study area have 0 cover, instead of NAs ...")
+  # Changed to terra Nov 17 by Eliot --> this was many minutes with raster::cover --> 3 seconds with terra
+  speciesLayers <- terra::cover(rast(speciesLayers), rast(tempRas))
+  speciesLayers <- raster::stack(speciesLayers)
+  names(speciesLayers) <- namesLayers
+  message("   ...done")
+
+  return(speciesLayers)
+}
