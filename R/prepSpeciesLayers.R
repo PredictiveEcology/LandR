@@ -92,7 +92,7 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 #' @param CASFRIdt TODO: description needed
 #' @template sppEquiv
 #' @template sppEquivCol
-#' @param destinationPath TODO: description needed
+#' @template destinationPath
 #'
 #' @return TODO: description needed
 #'
@@ -178,7 +178,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 #'
 #' TODO: description needed
 #'
-#' @param destinationPath TODO: description needed
+#' @template destinationPath
 #' @param outputPath TODO: description needed
 #' @param url TODO: description needed; if `NULL`, the default, use the default source url
 #' @template studyArea
@@ -541,7 +541,7 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   stack(CCstack) ## ensure it's still a stack
 }
 
-#' @param destinationPath path to data directory
+#' @template destinationPath
 #' @param outputPath path to output directory
 #' @export
 #' @rdname LandR-deprecated
@@ -576,7 +576,7 @@ prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, s
 #' @param PickellRaster TODO: description needed
 #' @template sppEquiv
 #' @template sppEquivCol
-#' @param destinationPath TODO: description needed
+#' @template destinationPath
 #'
 #' @return TODO: description needed
 #'

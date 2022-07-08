@@ -913,7 +913,7 @@ sumRastersBySpecies <- function(speciesLayers, layersToSum, filenameToSave, newL
 #'                              (will be used to fill `NA`s in `highQualityStack`)
 #' @param outputFilenameSuffix  file suffix to save raster if there was overlaying.
 #'                              Defaults to `"overlay"`.
-#' @param destinationPath       directory for saved rasters
+#' @template destinationPath
 #'
 #' @export
 #' @importFrom data.table data.table

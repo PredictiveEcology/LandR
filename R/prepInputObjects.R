@@ -358,7 +358,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @param maskWithRTM passed to `prepInputs` of stand age map
 #' @param method passed to `prepInputs` of stand age map
 #' @param datatype passed to `prepInputs` of stand age map
-#' @param destinationPath directory where  age and fire data will be downloaded
+#' @template destinationPath
 #' @param filename2 passed to `prepInputs` of stand age map
 #' @param fireURL url to download fire polygons used to update age map. If NULL or NA age imputation is bypassed.
 #' @param fireFun passed to `prepInputs` of fire data
@@ -546,3 +546,112 @@ prepInputsFireYear <- function(..., rasterToMatch = NULL, fireField = "YEAR", ea
     return(NULL)
   }
 }
+
+#' Create `rasterToMatch` and `rasterToMatchLarge`
+#'
+#' `rasterToMatch` and `rasterToMatchLarge` raster layers are created
+#'   from `studyArea` and `studyAreaLarge` polygons (respectively)
+#'   using a template raster (often `rawBiomassMap`)
+#'
+#' @template studyArea
+#' @param studyAreaLarge same as `studyArea`, but larger and completely
+#'   covering it.
+#' @template rasterToMatch
+#' @template rasterToMatchLarge
+#' @template destinationPath
+#' @param templateRas a template raster used to make `rasterToMatch`
+#'   and/or `rasterToMatchLarge`. Must match `studyAreaLarge`.
+#' @template studyAreaName
+#' @template cacheTags
+#'
+#' @export
+#'
+#' @importFrom reproducible Cache postProcessTerra fixErrors writeOutputs .suffix
+#' @importFrom raster compareRaster
+prepRasterToMatch <- function(studyArea, studyAreaLarge,
+                              rasterToMatch, rasterToMatchLarge,
+                              destinationPath,
+                              templateRas, studyAreaName, cacheTags) {
+
+  if (is.null(rasterToMatch) || is.null(rasterToMatchLarge)) {
+    ## if we need rasterToMatch/rasterToMatchLarge, that means a) we don't have it,
+    ## but b) we will have templateRas
+
+    if (is.null(rasterToMatchLarge) && !is.null(rasterToMatch)) {
+      rasterToMatchLarge <- rasterToMatch
+    } else if (is.null(rasterToMatchLarge) && is.null(rasterToMatch)) {
+      warning(paste0("rasterToMatch and rasterToMatchLarge are missing. Both will be created \n",
+                     "from templateRas and studyArea/studyAreaLarge.\n
+                     If this is wrong, provide both rasters"))
+
+      if (is.null(templateRas)) {
+        stop(paste("Please provide a template raster to make rasterToMatch(Large).",
+                   "An option is to use 'rawBiomassMap'"))
+      }
+      if (!compareRaster(templateRas, studyAreaLarge, stopiffalse = FALSE)) {
+        ## note that extents may never align if the resolution and projection do not allow for it
+        templateRas <- Cache(postProcessTerra,
+                             templateRas,
+                             studyArea = studyAreaLarge,
+                             useSAcrs = TRUE,
+                             overwrite = TRUE,
+                             userTags = c("postRTMtemplate"))
+        templateRas <- fixErrors(templateRas)
+      }
+      rasterToMatchLarge <- templateRas
+    }
+
+    if (!anyNA(rasterToMatchLarge[])) {
+      whZeros <- rasterToMatchLarge[] == 0
+      if (sum(whZeros) > 0) {# means there are zeros instead of NAs for RTML --> change
+        rasterToMatchLarge[whZeros] <- NA
+        message("There were no NAs on the rasterToMatchLarge, but there were zeros; converting these zeros to NA")
+      }
+    }
+
+    RTMvals <- getValues(rasterToMatchLarge)
+    rasterToMatchLarge[!is.na(RTMvals)] <- 1
+
+    rasterToMatchLarge <- Cache(
+      writeOutputs,
+      rasterToMatchLarge,
+      filename2 = .suffix(file.path(destinationPath, "rasterToMatchLarge.tif"),
+                          paste0("_", studyAreaName)),
+      datatype = "INT2U",
+      overwrite = TRUE,
+      userTags = c(cacheTags, "rasterToMatchLarge"),
+      omitArgs = c("userTags")
+    )
+    if (is.null(rasterToMatch)) {
+      rasterToMatch <- Cache(postProcessTerra,
+                             from = rasterToMatchLarge,
+                             studyArea = studyArea,
+                             # rasterToMatch = rasterToMatchLarge,   ## Ceres: this messes up the extent. if we are doing this it means BOTH RTMs come from biomassMap, so no need for RTMLarge here.
+                             useSAcrs = FALSE,
+                             # maskWithRTM = FALSE,   ## mask with SA
+                             method = "bilinear",
+                             datatype = "INT2U",
+                             filename2 = .suffix(file.path(destinationPath, "rasterToMatch.tif"),
+                                                 paste0("_", studyAreaName)),
+                             overwrite = TRUE,
+                             # useCache = "overwrite",
+                             userTags = c(cacheTags, "rasterToMatch"),
+                             omitArgs = c("destinationPath", "targetFile", "userTags", "stable", "filename2",
+                                          "overwrite"))
+    }
+    ## covert to 'mask'
+    if (!anyNA(rasterToMatch[])) {
+      whZeros <- rasterToMatch[] == 0
+      if (sum(whZeros) > 0) {# means there are zeros instead of NAs for RTML --> change
+        rasterToMatch[whZeros] <- NA
+        message("There were no NAs on the RTM, but there were zeros; converting these zeros to NA")
+      }
+    }
+
+    RTMvals <- rasterToMatch[]
+    rasterToMatch[!is.na(RTMvals)] <- 1
+  }
+
+  return(list(rasterToMatch = rasterToMatch, rasterToMatchLarge = rasterToMatchLarge))
+}
+
