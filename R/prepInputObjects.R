@@ -431,6 +431,79 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
   return(standAgeMap)
 }
 
+#' Create `rawBiomassMap`
+#'
+#' Create the `rawBiomassMap` raster containing biomass estimates for
+#' `pixelCohortData`.
+#'
+#' @param year which year of kNN stand biomass maps should be downloaded
+#'   from the NRCan National Forest Inventory? Only 2001 or 2011 are possible.
+#'   This is overridden by passing a `url` argument to `prepInputs`.
+#' @template studyAreaName
+#'   See `...`.
+#' @template cacheTags
+#' @param ... arguments passed to `prepInputs` and `Cache`. If the following arguments
+#'   are not provided, the following values will be used:
+#'   \itemize{
+#'     \item{url: for year = 2001 or 2011, corresponding kNN stand biomass
+#'     maps will be downloaded from the NRCan National Forest Inventory}
+#'     \item{useSAcrs: FALSE}
+#'     \item{method: "bilinear"}
+#'     \item{datatype: "INT2U"}
+#'     \item{filename2: `suffix("rawBiomassMap.tif", paste0("_", studyAreaName))`}
+#'     \item{overwrite: TRUE}
+#'     \item{userTags: `c(cacheTags, "rawBiomassMap")`}
+#'     \item{omitArgs: `c("destinationPath", "targetFile", "userTags", "stable")`}
+#'   }
+#'
+#' @return a rawBiomassMap raster
+#' @export
+#' @importFrom reproducible Cache prepInputs
+prepRawBiomassMap <- function(year = 2001, studyAreaName, cacheTags, ...) {
+  Args <- list(...)
+  if (is.null(Args$url)) {
+    if (year == 2001) {
+      Args$url <- extractURL("rawBiomassMap")
+    } else {
+      if (year == 2011) {
+        Args$url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                           "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
+                           "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
+      } else {
+        stop("'year' must be 2001 OR 2011")
+      }
+    }
+  }
+  if (is.null(Args$useSAcrs)) {
+    Args$useSAcrs <- FALSE
+  }
+  if (is.null(Args$method)) {
+    Args$method <- "bilinear"
+  }
+  if (is.null(Args$datatype)) {
+    Args$datatype <- "INT2U"
+  }
+  if (is.null(Args$filename2)) {
+    Args$filename2 <- .suffix("rawBiomassMap.tif", paste0("_", studyAreaName))
+  }
+  if (is.null(Args$overwrite)) {
+    Args$overwrite <- TRUE
+  }
+  if (is.null(Args$userTags)) {
+    Args$userTags <- c(cacheTags, "rawBiomassMap")
+  }
+  if (is.null(Args$omitArgs)) {
+    Args$omitArgs <- c("destinationPath", "targetFile", "userTags", "stable")
+  }
+  Args$FUN <- prepInputs
+
+  # httr::with_config(config = httr::config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
+  #necessary for KNN
+  rawBiomassMap <- do.call(Cache, args = Args)
+  # })
+  return(rawBiomassMap)
+}
+
 #' Create a raster of fire perimeters
 #'
 #' @param ... Additional arguments passed to `prepInputs`
