@@ -436,17 +436,13 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' Create the `rawBiomassMap` raster containing biomass estimates for
 #' `pixelCohortData`.
 #'
-#' @param year which year of kNN stand biomass maps should be downloaded
-#'   from the NRCan National Forest Inventory? Only 2001 or 2011 are possible.
-#'   This is overridden by passing a `url` argument to `prepInputs`.
-#'   See `...`.
 #' @template studyAreaName
 #' @template cacheTags
 #' @param ... arguments passed to `prepInputs` and `Cache`. If the following arguments
 #'   are not provided, the following values will be used:
 #'   \itemize{
-#'     \item{url: for year = 2001 or 2011, corresponding kNN stand biomass
-#'     maps will be downloaded from the NRCan National Forest Inventory}
+#'     \item{url: by default, the 2001 kNN stand biomass map is downloaded from
+#'       the NRCan National Forest Inventory}
 #'     \item{useSAcrs: FALSE}
 #'     \item{method: "bilinear"}
 #'     \item{datatype: "INT2U"}
@@ -459,20 +455,12 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @return a rawBiomassMap raster
 #' @export
 #' @importFrom reproducible Cache prepInputs
-prepRawBiomassMap <- function(year = 2001, studyAreaName, cacheTags, ...) {
+prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
   Args <- list(...)
   if (is.null(Args$url)) {
-    if (year == 2001) {
-      Args$url <- extractURL("rawBiomassMap")
-    } else {
-      if (year == 2011) {
-        Args$url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                           "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
-                           "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
-      } else {
-        stop("'year' must be 2001 OR 2011")
-      }
-    }
+    Args$url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                       "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
+                       "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
   }
   if (is.null(Args$useSAcrs)) {
     Args$useSAcrs <- FALSE
