@@ -4,6 +4,8 @@ version 1.0.9
 =============
 * new function: `nonForestedPixels` used to detect pixels without species cover
 or a non-forested land-cover class
+* new function: `prepRawBiomassMap` used to create `rawBiomassMap`
+* new function: `prepRasterToMatch` used to create `RasterToMatch` and `RasterToMatchLarge`
 
 version 1.0.8
 =============
