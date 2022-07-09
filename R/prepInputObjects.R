@@ -396,7 +396,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' attr(standAge, "imputedPixID")
 #'
 #' ## USING FIRE PERIMETERS TO CORRECT STAND AGE
-#' ## ideaally, get the firePerimenters layer first
+#' ## ideally, get the firePerimenters layer first
 #' firePerimeters <- Cache(prepInputsFireYear,
 #'                         url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
 #'                         "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
