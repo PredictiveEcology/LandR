@@ -307,8 +307,8 @@ makeMinRelativeB <- function(pixelCohortData) {
                              # X2 = 0.25, ## 0.4
                              # X3 = 0.50, ## 0.5
                              # X4 = 0.75, ## 0.7
-                             # X5 = 0.85
-  ) ## 0.9
+                             # X5 = 0.85  ## 0.9
+  )
 
   return(minRelativeB)
 }
@@ -349,8 +349,8 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' Create `standAgeMap`
 #'
 #' Create the `standAgeMap` raster containing age estimates for `pixelCohortData`.
-#' A separate `prepInputs` call will source NDFB data used to update ages of recently burned
-#' pixels.
+#' A separate `prepInputs` call will source Canadian National Fire Data Base
+#' data to update ages of recently burned pixels. To suppress this, pass NULL/NA `fireURL`
 #'
 #' @param ... additional arguments passed to `prepInputs`
 #' @param ageURL url where age map is downloaded
@@ -358,19 +358,62 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @param maskWithRTM passed to `prepInputs` of stand age map
 #' @param method passed to `prepInputs` of stand age map
 #' @param datatype passed to `prepInputs` of stand age map
-#' @template destinationPath
 #' @param filename2 passed to `prepInputs` of stand age map
-#' @param fireURL url to download fire polygons used to update age map. If NULL or NA age imputation is bypassed.
-#' @param fireFun passed to `prepInputs` of fire data
+#' @param firePerimeters fire raster layer fire year values.
+#' @param fireURL url to download fire polygons used to update age map. If NULL or NA age
+#'   imputation is bypassed. Requires passing `rasterToMatch`. Only used if `firePerimeters`
+#'   is missing.
+#' @param fireFun passed to `prepInputs` of fire data. Only used if `firePerimeters`
+#'   is missing.
+#' @param fireField field used to rasterize fire polys. Only used if `firePerimeters`
+#'   is missing.
+#' @template destinationPath
 #' @template rasterToMatch
-#' @param fireField field used to rasterize fire polys
-#' @param startTime date of first fire year.
+#' @template startTime
+#'
 #' @return a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
 #'  for which ages were corrected. If no corrections were applied the attribute vector is `integer(0)`.
 #'
 #' @export
 #' @importFrom raster crs
 #' @importFrom reproducible Cache prepInputs
+#'
+#' @examples
+#' library(SpaDES.tools)
+#' library(raster)
+#' library(reproducible)
+#' randomPoly <- randomStudyArea(size = 1e7)
+#' randomPoly
+#' ras2match <- raster(res = 250, ext = extent(randomPoly), crs = crs(randomPoly))
+#' ras2match <- rasterize(randomPoly, ras2match)
+#' tempDir <- tempdir()
+#'
+#' ## NOT USING FIRE PERIMETERS TO CORRECT STAND AGE
+#' ## rasterToMatch does not need to be provided, but can be for masking/cropping.
+#' standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
+#'                                   rasterToMatch = ras2match,
+#'                                   fireURL = NA)   ## or NULL
+#' attr(standAge, "imputedPixID")
+#'
+#' ## USING FIRE PERIMETERS TO CORRECT STAND AGE
+#' ## ideaally, get the firePerimenters layer first
+#' firePerimeters <- Cache(prepInputsFireYear,
+#'                         url = "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip",
+#'                         fun = "sf::st_read",
+#'                         destinationPath = tempDir,
+#'                         rasterToMatch = ras2match)
+#'
+#' standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
+#'                                   firePerimeters = firePerimeters,
+#'                                   rasterToMatch = ras2match)
+#' attr(standAge, "imputedPixID")
+#'
+#' ## not providing firePerimeters is still possible, but will be deprecated
+#' ## in this case 'rasterToMatch' MUST be provided
+#' standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
+#'                                   rasterToMatch = ras2match)
+#' attr(standAge, "imputedPixID")
+#'
 prepInputsStandAgeMap <- function(..., ageURL = NULL,
                                   ageFun = "raster::raster",
                                   maskWithRTM = TRUE,
@@ -378,20 +421,31 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
                                   datatype = "INT2U",
                                   destinationPath = NULL,
                                   filename2 = NULL,
+                                  firePerimeters = NULL,
                                   fireURL = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/",
                                                    "fire_poly/current_version/NFDB_poly.zip"),
                                   fireFun = "sf::st_read",
-                                  rasterToMatch = NULL, fireField = "YEAR",
+                                  fireField = "YEAR",
+                                  rasterToMatch = NULL,
                                   startTime) {
-  if (is.null(ageURL))
+
+  if (is.null(ageURL)) {
     ageURL <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
                      "canada-forests-attributes_attributs-forests-canada/",
                      "2001-attributes_attributs-2001/",
                      "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif")
+  }
 
+  getFires <- if (is.null(firePerimeters) &&
+                  (isFALSE(is.null(fireURL)) && isFALSE(is.na(fireURL)))) {
+    TRUE
+  } else {
+    FALSE
+  }
 
-  if (is.null(rasterToMatch))
+  if (is.null(rasterToMatch)) {
     maskWithRTM <- FALSE
+  }
 
   standAgeMap <- Cache(
     prepInputs, ...,
@@ -407,26 +461,24 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
   standAgeMap[] <- asInteger(standAgeMap[])
 
   imputedPixID <- integer(0)
-  if (!is.null(rasterToMatch)) {
-    if (!(is.null(fireURL) | is.na(fireURL))) {
-      fireYear <- Cache(prepInputsFireYear, ...,
-                        url = fireURL,
-                        fun = fireFun,
-                        destinationPath = destinationPath,
-                        rasterToMatch = rasterToMatch)
-
-      if (!is.null(fireYear)) {
-        toChange <- !is.na(fireYear[]) & fireYear[] <= asInteger(startTime)
-        standAgeMap[] <- asInteger(standAgeMap[])
-        standAgeMap[toChange] <- asInteger(startTime) - asInteger(fireYear[][toChange])
-        imputedPixID <- which(toChange)
-      }
+  if (getFires) {
+    if (isFALSE(is.null(rasterToMatch))) {
+      firePerimeters <- Cache(prepInputsFireYear, ...,
+                              url = fireURL,
+                              fun = fireFun,
+                              fireField = fireField,
+                              destinationPath = destinationPath,
+                              rasterToMatch = rasterToMatch)
     } else {
-      message("No fireURL supplied, so ages NOT adjusted using fire data.")
+      message("No 'rasterToMatch' or 'firePerimeters' supplied; ages will NOT be adjusted using fire data.")
     }
-  } else {
-    message("No rasterToMatch supplied, so ages NOT adjusted using fire data.")
   }
+
+  if (isFALSE(is.null(firePerimeters))) {
+    standAgeMap <- replaceAgeInFires(standAgeMap, firePerimeters, startTime)
+    imputedPixID <- attr(standAgeMap, "imputedPixID")
+  }
+
   attr(standAgeMap, "imputedPixID") <- imputedPixID
   return(standAgeMap)
 }
@@ -435,6 +487,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'
 #' Create the `rawBiomassMap` raster containing biomass estimates for
 #' `pixelCohortData`.
+#' Wrapper on `prepInputs` that will rasterize fire polygons.
 #'
 #' @template studyAreaName
 #' @template cacheTags
@@ -499,6 +552,8 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #' @param fireField field used to rasterize fire polys
 #' @param earliestYear the earliest fire date to allow
 #'
+#' @return a raster layer of fire perimeters with fire year values.
+#'
 #' @export
 #' @importFrom fasterize fasterize
 #' @importFrom raster crs
@@ -506,7 +561,25 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #' @importFrom sf st_cast st_transform
 #' @importFrom magrittr %>%
 #'
-prepInputsFireYear <- function(..., rasterToMatch = NULL, fireField = "YEAR", earliestYear = 1950) {
+#' @examples
+#' library(SpaDES.tools)
+#' library(raster)
+#' library(reproducible)
+#' randomPoly <- randomStudyArea()
+#' randomPoly
+#' ras2match <- raster(res = 10, ext = extent(randomPoly), crs = crs(randomPoly))
+#' ras2match <- rasterize(randomPoly, ras2match)
+#' tempDir <- tempdir()
+#' cacheRepo <- file.path(tempDir, "cache")
+#'
+#' ## ideally, get the firePerimenters layer first
+#' firePerimeters <- Cache(prepInputsFireYear,
+#'                         url = "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip",
+#'                         fun = "sf::st_read",
+#'                         destinationPath = tempDir,
+#'                         rasterToMatch = ras2match)
+#'
+prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950) {
   dots <- list(...)
   a <- if (is.null(dots$fun)) {
     Cache(prepInputs, rasterToMatch = rasterToMatch, ...) %>%
@@ -533,6 +606,60 @@ prepInputsFireYear <- function(..., rasterToMatch = NULL, fireField = "YEAR", ea
   } else {
     return(NULL)
   }
+}
+
+#' Replace stand age with time since last fire
+#'
+#' @param standAgeMap a raster layer stand age map
+#' @param firePerimeters the earliest fire date to allow
+#' @template startTime
+#'
+#' @return a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
+#'  for which ages were corrected. If no corrections were applied the attribute vector is `integer(0)`.
+#'
+#' @export
+#' @importFrom fasterize fasterize
+#' @importFrom raster crs
+#' @importFrom reproducible Cache prepInputs
+#' @importFrom sf st_cast st_transform
+#' @importFrom magrittr %>%
+#'
+#' @examples
+#' library(SpaDES.tools)
+#' library(raster)
+#' library(reproducible)
+#' randomPoly <- randomStudyArea(size = 1e7)
+#' randomPoly
+#' ras2match <- raster(res = 250, ext = extent(randomPoly), crs = crs(randomPoly))
+#' ras2match <- rasterize(randomPoly, ras2match)
+#' tempDir <- tempdir()
+#'
+#' standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
+#'                                   rasterToMatch = ras2match,
+#'                                   fireURL = NA)   ## or NULL
+#' attr(standAge, "imputedPixID")
+#'
+#' firePerimeters <- Cache(prepInputsFireYear,
+#'                         url = "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip",
+#'                         fun = "sf::st_read",
+#'                         destinationPath = tempDir,
+#'                         rasterToMatch = ras2match)
+#' standAge <- replaceAgeInFires(standAge, firePerimeters)
+#' attr(standAge, "imputedPixID")
+#'
+replaceAgeInFires <- function(standAgeMap, firePerimeters, startTime) {
+  if (missing(startTime)) {
+    message("'startTime' is missing, the most recent fire year will be used.")
+    startTime <- max(firePerimeters[], na.rm = TRUE)
+  }
+
+  toChange <- !is.na(firePerimeters[]) & firePerimeters[] <= asInteger(startTime)
+  standAgeMap[] <- asInteger(standAgeMap[])
+  standAgeMap[toChange] <- asInteger(startTime) - asInteger(firePerimeters[][toChange])
+  imputedPixID <- which(toChange)
+
+  attr(standAgeMap, "imputedPixID") <- imputedPixID
+  return(standAgeMap)
 }
 
 #' Create `rasterToMatch` and `rasterToMatchLarge`
