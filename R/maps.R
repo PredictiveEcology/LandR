@@ -968,7 +968,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' @param HQ `data.table` column of whether `SPP` is present in HQ layers
 #' @param LQ `data.table` column of whether `SPP` is present in LQ layers
 #'
-#' @importFrom raster compareRaster crs extent filename res projectExtent raster
+#' @importFrom raster compareRaster crs extent filename res projectExtent raster NAvalue
 #' @importFrom raster writeRaster xmax xmin ymax ymin
 #' @keywords internal
 .overlay <- function(SPP, HQ, LQ, hqLarger, highQualityStack, lowQualityStack, #nolint
@@ -987,9 +987,13 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
         if (!nzchar(filename(lowQualityStack[[SPP]]))) {
           LQCurName <- basename(tempfile(fileext = ".tif"))
           lowQualityStack[[SPP]][] <- as.integer(lowQualityStack[[SPP]][])
+
+          NAval <- 65535L
           lowQualityStack[[SPP]] <- writeRaster(lowQualityStack[[SPP]],
                                                 filename = LQCurName,
-                                                datatype = "INT2U")
+                                                datatype = "INT2U", NAflag = NAval)
+          ## NAvals need to be converted back to NAs
+          NAvalue(lowQualityStack[[SPP]]) <- NAval
         }
 
         LQRastInHQcrs <- projectExtent(lowQualityStack, crs = crs(highQualityStack))
@@ -1045,11 +1049,16 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 
       ## complete missing HQ data with LQ data
       HQRast[NAs] <- LQRast[][NAs]
+      NAval <- 255L
       HQRast <- writeRaster(HQRast, datatype = "INT1U",
                             filename = file.path(destinationPath,
                                                  paste0(SPP, "_", outputFilenameSuffix, ".tif")),
-                            overwrite = TRUE)
+                            overwrite = TRUE, NAflag = NAval)
       names(HQRast) <- SPP
+
+      ## NAvals need to be converted back to NAs
+      NAvalue(HQRast) <- NAval
+
       return(HQRast)
     } else {
       ## if only HQ/LQ exist return one of them
