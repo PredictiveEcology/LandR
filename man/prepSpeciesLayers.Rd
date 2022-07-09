@@ -69,7 +69,7 @@ prepSpeciesLayers_ONFRI(
 
 \item{outputPath}{TODO: description needed}
 
-\item{url}{TODO: description needed; if \code{NULL}, the default, use the default source url}
+\item{url}{if \code{NULL}, the default, use the default source url}
 
 \item{studyArea}{A \code{SpatialPolygons*} object used as the principle study region,
 passed to \code{\link[reproducible]{prepInputs}}.}

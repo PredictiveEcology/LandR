@@ -19,7 +19,7 @@ makePixelTable(
 \item{speciesLayers}{A \code{RasterStack} or \code{RasterLayer} that
 should contain species cover data in the study area}
 
-\item{standAgeMap}{A \code{rasterLayer} with attribute "imputedPixID"}
+\item{standAgeMap}{A \code{rasterLayer} of stand ages with attribute "imputedPixID"}
 
 \item{ecoregionFiles}{A list with two objects: the \code{ecoregionMap} and a table summarizing
 its information per \code{pixelID.} See \code{ecoregionProducer}.}

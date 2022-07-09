@@ -13,11 +13,12 @@ prepInputsStandAgeMap(
   datatype = "INT2U",
   destinationPath = NULL,
   filename2 = NULL,
+  firePerimeters = NULL,
   fireURL = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/",
     "fire_poly/current_version/NFDB_poly.zip"),
   fireFun = "sf::st_read",
-  rasterToMatch = NULL,
   fireField = "YEAR",
+  rasterToMatch = NULL,
   startTime
 )
 }
@@ -38,16 +39,23 @@ prepInputsStandAgeMap(
 
 \item{filename2}{passed to \code{prepInputs} of stand age map}
 
-\item{fireURL}{url to download fire polygons used to update age map. If NULL or NA age imputation is bypassed.}
+\item{firePerimeters}{fire raster layer fire year values.}
 
-\item{fireFun}{passed to \code{prepInputs} of fire data}
+\item{fireURL}{url to download fire polygons used to update age map. If NULL or NA age
+imputation is bypassed. Requires passing \code{rasterToMatch}. Only used if \code{firePerimeters}
+is missing.}
+
+\item{fireFun}{passed to \code{prepInputs} of fire data. Only used if \code{firePerimeters}
+is missing.}
+
+\item{fireField}{field used to rasterize fire polys. Only used if \code{firePerimeters}
+is missing.}
 
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
 
-\item{fireField}{field used to rasterize fire polys}
-
-\item{startTime}{date of first fire year.}
+\item{startTime}{date of the last fire year to be considered (e.g., start of fire
+period counting backwords). If missing, last fire year available will be used.}
 }
 \value{
 a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
@@ -55,6 +63,43 @@ for which ages were corrected. If no corrections were applied the attribute vect
 }
 \description{
 Create the \code{standAgeMap} raster containing age estimates for \code{pixelCohortData}.
-A separate \code{prepInputs} call will source NDFB data used to update ages of recently burned
-pixels.
+A separate \code{prepInputs} call will source Canadian National Fire Data Base
+data to update ages of recently burned pixels. To suppress this, pass NULL/NA \code{fireURL}
+}
+\examples{
+library(SpaDES.tools)
+library(raster)
+library(reproducible)
+randomPoly <- randomStudyArea(size = 1e7)
+randomPoly
+ras2match <- raster(res = 250, ext = extent(randomPoly), crs = crs(randomPoly))
+ras2match <- rasterize(randomPoly, ras2match)
+tempDir <- tempdir()
+
+## NOT USING FIRE PERIMETERS TO CORRECT STAND AGE
+## rasterToMatch does not need to be provided, but can be for masking/cropping.
+standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
+                                  rasterToMatch = ras2match,
+                                  fireURL = NA)   ## or NULL
+attr(standAge, "imputedPixID")
+
+## USING FIRE PERIMETERS TO CORRECT STAND AGE
+## ideaally, get the firePerimenters layer first
+firePerimeters <- Cache(prepInputsFireYear,
+                        url = "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_poly/current_version/NFDB_poly.zip",
+                        fun = "sf::st_read",
+                        destinationPath = tempDir,
+                        rasterToMatch = ras2match)
+
+standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
+                                  firePerimeters = firePerimeters,
+                                  rasterToMatch = ras2match)
+attr(standAge, "imputedPixID")
+
+## not providing firePerimeters is still possible, but will be deprecated
+## in this case 'rasterToMatch' MUST be provided
+standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
+                                  rasterToMatch = ras2match)
+attr(standAge, "imputedPixID")
+
 }
