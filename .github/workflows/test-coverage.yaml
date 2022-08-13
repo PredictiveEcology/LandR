@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: r-lib/actions/setup-pandoc@master
+      - uses: r-lib/actions/setup-pandoc@v2
 
       - uses: r-lib/actions/setup-r@v2
         with:
@@ -29,19 +29,21 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
-            any::rcmdcheck
+            any::covr
             BioSIM=?ignore
+            fastshp=?ignore
             J4R=?ignore
             NLMR=?ignore
-            github::s-u/fastshp
-            github::PredictiveEcology/Require@development
-            github::PredictiveEcology/reproducible@development
-            github::PredictiveEcology/quickPlot@development
-            github::PredictiveEcology/SpaDES.tools@development
+            PredictiveEcology/quickPlot@development
+            PredictiveEcology/reproducible@development
+            PredictiveEcology/Require@development
+            PredictiveEcology/SpaDES.core@development
+            PredictiveEcology/SpaDES.tools@development
 
       - name: Install additional package dependencies
         run: |
           pak::pkg_install("achubaty/NLMR")
+          remotes::install_github("s-u/fastshp")
           install.packages("https://sourceforge.net/projects/repiceasource/files/latest", repos = NULL,  type = "source") ## J4R
           install.packages("https://sourceforge.net/projects/biosimclient.mrnfforesttools.p/files/latest", repos = NULL,  type = "source") ## BioSIM
         shell: Rscript {0}
