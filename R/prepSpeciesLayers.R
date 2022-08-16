@@ -100,7 +100,7 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 #' @importFrom data.table setkey
 #' @importFrom magrittr %>%
 #' @importFrom reproducible asPath Cache
-#' @importFrom raster crs crs<- raster setValues stack writeRaster NAvalue
+#' @importFrom raster crs crs<- NAvalue<- raster setValues stack writeRaster
 CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
                             sppEquiv, sppEquivCol, destinationPath) {
   # The ones we want
@@ -589,7 +589,7 @@ prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, s
 #' @export
 #' @importFrom magrittr %>%
 #' @importFrom reproducible asPath Cache
-#' @importFrom raster raster rasterOptions setValues stack NAvalue
+#' @importFrom raster NAvalue<- raster rasterOptions setValues stack
 makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPath) {
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
@@ -725,13 +725,13 @@ NAcover2zero <- function(speciesLayers, rasterToMatch) {
          "Install it using `install.packages('terra')`.")
   }
 
-  tempRas <- rasterToMatchLarge
+  tempRas <- rasterToMatch
   tempRas[!is.na(tempRas[])] <- 0
   namesLayers <- names(speciesLayers)
 
   message("...making sure empty pixels inside study area have 0 cover, instead of NAs ...")
   # Changed to terra Nov 17 by Eliot --> this was many minutes with raster::cover --> 3 seconds with terra
-  speciesLayers <- terra::cover(rast(speciesLayers), rast(tempRas))
+  speciesLayers <- terra::cover(terra::rast(speciesLayers), terra::rast(tempRas))
   speciesLayers <- raster::stack(speciesLayers)
   names(speciesLayers) <- namesLayers
   message("   ...done")

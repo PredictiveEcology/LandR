@@ -968,7 +968,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' @param HQ `data.table` column of whether `SPP` is present in HQ layers
 #' @param LQ `data.table` column of whether `SPP` is present in LQ layers
 #'
-#' @importFrom raster compareRaster crs extent filename res projectExtent raster NAvalue
+#' @importFrom raster compareRaster crs extent filename NAvalue<- projectExtent raster res
 #' @importFrom raster writeRaster xmax xmin ymax ymin
 #' @keywords internal
 .overlay <- function(SPP, HQ, LQ, hqLarger, highQualityStack, lowQualityStack, #nolint
