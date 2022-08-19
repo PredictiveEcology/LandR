@@ -33,6 +33,7 @@ jobs:
             any::XML
             BioSIM=?ignore
             fastshp=?ignore
+            NLMR=?ignore
             J4R=?ignore
             PredictiveEcology/quickPlot@development
             PredictiveEcology/reproducible@development
@@ -43,6 +44,7 @@ jobs:
       - name: Install additional package dependencies
         run: |
           pak::pkg_install("remotes")
+          pak::pkg_install("achubaty/NLMR")
           remotes::install_github("s-u/fastshp")
           install.packages("https://sourceforge.net/projects/repiceasource/files/latest", repos = NULL,  type = "source") ## J4R
           install.packages("https://sourceforge.net/projects/biosimclient.mrnfforesttools.p/files/latest", repos = NULL,  type = "source") ## BioSIM

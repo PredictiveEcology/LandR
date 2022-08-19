@@ -37,6 +37,7 @@ jobs:
             BioSIM=?ignore
             fastshp=?ignore
             J4R=?ignore
+            NLMR=?ignore
             PredictiveEcology/quickPlot@development
             PredictiveEcology/reproducible@development
             PredictiveEcology/Require@development
@@ -47,6 +48,7 @@ jobs:
       - name: Install additional package dependencies
         run: |
           pak::pkg_install("remotes")
+          pak::pkg_install("achubaty/NLMR")
           remotes::install_github("s-u/fastshp")
         shell: Rscript {0}
 
