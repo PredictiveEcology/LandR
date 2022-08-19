@@ -42,10 +42,10 @@ Imports:
     quickPlot,
     raster,
     RColorBrewer,
-    reproducible (>= 1.2.8.9040),
+    reproducible (>= 1.2.9),
     sf,
     sp,
-    SpaDES.tools (>= 0.3.1.9000),
+    SpaDES.tools (>= 0.3.2),
     stats,
     tools,
     utils
@@ -67,9 +67,9 @@ Suggests:
 Remotes:
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
-    PredictiveEcology/quickPlot,
-    PredictiveEcology/reproducible,
-    PredictiveEcology/SpaDES.tools
+    PredictiveEcology/quickPlot@development,
+    PredictiveEcology/reproducible@development,
+    PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
