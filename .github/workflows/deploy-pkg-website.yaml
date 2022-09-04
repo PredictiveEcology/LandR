@@ -1,22 +1,24 @@
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
   push:
-    branches:
-      - master
-      - development
+    branches: [main, master]
   pull_request:
-    branches:
-      - master
-      - development
+    branches: [main, master]
+  release:
+    types: [published]
+  workflow_dispatch:
 
-name: test-coverage
+name: pkgdown
 
 jobs:
-  test-coverage:
-    if: "!contains(github.event.commits[0].message, '[skip-ci]')"
-    runs-on: macOS-latest
+  pkgdown:
+    runs-on: ubuntu-latest
+    # Only restrict concurrency for non-PR jobs
+    concurrency:
+      group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-
     steps:
       - uses: actions/checkout@v2
 
@@ -29,27 +31,35 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
-            any::covr
+            any::pkgdown
             any::XML
+            local::.
             BioSIM=?ignore
             fastshp=?ignore
-            NLMR=?ignore
             J4R=?ignore
+            NLMR=?ignore
             PredictiveEcology/quickPlot@development
             PredictiveEcology/reproducible@development
             PredictiveEcology/Require@development
             PredictiveEcology/SpaDES.core@development
             PredictiveEcology/SpaDES.tools@development
+          needs: website
 
       - name: Install additional package dependencies
         run: |
           pak::pkg_install("remotes")
           pak::pkg_install("achubaty/NLMR")
           remotes::install_github("s-u/fastshp")
-          install.packages("https://sourceforge.net/projects/repiceasource/files/latest", repos = NULL,  type = "source") ## J4R
-          install.packages("https://sourceforge.net/projects/biosimclient.mrnfforesttools.p/files/latest", repos = NULL,  type = "source") ## BioSIM
         shell: Rscript {0}
 
-      - name: Test coverage
-        run: covr::codecov()
+      - name: Build site
+        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
+
+      - name: Deploy to GitHub pages 🚀
+        if: github.event_name != 'pull_request'
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          clean: false
+          branch: gh-pages
+          folder: docs

@@ -8,7 +8,7 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2022-07-08
+Date: 2022-08-13
 Version: 1.0.7.9030
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
@@ -42,10 +42,10 @@ Imports:
     quickPlot,
     raster,
     RColorBrewer,
-    reproducible (>= 1.2.8.9040),
+    reproducible (>= 1.2.9),
     sf,
     sp,
-    SpaDES.tools (>= 0.3.1.9000),
+    SpaDES.tools (>= 0.3.2),
     stats,
     tools,
     utils
@@ -56,7 +56,6 @@ Suggests:
     googledrive (>= 2.0.0),
     knitr,
     qs,
-    RandomFields,
     rasterVis,
     RCurl,
     roxygen2,
@@ -68,6 +67,7 @@ Suggests:
 Remotes:
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
+    PredictiveEcology/quickPlot@development,
     PredictiveEcology/reproducible@development,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
@@ -110,5 +110,5 @@ Collate:
     'studyArea.R'
     'wildfire.R'
     'zzz.R'
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 Roxygen: list(markdown = TRUE)
