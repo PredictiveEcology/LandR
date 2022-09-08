@@ -1364,10 +1364,10 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
 
   ## drop factor terms with a single level
   singles <- names(which(sapply(lapply(.specialData, unique), length) == 1))
+  keep <- which(unname(vapply(singles, grepl, x = paste(modelArgs$formula, collapse = " "), logical(1))))
+  singles <- singles[keep]
   if (length(singles) > 0) {
-    if (any(grepl(paste(singles, collapse = "|"), modelArgs$formula)))  {
-      modelArgs$formula <- dropTerm(modelArgs$formula, singles)
-    }
+    modelArgs$formula <- dropTerm(modelArgs$formula, singles)
   }
 
   mod <- do.call(fun, modelArgs)
