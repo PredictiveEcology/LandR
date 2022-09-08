@@ -25,9 +25,10 @@ raster operations (i.e., the one used throughout the simulation).}
 \item{rawBiomassMap}{a \code{rawBiomassMap} (e.g. the one used
 throughout the simulation)}
 
-\item{ecoregionMap}{a raster of all the unique groupings.}
+\item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique ecoregion groupings,
+which group together pixels of similar biophysical characteristics.}
 
-\item{rstLCC}{a raster land-cover class per pixel,}
+\item{rstLCC}{raster of land-cover class, e.g., LCC2005}
 }
 \value{
 a \code{RasterLayer} object or, in the case of \code{makeDummyEcoregionFiles}, a list.
@@ -37,13 +38,13 @@ a \code{RasterLayer} object or, in the case of \code{makeDummyEcoregionFiles}, a
 }
 \details{
 \code{rawBiomassMap} is a raster of "raw" total stand biomass per pixel,
-     with values between 100 and 20000 g/m^2.
+with values between 100 and 20000 g/m^2.
 
 \code{standAgeMap} is a raster of stand age per pixel (where biomass exists)
-     with values between 1 and 300 years.
+with values between 1 and 300 years.
 
 \code{rstLCC} is a raster land-cover class per pixel, with values between 1 and 5 that have no
-     correspondence to any real land-cover classes.
+correspondence to any real land-cover classes.
 
 \code{ecoregionFiles} uses dummy versions of \code{ecoregionMap} and \code{rstLCC}
 to create a list with two objects: the \code{ecoregionMap} and a table summarizing its

@@ -7,17 +7,22 @@
 checkSpeciesTraits(speciesLayers, species, sppColorVect)
 }
 \arguments{
-\item{speciesLayers}{stack of species layers rasters}
+\item{speciesLayers}{A \code{RasterStack} or \code{RasterLayer} that
+should contain species cover data in the study area}
 
 \item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
 
 \item{sppColorVect}{A named vector of colours to use for plotting.
-The names must conform with \code{names(speciesLayers)} and should also
-contain a colour for 'Mixed'.}
+The names must conform with species name convention used
+(see LandR::sppEquivalencies_CA for possible naming
+conventions) and should also contain a colour for 'Mixed',
+when a mixed forest type is supported  (see vegLeadingProportion
+parameter in LandR::vegTypeGenerator for details on mixed
+fores types).}
 }
 \value{
 A \code{list} with the \code{speciesLayers} and \code{sppColorVect}
-  containing only the species that have trait values in \code{species}
+containing only the species that have trait values in \code{species}
 }
 \description{
 Check if all species in have trait values

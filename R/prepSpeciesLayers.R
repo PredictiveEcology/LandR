@@ -1,4 +1,6 @@
-utils::globalVariables(c("AGE", "CC", "GID", "keepSpecies", "layerName", "pct", "value"))
+utils::globalVariables(c(
+  "AGE", "CC", "GID", "id", "keepSpecies", "layerName", "name", "pct", "value"
+))
 
 #' Load CASFRI data
 #'
@@ -9,7 +11,7 @@ utils::globalVariables(c("AGE", "CC", "GID", "keepSpecies", "layerName", "pct", 
 #' @param headerFile TODO: description needed
 #' @template sppEquiv
 #' @template sppEquivCol
-#' @param type Character string. Either \code{"cover"} or \code{"age"}.
+#' @param type Character string. Either `"cover"` or `"age"`.
 #'
 #' @return TODO: description needed
 #'
@@ -81,7 +83,7 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
   return(list(CASFRIattrLong = CASFRIattrLong, CASFRIdt = CASFRIdt))
 }
 
-#' \code{CASFRItoSpRasts}
+#' `CASFRItoSpRasts`
 #'
 #' TODO: description and title needed
 #'
@@ -90,7 +92,7 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 #' @param CASFRIdt TODO: description needed
 #' @template sppEquiv
 #' @template sppEquivCol
-#' @param destinationPath TODO: description needed
+#' @template destinationPath
 #'
 #' @return TODO: description needed
 #'
@@ -98,7 +100,7 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 #' @importFrom data.table setkey
 #' @importFrom magrittr %>%
 #' @importFrom reproducible asPath Cache
-#' @importFrom raster crs crs<- raster setValues stack writeRaster
+#' @importFrom raster crs crs<- NAvalue<- raster setValues stack writeRaster
 CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
                             sppEquiv, sppEquivCol, destinationPath) {
   # The ones we want
@@ -130,10 +132,13 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
   for (sp in NA_Sp) {
     message("  running ", sp, ". Assigning NA, because absent from CASFRI")
     spRasts[[sp]] <- spRas
+    NAval <- 65535L
     spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                            filename = asPath(file.path(destinationPath,
                                                        paste0("CASFRI_", sp, ".tif"))),
-                           overwrite = TRUE, datatype = "INT2U")
+                           overwrite = TRUE, datatype = "INT2U", NAflag = NAval)
+    ## NAvals need to be converted back to NAs
+    NAvalue(spRasts[[sp]]) <- NAval
   }
 
   sppTODO <- unique(names(sppListMergesCASFRI))
@@ -152,10 +157,13 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     message("  ", sp, " writing to disk")
 
     startCRS <- crs(spRasts[[sp]])
+    NAval <- 255L
     spRasts[[sp]] <- writeRaster(spRasts[[sp]],
                                  filename = asPath(file.path(destinationPath,
                                                              paste0("CASFRI_", sp, ".tif"))),
-                                 datatype = "INT1U", overwrite = TRUE)
+                                 datatype = "INT1U", overwrite = TRUE, NAflag = NAval)
+    ## NAvals need to be converted back to NAs
+    NAvalue(spRasts[[sp]]) <- NAval
 
     if (is(spRasts[[sp]], "Raster")) {
       # Rasters need to have their disk-backed value assigned, but not shapefiles
@@ -176,17 +184,17 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 #'
 #' TODO: description needed
 #'
-#' @param destinationPath TODO: description needed
+#' @template destinationPath
 #' @param outputPath TODO: description needed
-#' @param url TODO: description needed; if \code{NULL}, the default, use the default source url
-#' @param studyArea TODO: description needed
+#' @param url if `NULL`, the default, use the default source url
+#' @template studyArea
 #' @template rasterToMatch
 #' @template sppEquiv
 #' @template sppEquivCol
 #' @param thresh threshold \% cover used to defined the species as "present" in the study area.
-#'    If at least one pixel has \code{cover >= thresh} , the species is considered "present".
+#'    If at least one pixel has `cover >= thresh` , the species is considered "present".
 #'    Otherwise the raster is excluded from the output. Defaults to 10.
-#' @param ... other arguments, used for compatibility with other \code{prepSpeciesLayers} functions.
+#' @param ... other arguments, used for compatibility with other `prepSpeciesLayers` functions.
 #'
 #' @return TODO: description needed
 #'
@@ -199,11 +207,42 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
                                   sppEquiv,
                                   sppEquivCol,
                                   thresh = 10, ...) {
+  stopifnot(requireNamespace("RCurl", quietly = TRUE))
+
   dots <- list(...)
 
-  if (is.null(url))
+  if ("year" %in% names(dots)) {
+    year <- dots[["year"]]
+  } else {
+    year <- 2001
+  }
+
+  if (is.null(url)) {
     url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                  "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/")
+                  "canada-forests-attributes_attributs-forests-canada/", year,
+                  "-attributes_attributs-", year, "/")
+  }
+
+  shared_drive_url <- NULL
+  if (!RCurl::url.exists(url)) {  ## ping website and use gdrive if not available
+    if (requireNamespace("googledrive", quietly = TRUE)) {
+      driveFolder <- paste0("kNNForestAttributes_", year)
+      shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
+      # url <- googledrive::with_drive_quiet(
+      #   googledrive::drive_link(
+      #     googledrive::drive_ls(
+      #       driveFolder,
+      #       shared_drive = googledrive::as_id(shared_drive_url)
+      #     )
+      #   )
+      # )
+
+      driveDT <- as.data.table(googledrive::drive_ls(googledrive::as_id(shared_drive_url)))
+      url <- googledrive::with_drive_quiet(
+        googledrive::drive_link(driveDT[name == driveFolder, id])
+      )
+    }
+  }
 
   loadkNNSpeciesLayers(
     dPath = destinationPath,
@@ -216,6 +255,8 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
     sppEquivCol = sppEquivCol,
     thresh = thresh,
     url = url,
+    year = year,
+    shared_drive_url = shared_drive_url,
     userTags = c("speciesLayers", "KNN")
   )
 }
@@ -228,7 +269,7 @@ prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
                                      sppEquiv,
                                      sppEquivCol, ...) {
   if (is.null(url))
-    url <- "https://drive.google.com/file/d/1y0ofr2H0c_IEMIpx19xf3_VTBheY0C9h/view?usp=sharing"
+    url <- "https://drive.google.com/file/d/1y0ofr2H0c_IEMIpx19xf3_VTBheY0C9h"
 
   CASFRItiffFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs.tif"))
   CASFRIattrFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs_attributes3.csv"))
@@ -284,7 +325,7 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
                                       sppEquiv,
                                       sppEquivCol, ...) {
   if (is.null(url))
-    url <- "https://drive.google.com/open?id=1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
+    url <- "https://drive.google.com/file/d/1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
 
   speciesLayers <- Cache(prepInputs,
                          targetFile = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.dat"),
@@ -308,8 +349,9 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
 }
 
 #' @export
+#' @importFrom data.table data.table rbindlist
 #' @importFrom map mapAdd maps
-#' @importFrom raster maxValue minValue stack unstack
+#' @importFrom raster crop extend maxValue minValue origin origin<- stack unstack
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
                                               url = NULL,
@@ -337,10 +379,50 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   ml <- mapAdd(studyArea, map = ml, isStudyArea = TRUE, layerName = "studyArea",
                useSAcrs = TRUE, filename2 = NULL)
 
-  ml <- mapAdd(map = ml, url = url, layerName = CClayerNames, CC = TRUE,
+  ## TODO: avoid this workaround for stack not liking rasters with different origns and extents
+  lr <- lapply(CClayerNamesFiles, prepInputs, url = url, alsoExtract = "similar",
+               destinationPath = destinationPath, fun = "raster::raster")
+  le <- lapply(lr, extent)
+  dts <- lapply(lr, function(r) {
+    e <- extent(r)
+    data.table(xmin = e[1], xmax = e[2], ymin = e[3], ymax = e[4])
+  })
+  dt <- rbindlist(dts)
+  new_ext <- extent(max(dt$xmin), min(dt$xmax), max(dt$ymin), min(dt$ymax))
+  lr2 <- lapply(lr, `origin<-`, value = origin(lr[[1]]))
+  lr3 <- lapply(lr2, function(r) {
+    crop(r, y = new_ext, filename = tempfile())
+  })
+  lr4 <- lapply(lr3, function(r) {
+    extend(r, y = new_ext, filename = tempfile())
+  })
+  ## stack(lr4) ## confirm it works
+
+  ## loop/apply doesn't work here???
+  ml <- mapAdd(lr4[[1]], map = ml, layerName = CClayerNames[1], CC = TRUE,
                destinationPath = destinationPath,
-               targetFile = CClayerNamesFiles, filename2 = NULL,
-               alsoExtract = "similar", leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[2]], map = ml, layerName = CClayerNames[2], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[3]], map = ml, layerName = CClayerNames[3], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[4]], map = ml, layerName = CClayerNames[4], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[5]], map = ml, layerName = CClayerNames[5], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(lr4[[6]], map = ml, layerName = CClayerNames[6], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ## END WORKAROUND
+
+  # ml <- mapAdd(map = ml, url = url, layerName = CClayerNames, CC = TRUE,
+  #              destinationPath = destinationPath,
+  #              targetFile = CClayerNamesFiles, filename2 = NULL,
+  #              alsoExtract = "similar", leaflet = FALSE, method = "ngb") ## TODO: fix error due to different extent
 
   ccs <- ml@metadata[CC == TRUE & !(layerName == "LandType"), ]
   CCs <- maps(ml, layerName = ccs$layerName)
@@ -350,8 +432,6 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   if (!all(raster::minValue(CCstack) >= 0)) stop("problem with minValue of CCstack (< 0)")
   if (!all(raster::maxValue(CCstack) <= 10)) stop("problem with maxValue of CCstack (> 10)")
 
-  CCstack[CCstack[] < 0] <- 0  ## turns stack into brick, so need to restack later
-  CCstack[CCstack[] > 10] <- 10
   CCstack <- CCstack * 10 # convert back to percent
   NA_ids <- which(is.na(ml$LandType[]) |  # outside of studyArea polygon
                     ml$LandType[] == 1)   # 1 is cities -- NA it here -- will be filled in with another veg layer if available (e.g. Pickell)
@@ -467,52 +547,49 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   stack(CCstack) ## ensure it's still a stack
 }
 
+#' @template destinationPath
+#' @param outputPath path to output directory
 #' @export
-#' @rdname prepSpeciesLayers
-prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath,
-                                      url = NULL,
-                                      studyArea, rasterToMatch,
-                                      sppEquiv,
-                                      sppEquivCol,
-                                      thresh = 10, ...) {
-  dots <- list(...)
+#' @rdname LandR-deprecated
+prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, studyArea,
+                                      rasterToMatch, sppEquiv, sppEquivCol, thresh = 10, ...) {
+  .Deprecated("loadkNNSpeciesLayers",
+              msg = paste("prepSpeciesLayers_KNN2011 is deprecated.",
+                          "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers."))
 
-  if (is.null(url))
-    url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                  "canada-forests-attributes_attributs-forests-canada/2011-",
-                  "attributes_attributs-2011/")
-
-  loadkNNSpeciesLayersValidation(
+  loadkNNSpeciesLayers(
     dPath = destinationPath,
-    knnNamesCol = "KNN",
-    outputPath = outputPath,
     rasterToMatch = rasterToMatch,
     studyArea = studyArea,
-    studyAreaName = dots$studyAreaName,
     sppEquiv = sppEquiv,
+    year = 2011,
+    knnNamesCol = "KNN",
     sppEquivCol = sppEquivCol,
     thresh = thresh,
     url = url,
-    userTags = c("speciesLayers", "KNN")
+    ## dots start here:
+    outputPath = outputPath,
+    userTags = c("speciesLayers", "KNN"),
+    ...
   )
 }
 
 
-#' \code{makePickellStack}
+#' `makePickellStack`
 #'
 #' TODO: description and title needed
 #'
 #' @param PickellRaster TODO: description needed
 #' @template sppEquiv
 #' @template sppEquivCol
-#' @param destinationPath TODO: description needed
+#' @template destinationPath
 #'
 #' @return TODO: description needed
 #'
 #' @export
 #' @importFrom magrittr %>%
 #' @importFrom reproducible asPath Cache
-#' @importFrom raster raster rasterOptions setValues stack
+#' @importFrom raster NAvalue<- raster rasterOptions setValues stack
 makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPath) {
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
@@ -557,10 +634,13 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(41, 42, 43)] <- 60
         spRasts[[sp]][PickellRaster[] %in% c(44)] <- 80
         spRasts[[sp]][PickellRaster[] %in% c(14, 34)] <- 40
+        NAval <- 255L
         spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                                filename = asPath(file.path(destinationPath,
                                                            paste0("Pickell_", sp, ".tif"))),
-                               overwrite = TRUE, datatype = "INT1U")
+                               overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
+        ## NAvals need to be converted back to NAs
+        NAvalue(spRasts[[sp]]) <- NAval
       }
     }
 
@@ -570,10 +650,14 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(23, 26)] <- 60
         spRasts[[sp]][PickellRaster[] %in% c(22)] <- 80
         spRasts[[sp]][PickellRaster[] %in% c(32, 42)] <- 40
+
+        NAval <- 255L
         spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                                filename = asPath(file.path(destinationPath,
                                                            paste0("Pickell_", sp, ".tif"))),
-                               overwrite = TRUE, datatype = "INT1U")
+                               overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
+        ## NAvals need to be converted back to NAs
+        NAvalue(spRasts[[sp]]) <- NAval
       }
     }
 
@@ -587,10 +671,14 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(31, 32, 34)] <- 60
         spRasts[[sp]][PickellRaster[] %in% c(33)] <- 80
         spRasts[[sp]][PickellRaster[] %in% c(23, 43)] <- 40
+
+        NAval <- 255L
         spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                                filename = asPath(file.path(destinationPath,
                                                            paste0("Pickell_", sp, ".tif"))),
-                               overwrite = TRUE, datatype = "INT1U")
+                               overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
+        ## NAvals need to be converted back to NAs
+        NAvalue(spRasts[[sp]]) <- NAval
       }
     }
 
@@ -600,14 +688,53 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(14)] <- 60
         spRasts[[sp]][PickellRaster[] %in% c(11)] <- 80
         spRasts[[sp]][PickellRaster[] %in% c(31, 41)] <- 40
+
+        NAval <- 65535L
         spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
                                filename = asPath(file.path(destinationPath,
                                                            paste0("Pickell_", sp, ".tif"))),
-                               overwrite = TRUE, datatype = "INT2U")
+                               overwrite = TRUE, datatype = "INT2U", NAflag = NAval)
+        ## NAvals need to be converted back to NAs
+        NAvalue(spRasts[[sp]]) <- NAval
       }
     }
   }
 
   ## species in Pickell's data
   raster::stack(spRasts)
+}
+
+
+#' Convert NA's in speciesLayers to zeros
+#'
+#' Pixels that have NAs but are inside `rasterToMatch`
+#' may need to be converted to 0s as they can could still potentially
+#' be forested
+#'
+#' @template speciesLayers
+#' @template rasterToMatch
+#'
+#' @return the `speciesLayers` with 0s in pixels that had NAs
+#'
+#' @export
+#' @importFrom raster stack
+NAcover2zero <- function(speciesLayers, rasterToMatch) {
+  if (!requireNamespace("terra", quietly = TRUE)) {
+    ## since terra is dependency of raster, it should already be installed, but just in case...
+    stop("Suggested package 'terra' not installed.\n",
+         "Install it using `install.packages('terra')`.")
+  }
+
+  tempRas <- rasterToMatch
+  tempRas[!is.na(tempRas[])] <- 0
+  namesLayers <- names(speciesLayers)
+
+  message("...making sure empty pixels inside study area have 0 cover, instead of NAs ...")
+  # Changed to terra Nov 17 by Eliot --> this was many minutes with raster::cover --> 3 seconds with terra
+  speciesLayers <- terra::cover(terra::rast(speciesLayers), terra::rast(tempRas))
+  speciesLayers <- raster::stack(speciesLayers)
+  names(speciesLayers) <- namesLayers
+  message("   ...done")
+
+  return(speciesLayers)
 }

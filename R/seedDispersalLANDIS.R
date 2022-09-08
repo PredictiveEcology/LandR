@@ -8,7 +8,7 @@ utils::globalVariables(c(
 #' dispersal approach.
 #' It is the "potentially receiving" cell that looks around itself for potential seed sources.
 #' If it finds a single seed source, that passes the probability function described by the
-#' \code{dispersalFn}.
+#' `dispersalFn`.
 #' If this passes a comparison to a uniform random draw, then the receiving cell is deemed to have
 #' a "successful" dispersal for that species.
 #' This function can therefore only be used for a relatively specific situation
@@ -17,14 +17,14 @@ utils::globalVariables(c(
 #' a receiving cell has lots of seed sources around it vs. a single seed source.
 #' The difference will come with a higher probability of successfully receiving a "seed".
 #'
-#' \code{dispersalFn} (temporarily unused as code is converted to Rcpp -- the
-#' default \code{dispersalFn} is hard coded within the \code{spiralSeedDispersal}
+#' `dispersalFn` (temporarily unused as code is converted to Rcpp -- the
+#' default `dispersalFn` is hard coded within the `spiralSeedDispersal`
 #' function that uses C++) must be an expression that returns a probability
 #' distribution. Because it is a dispersal kernel, it must be a probability
 #' distribution. The expression that can take an argument named "dis" (without
 #' quotes) as this will be calculated internally and represents the distance
 #' from the initial (receiving) pixel and all active pixels within that cluster
-#' of active pixels. \code{SpaDES} includes the \code{\link{Ward}} kernel as
+#' of active pixels. `SpaDES` includes the [Ward()] kernel as
 #' defined in the LANDIS-II documentation.
 #'
 #' @param dtSrc data.table
@@ -34,11 +34,11 @@ utils::globalVariables(c(
 #' @param pixelGroupMap map
 #'
 #' @param speciesTable A data.table that should have at least 3 columns:
-#'   \code{speciesCode} an integer representation of species, \code{seeddistance_max}
-#'   a numeric with the maximum seed dispersal distance and \code{seeddistance_eff}
+#'   `speciesCode` an integer representation of species, `seeddistance_max`
+#'   a numeric with the maximum seed dispersal distance and `seeddistance_eff`
 #'   the "effective" seed dispersal distance. These latter two are
 #'   parameters passed to Ward dispersal kernel. This data.table can come from
-#'   a \code{species} table from a LANDIS project.
+#'   a `species` table from a LANDIS project.
 #'
 #' @param dispersalFn  An expression that can take a "dis" argument. See details.
 #'   Default is "Ward" (temporarily unused, as it is hard coded inside Rcpp function)
@@ -52,13 +52,13 @@ utils::globalVariables(c(
 #'
 #' @param successionTimestep integer. The time in timeunits between succession (i.e., dispersal) events.
 #'
-#' @param verbose Numeric. \code{0} is not verbose, with increasing numbers indicating
+#' @param verbose Numeric. `0` is not verbose, with increasing numbers indicating
 #'   increasing levels of verbosity (currently up to 2)
 #'
 #' @param ...   Additional parameters. Currently none
 #'
 #' @return A numeric vector of raster pixel indices, in the same resolution and extent as
-#' \code{seedSrc} raster.
+#' `seedSrc` raster.
 #'
 #' @importFrom magrittr %>%
 #' @importFrom raster xyFromCell focalWeight rowColFromCell cellFromRowCol
@@ -169,140 +169,139 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                        verbose = getOption("LandR.verbose", TRUE),
                        ...) {
 
-  ####### Assertions #############
-  if (!( (is.numeric(dtSrc$speciesCode) && is.numeric(dtRcv$speciesCode) && is.numeric(speciesTable$speciesCode)) ||
-         (is.factor(dtSrc$speciesCode) && is.factor(dtRcv$speciesCode) && is.factor(speciesTable$speciesCode))))
-    stop("In LANDISDisp, dtSrc and dtRcv and speciesTable must each have columns for speciesCode which ",
-         "must be both integer or both factor; they are not. Please correct this.")
+  if ((NROW(dtSrc) > 0) & (NROW(dtRcv) > 0)) {
+    ####### Assertions #############
+    if (!( (is.numeric(dtSrc$speciesCode) && is.numeric(dtRcv$speciesCode) && is.numeric(speciesTable$speciesCode)) ||
+           (is.factor(dtSrc$speciesCode) && is.factor(dtRcv$speciesCode) && is.factor(speciesTable$speciesCode))))
+      stop("In LANDISDisp, dtSrc and dtRcv and speciesTable must each have columns for speciesCode which ",
+           "must be both integer or both factor; they are not. Please correct this.")
 
-  dtSrc <- data.table::copy(dtSrc)
-  dtRcv <- data.table::copy(dtRcv)
-  speciesTable <- data.table::copy(speciesTable)
+    dtSrc <- data.table::copy(dtSrc)
+    dtRcv <- data.table::copy(dtRcv)
+    speciesTable <- data.table::copy(speciesTable)
 
-  origClassWasNumeric <- is.numeric(speciesTable[["speciesCode"]])
-  if (is(dtSrc$speciesCode, "numeric")) {
-    #if (length(unique(dtSrc$speciesCode)) != max(dtSrc$speciesCode)) {
-      # This is "numerics" that are no contiguous from 1
-      set(dtSrc, NULL, c("speciesCode"), factor(dtSrc[["speciesCode"]]))
-      origLevels <- levels(dtSrc[["speciesCode"]])
-      speciesTable <- speciesTable[as.numeric(origLevels), ]
-      set(speciesTable, NULL, c("speciesCode"),
-          factor(speciesTable[["speciesCode"]], levels = origLevels))
-      set(dtRcv, NULL, c("speciesCode"),
-          factor(dtRcv[["speciesCode"]], levels = origLevels))
-    #}
-  }
-
-  if (is.factor(dtSrc$speciesCode)) {
-    if (!identical(levels(dtSrc$speciesCode), levels(dtRcv$speciesCode)) &&
-        identical(levels(dtSrc$speciesCode), levels(speciesTable$speciesCode)))
-      stop("In LANDISDisp, dtSrc$speciesCode and dtRcv$speciesCode and speciesTable$speciesCode ",
-           "are all factors (good), ",
-           "but they have different levels (bad). They must have the same factor levels.")
-    origLevels <- levels(dtSrc$speciesCode)
-    dtSrc[, speciesCode2 := as.integer(speciesCode)]
-    dtRcv[, speciesCode2 := as.integer(speciesCode)]
-    speciesTable[, speciesCode2 := as.integer(speciesCode)]
-    set(dtSrc, NULL, "speciesCode", NULL)
-    set(dtRcv, NULL, "speciesCode", NULL)
-    set(speciesTable, NULL, "speciesCode", NULL)
-    setnames(dtSrc, "speciesCode2", "speciesCode")
-    setnames(dtRcv, "speciesCode2", "speciesCode")
-    setnames(speciesTable, "speciesCode2", "speciesCode")
-    if (!"species" %in% colnames(speciesTable))
-      set(speciesTable, NULL, "species", paste0("Spp_", speciesTable[["speciesCode"]]))
-    setorderv(speciesTable, "speciesCode")
-    setorderv(dtSrc, "speciesCode")
-    setorderv(dtRcv, "speciesCode")
-  }
-
-  if (is.character(dtSrc$speciesCode)) {
-    stop("LANDISDisp expects that dtSrc$speciesCode and dtRcv$speciesCode are either factor or integer")
-  }
-  ####### End Assertions #############
-
-  # Create srcPixelMatrix -- which is the matrix representation
-  #    of the dtSrc x speciesCode with NAs everywhere there is no
-  #    species present
-  pgv <- pixelGroupMap[]
-
-  rasVectorTemplate <- rep(NA_integer_, ncell(pixelGroupMap))
-  rasTemplate <- raster(pixelGroupMap)
-  srcSpeciesCodes <- sort(unique(dtSrc$speciesCode))
-  names(srcSpeciesCodes) <- as.character(srcSpeciesCodes)
-  cellsCanSrc <- which(pgv %in% dtSrc$pixelGroup)
-  dtSrcLong <- data.table(pixelGroup = pgv[cellsCanSrc], pixelIndex = cellsCanSrc)
-  dtSrcLong <- dtSrc[, c("pixelGroup", "speciesCode")][dtSrcLong, on = "pixelGroup", allow.cartesian = TRUE]
-  set(dtSrcLong, NULL, "pixelGroup", NULL)
-  setkeyv(dtSrcLong, "speciesCode") # sort ascending
-
-  srcSpeciesByIndex <- split(dtSrcLong, by = "speciesCode")
-  speciesSrcRasterVecList <- lapply(srcSpeciesCodes, function(sc) {
-    rasVectorTemplate[srcSpeciesByIndex[[as.character(sc)]][["pixelIndex"]]] <- sc
-    rasVectorTemplate
-  })
-  maxSpCode <- max(as.integer(srcSpeciesCodes))
-  speciesSrcRasterVecList <- lapply(seq_len(maxSpCode), function(ind) {
-    if (as.character(ind) %in% names(speciesSrcRasterVecList)) {
-      speciesSrcRasterVecList[[as.character(ind)]]
+    origClassWasNumeric <- is.numeric(speciesTable[["speciesCode"]])
+    if (is(dtSrc$speciesCode, "numeric")) {
+      #if (length(unique(dtSrc$speciesCode)) != max(dtSrc$speciesCode)) {
+        # This is "numerics" that are no contiguous from 1
+        set(dtSrc, NULL, c("speciesCode"), factor(dtSrc[["speciesCode"]]))
+        origLevels <- levels(dtSrc[["speciesCode"]])
+        speciesTable <- speciesTable[as.numeric(origLevels), ]
+        set(speciesTable, NULL, c("speciesCode"),
+            factor(speciesTable[["speciesCode"]], levels = origLevels))
+        set(dtRcv, NULL, c("speciesCode"),
+            factor(dtRcv[["speciesCode"]], levels = origLevels))
+      #}
     }
-  })
-  srcPixelMatrix <- do.call(cbind, speciesSrcRasterVecList)
 
-  #### cellSize -- faster than
-  cellSize <- unique(res(pixelGroupMap))
-  if (length(cellSize) > 1) {
-    ## check for equal cell sizes that "aren't" due to floating point error
-    res <-
-      vapply(cellSize, function(x) {
-        isTRUE(all.equal(x, cellSize[1]))
-      }, logical(1))
-    if (all(res)) {
-      cellSize <- cellSize[1]
-    } else {
-      stop("pixelGroupMap resolution must be same in x and y dimension")
+    if (is.factor(dtSrc$speciesCode)) {
+      if (!identical(levels(dtSrc$speciesCode), levels(dtRcv$speciesCode)) &&
+          identical(levels(dtSrc$speciesCode), levels(speciesTable$speciesCode)))
+        stop("In LANDISDisp, dtSrc$speciesCode and dtRcv$speciesCode and speciesTable$speciesCode ",
+             "are all factors (good), ",
+             "but they have different levels (bad). They must have the same factor levels.")
+      origLevels <- levels(dtSrc$speciesCode)
+      dtSrc[, speciesCode2 := as.integer(speciesCode)]
+      dtRcv[, speciesCode2 := as.integer(speciesCode)]
+      speciesTable[, speciesCode2 := as.integer(speciesCode)]
+      set(dtSrc, NULL, "speciesCode", NULL)
+      set(dtRcv, NULL, "speciesCode", NULL)
+      set(speciesTable, NULL, "speciesCode", NULL)
+      setnames(dtSrc, "speciesCode2", "speciesCode")
+      setnames(dtRcv, "speciesCode2", "speciesCode")
+      setnames(speciesTable, "speciesCode2", "speciesCode")
+      if (!"species" %in% colnames(speciesTable))
+        set(speciesTable, NULL, "species", paste0("Spp_", speciesTable[["speciesCode"]]))
+      setorderv(speciesTable, "speciesCode")
+      setorderv(dtSrc, "speciesCode")
+      setorderv(dtRcv, "speciesCode")
     }
-  }
 
-  #  Remove any species in dtRcv that are not available in dtSrc
-  dtRcvNew <- dtRcv[unique(dtSrc[, "speciesCode"], by = "speciesCode"), on = "speciesCode",
-                    nomatch = NULL]
-  cellsCanRcv <- which(pgv %in% dtRcvNew$pixelGroup)
-  rcvSpeciesCodes <- sort(unique(dtRcvNew$speciesCode))
-  dtRcvLong <- data.table(pixelGroup = pgv[cellsCanRcv], pixelIndex = cellsCanRcv)
-  dtRcvSmall <- dtRcvNew[, c("pixelGroup", "speciesCode")]
-  dtSrcUniqueSP <- unique(dtSrc[, "speciesCode"], by = "speciesCode")
-  dtRcvSmall1 <- dtRcvSmall[dtSrcUniqueSP, on = "speciesCode", nomatch = NULL]
-  dtRcvLong <- dtRcvLong[dtRcvSmall, on = "pixelGroup", allow.cartesian = TRUE,
-                         nomatch = NULL]
-  setorderv(dtRcvLong, c("pixelIndex", "speciesCode"))
-  if (NROW(dtRcvLong)) {
-
-    # There can be a case where a pixelGroup exists on map, with a species that is in Rcv but not in Src
-    if (anyNA(dtRcvLong[["pixelIndex"]]))
-      dtRcvLong <- na.omit(dtRcvLong)
-
-    if (verbose >= 3) {
-      message("numRcvPixels: ", length(unique(dtRcvLong$pixelIndex)),
-              "; numSrcPixels: ", max(apply(srcPixelMatrix, 2, function(x) sum(!is.na(x)))))
+    if (is.character(dtSrc$speciesCode)) {
+      stop("LANDISDisp expects that dtSrc$speciesCode and dtRcv$speciesCode are either factor or integer")
     }
-    dtRcvLong <- spiralSeedDispersalR(speciesTable, pixelGroupMap, dtRcvLong,
-                                    srcPixelMatrix, cellSize, k, b, successionTimestep,
-                                    verbose, dispersalFn = dispersalFn)
-    if (exists("origLevels", inherits = FALSE)) {
-      dtRcvLong[, speciesCode := factor(origLevels[speciesCode], levels = origLevels)]
-      if (origClassWasNumeric) {
-        set(dtRcvLong, NULL, "speciesCode", as.integer(as.character(dtRcvLong[["speciesCode"]])))
+    ####### End Assertions #############
+
+    # Create srcPixelMatrix -- which is the matrix representation
+    #    of the dtSrc x speciesCode with NAs everywhere there is no
+    #    species present
+    pgv <- pixelGroupMap[]
+
+    rasVectorTemplate <- rep(NA_integer_, ncell(pixelGroupMap))
+    rasTemplate <- raster(pixelGroupMap)
+    srcSpeciesCodes <- sort(unique(dtSrc$speciesCode))
+    names(srcSpeciesCodes) <- as.character(srcSpeciesCodes)
+    cellsCanSrc <- which(pgv %in% dtSrc$pixelGroup)
+    dtSrcLong <- data.table(pixelGroup = pgv[cellsCanSrc], pixelIndex = cellsCanSrc)
+    dtSrcLong <- dtSrc[, c("pixelGroup", "speciesCode")][dtSrcLong, on = "pixelGroup", allow.cartesian = TRUE]
+    set(dtSrcLong, NULL, "pixelGroup", NULL)
+    setkeyv(dtSrcLong, "speciesCode") # sort ascending
+
+    srcSpeciesByIndex <- split(dtSrcLong, by = "speciesCode")
+    speciesSrcRasterVecList <- lapply(srcSpeciesCodes, function(sc) {
+      rasVectorTemplate[srcSpeciesByIndex[[as.character(sc)]][["pixelIndex"]]] <- sc
+      rasVectorTemplate
+    })
+    maxSpCode <- max(as.integer(srcSpeciesCodes))
+    speciesSrcRasterVecList <- lapply(seq_len(maxSpCode), function(ind) {
+      if (as.character(ind) %in% names(speciesSrcRasterVecList)) {
+        speciesSrcRasterVecList[[as.character(ind)]]
+      }
+    })
+    srcPixelMatrix <- do.call(cbind, speciesSrcRasterVecList)
+
+    #### cellSize -- faster than
+    cellSize <- unique(res(pixelGroupMap))
+    if (length(cellSize) > 1) {
+      ## check for equal cell sizes that "aren't" due to floating point error
+      res <-
+        vapply(cellSize, function(x) {
+          isTRUE(all.equal(x, cellSize[1]))
+        }, logical(1))
+      if (all(res)) {
+        cellSize <- cellSize[1]
+      } else {
+        stop("pixelGroupMap resolution must be same in x and y dimension")
+      }
+    }
+
+    #  Remove any species in dtRcv that are not available in dtSrc
+    dtRcvNew <- dtRcv[unique(dtSrc[, "speciesCode"], by = "speciesCode"), on = "speciesCode",
+                      nomatch = NULL]
+    cellsCanRcv <- which(pgv %in% dtRcvNew$pixelGroup)
+    rcvSpeciesCodes <- sort(unique(dtRcvNew$speciesCode))
+    dtRcvLong <- data.table(pixelGroup = pgv[cellsCanRcv], pixelIndex = cellsCanRcv)
+    dtRcvSmall <- dtRcvNew[, c("pixelGroup", "speciesCode")]
+    dtSrcUniqueSP <- unique(dtSrc[, "speciesCode"], by = "speciesCode")
+    dtRcvSmall1 <- dtRcvSmall[dtSrcUniqueSP, on = "speciesCode", nomatch = NULL]
+    dtRcvLong <- dtRcvLong[dtRcvSmall, on = "pixelGroup", allow.cartesian = TRUE, nomatch = NULL]
+    setorderv(dtRcvLong, c("pixelIndex", "speciesCode"))
+    if (NROW(dtRcvLong)) {
+      # There can be a case where a pixelGroup exists on map, with a species that is in Rcv but not in Src
+      if (anyNA(dtRcvLong[["pixelIndex"]]))
+        dtRcvLong <- na.omit(dtRcvLong)
+
+      if (verbose >= 3) {
+        message("numRcvPixels: ", length(unique(dtRcvLong$pixelIndex)),
+                "; numSrcPixels: ", max(apply(srcPixelMatrix, 2, function(x) sum(!is.na(x)))))
+      }
+      dtRcvLong <- spiralSeedDispersalR(speciesTable, pixelGroupMap, dtRcvLong,
+                                        srcPixelMatrix, cellSize, k, b, successionTimestep,
+                                        verbose, dispersalFn = dispersalFn)
+      if (exists("origLevels", inherits = FALSE)) {
+        dtRcvLong[, speciesCode := factor(origLevels[speciesCode], levels = origLevels)]
+        if (origClassWasNumeric) {
+          set(dtRcvLong, NULL, "speciesCode", as.integer(as.character(dtRcvLong[["speciesCode"]])))
+        }
       }
     }
   } else {
-
+    dtRcvLong <- data.table(pixelIndex = integer(0), speciesCode = integer(0),
+                            DistOfSuccess = numeric(0), ReasonForStop = character(0),
+                            species = character(0))
   }
   return(dtRcvLong[])
-
-
 }
-
 
 speciesCodeFromCommunity <- function(num) {
   indices <- lapply(strsplit(intToBin2(num), split = ""), function(x) {
@@ -322,8 +321,6 @@ speciesComm <- function(num, sc) {
     sc[.]
 }
 
-
-
 #' Ward Dispersal Kernel -- vectorized, optimized for speed
 #'
 #' A probability distribution used in LANDIS-II.
@@ -335,9 +332,9 @@ speciesComm <- function(num, sc) {
 #' @param dist A vector of distances to evaluate kernel against
 #' @param cellSize A numeric, length 1, of the cell resolution (e.g., res(raster))
 #' @param effDist A vector of effective distance (parameter in kernel),
-#'   with same length as \code{dist}
+#'   with same length as `dist`
 #' @param maxDist A vector of maximum distance (parameter in kernel),
-#'   with same length as \code{dist}
+#'   with same length as `dist`
 #' @param k A parameter in the kernel
 #' @param b A parameter in the kernel
 #' @param algo Either 1 or 2. 2 is faster and is default. 1 is "simpler code" as it
@@ -346,7 +343,6 @@ speciesComm <- function(num, sc) {
 #' @name WardKernel
 #' @rdname WardKernel
 Ward <- function(dist, cellSize, effDist, maxDist, k, b, algo = 2) {
-
   if (length(maxDist) == 1) {
     if (length(dist) != 1)
       maxDist <- rep(maxDist, length(dist))
@@ -377,7 +373,6 @@ Ward <- function(dist, cellSize, effDist, maxDist, k, b, algo = 2) {
     exprb2 <- expression(
       (1 - k) * exp((distb2wh - cellSize - effDistb2wh) * log(b) / maxDistb2wh) -
         (1 - k) * exp((distb2wh - effDistb2wh) * log(b) / maxDistb2wh))
-
 
     # Determine the indices for each one
     # Here are the 3 logicals, toplevel, then 2 nested
@@ -446,11 +441,9 @@ intToBin2 <- function(x) {
   y
 }
 
-
 spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
                                  srcPixelMatrix, cellSize, k, b,
                                  successionTimestep, verbose, dispersalFn) {
-
   # # quick test -- just first cell
   # if (missing(useMask))
   #   useMask <- isTRUE(is.na(srcPixelMatrix[1]) | is.na(all(tail(srcPixelMatrix, 1))))
@@ -596,7 +589,6 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
       } else {
         newCurDist <- FALSE
       }
-
     }
 
     needNewCol <- TRUE
@@ -620,8 +612,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     # I tried to get this faster; but the problem is omitting all the
     #   row/col combinations that are "off" raster. cellFromRowCol does this
     #   internally and is fast
-    newPixelIndex <-
-      as.integer(cellFromRowCol(row = row, col = col, object = pixelGroupMap))
+    newPixelIndex <- as.integer(cellFromRowCol(row = row, col = col, object = pixelGroupMap))
 
     # lookup on src rasters
     if (newActiveIndex) {
@@ -754,10 +745,9 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 }
 
 spiralDistances <- function(pixelGroupMap, maxDis, cellSize) {
-  spiral <- which(focalWeight(pixelGroupMap, maxDis, type = "circle")>0, arr.ind = TRUE) -
+  spiral <- which(focalWeight(pixelGroupMap, maxDis, type = "circle") > 0, arr.ind = TRUE) -
     ceiling(maxDis/cellSize) - 1
   spiral <- cbind(spiral, dists = sqrt( (0 - spiral[,1]) ^ 2 + (0 - spiral[, 2]) ^ 2))
   spiral <- spiral[order(spiral[, "dists"], apply(abs(spiral), 1, sum),
                          abs(spiral[, 1]), abs(spiral[, 2])),, drop = FALSE]
 }
-

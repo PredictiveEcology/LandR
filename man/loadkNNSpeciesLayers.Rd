@@ -6,13 +6,14 @@
 \usage{
 loadkNNSpeciesLayers(
   dPath,
-  rasterToMatch,
-  studyArea,
+  rasterToMatch = NULL,
+  studyArea = NULL,
   sppEquiv,
+  year = 2001,
   knnNamesCol = "KNN",
-  sppEquivCol,
-  thresh = 1,
-  url,
+  sppEquivCol = "Boreal",
+  thresh = 10,
+  url = NULL,
   ...
 )
 }
@@ -32,6 +33,8 @@ this only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use
 \code{data("sppEquivalencies_CA", "LandR")}.}
 
+\item{year}{which year's layers should be retrieved? One of 2001 (default) or 2011.}
+
 \item{knnNamesCol}{character string indicating the column in \code{sppEquiv}
 containing kNN species names.
 Default \code{"KNN"} for when \code{sppEquivalencies_CA} is used.}
@@ -41,14 +44,17 @@ For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
 Only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
-\item{thresh}{the minimum number of pixels where the species must have
-\code{biomass > 0} to be considered present in the study area.
-Defaults to 1.}
+\item{thresh}{the minimum percent cover a species must have (per pixel)
+to be considered present in the study area.
+Defaults to 10.}
 
-\item{url}{the source url for the data, passed to \code{\link[reproducible]{prepInputs}}}
+\item{url}{the source url for the data, default is KNN 2011 dataset
+<paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",>
+<"canada-forests-attributes_attributs-forests-canada/2011-",>
+<"attributes_attributs-2011/")>}
 
-\item{...}{Additional arguments passed to \code{\link[reproducible]{Cache}}
-and \code{\link{equivalentName}}. Also valid: \code{outputPath}, and \code{studyAreaName}.}
+\item{...}{Additional arguments passed to \code{\link[reproducible:Cache]{reproducible::Cache()}}
+and \code{\link[=equivalentName]{equivalentName()}}. Also valid: \code{outputPath}, and \code{studyAreaName}.}
 }
 \value{
 A raster stack of percent cover layers by species.

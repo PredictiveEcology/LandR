@@ -2,11 +2,11 @@ utils::globalVariables(c())
 
 #' Create dummy inputs for test simulations
 #'
-#' \code{ecoregionMap}is a raster of all the unique groupings.
+#' `ecoregionMap`is a raster of all the unique groupings.
 #'
 #' @template rasterToMatch
 #'
-#' @return a \code{RasterLayer} object or, in the case of \code{makeDummyEcoregionFiles}, a list.
+#' @return a `RasterLayer` object or, in the case of `makeDummyEcoregionFiles`, a list.
 #'
 #' @export
 #' @importFrom raster mask res
@@ -21,7 +21,7 @@ makeDummyEcoregionMap <- function(rasterToMatch) {
 }
 
 #' @details
-#' \code{rawBiomassMap} is a raster of "raw" total stand biomass per pixel,
+#' `rawBiomassMap` is a raster of "raw" total stand biomass per pixel,
 #'      with values between 100 and 20000 g/m^2.
 #'
 #' @export
@@ -31,16 +31,16 @@ makeDummyEcoregionMap <- function(rasterToMatch) {
 makeDummyRawBiomassMap <- function(rasterToMatch) {
   rawBiomassMap <- gaussMap(rasterToMatch)
   rawBiomassMap <- setValues(rawBiomassMap,
-                             rescale(getValues(rawBiomassMap), c(100, 20000)))
+                             rescale(getValues(rawBiomassMap), c(10, 500)))
   rawBiomassMap <- mask(rawBiomassMap, rasterToMatch)
   return(rawBiomassMap)
 }
 
 #' @details
-#' \code{standAgeMap} is a raster of stand age per pixel (where biomass exists)
+#' `standAgeMap` is a raster of stand age per pixel (where biomass exists)
 #'      with values between 1 and 300 years.
 #'
-#' @param rawBiomassMap a \code{rawBiomassMap} (e.g. the one used
+#' @param rawBiomassMap a `rawBiomassMap` (e.g. the one used
 #'     throughout the simulation)
 #'
 #' @export
@@ -52,7 +52,7 @@ makeDummyStandAgeMap <- function(rawBiomassMap) {
 }
 
 #' @details
-#' \code{rstLCC} is a raster land-cover class per pixel, with values between 1 and 5 that have no
+#' `rstLCC` is a raster land-cover class per pixel, with values between 1 and 5 that have no
 #'      correspondence to any real land-cover classes.
 #'
 #' @export
@@ -68,13 +68,13 @@ makeDummyRstLCC <- function(rasterToMatch) {
 }
 
 #' @details
-#' \code{ecoregionFiles} uses dummy versions of \code{ecoregionMap} and \code{rstLCC}
-#' to create a list with two objects: the \code{ecoregionMap} and a table summarizing its
-#' information per \code{pixelID}.
-#' See \code{ecoregionProducer} (it uses \code{ecoregionProducer} internally).
+#' `ecoregionFiles` uses dummy versions of `ecoregionMap` and `rstLCC`
+#' to create a list with two objects: the `ecoregionMap` and a table summarizing its
+#' information per `pixelID`.
+#' See `ecoregionProducer` (it uses `ecoregionProducer` internally).
 #'
-#' @param ecoregionMap a raster of all the unique groupings.
-#' @param rstLCC a raster land-cover class per pixel,
+#' @template ecoregionMap
+#' @template rstLCC
 #'
 #' @export
 #' @importFrom data.table data.table
@@ -94,13 +94,13 @@ makeDummyEcoregionFiles <- function(ecoregionMap, rstLCC, rasterToMatch) {
   return(ecoregionFiles)
 }
 
-#' Rescale function (as in \code{scales::rescale})
+#' Rescale function (as in `scales::rescale`)
 #'
 #' This is a simple function copied from the scales package (almost the same). Too heavy
 #'    to use one simple function
 #'
-#' @param x a \code{numeric} vector
-#' @param to a \code{numeric} vector of length 2. The new range of values.
+#' @param x a `numeric` vector
+#' @param to a `numeric` vector of length 2. The new range of values.
 #' @importFrom fpCompare %==%
 #' @export
 

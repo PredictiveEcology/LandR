@@ -7,9 +7,17 @@
 speciesTableUpdate(species, speciesTable, sppEquiv, sppEquivCol)
 }
 \arguments{
-\item{species}{a \code{data.table} that has species traits such as longevity, shade tolerance, etc.}
+\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
 
-\item{speciesTable}{TODO: DESCRIPTION NEEDED}
+\item{speciesTable}{The raw species traits table, with \emph{at least} the following columns:
+\code{speciesCode} an character representation of species, \code{Area} a character of
+geographical area within a species range for which trait values are relevant,
+\code{longevity} species longevity in years, \code{sexualmature} age in years at sexual maturity,
+\code{shadetolerance} numeric value between 1-5 of relative shade tolerance (with respect to oteher species),
+\code{seeddistance_eff} the "effective" seed dispersal distance, \code{seeddistance_max} a
+numeric with the maximum seed dispersal distance, and \code{mortalityshape} and \code{growthcureve} to growth
+curve shape parameters. Other columns (e.g. fire-related traits) can also be included depeding on LandR modules in use.
+Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015) for further detail.}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
@@ -27,11 +35,28 @@ If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 An updated species \code{data.table}
 }
 \description{
-Changes longevity values in the species table according to Burton & Cumming (1995).
-Only the species and values present in Boreal Shield West (BSW), Boreal Plains (BP) and
-Montane Cordillera (MC) \code{speciesTable$Area} are being changed.
-All others follow Dominic Cyr and Yan Boulanger's trait values
-(\url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
+Changes longevity and shade tolerance values in the species table.
+Longevity values are changed to follow Burton & Cumming (1995) for the following species:
+\emph{Abies balsamea}, \emph{Abies lasiocarpa}, \emph{Betula papyrifera}, \emph{Larix laricina},
+\emph{Larix occidentalis}, \emph{Picea engelmannii}, \emph{Picea glauca}, \emph{Picea mariana},
+\emph{Pinus banksiana}, \emph{Pinus contorta}, \emph{Pinus resinosa}, \emph{Pinus strobus},
+\emph{Populus balsamifera v. balsamifera}, \emph{Populus tremuloides}, \emph{Pseudotsuga menziesii var. glauca},
+\emph{Pseudotsuga menziesii}, \emph{Thuja plicata}, \emph{Tsuga heterophylla},
+\emph{Tsuga mertensiana x heterophylla}, and only for the  Boreal Shield West (BSW), Boreal Plains (BP)
+and Montane Cordillera (MC) \code{speciesTable$Area}s.
 Note that BSW and BP areas correspond more closely to the region considered in Table 2 of
 Burton & Cumming (1995), while MC will correspond to both tables.
+}
+\details{
+Of the above species, shade tolerance values are changed for Abies sp, Picea sp, and Tsuga sp.
+to reflect western boreal shade tolerances better.
+
+When different longectivity/shade tolerance trait values exist for a given species, the minimum
+value across \code{Area}'s (BSW, BP, MC) is kept.
+
+ATTENTION: if none of species in \code{species} are from BSW, BP or MC area this function will not
+change any values.
+
+All other species/Area trait values follow Dominic Cyr and Yan Boulanger's trait values available at:
+(\url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
 }

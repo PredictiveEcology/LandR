@@ -18,7 +18,7 @@ doResprouting(
 }
 \arguments{
 \item{burnedPixelCohortData}{An expanded \code{cohortData} \code{data.table} with pixel-level
-cohort information on burnt pixels and columns:
+cohort information on burnt pixels and the following (optional) columns:
 \code{severity} - fire severity in that pixel calculated based on fire behaviour properties;
 \code{firetolerance} - species-level fire tolerance;
 \code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}.}
@@ -46,9 +46,9 @@ of a species shade tolerance (\code{1}-\code{5}).}
 }
 \value{
 A list of objects:
-    \code{postFirePixelCohortData}, a \code{data.table} with the cohorts that undergo serotiny;
-    \code{serotinyPixel}, a vector of pixels where serotiny was activated;
-    \code{postFireRegenSummary}, the updated \code{postFireRegenSummary}, if \code{calibrate = TRUE}.
+\code{postFirePixelCohortData}, a \code{data.table} with the cohorts that undergo serotiny;
+\code{serotinyPixel}, a vector of pixels where serotiny was activated;
+\code{postFireRegenSummary}, the updated \code{postFireRegenSummary}, if \code{calibrate = TRUE}.
 }
 \description{
 Activate resprouting after a (fire) disturbance

@@ -4,16 +4,15 @@ utils::globalVariables(c(
 
 #' Summary plots of leading vegetation types
 #'
-#' Create raster of leading vegetation types and \code{Plot} a bar chart summary
-#' and a vegetation type map. NOTE: plot order will follow \code{colors} order.
+#' Create raster of leading vegetation types and `Plot` a bar chart summary
+#' and a vegetation type map. NOTE: plot order will follow `colors` order.
 #'
-#' @param speciesStack A \code{RasterStack} of percent-cover-by-species layers.
+#' @param speciesStack A `RasterStack` of percent-cover-by-species layers.
 #'
-#' @param vtm An optional vegetation type map (\code{RasterLayer}).
-#'            If not supplied, will be produced internally by \code{makeVegTypeMap}.
+#' @param vtm An optional vegetation type map (`RasterLayer`).
+#'            If not supplied, will be produced internally by `makeVegTypeMap`.
 #'
-#' @param vegLeadingProportion The minimum proportion cover required to consider
-#'                             a species to be the "leading" one. Default 0.8.
+#' @template vegLeadingProportion
 #'
 #' @template sppEquiv
 #'
@@ -122,17 +121,17 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   Plot(vtm, title = title)
 }
 
-#' Create species colour vector from a \code{sppEquiv} table
+#' Create species colour vector from a `sppEquiv` table
 #'
 #' @template sppEquiv
 #'
 #' @template sppEquivCol
 #' @param newVals An optional character vector of extra names to use, e.g., "Mixed".
 #' @param palette An \pkg{RColorBrewer} palette, e.g., "Accent".
-#'     Can get \pkg{RColorBrewer} palette names from \code{rownames(RColorBrewer::brewer.pal.info)}.
+#'     Can get \pkg{RColorBrewer} palette names from `rownames(RColorBrewer::brewer.pal.info)`.
 #'
 #' @return A named vector of colour codes, where the names are the species names
-#' plus any extra names passed with \code{newVals}.
+#' plus any extra names passed with `newVals`.
 #'
 #' @export
 #' @importFrom RColorBrewer brewer.pal brewer.pal.info

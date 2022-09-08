@@ -2,21 +2,21 @@ utils::globalVariables(c(
   "active", "ecoregion", "ecoregion_lcc", "ecoregionGroup", "ID", "landcover", "mapcode"
 ))
 
-#' Make \code{ecoregionMap} and \code{ecoregion} table
+#' Make `ecoregionMap` and `ecoregion` table
 #'
 #' This function combines an ecoregion map and a land cover map (e.g. ecodistricts and LCC)
 #' and creates a map and table of containing their combined values and pixel IDs.
-#' Used internally in LandR modules to prepare maps for to make \code{cohortData}.
+#' Used internally in LandR modules to prepare maps for to make `cohortData`.
 #'
-#' @param ecoregionMaps a \code{list} with two rasters, one with ecoregions (e.g. ecodistricts)
+#' @param ecoregionMaps a `list` with two rasters, one with ecoregions (e.g. ecodistricts)
 #' and another with land cover (e.g. LCC)
 #' @param ecoregionName the name describing the type of ecoregions in first map
-#' (e.g. \code{"ecoDistrict"}) if passing a polygon file
+#' (e.g. `"ecoDistrict"`) if passing a polygon file
 #' @template rasterToMatch
 #'
 #' @return
-#' A list with two objects: the \code{ecoregionMap} and a table summarizing
-#' its information per \code{pixelID}
+#' A list with two objects: the `ecoregionMap` and a table summarizing
+#' its information per `pixelID`
 #'
 #' @export
 #' @importFrom data.table as.data.table data.table
@@ -70,18 +70,18 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch
   return(list(ecoregionMap = rstEcoregion, ecoregion = ecoregionTable))
 }
 
-#' Make the \code{ecoregion} table
+#' Make the `ecoregion` table
 #'
 #' This function creates a table containing pixel-wise ecoregion codes and whether they
-#'   are "active" (have biomass > 0) or not for simulation. Unlike \code{ecoregionProducer},
-#'   this function creates the \code{ecoregion} table from pixel information contained in
-#'   \code{pixelCohortData}
+#'   are "active" (have biomass > 0) or not for simulation. Unlike `ecoregionProducer`,
+#'   this function creates the `ecoregion` table from pixel information contained in
+#'   `pixelCohortData`
 #'
 #' @template pixelCohortData
 #' @template speciesEcoregion
 #'
 #' @return
-#' A \code{data.table} with ecoregion codes and their active status per \code{pixelID}.
+#' A `data.table` with ecoregion codes and their active status per `pixelID`.
 #'
 #' @export
 #' @importFrom data.table data.table
@@ -97,15 +97,15 @@ makeEcoregionDT <- function(pixelCohortData, speciesEcoregion) {
   return(ecoregion)
 }
 
-#' Make the \code{ecoregionMap} raster
+#' Make the `ecoregionMap` raster
 #'
 #' Creates a raster of ecoregion codes per pixel.
-#' Unlike \code{ecoregionProducer}, this fills the raster with pixel information contained in
-#' \code{pixelCohortData}.
+#' Unlike `ecoregionProducer`, this fills the raster with pixel information contained in
+#' `pixelCohortData`.
 #'
 #' @template pixelCohortData
-#' @param ecoregionFiles A list with two objects: the \code{ecoregionMap} and a table summarizing
-#'   its information per \code{pixelID}.
+#' @param ecoregionFiles A list with two objects: the `ecoregionMap` and a table summarizing
+#'   its information per `pixelID`.
 #'
 #' @return A raster with ecoregion codes.
 #'
@@ -130,17 +130,17 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
 
 #' Create Stacks of the speciesEcoregion content
 #'
-#' This will output a list of RasterStack objects. Each \code{RasterStack} show
-#' raster maps of one of the columns listed in \code{columns} and each
-#' \code{RasterLayer} will be one species.
+#' This will output a list of RasterStack objects. Each `RasterStack` show
+#' raster maps of one of the columns listed in `columns` and each
+#' `RasterLayer` will be one species.
 #' @importFrom data.table data.table setDTthreads
 #' @rawNamespace import(data.table, except = getNamespaceExports("data.table"))
 #' @importFrom pemisc factorValues2
 #' @importFrom raster stack raster
-#' @param ecoregionMap The Factor RasterLayer of the ecoregionMap
-#' @param speciesEcoregion The data.table with the speciesEcoregion information
-#' @param columns The columns to use in the \code{speciesEcoregion} data.table.
-#'   Default is \code{c("establishprob", "maxB", "maxANPP")}
+#' @template ecoregionMap
+#' @template speciesEcoregion
+#' @param columns The columns to use in the `speciesEcoregion` data.table.
+#'   Default is `c("establishprob", "maxB", "maxANPP")`
 speciesEcoregionStack <- function(ecoregionMap, speciesEcoregion,
                                   columns = c("establishprob", "maxB", "maxANPP")) {
   # stack of SEP

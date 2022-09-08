@@ -1,4 +1,3 @@
-##
 .onLoad <- function(libname, pkgname) {
   ## set options using the approach used by devtools
   opts <- options()
@@ -13,7 +12,7 @@
   invisible()
 }
 
-#' The \code{LandR} package environment
+#' The `LandR` package environment
 #'
 #' Environment used internally to store internal package objects and methods.
 #'
