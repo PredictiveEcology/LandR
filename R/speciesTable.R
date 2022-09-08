@@ -19,9 +19,10 @@ updateSpeciesTable <- function(speciesTable, params) {
     ## checks:
     spp <- names(subParams)
     missingSpp <- spp[!spp %in% speciesTable$species]
-    if (length(missingSpp))
+    if (length(missingSpp)) {
       stop("The species: ", paste(missingSpp, collapse = ", "),
            "\ndo not exist in `speciesTable$species`")
+    }
 
     ## this is sub ideal to convert classes, but the only solution I found.
     ## neither class(...) <- class(..) nor as(..., class(...)) were changing integer to numeric.
