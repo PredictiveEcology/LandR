@@ -92,13 +92,13 @@ prepInputsLCC <- function(year = 2010,
       filename <- asPath("LCC2005_V1_4a.tif")
       archive <- asPath("LandCoverOfCanada2005_V1_4.zip")
     } else if (identical(as.integer(year), 2010L)) {
-      url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/",
+      url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/",
                     "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
                     "CanadaLandcover2010.zip")
       filename <- asPath("CAN_LC_2010_CAL.tif")
       archive <- asPath("CanadaLandcover2010.zip")
     } else if (identical(as.integer(year), 2015L)) {
-      url <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/",
+      url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/",
                     "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
                     "CanadaLandcover2015.zip")
       filename <- asPath("CAN_LC_2015_CAL.tif")
@@ -108,16 +108,15 @@ prepInputsLCC <- function(year = 2010,
     }
   }
 
-  prepInputs(
-        targetFile = filename,
-        archive = archive,
-        url = url,
-        destinationPath = asPath(destinationPath),
-        studyArea = studyArea,
-        rasterToMatch = rasterToMatch,
-        method = "ngb",
-        datatype = "INT2U",
-        filename2 = filename2, ...)
+  prepInputs(targetFile = filename,
+             archive = archive,
+             url = url,
+             destinationPath = asPath(destinationPath),
+             studyArea = studyArea,
+             rasterToMatch = rasterToMatch,
+             method = "ngb",
+             datatype = "INT2U",
+             filename2 = filename2, ...)
 }
 
 #' Make a vegetation type map from a stack of species abundances
@@ -582,9 +581,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #'               Defaults to 10.
 #'
 #' @param url the source url for the data, default is KNN 2011 dataset
-#' <paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",>
-#' <"canada-forests-attributes_attributs-forests-canada/2011-",>
-#' <"attributes_attributs-2011/")>
+#' (\url{https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/})
 #'
 #' @param ... Additional arguments passed to [reproducible::Cache()]
 #'            and [equivalentName()]. Also valid: `outputPath`, and `studyAreaName`.

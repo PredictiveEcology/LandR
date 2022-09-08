@@ -7,6 +7,7 @@ str(sppEquivalencies_CA)
 if (FALSE) {   ## run this manually
   library(RCurl)
   library(XML)
+
   fileURLs2001 <- getURL(paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
                                 "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/"),
                          dirlistonly = TRUE,

@@ -52,8 +52,10 @@ Imports:
 Suggests:
     BioSIM,
     covr,
+    curl,
     gdalUtilities,
     googledrive (>= 2.0.0),
+    httr,
     knitr,
     qs,
     rasterVis,
