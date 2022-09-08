@@ -65,6 +65,7 @@ Suggests:
     testthat,
     XML
 Remotes:
+    JoshOBrien/gdalUtilities,
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/quickPlot@development,
