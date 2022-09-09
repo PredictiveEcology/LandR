@@ -191,7 +191,8 @@ vegTypeMapGenerator <- function(x, ...) {
 #' @rdname vegTypeMapGenerator
 vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("LandR.doAssertion", TRUE)) {
   pixelTable <- suppressMessages(makePixelTable(x, printSummary = FALSE, doAssertion = doAssertion))
-  cohortTable <- suppressMessages(.createCohortData(pixelTable, rescale = FALSE, doAssertion = doAssertion))
+  sppCols <- grep("cover", colnames(pixelTable), value = TRUE)
+  cohortTable <- suppressMessages(.createCohortData(pixelTable, sppColumns = sppCols, rescale = FALSE, doAssertion = doAssertion))
   cohortTable <- cohortTable[cover > 0]
   pixelGroupMap <- raster(x)
   pixelGroupMap[pixelTable[["pixelIndex"]]] <- pixelTable[["initialEcoregionCode"]]
