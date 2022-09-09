@@ -1,6 +1,7 @@
 utils::globalVariables(c(
-  ":=", ".SD", "Area", "col1", "growthcurve", "hardsoft", "leafLignin", "leaflongevity",
-  "mortalityshape", "seeddistance_eff", "seeddistance_max", "species", "species1", "species2",
+  ":=", ".SD", "Area", "col1", "firetolerance", "growthcurve", "hardsoft",
+  "leafLignin", "leaflongevity", "mortalityshape",
+  "seeddistance_eff", "seeddistance_max", "species", "species1", "species2",
   "wooddecayrate"
 ))
 
@@ -211,7 +212,7 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   speciesTableShort <- speciesTableShort[, .(longevity = min(longevity),
                                              shadetolerance = min(shadetolerance)), by = "species"]
 
-  ## join to dealt with eventual non-matching species ordering
+  ## join to deal with eventual non-matching species ordering
   ## subset species table to common species, then add missing species lines
   ## (which did not have traits changed above)
   cols <- setdiff(names(species), c("longevity", "shadetolerance"))
@@ -220,8 +221,25 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   species <- rbind(species[!species %in% speciesTemp$species], speciesTemp)[order(species)]
 
   ## make sure updated columns have the correct class
-  species[, `:=`(longevity = asInteger(longevity),
-                 shadetolerance = as.numeric(shadetolerance))]
+  species[, `:=`(
+    Area = as.factor(Area),
+    firetolerance = asInteger(firetolerance),
+    growthcurve = as.numeric(growthcurve),
+    longevity = asInteger(longevity),
+    leaflongevity = asInteger(leaflongevity),
+    leafLignin = as.numeric(leafLignin),
+    mortalityshape = asInteger(mortalityshape),
+    postfireregen = as.factor(postfireregen),
+    resproutage_max = asInteger(resproutage_max),
+    resproutage_min = asInteger(resproutage_min),
+    resproutprob = as.numeric(resproutprob),
+    seeddistance_eff = asInteger(seeddistance_eff),
+    seeddistance_max = asInteger(seeddistance_max),
+    sexualmature = asInteger(sexualmature),
+    shadetolerance = as.numeric(shadetolerance),
+    species = as.character(species),
+    wooddecayrate = as.numeric(wooddecayrate)
+  )]
 
   return(species)
 }

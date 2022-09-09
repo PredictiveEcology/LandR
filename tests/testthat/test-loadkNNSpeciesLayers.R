@@ -1,6 +1,20 @@
+## TEMPORARY to deal with intermittent NFI server SSL issue
+.sslVerify <- local({
+  tryURL <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                   "canada-forests-attributes_attributs-forests-canada/2001",
+                   "-attributes_attributs-2001/")
+  sslIssue <- isTRUE(tryCatch({
+    RCurl::getURL(tryURL)
+  }, error = function(e) {
+    grepl("SSL certificate problem", paste(e))
+  }))
+
+  ifelse(sslIssue, 0L, unname(curl::curl_options("^ssl_verifypeer$")))
+})
+
 test_that("test download kNN SpeciesLayers with kNN website - all species", {
   skip_if_not(interactive())
-  skip_if_not_installed(c("googledrive", "RCurl", "XML"))
+  skip_if_not_installed(c("curl", "googledrive", "httr", "RCurl", "XML"))
 
   if (FALSE) {
     # devtools::load_all("../LandR")
@@ -21,16 +35,19 @@ test_that("test download kNN SpeciesLayers with kNN website - all species", {
   ## get all available species for 2001
   opt_cachePath <- getOption("reproducible.cachePath")
   options(reproducible.cachePath = cPath)
-  speciesLayers <- loadkNNSpeciesLayers(dPath = dPath,
-                                        rasterToMatch = RTM,
-                                        studyArea = SA,
-                                        year = 2001,
-                                        url = paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                                                     "canada-forests-attributes_attributs-forests-canada/2001",
-                                                     "-attributes_attributs-2001/"),
-                                        sppEquiv = sppEquiv,
-                                        sppEquivCol = sppEquivCol,
-                                        thresh = 0)
+
+  httr::with_config(config = httr::config(ssl_verifypeer = .sslVerify), {
+    speciesLayers <- loadkNNSpeciesLayers(dPath = dPath,
+                                          rasterToMatch = RTM,
+                                          studyArea = SA,
+                                          year = 2001,
+                                          url = paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                                                       "canada-forests-attributes_attributs-forests-canada/2001",
+                                                       "-attributes_attributs-2001/"),
+                                          sppEquiv = sppEquiv,
+                                          sppEquivCol = sppEquivCol,
+                                          thresh = 0)
+  })
 
   expectedSpp <- c("Abie_Las", "Betu_Pap", "Pice_Eng",
                    "Pice_Gla", "Pice_Mar", "Pinu_Alb",
@@ -42,16 +59,18 @@ test_that("test download kNN SpeciesLayers with kNN website - all species", {
   expect_true(compareRaster(RTM, speciesLayers, res = TRUE, orig = TRUE, stopiffalse = FALSE))
 
   ## get all available species for 2011
-  speciesLayers2011 <- loadkNNSpeciesLayers(dPath = dPath,
-                                            rasterToMatch = RTM,
-                                            studyArea = SA,
-                                            year = 2011,
-                                            url = paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                                                         "canada-forests-attributes_attributs-forests-canada/2011",
-                                                         "-attributes_attributs-2011/"),
-                                            sppEquiv = sppEquiv,
-                                            sppEquivCol = sppEquivCol,
-                                            thresh = 0)
+  httr::with_config(config = httr::config(ssl_verifypeer = .sslVerify), {
+    speciesLayers2011 <- loadkNNSpeciesLayers(dPath = dPath,
+                                              rasterToMatch = RTM,
+                                              studyArea = SA,
+                                              year = 2011,
+                                              url = paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                                                           "canada-forests-attributes_attributs-forests-canada/2011",
+                                                           "-attributes_attributs-2011/"),
+                                              sppEquiv = sppEquiv,
+                                              sppEquivCol = sppEquivCol,
+                                              thresh = 0)
+  })
   expectedSpp <- c("Abie_Las", "Abie_Spp", "Betu_Pap",
                    "Lari_Occ", "Pice_Eng", "Pice_Gla",
                    "Pice_Mar", "Pice_Spp", "Pinu_Con",
@@ -87,30 +106,35 @@ test_that("test download kNN SpeciesLayers with kNN website - three species", {
   ## get all available species for 2001
   opt_cachePath <- getOption("reproducible.cachePath")
   options(reproducible.cachePath = cPath)
-  speciesLayers <- loadkNNSpeciesLayers(dPath = dPath,
-                                        rasterToMatch = RTM,
-                                        studyArea = SA,
-                                        year = 2001,
-                                        url = paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                                                     "canada-forests-attributes_attributs-forests-canada/2001",
-                                                     "-attributes_attributs-2001/"),
-                                        sppEquiv = sppEquiv,
-                                        sppEquivCol = sppEquivCol,
-                                        thresh = 0)
+
+  httr::with_config(config = httr::config(ssl_verifypeer = .sslVerify), {
+    speciesLayers <- loadkNNSpeciesLayers(dPath = dPath,
+                                          rasterToMatch = RTM,
+                                          studyArea = SA,
+                                          year = 2001,
+                                          url = paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                                                       "canada-forests-attributes_attributs-forests-canada/2001",
+                                                       "-attributes_attributs-2001/"),
+                                          sppEquiv = sppEquiv,
+                                          sppEquivCol = sppEquivCol,
+                                          thresh = 0)
+  })
   expect_true(all(sppEquiv$KNN %in% names(speciesLayers)))
   expect_true(compareRaster(RTM, speciesLayers, res = TRUE, orig = TRUE, stopiffalse = FALSE))
 
   ## get all available species for 2011
-  speciesLayers2011 <- loadkNNSpeciesLayers(dPath = dPath,
-                                            rasterToMatch = RTM,
-                                            studyArea = SA,
-                                            year = 2011,
-                                            url = paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                                                         "canada-forests-attributes_attributs-forests-canada/2011",
-                                                         "-attributes_attributs-2011/"),
-                                            sppEquiv = sppEquiv,
-                                            sppEquivCol = sppEquivCol,
-                                            thresh = 0)
+  httr::with_config(config = httr::config(ssl_verifypeer = .sslVerify), {
+    speciesLayers2011 <- loadkNNSpeciesLayers(dPath = dPath,
+                                              rasterToMatch = RTM,
+                                              studyArea = SA,
+                                              year = 2011,
+                                              url = paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                                                           "canada-forests-attributes_attributs-forests-canada/2011",
+                                                           "-attributes_attributs-2011/"),
+                                              sppEquiv = sppEquiv,
+                                              sppEquivCol = sppEquivCol,
+                                              thresh = 0)
+  })
   expect_true(all(sppEquiv$KNN %in% names(speciesLayers2011)))
   expect_true(compareRaster(RTM, speciesLayers2011, res = TRUE, orig = TRUE, stopiffalse = FALSE))
 
@@ -142,15 +166,18 @@ test_that("test download kNN SpeciesLayers bad website - three species", {
   ## get all available species for 2001
   opt_cachePath <- getOption("reproducible.cachePath")
   options(reproducible.cachePath = cPath)
-  speciesLayers <- prepSpeciesLayers_KNN(destinationPath = dPath,
-                                         outputPath = dPath,
-                                         rasterToMatch = RTM,
-                                         studyArea = SA,
-                                         year = 2001,
-                                         url = "dvnsebvebvwebv.cajey/aebcbeh/",
-                                         sppEquiv = sppEquiv,
-                                         sppEquivCol = sppEquivCol,
-                                         thresh = 0)
+
+  httr::with_config(config = httr::config(ssl_verifypeer = .sslVerify), {
+    speciesLayers <- prepSpeciesLayers_KNN(destinationPath = dPath,
+                                           outputPath = dPath,
+                                           rasterToMatch = RTM,
+                                           studyArea = SA,
+                                           year = 2001,
+                                           url = "dvnsebvebvwebv.cajey/aebcbeh/",
+                                           sppEquiv = sppEquiv,
+                                           sppEquivCol = sppEquivCol,
+                                           thresh = 0)
+  })
   expect_true(all(sppEquiv$KNN %in% names(speciesLayers)))
   expect_true(compareRaster(RTM, speciesLayers, res = TRUE, orig = TRUE, stopiffalse = FALSE))
 

@@ -49,9 +49,7 @@ to be considered present in the study area.
 Defaults to 10.}
 
 \item{url}{the source url for the data, default is KNN 2011 dataset
-<paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",>
-<"canada-forests-attributes_attributs-forests-canada/2011-",>
-<"attributes_attributs-2011/")>}
+(\url{https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/})}
 
 \item{...}{Additional arguments passed to \code{\link[reproducible:Cache]{reproducible::Cache()}}
 and \code{\link[=equivalentName]{equivalentName()}}. Also valid: \code{outputPath}, and \code{studyAreaName}.}
