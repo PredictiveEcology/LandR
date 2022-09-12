@@ -67,6 +67,7 @@ A separate \code{prepInputs} call will source Canadian National Fire Data Base
 data to update ages of recently burned pixels. To suppress this, pass NULL/NA \code{fireURL}
 }
 \examples{
+\dontrun{
 library(SpaDES.tools)
 library(raster)
 library(reproducible)
@@ -93,8 +94,8 @@ firePerimeters <- Cache(prepInputsFireYear,
                         rasterToMatch = ras2match)
 
 standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
-                                  firePerimeters = firePerimeters,
-                                  rasterToMatch = ras2match)
+                                    firePerimeters = firePerimeters,
+                                    rasterToMatch = ras2match)
 attr(standAge, "imputedPixID")
 
 ## not providing firePerimeters is still possible, but will be deprecated
@@ -102,5 +103,5 @@ attr(standAge, "imputedPixID")
 standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
                                   rasterToMatch = ras2match)
 attr(standAge, "imputedPixID")
-
+}
 }

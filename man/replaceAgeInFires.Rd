@@ -22,6 +22,7 @@ for which ages were corrected. If no corrections were applied the attribute vect
 Replace stand age with time since last fire
 }
 \examples{
+\dontrun{
 library(SpaDES.tools)
 library(raster)
 library(reproducible)
@@ -44,5 +45,5 @@ firePerimeters <- Cache(prepInputsFireYear,
                         rasterToMatch = ras2match)
 standAge <- replaceAgeInFires(standAge, firePerimeters)
 attr(standAge, "imputedPixID")
-
+}
 }

@@ -1,4 +1,4 @@
-bug reports https://github.com/PredictiveEcology/LandR/issues
+bug reports <https://github.com/PredictiveEcology/LandR/issues>
 
 version 1.0.9
 =============

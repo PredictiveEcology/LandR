@@ -379,6 +379,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @importFrom reproducible Cache prepInputs
 #'
 #' @examples
+#' \dontrun{
 #' library(SpaDES.tools)
 #' library(raster)
 #' library(reproducible)
@@ -405,8 +406,8 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #'                         rasterToMatch = ras2match)
 #'
 #' standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
-#'                                   firePerimeters = firePerimeters,
-#'                                   rasterToMatch = ras2match)
+#'                                     firePerimeters = firePerimeters,
+#'                                     rasterToMatch = ras2match)
 #' attr(standAge, "imputedPixID")
 #'
 #' ## not providing firePerimeters is still possible, but will be deprecated
@@ -414,7 +415,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
 #'                                   rasterToMatch = ras2match)
 #' attr(standAge, "imputedPixID")
-#'
+#' }
 prepInputsStandAgeMap <- function(..., ageURL = NULL,
                                   ageFun = "raster::raster",
                                   maskWithRTM = TRUE,
@@ -627,6 +628,7 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 #' @importFrom magrittr %>%
 #'
 #' @examples
+#' \dontrun{
 #' library(SpaDES.tools)
 #' library(raster)
 #' library(reproducible)
@@ -649,7 +651,7 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 #'                         rasterToMatch = ras2match)
 #' standAge <- replaceAgeInFires(standAge, firePerimeters)
 #' attr(standAge, "imputedPixID")
-#'
+#' }
 replaceAgeInFires <- function(standAgeMap, firePerimeters, startTime) {
   if (missing(startTime)) {
     message("'startTime' is missing, the most recent fire year will be used.")
