@@ -8,7 +8,7 @@
 \usage{
 vegTypeMapGenerator(x, ...)
 
-\method{vegTypeMapGenerator}{RasterStack}(x, ..., doAssertion = getOption("LandR.doAssertion", TRUE))
+\method{vegTypeMapGenerator}{RasterStack}(x, ..., doAssertion = getOption("LandR.assertions", FALSE))
 
 \method{vegTypeMapGenerator}{data.table}(
   x,
