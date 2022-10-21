@@ -13,6 +13,12 @@
 \alias{assertFireToleranceDif}
 \alias{assertSpeciesLayers}
 \alias{assertRstLCChange}
+\alias{assertSpeciesEcoregionCohortDataMatch}
+\alias{assertPixelCohortDataValid}
+\alias{assertRepsAllCohortData}
+\alias{assertStandAgeMapAttr}
+\alias{assertCohortDataAttr}
+\alias{assertSppVectors}
 \title{Assertions}
 \usage{
 assert1(
@@ -93,6 +99,42 @@ assertRstLCChange(
   rasterToMatch,
   doAssertion = getOption("LandR.assertions", TRUE)
 )
+
+assertSpeciesEcoregionCohortDataMatch(
+  cohortData,
+  speciesEcoregion,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertPixelCohortDataValid(
+  standCohortData,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertRepsAllCohortData(
+  allCohortData,
+  reps,
+  years,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertStandAgeMapAttr(
+  standAgeMap,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertCohortDataAttr(
+  cohortData,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertSppVectors(
+  sppEquiv = NULL,
+  sppNameVector = NULL,
+  sppColorVect = NULL,
+  sppEquivCol = NULL,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 }
 \arguments{
 \item{cohortData34to36}{A \code{cohortData} \code{data.table} with only the
@@ -152,12 +194,7 @@ was called.}
 
 \item{speciesNames}{A vector of species names for which the labels will be checked}
 
-\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
-See \code{data("sppEquivalencies_CA", "LandR")}.
-For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
-this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use
-\code{data("sppEquivalencies_CA", "LandR")}.}
+\item{sppEquiv}{an table with a column containing species names}
 
 \item{burnedPixelCohortData}{An expanded \code{cohortData} \code{data.table} with pixel-level
 cohort information on burnt pixels and the following (optional) columns:
@@ -176,13 +213,35 @@ Defaults to 1.}
 
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
+
+\item{standCohortData}{A \code{data.table} with simulated and observed stand data for validation}
+
+\item{allCohortData}{A \code{data.table} with all simulated \code{cohortData} to use for
+validation}
+
+\item{reps}{repetition ids}
+
+\item{years}{years}
+
+\item{standAgeMap}{A \code{rasterLayer} of stand ages with attribute "imputedPixID"}
+
+\item{sppNameVector}{A character vector of species to use. These species must all
+be from one naming convention, i.e., from one column in the \code{sppEquiv}.}
+
+\item{sppColorVect}{A named vector of colours to use for plotting.
+The names must conform with species name convention used
+(see LandR::sppEquivalencies_CA for possible naming
+conventions) and should also contain a colour for 'Mixed',
+when a mixed forest type is supported  (see vegLeadingProportion
+parameter in LandR::vegTypeGenerator for details on mixed
+fores types).}
+
+\item{sppEquivCol}{the column name to use from \code{sppEquiv}.}
 }
 \description{
-Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
-
-Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
-
-Assert that all species have maxB and maxANPP values in the landscape
+\itemize{
+\item \code{assert1}: Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
+}
 
 This is the full \code{pixelCohortData}, not the collapsed one.
 }

@@ -189,7 +189,7 @@ vegTypeMapGenerator <- function(x, ...) {
 
 #' @export
 #' @rdname vegTypeMapGenerator
-vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("LandR.doAssertion", TRUE)) {
+vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("LandR.assertions", FALSE)) {
   pixelTable <- suppressMessages(makePixelTable(x, printSummary = FALSE, doAssertion = doAssertion))
   sppCols <- grep("cover", colnames(pixelTable), value = TRUE)
   cohortTable <- suppressMessages(.createCohortData(pixelTable, sppColumns = sppCols, rescale = FALSE, doAssertion = doAssertion))

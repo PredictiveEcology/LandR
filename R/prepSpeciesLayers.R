@@ -448,6 +448,87 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
 }
 
 #' @export
+#' @importFrom data.table data.table rbindlist
+#' @importFrom map mapAdd maps
+#' @importFrom raster crop extend maxValue minValue origin origin<- stack unstack
+#' @rdname prepSpeciesLayers
+prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
+                                    url = NULL,
+                                    studyArea, rasterToMatch,
+                                    sppEquiv,
+                                    sppEquivCol, ...) {
+  if (is.null(url))
+    url <- "https://drive.google.com/file/d/1KTqNBntNrEsDL6jk-5bchsBOcraDqNHe"
+
+  # The ones we want
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
+
+  # Take this from the sppEquiv table; user cannot supply manually
+  sppNameVector <- unique(sppEquiv[[sppEquivCol]])
+  names(sppNameVector) <- sppNameVector
+
+  # This includes LandType because it will use that at the bottom of this function to
+  #  remove NAs
+  CClayerNames <- c("Pine", "Black Spruce", "Deciduous", "Fir", "White Spruce", "Landtype") ## file is 'Landtype'
+  CClayerNames2 <- c("Pine", "Black Spruce", "Deciduous", "Fir", "White Spruce", "LandType") ## needs 'LandType'
+  CClayerNamesFiles <- paste0("MB_", gsub(" ", "", CClayerNames), "2016_NRV.tif")
+  options(map.useParallel = FALSE) ## TODO: pass additional arg to function
+  ml <- mapAdd(rasterToMatch, isRasterToMatch = TRUE, layerName = "rasterToMatch",
+               filename2 = NULL)
+
+  ml <- mapAdd(studyArea, map = ml, isStudyArea = TRUE, layerName = "studyArea",
+               useSAcrs = TRUE, filename2 = NULL)
+
+  lr <- lapply(CClayerNamesFiles, prepInputs, url = url, alsoExtract = "similar",
+               destinationPath = destinationPath, fun = "raster::raster")
+
+  rs <- stack(lr)
+  names(rs) <- CClayerNames2
+
+  ## loop/apply doesn't work here???
+  ml <- mapAdd(rs[[1]], map = ml, layerName = CClayerNames2[1], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(rs[[2]], map = ml, layerName = CClayerNames2[2], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(rs[[3]], map = ml, layerName = CClayerNames2[3], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(rs[[4]], map = ml, layerName = CClayerNames2[4], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(rs[[5]], map = ml, layerName = CClayerNames2[5], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+  ml <- mapAdd(rs[[6]], map = ml, layerName = CClayerNames2[6], CC = TRUE,
+               destinationPath = destinationPath,
+               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+
+  ccs <- ml@metadata[CC == TRUE & !(layerName == "LandType"), ]
+  CCs <- maps(ml, layerName = ccs$layerName)
+  CCstack <- raster::stack(CCs)
+  CCstackNames <- names(CCstack)
+
+  if (!all(raster::minValue(CCstack) >= 0)) stop("problem with minValue of CCstack (< 0)")
+  if (!all(raster::maxValue(CCstack) <= 10)) stop("problem with maxValue of CCstack (> 10)")
+
+  CCstack <- CCstack * 10 # convert back to percent
+  NA_ids <- which(is.na(ml$LandType[]) |  # outside of studyArea polygon
+                    ml$LandType[] == 1)   # 1 is cities -- NA it here -- will be filled in with another veg layer if available (e.g. Pickell)
+  message("  Setting NA, 1 in LandType to NA in speciesLayers in MB FRI data")
+  aa <- try(CCstack[NA_ids] <- NA, silent = TRUE)
+  ## unclear why line above sometimes fails: 'Error in value[j, ] : incorrect number of dimensions'
+  if (is(aa, "try-error")) {
+    l <- unstack(CCstack)
+    CCstack <- lapply(l, function(x) {x[NA_ids] <- NA; x})
+  }
+  names(CCstack) <- equivalentName(CCstackNames, sppEquiv, sppEquivCol)
+
+  stack(CCstack)
+}
+
+#' @export
 #' @importFrom map mapAdd maps
 #' @importFrom raster addLayer dropLayer maxValue minValue stack unstack
 #' @rdname prepSpeciesLayers
