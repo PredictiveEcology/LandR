@@ -25,14 +25,24 @@ makeDummyEcoregionMap <- function(rasterToMatch) {
 #'      with values between 100 and 20000 g/m^2.
 #'
 #' @export
-#' @importFrom raster mask setValues getValues
-#' @importFrom SpaDES.tools gaussMap
+#' @importFrom raster res ncol nrow raster
 #' @rdname dummy-inputs
 makeDummyRawBiomassMap <- function(rasterToMatch) {
-  rawBiomassMap <- gaussMap(rasterToMatch)
-  rawBiomassMap <- setValues(rawBiomassMap,
-                             rescale(getValues(rawBiomassMap), c(10, 500)))
-  rawBiomassMap <- mask(rawBiomassMap, rasterToMatch)
+  if (requireNamespace("rflsgen", quietly = TRUE)) {
+    dummyVals <- rflsgen::flsgen_terrain(
+      width = ncol(rasterToMatch),
+      height = nrow(rasterToMatch),
+      resolution = unique(res(rasterToMatch)),
+      roughness = 0.3,
+    )
+    dummyVals <- raster(dummyVals)
+    dummyVals[] <- rescale(dummyVals[], c(10,500))
+    dummyVals[] <- round(abs(dummyVals[]))
+  } else {
+    stop("Package rflsgen not installed. Please install it to make dummy landscapes.")
+  }
+  rawBiomassMap <- rasterToMatch
+  rawBiomassMap[] <- dummyVals[]
   return(rawBiomassMap)
 }
 
