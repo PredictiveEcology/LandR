@@ -31,7 +31,6 @@ makeDummyEcoregionMap <- function(rasterToMatch) {
 #' @importFrom SpaDES.tools neutralLandscapeMap
 #' @rdname dummy-inputs
 makeDummyRawBiomassMap <- function(rasterToMatch) {
-  browser()
   rawBiomassMap <- neutralLandscapeMap(rasterToMatch,
                                        roughness = 0.65,
                                        rand_dev = 200,
