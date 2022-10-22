@@ -24,40 +24,21 @@ makeDummyEcoregionMap <- function(rasterToMatch) {
 #' `rawBiomassMap` is a raster of "raw" total stand biomass per pixel,
 #'      with values between 100 and 20000 g/m^2.
 #'
+#' @template rasterToMatch
+#'
 #' @export
 #' @importFrom raster mask crop res ncol nrow crs
+#' @importFrom SpaDES.tools neutralLandscapeMap
 #' @rdname dummy-inputs
 makeDummyRawBiomassMap <- function(rasterToMatch) {
-  if (requireNamespace("NLMR", quietly = TRUE)) {
-    dummyVals <- NLMR::nlm_mpd(
-      ncol = ncol(rasterToMatch),
-      nrow = nrow(rasterToMatch),
-      resolution = unique(res(rasterToMatch)),
-      roughness = 0.65,
-      rand_dev = 200,
-      rescale = FALSE,
-      verbose = FALSE
-    )
-    dummyVals[] <- round(abs(dummyVals[]))
-    if (ncol(dummyVals) < ncol(rasterToMatch) |
-        nrow(dummyVals) < nrow(rasterToMatch)) {
-      ## because dummyVals has no CRS and its extent doesn't match RTM's (but the resolution does)
-      ## we can't reproject or use RTM to define the extent. We need to add rows/cols
-      ## by multiplying the final number by res
-      dummyVals <- extend(dummyVals,
-                          extent(c(0, ncol(rasterToMatch)*unique(res(rasterToMatch)),
-                                   0, nrow(rasterToMatch)*unique(res(rasterToMatch)))),
-                          values = NA)
-      ## now replace added NAs
-      dummyVals <- focal(dummyVals, w = matrix(1,3,3),
-                              fun = mean, NAonly = TRUE, na.rm = TRUE)
-    }
+  browser()
+  rawBiomassMap <- neutralLandscapeMap(rasterToMatch,
+                                       roughness = 0.65,
+                                       rand_dev = 200,
+                                       rescale = FALSE,
+                                       verbose = FALSE)
 
-     rawBiomassMap <- rasterToMatch
-     rawBiomassMap[] <- dummyVals[]
-  } else {
-    stop("Package 'NLMR' not installed. Please install it to make dummy landscapes.")
-  }
+  rawBiomassMap[] <- round(abs(rawBiomassMap[]))
   return(rawBiomassMap)
 }
 
