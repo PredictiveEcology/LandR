@@ -25,24 +25,39 @@ makeDummyEcoregionMap <- function(rasterToMatch) {
 #'      with values between 100 and 20000 g/m^2.
 #'
 #' @export
-#' @importFrom raster res ncol nrow raster
+#' @importFrom raster mask crop res ncol nrow crs
 #' @rdname dummy-inputs
 makeDummyRawBiomassMap <- function(rasterToMatch) {
-  if (requireNamespace("rflsgen", quietly = TRUE)) {
-    dummyVals <- rflsgen::flsgen_terrain(
-      width = ncol(rasterToMatch),
-      height = nrow(rasterToMatch),
+  if (requireNamespace("NLMR", quietly = TRUE)) {
+    dummyVals <- NLMR::nlm_mpd(
+      ncol = ncol(rasterToMatch),
+      nrow = nrow(rasterToMatch),
       resolution = unique(res(rasterToMatch)),
-      roughness = 0.3,
+      roughness = 0.65,
+      rand_dev = 200,
+      rescale = FALSE,
+      verbose = FALSE
     )
-    dummyVals <- raster(dummyVals)
-    dummyVals[] <- rescale(dummyVals[], c(10,500))
     dummyVals[] <- round(abs(dummyVals[]))
+    if (ncol(dummyVals) < ncol(rasterToMatch) |
+        nrow(dummyVals) < nrow(rasterToMatch)) {
+      ## because dummyVals has no CRS and its extent doesn't match RTM's (but the resolution does)
+      ## we can't reproject or use RTM to define the extent. We need to add rows/cols
+      ## by multiplying the final number by res
+      dummyVals <- extend(dummyVals,
+                          extent(c(0, ncol(rasterToMatch)*unique(res(rasterToMatch)),
+                                   0, nrow(rasterToMatch)*unique(res(rasterToMatch)))),
+                          values = NA)
+      ## now replace added NAs
+      dummyVals <- focal(dummyVals, w = matrix(1,3,3),
+                              fun = mean, NAonly = TRUE, na.rm = TRUE)
+    }
+
+     rawBiomassMap <- rasterToMatch
+     rawBiomassMap[] <- dummyVals[]
   } else {
-    stop("Package rflsgen not installed. Please install it to make dummy landscapes.")
+    stop("Package 'NLMR' not installed. Please install it to make dummy landscapes.")
   }
-  rawBiomassMap <- rasterToMatch
-  rawBiomassMap[] <- dummyVals[]
   return(rawBiomassMap)
 }
 
