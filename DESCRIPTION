@@ -45,7 +45,7 @@ Imports:
     reproducible (>= 1.2.9),
     sf,
     sp,
-    SpaDES.tools (>= 0.3.2),
+    SpaDES.tools (>= 1.0.0.9000),
     stats,
     tools,
     utils
@@ -59,7 +59,6 @@ Suggests:
     knitr,
     qs,
     rasterVis,
-    rflsgen,
     RCurl,
     roxygen2,
     rmarkdown,
