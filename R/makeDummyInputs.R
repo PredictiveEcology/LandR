@@ -61,6 +61,8 @@ makeDummyStandAgeMap <- function(rawBiomassMap) {
 #' `rstLCC` is a raster land-cover class per pixel, with values between 1 and 5 that have no
 #'      correspondence to any real land-cover classes.
 #'
+#' @template rasterToMatch
+#'
 #' @export
 #' @importFrom raster mask res
 #' @importFrom SpaDES.tools randomPolygons
@@ -81,6 +83,7 @@ makeDummyRstLCC <- function(rasterToMatch) {
 #'
 #' @template ecoregionMap
 #' @template rstLCC
+#' @template rasterToMatch
 #'
 #' @export
 #' @importFrom data.table data.table
