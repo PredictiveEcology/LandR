@@ -45,7 +45,7 @@ Imports:
     reproducible (>= 1.2.9),
     sf,
     sp,
-    SpaDES.tools (>= 1.0.0.9000),
+    SpaDES.tools (>= 1.0.0.9001),
     stats,
     tools,
     utils
