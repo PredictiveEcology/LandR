@@ -37,7 +37,8 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #' @template standAgeMap
 #' @param ecoregionFiles A list with two objects: the `ecoregionMap` and a table summarizing
 #'   its information per `pixelID.` See `ecoregionProducer`.
-#' @param biomassMap raster of total stand biomass
+#' @param biomassMap raster of total stand biomass in t/ha. Biomass units are
+#'   converted to g/m^2.
 #' @template rasterToMatch
 #' @template rstLCC
 #' @param printSummary Logical. If `TRUE`, the default, a print out of the
@@ -46,7 +47,8 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #'
 #' @return
 #' A `data.table` as many rows as non-NA pixels in `rasterToMath` and
-#'  the columns containing pixel data from the input raster layers.
+#'  the columns containing pixel data from the input raster layers, with
+#'  biomass in g/m^2.
 #'
 #' @export
 #' @importFrom crayon blue
