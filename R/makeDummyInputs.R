@@ -24,15 +24,20 @@ makeDummyEcoregionMap <- function(rasterToMatch) {
 #' `rawBiomassMap` is a raster of "raw" total stand biomass per pixel,
 #'      with values between 100 and 20000 g/m^2.
 #'
+#' @template rasterToMatch
+#'
 #' @export
-#' @importFrom raster mask setValues getValues
-#' @importFrom SpaDES.tools gaussMap
+#' @importFrom raster mask crop res ncol nrow crs
+#' @importFrom SpaDES.tools neutralLandscapeMap
 #' @rdname dummy-inputs
 makeDummyRawBiomassMap <- function(rasterToMatch) {
-  rawBiomassMap <- gaussMap(rasterToMatch)
-  rawBiomassMap <- setValues(rawBiomassMap,
-                             rescale(getValues(rawBiomassMap), c(10, 500)))
-  rawBiomassMap <- mask(rawBiomassMap, rasterToMatch)
+  rawBiomassMap <- neutralLandscapeMap(rasterToMatch,
+                                       roughness = 0.65,
+                                       rand_dev = 200,
+                                       rescale = FALSE,
+                                       verbose = FALSE)
+
+  rawBiomassMap[] <- round(abs(rawBiomassMap[]))
   return(rawBiomassMap)
 }
 
@@ -55,6 +60,8 @@ makeDummyStandAgeMap <- function(rawBiomassMap) {
 #' `rstLCC` is a raster land-cover class per pixel, with values between 1 and 5 that have no
 #'      correspondence to any real land-cover classes.
 #'
+#' @template rasterToMatch
+#'
 #' @export
 #' @importFrom raster mask res
 #' @importFrom SpaDES.tools randomPolygons
@@ -75,6 +82,7 @@ makeDummyRstLCC <- function(rasterToMatch) {
 #'
 #' @template ecoregionMap
 #' @template rstLCC
+#' @template rasterToMatch
 #'
 #' @export
 #' @importFrom data.table data.table
