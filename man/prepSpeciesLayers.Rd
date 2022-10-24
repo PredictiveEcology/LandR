@@ -5,6 +5,7 @@
 \alias{prepSpeciesLayers_CASFRI}
 \alias{prepSpeciesLayers_Pickell}
 \alias{prepSpeciesLayers_ForestInventory}
+\alias{prepSpeciesLayers_MBFRI}
 \alias{prepSpeciesLayers_ONFRI}
 \title{Prepare species layers}
 \usage{
@@ -43,6 +44,17 @@ prepSpeciesLayers_Pickell(
 )
 
 prepSpeciesLayers_ForestInventory(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  ...
+)
+
+prepSpeciesLayers_MBFRI(
   destinationPath,
   outputPath,
   url = NULL,

@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2022-09-09
-Version: 1.0.9.9002
+Date: 2022-10-24
+Version: 1.1.0.9006
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -18,12 +18,13 @@ Authors@R: c(
     person("Ceres", "Barros", email = "ceres.barros@ubc.ca",
            role = c("aut"), comment = c(ORCID = "0000-0003-4036-977X")),
     person("Ian M S", "Eddy", email = "ian.eddy@nrcan-rncan.gc.ca",
-           role = c("aut"), comment = c(ORCID = "0000-0001-7397-2116")),           
-    person("Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources Canada",
+           role = c("aut"), comment = c(ORCID = "0000-0001-7397-2116")),
+    person(paste("Her Majesty the Queen in Right of Canada,",
+                 "as represented by the Minister of Natural Resources Canada"),
            role = "cph")
     )
 Depends:
-    R (>= 4.0)
+    R (>= 4.2)
 Imports:
     crayon,
     data.table,
@@ -45,7 +46,7 @@ Imports:
     reproducible (>= 1.2.9),
     sf,
     sp,
-    SpaDES.tools (>= 0.3.2),
+    SpaDES.tools (>= 1.0.0.9001),
     stats,
     tools,
     utils

@@ -3,7 +3,7 @@ utils::globalVariables(c(".N", "V1", "V2", "relativeAbundObsrvd", "relativeAbund
 
 #' Assertions
 #'
-#' Assert that `ecoregionCodes` that were replaced, were correctly identified.
+#' - `assert1`: Assert that `ecoregionCodes` that were replaced, were correctly identified.
 #'
 #' @param cohortData34to36 A `cohortData` `data.table` with only the
 #'                         pixels what were LCC 34:36
@@ -61,9 +61,7 @@ assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote, classesToR
   }
 }
 
-#' Assertions
-#'
-#' Assert that `ecoregionCodes` that were replaced, were correctly identified.
+#' - `assert2`: assert that `ecoregionCodes` that were replaced, were correctly identified.
 #'
 #' @param cohortDataNo34to36 A `cohortData` `data.table` with only the
 #'                         pixels what were LCC 34:36
@@ -87,9 +85,7 @@ assert2 <- function(cohortDataNo34to36, classesToReplace = 34:36,
   }
 }
 
-#' Assertions
-#'
-#' Assert that all species have maxB and maxANPP values in the landscape
+#' - `assertSppMaxBMaxANPP`: assert that all species have `maxB` and `maxANPP` values in the landscape
 #'
 #' @template speciesEcoregion
 #'
@@ -120,7 +116,8 @@ assertSppMaxBMaxANPP <- function(speciesEcoregion,
   }
 }
 
-#' Assert that `cohortData` has unique lines when subsetting for a given set of columns
+#' - `assertUniqueCohortData`: assert that `cohortData` has unique lines when subsetting
+#' for a given set of columns
 #'
 #' @param columns Vector of column names on which to test for unique `cohortData`
 #'
@@ -138,7 +135,7 @@ assertUniqueCohortData <- function(cohortData, columns,
   }
 }
 
-#' Assert that `ecoregionGroups` match across different objects
+#' - `assertERGs`: assert that `ecoregionGroups` match across different objects
 #'
 #' @template ecoregionMap
 #' @template speciesEcoregion
@@ -189,7 +186,7 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
   }
 }
 
-#' Assert that an object contains a particular set of columns
+#' - `assertColumns`: assert that an object contains a particular set of columns
 #'
 #' @param obj A data.frame or data.table-like object
 #' @param colClasses A named vector of column classes, where the names are the column names
@@ -241,7 +238,7 @@ assertColumns <- function(obj, colClasses,
   }
 }
 
-#' A test that `pixelGroupMap` and `cohortData` match
+#' - `assertCohortData`: test that `pixelGroupMap` and `cohortData` match
 #'
 #' @template cohortData
 #'
@@ -256,6 +253,7 @@ assertColumns <- function(obj, colClasses,
 #'   was called.
 #'
 #' @param verbose Controls message output. Defaults to `getOption("LandR.verbose")`
+#'
 #' @note
 #' TODO
 #'
@@ -300,7 +298,7 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
   }
 }
 
-#' A test that `pixelGroupMap` and `pixelCohortData` match `pixelIndex`
+#' - `assertPixelCohortData`: test that `pixelGroupMap` and `pixelCohortData` match `pixelIndex`
 #'
 #' This is the full `pixelCohortData`, not the collapsed one.
 #'
@@ -335,10 +333,11 @@ assertPixelCohortData <- function(pixelCohortData, pixelGroupMap,
   }
 }
 
-#' Check that each species as a unique label in the 'EN_generic_short' and 'Leading'
-#'   columns of the `sppEquiv` table.
+#' - `assertSpeciesPlotLabels`: Check that each species as a unique label in the
+#' 'EN_generic_short' and 'Leading' columns of the `sppEquiv` table.
 #'
 #' @param speciesNames A vector of species names for which the labels will be checked
+#'
 #' @template sppEquiv
 #'
 #' @export
@@ -355,8 +354,8 @@ assertSpeciesPlotLabels <- function(speciesNames, sppEquiv,
   }
 }
 
-#' Assert that the difference between fire severity and species fire tolerances
-#'  ranges between -4 and 4.
+#' - `assertFireToleranceDif`: Assert that the difference between fire severity and
+#' species fire tolerances ranges between -4 and 4.
 #'
 #' @template burnedPixelCohortData
 #'
@@ -390,7 +389,7 @@ assertFireToleranceDif <- function(burnedPixelCohortData,
   }
 }
 
-#' Assert that species layers exist with species cover in the study area
+#' - `assertSpeciesLayers`: assert that species layers exist with species cover in the study area
 #'
 #' @template speciesLayers
 #' @param thresh the minimum number of pixels where the species must have
@@ -419,8 +418,7 @@ assertSpeciesLayers <- function(speciesLayers, thresh,
   }
 }
 
-#' Assert that `rstLCChange` is a mask-type raster layer and matches
-#' rasterToMatch
+#' - `assertRstLCChange`: assert that `rstLCChange` is a mask-type raster layer and matches `rasterToMatch`
 #'
 #' @param rstLCChange a raster layer indicating pixels were land-use change occurred as 1s
 #' @template rasterToMatch
@@ -445,10 +443,9 @@ assertRstLCChange <- function(rstLCChange, rasterToMatch,
   }
 }
 
-#' Assert that the `cohortData` `speciesEcoregion` have matching classes
-#'
-#' Specifically, whether all combinations of `ecoregionGroup` and `speciesCode` are in
-#' both objects, no more no less.
+#' - `assertSpeciesEcoregionCohortDataMatch`: assert that the `cohortData` and `speciesEcoregion`
+#' have matching classes. Specifically, whether all combinations of `ecoregionGroup`
+#' and `speciesCode` are in both objects, no more no less.
 #'
 #' @param cohortData A `cohortData` object
 #'
@@ -457,6 +454,7 @@ assertRstLCChange <- function(rstLCChange, rasterToMatch,
 #' @template doAssertion
 #'
 #' @export
+#' @rdname assertions
 assertSpeciesEcoregionCohortDataMatch <- function(cohortData, speciesEcoregion,
                                                   doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
@@ -474,15 +472,15 @@ assertSpeciesEcoregionCohortDataMatch <- function(cohortData, speciesEcoregion,
   }
 }
 
-#' Assert that the `standCohortData` has no NAs
+#' - `assertPixelCohortDataValid`: assert that the `standCohortData` has no NA values
 #'
 #' @param standCohortData A `data.table` with simulated and observed stand data for validation
 #'
 #' @template doAssertion
 #'
 #' @export
-#'
 #' @importFrom magrittr %>%
+#' @rdname assertions
 assertPixelCohortDataValid <- function(standCohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     test <- standCohortData[, vapply(.SD, FUN = function(x) any(is.na(x)), FUN.VALUE = logical(1))]
@@ -505,8 +503,7 @@ assertPixelCohortDataValid <- function(standCohortData, doAssertion = getOption(
   }
 }
 
-
-#' Assert that the `allCohortData` has the expected years and reps combinations
+#' - `assertRepsAllCohortData`: assert that the `allCohortData` has the expected years and reps combinations
 #'
 #' @param allCohortData A `data.table` with all simulated `cohortData` to use for
 #'                      validation
@@ -516,6 +513,7 @@ assertPixelCohortDataValid <- function(standCohortData, doAssertion = getOption(
 #' @template doAssertion
 #'
 #' @export
+#' @rdname assertions
 assertRepsAllCohortData <- function(allCohortData, reps, years,
                                     doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
@@ -536,12 +534,13 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
 }
 
 
-#' Assert that `standAgeMap` is a `RasterLayer` with attribute `imputedPixID`
+#' - `assertStandAgeMapAttr`: assert that `standAgeMap` is a `RasterLayer` with attribute `imputedPixID`
 #'
 #' @template standAgeMap
 #' @template doAssertion
 #'
 #' @export
+#' @rdname assertions
 assertStandAgeMapAttr <- function(standAgeMap,
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
@@ -560,12 +559,13 @@ assertStandAgeMapAttr <- function(standAgeMap,
   }
 }
 
-#' Assert that `cohortData` has attribute `imputedPixID`
+#' - `assertCohortDataAttr`: assert that `cohortData` has attribute `imputedPixID`
 #'
 #' @template cohortData
 #' @template doAssertion
 #'
 #' @export
+#' @rdname assertions
 assertCohortDataAttr <- function(cohortData,
                                  doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
@@ -580,14 +580,10 @@ assertCohortDataAttr <- function(cohortData,
   }
 }
 
-
-
-#' Assert that vectors of species match
-#'
-#' This assertion compares the species listed in the `sppEquiv`
-#' table (under the `sppEquivCol` column), with species listed
-#' in the `sppNameVector` and `sppColorVect`.
-#' The comparison excludes the "Mixed" type, in case it exists.
+#' `assertSppVectors`: assert that vectors of species match.
+#' It compares the species listed in the `sppEquiv` table (under the `sppEquivCol` column),
+#' with species listed in the `sppNameVector` and `sppColorVect`.
+#' The comparison excludes the "Mixed" type, if it exists.
 #'
 #' @param sppEquiv an table with a column containing species names
 #'
@@ -600,6 +596,7 @@ assertCohortDataAttr <- function(cohortData,
 #' @template doAssertion
 #'
 #' @export
+#' @rdname assertions
 assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect = NULL,
                              sppEquivCol = NULL, doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
@@ -610,14 +607,13 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
       stop("Please provide 'sppEquivCol'")
     }
 
-    if (is.null(sppNameVector) &
-        is.null(sppColorVect)) {
+    if (is.null(sppNameVector) && is.null(sppColorVect)) {
       stop("Please provide 'sppNameVector' and/or 'sppColorVect'")
     }
 
     sppInSppEquiv <- unique(sppEquiv[[sppEquivCol]])
 
-    if (!missing(sppNameVector)) {
+    if (!is.null(sppNameVector)) {
       test1 <- any(length(union(sppInSppEquiv, sppNameVector)) != length(sppInSppEquiv),
                    length(union(sppInSppEquiv, sppNameVector)) != length(sppNameVector))
 
@@ -626,7 +622,7 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
       }
     }
 
-    if (!missing(sppColorVect)) {
+    if (!is.null(sppColorVect)) {
       sppInColourV <- setdiff(names(sppColorVect), "Mixed")
       test2 <- any(length(union(sppInSppEquiv, sppInColourV)) != length(sppInColourV),
                    length(union(sppInSppEquiv, sppInColourV)) != length(sppInSppEquiv))

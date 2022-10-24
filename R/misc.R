@@ -3,6 +3,8 @@ utils::globalVariables(c(
   "shadetolerance", "siteShade", "year"
 ))
 
+.extractFunction <- getFromNamespace(".extractFunction", "reproducible")
+
 #' Assign light probability
 #'
 #' @template sufficientLight

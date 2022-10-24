@@ -1340,7 +1340,7 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
   }
 
   ## get function and check
-  fun <- reproducible:::.extractFunction(fun) ## TODO: don't use `:::`; export from reproducible ?
+  fun <- .extractFunction(fun)
   if (!is.function(fun)) {
     stop(paste0(
       "Can't find the function '", modelArgs[1], "'.",
@@ -1364,6 +1364,8 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
 
   ## drop factor terms with a single level
   singles <- names(which(sapply(lapply(.specialData, unique), length) == 1))
+  keep <- which(unname(vapply(singles, grepl, x = paste(modelArgs$formula, collapse = " "), logical(1))))
+  singles <- singles[keep]
   if (length(singles) > 0) {
     modelArgs$formula <- dropTerm(modelArgs$formula, singles)
   }
