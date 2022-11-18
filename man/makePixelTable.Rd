@@ -24,7 +24,8 @@ should contain species cover data in the study area}
 \item{ecoregionFiles}{A list with two objects: the \code{ecoregionMap} and a table summarizing
 its information per \code{pixelID.} See \code{ecoregionProducer}.}
 
-\item{biomassMap}{raster of total stand biomass}
+\item{biomassMap}{raster of total stand biomass in t/ha. Biomass units are
+converted to g/m^2.}
 
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
@@ -40,7 +41,8 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \value{
 A \code{data.table} as many rows as non-NA pixels in \code{rasterToMath} and
-the columns containing pixel data from the input raster layers.
+the columns containing pixel data from the input raster layers, with
+biomass in g/m^2.
 }
 \description{
 Make \code{pixelTable} from biomass, age, land-cover and species cover data
