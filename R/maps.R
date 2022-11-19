@@ -739,6 +739,9 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   targetFiles <- sapply(paste0(kNNnames, ".*\\.tif$"), USE.NAMES = FALSE, FUN = function(pat) {
     grep(pat, fileNames, value = TRUE)
   })
+  ## the grep may partially match several species, resulting on a list.
+  targetFiles <- unique(unlist(targetFiles))
+
   postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
   postProcessedFilenamesWithStudyAreaName <- if (is.null(dots$studyAreaName)) {
     postProcessedFilenames
