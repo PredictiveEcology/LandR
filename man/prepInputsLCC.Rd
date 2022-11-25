@@ -24,16 +24,16 @@ To prevent repeated downloads in different locations, the user can also set
 search for the file before attempting to download. Default for that option is
 \code{NULL} meaning do not search locally.}
 
-\item{studyArea}{\code{SpatialPolygons*} object used for masking and possibly cropping
+\item{studyArea}{\verb{SpatialPolygons*} object used for masking and possibly cropping
 if no \code{rasterToMatch} is provided.
 If not in same CRS, then it will be \code{spTransform}ed to
 CRS of \code{x} before masking. Currently, this function will not reproject the
 \code{x}. Optional in \code{postProcess}.}
 
-\item{rasterToMatch}{Template \code{Raster*} object used for cropping (so extent should be
+\item{rasterToMatch}{Template \verb{Raster*} object used for cropping (so extent should be
 the extent of desired outcome) and reprojecting (including changing the
 resolution and projection).
-See details in \code{\link[reproducible]{postProcess}}.}
+See details in \code{\link[reproducible:postProcess]{postProcess()}}.}
 
 \item{filename2}{\code{filename2} is optional, and is either
 NULL (no writing of outputs to disk), or several options
@@ -41,7 +41,7 @@ for writing the object to disk. If
 \code{TRUE} (the default), it will give it a file name determined by
 \code{.prefix(basename(filename1), prefix)}. If
 a character string, it will use this as its file name. See
-\code{\link[reproducible]{determineFilename}}.}
+\code{\link[reproducible:determineFilename]{determineFilename()}}.}
 
 \item{...}{Passed to \code{raster::crop}}
 }

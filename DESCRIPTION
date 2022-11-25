@@ -6,9 +6,9 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
     incorporate fire and insect disturbance, as well as other important ecological
     processes. Models are implemented as 'SpaDES' modules.
 URL: 
-    https://landr.predictiveecology.org,
+    http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2022-11-18
+Date: 2022-11-25
 Version: 1.1.0.9007
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
@@ -39,7 +39,7 @@ Imports:
     map,
     methods,
     MuMIn (>= 1.42.5),
-    pemisc,
+    pemisc (>= 0.0.4.9004),
     quickPlot,
     raster,
     RColorBrewer,
