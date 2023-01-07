@@ -2,7 +2,6 @@
 % Please edit documentation in R/prepSpeciesLayers.R
 \name{prepSpeciesLayers_KNN}
 \alias{prepSpeciesLayers_KNN}
-\alias{prepSpeciesLayers_CASFRI}
 \alias{prepSpeciesLayers_Pickell}
 \alias{prepSpeciesLayers_ForestInventory}
 \alias{prepSpeciesLayers_MBFRI}
@@ -18,17 +17,6 @@ prepSpeciesLayers_KNN(
   sppEquiv,
   sppEquivCol,
   thresh = 10,
-  ...
-)
-
-prepSpeciesLayers_CASFRI(
-  destinationPath,
-  outputPath,
-  url = NULL,
-  studyArea,
-  rasterToMatch,
-  sppEquiv,
-  sppEquivCol,
   ...
 )
 
