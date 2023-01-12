@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2022-10-24
-Version: 1.1.0.9006
+Date: 2023-01-07
+Version: 1.1.0.9009
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -39,7 +39,7 @@ Imports:
     map,
     methods,
     MuMIn (>= 1.42.5),
-    pemisc,
+    pemisc (>= 0.0.4.9004),
     quickPlot,
     raster,
     RColorBrewer,
@@ -86,11 +86,11 @@ Collate:
     'assertions.R'
     'biosim.R'
     'chooseName.R'
-    'cleanLandWebStudyArea.R'
     'cohorts.R'
     'convertUnwantedLCC2.R'
     'dem.R'
     'ecoregions.R'
+    'ecozones.R'
     'fireSeverity.R'
     'light-shade.R'
     'makeDummyInputs.R'
@@ -113,5 +113,5 @@ Collate:
     'studyArea.R'
     'wildfire.R'
     'zzz.R'
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
