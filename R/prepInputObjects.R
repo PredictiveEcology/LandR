@@ -604,8 +604,13 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
       warning("Chosen fireField will be coerced to numeric")
       d[[fireField]] <- as.numeric(as.factor(d[[fireField]]))
     }
-    fireRas <- fasterize(d, raster = rasterToMatch, field = fireField)
-    fireRas[!is.na(getValues(fireRas)) & getValues(fireRas) < earliestYear] <- NA
+    if (is(rasterToMatch, "SpatRaster")) {
+      fireRas <- terra::rasterize(d, rasterToMatch, field = fireField)
+      fireRas[!is.na(values(fireRas)) & values(fireRas) < earliestYear] <- NA
+    } else {
+      fireRas <- fasterize(d, raster = rasterToMatch, field = fireField)
+      fireRas[!is.na(getValues(fireRas)) & getValues(fireRas) < earliestYear] <- NA
+    }
     return(fireRas)
   } else {
     return(NULL)
