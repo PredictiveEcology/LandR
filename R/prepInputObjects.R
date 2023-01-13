@@ -540,11 +540,10 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
   if (is.null(Args$omitArgs)) {
     Args$omitArgs <- c("destinationPath", "targetFile", "userTags", "stable")
   }
-  Args$FUN <- prepInputs
 
   # httr::with_config(config = httr::config(ssl_verifypeer = 0L), { ## TODO: re-enable verify
   #necessary for KNN
-  rawBiomassMap <- do.call(Cache, args = Args)
+  rawBiomassMap <- Cache(do.call, what = prepInputs, args = Args)
   # })
   return(rawBiomassMap)
 }
