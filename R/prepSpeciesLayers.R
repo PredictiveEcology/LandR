@@ -145,7 +145,7 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   ml <- mapAdd(studyArea, map = ml, isStudyArea = TRUE, layerName = "studyArea",
                useSAcrs = TRUE, filename2 = NULL)
 
-  ## TODO: avoid this workaround for stack not liking rasters with different origns and extents
+  ## TODO: avoid this workaround for stack not liking rasters with different origins and extents
   lr <- lapply(CClayerNamesFiles, prepInputs, url = url, alsoExtract = "similar",
                destinationPath = destinationPath, fun = "raster::raster")
   le <- lapply(lr, extent)
@@ -157,32 +157,32 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   new_ext <- extent(max(dt$xmin), min(dt$xmax), max(dt$ymin), min(dt$ymax))
   lr2 <- lapply(lr, `origin<-`, value = origin(lr[[1]]))
   lr3 <- lapply(lr2, function(r) {
-    crop(r, y = new_ext, filename = tempfile())
+    crop(r, y = new_ext, filename = tempfile(fileext = ".tif"))
   })
   lr4 <- lapply(lr3, function(r) {
-    extend(r, y = new_ext, filename = tempfile())
+    extend(r, y = new_ext, filename = tempfile(fileext = ".tif"))
   })
   ## stack(lr4) ## confirm it works
 
   ## loop/apply doesn't work here???
   ml <- mapAdd(lr4[[1]], map = ml, layerName = CClayerNames[1], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(lr4[[2]], map = ml, layerName = CClayerNames[2], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(lr4[[3]], map = ml, layerName = CClayerNames[3], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(lr4[[4]], map = ml, layerName = CClayerNames[4], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(lr4[[5]], map = ml, layerName = CClayerNames[5], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(lr4[[6]], map = ml, layerName = CClayerNames[6], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
   ## END WORKAROUND
 
   # ml <- mapAdd(map = ml, url = url, layerName = CClayerNames, CC = TRUE,
@@ -254,22 +254,22 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
   ## loop/apply doesn't work here???
   ml <- mapAdd(rs[[1]], map = ml, layerName = CClayerNames2[1], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(rs[[2]], map = ml, layerName = CClayerNames2[2], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(rs[[3]], map = ml, layerName = CClayerNames2[3], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(rs[[4]], map = ml, layerName = CClayerNames2[4], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(rs[[5]], map = ml, layerName = CClayerNames2[5], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
   ml <- mapAdd(rs[[6]], map = ml, layerName = CClayerNames2[6], CC = TRUE,
                destinationPath = destinationPath,
-               filename2 = tempfile(), leaflet = FALSE, method = "ngb")
+               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
 
   ccs <- ml@metadata[CC == TRUE & !(layerName == "LandType"), ]
   CCs <- maps(ml, layerName = ccs$layerName)
