@@ -578,8 +578,16 @@ NAcover2zero <- function(speciesLayers, rasterToMatch) {
 
   message("...making sure empty pixels inside study area have 0 cover, instead of NAs ...")
   # Changed to terra Nov 17 by Eliot --> this was many minutes with raster::cover --> 3 seconds with terra
-  speciesLayers <- terra::cover(terra::rast(speciesLayers), terra::rast(tempRas))
-  speciesLayers <- raster::stack(speciesLayers)
+  if (is(rasterToMatch, "Raster")) {
+    speciesLayers <- terra::rast(speciesLayers)
+    tempRas <- terra::rast(tempRas)
+  }
+  speciesLayers <- terra::cover(speciesLayers, tempRas)
+
+  if (is(rasterToMatch, "Raster")) {
+    speciesLayers <- raster::stack(speciesLayers)
+  }
+
   names(speciesLayers) <- namesLayers
   message("   ...done")
 

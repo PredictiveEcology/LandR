@@ -46,7 +46,7 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
     nonFlammClasses <- as.integer(nonFlammClasses)
   }
 
-  oldClass <- minValue(LandCoverClassifiedMap):maxValue(LandCoverClassifiedMap)
+  oldClass <- minFn(LandCoverClassifiedMap):maxFn(LandCoverClassifiedMap)
   newClass <- ifelse(oldClass %in% nonFlammClasses, 0L, 1L) ## NOTE: 0 codes for NON-flammable
   flammableTable <- cbind(oldClass, newClass)
   rstFlammable <- ratify(reclassify(LandCoverClassifiedMap, flammableTable))
@@ -214,7 +214,7 @@ vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("Lan
       whMixed <- which(sum(speciesStack < (100 * vegLeadingProportion))[] == numLayers(speciesStack))
       MixedRas <- speciesStack[[1]]
       MixedRas[!is.na(speciesStack[[1]][])] <- 0
-      MixedRas[whMixed] <- max(maxValue(speciesStack)) * 1.01
+      MixedRas[whMixed] <- max(maxFn(speciesStack)) * 1.01
 
       speciesStack$Mixed <- MixedRas
     }
@@ -772,7 +772,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
                          filename2 = postProcessedFilenamesWithStudyAreaName,
                          url = URLs,
                          MoreArgs = list(destinationPath = dPath,
-                                         fun = "raster::raster",
+                                         # fun = "raster::raster",
                                          studyArea = studyArea,
                                          rasterToMatch = rasterToMatch,
                                          method = "bilinear",
@@ -786,7 +786,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   names(speciesLayers) <- names(correctOrder)[match(correctOrder, targetFiles)]
 
   # remove "no data" first
-  noData <- sapply(speciesLayers, function(xx) is.na(maxValue(xx)))
+  browser()
+  noData <- sapply(speciesLayers, function(xx) is.na(maxFn(xx)))
   if (any(noData)) {
     message(paste(paste(names(noData)[noData], collapse = " "),
                   " has no data in this study area; omitting it"))
@@ -794,7 +795,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   }
 
   # remove "little data" first
-  layersWdata <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh) FALSE else TRUE)
+  layersWdata <- sapply(speciesLayers, function(xx) if (maxFn(xx) < thresh) FALSE else TRUE)
   if (sum(!layersWdata) > 0) {
     sppKeep <- names(speciesLayers)[layersWdata]
     if (length(sppKeep)) {
@@ -833,7 +834,10 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
 
   ## return stack and updated species names vector
   if (length(speciesLayers)) {
-    raster::stack(speciesLayers)
+    if (is(rasterToMatch, "Raster"))
+      raster::stack(speciesLayers)
+    else
+      terra::rast(speciesLayers)
   }
 }
 
