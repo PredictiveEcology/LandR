@@ -3,6 +3,7 @@ bug reports <https://github.com/PredictiveEcology/LandR/issues>
 version 1.1.0
 =============
 * move LandWeb-specific functions to `LandWebUtils` package (#86)
+* `prepInputsFireYear` can now handle `rasterToMatch` that is a `SpatRaster`
 
 version 1.1.0
 =============
