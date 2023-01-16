@@ -39,7 +39,7 @@ Imports:
     map,
     methods,
     MuMIn (>= 1.42.5),
-    pemisc (>= 0.0.4.9004),
+    pemisc (>= 0.0.4.9007),
     quickPlot,
     raster,
     RColorBrewer,
