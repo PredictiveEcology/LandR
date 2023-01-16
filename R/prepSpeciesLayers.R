@@ -421,7 +421,6 @@ prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, s
   )
 }
 
-
 #' `makePickellStack`
 #'
 #' TODO: description and title needed

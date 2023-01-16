@@ -786,7 +786,6 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   names(speciesLayers) <- names(correctOrder)[match(correctOrder, targetFiles)]
 
   # remove "no data" first
-  browser()
   noData <- sapply(speciesLayers, function(xx) is.na(maxFn(xx)))
   if (any(noData)) {
     message(paste(paste(names(noData)[noData], collapse = " "),
