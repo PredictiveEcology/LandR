@@ -20,6 +20,7 @@ utils::globalVariables(c(
 #' @importFrom grDevices colorRampPalette
 #' @importFrom quickPlot setColors<-
 #' @importFrom raster maxValue minValue ratify reclassify writeRaster
+#' @importFrom reproducible maxFn minFn
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
                             nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
                             mask = NULL, filename2 = NULL) {
@@ -180,6 +181,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 #' @importFrom data.table copy data.table setkey setorderv
 #' @importFrom pemisc factorValues2
 #' @importFrom raster getValues projection projection<- setValues
+#' @importFrom reproducible maxFn
 #' @importFrom SpaDES.tools rasterizeReduced
 #' @importFrom utils data
 #' @rdname vegTypeMapGenerator
@@ -592,7 +594,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @export
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
-#' @importFrom reproducible Cache .prefix preProcess basename2
+#' @importFrom reproducible Cache .prefix basename2 maxFn preProcess
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, sppEquiv, year = 2001,
