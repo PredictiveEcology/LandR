@@ -692,8 +692,8 @@ replaceAgeInFires <- function(standAgeMap, firePerimeters, startTime) {
 #'
 #' @export
 #'
-#' @importFrom reproducible Cache postProcessTerra fixErrors writeOutputs .suffix
 #' @importFrom raster compareRaster
+#' @importFrom reproducible Cache postProcessTerra fixErrors writeOutputs .suffix
 prepRasterToMatch <- function(studyArea, studyAreaLarge,
                               rasterToMatch, rasterToMatchLarge,
                               destinationPath,
