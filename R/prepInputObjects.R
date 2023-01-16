@@ -559,10 +559,10 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #'
 #' @export
 #' @importFrom fasterize fasterize
-#' @importFrom raster crs
+#' @importFrom magrittr %>%
+#' @importFrom raster crs getValues
 #' @importFrom reproducible Cache prepInputs
 #' @importFrom sf st_cast st_transform
-#' @importFrom magrittr %>%
 #'
 #' @examples
 #' library(SpaDES.tools)
@@ -604,9 +604,9 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
       warning("Chosen fireField will be coerced to numeric")
       d[[fireField]] <- as.numeric(as.factor(d[[fireField]]))
     }
-    if (is(rasterToMatch, "SpatRaster")) {
+    if (requireNamespace("terra", quietly = TRUE) && is(rasterToMatch, "SpatRaster")) {
       fireRas <- terra::rasterize(d, rasterToMatch, field = fireField)
-      fireRas[!is.na(values(fireRas)) & values(fireRas) < earliestYear] <- NA
+      fireRas[!is.na(terra::values(fireRas)) & terra::values(fireRas) < earliestYear] <- NA
     } else {
       fireRas <- fasterize(d, raster = rasterToMatch, field = fireField)
       fireRas[!is.na(getValues(fireRas)) & getValues(fireRas) < earliestYear] <- NA
