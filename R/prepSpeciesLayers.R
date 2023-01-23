@@ -361,6 +361,7 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   ml <- mapAdd(map = ml, url = url2, layerName = "LCC_FRI", CC = TRUE,
                destinationPath = destinationPath,
                targetFile = FRIlccname, filename2 = NULL,
+               overwrite = TRUE, ## TODO: workaraund bug in prepInputs redownloading each time
                alsoExtract = NA, leaflet = FALSE, method = "ngb")
 
   ccs <- ml@metadata[CC == TRUE & !(layerName == "LCC_FRI"), ]
