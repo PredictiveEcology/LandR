@@ -305,26 +305,16 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
                                     sppEquivCol, ...) {
 
   ## TODO: this is sneaky and annoying (runName is part of outputPath)
-  if (grepl("AOU", basename(outputPath))) {
+  if (grepl("AOU", dirname(outputPath))) {
     sA <- "ceon"
-    if (grepl("test", basename(outputPath))) {
-      sAN <- "AOU_test"
-    } else {
-      sAN <- "AOU"
-    }
-  } else if (grepl("ROF", basename(outputPath))) {
+    sAN <- "AOU"
+  } else if (grepl("ROF", dirname(outputPath))) {
     sA <- "rof"
-    if (grepl("test", basename(outputPath))) {
-      sAN <- "ROF_test"
-    } else {
-      sAN <- "ROF"
-    }
+    sAN <- "ROF"
   }
 
-  if (grepl("res125", basename(outputPath))) {
+  if (grepl("res125", dirname(outputPath))) {
     res <- 125L
-  } else if (grepl("res250", basename(outputPath))) {
-    res <- 250L
   } else {
     res <- 250L
   }
