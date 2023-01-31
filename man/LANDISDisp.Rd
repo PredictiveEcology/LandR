@@ -49,7 +49,7 @@ LANDISDisp event grow.}
 \item{verbose}{Numeric. \code{0} is not verbose, with increasing numbers indicating
 increasing levels of verbosity (currently up to 2)}
 
-\item{...}{Additional parameters. Currently none}
+\item{...}{Additional parameters. Currently none.}
 }
 \value{
 A numeric vector of raster pixel indices, in the same resolution and extent as

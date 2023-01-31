@@ -55,15 +55,14 @@ utils::globalVariables(c(
 #' @param verbose Numeric. `0` is not verbose, with increasing numbers indicating
 #'   increasing levels of verbosity (currently up to 2)
 #'
-#' @param ...   Additional parameters. Currently none
+#' @param ...   Additional parameters. Currently none.
 #'
 #' @return A numeric vector of raster pixel indices, in the same resolution and extent as
 #' `seedSrc` raster.
 #'
-#' @importFrom magrittr %>%
+#' @importFrom data.table setDT setattr set
 #' @importFrom raster xyFromCell focalWeight rowColFromCell cellFromRowCol
 #' @importFrom stats na.omit
-#' @importFrom data.table setDT setattr set
 #' @importFrom SpaDES.tools runifC
 #' @export
 #' @docType methods
@@ -313,12 +312,12 @@ speciesCodeFromCommunity <- function(num) {
 
 speciesComm <- function(num, sc) {
   speciesCode <- speciesCodeFromCommunity(num)
-  data.table(
+  a <- data.table(
     RcvCommunity = as.integer(rep(num, sapply(speciesCode, length))),
     speciesCode = unlist(speciesCode),
     key = "speciesCode"
-  )[!is.na(speciesCode)] %>%
-    sc[.]
+  )[!is.na(speciesCode)]
+  sc[a]
 }
 
 #' Ward Dispersal Kernel -- vectorized, optimized for speed
