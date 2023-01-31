@@ -55,7 +55,9 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
     rstFlammable <- writeRaster(rstFlammable, filename = filename2, overwrite = TRUE)
 
   setColors(rstFlammable, n = 2) <- colorRampPalette(c("blue", "red"))(2)
-  if (!is.null(mask)) rstFlammable <- mask(rstFlammable, mask)
+  if (!is.null(mask)) {
+    rstFlammable <- mask(rstFlammable, extend(mask, rstFlammable))
+  }
 
   rstFlammable[] <- as.integer(rstFlammable[])
   rstFlammable
