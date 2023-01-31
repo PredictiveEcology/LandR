@@ -19,7 +19,7 @@ utils::globalVariables(c(
 #' @export
 #' @importFrom grDevices colorRampPalette
 #' @importFrom quickPlot setColors<-
-#' @importFrom raster mask maxValue minValue ratify reclassify writeRaster
+#' @importFrom raster extend mask maxValue minValue ratify reclassify writeRaster
 #' @importFrom reproducible maxFn minFn
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
                             nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
