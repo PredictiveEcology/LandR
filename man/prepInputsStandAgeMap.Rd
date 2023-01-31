@@ -16,7 +16,7 @@ prepInputsStandAgeMap(
   firePerimeters = NULL,
   fireURL = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/",
     "fire_poly/current_version/NFDB_poly.zip"),
-  fireFun = "sf::st_read",
+  fireFun = "terra::vect",
   fireField = "YEAR",
   rasterToMatch = NULL,
   startTime
