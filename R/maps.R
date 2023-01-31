@@ -19,7 +19,7 @@ utils::globalVariables(c(
 #' @export
 #' @importFrom grDevices colorRampPalette
 #' @importFrom quickPlot setColors<-
-#' @importFrom raster maxValue minValue ratify reclassify writeRaster
+#' @importFrom raster mask maxValue minValue ratify reclassify writeRaster
 #' @importFrom reproducible maxFn minFn
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
                             nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
@@ -55,7 +55,7 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
     rstFlammable <- writeRaster(rstFlammable, filename = filename2, overwrite = TRUE)
 
   setColors(rstFlammable, n = 2) <- colorRampPalette(c("blue", "red"))(2)
-  if (!is.null(mask)) rstFlammable[is.na(mask[])] <- NA_integer_
+  if (!is.null(mask)) rstFlammable <- mask(rstFlammable, mask)
 
   rstFlammable[] <- as.integer(rstFlammable[])
   rstFlammable
