@@ -304,7 +304,7 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
                                     sppEquiv,
                                     sppEquivCol, ...) {
 
-  ## TODO: this is sneaky and annoying (runName is part of outputPath)
+  ## TODO: this is sneaky and annoying (studyAreaName is part of outputPath)
   if (grepl("AOU", dirname(outputPath))) {
     sA <- "ceon"
     sAN <- "AOU"
@@ -347,7 +347,8 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   FRIlayerNames <- unique(sppEquiv[["ONFRI"]])
   FRIlayerNamesFiles <- paste0(FRIlayerNames, "_fri_", sA, "_", res, "m.tif")
   FRIlccname <- paste0("lcc_fri_", sA, "_", res, "m.tif")
-  options(map.useParallel = FALSE) ## TODO: pass additional arg to function
+
+  opt <- options(map.useParallel = FALSE) ## TODO: pass additional arg to function
   ml <- mapAdd(rasterToMatch, isRasterToMatch = TRUE, layerName = "rasterToMatch", filename2 = NULL)
 
   ml <- mapAdd(studyArea, map = ml, isStudyArea = TRUE, layerName = "studyArea",
@@ -360,9 +361,11 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
 
   ml <- mapAdd(map = ml, url = url2, layerName = "LCC_FRI", CC = TRUE,
                destinationPath = destinationPath,
-               targetFile = FRIlccname, filename2 = NULL,
-               overwrite = TRUE, ## TODO: workaraund bug in prepInputs redownloading each time
+               targetFile = FRIlccname,
+               filename1 = file.path(destinationPath, FRIlccname),
+               filename2 = NULL,
                alsoExtract = NA, leaflet = FALSE, method = "ngb")
+  options(opt)
 
   ccs <- ml@metadata[CC == TRUE & !(layerName == "LCC_FRI"), ]
   CCs <- maps(ml, layerName = ccs$layerName)
