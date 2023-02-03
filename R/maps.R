@@ -112,7 +112,7 @@ prepInputsLCC <- function(year = 2010,
     }
   }
 
-  prepInputs(targetFile = filename,
+  out <- prepInputs(targetFile = filename,
              archive = archive,
              url = url,
              destinationPath = asPath(destinationPath),
@@ -121,6 +121,8 @@ prepInputsLCC <- function(year = 2010,
              method = "ngb",
              datatype = "INT2U",
              filename2 = filename2, ...)
+  values(out) <- as.integer(values(out))
+  out
 }
 
 #' Make a vegetation type map from a stack of species abundances
