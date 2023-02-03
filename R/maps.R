@@ -84,6 +84,7 @@ prepInputsLCC <- function(year = 2010,
                           destinationPath = asPath("."),
                           studyArea = NULL,
                           rasterToMatch = NULL,
+                          method = c("ngb", "near"),
                           filename2 = NULL, ...) {
   dots <- list(...)
   if (is.null(dots$url)) {
@@ -112,13 +113,19 @@ prepInputsLCC <- function(year = 2010,
     }
   }
 
+  if (identical(eval(parse(text = getOption("reproducible.rasterRead"))),
+                terra::rast))
+    method <- intersect("near", method)
+  else
+    method <- intersect("ngb", method)
+
   out <- prepInputs(targetFile = filename,
              archive = archive,
              url = url,
              destinationPath = asPath(destinationPath),
              studyArea = studyArea,
              rasterToMatch = rasterToMatch,
-             method = "ngb",
+             method = method,
              datatype = "INT2U",
              filename2 = filename2, ...)
   values(out) <- as.integer(values(out))
