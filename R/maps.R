@@ -19,16 +19,11 @@ utils::globalVariables(c(
 #' @export
 #' @importFrom grDevices colorRampPalette
 #' @importFrom quickPlot setColors<-
-#' @importFrom raster maxValue minValue ratify reclassify writeRaster
+#' @importFrom raster compareRaster mask maxValue minValue ratify reclassify writeRaster
+#' @importFrom reproducible maxFn minFn
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
                             nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
                             mask = NULL, filename2 = NULL) {
-  if (!is.null(mask)) {
-    if (!is(mask, "Raster")) {
-      stop("mask must be a raster layer")
-    }
-  }
-
   if (!is(LandCoverClassifiedMap, "RasterLayer")) {
     stop("Need a classified land cover map. Currently only accepts 'LCC2005'")
   }
@@ -46,7 +41,14 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
     nonFlammClasses <- as.integer(nonFlammClasses)
   }
 
-  oldClass <- minValue(LandCoverClassifiedMap):maxValue(LandCoverClassifiedMap)
+  if (!is.null(mask)) {
+    if (!is(mask, "Raster")) {
+      stop("mask must be a raster layer")
+    }
+    compareRaster(LandCoverClassifiedMap, mask)
+  }
+
+  oldClass <- minFn(LandCoverClassifiedMap):maxFn(LandCoverClassifiedMap)
   newClass <- ifelse(oldClass %in% nonFlammClasses, 0L, 1L) ## NOTE: 0 codes for NON-flammable
   flammableTable <- cbind(oldClass, newClass)
   rstFlammable <- ratify(reclassify(LandCoverClassifiedMap, flammableTable))
@@ -54,7 +56,9 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
     rstFlammable <- writeRaster(rstFlammable, filename = filename2, overwrite = TRUE)
 
   setColors(rstFlammable, n = 2) <- colorRampPalette(c("blue", "red"))(2)
-  if (!is.null(mask)) rstFlammable[is.na(mask[])] <- NA_integer_
+  if (!is.null(mask)) {
+    rstFlammable <- mask(rstFlammable, mask)
+  }
 
   rstFlammable[] <- as.integer(rstFlammable[])
   rstFlammable
@@ -80,6 +84,7 @@ prepInputsLCC <- function(year = 2010,
                           destinationPath = asPath("."),
                           studyArea = NULL,
                           rasterToMatch = NULL,
+                          method = c("ngb", "near"),
                           filename2 = NULL, ...) {
   dots <- list(...)
   if (is.null(dots$url)) {
@@ -108,15 +113,23 @@ prepInputsLCC <- function(year = 2010,
     }
   }
 
-  prepInputs(targetFile = filename,
+  if (identical(eval(parse(text = getOption("reproducible.rasterRead"))),
+                terra::rast))
+    method <- intersect("near", method)
+  else
+    method <- intersect("ngb", method)
+
+  out <- prepInputs(targetFile = filename,
              archive = archive,
              url = url,
              destinationPath = asPath(destinationPath),
              studyArea = studyArea,
              rasterToMatch = rasterToMatch,
-             method = "ngb",
+             method = method,
              datatype = "INT2U",
              filename2 = filename2, ...)
+  values(out) <- as.integer(values(out))
+  out
 }
 
 #' Make a vegetation type map from a stack of species abundances
@@ -180,6 +193,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 #' @importFrom data.table copy data.table setkey setorderv
 #' @importFrom pemisc factorValues2
 #' @importFrom raster getValues projection projection<- setValues
+#' @importFrom reproducible maxFn
 #' @importFrom SpaDES.tools rasterizeReduced
 #' @importFrom utils data
 #' @rdname vegTypeMapGenerator
@@ -214,7 +228,7 @@ vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("Lan
       whMixed <- which(sum(speciesStack < (100 * vegLeadingProportion))[] == numLayers(speciesStack))
       MixedRas <- speciesStack[[1]]
       MixedRas[!is.na(speciesStack[[1]][])] <- 0
-      MixedRas[whMixed] <- max(maxValue(speciesStack)) * 1.01
+      MixedRas[whMixed] <- max(maxFn(speciesStack)) * 1.01
 
       speciesStack$Mixed <- MixedRas
     }
@@ -592,7 +606,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @export
 #' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
-#' @importFrom reproducible Cache .prefix preProcess basename2
+#' @importFrom reproducible Cache .prefix basename2 maxFn preProcess
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output untar
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, sppEquiv, year = 2001,
@@ -772,7 +786,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
                          filename2 = postProcessedFilenamesWithStudyAreaName,
                          url = URLs,
                          MoreArgs = list(destinationPath = dPath,
-                                         fun = "raster::raster",
+                                         # fun = "raster::raster",
                                          studyArea = studyArea,
                                          rasterToMatch = rasterToMatch,
                                          method = "bilinear",
@@ -786,7 +800,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   names(speciesLayers) <- names(correctOrder)[match(correctOrder, targetFiles)]
 
   # remove "no data" first
-  noData <- sapply(speciesLayers, function(xx) is.na(maxValue(xx)))
+  noData <- sapply(speciesLayers, function(xx) is.na(maxFn(xx)))
   if (any(noData)) {
     message(paste(paste(names(noData)[noData], collapse = " "),
                   " has no data in this study area; omitting it"))
@@ -794,7 +808,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   }
 
   # remove "little data" first
-  layersWdata <- sapply(speciesLayers, function(xx) if (maxValue(xx) < thresh) FALSE else TRUE)
+  layersWdata <- sapply(speciesLayers, function(xx) if (maxFn(xx) < thresh) FALSE else TRUE)
   if (sum(!layersWdata) > 0) {
     sppKeep <- names(speciesLayers)[layersWdata]
     if (length(sppKeep)) {
@@ -833,7 +847,10 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
 
   ## return stack and updated species names vector
   if (length(speciesLayers)) {
-    raster::stack(speciesLayers)
+    if (is(rasterToMatch, "Raster"))
+      raster::stack(speciesLayers)
+    else
+      terra::rast(speciesLayers)
   }
 }
 

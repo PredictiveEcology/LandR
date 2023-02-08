@@ -135,7 +135,10 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL) 
   } else {
     bb <- postProcess(x = speciesPresRas, studyArea = studyArea)
   }
-
+  rasLevs <- raster::levels(speciesPresRas)[[1]]
+  rasLevs <- rasLevs[rasLevs$ID %in% na.omit(getValues(bb)), ]
+  levels(bb) <- rasLevs
+  bb <- raster::deratify(bb)
   speciesCommunities <- na.omit(factorValues2(bb, bb[], att = "category"))
   species <- as.character(speciesCommunities)
   species <- unique(unlist(strsplit(species, "__")))
