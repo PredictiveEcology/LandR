@@ -59,13 +59,20 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
   if (!identical(theOrder, seq_along(forestedList)))
     forestedList <- forestedList[theOrder]
 
-  if (!is(LCCs, "RasterStack"))
-    LCCs <- stack(LCCs)
+  fn <- eval(parse(text = getOption("reproducible.rasterRead")))
+  if (!is(LCCs, "RasterStack") && !identical(fn, terra::rast)) {
+    if (!requireNamespace("raster")) stop("raster pkg is not installed; ",
+                                          "either set options('reproducible.rasterRead' = 'terra::rast'), ",
+                                          "or install `raster`")
+    fn <- raster::stack
+  }
+  LCCs <- fn(LCCs)
 
-  if (nlayers(LCCs) > 1) {
-    forestedStack <- stack(LCCs)
+
+  if (length(names(LCCs)) > 1) {
+    forestedStack <- fn(LCCs)
     forestedStack[] <- 0 ## will convert to a brick, so need to restack
-    forestedStack <- stack(forestedStack)
+    forestedStack <- fn(forestedStack)
     names(forestedStack) <- names(LCCs)
 
     for (x in names(LCCs)) {
@@ -108,7 +115,7 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
       }
     } else {
       if (is.data.frame(remapTable))
-        as.data.table(remapTable)
+        remapTable <- as.data.table(remapTable)
 
       if (!all(names(LCCs) %in% colnames(remapTable)))
         stop("All LCC names must be columns in remapTable")
