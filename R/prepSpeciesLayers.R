@@ -344,7 +344,6 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
                          archive = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.zip"),
                          alsoExtract = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.hdr"),
                          destinationPath = destinationPath,
-                         fun = "raster::raster",
                          studyArea = studyArea,
                          rasterToMatch = rasterToMatch,
                          method = "bilinear", ## ignore warning re: ngb (#5)
@@ -674,7 +673,8 @@ prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, s
 #' @export
 #' @importFrom magrittr %>%
 #' @importFrom reproducible asPath Cache
-#' @importFrom raster NAvalue<- raster rasterOptions setValues stack
+#' @importFrom raster rasterOptions
+#' @importFrom terra terraOptions writeRaster
 makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPath) {
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
@@ -705,9 +705,11 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
 
   ## create list and template raster
   spRasts <- list()
-  spRas <- raster(PickellRaster) %>% setValues(., NA_integer_)
+  spRas <- PickellRaster
+  spRas[] <- NA_integer_
 
   rasterOptions(maxmemory = 1e9)
+  terraOptions(memmax = 1L)
 
   ## converting existing species codes into percentages
   for (sp in PickellSpp) {
@@ -725,7 +727,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
                                                            paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
         ## NAvals need to be converted back to NAs
-        NAvalue(spRasts[[sp]]) <- NAval
+        spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
       }
     }
 
@@ -742,7 +744,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
                                                            paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
         ## NAvals need to be converted back to NAs
-        NAvalue(spRasts[[sp]]) <- NAval
+        spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
       }
     }
 
@@ -763,7 +765,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
                                                            paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
         ## NAvals need to be converted back to NAs
-        NAvalue(spRasts[[sp]]) <- NAval
+        spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
       }
     }
 
@@ -780,13 +782,13 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
                                                            paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT2U", NAflag = NAval)
         ## NAvals need to be converted back to NAs
-        NAvalue(spRasts[[sp]]) <- NAval
+        spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
       }
     }
   }
 
   ## species in Pickell's data
-  raster::stack(spRasts)
+  .stack(spRasts)
 }
 
 
