@@ -65,7 +65,6 @@ Suggests:
     roxygen2,
     rmarkdown,
     spelling,
-    terra,
     testthat,
     XML
 Remotes:
