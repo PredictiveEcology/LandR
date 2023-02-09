@@ -86,7 +86,6 @@ Collate:
     'assertions.R'
     'biosim.R'
     'chooseName.R'
-    'cleanLandWebStudyArea.R'
     'cohorts.R'
     'convertUnwantedLCC2.R'
     'dem.R'
