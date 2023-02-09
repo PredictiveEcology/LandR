@@ -941,8 +941,8 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
                           destinationPath) {
   ## check if there are any layers/values in the lowQualityStack
   ## if not return the HQ one
-  if (!is(lowQualityStack, "RasterStack") &
-      all(is.na(getValues(lowQualityStack)))) {
+  if (!(is(lowQualityStack, "RasterStack") || is(lowQualityStack, "SpatRaster")) &
+      all(is.na(lowQualityStack[]))) {
     highQualityStack
   } else {
     ## check if HQ resolution > LQ resolutions
@@ -950,8 +950,8 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
       ncell(highQualityStack) * prod(res(highQualityStack))
 
     ## make table of species layers in HQ and LQ
-    dt1 <- data.table(SPP = layerNames(highQualityStack), HQ = layerNames(highQualityStack))
-    dt2 <- data.table(SPP = layerNames(lowQualityStack), LQ = layerNames(lowQualityStack))
+    dt1 <- data.table(SPP = names(highQualityStack), HQ = names(highQualityStack))
+    dt2 <- data.table(SPP = names(lowQualityStack), LQ = names(lowQualityStack))
     setkey(dt1, SPP); setkey(dt2, SPP)
     dtj <- merge(dt1, dt2, all = TRUE)
     dtj[, c("HQ", "LQ") := list(!is.na(HQ), !is.na(LQ))]
@@ -970,7 +970,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
     }
     names(stackRas) <- dtj$SPP
 
-    stack(stackRas)
+    .stack(stackRas)
   }
 }
 
@@ -986,8 +986,9 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' @param HQ `data.table` column of whether `SPP` is present in HQ layers
 #' @param LQ `data.table` column of whether `SPP` is present in LQ layers
 #'
-#' @importFrom raster compareRaster crs extent filename NAvalue<- projectExtent raster res
-#' @importFrom raster writeRaster xmax xmin ymax ymin
+#' @importFrom terra crs ext res rast
+#' @importFrom terra writeRaster xmax xmin ymax ymin
+#' @importFrom reproducible Filenames projectInputs
 #' @keywords internal
 .overlay <- function(SPP, HQ, LQ, hqLarger, highQualityStack, lowQualityStack, #nolint
                      outputFilenameSuffix = "overlay", destinationPath) {
@@ -996,13 +997,12 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
     if (HQ & LQ) {
       ## check equality of raster attributes and correct if necessary
       if (!all(
-        isTRUE(all.equal(extent(lowQualityStack), extent(highQualityStack))),
+        isTRUE(all.equal(ext(lowQualityStack), ext(highQualityStack))),
         isTRUE(all.equal(crs(lowQualityStack), crs(highQualityStack))),
         isTRUE(all.equal(res(lowQualityStack), res(highQualityStack))))) {
         message("  ", SPP, " extents, or resolution, or projection did not match; ",
                 "using gdalwarp to make them overlap")
-        LQRastName <- basename(tempfile(fileext = ".tif"))
-        if (!nzchar(filename(lowQualityStack[[SPP]]))) {
+        if (!nzchar(Filenames(lowQualityStack[[SPP]]))) {
           LQCurName <- basename(tempfile(fileext = ".tif"))
           lowQualityStack[[SPP]][] <- as.integer(lowQualityStack[[SPP]][])
 
@@ -1011,10 +1011,12 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
                                                 filename = LQCurName,
                                                 datatype = "INT2U", NAflag = NAval)
           ## NAvals need to be converted back to NAs
-          NAvalue(lowQualityStack[[SPP]]) <- NAval
+          lowQualityStack[[SPP]] <- .NAvalueFlag(lowQualityStack[[SPP]], NAval)
         }
 
-        LQRastInHQcrs <- projectExtent(lowQualityStack, crs = crs(highQualityStack))
+        LQRastName <- basename(tempfile(fileext = ".tif"))
+        LQRastInHQcrs <- .projectExtent(lowQualityStack, crs = crs(highQualityStack))
+
         # project LQ raster into HQ dimensions
         gdalUtilities::gdalwarp(overwrite = TRUE,
                                 dstalpha = TRUE,
@@ -1060,10 +1062,14 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
       }
 
       message("  Writing new, overlaid ", SPP, " raster to disk.")
-      if (!compareRaster(LQRast, HQRast))
+      ## TODO: .compareRas (compareGeom) is less tolerant than st_crs, but projecting
+      ## manually is a pain (we can't use postProcess because it also uses st_crs internally)
+      ## for now use st_crs to compare CRS, but this is unlikely to be the best
+      if (!.compareRas(LQRast, HQRast, crs = FALSE) ||
+          st_crs(LQRast) != st_crs(HQRast))
         stop("Stacks not identical, something is wrong with overlayStacks function.")
 
-      NAs <- is.na(HQRast[])
+      NAs <- is.na(as.vector(HQRast[]))
 
       ## complete missing HQ data with LQ data
       HQRast[NAs] <- LQRast[][NAs]
@@ -1075,7 +1081,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
       names(HQRast) <- SPP
 
       ## NAvals need to be converted back to NAs
-      NAvalue(HQRast) <- NAval
+      HQRast <- .NAvalueFlag(HQRast, NAval)
 
       return(HQRast)
     } else {
