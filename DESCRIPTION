@@ -48,6 +48,7 @@ Imports:
     sp,
     SpaDES.tools (>= 1.0.0.9001),
     stats,
+    terra,
     tools,
     utils
 Suggests:
@@ -114,5 +115,5 @@ Collate:
     'terra-raster-utils.R'
     'wildfire.R'
     'zzz.R'
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
