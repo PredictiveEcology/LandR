@@ -100,6 +100,6 @@
   do.call(compareGeom, append(list(ras1, ras2), dots))
 }
 
-.compareCRS <- function(ras1, ra2, ...) {
+.compareCRS <- function(ras1, ras2, ...) {
   st_crs(ras1) != st_crs(ras2)
 }
