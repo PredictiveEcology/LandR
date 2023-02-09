@@ -568,6 +568,9 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #' library(SpaDES.tools)
 #' library(raster)
 #' library(reproducible)
+#'
+#' options("reproducible.useTerra" = TRUE, "reproducible.rasterRead" = "terra::rast")
+#'
 #' randomPoly <- randomStudyArea()
 #' randomPoly
 #' ras2match <- raster(res = 10, ext = extent(randomPoly), crs = crs(randomPoly))
@@ -579,7 +582,6 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #' firePerimeters <- Cache(prepInputsFireYear,
 #'                         url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
 #'                         "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-#'                         fun = "sf::st_read",
 #'                         destinationPath = tempDir,
 #'                         rasterToMatch = ras2match)
 #'
