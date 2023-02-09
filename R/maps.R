@@ -1017,42 +1017,73 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
         LQRastName <- basename(tempfile(fileext = ".tif"))
         LQRastInHQcrs <- .projectExtent(lowQualityStack, crs = crs(highQualityStack))
 
+        ## create a template raster to use as RTM
+        templateRas <- rast(ext = LQRastInHQcrs, crs = crs(highQualityStack),
+                            res = res(highQualityStack))
+
         # project LQ raster into HQ dimensions
-        gdalUtilities::gdalwarp(overwrite = TRUE,
-                                dstalpha = TRUE,
-                                s_srs = as.character(crs(lowQualityStack[[SPP]])),
-                                t_srs = as.character(crs(highQualityStack[[SPP]])),
-                                multi = TRUE, of = "GTiff",
-                                tr = res(highQualityStack),
-                                te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
-                                       xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
-                                filename(lowQualityStack[[SPP]]), ot = "Byte",
-                                LQRastName)
+        ## TODO: moving away from gdal and using postProcess --
+        ## gdal code is kept for now in case edge cases of non-alignment arise
+        # gdalUtilities::gdalwarp(overwrite = TRUE,
+        #                         dstalpha = TRUE,
+        #                         s_srs = crs(lowQualityStack[[SPP]], proj = TRUE),
+        #                         t_srs = crs(highQualityStack[[SPP]], proj = TRUE),
+        #                         multi = TRUE, of = "GTiff",
+        #                         tr = res(highQualityStack),
+        #                         te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
+        #                                xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
+        #                         .filename(lowQualityStack[[SPP]]), ot = "Byte",
+        #                         LQRastName)
 
-        LQRast <- raster(LQRastName)
-        LQRast[] <- LQRast[]
-        unlink(LQRastName)
+        # LQRast <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(LQRastName)
+        # LQRast[] <- LQRast[]
+        # ## `terra` imports two layers (?). the second has 255 (NA) everywhere
+        # if (length(names(LQRast)) > 1) {
+        #   LQRast <- LQRast[[1]]
+        # }
+        # LQRast[LQRast[] == 255] <- NA_integer_
+        #
+        # unlink(LQRastName)
+        # try(unlink(LQCurName), silent = TRUE)
 
-        try(unlink(LQCurName), silent = TRUE)
+        ## TODO: postProcess returns NaN values and always tries to mask despite maskWithRTM = FALSE
+        # LQRast <- postProcess(LQRast, rasterToMatch = templateRas,
+        #                         maskWithRTM = FALSE)  ## not working
+        LQRast <- cropInputs(lowQualityStack[[SPP]], rasterToMatch = templateRas)
+        LQRast <- projectInputs(LQRast, rasterToMatch = templateRas,
+                                maskWithRTM = FALSE)
 
         if (hqLarger) {
-          tmpHQName <- basename(tempfile(fileext = ".tif"))
+          ## TODO: moving away from gdal and using postProcess --
+          ## gdal code is kept for now in case edge cases of non-alignment arise
+          # tmpHQName <- basename(tempfile(fileext = ".tif"))
+          #
+          # gdalUtilities::gdalwarp(overwrite = TRUE,
+          #                         dstalpha = TRUE,
+          #                         s_srs = crs(highQualityStack[[SPP]], proj = TRUE),
+          #                         t_srs = crs(highQualityStack[[SPP]], proj = TRUE),
+          #                         multi = TRUE, of = "GTiff",
+          #                         tr = res(highQualityStack),
+          #                         te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
+          #                                xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
+          #                         ot = "Byte",
+          #                         srcfile = .filename(highQualityStack[[SPP]]),
+          #                         dstfile = tmpHQName)
+          # HQRast <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(tmpHQName)
+          # HQRast[] <- HQRast[]
+          # ## `terra` imports two layers (?). the second has 255 (NA) everywhere
+          # if (length(names(HQRast)) > 1) {
+          #   HQRast <- HQRast[[1]]
+          # }
+          # HQRast[HQRast[] == 255] <- NA_integer_
+          # unlink(tmpHQName)
 
-          gdalUtilities::gdalwarp(overwrite = TRUE,
-                                  dstalpha = TRUE,
-                                  s_srs = as.character(crs(highQualityStack[[SPP]])),
-                                  t_srs = as.character(crs(highQualityStack[[SPP]])),
-                                  multi = TRUE, of = "GTiff",
-                                  tr = res(highQualityStack),
-                                  te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
-                                         xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
-                                  ot = "Byte",
-                                  srcfile = filename(highQualityStack[[SPP]]),
-                                  dstfile = tmpHQName)
-          HQRast <- raster(tmpHQName)
-          HQRast[] <- HQRast[]
-          HQRast[HQRast[] == 255] <- NA_integer_
-          unlink(tmpHQName)
+          ## TODO: postProcess returns NaN values and always tries to mask despite maskWithRTM = FALSE
+          # HQRast <- postProcess(HQRast, rasterToMatch = templateRas,
+          #                       maskWithRTM = FALSE)  ## not working
+          HQRast <- cropInputs(highQualityStack[[SPP]], rasterToMatch = templateRas)
+          HQRast <- projectInputs(HQRast, rasterToMatch = templateRas,
+                                  maskWithRTM = FALSE)
         } else {
           HQRast <- highQualityStack[[SPP]]
         }
