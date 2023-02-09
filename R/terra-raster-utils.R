@@ -5,9 +5,10 @@
 #' Set NA value in Raster/SpatRaster
 #'
 #' @param ras a Raster* , or SpatRaster object
+#' @param NAval the value to use as `NA`
 #'
-#' @importFrom raster NAvalue
-#' @importFrom terra NAflag
+#' @importFrom raster NAvalue<-
+#' @importFrom terra NAflag<-
 #'
 #' @return a raster with attributed NA values
 .NAvalueFlag <- function(ras, NAval) {
