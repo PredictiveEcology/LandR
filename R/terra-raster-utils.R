@@ -46,34 +46,14 @@
   }
 }
 
-
-#' Make stacked raster
-#'
-#' @param ras a Raster* or SpatRaster object
-#'
-#' @importFrom raster filename
-#' @importFrom terra sources
-#'
-#' @return the filename or source of raster. See `raster::filename` and `terra::sources`
-.filename <- function(ras) {
-  if (is(ras, "Raster")) {
-    return(filename(ras))
-  } else {
-    if (is(ras, "SpatRaster")) {
-      return(sources(ras))
-    } else {
-      stop("ras should be a Raster* or SpatRaster")
-    }
-  }
-}
-
-
 #' Project raster extent
 #'
 #' @param ras a Raster* or SpatRaster object
+#' @param crs passed to `raster::projectRaster(..., crs = crs)`
+#'   and `terra::project(..., y = crs)`
 #'
-#' @importFrom raster filename
-#' @importFrom terra sources
+#' @importFrom raster projectExtent
+#' @importFrom terra ext project
 #'
 #' @return the projected extent
 .projectExtent <- function(ras, crs) {
@@ -81,9 +61,8 @@
     return(projectExtent(ras, crs = crs))
   } else {
     if (is(ras, "SpatRaster")) {
-      rasProjExt <- rast(extent = ext(ras), crs = crs(ras))
-      rasProjExt <- project(rasProjExt, y = crs)
-      return(ext(rasProjExt))
+      rasProj <- project(ras, y = crs)
+      return(ext(rasProj))
     } else {
       stop("ras should be a Raster* or SpatRaster")
     }
