@@ -159,7 +159,6 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     rm(aa2)
     spRasts[[sp]][cc$rastInd] <- cc$V1
     message("  ", sp, " writing to disk")
-    if(sp == "Betu_Pap") browser()
 
     startCRS <- crs(spRasts[[sp]])
     NAval <- 255L
