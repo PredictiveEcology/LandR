@@ -80,6 +80,7 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #'
 #' @export
 #' @importFrom reproducible asPath prepInputs
+#' @importFrom terra values
 prepInputsLCC <- function(year = 2010,
                           destinationPath = asPath("."),
                           studyArea = NULL,
@@ -128,7 +129,7 @@ prepInputsLCC <- function(year = 2010,
              method = method,
              datatype = "INT2U",
              filename2 = filename2, ...)
-  values(out) <- as.integer(values(out))
+  out[] <- as.integer(as.vector(values(out)))
   out
 }
 
