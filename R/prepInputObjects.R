@@ -60,21 +60,21 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
                            printSummary = TRUE,
                            doAssertion = getOption("LandR.assertions", TRUE)) {
   if (missing(rasterToMatch)) {
-    rasterToMatch <- raster(speciesLayers[[1]])
+    rasterToMatch <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(speciesLayers[[1]])
     rasterToMatch[] <- 0
     rasterToMatch[is.na(speciesLayers[[1]])] <- NA
   }
 
   if (missing(ecoregionFiles)) {
     ecoregionFiles <- list()
-    ecoregionFiles$ecoregionMap <- raster(rasterToMatch)
+    ecoregionFiles$ecoregionMap <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(rasterToMatch)
     rtmNotNA <- which(!is.na(rasterToMatch[]))
     ecoregionFiles$ecoregionMap[rtmNotNA] <- seq_along(rtmNotNA)
     initialEcoregionCodeVals <- ecoregionFiles$ecoregionMap[]
   } else {
     initialEcoregionCodeVals <- factorValues2(
       ecoregionFiles$ecoregionMap,
-      ecoregionFiles$ecoregionMap[],
+      as.vector(values(ecoregionFiles$ecoregionMap)),
       att = 5)
   }
 
@@ -91,7 +91,7 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
   pixelTable <- data.table(initialEcoregionCode = iec,
                            cover = coverMatrix,
                            pixelIndex = seq(ncell(rasterToMatch)),
-                           rasterToMatch = rasterToMatch[]
+                           rasterToMatch = as.vector(values(rasterToMatch))
   )
   if (!missing(standAgeMap)) {
     set(pixelTable, NULL, "age", asInteger(standAgeMap[]))
@@ -103,7 +103,7 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
   }
 
   if (!missing(rstLCC)) {
-    set(pixelTable, NULL, "lcc", rstLCC[])
+    set(pixelTable, NULL, "lcc", as.vector(values(rstLCC)))
   }
 
   #pixelTable <- data.table(#age = asInteger(ceiling(asInteger(standAgeMap[]) /
@@ -270,12 +270,12 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
 #' @return The `biomassMap`, a raster of total stand biomass per pixel.
 #'
 #' @export
-#' @importFrom raster raster
+#' @importFrom terra rast
 makeBiomassMap <-  function(pixelCohortData, rasterToMatch) {
   pixelData <- unique(pixelCohortData, by = "pixelIndex")
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
-  biomassMap <- raster(rasterToMatch)
+  biomassMap <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(rasterToMatch)
   # suppress this message call no non-missing arguments to min;
   # returning Inf min(x@data@values, na.rm = TRUE)
   suppressWarnings(biomassMap[pixelData$pixelIndex] <- pixelData$totalBiomass)
@@ -339,7 +339,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
   pixelData <- unique(pixelCohortData, by = "pixelIndex")
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
-  pixelGroupMap <- raster(rasterToMatch)
+  pixelGroupMap <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(rasterToMatch)
 
   ## suppress this message call no non-missing arguments to min;
   ## returning Inf min(x@data@values, na.rm = TRUE)
