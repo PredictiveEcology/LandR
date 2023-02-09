@@ -9,6 +9,7 @@ prepInputsLCC(
   destinationPath = asPath("."),
   studyArea = NULL,
   rasterToMatch = NULL,
+  method = c("ngb", "near"),
   filename2 = NULL,
   ...
 )
