@@ -36,6 +36,9 @@ the extent of desired outcome) and reprojecting (including changing the
 resolution and projection).
 See details in \code{\link[reproducible:postProcess]{postProcess()}}.}
 
+\item{method}{passed to \code{terra::intersect} or \code{raster::intersect},
+and \code{reproducible::prepInputs}}
+
 \item{filename2}{\code{filename2} is optional, and is either
 NULL (no writing of outputs to disk), or several options
 for writing the object to disk. If

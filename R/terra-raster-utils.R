@@ -80,11 +80,11 @@
 #' @param ... passed to `terra::compareGeom`
 #'
 #' @importFrom terra compareGeom rast
-#'
+#' @rdname compare
+#' @export
 #' @return the projected extent
 #'
 ## TODO: should be extended to many rasters
-
 .compareRas <- function(ras1, ras2, ...) {
   if (is(ras1, "Raster")) {
     ras1 <- rast(ras1)
@@ -100,6 +100,9 @@
   do.call(compareGeom, append(list(ras1, ras2), dots))
 }
 
+#' @export
+#' @rdname compare
+#' @importFrom sf st_crs
 .compareCRS <- function(ras1, ras2, ...) {
   st_crs(ras1) != st_crs(ras2)
 }
