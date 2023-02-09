@@ -992,7 +992,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #'
 #' @importFrom terra crs ext res rast
 #' @importFrom terra writeRaster xmax xmin ymax ymin
-#' @importFrom reproducible Filenames projectInputs
+#' @importFrom reproducible Filenames cropInputs projectInputs
 #' @keywords internal
 .overlay <- function(SPP, HQ, LQ, hqLarger, highQualityStack, lowQualityStack, #nolint
                      outputFilenameSuffix = "overlay", destinationPath) {
