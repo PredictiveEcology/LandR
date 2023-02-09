@@ -396,21 +396,24 @@ assertFireToleranceDif <- function(burnedPixelCohortData,
 #'   `biomass > 0` to be considered present in the study area.
 #'   Defaults to 1.
 #'
+#' @importFrom raster unstack
+#'
 #' @export
 #' @rdname assertions
 assertSpeciesLayers <- function(speciesLayers, thresh,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    ## covert to list if not a stack
-    if (!is(speciesLayers, "RasterStack")) {
-      speciesLayers <- list(speciesLayers)
-
-      test1 <- vapply(speciesLayers, FUN = function(x)
-        all(is.na(getValues(x))), FUN.VALUE = logical(1))
-    } else {
-      test1 <- vapply(1:nlayers(speciesLayers), FUN = function(x)
-        all(is.na(getValues(speciesLayers[[x]]))), FUN.VALUE = logical(1))
+    ## covert to list if not a stack or single/multi layer SpatRaster
+    if (is(speciesLayers, "RasterStack")) {
+      speciesLayers <- unstack(speciesLayers)
     }
+    ## convert to list if only one RasterLayer
+    if (is(speciesLayers, "RasterLayer")) {
+      speciesLayers <- list(speciesLayers)
+    }
+
+    test1 <- vapply(speciesLayers, FUN = function(x)
+      all(is.na(as.vector(values(x)))), FUN.VALUE = logical(1))
 
     if (all(test1))
       stop("no pixels found were found with species % cover >=", thresh,
