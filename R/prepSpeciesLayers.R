@@ -18,6 +18,7 @@ utils::globalVariables(c(
 #' @export
 #' @importFrom data.table data.table fread melt set setkey
 #' @importFrom reproducible asPath Cache
+#' @importFrom terra values
 loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
                        type = c("cover", "age")) {
   # The ones we want
@@ -74,7 +75,7 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
     CASFRIattrLong <- CASFRIattrLong[!is.na(AGE) & AGE > -1]
   }
 
-  CASFRIdt <- data.table(GID = CASFRIRas[], rastInd = 1:ncell(CASFRIRas))
+  CASFRIdt <- data.table(GID = as.vector(values(CASFRIRas)), rastInd = 1:ncell(CASFRIRas))
   CASFRIdt <- CASFRIdt[!is.na(GID)]
   #CASFRIdt <- CASFRIdt[isNA == FALSE]
   setkey(CASFRIdt, GID)
@@ -100,7 +101,8 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 #' @importFrom data.table setkey
 #' @importFrom magrittr %>%
 #' @importFrom reproducible asPath Cache
-#' @importFrom raster crs crs<- NAvalue<- raster setValues stack writeRaster
+#' @importFrom raster crs crs<- NAvalue<- raster stack writeRaster
+#' @importFrom terra crs rast writeRaster
 CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
                             sppEquiv, sppEquivCol, destinationPath) {
   # The ones we want
@@ -117,7 +119,8 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 
   ## create list and template raster
   spRasts <- list()
-  spRas <- raster(CASFRIRas) %>% setValues(., NA_integer_)
+  spRas <- CASFRIRas
+  spRas[] <- NA_integer_
 
   ## NOT SURE IF THESE LINES ABOUT NA are relevant -- Eliot Dec 7
   ## selected spp absent from CASFRI data
@@ -138,7 +141,8 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
                                                        paste0("CASFRI_", sp, ".tif"))),
                            overwrite = TRUE, datatype = "INT2U", NAflag = NAval)
     ## NAvals need to be converted back to NAs
-    NAvalue(spRasts[[sp]]) <- NAval
+    spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
+
   }
 
   sppTODO <- unique(names(sppListMergesCASFRI))
@@ -155,6 +159,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     rm(aa2)
     spRasts[[sp]][cc$rastInd] <- cc$V1
     message("  ", sp, " writing to disk")
+    if(sp == "Betu_Pap") browser()
 
     startCRS <- crs(spRasts[[sp]])
     NAval <- 255L
@@ -163,9 +168,9 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
                                                              paste0("CASFRI_", sp, ".tif"))),
                                  datatype = "INT1U", overwrite = TRUE, NAflag = NAval)
     ## NAvals need to be converted back to NAs
-    NAvalue(spRasts[[sp]]) <- NAval
+    spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
 
-    if (is(spRasts[[sp]], "Raster")) {
+    if (is(spRasts[[sp]], "Raster") || is(spRasts[[sp]], "SpatRaster")) {
       # Rasters need to have their disk-backed value assigned, but not shapefiles
       # This is a bug in writeRaster was spotted with crs of rastTmp became
       # +proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
@@ -177,7 +182,14 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     message("  ", sp, " done")
   }
 
-  raster::stack(spRasts)
+  ## if the original raster was `RasterLayer`, those in the list will be also.
+  spRasts <- if (is(CASFRIRas, "Raster")) {
+    raster::stack(spRasts)
+  } else {
+    rast(spRasts)
+  }
+
+  return(spRasts)
 }
 
 #' Prepare species layers
@@ -283,7 +295,6 @@ prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
                      url = url,
                      alsoExtract = c(CASFRItiffFile, CASFRIattrFile, CASFRIheaderFile),
                      destinationPath = destinationPath,
-                     fun = "raster::raster",
                      studyArea = studyArea,
                      rasterToMatch = rasterToMatch,
                      method = "bilinear", ## ignore warning re: ngb (#5)
