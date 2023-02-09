@@ -693,7 +693,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     )
     out <- out[initialPixels != pixels] # rm pixels which are same as initialPixels --> these are known wrong
     iterations <- iterations + 1
-    out[, lcc := rstLCC[][pixels]]
+    out[, lcc := as.vector(rstLCC[])[pixels]]
     out[lcc %in% c(classesToReplace), lcc := NA]
     out <- na.omit(out)
     out5 <- availableERC_by_Sp[out[, state := NULL],
