@@ -77,10 +77,13 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #' @inheritParams reproducible::prepInputs
 #'
 #' @param year Numeric, either 2010 or 2015. See note re: backwards compatibility for 2005.
+#' @param method passed to `terra::intersect` or `raster::intersect`,
+#'   and `reproducible::prepInputs`
 #'
 #' @export
 #' @importFrom reproducible asPath prepInputs
-#' @importFrom terra values
+#' @importFrom terra values intersect
+#' @importFrom raster intersect
 prepInputsLCC <- function(year = 2010,
                           destinationPath = asPath("."),
                           studyArea = NULL,
