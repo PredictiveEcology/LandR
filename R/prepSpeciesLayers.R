@@ -363,6 +363,8 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
 #' @importFrom map mapAdd maps
 #' @importFrom raster crop extend maxValue minValue origin origin<- stack unstack
 #' @rdname prepSpeciesLayers
+#'
+## TODO: add terra compatible methods.
 prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
                                               url = NULL,
                                               studyArea, rasterToMatch,
@@ -462,6 +464,8 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
 #' @importFrom map mapAdd maps
 #' @importFrom raster crop extend maxValue minValue origin origin<- stack unstack
 #' @rdname prepSpeciesLayers
+#'
+## TODO: add terra compatible methods.
 prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
                                     url = NULL,
                                     studyArea, rasterToMatch,
@@ -542,6 +546,8 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
 #' @importFrom map mapAdd maps
 #' @importFrom raster addLayer dropLayer maxValue minValue stack unstack
 #' @rdname prepSpeciesLayers
+
+## TODO: add terra compatible methods.
 prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
                                     url = NULL,
                                     studyArea, rasterToMatch,
