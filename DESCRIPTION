@@ -8,8 +8,13 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
+<<<<<<< HEAD
 Date: 2023-02-03
 Version: 1.1.0.9021
+=======
+Date: 2022-11-25
+Version: 1.1.0.9007
+>>>>>>> parent of 9601a60... move landweb-specific functions to LandWebUtils package (close #85)
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -86,6 +91,7 @@ Collate:
     'assertions.R'
     'biosim.R'
     'chooseName.R'
+    'cleanLandWebStudyArea.R'
     'cohorts.R'
     'convertUnwantedLCC2.R'
     'dem.R'
@@ -113,5 +119,5 @@ Collate:
     'studyArea.R'
     'wildfire.R'
     'zzz.R'
-RoxygenNote: 7.2.3
+RoxygenNote: 7.2.2
 Roxygen: list(markdown = TRUE)
