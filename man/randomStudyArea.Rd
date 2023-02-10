@@ -6,16 +6,6 @@
 \usage{
 randomStudyArea(center = NULL, size = 10000, seed = NULL)
 }
-\arguments{
-\item{center}{\code{SpatialPoints} object specifying a set of coordinates and
-a projection. Default is an area in southern Alberta, Canada.}
-
-\item{size}{Numeric specifying the approximate size of the area in m^2.
-Default \code{1e4}.}
-
-\item{seed}{Numeric indicating the random seed to set internally
-(useful for ensuring the same study area is produced each time).}
-}
 \description{
 This simply re-exports \code{SpaDES.tools::randomStudyArea}
 }

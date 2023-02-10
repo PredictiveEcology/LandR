@@ -152,5 +152,8 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
     # replace all values in the raster
     LCCs[[outputLayer]][] <- dt$ecoregionCode
   }
+  if (is(LCCs[[outputLayer]], "SpatRaster"))
+    LCCs[[outputLayer]] <- as.int(LCCs[[outputLayer]])
+
   return(LCCs[[outputLayer]])
 }

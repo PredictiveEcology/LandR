@@ -24,11 +24,11 @@ utils::globalVariables(c(
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
                             nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
                             mask = NULL, filename2 = NULL) {
-  if (!is(LandCoverClassifiedMap, "RasterLayer")) {
-    stop("Need a classified land cover map. Currently only accepts 'LCC2005'")
+  if (!inherits(LandCoverClassifiedMap, c("RasterLayer", "SpatRaster"))) {
+    stop("Need a classified land cover map that is a RasterLayer or SpatRaster")
   }
 
-  if (!is.integer(LandCoverClassifiedMap[])) {
+  if (!isInt(LandCoverClassifiedMap)) {
     stop("LandCoverClassifiedMap must be an integer")
   }
 
@@ -42,25 +42,34 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
   }
 
   if (!is.null(mask)) {
-    if (!is(mask, "Raster")) {
+    if (!inherits(mask, c("RasterLayer", "SpatRaster"))) {
       stop("mask must be a raster layer")
     }
-    compareRaster(LandCoverClassifiedMap, mask)
+    LandR:::.compareRas(LandCoverClassifiedMap, mask)
   }
 
   oldClass <- minFn(LandCoverClassifiedMap):maxFn(LandCoverClassifiedMap)
   newClass <- ifelse(oldClass %in% nonFlammClasses, 0L, 1L) ## NOTE: 0 codes for NON-flammable
   flammableTable <- cbind(oldClass, newClass)
-  rstFlammable <- ratify(reclassify(LandCoverClassifiedMap, flammableTable))
+
+  reclassed <- reclass(LandCoverClassifiedMap, flammableTable)
+  rstFlammable <- if (is(reclassed, "SpatRaster")) terra::as.factor(reclassed) else ratify(reclassed)
+
   if (!is.null(filename2))
     rstFlammable <- writeRaster(rstFlammable, filename = filename2, overwrite = TRUE)
 
-  setColors(rstFlammable, n = 2) <- colorRampPalette(c("blue", "red"))(2)
+  cols <- colorRampPalette(c("blue", "red"))(2)
+  if (is(rstFlammable, "SpatRaster"))
+    coltab(rstFlammable, layer=1) <- cols
+  else
+    setColors(rstFlammable, n = 2) <- cols
+
   if (!is.null(mask)) {
     rstFlammable <- mask(rstFlammable, mask)
   }
 
-  rstFlammable[] <- as.integer(rstFlammable[])
+  rstFlammable <- asInt(rstFlammable)
+  # rstFlammable[] <- as.integer(rstFlammable[])
   rstFlammable
 }
 
@@ -1242,3 +1251,52 @@ aggregateRasByDT <- function(ras, newRas, fn = sum) {
   names(newRasOut) <- names(ras)
   newRasOut
 }
+
+
+#' Helpers for transition to `terra`
+#'
+#' These all create a single function that can be used for either `Raster` or `SpatRaster`
+#' objects.
+#'
+#' @export
+#' @rdname rasterTerraHelpers
+#' @return
+#' `asInt` returns a `*Raster` with values converted to `integer`, if they weren't already.
+asInt <- function(ras) {
+  if (!isInt(ras)) {
+    if (inherits(ras, "SpatRaster"))
+      ras <- as.int(ras)
+    else
+      ras[] <- as.integer(ras)
+
+  }
+  ras
+}
+
+#' @export
+#' @rdname rasterTerraHelpers
+#' @return
+#' `isInt` returns a logical as per `is.integer`.
+isInt <- function(ras) {
+  if (inherits(ras, "SpatRaster"))
+    is.int(ras)
+  else
+    is.integer(values(ras))
+}
+
+
+#' @export
+#' @rdname rasterTerraHelpers
+#' @return
+#' `reclass` returns a `*Raster` with values reclassified as per `terra::classify`
+#'   and `raster::reclassify`.
+#'
+reclass <- function(ras, tab) {
+  if (is(ras, "SpatRaster")) {
+    classify(ras, tab)
+  } else {
+    reclassify(ras, tab)
+  }
+}
+
+
