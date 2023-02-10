@@ -113,7 +113,7 @@
     }
 
     out <- .compareCRS(ras1, rasts[[i]], crs = FALSE)
-    if (isTRUE(out))
+    if (!isTRUE(out))
       message(".compareRas fail: ", format(mc[[i + 1]]), " is not same as ", format(mc[["ras1"]]))
     out <- do.call(compareGeom, append(list(ras1, rasts[[i]]), dotsNotRasters))
     if (!isTRUE(out))
@@ -126,7 +126,7 @@
 #' @importFrom sf st_crs
 #' TODO: Move to `reproducible`
 .compareCRS <- function(ras1, ras2, ...) {
-  st_crs(ras1) != st_crs(ras2)
+  st_crs(ras1) == st_crs(ras2)
 }
 
 #' Method to read raster
