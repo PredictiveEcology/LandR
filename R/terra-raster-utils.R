@@ -7,10 +7,11 @@
 #' @param ras a Raster* , or SpatRaster object
 #' @param NAval the value to use as `NA`
 #'
+#' @return a raster with attributed NA values
+#'
+#' @rdname rasterTerraHelpers
 #' @importFrom raster NAvalue<-
 #' @importFrom terra NAflag<-
-#'
-#' @return a raster with attributed NA values
 .NAvalueFlag <- function(ras, NAval) {
   if (is(ras, "Raster")) {
     NAvalue(ras) <- NAval
@@ -29,10 +30,11 @@
 #'
 #' @param rasList a list of Raster* or SpatRaster layers
 #'
+#' @return a stacked raster
+#'
+#' @rdname rasterTerraHelpers
 #' @importFrom raster stack
 #' @importFrom terra rast
-#'
-#' @return a stacked raster
 .stack <- function(rasList) {
   isRaster <- sapply(rasList, function(ras) is(ras, "Raster"))
   isSpatRas <- sapply(rasList, function(ras) is(ras, "SpatRaster"))
@@ -53,10 +55,11 @@
 #' @param crs passed to `raster::projectRaster(..., crs = crs)`
 #'   and `terra::project(..., y = crs)`
 #'
+#' @return the projected extent
+#'
+#' @rdname rasterTerraHelpers
 #' @importFrom raster projectExtent
 #' @importFrom terra ext project
-#'
-#' @return the projected extent
 .projectExtent <- function(ras, crs) {
   if (is(ras, "Raster")) {
     return(projectExtent(ras, crs = crs))
@@ -84,7 +87,8 @@
 #' @export
 #' @return the projected extent
 #'
-## TODO: should be extended to many rasters
+#' TODO: should be extended to many rasters
+#' TODO: Move to `reproducible`
 .compareRas <- function(ras1, ras2, ...) {
   mc <- match.call()
 
