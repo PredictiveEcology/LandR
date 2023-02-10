@@ -15,9 +15,10 @@ plotVTM(
 )
 }
 \arguments{
-\item{speciesStack}{A \code{RasterStack} of percent-cover-by-species layers.}
+\item{speciesStack}{A \code{SpatRaster}, \code{RasterStack} or \code{RasterBrick}
+of percent-cover-by-species layers.}
 
-\item{vtm}{An optional vegetation type map (\code{RasterLayer}).
+\item{vtm}{An optional vegetation type map (\code{RasterLayer} or \code{SpatRaster}).
 If not supplied, will be produced internally by \code{makeVegTypeMap}.}
 
 \item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass

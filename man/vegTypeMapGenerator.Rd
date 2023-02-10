@@ -2,13 +2,13 @@
 % Please edit documentation in R/maps.R
 \name{vegTypeMapGenerator}
 \alias{vegTypeMapGenerator}
-\alias{vegTypeMapGenerator.RasterStack}
+\alias{vegTypeMapGenerator.default}
 \alias{vegTypeMapGenerator.data.table}
 \title{Generate vegetation type map}
 \usage{
 vegTypeMapGenerator(x, ...)
 
-\method{vegTypeMapGenerator}{RasterStack}(x, ..., doAssertion = getOption("LandR.assertions", FALSE))
+\method{vegTypeMapGenerator}{default}(x, ..., doAssertion = getOption("LandR.assertions", FALSE))
 
 \method{vegTypeMapGenerator}{data.table}(
   x,
@@ -24,7 +24,7 @@ vegTypeMapGenerator(x, ...)
 )
 }
 \arguments{
-\item{x}{Either a \code{cohortData} object or a \code{speciesCover} \code{RasterStack}}
+\item{x}{Either a \code{cohortData} object or a \code{speciesCover} \code{RasterStack}/\code{SpatRaster}}
 
 \item{...}{Additional arguments.}
 
