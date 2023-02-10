@@ -49,6 +49,7 @@ Imports:
     SpaDES.tools (>= 1.0.0.9001),
     stats,
     terra,
+    tidyterra,
     tools,
     utils
 Suggests:
