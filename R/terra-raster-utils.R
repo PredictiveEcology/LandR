@@ -75,6 +75,9 @@
 
 #' Compare two raster's properties
 #'
+#' TODO: Move to `reproducible`
+#' TODO: should be extended to many rasters
+#'
 #' Note: this function internally converts Raster* to
 #' `SpatRaster` to allow using `compareGeom` and benefit
 #' from its complexity
@@ -87,8 +90,6 @@
 #' @export
 #' @return the projected extent
 #'
-#' TODO: should be extended to many rasters
-#' TODO: Move to `reproducible`
 .compareRas <- function(ras1, ras2, ...) {
   mc <- match.call()
 
@@ -124,7 +125,6 @@
 #' @export
 #' @rdname compare
 #' @importFrom sf st_crs
-#' TODO: Move to `reproducible`
 .compareCRS <- function(ras1, ras2, ...) {
   st_crs(ras1) == st_crs(ras2)
 }

@@ -18,11 +18,12 @@
 }
 \value{
 the projected extent
-
-TODO: should be extended to many rasters
-TODO: Move to \code{reproducible}
 }
 \description{
+TODO: Move to \code{reproducible}
+TODO: should be extended to many rasters
+}
+\details{
 Note: this function internally converts Raster* to
 \code{SpatRaster} to allow using \code{compareGeom} and benefit
 from its complexity
