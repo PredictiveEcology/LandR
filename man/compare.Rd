@@ -2,9 +2,12 @@
 % Please edit documentation in R/terra-raster-utils.R
 \name{.compareRas}
 \alias{.compareRas}
+\alias{.compareCRS}
 \title{Compare two raster's properties}
 \usage{
 .compareRas(ras1, ras2, ...)
+
+.compareCRS(ras1, ras2, ...)
 }
 \arguments{
 \item{ras2}{a Raster* or SpatRaster object}

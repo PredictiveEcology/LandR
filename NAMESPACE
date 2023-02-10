@@ -2,6 +2,8 @@
 
 S3method(vegTypeMapGenerator,RasterStack)
 S3method(vegTypeMapGenerator,data.table)
+export(.compareCRS)
+export(.compareRas)
 export(BioSIM_extractPoints)
 export(BioSIM_getMPBSLR)
 export(BioSIM_getWindAnnual)
