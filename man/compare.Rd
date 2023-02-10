@@ -18,6 +18,9 @@
 }
 \value{
 the projected extent
+
+TODO: should be extended to many rasters
+TODO: Move to \code{reproducible}
 }
 \description{
 Note: this function internally converts Raster* to
