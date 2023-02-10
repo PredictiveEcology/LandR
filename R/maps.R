@@ -509,7 +509,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       pixelGroupData3[["leading"]] <- factor(pixelGroupData3[["leading"]])
     }
 
-    vegTypeMap <- raster(pixelGroupMap)
+    vegTypeMap <- rasterRead(pixelGroupMap)
+    names(vegTypeMap) <- names(rasterRead())
 
     vegTypeMap[pixelGroupData3[["pixelIndex"]]] <- pixelGroupData3[["leading"]]
     levels(vegTypeMap) <- data.frame(ID = seq_along(levels(pixelGroupData3[["leading"]])),
@@ -534,10 +535,17 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
   assertSppVectors(sppEquiv = sppEquiv, sppEquivCol = sppEquivCol,
                    sppColorVect = colors)
 
-  levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]],
-                              colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
-                              stringsAsFactors = FALSE)
-  setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
+  rasLevels <- levels(vegTypeMap)[[1]]
+  if (!is.null(dim(rasLevels))) {
+    levels(vegTypeMap) <- cbind(rasLevels,
+                                colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
+                                stringsAsFactors = FALSE)
+    if (is(vegTypeMap, "RasterLayer")) {
+      setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
+    } else {
+      ## TODO: setColors needs to be adapted to SpatRaster...
+    }
+  }
 
   if (isTRUE(doAssertion)) {
     if (sum(!is.na(vegTypeMap[])) < 100)
@@ -551,7 +559,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       pgs <- pgs[!dups]
       ids <- ids[!dups]
     }
-    leadingTest <- factorValues2(vegTypeMap, vegTypeMap[ids], att = 2)
+
+    leadingTest <- factorValues2(vegTypeMap, vegTypeMap[][ids], att = 2)
     names(pgs) <- leadingTest
     pgTest <- pixelGroupData[get(pixelGroupColName) %in% pgs]
     whNA <- unique(unlist(sapply(pgTest, function(xx) which(is.na(xx)))))
