@@ -120,6 +120,7 @@
     if (!isTRUE(out))
       message(".compareRas fail: ", format(mc[[i + 1]]), " is not same as ", format(mc[["ras1"]]))
   }
+  return(out)
 }
 
 #' @export
