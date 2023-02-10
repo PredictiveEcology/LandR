@@ -106,3 +106,14 @@
 .compareCRS <- function(ras1, ras2, ...) {
   st_crs(ras1) != st_crs(ras2)
 }
+
+#' Method to read raster
+#'
+#' TODO: Move to `reproducible`
+#' @param ... passed to `terra::rast` or
+#'   `raster::raster`
+#'
+#' @return the function
+#' @export
+rasterRead <- function(...)
+  eval(parse(text = getOption("reproducible.rasterRead")))(...)
