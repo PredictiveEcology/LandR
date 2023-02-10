@@ -133,14 +133,14 @@ prepInputsLCC <- function(year = 2010,
     method <- intersect("ngb", method)
 
   out <- prepInputs(targetFile = filename,
-             archive = archive,
-             url = url,
-             destinationPath = asPath(destinationPath),
-             studyArea = studyArea,
-             rasterToMatch = rasterToMatch,
-             method = method,
-             datatype = "INT2U",
-             filename2 = filename2, ...)
+                    archive = archive,
+                    url = url,
+                    destinationPath = asPath(destinationPath),
+                    studyArea = studyArea,
+                    rasterToMatch = rasterToMatch,
+                    method = method,
+                    datatype = "INT2U",
+                    filename2 = filename2, ...)
   out[] <- as.integer(as.vector(values(out)))
   out
 }
@@ -178,7 +178,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 
 #' Generate vegetation type map
 #'
-#' @param x Either a `cohortData` object or a `speciesCover` `RasterStack`
+#' @param x Either a `cohortData` object or a `speciesCover` `RasterStack`/`SpatRaster`
 #'
 #' @template pixelGroupMap
 #'
@@ -211,64 +211,70 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 #' @importFrom utils data
 #' @rdname vegTypeMapGenerator
 vegTypeMapGenerator <- function(x, ...) {
-  UseMethod("vegTypeMapGenerator")
+  UseMethod("vegTypeMapGenerator", x)
 }
 
 #' @export
 #' @rdname vegTypeMapGenerator
-vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("LandR.assertions", FALSE)) {
-  pixelTable <- suppressMessages(makePixelTable(x, printSummary = FALSE, doAssertion = doAssertion))
-  sppCols <- grep("cover", colnames(pixelTable), value = TRUE)
-  cohortTable <- suppressMessages(.createCohortData(pixelTable, sppColumns = sppCols, rescale = FALSE, doAssertion = doAssertion))
-  cohortTable <- cohortTable[cover > 0]
-  pixelGroupMap <- raster(x)
-  pixelGroupMap[pixelTable[["pixelIndex"]]] <- pixelTable[["initialEcoregionCode"]]
-  vegTypeMap <- vegTypeMapGenerator(x = cohortTable,
-                                    pixelGroupMap = pixelGroupMap,
-                                    pixelGroupColName = "initialEcoregionCode",
-                                    doAssertion = doAssertion,
-                                    ...)
+vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.assertions", FALSE)) {
+  if (inherits(x, c("Raster", "SpatRaster"))) {
+    pixelTable <- suppressMessages(makePixelTable(x, printSummary = FALSE, doAssertion = doAssertion))
+    sppCols <- grep("cover", colnames(pixelTable), value = TRUE)
+    cohortTable <- suppressMessages(.createCohortData(pixelTable, sppColumns = sppCols, rescale = FALSE, doAssertion = doAssertion))
+    cohortTable <- cohortTable[cover > 0]
+    pixelGroupMap <- rasterRead(x[[1]])  ## works in x is multi or single layer
+    names(pixelGroupMap) <- names(rasterRead())
+    pixelGroupMap[pixelTable[["pixelIndex"]]] <- pixelTable[["initialEcoregionCode"]]
+    vegTypeMap <- vegTypeMapGenerator(x = cohortTable,
+                                      pixelGroupMap = pixelGroupMap,
+                                      pixelGroupColName = "initialEcoregionCode",
+                                      doAssertion = doAssertion,
+                                      ...)
 
-  if (FALSE) { # This is the old version -- Eliot & Alex July 11, 2019
-    sumVegPct <- sum(speciesStack) ## TODO: how is the sum >100 ?
+    if (FALSE) { # This is the old version -- Eliot & Alex July 11, 2019
+      sumVegPct <- sum(speciesStack) ## TODO: how is the sum >100 ?
 
-    if (isTRUE(mixed)) {
-      ## create "mixed" layer, which is given a value slightly higher than any other layer,
-      ## if it is deemed a mixed pixel.
-      ## All layers must be below vegLeadingProportion to be called Mixed.
-      ## This check turns stack to binary: 1 if < vegLeadingProportion; 0 if more than.
-      ## Then, sum should be numLayers of all are below vegLeadingProportion
-      whMixed <- which(sum(speciesStack < (100 * vegLeadingProportion))[] == numLayers(speciesStack))
-      MixedRas <- speciesStack[[1]]
-      MixedRas[!is.na(speciesStack[[1]][])] <- 0
-      MixedRas[whMixed] <- max(maxFn(speciesStack)) * 1.01
+      if (isTRUE(mixed)) {
+        ## create "mixed" layer, which is given a value slightly higher than any other layer,
+        ## if it is deemed a mixed pixel.
+        ## All layers must be below vegLeadingProportion to be called Mixed.
+        ## This check turns stack to binary: 1 if < vegLeadingProportion; 0 if more than.
+        ## Then, sum should be numLayers of all are below vegLeadingProportion
+        whMixed <- which(sum(speciesStack < (100 * vegLeadingProportion))[] == numLayers(speciesStack))
+        MixedRas <- speciesStack[[1]]
+        MixedRas[!is.na(speciesStack[[1]][])] <- 0
+        MixedRas[whMixed] <- max(maxFn(speciesStack)) * 1.01
 
-      speciesStack$Mixed <- MixedRas
-    }
-
-    a <- speciesStack[]
-    nas <- is.na(a[, 1])
-    maxes <- apply(a[!nas, ], 1, function(x) {
-      whMax <- which(x == max(x, na.rm = TRUE))
-      if (length(whMax) > 1) {
-        whMax <- sample(whMax, size = 1)
+        speciesStack$Mixed <- MixedRas
       }
-      return(whMax)
-    })
 
-    vegTypeMap <- raster(speciesStack[[1]])
+      a <- speciesStack[]
+      nas <- is.na(a[, 1])
+      maxes <- apply(a[!nas, ], 1, function(x) {
+        whMax <- which(x == max(x, na.rm = TRUE))
+        if (length(whMax) > 1) {
+          whMax <- sample(whMax, size = 1)
+        }
+        return(whMax)
+      })
 
-    vegTypeMap[!nas] <- maxes
+      vegTypeMap <- raster(speciesStack[[1]])
 
-    layerNames <- names(speciesStack)
-    names(layerNames) <- layerNames
-    levels(vegTypeMap) <- data.frame(ID = seq(layerNames), Species = names(layerNames),
-                                     stringsAsFactors = TRUE)
-    vegTypeMap
+      vegTypeMap[!nas] <- maxes
 
+      layerNames <- names(speciesStack)
+      names(layerNames) <- layerNames
+      levels(vegTypeMap) <- data.frame(ID = seq(layerNames), Species = names(layerNames),
+                                       stringsAsFactors = TRUE)
+      vegTypeMap
+
+    }
+    return(vegTypeMap)
+  } else {
+    stop("x should be a Raster or SpatRaster")
   }
-  return(vegTypeMap)
 }
+
 
 #' @export
 #' @importFrom SpaDES.tools inRange
