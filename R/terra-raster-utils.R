@@ -86,23 +86,41 @@
 #'
 ## TODO: should be extended to many rasters
 .compareRas <- function(ras1, ras2, ...) {
+  mc <- match.call()
+
   if (is(ras1, "Raster")) {
     ras1 <- rast(ras1)
   }
   if (is(ras2, "Raster")) {
     ras2 <- rast(ras2)
   }
-
-  .compareCRS(ras1, ras2)
-
   dots <- list(...) # need to pass the ...
-  dots$crs <- FALSE
-  do.call(compareGeom, append(list(ras1, ras2), dots))
+  whRast <- vapply(dots, inherits, c("Raster", "SpatRaster"), FUN.VALUE = logical(1))
+  rasts <- append(list(ras2), dots[whRast])
+
+
+  dotsNotRasters <- dots[!whRast]
+  dotsNotRasters$crs <- FALSE
+
+  for (i in seq_along(rasts)) {
+
+    if (is(rasts[[i]], "Raster")) {
+      rasts[[i]] <- rast(rasts[[i]])
+    }
+
+    out <- .compareCRS(ras1, rasts[[i]], crs = FALSE)
+    if (isTRUE(out))
+      message(".compareRas fail: ", format(mc[[i + 1]]), " is not same as ", format(mc[["ras1"]]))
+    out <- do.call(compareGeom, append(list(ras1, rasts[[i]]), dotsNotRasters))
+    if (!isTRUE(out))
+      message(".compareRas fail: ", format(mc[[i + 1]]), " is not same as ", format(mc[["ras1"]]))
+  }
 }
 
 #' @export
 #' @rdname compare
 #' @importFrom sf st_crs
+#' TODO: Move to `reproducible`
 .compareCRS <- function(ras1, ras2, ...) {
   st_crs(ras1) != st_crs(ras2)
 }
@@ -117,3 +135,53 @@
 #' @export
 rasterRead <- function(...)
   eval(parse(text = getOption("reproducible.rasterRead")))(...)
+
+
+
+#' Helpers for transition to `terra`
+#'
+#' These all create a single function that can be used for either `Raster` or `SpatRaster`
+#' objects.
+#'
+#' @export
+#' @rdname rasterTerraHelpers
+#' @return
+#' `asInt` returns a `*Raster` with values converted to `integer`, if they weren't already.
+asInt <- function(ras) {
+  if (!isInt(ras)) {
+    if (inherits(ras, "SpatRaster"))
+      ras <- as.int(ras)
+    else
+      ras[] <- as.integer(ras)
+
+  }
+  ras
+}
+
+#' @export
+#' @rdname rasterTerraHelpers
+#' @return
+#' `isInt` returns a logical as per `is.integer`.
+isInt <- function(ras) {
+  if (inherits(ras, "SpatRaster"))
+    is.int(ras)
+  else
+    is.integer(values(ras))
+}
+
+
+#' @export
+#' @rdname rasterTerraHelpers
+#' @return
+#' `reclass` returns a `*Raster` with values reclassified as per `terra::classify`
+#'   and `raster::reclassify`.
+#'
+reclass <- function(ras, tab) {
+  if (is(ras, "SpatRaster")) {
+    classify(ras, tab)
+  } else {
+    reclassify(ras, tab)
+  }
+}
+
+
