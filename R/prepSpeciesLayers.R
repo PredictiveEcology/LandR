@@ -98,9 +98,9 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 #'
 #' @export
 #' @importFrom data.table setkey
-#' @importFrom magrittr %>%
 #' @importFrom reproducible asPath Cache
 #' @importFrom raster crs crs<- NAvalue<- raster setValues stack writeRaster
+#' @importFrom sf %>%
 CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
                             sppEquiv, sppEquivCol, destinationPath) {
   # The ones we want
