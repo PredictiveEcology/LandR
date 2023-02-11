@@ -372,69 +372,22 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   #  remove NAs
   CClayerNames <- c("Pine", "Black Spruce", "Deciduous", "Fir", "White Spruce", "LandType")
   CClayerNamesFiles <- paste0(gsub(" ", "", CClayerNames), "1.tif")
-  options(map.useParallel = FALSE) ## TODO: pass additional arg to function
-  ml <- mapAdd(rasterToMatch, isRasterToMatch = TRUE, layerName = "rasterToMatch",
-               filename2 = NULL)
 
-  ml <- mapAdd(studyArea, map = ml, isStudyArea = TRUE, layerName = "studyArea",
-               useSAcrs = TRUE, filename2 = NULL)
+  lr <- lapply(CClayerNamesFiles, prepInputs, studyArea = studyArea, rasterToMatch = rasterToMatch,
+               url = url, alsoExtract = "similar", method = "ngb",
+               destinationPath = destinationPath, filename2 = NULL)
+  rs <- raster::stack(lr)
+  names(rs) <- CClayerNames
 
-  ## TODO: avoid this workaround for stack not liking rasters with different origins and extents
-  lr <- lapply(CClayerNamesFiles, prepInputs, url = url, alsoExtract = "similar",
-               destinationPath = destinationPath, fun = "raster::raster")
-  le <- lapply(lr, extent)
-  dts <- lapply(lr, function(r) {
-    e <- extent(r)
-    data.table(xmin = e[1], xmax = e[2], ymin = e[3], ymax = e[4])
-  })
-  dt <- rbindlist(dts)
-  new_ext <- extent(max(dt$xmin), min(dt$xmax), max(dt$ymin), min(dt$ymax))
-  lr2 <- lapply(lr, `origin<-`, value = origin(lr[[1]]))
-  lr3 <- lapply(lr2, function(r) {
-    crop(r, y = new_ext, filename = tempfile(fileext = ".tif"))
-  })
-  lr4 <- lapply(lr3, function(r) {
-    extend(r, y = new_ext, filename = tempfile(fileext = ".tif"))
-  })
-  ## stack(lr4) ## confirm it works
-
-  ## loop/apply doesn't work here???
-  ml <- mapAdd(lr4[[1]], map = ml, layerName = CClayerNames[1], CC = TRUE,
-               destinationPath = destinationPath,
-               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
-  ml <- mapAdd(lr4[[2]], map = ml, layerName = CClayerNames[2], CC = TRUE,
-               destinationPath = destinationPath,
-               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
-  ml <- mapAdd(lr4[[3]], map = ml, layerName = CClayerNames[3], CC = TRUE,
-               destinationPath = destinationPath,
-               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
-  ml <- mapAdd(lr4[[4]], map = ml, layerName = CClayerNames[4], CC = TRUE,
-               destinationPath = destinationPath,
-               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
-  ml <- mapAdd(lr4[[5]], map = ml, layerName = CClayerNames[5], CC = TRUE,
-               destinationPath = destinationPath,
-               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
-  ml <- mapAdd(lr4[[6]], map = ml, layerName = CClayerNames[6], CC = TRUE,
-               destinationPath = destinationPath,
-               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
-  ## END WORKAROUND
-
-  # ml <- mapAdd(map = ml, url = url, layerName = CClayerNames, CC = TRUE,
-  #              destinationPath = destinationPath,
-  #              targetFile = CClayerNamesFiles, filename2 = NULL,
-  #              alsoExtract = "similar", leaflet = FALSE, method = "ngb") ## TODO: fix error due to different extent
-
-  ccs <- ml@metadata[CC == TRUE & !(layerName == "LandType"), ]
-  CCs <- maps(ml, layerName = ccs$layerName)
-  CCstack <- raster::stack(CCs)
+  CCstack <- dropLayer(rs, which(grepl("LandType", CClayerNames)))
   CCstackNames <- names(CCstack)
 
   if (!all(raster::minValue(CCstack) >= 0)) stop("problem with minValue of CCstack (< 0)")
   if (!all(raster::maxValue(CCstack) <= 10)) stop("problem with maxValue of CCstack (> 10)")
 
   CCstack <- CCstack * 10 # convert back to percent
-  NA_ids <- which(is.na(ml$LandType[]) |  # outside of studyArea polygon
-                    ml$LandType[] == 1)   # 1 is cities -- NA it here -- will be filled in with another veg layer if available (e.g. Pickell)
+  NA_ids <- which(is.na(rs$LandType[]) |  # outside of studyArea polygon
+                    rs$LandType[] == 1)   # 1 is cities -- NA it here -- will be filled in with another veg layer if available (e.g. Pickell)
   message("  Setting NA, 1 in LandType to NA in speciesLayers in ForestInventory data")
   aa <- try(CCstack[NA_ids] <- NA, silent = TRUE)
   ## unclear why line above sometimes fails: 'Error in value[j, ] : incorrect number of dimensions'
@@ -467,55 +420,25 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   names(sppNameVector) <- sppNameVector
 
-  # This includes LandType because it will use that at the bottom of this function to
-  #  remove NAs
+  ## NOTE: This includes LandType because we will use it to remove NAs
   CClayerNames <- c("Pine", "Black Spruce", "Deciduous", "Fir", "White Spruce", "Landtype") ## file is 'Landtype'
   CClayerNames2 <- c("Pine", "Black Spruce", "Deciduous", "Fir", "White Spruce", "LandType") ## needs 'LandType'
   CClayerNamesFiles <- paste0("MB_", gsub(" ", "", CClayerNames), "2016_NRV.tif")
-  options(map.useParallel = FALSE) ## TODO: pass additional arg to function
-  ml <- mapAdd(rasterToMatch, isRasterToMatch = TRUE, layerName = "rasterToMatch",
-               filename2 = NULL)
 
-  ml <- mapAdd(studyArea, map = ml, isStudyArea = TRUE, layerName = "studyArea",
-               useSAcrs = TRUE, filename2 = NULL)
-
-  lr <- lapply(CClayerNamesFiles, prepInputs, url = url, alsoExtract = "similar",
-               destinationPath = destinationPath, fun = "raster::raster")
-
+  lr <- lapply(CClayerNamesFiles, prepInputs, studyArea = studyArea, rasterToMatch = rasterToMatch,
+               url = url, alsoExtract = "similar", method = "ngb",
+               destinationPath = destinationPath, filename2 = NULL)
   rs <- stack(lr)
   names(rs) <- CClayerNames2
 
-  ## loop/apply doesn't work here???
-  ml <- mapAdd(rs[[1]], map = ml, layerName = CClayerNames2[1], CC = TRUE,
-               destinationPath = destinationPath,
-               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
-  ml <- mapAdd(rs[[2]], map = ml, layerName = CClayerNames2[2], CC = TRUE,
-               destinationPath = destinationPath,
-               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
-  ml <- mapAdd(rs[[3]], map = ml, layerName = CClayerNames2[3], CC = TRUE,
-               destinationPath = destinationPath,
-               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
-  ml <- mapAdd(rs[[4]], map = ml, layerName = CClayerNames2[4], CC = TRUE,
-               destinationPath = destinationPath,
-               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
-  ml <- mapAdd(rs[[5]], map = ml, layerName = CClayerNames2[5], CC = TRUE,
-               destinationPath = destinationPath,
-               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
-  ml <- mapAdd(rs[[6]], map = ml, layerName = CClayerNames2[6], CC = TRUE,
-               destinationPath = destinationPath,
-               filename2 = tempfile(fileext = ".tif"), leaflet = FALSE, method = "ngb")
-
-  ccs <- ml@metadata[CC == TRUE & !(layerName == "LandType"), ]
-  CCs <- maps(ml, layerName = ccs$layerName)
-  CCstack <- raster::stack(CCs)
-  CCstackNames <- names(CCstack)
+  CCstack <- dropLayer(rs, which(grepl("LandType", CClayerNames2)))
 
   if (!all(raster::minValue(CCstack) >= 0)) stop("problem with minValue of CCstack (< 0)")
   if (!all(raster::maxValue(CCstack) <= 10)) stop("problem with maxValue of CCstack (> 10)")
 
   CCstack <- CCstack * 10 # convert back to percent
-  NA_ids <- which(is.na(ml$LandType[]) |  # outside of studyArea polygon
-                    ml$LandType[] == 1)   # 1 is cities -- NA it here -- will be filled in with another veg layer if available (e.g. Pickell)
+  NA_ids <- which(is.na(rs$LandType[]) |  # outside of studyArea polygon
+                    rs$LandType[] == 1)   # 1 is cities -- NA it here -- will be filled in with another veg layer if available (e.g. Pickell)
   message("  Setting NA, 1 in LandType to NA in speciesLayers in MB FRI data")
   aa <- try(CCstack[NA_ids] <- NA, silent = TRUE)
   ## unclear why line above sometimes fails: 'Error in value[j, ] : incorrect number of dimensions'
@@ -523,7 +446,7 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
     l <- unstack(CCstack)
     CCstack <- lapply(l, function(x) {x[NA_ids] <- NA; x})
   }
-  names(CCstack) <- equivalentName(CCstackNames, sppEquiv, sppEquivCol)
+  names(CCstack) <- equivalentName(CClayerNames2, sppEquiv, sppEquivCol)
 
   stack(CCstack)
 }
@@ -582,44 +505,27 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   FRIlayerNamesFiles <- paste0(FRIlayerNames, "_fri_", sA, "_", res, "m.tif")
   FRIlccname <- paste0("lcc_fri_", sA, "_", res, "m.tif")
 
-  opt <- options(map.useParallel = FALSE) ## TODO: pass additional arg to function
-  ml <- mapAdd(rasterToMatch, isRasterToMatch = TRUE, layerName = "rasterToMatch", filename2 = NULL)
+  sppLayers <- raster::stack(lapply(FRIlayerNamesFiles, function(f) {
+    prepInputs(url = url, studyArea = studyArea, rasterToMatch = rasterToMatch,
+               destinationPath = destinationPath, targetFile = f, filename2 = NULL,
+               alsoExtract = NA, method = "ngb")
+  }))
+  names(sppLayers) <- FRIlayerNames
 
-  ml <- mapAdd(studyArea, map = ml, isStudyArea = TRUE, layerName = "studyArea",
-               useSAcrs = TRUE, filename2 = NULL)
-
-  ml <- mapAdd(map = ml, url = url, layerName = FRIlayerNames, CC = TRUE,
-               destinationPath = destinationPath,
-               targetFile = FRIlayerNamesFiles, filename2 = NULL,
-               alsoExtract = NA, leaflet = FALSE, method = "ngb")
-
-  ml <- mapAdd(map = ml, url = url2, layerName = "LCC_FRI", CC = TRUE,
-               destinationPath = destinationPath,
-               targetFile = FRIlccname,
-               filename1 = file.path(destinationPath, FRIlccname),
-               filename2 = NULL,
-               alsoExtract = NA, leaflet = FALSE, method = "ngb")
-  options(opt)
-
-  ccs <- ml@metadata[CC == TRUE & !(layerName == "LCC_FRI"), ]
-  CCs <- maps(ml, layerName = ccs$layerName)
-  CCstack <- raster::stack(CCs)
-  CCstackNames <- names(CCstack)
-
-  if (!all(raster::minValue(CCstack) >= 0)) stop("problem with minValue of CCstack (< 0)")
-  if (!all(raster::maxValue(CCstack) <= 100)) stop("problem with maxValue of CCstack (> 100)")
+  if (!all(raster::minValue(sppLayers) >= 0)) stop("problem with minValue of species layers stack (< 0)")
+  if (!all(raster::maxValue(sppLayers) <= 100)) stop("problem with maxValue of species layers stack (> 100)")
 
   ## merge species layers (currently only Popu; TODO: pine?)
-  idsPopu <- grep("Popu", CCstackNames)
-  mergedPopu <- calc(stack(CCstack[[idsPopu]]), sum, na.rm = TRUE)
+  idsPopu <- grep("Popu", FRIlayerNames)
+  mergedPopu <- calc(stack(sppLayers[[idsPopu]]), sum, na.rm = TRUE)
 
-  CCstack <- dropLayer(CCstack, idsPopu)
-  CCstack[["Popu_sp"]] <- mergedPopu ## NOTE: addLayer sporadically fails to add layer, w/o warning
+  sppLayers <- dropLayer(sppLayers, idsPopu)
+  sppLayers[["Popu_sp"]] <- mergedPopu ## NOTE: addLayer sporadically fails to add layer, w/o warning
 
-  idThuj <- grep("Thuj_spp", names(CCstack))
-  names(CCstack[[idThuj]]) <- "Thuj_sp"
+  idThuj <- grep("Thuj_spp", names(sppLayers))
+  names(sppLayers[[idThuj]]) <- "Thuj_sp"
 
-  stack(CCstack) ## ensure it's still a stack
+  stack(sppLayers) ## ensure it's still a stack
 }
 
 #' @template destinationPath

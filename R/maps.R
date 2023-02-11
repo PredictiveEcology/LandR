@@ -77,8 +77,10 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #' @inheritParams reproducible::prepInputs
 #'
 #' @param year Numeric, either 2010 or 2015. See note re: backwards compatibility for 2005.
+#' @param method One of 'ngb' or 'near' depending on the class of the object (`Raster*` or `SpatRas`)
 #'
 #' @export
+#' @importFrom raster values values<-
 #' @importFrom reproducible asPath prepInputs
 prepInputsLCC <- function(year = 2010,
                           destinationPath = asPath("."),
@@ -120,14 +122,14 @@ prepInputsLCC <- function(year = 2010,
     method <- intersect("ngb", method)
 
   out <- prepInputs(targetFile = filename,
-             archive = archive,
-             url = url,
-             destinationPath = asPath(destinationPath),
-             studyArea = studyArea,
-             rasterToMatch = rasterToMatch,
-             method = method,
-             datatype = "INT2U",
-             filename2 = filename2, ...)
+                    archive = archive,
+                    url = url,
+                    destinationPath = asPath(destinationPath),
+                    studyArea = studyArea,
+                    rasterToMatch = rasterToMatch,
+                    method = method,
+                    datatype = "INT2U",
+                    filename2 = filename2, ...)
   values(out) <- as.integer(values(out))
   out
 }
