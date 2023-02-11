@@ -9,6 +9,7 @@ prepInputsLCC(
   destinationPath = asPath("."),
   studyArea = NULL,
   rasterToMatch = NULL,
+  method = c("ngb", "near"),
   filename2 = NULL,
   ...
 )
@@ -34,6 +35,8 @@ CRS of \code{x} before masking. Currently, this function will not reproject the
 the extent of desired outcome) and reprojecting (including changing the
 resolution and projection).
 See details in \code{\link[reproducible:postProcess]{postProcess()}}.}
+
+\item{method}{One of 'ngb' or 'near' depending on the class of the object (\verb{Raster*} or \code{SpatRas})}
 
 \item{filename2}{\code{filename2} is optional, and is either
 NULL (no writing of outputs to disk), or several options

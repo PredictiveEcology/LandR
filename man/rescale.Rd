@@ -12,6 +12,5 @@ rescale(x, to)
 \item{to}{a \code{numeric} vector of length 2. The new range of values.}
 }
 \description{
-This is a simple function copied from the scales package (almost the same). Too heavy
-to use one simple function
+This is a simple function copied from the \code{scales} package (almost the same).
 }

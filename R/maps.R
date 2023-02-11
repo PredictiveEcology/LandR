@@ -19,17 +19,11 @@ utils::globalVariables(c(
 #' @export
 #' @importFrom grDevices colorRampPalette
 #' @importFrom quickPlot setColors<-
-#' @importFrom raster extend mask maxValue minValue ratify reclassify writeRaster
+#' @importFrom raster compareRaster mask maxValue minValue ratify reclassify writeRaster
 #' @importFrom reproducible maxFn minFn
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
                             nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
                             mask = NULL, filename2 = NULL) {
-  if (!is.null(mask)) {
-    if (!is(mask, "Raster")) {
-      stop("mask must be a raster layer")
-    }
-  }
-
   if (!is(LandCoverClassifiedMap, "RasterLayer")) {
     stop("Need a classified land cover map. Currently only accepts 'LCC2005'")
   }
@@ -47,6 +41,13 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
     nonFlammClasses <- as.integer(nonFlammClasses)
   }
 
+  if (!is.null(mask)) {
+    if (!is(mask, "Raster")) {
+      stop("mask must be a raster layer")
+    }
+    compareRaster(LandCoverClassifiedMap, mask)
+  }
+
   oldClass <- minFn(LandCoverClassifiedMap):maxFn(LandCoverClassifiedMap)
   newClass <- ifelse(oldClass %in% nonFlammClasses, 0L, 1L) ## NOTE: 0 codes for NON-flammable
   flammableTable <- cbind(oldClass, newClass)
@@ -56,7 +57,7 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 
   setColors(rstFlammable, n = 2) <- colorRampPalette(c("blue", "red"))(2)
   if (!is.null(mask)) {
-    rstFlammable <- mask(rstFlammable, extend(mask, rstFlammable))
+    rstFlammable <- mask(rstFlammable, mask)
   }
 
   rstFlammable[] <- as.integer(rstFlammable[])
@@ -76,13 +77,16 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #' @inheritParams reproducible::prepInputs
 #'
 #' @param year Numeric, either 2010 or 2015. See note re: backwards compatibility for 2005.
+#' @param method One of 'ngb' or 'near' depending on the class of the object (`Raster*` or `SpatRas`)
 #'
 #' @export
+#' @importFrom raster values values<-
 #' @importFrom reproducible asPath prepInputs
 prepInputsLCC <- function(year = 2010,
                           destinationPath = asPath("."),
                           studyArea = NULL,
                           rasterToMatch = NULL,
+                          method = c("ngb", "near"),
                           filename2 = NULL, ...) {
   dots <- list(...)
   if (is.null(dots$url)) {
@@ -111,15 +115,23 @@ prepInputsLCC <- function(year = 2010,
     }
   }
 
-  prepInputs(targetFile = filename,
-             archive = archive,
-             url = url,
-             destinationPath = asPath(destinationPath),
-             studyArea = studyArea,
-             rasterToMatch = rasterToMatch,
-             method = "ngb",
-             datatype = "INT2U",
-             filename2 = filename2, ...)
+  if (identical(eval(parse(text = getOption("reproducible.rasterRead"))),
+                terra::rast))
+    method <- intersect("near", method)
+  else
+    method <- intersect("ngb", method)
+
+  out <- prepInputs(targetFile = filename,
+                    archive = archive,
+                    url = url,
+                    destinationPath = asPath(destinationPath),
+                    studyArea = studyArea,
+                    rasterToMatch = rasterToMatch,
+                    method = method,
+                    datatype = "INT2U",
+                    filename2 = filename2, ...)
+  values(out) <- as.integer(values(out))
+  out
 }
 
 #' Make a vegetation type map from a stack of species abundances
