@@ -86,7 +86,6 @@ Collate:
     'assertions.R'
     'biosim.R'
     'chooseName.R'
-    'cleanLandWebStudyArea.R'
     'cohorts.R'
     'convertUnwantedLCC2.R'
     'dem.R'
@@ -114,5 +113,5 @@ Collate:
     'studyArea.R'
     'wildfire.R'
     'zzz.R'
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
