@@ -98,9 +98,9 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 #'
 #' @export
 #' @importFrom data.table setkey
-#' @importFrom magrittr %>%
 #' @importFrom reproducible asPath Cache
 #' @importFrom raster crs crs<- NAvalue<- raster setValues stack writeRaster
+#' @importFrom sf %>%
 CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
                             sppEquiv, sppEquivCol, destinationPath) {
   # The ones we want
@@ -567,7 +567,6 @@ prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, s
 #' @return TODO: description needed
 #'
 #' @export
-#' @importFrom magrittr %>%
 #' @importFrom reproducible asPath Cache
 #' @importFrom raster NAvalue<- raster rasterOptions setValues stack
 makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPath) {
@@ -600,7 +599,8 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
 
   ## create list and template raster
   spRasts <- list()
-  spRas <- raster(PickellRaster) %>% setValues(., NA_integer_)
+  spRas <- raster(PickellRaster) |>
+    setValues(NA_integer_)
 
   rasterOptions(maxmemory = 1e9)
 

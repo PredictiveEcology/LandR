@@ -559,7 +559,6 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #'
 #' @export
 #' @importFrom fasterize fasterize
-#' @importFrom magrittr %>%
 #' @importFrom raster crs getValues
 #' @importFrom reproducible Cache prepInputs
 #' @importFrom sf st_cast st_transform st_zm
@@ -586,15 +585,15 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950) {
   dots <- list(...)
   a <- if (is.null(dots$fun)) {
-    Cache(prepInputs, rasterToMatch = rasterToMatch, fun = "terra::vect", ...) %>%
-      st_as_sf(.) %>%
-      st_zm(.) #NFDB data has incomplete z coordinates resulting in errors
+    Cache(prepInputs, rasterToMatch = rasterToMatch, fun = "terra::vect", ...) |>
+      st_as_sf() |>
+      st_zm() #NFDB data has incomplete z coordinates resulting in errors
   } else {
     if (grepl("st_read", dots$fun)) {
       Cache(prepInputs, ...)
     } else {
-      Cache(prepInputs, rasterToMatch = rasterToMatch, ...) %>%
-        st_as_sf(.)
+      Cache(prepInputs, rasterToMatch = rasterToMatch, ...) |>
+        st_as_sf()
     }
   }
 
@@ -632,7 +631,6 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 #' @importFrom raster crs
 #' @importFrom reproducible Cache prepInputs
 #' @importFrom sf st_cast st_transform
-#' @importFrom magrittr %>%
 #'
 #' @examples
 #' \dontrun{

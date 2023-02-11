@@ -23,9 +23,9 @@ if (FALSE) {   ## run this manually
   fileNames <- union(fileNames2001, fileNames2011)
   fileNames <- grep("(Species|SpeciesGroups)_.*\\.tif$", fileNames, value = TRUE)
 
-  allSpp <- fileNames %>%
-    sub("_v1\\.tif", "", .) %>%
-    sub(".*(Species|SpeciesGroups)_", "", .)
+  allSpp <- fileNames |>
+    sub("_v1\\.tif", "", x = _) |>
+    sub(".*(Species|SpeciesGroups)_", "", x = _)
   allSpp <- unique(allSpp)
 
   ## remove species that have no layers
