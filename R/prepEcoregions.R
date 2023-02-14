@@ -38,8 +38,14 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
       ecoregionMapSF[["ecoregionLayerField"]] <- as.factor(ecoDT$ecoregionLayerField)
       rm(ecoDT)
     }
-    ecoregionRst <- fasterize::fasterize(ecoregionMapSF, raster = rasterToMatchLarge,
+
+    ## while terra is not supported
+    ecoregionRst <- fasterize::fasterize(ecoregionMapSF,
+                                         raster = if(is(rasterToMatchLarge, "SpatRaster")) raster(rasterToMatchLarge) else rasterToMatchLarge,
                                          field = "ecoregionLayerField")
+    if (is(rasterToMatchLarge, "SpatRaster")) {
+      ecoregionRst <- rast(ecoregionRst)
+    }
     rm(ecoregionLayer)
     if (is.factor(ecoregionMapSF$ecoregionLayerField)) {
       appendEcoregionFactor <- TRUE
@@ -49,6 +55,9 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
                        ecoregionName = uniqVals,
                        stringsAsFactors = FALSE)
       levels(ecoregionRst) <- df #this will preserve the factors
+
+      ecoregionTable <- as.data.table(df)
+      ecoregionTable[, ID := as.factor(paddedFloatToChar(ID, max(nchar(ID))))]
     }
   } else {
     if (!length(ecoregionRst@data@attributes) == 0) {
@@ -61,8 +70,8 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
 
   message(blue("Make initial ecoregionGroups ", Sys.time()))
 
-  if (!isTRUE(compareRaster(ecoregionRst, rstLCCAdj,
-                           res = TRUE, orig = TRUE, stopiffalse = FALSE)))
+  if (!isTRUE(.compareRas(ecoregionRst, rstLCCAdj,
+                          res = TRUE, orig = TRUE, stopOnError = FALSE)))
     stop("problem with rasters ecoregionRst and rstLCCAdj -- they don't have same metadata")
 
   ecoregionFiles <- Cache(ecoregionProducer,
@@ -72,8 +81,6 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
                           omitArgs = c("userTags"))
 
   if (appendEcoregionFactor) {
-    ecoregionTable <- as.data.table(ecoregionRst@data@attributes[[1]])
-    ecoregionTable[, ID := as.factor(paddedFloatToChar(ID, max(nchar(ID))))]
     ecoregionFiles$ecoregion <- ecoregionFiles$ecoregion[ecoregionTable, on = c("ecoregion" = "ID")] %>%
       na.omit(.)
     setnames(ecoregionFiles$ecoregion, old = "ecoregion_lcc", new = "ecoregionGroup")
