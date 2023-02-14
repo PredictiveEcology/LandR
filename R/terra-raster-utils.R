@@ -123,6 +123,9 @@
 
 #' Compare two raster's projections
 #'
+#' TODO: Move to `reproducible`
+#' TODO: expand to multiple objects
+#'
 #' @param ras1 a Raster* or SpatRaster object
 #' @param ras2 a Raster* or SpatRaster object
 #' @export
