@@ -547,8 +547,8 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
 assertStandAgeMapAttr <- function(standAgeMap,
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    if (!is(standAgeMap, "RasterLayer")) {
-      stop("standAgeMap should be a RasterLayer")
+    if (!inherits(standAgeMap, c("RasterLayer", "SpatRaster"))) {
+      stop("standAgeMap should be a RasterLayer or SpatRaster")
     }
     if (is.null(attr(standAgeMap, "imputedPixID"))) {
       stop("standAgeMap should have a 'imputedPixID' attribute.",
