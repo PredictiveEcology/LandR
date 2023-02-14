@@ -81,7 +81,7 @@
 #' Note: this function internally converts Raster* to
 #' `SpatRaster` to allow using `compareGeom` and benefit
 #' from its complexity
-#' @param ras a Raster* or SpatRaster object
+#' @param ras1 a Raster* or SpatRaster object
 #' @param ras2 a Raster* or SpatRaster object
 #' @param ... passed to `terra::compareGeom`
 #'
