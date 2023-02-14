@@ -112,7 +112,7 @@
       rasts[[i]] <- rast(rasts[[i]])
     }
 
-    out <- .compareCRS(ras1, rasts[[i]], crs = FALSE)
+    out <- .compareCRS(ras1, rasts[[i]])
     if (!isTRUE(out))
       message(".compareRas fail: ", format(mc[[i + 1]]), " is not same as ", format(mc[["ras1"]]))
     out <- do.call(compareGeom, append(list(ras1, rasts[[i]]), dotsNotRasters))
@@ -125,7 +125,7 @@
 #' @export
 #' @rdname compare
 #' @importFrom sf st_crs
-.compareCRS <- function(ras1, ras2, ...) {
+.compareCRS <- function(ras1, ras2) {
   st_crs(ras1) == st_crs(ras2)
 }
 
