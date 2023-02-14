@@ -105,18 +105,20 @@
   dotsNotRasters <- dots[!whRast]
   dotsNotRasters$crs <- FALSE
 
-  for (i in seq_along(rasts)) {
+  ras1 <- rasts[[1]]
 
-    if (is(rasts[[i]], "Raster")) {
-      rasts[[i]] <- rast(rasts[[i]])
-    }
-
+  for (i in 2:length(rasts)) {
     out <- .compareCRS(ras1, rasts[[i]])
-    if (!isTRUE(out))
-      message(".compareRas fail: ", format(mc[[i + 1]]), " is not same as ", format(mc[["ras1"]]))
-    out <- do.call(compareGeom, append(list(ras1, rasts[[i]]), dotsNotRasters))
-    if (!isTRUE(out))
-      message(".compareRas fail: ", format(mc[[i + 1]]), " is not same as ", format(mc[["ras1"]]))
+    if (!isTRUE(out)) {
+      message(".compareCRS fail: ", format(mc[[i + 1]]), " is not same as ", format(mc[["ras1"]]))
+      break
+    } else{
+      out <- do.call(compareGeom, append(list(ras1, rasts[[i]]), dotsNotRasters))
+      if (!isTRUE(out)) {
+        message(".compareRas fail: ", format(mc[[i + 1]]), " is not same as ", format(mc[["ras1"]]))
+        break
+      }
+    }
   }
   return(out)
 }
