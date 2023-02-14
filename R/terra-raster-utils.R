@@ -82,27 +82,26 @@
 #' `SpatRaster` to allow using `compareGeom` and benefit
 #' from its complexity
 #' @param ras1 a Raster* or SpatRaster object
-#' @param ras2 a Raster* or SpatRaster object
-#' @param ... passed to `terra::compareGeom`
+#' @param ... additional Raster* or SpatRaster objects, and arguments
+#'   passed to `terra::compareGeom`
 #'
 #' @importFrom terra compareGeom rast
 #' @rdname compare
 #' @export
 #' @return the projected extent
 #'
-.compareRas <- function(ras1, ras2, ...) {
+.compareRas <- function(ras1, ...) {
   mc <- match.call()
 
-  if (is(ras1, "Raster")) {
-    ras1 <- rast(ras1)
-  }
-  if (is(ras2, "Raster")) {
-    ras2 <- rast(ras2)
-  }
   dots <- list(...) # need to pass the ...
   whRast <- vapply(dots, inherits, c("Raster", "SpatRaster"), FUN.VALUE = logical(1))
-  rasts <- append(list(ras2), dots[whRast])
+  rasts <- append(list(ras1), dots[whRast])
 
+  rasts <- Map(function(ras) {
+    if (is(ras, "Raster")) {
+      rast(ras)
+    } else ras
+  }, ras = rasts)
 
   dotsNotRasters <- dots[!whRast]
   dotsNotRasters$crs <- FALSE
