@@ -73,10 +73,9 @@
   }
 }
 
-#' Compare two raster's properties
+#' Compare raster properties
 #'
 #' TODO: Move to `reproducible`
-#' TODO: should be extended to many rasters
 #'
 #' Note: this function internally converts Raster* to
 #' `SpatRaster` to allow using `compareGeom` and benefit
@@ -122,6 +121,10 @@
   return(out)
 }
 
+#' Compare two raster's projections
+#'
+#' @param ras1 a Raster* or SpatRaster object
+#' @param ras2 a Raster* or SpatRaster object
 #' @export
 #' @rdname compare
 #' @importFrom sf st_crs
