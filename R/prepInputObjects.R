@@ -60,22 +60,22 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
                            printSummary = TRUE,
                            doAssertion = getOption("LandR.assertions", TRUE)) {
   if (missing(rasterToMatch)) {
-    rasterToMatch <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(speciesLayers[[1]])
+    rasterToMatch <- rasterRead(speciesLayers[[1]])
     rasterToMatch[] <- 0
     rasterToMatch[is.na(speciesLayers[[1]])] <- NA
   }
 
   if (missing(ecoregionFiles)) {
     ecoregionFiles <- list()
-    ecoregionFiles$ecoregionMap <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(rasterToMatch)
-    rtmNotNA <- which(!is.na(rasterToMatch[]))
+    ecoregionFiles$ecoregionMap <- rasterRead(rasterToMatch)
+    rtmNotNA <- which(!is.na(as.vector(rasterToMatch[])))
     ecoregionFiles$ecoregionMap[rtmNotNA] <- seq_along(rtmNotNA)
-    initialEcoregionCodeVals <- ecoregionFiles$ecoregionMap[]
+    initialEcoregionCodeVals <- as.vector(ecoregionFiles$ecoregionMap[])
   } else {
     initialEcoregionCodeVals <- factorValues2(
       ecoregionFiles$ecoregionMap,
       as.vector(values(ecoregionFiles$ecoregionMap)),
-      att = 5)
+      att = "ecoregion_lcc")
   }
 
   # message(blue("Round age to nearest pixelGroupAgeClass, which is", pixelGroupAgeClass))
