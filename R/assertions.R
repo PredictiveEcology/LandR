@@ -148,9 +148,13 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
                        doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     erg <- list()
-    if (!missing(ecoregionMap))
+    if (!missing(ecoregionMap)) {
       erg[[1]] <- sort(na.omit(unique(factorValues2(ecoregionMap, ecoregionMap[],
                                                     att = "ecoregionGroup"))))
+      if (is.character(erg[[1]])) { # this can happed if SpatRaster
+        erg[[1]] <- factor(erg[[1]])
+      }
+    }
     if (!missing(cohortData))
       erg[[2]] <- sort(unique(cohortData$ecoregionGroup))
     if (!missing(speciesEcoregion))
