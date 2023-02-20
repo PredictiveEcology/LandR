@@ -161,7 +161,8 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 #' @importFrom terra coltab<-
 #' @importFrom quickPlot setColors
 #' @param ras A `Raster*` or `SpatRaster` class object.
-#' @param cols a character vector of colours. See examples.
+#' @param cols a character vector of colours. See examples. Can also be a `data.frame`,
+#'   see `terra::coltab`
 #' @param n A numeric scalar giving the number of colours to create. Passed to
 #'   `quickPlot::setColors(ras, n = n) <- `. If missing, then `n` will be `length(cols)`
 #' @examples
@@ -171,10 +172,17 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 #' }
 Colors <- function(ras, cols, n) {
 
-  if (missing(n))
-    n <- length(cols)
-  if (is(ras, "SpatRaster"))
+  if (is(ras, "SpatRaster")) {
+    theSeq <- round(minFn(ras)):round(maxFn(ras))
+    if (!is(cols, "data.frame")) {
+      if (length(cols) < length(theSeq)) {
+        message("not enough colours, interpolating")
+        cols <- colorRampPalette(cols)(length(theSeq))
+      }
+    }
+
     coltab(ras, layer = 1) <- cols
+  }
   else
     setColors(ras, n = n) <- cols
 
