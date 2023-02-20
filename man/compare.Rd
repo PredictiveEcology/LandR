@@ -3,25 +3,28 @@
 \name{.compareRas}
 \alias{.compareRas}
 \alias{.compareCRS}
-\title{Compare two raster's properties}
+\title{Compare raster properties}
 \usage{
-.compareRas(ras1, ras2, ...)
+.compareRas(ras1, ...)
 
-.compareCRS(ras1, ras2, ...)
+.compareCRS(ras1, ras2)
 }
 \arguments{
+\item{ras1}{a Raster* or SpatRaster object}
+
+\item{...}{additional Raster* or SpatRaster objects, and arguments
+passed to \code{terra::compareGeom}}
+
 \item{ras2}{a Raster* or SpatRaster object}
-
-\item{...}{passed to \code{terra::compareGeom}}
-
-\item{ras}{a Raster* or SpatRaster object}
 }
 \value{
 the projected extent
 }
 \description{
 TODO: Move to \code{reproducible}
-TODO: should be extended to many rasters
+
+TODO: Move to \code{reproducible}
+TODO: expand to multiple objects
 }
 \details{
 Note: this function internally converts Raster* to

@@ -153,6 +153,33 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   Plot(vtmPlot, title = title)
 }
 
+#' Helper for setting Raster or SpatRaster colors
+#'
+#' This is a wrapper to help with migration to terra. Currently can only be used
+#' for a single layer `SpatRaster` or a `RasterLayer`
+#' @export
+#' @importFrom terra coltab<-
+#' @importFrom quickPlot setColors
+#' @param ras A `Raster*` or `SpatRaster` class object.
+#' @param cols a character vector of colours. See examples.
+#' @param n A numeric scalar giving the number of colours to create. Passed to
+#'   `quickPlot::setColors(ras, n = n) <- `. If missing, then `n` will be `length(cols)`
+#' @examples
+#' \donttest{
+#' cols <- colorRampPalette(c("blue", "red"))(12)
+#' ras <- Colors(ras, cols)
+#' }
+Colors <- function(ras, cols, n) {
+
+  if (missing(n))
+    n <- length(cols)
+  if (is(ras, "SpatRaster"))
+    coltab(ras, layer = 1) <- cols
+  else
+    setColors(ras, n = n) <- cols
+
+  ras
+}
 #' Create species colour vector from a `sppEquiv` table
 #'
 #' @template sppEquiv
