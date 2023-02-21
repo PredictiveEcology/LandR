@@ -1198,7 +1198,10 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
       newLayerName <- names(sppMerges)[i]
 
       fname <- .suffix(file.path(dPath, paste0(column, "_", newLayerName, ".tif")), suffix)
-      a <- calc(stack(speciesLayers[sumSpecies]), sum, na.rm = TRUE)
+      if (is(speciesLayers[sumSpecies][1], "Raster"))
+        a <- calc(stack(speciesLayers[sumSpecies]), sum, na.rm = TRUE)
+      else
+        a <- sum(rast(speciesLayers[sumSpecies]), na.rm = TRUE)
       names(a) <- newLayerName
       a <- writeRaster(a, filename = fname, overwrite = TRUE, ...)
       ## replace spp rasters by the summed one
