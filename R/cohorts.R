@@ -61,7 +61,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
                              initialB = 10,
                              verbose = getOption("LandR.verbose", TRUE),
                              doAssertion = getOption("LandR.assertions", TRUE)) {
-  maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
+  maxPixelGroup <- as.integer(maxFn(pixelGroupMap))
 
   if (!is.null(treedFirePixelTableSinceLastDisp)) {
     ## only set to 0 the pixels that became empty (have no survivors)
@@ -186,7 +186,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 
   if (doAssertion) {
     maxPixelGroupFromCohortData <- max(outs$cohortData$pixelGroup)
-    maxPixelGroup <- as.integer(maxValue(outs$pixelGroupMap))
+    maxPixelGroup <- as.integer(maxFn(outs$pixelGroupMap))
     test1 <- (!identical(maxPixelGroup, maxPixelGroupFromCohortData))
     if (test1) {
       stop(
@@ -1434,7 +1434,6 @@ addPixels2CohortData <- function(cohortData, pixelGroupMap,
 #'
 #' @export
 #' @importFrom data.table data.table
-#' @importFrom raster maxValue
 addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
                                   cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
@@ -1444,7 +1443,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 
   noPixelsXGroup <- data.table(
     noPixels = tabulate(pixelGroupMap[]),
-    pixelGroup = c(1:maxValue(pixelGroupMap))
+    pixelGroup = c(1:maxFn(pixelGroupMap))
   )
 
   pixelCohortData <- cohortData[noPixelsXGroup, on = "pixelGroup", nomatch = 0]
@@ -1755,7 +1754,7 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
   cohortData <- copy(cohortData)
   provenanceTable <- copy(provenanceTable)
 
-  maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
+  maxPixelGroup <- as.integer(maxFn(pixelGroupMap))
 
   if (!is.null(treedHarvestPixelTable)) {
     pixelGroupMap[treedHarvestPixelTable$pixelIndex] <- 0L
@@ -1836,7 +1835,7 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
 
   if (doAssertion) {
     maxPixelGroupFromCohortData <- max(outs$cohortData$pixelGroup)
-    maxPixelGroup <- as.integer(maxValue(outs$pixelGroupMap))
+    maxPixelGroup <- as.integer(maxFn(outs$pixelGroupMap))
     test1 <- (!identical(maxPixelGroup, maxPixelGroupFromCohortData))
     if (test1) {
       stop(
