@@ -38,14 +38,10 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
       ecoregionMapSF[["ecoregionLayerField"]] <- as.factor(ecoDT$ecoregionLayerField)
       rm(ecoDT)
     }
-
-    ## while terra is not supported
-    ecoregionRst <- fasterize::fasterize(ecoregionMapSF,
-                                         raster = if(is(rasterToMatchLarge, "SpatRaster")) raster(rasterToMatchLarge) else rasterToMatchLarge,
-                                         field = "ecoregionLayerField")
-    if (is(rasterToMatchLarge, "SpatRaster")) {
-      ecoregionRst <- rast(ecoregionRst)
-    }
+    ecoregionRst <- rasterize(ecoregionMapSF, rasterToMatchLarge,
+                                     field = "ecoregionLayerField")
+    # ecoregionRst <- fasterize::fasterize(ecoregionMapSF, rasterToMatchLarge,
+    #                                      field = "ecoregionLayerField")
     rm(ecoregionLayer)
     if (is.factor(ecoregionMapSF$ecoregionLayerField)) {
       appendEcoregionFactor <- TRUE
