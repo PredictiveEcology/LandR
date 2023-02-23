@@ -42,8 +42,8 @@ jobs:
       - name: Install Linux system dependencies
         if: runner.os == 'Linux'
         run: |
-          apt-get -y update
-          apt-get install -y  libudunits2-dev libgdal-dev libgeos-dev libproj-dev
+          sudo apt-get -y update
+          sudo apt-get install -y  libudunits2-dev libgdal-dev libgeos-dev libproj-dev
 
       - name: Install macOS system dependencies
         if: runner.os == 'macOS'
