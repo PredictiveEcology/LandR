@@ -33,16 +33,21 @@ jobs:
           extra-repositories: 'https://r-spatial.r-universe.dev/'
           use-public-rspm: true
 
+      - name: Install sf from r-universe
+        run: |
+          install.packages("sf")
+        shell: Rscript {0}
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
             any::covr
-            any::sf
             any::XML
             BioSIM=?ignore
             fastshp=?ignore
             NLMR=?ignore
             J4R=?ignore
+            sf=?ignore
             PredictiveEcology/quickPlot@development
             PredictiveEcology/reproducible@development
             PredictiveEcology/Require@development
