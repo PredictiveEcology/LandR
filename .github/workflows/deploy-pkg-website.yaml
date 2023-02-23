@@ -33,6 +33,7 @@ jobs:
         with:
           extra-packages: |
             any::pkgdown
+            any::sf
             any::XML
             local::.
             BioSIM=?ignore
