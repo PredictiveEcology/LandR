@@ -23,22 +23,25 @@ a raster layer of fire perimeters with fire year values.
 Create a raster of fire perimeters
 }
 \examples{
-library(SpaDES.tools)
-library(raster)
-library(reproducible)
-randomPoly <- randomStudyArea()
-randomPoly
-ras2match <- raster(res = 10, ext = extent(randomPoly), crs = crs(randomPoly))
-ras2match <- rasterize(randomPoly, ras2match)
-tempDir <- tempdir()
-cacheRepo <- file.path(tempDir, "cache")
+if (require("googledrive")) {
+  library(SpaDES.tools)
+  library(raster)
+  library(reproducible)
 
-## ideally, get the firePerimenters layer first
-firePerimeters <- Cache(prepInputsFireYear,
-                        url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
-                        "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-                        fun = "sf::st_read",
-                        destinationPath = tempDir,
-                        rasterToMatch = ras2match)
+  randomPoly <- randomStudyArea()
+  randomPoly
+  ras2match <- raster(res = 10, ext = extent(randomPoly), crs = crs(randomPoly))
+  ras2match <- rasterize(randomPoly, ras2match)
+  tempDir <- tempdir()
+  cacheRepo <- file.path(tempDir, "cache")
+
+  ## ideally, get the firePerimenters layer first
+  firePerimeters <- Cache(prepInputsFireYear,
+                          url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
+                                       "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
+                          fun = "sf::st_read",
+                          destinationPath = tempDir,
+                          rasterToMatch = ras2match)
+}
 
 }
