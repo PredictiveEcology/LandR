@@ -43,7 +43,7 @@ Imports:
     raster,
     RColorBrewer,
     reproducible (>= 1.2.16.9018),
-    sf (>= 1.0-10),
+    sf,
     sp,
     SpaDES.tools (>= 1.0.0.9001),
     stats,
