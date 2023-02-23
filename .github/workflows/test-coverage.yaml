@@ -35,7 +35,7 @@ jobs:
             fastshp=?ignore
             NLMR=?ignore
             J4R=?ignore
-            sf=?ignore
+            r-spatial/sf
             PredictiveEcology/quickPlot@development
             PredictiveEcology/reproducible@development
             PredictiveEcology/Require@development
@@ -47,7 +47,6 @@ jobs:
           pak::pkg_install("remotes")
           pak::pkg_install("ropensci/NLMR")
           remotes::install_github("s-u/fastshp")
-          install.packages("sf", repos = "https://r-spatial.r-universe.dev")
           install.packages("https://sourceforge.net/projects/repiceasource/files/latest", repos = NULL,  type = "source") ## J4R
           install.packages("https://sourceforge.net/projects/biosimclient.mrnfforesttools.p/files/latest", repos = NULL,  type = "source") ## BioSIM
         shell: Rscript {0}
