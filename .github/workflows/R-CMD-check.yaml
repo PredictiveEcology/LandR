@@ -54,19 +54,19 @@ jobs:
 
       - name: Install sf from r-universe
         run: |
-          install.packages("sf")
+          install.packages("sf", repos = "https://r-spatial.r-universe.dev/", )
         shell: Rscript {0}
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
             any::rcmdcheck
+            any::sf
             any::XML
             BioSIM=?ignore
             fastshp=?ignore
             J4R=?ignore
             NLMR=?ignore
-            sf=?ignore
             PredictiveEcology/quickPlot@development
             PredictiveEcology/reproducible@development
             PredictiveEcology/Require@development
