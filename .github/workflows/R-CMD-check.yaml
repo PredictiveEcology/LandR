@@ -68,11 +68,11 @@ jobs:
           extra-packages: |
             any::rcmdcheck
             any::XML
-            CRAN::sf
             BioSIM=?ignore
             fastshp=?ignore
             J4R=?ignore
             NLMR=?ignore
+            sf=?ignore
             PredictiveEcology/quickPlot@development
             PredictiveEcology/reproducible@development
             PredictiveEcology/Require@development
