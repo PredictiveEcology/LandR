@@ -57,7 +57,7 @@ jobs:
           extra-repositories: 'https://r-spatial.r-universe.dev/'
           Ncpus: 2
           r-version: ${{ matrix.config.r }}
-          use-public-rspm: true
+          use-public-rspm: false
 
       - name: Install sf from r-universe
         run: |
