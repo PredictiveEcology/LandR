@@ -60,7 +60,7 @@ jobs:
 
       - name: Install sf from r-universe
         run: |
-          install.packages("sf", repos = "https://r-spatial.r-universe.dev/", )
+          install.packages("sf")
         shell: Rscript {0}
 
       - uses: r-lib/actions/setup-r-dependencies@v2
