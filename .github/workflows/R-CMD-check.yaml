@@ -67,8 +67,8 @@ jobs:
         with:
           extra-packages: |
             any::rcmdcheck
-            any::sf
             any::XML
+            CRAN::sf
             BioSIM=?ignore
             fastshp=?ignore
             J4R=?ignore
