@@ -4,7 +4,7 @@
 \alias{Colors}
 \title{Helper for setting Raster or SpatRaster colors}
 \usage{
-Colors(ras, cols, n)
+Colors(ras, cols, n = NULL)
 }
 \arguments{
 \item{ras}{A \verb{Raster*} or \code{SpatRaster} class object.}
@@ -21,8 +21,13 @@ for a single layer \code{SpatRaster} or a \code{RasterLayer}
 }
 \examples{
 \donttest{
+cols <- colorRampPalette(c("blue", "red"))(12)
 ras <- terra::rast(matrix(1:100, 10, 10))
-cols <- colorRampPalette(c("blue", "red"))(100)
 ras <- Colors(ras, cols)
+terra::plot(ras)
+
+ras <- raster::raster(matrix(1:100, 10, 10))
+ras <- Colors(ras, cols)
+raster::plot(ras)
 }
 }
