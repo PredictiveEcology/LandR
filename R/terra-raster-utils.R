@@ -159,6 +159,7 @@ rasterRead <- function(...)
 #' @rdname rasterTerraHelpers
 #' @return
 #' `asInt` returns a `*Raster` with values converted to `integer`, if they weren't already.
+#' @importFrom terra as.int
 asInt <- function(ras) {
   if (!isInt(ras)) {
     if (inherits(ras, "SpatRaster"))
@@ -174,6 +175,7 @@ asInt <- function(ras) {
 #' @rdname rasterTerraHelpers
 #' @return
 #' `isInt` returns a logical as per `is.integer`.
+#' @importFrom terra is.int
 isInt <- function(ras) {
   if (inherits(ras, "SpatRaster"))
     is.int(ras)
@@ -187,7 +189,8 @@ isInt <- function(ras) {
 #' @return
 #' `reclass` returns a `*Raster` with values reclassified as per `terra::classify`
 #'   and `raster::reclassify`.
-#'
+#' @importFrom terra classify
+#' @importFrom raster reclassify
 reclass <- function(ras, tab) {
   if (is(ras, "SpatRaster")) {
     classify(ras, tab)
