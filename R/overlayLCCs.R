@@ -41,7 +41,8 @@ utils::globalVariables(c("ecoregionCode", "NAs", "newLCC"))
 #' @author Eliot McIntire and Alex Chubaty
 #' @export
 #' @importFrom data.table as.data.table
-#' @importFrom raster nlayers stack
+#' @importFrom raster stack
+#' @importFrom terra as.int
 overlayLCCs <- function(LCCs, forestedList, outputLayer,
                         NAcondition, NNcondition, remapTable = NULL,
                         classesToReplace, availableERC_by_Sp,
