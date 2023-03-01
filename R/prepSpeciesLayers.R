@@ -154,7 +154,8 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
       message("  Merging ", paste(spCASFRI, collapse = ", "), "; becoming: ", sp)
     aa2 <- CASFRIattrLong[value %in% spCASFRI][, min(100L, sum(pct)), by = GID]
     setkey(aa2, GID)
-    cc <- aa2[CASFRIdt] %>% na.omit()
+    cc <- aa2[CASFRIdt] |>
+      na.omit()
     rm(aa2)
     spRasts[[sp]][cc$rastInd] <- cc$V1
     message("  ", sp, " writing to disk")
