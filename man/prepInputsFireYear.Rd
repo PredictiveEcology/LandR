@@ -24,14 +24,14 @@ Create a raster of fire perimeters
 }
 \examples{
 library(SpaDES.tools)
-library(raster)
+library(terra)
 library(reproducible)
 
 options("reproducible.useTerra" = TRUE, "reproducible.rasterRead" = "terra::rast")
 
-randomPoly <- randomStudyArea()
+randomPoly <- vect(randomStudyArea())
 randomPoly
-ras2match <- raster(res = 10, ext = extent(randomPoly), crs = crs(randomPoly))
+ras2match <- rast(res = 10, ext = ext(randomPoly), crs = crs(randomPoly))
 ras2match <- rasterize(randomPoly, ras2match)
 tempDir <- tempdir()
 cacheRepo <- file.path(tempDir, "cache")
@@ -43,13 +43,5 @@ firePerimeters <- Cache(prepInputsFireYear,
                         destinationPath = tempDir,
                         rasterToMatch = ras2match)
 
-  ## ideally, get the firePerimenters layer first
-  firePerimeters <- Cache(prepInputsFireYear,
-                          url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
-                                       "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-                          fun = "sf::st_read",
-                          destinationPath = tempDir,
-                          rasterToMatch = ras2match)
-}
 
 }

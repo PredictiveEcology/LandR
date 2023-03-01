@@ -90,7 +90,6 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #'   and `reproducible::prepInputs`
 #'
 #' @export
-#' @importFrom raster values values<-
 #' @importFrom reproducible asPath prepInputs
 #' @importFrom terra values intersect
 #' @importFrom raster intersect

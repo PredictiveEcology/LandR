@@ -383,11 +383,11 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @examples
 #' \dontrun{
 #' library(SpaDES.tools)
-#' library(raster)
+#' library(terra)
 #' library(reproducible)
-#' randomPoly <- randomStudyArea(size = 1e7)
+#' randomPoly <- vect(randomStudyArea(size = 1e7))
 #' randomPoly
-#' ras2match <- raster(res = 250, ext = extent(randomPoly), crs = crs(randomPoly))
+#' ras2match <- rast(res = 250, ext = ext(randomPoly), crs = crs(randomPoly))
 #' ras2match <- rasterize(randomPoly, ras2match)
 #' tempDir <- tempdir()
 #'
@@ -403,13 +403,12 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' firePerimeters <- Cache(prepInputsFireYear,
 #'                         url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
 #'                         "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-#'                         fun = "sf::st_read",
 #'                         destinationPath = tempDir,
 #'                         rasterToMatch = ras2match)
 #'
 #' standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
-#'                                     firePerimeters = firePerimeters,
-#'                                     rasterToMatch = ras2match)
+#'                                   firePerimeters = firePerimeters,
+#'                                   rasterToMatch = ras2match)
 #' attr(standAge, "imputedPixID")
 #'
 #' ## not providing firePerimeters is still possible, but will be deprecated
@@ -565,14 +564,14 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #'
 #' @examples
 #' library(SpaDES.tools)
-#' library(raster)
+#' library(terra)
 #' library(reproducible)
 #'
 #' options("reproducible.useTerra" = TRUE, "reproducible.rasterRead" = "terra::rast")
 #'
-#' randomPoly <- randomStudyArea()
+#' randomPoly <- vect(randomStudyArea())
 #' randomPoly
-#' ras2match <- raster(res = 10, ext = extent(randomPoly), crs = crs(randomPoly))
+#' ras2match <- rast(res = 10, ext = ext(randomPoly), crs = crs(randomPoly))
 #' ras2match <- rasterize(randomPoly, ras2match)
 #' tempDir <- tempdir()
 #' cacheRepo <- file.path(tempDir, "cache")
@@ -584,14 +583,6 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #'                         destinationPath = tempDir,
 #'                         rasterToMatch = ras2match)
 #'
-#'   ## ideally, get the firePerimenters layer first
-#'   firePerimeters <- Cache(prepInputsFireYear,
-#'                           url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
-#'                                        "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-#'                           fun = "sf::st_read",
-#'                           destinationPath = tempDir,
-#'                           rasterToMatch = ras2match)
-#' }
 #'
 prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950) {
   dots <- list(...)
@@ -646,11 +637,11 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 #' @examples
 #' \dontrun{
 #' library(SpaDES.tools)
-#' library(raster)
+#' library(terra)
 #' library(reproducible)
-#' randomPoly <- randomStudyArea(size = 1e7)
+#' randomPoly <- vect(randomStudyArea(size = 1e7))
 #' randomPoly
-#' ras2match <- raster(res = 250, ext = extent(randomPoly), crs = crs(randomPoly))
+#' ras2match <- rast(res = 250, ext = ext(randomPoly), crs = crs(randomPoly))
 #' ras2match <- rasterize(randomPoly, ras2match)
 #' tempDir <- tempdir()
 #'
@@ -662,7 +653,6 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 #' firePerimeters <- Cache(prepInputsFireYear,
 #'                         url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
 #'                         "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-#'                         fun = "sf::st_read",
 #'                         destinationPath = tempDir,
 #'                         rasterToMatch = ras2match)
 #' standAge <- replaceAgeInFires(standAge, firePerimeters)
