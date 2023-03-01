@@ -21,7 +21,8 @@ for a single layer \code{SpatRaster} or a \code{RasterLayer}
 }
 \examples{
 \donttest{
-cols <- colorRampPalette(c("blue", "red"))(12)
+ras <- terra::rast(matrix(1:100, 10, 10))
+cols <- colorRampPalette(c("blue", "red"))(100)
 ras <- Colors(ras, cols)
 }
 }
