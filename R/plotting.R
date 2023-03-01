@@ -167,7 +167,8 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 #'   `quickPlot::setColors(ras, n = n) <- `. If missing, then `n` will be `length(cols)`
 #' @examples
 #' \donttest{
-#' cols <- colorRampPalette(c("blue", "red"))(12)
+#' ras <- terra::rast(matrix(1:100, 10, 10))
+#' cols <- colorRampPalette(c("blue", "red"))(100)
 #' ras <- Colors(ras, cols)
 #' }
 Colors <- function(ras, cols, n) {
