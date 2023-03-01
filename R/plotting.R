@@ -177,15 +177,14 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 #' raster::plot(ras)
 #' }
 Colors <- function(ras, cols, n = NULL) {
-  theSeq <- round(minFn(ras)):round(maxFn(ras))
-  if (!is(cols, "data.frame")) {
-    if (length(cols) < length(theSeq)) {
-      message("not enough colours, interpolating")
-      cols <- colorRampPalette(cols)(length(theSeq)+1)
-    }
-  }
-
   if (is(ras, "SpatRaster")) {
+    theSeq <- round(minFn(ras)):round(maxFn(ras))
+    if (!is(cols, "data.frame")) {
+      if (length(cols) < length(theSeq)) {
+        message("not enough colours, interpolating")
+        cols <- colorRampPalette(cols)(length(theSeq)+1)
+      }
+    }
     coltab(ras, layer = 1) <- cols
   } else {
     if (is.null(n)) {
