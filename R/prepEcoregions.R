@@ -58,7 +58,9 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
     }
   }
 
-  ecoregionRst[pixelsToRm] <- NA
+  if (!is.null(pixelsToRm)) {
+    ecoregionRst[pixelsToRm] <- NA
+  }
 
   message(blue("Make initial ecoregionGroups ", Sys.time()))
 
