@@ -158,7 +158,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 #' This is a wrapper to help with migration to terra. Currently can only be used
 #' for a single layer `SpatRaster` or a `RasterLayer`
 #' @export
-#' @importFrom terra coltab<-
+#' @importFrom terra coltab<- ncell
 #' @importFrom quickPlot setColors
 #' @param ras A `Raster*` or `SpatRaster` class object.
 #' @param cols a character vector of colours. See examples. Can also be a `data.frame`,
@@ -167,25 +167,32 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 #'   `quickPlot::setColors(ras, n = n) <- `. If missing, then `n` will be `length(cols)`
 #' @examples
 #' \donttest{
+#' cols <- colorRampPalette(c("blue", "red"))(12)
 #' ras <- terra::rast(matrix(1:100, 10, 10))
-#' cols <- colorRampPalette(c("blue", "red"))(100)
 #' ras <- Colors(ras, cols)
+#' terra::plot(ras)
+#'
+#' ras <- raster::raster(matrix(1:100, 10, 10))
+#' ras <- Colors(ras, cols)
+#' raster::plot(ras)
 #' }
-Colors <- function(ras, cols, n) {
+Colors <- function(ras, cols, n = NULL) {
+  theSeq <- round(minFn(ras)):round(maxFn(ras))
+  if (!is(cols, "data.frame")) {
+    if (length(cols) < length(theSeq)) {
+      message("not enough colours, interpolating")
+      cols <- colorRampPalette(cols)(length(theSeq)+1)
+    }
+  }
 
   if (is(ras, "SpatRaster")) {
-    theSeq <- round(minFn(ras)):round(maxFn(ras))
-    if (!is(cols, "data.frame")) {
-      if (length(cols) < length(theSeq)) {
-        message("not enough colours, interpolating")
-        cols <- colorRampPalette(cols)(length(theSeq))
-      }
-    }
-
     coltab(ras, layer = 1) <- cols
-  }
-  else
+  } else {
+    if (is.null(n)) {
+      n <- length(cols)
+    }
     setColors(ras, n = n) <- cols
+  }
 
   ras
 }
