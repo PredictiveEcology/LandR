@@ -31,9 +31,8 @@ calcSeverityB <- function(cohortData, burnedPixelCohortData) {
   }
 
   ## calculate post-fire stand biomass, drop unnecessary columns
-  severityData <- severityData[, list(postfireB = sum(B),
-                                      pixelGroup = pixelGroup), by = pixelIndex] %>%
-    unique(.)
+  severityData <- severityData[, list(postfireB = sum(B), pixelGroup = pixelGroup), by = pixelIndex] |>
+    unique()
 
   ## sum initial B to stand level and add to severityData - this expands cohortData's B to pixels.
   severityData <- cohortData[, list(prefireB = sum(B)), by = pixelGroup][severityData, on = "pixelGroup"]

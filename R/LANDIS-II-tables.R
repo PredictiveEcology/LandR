@@ -27,7 +27,6 @@ landisIIrepo <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/"
 #'
 #' @export
 #' @importFrom data.table data.table
-#' @importFrom magrittr %>%
 #' @importFrom reproducible asPath Cache prepInputs
 #' @rdname speciesTable
 getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {

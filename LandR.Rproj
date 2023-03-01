@@ -21,4 +21,7 @@ PackageInstallArgs: --no-multiarch --with-keep.source
 PackageCheckArgs: --as-cran
 PackageRoxygenize: rd,collate,namespace,vignette
 
+UseNativePipeOperator: Yes
+
 QuitChildProcessesOnExit: Yes
+DisableExecuteRprofile: Yes

@@ -23,7 +23,8 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
 
   if (is.null(ecoregionRst)) {
     ecoregionLayer <- fixErrors(ecoregionLayer)
-    ecoregionMapSF <- sf::st_as_sf(ecoregionLayer) %>% sf::st_transform(., st_crs(rasterToMatchLarge))
+    ecoregionMapSF <- sf::st_as_sf(ecoregionLayer) |>
+      sf::st_transform(crs = st_crs(rasterToMatchLarge))
 
     if (is.null(ecoregionLayerField)) {
       if (!is.null(ecoregionMapSF$ECODISTRIC)) {
@@ -62,7 +63,9 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
     }
   }
 
-  ecoregionRst[pixelsToRm] <- NA
+  if (!is.null(pixelsToRm)) {
+    ecoregionRst[pixelsToRm] <- NA
+  }
 
   message(blue("Make initial ecoregionGroups ", Sys.time()))
 

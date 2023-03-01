@@ -50,8 +50,8 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
                                                        on = "speciesCode", nomatch = 0]
     #serotinyPixelCohortData <- setkey(serotinyPixelCohortData, speciesCode)[species[,.(speciesCode, sexualmature)],
     #                                                                          nomatch = 0]
-    serotinyPixelCohortData <- serotinyPixelCohortData[age >= sexualmature] %>% # NOTE should be in mortalityFromDisturbance module or event
-      unique(., by = c("pixelGroup", "speciesCode"))
+    serotinyPixelCohortData <- serotinyPixelCohortData[age >= sexualmature]  |> # NOTE should be in mortalityFromDisturbance module or event
+      unique(by = c("pixelGroup", "speciesCode"))
     set(serotinyPixelCohortData, NULL, "sexualmature", NULL)
 
     ## select the pixels that have potential serotiny regeneration and assess them

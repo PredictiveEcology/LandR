@@ -90,6 +90,7 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #'   and `reproducible::prepInputs`
 #'
 #' @export
+#' @importFrom raster values values<-
 #' @importFrom reproducible asPath prepInputs
 #' @importFrom terra values intersect
 #' @importFrom raster intersect
@@ -632,7 +633,6 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @return A raster stack of percent cover layers by species.
 #'
 #' @export
-#' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
 #' @importFrom reproducible Cache .prefix basename2 maxFn preProcess
 #' @importFrom tools file_path_sans_ext
@@ -711,9 +711,9 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   }
 
   ## get all kNN species - names only
-  allSpp <- fileNames %>%
-    sub("_v1\\.tif", "", .) %>%
-    sub(".*(Species|SpeciesGroups)_", "", .)
+  allSpp <- fileNames |>
+    sub("_v1\\.tif", "", x = _) |>
+    sub(".*(Species|SpeciesGroups)_", "", x = _)
 
   if (getRversion() < "4.0.0") {
     if (length(allSpp) == 0)
@@ -913,7 +913,6 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
 #' @return A raster stack of percent cover layers by species.
 #'
 #' @export
-#' @importFrom magrittr %>%
 #' @importFrom raster ncell raster
 #' @importFrom reproducible basename2 Cache .prefix preProcess
 #' @importFrom tools file_path_sans_ext

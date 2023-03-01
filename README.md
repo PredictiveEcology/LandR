@@ -5,7 +5,6 @@
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/LandR)](https://cran.r-project.org/package=LandR)
 [![CRAN Downloads](http://cranlogs.r-pkg.org/badges/grand-total/LandR)](https://cran.r-project.org/package=LandR)
 [![Codecov test coverage](https://codecov.io/gh/PredictiveEcology/LandR/branch/master/graph/badge.svg)](https://app.codecov.io/gh/PredictiveEcology/LandR?branch=master)
-[![Gitter](https://badges.gitter.im/PredictiveEcology/LandR_Biomass.svg)](https://gitter.im/PredictiveEcology/LandR_Biomass?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 <!-- badges: end -->
 
 **Landscape Ecosystem Modelling in R**
@@ -50,5 +49,4 @@ install_github("PredictiveEcology/LandR", ref = "development", dependencies = TR
 
 ## Getting help
 
-- Discussion: https://gitter.im/PredictiveEcology/LandR_Biomass
-- Bug reports: https://github.com/PredictiveEcology/LandR/issues
+- Bug reports: <https://github.com/PredictiveEcology/LandR/issues>

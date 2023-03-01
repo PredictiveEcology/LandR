@@ -35,7 +35,6 @@ Imports:
     ggspatial,
     grDevices,
     lme4,
-    magrittr,
     map,
     methods,
     MuMIn (>= 1.42.5),
@@ -69,6 +68,7 @@ Suggests:
     testthat,
     XML
 Remotes:
+    r-spatial/sf,
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/quickPlot@development,

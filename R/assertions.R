@@ -486,7 +486,6 @@ assertSpeciesEcoregionCohortDataMatch <- function(cohortData, speciesEcoregion,
 #' @template doAssertion
 #'
 #' @export
-#' @importFrom magrittr %>%
 #' @rdname assertions
 assertPixelCohortDataValid <- function(standCohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
@@ -494,10 +493,10 @@ assertPixelCohortDataValid <- function(standCohortData, doAssertion = getOption(
     if (any(test))
       stop("there are NAs in either the observed or simulated data. Please debug 'standCohortData'")
 
-    test2 <- standCohortData[, sum(relativeAbundObsrvd), by = .(rep, year, pixelIndex)]$V1 %>%
-      unique(.)
-    test3 <- standCohortData[, sum(relativeAbund), by = .(rep, year, pixelIndex)]$V1 %>%
-      unique(.)
+    test2 <- standCohortData[, sum(relativeAbundObsrvd), by = .(rep, year, pixelIndex)]$V1 |>
+      unique()
+    test3 <- standCohortData[, sum(relativeAbund), by = .(rep, year, pixelIndex)]$V1 |>
+      unique()
 
     ## need to round, because some values "appear" to be 1, but probably have v. small decimals.
     if (length(setdiff(round(test2, 6), c(1,0)))) {
