@@ -23,7 +23,8 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
 
   if (is.null(ecoregionRst)) {
     ecoregionLayer <- fixErrors(ecoregionLayer)
-    ecoregionMapSF <- sf::st_as_sf(ecoregionLayer) %>% sf::st_transform(., st_crs(rasterToMatchLarge))
+    ecoregionMapSF <- sf::st_as_sf(ecoregionLayer) |>
+      sf::st_transform(crs = st_crs(rasterToMatchLarge))
 
     if (is.null(ecoregionLayerField)) {
       if (!is.null(ecoregionMapSF$ECODISTRIC)) {
@@ -57,7 +58,9 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
     }
   }
 
-  ecoregionRst[pixelsToRm] <- NA
+  if (!is.null(pixelsToRm)) {
+    ecoregionRst[pixelsToRm] <- NA
+  }
 
   message(blue("Make initial ecoregionGroups ", Sys.time()))
 
@@ -74,8 +77,8 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
   if (appendEcoregionFactor) {
     ecoregionTable <- as.data.table(ecoregionRst@data@attributes[[1]])
     ecoregionTable[, ID := as.factor(paddedFloatToChar(ID, max(nchar(ID))))]
-    ecoregionFiles$ecoregion <- ecoregionFiles$ecoregion[ecoregionTable, on = c("ecoregion" = "ID")] %>%
-      na.omit(.)
+    ecoregionFiles$ecoregion <- ecoregionFiles$ecoregion[ecoregionTable, on = c("ecoregion" = "ID")] |>
+      na.omit()
     setnames(ecoregionFiles$ecoregion, old = "ecoregion_lcc", new = "ecoregionGroup")
   }
 

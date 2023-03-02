@@ -1,4 +1,6 @@
 test_that("test Ward dispersal seeding algorithm", {
+  skip_if_not_installed("googledrive")
+
   verbose <- 0
 
   if (FALSE) {

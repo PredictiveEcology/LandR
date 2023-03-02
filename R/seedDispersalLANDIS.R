@@ -55,15 +55,14 @@ utils::globalVariables(c(
 #' @param verbose Numeric. `0` is not verbose, with increasing numbers indicating
 #'   increasing levels of verbosity (currently up to 2)
 #'
-#' @param ...   Additional parameters. Currently none
+#' @param ...   Additional parameters. Currently none.
 #'
 #' @return A numeric vector of raster pixel indices, in the same resolution and extent as
 #' `seedSrc` raster.
 #'
-#' @importFrom magrittr %>%
+#' @importFrom data.table setDT setattr set
 #' @importFrom raster xyFromCell focalWeight rowColFromCell cellFromRowCol
 #' @importFrom stats na.omit
-#' @importFrom data.table setDT setattr set
 #' @importFrom SpaDES.tools runifC
 #' @export
 #' @docType methods
@@ -74,93 +73,96 @@ utils::globalVariables(c(
 #' @rdname LANDISDisp
 #'
 #' @examples
-#' seed <- sample(1e6, 1)
-#' set.seed(seed)
-#' library(data.table)
-#' library(raster)
-#' # keep this here for interactive testing with a larger raster
-#' rasterTemplate <- raster(extent(0, 2500, 0, 2500), res = 100)
+#' if (require("googledrive")) {
+#'   seed <- sample(1e6, 1)
+#'   set.seed(seed)
+#'   library(data.table)
+#'   library(raster)
 #'
-#' # make a pixelGroupMap
-#' pgs <- 4 # make even just because of approach below requires even
-#' pixelGroupMap <- SpaDES.tools::randomPolygons(rasterTemplate, numTypes = pgs)
-#' pixelGroupMap[1:100] <- NA # emulate a mask at the start
+#'   # keep this here for interactive testing with a larger raster
+#'   rasterTemplate <- raster(extent(0, 2500, 0, 2500), res = 100)
 #'
-#' # Make a receive pixels table -- need pixelGroup and species
-#' nSpecies <- 3
-#' maxNSpeciesPerPixel <- min(5, nSpecies)
-#' rcvSpByPG <- lapply(seq_len(pgs / 2), function(pg) {
-#'   data.table(speciesCode = sample(nSpecies, size = sample(maxNSpeciesPerPixel, 1)))
-#' })
-#' seedReceive <- rbindlist(rcvSpByPG, idcol = "pixelGroup")
+#'   # make a pixelGroupMap
+#'   pgs <- 4 # make even just because of approach below requires even
+#'   pixelGroupMap <- SpaDES.tools::randomPolygons(rasterTemplate, numTypes = pgs)
+#'   pixelGroupMap[1:100] <- NA # emulate a mask at the start
 #'
-#' # Make a source pixels table -- need pixelGroup and species
-#' srcSpByPG <- lapply(seq_len(pgs / 2), function(pg) {
-#'   data.table(speciesCode = sample(nSpecies, size = sample(maxNSpeciesPerPixel, 1)))
-#' })
-#' seedSource <- rbindlist(srcSpByPG, idcol = "pixelGroup")
-#' # make source pixels not same pixelGroups as receive
-#' seedSource[, pixelGroup := pixelGroup + pgs / 2]
+#'   # Make a receive pixels table -- need pixelGroup and species
+#'   nSpecies <- 3
+#'   maxNSpeciesPerPixel <- min(5, nSpecies)
+#'   rcvSpByPG <- lapply(seq_len(pgs / 2), function(pg) {
+#'     data.table(speciesCode = sample(nSpecies, size = sample(maxNSpeciesPerPixel, 1)))
+#'   })
+#'   seedReceive <- rbindlist(rcvSpByPG, idcol = "pixelGroup")
 #'
-#' # Get a species table -- if using in Canada, can use this
-#' speciesTable <- getSpeciesTable(dPath = tempdir())
-#' speciesTable <- speciesTable[Area == "BSW"]
-#' speciesTable[, speciesCode := as.factor(LandisCode)]
-#' speciesTable[, seeddistance_eff := SeedEffDist]
-#' speciesTable[, seeddistance_max := SeedMaxDist]
+#'   # Make a source pixels table -- need pixelGroup and species
+#'   srcSpByPG <- lapply(seq_len(pgs / 2), function(pg) {
+#'     data.table(speciesCode = sample(nSpecies, size = sample(maxNSpeciesPerPixel, 1)))
+#'   })
+#'   seedSource <- rbindlist(srcSpByPG, idcol = "pixelGroup")
+#'   # make source pixels not same pixelGroups as receive
+#'   seedSource[, pixelGroup := pixelGroup + pgs / 2]
 #'
-#' speciesTable <- speciesTable
-#' speciesTable <- data.table(speciesTable)[, speciesCode := seq_along(LandisCode)]
-#' seedReceiveFull <- speciesTable[seedReceive, on = "speciesCode"]
-#' output <- LANDISDisp(
-#'   dtRcv = seedReceiveFull, plot.it = interactive(),
-#'   dtSrc = seedSource,
-#'   speciesTable = speciesTable,
-#'   pixelGroupMap,
-#'   verbose = TRUE,
-#'   successionTimestep = 10
-#' )
-#' # Summarize
-#' output[, .N, by = speciesCode]
+#'   # Get a species table -- if using in Canada, can use this
+#'   speciesTable <- getSpeciesTable(dPath = tempdir())
+#'   speciesTable <- speciesTable[Area == "BSW"]
+#'   speciesTable[, speciesCode := as.factor(LandisCode)]
+#'   speciesTable[, seeddistance_eff := SeedEffDist]
+#'   speciesTable[, seeddistance_max := SeedMaxDist]
 #'
-#' ## Plot the maps
-#' if (interactive()) {
-#'   library(quickPlot)
-#'   clearPlot()
-#'   spMap <- list()
-#'   spMap$pixelGroupMap <- pixelGroupMap
-#'   for (sppp in unique(output$speciesCode)) {
-#'     spppChar <- paste0("Sp_", sppp)
-#'     spMap[[spppChar]] <- raster(pixelGroupMap)
-#'     ss <- unique(seedSource[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
-#'     spMap[[spppChar]][pixelGroupMap[] %in% ss$pixelGroup] <- 1
+#'   speciesTable <- speciesTable
+#'   speciesTable <- data.table(speciesTable)[, speciesCode := seq_along(LandisCode)]
+#'   seedReceiveFull <- speciesTable[seedReceive, on = "speciesCode"]
+#'   output <- LANDISDisp(
+#'     dtRcv = seedReceiveFull, plot.it = interactive(),
+#'     dtSrc = seedSource,
+#'     speciesTable = speciesTable,
+#'     pixelGroupMap,
+#'     verbose = TRUE,
+#'     successionTimestep = 10
+#'   )
+#'   # Summarize
+#'   output[, .N, by = speciesCode]
 #'
-#'     receivable <- raster(pixelGroupMap)
-#'     srf <- unique(seedReceiveFull[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
-#'     receivable[pixelGroupMap[] %in% srf$pixelGroup] <- 1
+#'   ## Plot the maps
+#'   if (interactive()) {
+#'     library(quickPlot)
+#'     clearPlot()
+#'     spMap <- list()
+#'     spMap$pixelGroupMap <- pixelGroupMap
+#'     for (sppp in unique(output$speciesCode)) {
+#'       spppChar <- paste0("Sp_", sppp)
+#'       spMap[[spppChar]] <- raster(pixelGroupMap)
+#'       ss <- unique(seedSource[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
+#'       spMap[[spppChar]][pixelGroupMap[] %in% ss$pixelGroup] <- 1
 #'
-#'     forest <- which(!is.na(pixelGroupMap[]))
-#'     src <- which(!is.na(spMap[[spppChar]][]))
-#'     recvable <- which(!is.na(receivable[]))
-#'     rcvd <- output[speciesCode == sppp]$pixelIndex
+#'       receivable <- raster(pixelGroupMap)
+#'       srf <- unique(seedReceiveFull[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
+#'       receivable[pixelGroupMap[] %in% srf$pixelGroup] <- 1
 #'
-#'     spMap[[spppChar]][forest] <- 0
-#'     spMap[[spppChar]][recvable] <- 2
-#'     spMap[[spppChar]][src] <- 1
-#'     spMap[[spppChar]][rcvd] <- 3
-#'     spMap[[spppChar]][intersect(src, rcvd)] <- 4
+#'       forest <- which(!is.na(pixelGroupMap[]))
+#'       src <- which(!is.na(spMap[[spppChar]][]))
+#'       recvable <- which(!is.na(receivable[]))
+#'       rcvd <- output[speciesCode == sppp]$pixelIndex
 #'
-#'     levels(spMap[[spppChar]]) <- data.frame(ID = 0:4,
-#'                                             type = c("OtherForest", "Source", "Didn't receive",
-#'                                                      "Received", "Src&Rcvd"))
-#'   }
-#'   Plot(spMap, cols = "Set2")
+#'       spMap[[spppChar]][forest] <- 0
+#'       spMap[[spppChar]][recvable] <- 2
+#'       spMap[[spppChar]][src] <- 1
+#'       spMap[[spppChar]][rcvd] <- 3
+#'       spMap[[spppChar]][intersect(src, rcvd)] <- 4
 #'
-#'   # A summary
-#'   rr <- apply(raster::stack(spMap)[[-1]][] + 1, 2, tabulate) # tabulate accommodate missing levels
-#'   rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"][1:NROW(rr)]
-#'   # This next line only works if there are some places that are both source and potential to receive
-#'   # rr <- rbind(rr, propSrcRcved = round(rr[5,]/ (rr[5,]+rr[2,]), 2))
+#'       levels(spMap[[spppChar]]) <- data.frame(ID = 0:4,
+#'                                               type = c("OtherForest", "Source", "Didn't receive",
+#'                                                        "Received", "Src&Rcvd"))
+#'     }
+#'     Plot(spMap, cols = "Set2")
+#'
+#'     # A summary
+#'     rr <- apply(raster::stack(spMap)[[-1]][] + 1, 2, tabulate)
+#'     rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"][1:NROW(rr)]
+#'     # next line only works if there are some places that are both source and potential to receive
+#'     # rr <- rbind(rr, propSrcRcved = round(rr[5,]/ (rr[5,]+rr[2,]), 2))
+#'  }
 #' }
 #'
 LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
@@ -313,12 +315,12 @@ speciesCodeFromCommunity <- function(num) {
 
 speciesComm <- function(num, sc) {
   speciesCode <- speciesCodeFromCommunity(num)
-  data.table(
+  a <- data.table(
     RcvCommunity = as.integer(rep(num, sapply(speciesCode, length))),
     speciesCode = unlist(speciesCode),
     key = "speciesCode"
-  )[!is.na(speciesCode)] %>%
-    sc[.]
+  )[!is.na(speciesCode)]
+  sc[a]
 }
 
 #' Ward Dispersal Kernel -- vectorized, optimized for speed

@@ -2,12 +2,9 @@ bug reports <https://github.com/PredictiveEcology/LandR/issues>
 
 version 1.1.0
 =============
+* drop support for R < 4.2 due to change in dependency package `MuMIn` (Sept 2022)
 * move LandWeb-specific functions to `LandWebUtils` package (#86)
 * `prepInputsFireYear` can now handle `rasterToMatch` that is a `SpatRaster`
-
-version 1.1.0
-=============
-* drop support for R < 4.2 due to change in dependency package `MuMIn` (Sept 2022)
 
 version 1.0.9
 =============

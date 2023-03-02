@@ -86,9 +86,9 @@ BioSIM_getWindAnnual <- function(dem, years, climModel = "GCM4", rcp = "RCP45") 
 
       # Convert BioSIM data to Vector dataset
       sfWind <- SpatialPoints(wind[Year == yr, c("Longitude", "Latitude")],
-                              proj4string = CRS("+init=epsg:4326")) %>%
-        sf::st_as_sf(.) %>%
-        sf::st_transform(., crs = sf::st_crs(dem))
+                              proj4string = CRS("+init=epsg:4326")) |>
+        sf::st_as_sf() |>
+        sf::st_transform(crs = sf::st_crs(dem))
       cells <- cellFromXY(dem, sf::st_coordinates(sfWind))
       cols <- grep("^W[[:digit:]]", colnames(windYr), value = TRUE)
 
@@ -207,8 +207,8 @@ BioSIM_getMPBSLR <- function(dem, years, SLR = "R", climModel = "GCM4", rcp = "R
           climModel = climModel
         )
         setDT(slr)
-      }) %>%
-        rbindlist(.)
+      }) |>
+        rbindlist()
     })
 
     message("Fetched ", NROW(slr), " locations in ", st[3], "s.")
@@ -223,9 +223,9 @@ BioSIM_getMPBSLR <- function(dem, years, SLR = "R", climModel = "GCM4", rcp = "R
 
       # Convert BioSIM data to Vector dataset
       sfSLR <- SpatialPoints(slr[Year == yr, c("Longitude", "Latitude")],
-                             proj4string = CRS("+init=epsg:4326")) %>%
-        sf::st_as_sf(.) %>%
-        sf::st_transform(., crs = sf::st_crs(dem))
+                             proj4string = CRS("+init=epsg:4326")) |>
+        sf::st_as_sf() |>
+        sf::st_transform(crs = sf::st_crs(dem))
       cells <- cellFromXY(dem, sf::st_coordinates(sfSLR))
 
       # Convert to Raster
