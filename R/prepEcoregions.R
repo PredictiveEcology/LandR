@@ -39,7 +39,7 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
       rm(ecoDT)
     }
     ecoregionRst <- rasterize(ecoregionMapSF, rasterToMatchLarge,
-                                     field = "ecoregionLayerField")
+                              field = "ecoregionLayerField")
     # ecoregionRst <- fasterize::fasterize(ecoregionMapSF, rasterToMatchLarge,
     #                                      field = "ecoregionLayerField")
     rm(ecoregionLayer)
