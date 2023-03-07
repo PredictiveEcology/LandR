@@ -727,15 +727,15 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
       rasterToMatchLarge <- templateRas
     }
 
-    if (!anyNA(rasterToMatchLarge[])) {
-      whZeros <- rasterToMatchLarge[] == 0
+    if (!anyNA(as.vector(rasterToMatchLarge[]))) {
+      whZeros <- as.vector(rasterToMatchLarge[]) == 0
       if (sum(whZeros) > 0) {# means there are zeros instead of NAs for RTML --> change
         rasterToMatchLarge[whZeros] <- NA
         message("There were no NAs on the rasterToMatchLarge, but there were zeros; converting these zeros to NA")
       }
     }
 
-    RTMvals <- rasterToMatchLarge[]
+    RTMvals <- as.vector(rasterToMatchLarge[])
     rasterToMatchLarge[!is.na(RTMvals)] <- 1
 
     rasterToMatchLarge <- Cache(
