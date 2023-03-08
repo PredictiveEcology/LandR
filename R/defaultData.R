@@ -350,6 +350,10 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
       outs[["thermokarst"]] <- thermokarstRas
     }
 
+    ## combine thermokarst and permafrost layers
+    ## high thermokarst in low permafrost areas != than in high permafrost areas (especially for veg)
+    ## perhaps multiplying is misleading too. is 25% PCC * 2 thermokarst (medium) the same as 50% permafrost * 1 (low) thermokarst?
+    ## actually we're lucky with Gibson's data because the permafrost classes are not multiples of each other - however this approach is not ideal when they are...
     if ("thermXperm" %in% vars) {
       outs[["thermXperm"]] <- thermokarstRas*permafrostRas
     }
