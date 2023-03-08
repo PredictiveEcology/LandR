@@ -115,6 +115,7 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
     vals <- values(timeSinceFire)
     vals[is.na(vals),] <- mean(fireData$TSLF)
     values(timeSinceFire) <- vals
+    timeSinceFire <- mask(timeSinceFire, rasterToMatch)
     outs[["timeSinceFire"]] <- timeSinceFire
   }
 
