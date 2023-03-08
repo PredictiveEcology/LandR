@@ -353,11 +353,11 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
     levels(thermokarstRas) <- levelsthermokarstRas
 
     if ("permafrost" %in% vars) {
-      outs["permafrostRas"] <- permafrostRas
+      outs["permafrost"] <- permafrostRas
     }
 
     if ("thermokarst" %in% vars) {
-      outs["thermokarstRas"] <- thermokarstRas
+      outs["thermokarst"] <- thermokarstRas
     }
 
     if ("thermXperm" %in% vars) {
