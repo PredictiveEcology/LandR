@@ -293,55 +293,44 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
                         userTags = c(userTags, "permafrost"),
                         omitArgs = c("userTags"))
 
-    ## rasterize permafrost amount
-    ## take minimum value to be pessimistic/conservative
-    ## TODO: temporarily allow for RTM as RasterLayer while transition to terra is not complete
-    tempRTM <- rast(crs = crs(permafrost), resolution = res(rasterToMatch), extent = ext(permafrost))
-    tempRTM[] <- 1L
-    sa <- postProcess(studyArea, projectTo = crs(permafrost))
-    permafrostRas <- Cache(rasterize,
-                           x = permafrost, y = tempRTM,
-                           field = "Permafrost", fun = "min", touches = TRUE,
-                           background = 0,
-                           userTags = c(userTags, "permafrostRas"),
-                           omitArgs = c("userTags")) |>
-      mask(mask = sa)
+    ## "rasterize" amount of permafrost
+    ## make a points object to extract values in native CRS
+    pixIDs <- which(!is.na(as.vector(rasterToMatch[])))
+    pixIDsCoords <- as.data.frame(xyFromCell(rasterToMatch, cell = pixIDs))
+    pixIDsPoints <- vect(pixIDsCoords, geom = c("x", "y"), crs = crs(rasterToMatch))
+    pixIDs <- data.table(ID = 1:length(pixIDs), pixelIndex = pixIDs)   ## these will be the points IDs
 
-    ## rasterize thermokarst amount
-    ## convert factor to numeric first
-    ## note: Degree_Of2 used to have a longer name but that caused rasterize to crash
-    permafrost$thermokrst <- factor(permafrost$Degree_Of_, levels = c("None", "Low", "Medium", "High"),
-                                    labels = c(0, 1, 2, 3))
-    permafrost$thermokrst <- as.integer(as.character(permafrost$thermokrst))
-    ## take maximum value to be conservative (pessimistic)
-    ## this rasterize is causing R to crash...?!
-    ## use fasterize for now
-    # thermokarstRas <- rasterize(permafrost, y = tempRTM,
-    #                             field = "thermokrst", fun = "max", touches = TRUE,
-    #                             background = 0)
-
-    if (!requireNamespace("fasterize")) {
-      stop("Install fasterize")
+    permafrostData <- genericExtract(x = permafrost, y = pixIDsPoints, field = "Permafrost")
+    ## points in between polys could touch more than one, take min value
+    ## for a conservative estimate of permafrost
+    if (any(duplicated(permafrostData$ID))) {
+      suppressWarnings({
+        permafrostData <- permafrostData[, list(Permafrost = min(Permafrost, na.rm = TRUE)),
+                                         by = ID]
+      })
+      permafrostData[Permafrost == Inf, Permafrost := NA]
     }
-    thermokarstRas <- fasterize::fasterize(st_as_sf(permafrost),
-                                           raster::raster(tempRTM), field = "thermokrst",
-                                           fun = "max", background = 0) |>
-      Cache(userTags = c(userTags, "thermokarstRas"),
-            omitArgs = c("userTags")) |>
-      rast() |>
-      mask(mask = sa)
+    permafrostData <- pixIDs[permafrostData, on = .(ID)]
+    permafrostRas <- rasterToMatch
+    permafrostRas[permafrostData$pixelIndex] <- permafrostData$Permafrost
 
-    rm(sa, tempRTM)
-
-    # browser()
-    # #library(terra)  ## makes no difference
-    # {
-    #   fasterize::fasterize(st_as_sf(as(permafrost, "Spatial")),
-    #                        raster::raster(tempRTM), field = "thermokrst",
-    #                        fun = "max", background = 0) |>
-    #     terra::rast() |>
-    #     terra::mask(mask = tempRTM)
-    #   } |> Cache()
+    ## "rasterize" amount of thermokarst
+    thermokarstData <- genericExtract(x = permafrost, y = pixIDsPoints, field = "Degree_Of_")
+    thermokarstData[, thermokrst := factor(Degree_Of_, levels = c("None", "Low", "Medium", "High"),
+                                           labels = c(0, 1, 2, 3))]
+    thermokarstData[, thermokrst := as.integer(as.character(thermokrst))]
+    ## points in between polys could touch more than one, take min value
+    ## for a pessimistic estimate of thermokarst
+    if (any(duplicated(thermokarstData$ID))) {
+      suppressWarnings({
+        thermokarstData <- thermokarstData[, list(thermokrst = max(thermokrst, na.rm = TRUE)),
+                                         by = ID]
+        thermokarstData[thermokrst == Inf, thermokrst := NA]
+      })
+    }
+    thermokarstData <- pixIDs[thermokarstData, on = .(ID)]
+    thermokarstRas <- rasterToMatch
+    thermokarstRas[thermokarstData$pixelIndex] <- thermokarstData$thermokrst
 
     ## /!\ there are "NAs"/"NULLs" in thermokarst areas (Degree_Of) that have permafrost.
     ## These are probably true zeros
