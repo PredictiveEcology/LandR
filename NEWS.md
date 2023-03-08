@@ -6,6 +6,8 @@ version 1.1.0
 * `Colors` -- new function to help with `terra` migration.
 * `prepInputsFireYear` can now handle `rasterToMatch` that is a `SpatRaster`
 * drop support for R < 4.2 due to change in dependency package `MuMIn` (Sept 2022)
+* new functions to download a set of default biogeoclimatic variables used across
+several modules. These functions may only be here temporarily.
 
 version 1.0.9
 =============
