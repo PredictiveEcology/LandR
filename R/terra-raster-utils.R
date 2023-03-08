@@ -199,3 +199,40 @@ reclass <- function(ras, tab) {
 }
 
 
+#' GENERIC EXTRACT POINTS
+#'
+#' Extracts points from raster layers using the
+#'   original raster layer projection.
+#'
+#' @param y a points spatial object (`sp`, `sf`, or `terra`)
+#' @param ras a raster object (`raster` or `terra`)
+#' @param ... passed to `terra::extract`
+#'
+#' @return a data.table with extracted values
+#'
+#' @importFrom reproducible .compareCRS
+#' @importFrom terra rast vect project extract
+#' @importFrom data.table as.data.table
+#' @export
+genericExtract <- function(x, y, ...) {
+  if (!inherits(x, c("SpatRaster", "Raster"))) {
+    stop("x must be a `terra`/`raster` raster")
+  }
+  if (!is(x, "SpatRaster")) {
+    x <- rast(x)
+  }
+
+  if (!inherits(y, c("SpatVector", "Spatial", "sf", "sfc", "POINT"))) {
+    stop("y must be `terra`/`raster`/ `sf` y")
+  }
+  if (!is(y, c("SpatVector"))) {
+    y <- vect(y)
+  }
+
+  if(!.compareCRS(y, x)) {
+    y <- project(y, y = crs(x, proj = TRUE))
+  }
+
+  terra::extract(x = x, y = y, ...) |>
+    as.data.table()
+}
