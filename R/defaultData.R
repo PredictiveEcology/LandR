@@ -115,11 +115,11 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
     vals <- values(timeSinceFire)
     vals[is.na(vals),] <- mean(fireData$TSLF)
     values(timeSinceFire) <- vals
-    outs["timeSinceFire"] <- timeSinceFire
+    outs[["timeSinceFire"]] <- timeSinceFire
   }
 
   if ("elevation" %in% vars) {
-    outs["elevation"] <- Cache(prepInputs,
+    outs[["elevation"]] <- Cache(prepInputs,
                                targetFile = "elevation.tif",
                                url = "https://s3-us-west-2.amazonaws.com/www.cacpd.org/CMIP6/elevation.tif",
                                destinationPath = destinationPath,
@@ -135,7 +135,7 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
   bioClimURL <- paste0("https://s3-us-west-2.amazonaws.com/www.cacpd.org/",
                        "CMIP6/normals/Normal_1981_2010_bioclim.zip")
   if ("MAT" %in% vars) {
-    outs["MAT"] <- Cache(prepInputs,
+    outs[["MAT"]] <- Cache(prepInputs,
                          targetFile = "Normal_1981_2010_MAT.tif",
                          archive = "data/Normal_1981_2010_bioclim.zip",
                          url = bioClimURL,
@@ -152,7 +152,7 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
   ## Precipitation of warmest quarter (total precipitation over warmest quarter of the year)
   ## assuming warmest quarter to be June-August
   if ("PPT_sm" %in% vars) {
-    outs["PPT_sm"] <- Cache(prepInputs,
+    outs[["PPT_sm"]] <- Cache(prepInputs,
                             targetFile = "Normal_1981_2010_PPT_sm.tif",
                             archive = "data/Normal_1981_2010_bioclim.zip",
                             url = bioClimURL,
@@ -169,7 +169,7 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
   ## Precipitation of coldest quarter (total precipitation over the coldest quarter of the year)
   ## assuming coldest quarter to be December-February
   if ("PPT_wt" %in% vars) {
-    outs["PPT_wt"] <- Cache(prepInputs,
+    outs[["PPT_wt"]] <- Cache(prepInputs,
                             targetFile = "Normal_1981_2010_PPT_wt.tif",
                             archive = "data/Normal_1981_2010_bioclim.zip",
                             url = bioClimURL,
@@ -186,7 +186,7 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
   ## Annual climate moisture index (CMI = P PET, where P is annual precipitation and PET is annual potential evapotranspiration)
   ## this is Hogg's CMI
   if ("CMI" %in% vars) {
-    outs["CMI"] <- Cache(prepInputs,
+    outs[["CMI"]] <- Cache(prepInputs,
                          targetFile = "Normal_1981_2010_CMI.tif",
                          archive = "data/Normal_1981_2010_bioclim.zip",
                          url = bioClimURL,
@@ -219,7 +219,7 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
     ## replace NAs inside study area with 0s. otherwise we loose data for SDMs
     sa <- postProcessTerra(studyArea, projectTo = wetlands)
     wetlands[is.na(wetlands[])] <- 0
-    outs["wetlands"] <- mask(wetlands, sa)
+    outs[["wetlands"]] <- mask(wetlands, sa)
     rm(sa)
   }
 
@@ -342,15 +342,15 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
     levels(thermokarstRas) <- levelsthermokarstRas
 
     if ("permafrost" %in% vars) {
-      outs["permafrost"] <- permafrostRas
+      outs[["permafrost"]] <- permafrostRas
     }
 
     if ("thermokarst" %in% vars) {
-      outs["thermokarst"] <- thermokarstRas
+      outs[["thermokarst"]] <- thermokarstRas
     }
 
     if ("thermXperm" %in% vars) {
-      outs["thermXperm"] <- thermokarstRas*permafrostRas
+      outs[["thermXperm"]] <- thermokarstRas*permafrostRas
     }
   }
   outs
