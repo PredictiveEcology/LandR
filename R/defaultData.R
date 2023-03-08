@@ -81,8 +81,8 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
                       fun = "readxl::read_xlsx",
                       destinationPath = destinationPath,
                       userTags = c(userTags, "fireDataNWT"),
-                      omitArgs = c("userTags")) %>%
-      as.data.table
+                      omitArgs = c("userTags")) |>
+      as.data.table()
     fireData <- st_as_sf(fireData[, .(TSLF, latitude, longitude)], coords = c("longitude", "latitude"))
     st_write(obj = fireData, dsn = file.path(destinationPath, "TSLF.shp"), delete_layer = TRUE)
     st_crs(fireData) <- "+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"  ## latlong
