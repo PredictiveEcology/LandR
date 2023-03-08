@@ -204,35 +204,54 @@ reclass <- function(ras, tab) {
 #' Extracts points from raster layers using the
 #'   original raster layer projection.
 #'
+#' @param x a raster or polygon object (`sp`, `raster` or `terra`)
 #' @param y a points spatial object (`sp`, `sf`, or `terra`)
-#' @param ras a raster object (`raster` or `terra`)
+#' @param field character. The field(s) to extract when x is a polygon.
+#'   If `NULL`, all fields are extracted and returned. IDs of y are always
+#'   returned (`ID` column) .
 #' @param ... passed to `terra::extract`
 #'
-#' @return a data.table with extracted values
+#' @return a data.table with extracted values and an `ID` column of
+#'   y point IDs
 #'
-#' @importFrom reproducible .compareCRS
 #' @importFrom terra rast vect project extract
 #' @importFrom data.table as.data.table
 #' @export
-genericExtract <- function(x, y, ...) {
-  if (!inherits(x, c("SpatRaster", "Raster"))) {
-    stop("x must be a `terra`/`raster` raster")
-  }
-  if (!is(x, "SpatRaster")) {
-    x <- rast(x)
+genericExtract <- function(x, y, field = NULL, ...) {
+  if (inherits(x, c("SpatVector", "Spatial", "sf", "sfc", "POLYGON"))) {
+    if (inherits(x, c("Spatial", "sf", "sfc", "POLYGON"))) {
+      x <- vect(x)
+    }
+  } else {
+    if (!inherits(x, c("SpatRaster", "Raster"))) {
+      stop("x must be a `terra`/`raster`/`sp` raster or polygon")
+    } else {
+      if (!is(x, "SpatRaster")) {
+        x <- rast(x)
+      }
+    }
   }
 
   if (!inherits(y, c("SpatVector", "Spatial", "sf", "sfc", "POINT"))) {
-    stop("y must be `terra`/`raster`/ `sf` y")
+    stop("y must be `terra`/`raster`/ `sf` points")
   }
   if (!is(y, c("SpatVector"))) {
     y <- vect(y)
   }
 
-  if(!.compareCRS(y, x)) {
+  if (!.compareCRS(y, x)) {
     y <- project(y, y = crs(x, proj = TRUE))
   }
 
-  terra::extract(x = x, y = y, ...) |>
+  out <- terra::extract(x = x, y = y, ...) |>
     as.data.table()
+
+  if (!is.null(field)) {
+    if (all(field %in% names(x))) {
+      out <- out[, .SD, .SDcols = c("id.y", field)]
+      setnames(out, "id.y", "ID")
+    }
+  }
+
+  out
 }
