@@ -42,7 +42,7 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
                                       "timeSinceFire", "wetlands", "permafrost", "thermokarst",
                                       "thermXperm"),
                              studyArea, userTags, destinationPath, rasterToMatch) {
-  vars <- match.arg(vars)
+  vars <- match.arg(vars, several.ok = TRUE)
 
   outs <- list()
 
@@ -398,7 +398,7 @@ defaultClimateDataProj <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI"),
                                    periods = c("2001_2020", "2021_2040", "2041_2060", "2061_2080", "2081_2100"),
                                    studyArea, userTags, destinationPath, rasterToMatch) {
   ## checks
-  vars <- match.arg(vars)
+  vars <- match.arg(vars, several.ok = TRUE)
 
   if (length(climateGCM) > 1) {
     stop("Provide a single climateGCM")
