@@ -410,8 +410,6 @@ defaultClimateDataProj <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI"),
 
   bioClimURLs <- paste0(paste(bioClimURL, periods, sep = "_"),"_bioclim.zip")
 
-  outs <- list()
-
   ## Mean annual temperature (mean of all of the monthly mean temperatures)
   if ("MAT" %in% vars) {
     MATfiles <- sub("bioclim.zip", "MAT.tif", basename(bioClimURLs))
