@@ -4,9 +4,8 @@
 
 #' Set NA value in Raster/SpatRaster
 #'
-#' @param ras a Raster* , or SpatRaster object
+#' @param ras a Raster*, or SpatRaster object
 #' @param NAval the value to use as `NA`
-#'
 #' @return a raster with attributed NA values
 #'
 #' @rdname rasterTerraHelpers
