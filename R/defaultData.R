@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "TSLF", "latitude", "longitude"
+  "TSLF", "latitude", "longitude", "Degree_Of_", "Permafrost", "thermokrst"
 ))
 
 ## ------------------------------------
