@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "TSLF", "latitude", "longitude", "Degree_Of_", "Permafrost", "thermokrst"
+  "TSLF", "latitude", "longitude", "Degree_Of_", "Permafrost", "thermokarst"
 ))
 
 ## ------------------------------------
@@ -318,21 +318,21 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
 
     ## "rasterize" amount of thermokarst
     thermokarstData <- genericExtract(x = permafrost, y = pixIDsPoints, field = "Degree_Of_")
-    thermokarstData[, thermokrst := factor(Degree_Of_, levels = c("None", "Low", "Medium", "High"),
+    thermokarstData[, thermokarst := factor(Degree_Of_, levels = c("None", "Low", "Medium", "High"),
                                            labels = c(0, 1, 2, 3))]
-    thermokarstData[, thermokrst := as.integer(as.character(thermokrst))]
+    thermokarstData[, thermokarst := as.integer(as.character(thermokarst))]
     ## points in between polys could touch more than one, take min value
     ## for a pessimistic estimate of thermokarst
     if (any(duplicated(thermokarstData$ID))) {
       suppressWarnings({
-        thermokarstData <- thermokarstData[, list(thermokrst = max(thermokrst, na.rm = TRUE)),
+        thermokarstData <- thermokarstData[, list(thermokarst = max(thermokarst, na.rm = TRUE)),
                                          by = ID]
       })
     }
-    thermokarstData[is.infinite(thermokrst), thermokrst := NA]
+    thermokarstData[is.infinite(thermokarst), thermokarst := NA]
     thermokarstData <- pixIDs[thermokarstData, on = .(ID)]
     thermokarstRas <- rasterToMatch
-    thermokarstRas[thermokarstData$pixelIndex] <- thermokarstData$thermokrst
+    thermokarstRas[thermokarstData$pixelIndex] <- thermokarstData$thermokarst
     thermokarstRas <- mask(thermokarstRas, rasterToMatch)
 
     ## /!\ there are "NAs"/"NULLs" in thermokarst areas (Degree_Of) that have permafrost.
