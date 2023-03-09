@@ -272,9 +272,9 @@ genericExtract <- function(x, y, field = NULL, ...) {
 #' @param plotTitle character. A title for the plot passed to
 #'   \code{ggplot::labs(title = plotTitle)}
 #'
-#' @importFrom ggplot2 geom_tile scale_fill_viridis_c coord_equal theme_classic
+#' @importFrom ggplot2 geom_raster scale_fill_viridis_c coord_equal theme_classic
 #' @importFrom ggplot2 facet_wrap labs aes
-#' @importFrom terra nlyr rast ncell
+#' @importFrom terra nlyr rast ncell is.factor
 #' @export
 plotRast <- function(ras, plotTitle) {
   if (inherits(ras, c("Raster", "SpatRaster"))) {
@@ -288,10 +288,24 @@ plotRast <- function(ras, plotTitle) {
   if (!requireNamespace("rasterVis")) {
     stop("Please install 'rasterVis'")
   }
-  plot1 <- rasterVis::gplot(ras, maxpixels = ncell(ras)) +
-    geom_tile(aes(fill = value)) +
-    scale_fill_viridis_c(option = "cividis", na.value = "grey") +
-    coord_equal() +
+  plot1 <- rasterVis::gplot(ras, maxpixels = ncell(ras))
+
+  if (terra::is.factor(ras)) {
+    ## need to do this manually for NAs
+    cols <- rasVals <- unique(as.vector(ras[]))
+    cols[!is.na(cols)] <- viridis::cividis(sum(!is.na(cols)))
+    names(cols) <- rasVals
+    cols[is.na(rasVals)] <- "grey"
+
+    plot1 <- plot1 +
+      geom_raster(aes(fill = as.character(value))) +
+      scale_fill_manual(values = cols, guide = "legend")
+  } else {
+    plot1 <- plot1 +
+      geom_raster(aes(fill = value)) +
+      scale_fill_viridis_c(option = "cividis", na.value = "grey")
+  }
+  plot1 <- plot1 + coord_equal() +
     theme_classic()
 
   if (nlyr(ras) > 1) {
