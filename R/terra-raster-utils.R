@@ -1,3 +1,8 @@
+utils::globalVariables(c(
+  "variable", "value"
+))
+
+
 ## TODO: Ceres: these functions can be improved by using options(reproducible...),
 ## but for now I didn't want to assume those options were directly affecting
 ## these objects
@@ -254,4 +259,48 @@ genericExtract <- function(x, y, field = NULL, ...) {
   }
 
   out
+}
+
+
+
+#' PLOT RASTER FUNCTION
+#'
+#' A function that creates a `ggplot` of a raster
+#'   layer. Can be used with `SpaDES.core::Plots`
+#'
+#' @param ras \code{SpatRaster} or \code{RasterLayer}
+#' @param plotTitle character. A title for the plot passed to
+#'   \code{ggplot::labs(title = plotTitle)}
+#'
+#' @importFrom ggplot2 geom_tile scale_fill_viridis_c coord_equal theme_classic
+#' @importFrom ggplot2 facet_wrap labs aes
+#' @importFrom terra nlyr rast ncell
+#' @export
+plotRast <- function(ras, plotTitle) {
+  if (inherits(ras, c("Raster", "SpatRaster"))) {
+    if (!is(ras, "SpatRaster")) {
+      ras <- rast(ras)
+    }
+  } else {
+    stop("ras must be a 'terra'/'raster' raster layer")
+  }
+
+  if (!requireNamespace("rasterVis")) {
+    stop("Please install 'rasterVis'")
+  }
+  plot1 <- rasterVis::gplot(ras, maxpixels = ncell(ras)) +
+    geom_tile(aes(fill = value)) +
+    scale_fill_viridis_c(option = "cividis", na.value = "grey") +
+    coord_equal() +
+    theme_classic()
+
+  if (nlyr(ras) > 1) {
+    plot1 <- plot1 + facet_wrap(~ variable)
+    plotTitle <- paste0(plotTitle, " -- ", paste(names(ras), collapse = " and "))
+  }
+
+  plot1 <- plot1 +
+    labs(title = plotTitle, x = "Longitude", y = "Latitude",
+         fill = "")
+  plot1
 }
