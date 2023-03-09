@@ -309,8 +309,8 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
         permafrostData <- permafrostData[, list(Permafrost = min(Permafrost, na.rm = TRUE)),
                                          by = ID]
       })
-      permafrostData[Permafrost == Inf, Permafrost := NA]
     }
+    permafrostData[is.infinite(Permafrost), Permafrost := NA]
     permafrostData <- pixIDs[permafrostData, on = .(ID)]
     permafrostRas <- rasterToMatch
     permafrostRas[permafrostData$pixelIndex] <- permafrostData$Permafrost
@@ -326,9 +326,9 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
       suppressWarnings({
         thermokarstData <- thermokarstData[, list(thermokrst = max(thermokrst, na.rm = TRUE)),
                                          by = ID]
-        thermokarstData[thermokrst == Inf, thermokrst := NA]
       })
     }
+    thermokarstData[is.infinite(thermokrst), thermokrst := NA]
     thermokarstData <- pixIDs[thermokarstData, on = .(ID)]
     thermokarstRas <- rasterToMatch
     thermokarstRas[thermokarstData$pixelIndex] <- thermokarstData$thermokrst
