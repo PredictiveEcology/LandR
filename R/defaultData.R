@@ -314,6 +314,7 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
     permafrostData <- pixIDs[permafrostData, on = .(ID)]
     permafrostRas <- rasterToMatch
     permafrostRas[permafrostData$pixelIndex] <- permafrostData$Permafrost
+    permafrostRas <- mask(permafrostRas, rasterToMatch)
 
     ## "rasterize" amount of thermokarst
     thermokarstData <- genericExtract(x = permafrost, y = pixIDsPoints, field = "Degree_Of_")
@@ -332,6 +333,7 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
     thermokarstData <- pixIDs[thermokarstData, on = .(ID)]
     thermokarstRas <- rasterToMatch
     thermokarstRas[thermokarstData$pixelIndex] <- thermokarstData$thermokrst
+    thermokarstRas <- mask(thermokarstRas, rasterToMatch)
 
     ## /!\ there are "NAs"/"NULLs" in thermokarst areas (Degree_Of) that have permafrost.
     ## These are probably true zeros
