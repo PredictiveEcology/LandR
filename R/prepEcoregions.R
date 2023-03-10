@@ -38,8 +38,12 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
       ecoregionMapSF[["ecoregionLayerField"]] <- as.factor(ecoDT$ecoregionLayerField)
       rm(ecoDT)
     }
+
+    ## terra::rasterize creates a factor raster from a factor field, but uses "0" as the first value
+    ## we will instead create integer field starting at 1.
+    ecoregionMapSF$ecoregionLayerFieldInt <- as.integer(ecoregionMapSF$ecoregionLayerField)
     ecoregionRst <- rasterize(ecoregionMapSF, rasterToMatchLarge,
-                              field = "ecoregionLayerField")
+                              field = "ecoregionLayerFieldInt")
     # ecoregionRst <- fasterize::fasterize(ecoregionMapSF, rasterToMatchLarge,
     #                                      field = "ecoregionLayerField")
     rm(ecoregionLayer)
@@ -47,7 +51,8 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
       appendEcoregionFactor <- TRUE
       #Preserve factor values
       uniqVals <- unique(ecoregionMapSF$ecoregionLayerField)
-      df <- data.frame(ID = seq_len(length(uniqVals)),
+      uniqIDs <- unique(ecoregionMapSF$ecoregionLayerFieldInt)
+      df <- data.frame(ID = uniqIDs,
                        ecoregionName = uniqVals,
                        stringsAsFactors = FALSE)
       levels(ecoregionRst) <- df #this will preserve the factors
