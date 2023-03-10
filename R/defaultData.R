@@ -302,6 +302,8 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
     pixIDs <- data.table(ID = 1:length(pixIDs), pixelIndex = pixIDs)   ## these will be the points IDs
 
     permafrostData <- genericExtract(x = permafrost, y = pixIDsPoints, field = "Permafrost")
+    permafrostData[is.na(Permafrost), Permafrost := 0] ## In NA's in RTM mean 0% permafrost (as rasterize(..., background = 0))
+
     ## points in between polys could touch more than one, take min value
     ## for a conservative estimate of permafrost
     if (any(duplicated(permafrostData$ID))) {
@@ -310,7 +312,6 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
                                          by = ID]
       })
     }
-    permafrostData[is.infinite(Permafrost), Permafrost := NA]
     permafrostData <- pixIDs[permafrostData, on = .(ID)]
     permafrostRas <- rasterToMatch
     permafrostRas[permafrostData$pixelIndex] <- permafrostData$Permafrost
@@ -321,6 +322,13 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
     thermokarstData[, thermokarst := factor(Degree_Of_, levels = c("None", "Low", "Medium", "High"),
                                            labels = c(0, 1, 2, 3))]
     thermokarstData[, thermokarst := as.integer(as.character(thermokarst))]
+
+    ## /!\ there are "NAs"/"NULLs" in thermokarst areas (Degree_Of) that have permafrost.
+    ## These are probably true zeros
+    ## note: this has to be done after rasterizing -- doing it before lead to mismatches
+    thermokarstData <- thermokarstData[permafrostData, on = .(ID)]
+    thermokarstData[is.na(thermokarst) & !is.na(Permafrost), thermokarst := 0L]
+
     ## points in between polys could touch more than one, take min value
     ## for a pessimistic estimate of thermokarst
     if (any(duplicated(thermokarstData$ID))) {
@@ -329,17 +337,10 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
                                          by = ID]
       })
     }
-    thermokarstData[is.infinite(thermokarst), thermokarst := NA]
     thermokarstData <- pixIDs[thermokarstData, on = .(ID)]
     thermokarstRas <- rasterToMatch
     thermokarstRas[thermokarstData$pixelIndex] <- thermokarstData$thermokarst
     thermokarstRas <- mask(thermokarstRas, rasterToMatch)
-
-    ## /!\ there are "NAs"/"NULLs" in thermokarst areas (Degree_Of) that have permafrost.
-    ## These are probably true zeros
-    ## note: this has to be done after rasterizing -- doing it before lead to mismatches
-    trueZeros <- which(is.na(values(thermokarstRas)) & !is.na(values(permafrostRas)))
-    values(thermokarstRas)[trueZeros] <- 0
 
     levelsthermokarstRas <- data.frame(VALUE = c(0, 1, 2, 3), LEGEND = c("None", "Low", "Medium", "High"))
     levels(thermokarstRas) <- levelsthermokarstRas
