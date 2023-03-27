@@ -294,72 +294,74 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
                         userTags = c(userTags, "permafrost"),
                         omitArgs = c("userTags"))
 
-    ## "rasterize" amount of permafrost
-    ## make a points object to extract values in native CRS
-    pixIDs <- which(!is.na(as.vector(rasterToMatch[])))
-    pixIDsCoords <- as.data.frame(xyFromCell(rasterToMatch, cell = pixIDs))
-    pixIDsPoints <- vect(pixIDsCoords, geom = c("x", "y"), crs = crs(rasterToMatch))
-    pixIDs <- data.table(ID = 1:length(pixIDs), pixelIndex = pixIDs)   ## these will be the points IDs
+    # ## "rasterize" amount of permafrost
+    # ## make a points object to extract values in native CRS
+    # pixIDs <- which(!is.na(as.vector(rasterToMatch[])))
+    # pixIDsCoords <- as.data.frame(xyFromCell(rasterToMatch, cell = pixIDs))
+    # pixIDsPoints <- vect(pixIDsCoords, geom = c("x", "y"), crs = crs(rasterToMatch))
+    # pixIDs <- data.table(ID = 1:length(pixIDs), pixelIndex = pixIDs)   ## these will be the points IDs
+    #
+    # permafrostData <- genericExtract(x = permafrost, y = pixIDsPoints, field = "Permafrost")
+    # permafrostData[is.na(Permafrost), Permafrost := 0] ## In NA's in RTM mean 0% permafrost (as rasterize(..., background = 0))
+    #
+    # ## points in between polys could touch more than one, take min value
+    # ## for a conservative estimate of permafrost
+    # if (any(duplicated(permafrostData$ID))) {
+    #   suppressWarnings({
+    #     permafrostData <- permafrostData[, list(Permafrost = min(Permafrost, na.rm = TRUE)),
+    #                                      by = ID]
+    #   })
+    # }
+    # permafrostData <- pixIDs[permafrostData, on = .(ID)]
+    # permafrostRas <- rasterToMatch
+    # permafrostRas[permafrostData$pixelIndex] <- permafrostData$Permafrost
+    # permafrostRas <- mask(permafrostRas, rasterToMatch)
+    #
+    # ## "rasterize" amount of thermokarst
+    # thermokarstData <- genericExtract(x = permafrost, y = pixIDsPoints, field = "Degree_Of_")
+    # thermokarstData[, thermokarst := factor(Degree_Of_, levels = c("None", "Low", "Medium", "High"),
+    #                                        labels = c(0, 1, 2, 3))]
+    # thermokarstData[, thermokarst := as.integer(as.character(thermokarst))]
+    #
+    # ## /!\ there are "NAs"/"NULLs" in thermokarst areas (Degree_Of) that have permafrost.
+    # ## These are probably true zeros
+    # ## note: this has to be done after rasterizing -- doing it before lead to mismatches
+    # thermokarstData <- thermokarstData[permafrostData, on = .(ID)]
+    # thermokarstData[is.na(thermokarst) & !is.na(Permafrost), thermokarst := 0L]
+    #
+    # ## points in between polys could touch more than one, take min value
+    # ## for a pessimistic estimate of thermokarst
+    # if (any(duplicated(thermokarstData$ID))) {
+    #   suppressWarnings({
+    #     thermokarstData <- thermokarstData[, list(thermokarst = max(thermokarst, na.rm = TRUE)),
+    #                                      by = ID]
+    #   })
+    # }
+    # thermokarstData <- pixIDs[thermokarstData, on = .(ID)]
+    # thermokarstRas <- rasterToMatch
+    # thermokarstRas[thermokarstData$pixelIndex] <- thermokarstData$thermokarst
+    # thermokarstRas <- mask(thermokarstRas, rasterToMatch)
+    #
+    # levelsthermokarstRas <- data.frame(VALUE = c(0, 1, 2, 3), LEGEND = c("None", "Low", "Medium", "High"))
+    # levels(thermokarstRas) <- levelsthermokarstRas
+    #
+    # if ("permafrost" %in% vars) {
+    #   outs[["permafrost"]] <- permafrostRas
+    # }
+    #
+    # if ("thermokarst" %in% vars) {
+    #   outs[["thermokarst"]] <- thermokarstRas
+    # }
+    #
+    # ## combine thermokarst and permafrost layers
+    # ## high thermokarst in low permafrost areas != than in high permafrost areas (especially for veg)
+    # ## perhaps multiplying is misleading too. is 25% PCC * 2 thermokarst (medium) the same as 50% permafrost * 1 (low) thermokarst?
+    # ## actually we're lucky with Gibson's data because the permafrost classes are not multiples of each other - however this approach is not ideal when they are...
+    # if ("thermXperm" %in% vars) {
+    #   outs[["thermXperm"]] <- thermokarstRas*permafrostRas
+    # }
 
-    permafrostData <- genericExtract(x = permafrost, y = pixIDsPoints, field = "Permafrost")
-    permafrostData[is.na(Permafrost), Permafrost := 0] ## In NA's in RTM mean 0% permafrost (as rasterize(..., background = 0))
-
-    ## points in between polys could touch more than one, take min value
-    ## for a conservative estimate of permafrost
-    if (any(duplicated(permafrostData$ID))) {
-      suppressWarnings({
-        permafrostData <- permafrostData[, list(Permafrost = min(Permafrost, na.rm = TRUE)),
-                                         by = ID]
-      })
-    }
-    permafrostData <- pixIDs[permafrostData, on = .(ID)]
-    permafrostRas <- rasterToMatch
-    permafrostRas[permafrostData$pixelIndex] <- permafrostData$Permafrost
-    permafrostRas <- mask(permafrostRas, rasterToMatch)
-
-    ## "rasterize" amount of thermokarst
-    thermokarstData <- genericExtract(x = permafrost, y = pixIDsPoints, field = "Degree_Of_")
-    thermokarstData[, thermokarst := factor(Degree_Of_, levels = c("None", "Low", "Medium", "High"),
-                                           labels = c(0, 1, 2, 3))]
-    thermokarstData[, thermokarst := as.integer(as.character(thermokarst))]
-
-    ## /!\ there are "NAs"/"NULLs" in thermokarst areas (Degree_Of) that have permafrost.
-    ## These are probably true zeros
-    ## note: this has to be done after rasterizing -- doing it before lead to mismatches
-    thermokarstData <- thermokarstData[permafrostData, on = .(ID)]
-    thermokarstData[is.na(thermokarst) & !is.na(Permafrost), thermokarst := 0L]
-
-    ## points in between polys could touch more than one, take min value
-    ## for a pessimistic estimate of thermokarst
-    if (any(duplicated(thermokarstData$ID))) {
-      suppressWarnings({
-        thermokarstData <- thermokarstData[, list(thermokarst = max(thermokarst, na.rm = TRUE)),
-                                         by = ID]
-      })
-    }
-    thermokarstData <- pixIDs[thermokarstData, on = .(ID)]
-    thermokarstRas <- rasterToMatch
-    thermokarstRas[thermokarstData$pixelIndex] <- thermokarstData$thermokarst
-    thermokarstRas <- mask(thermokarstRas, rasterToMatch)
-
-    levelsthermokarstRas <- data.frame(VALUE = c(0, 1, 2, 3), LEGEND = c("None", "Low", "Medium", "High"))
-    levels(thermokarstRas) <- levelsthermokarstRas
-
-    if ("permafrost" %in% vars) {
-      outs[["permafrost"]] <- permafrostRas
-    }
-
-    if ("thermokarst" %in% vars) {
-      outs[["thermokarst"]] <- thermokarstRas
-    }
-
-    ## combine thermokarst and permafrost layers
-    ## high thermokarst in low permafrost areas != than in high permafrost areas (especially for veg)
-    ## perhaps multiplying is misleading too. is 25% PCC * 2 thermokarst (medium) the same as 50% permafrost * 1 (low) thermokarst?
-    ## actually we're lucky with Gibson's data because the permafrost classes are not multiples of each other - however this approach is not ideal when they are...
-    if ("thermXperm" %in% vars) {
-      outs[["thermXperm"]] <- thermokarstRas*permafrostRas
-    }
+    outs[["permafrostPoly"]] <- permafrost
   }
   outs
 }
