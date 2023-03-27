@@ -2,9 +2,9 @@ utils::globalVariables(c(
   "TSLF", "latitude", "longitude", "Degree_Of_", "Permafrost", "thermokarst"
 ))
 
-## ------------------------------------
-## SOURCING FUNCTIONS FOR DEFAULT DATA
-## ------------------------------------
+## -----------------------------------------------
+## FUNCTIONS TO SOURCE AND PREPARE DEFAULT DATA
+## -----------------------------------------------
 
 ## LandR may not be the best pacakge for these funcitons, but they will live
 ## here for now.
