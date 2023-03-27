@@ -124,6 +124,9 @@ prepInputsLCC <- function(year = 2010,
     } else {
       stop("Other LCC covers don't exist yet.")
     }
+    dots$url <- url
+    dots$targetFile <- filename
+    dots$archive <- archive
   }
 
   if (identical(eval(parse(text = getOption("reproducible.rasterRead"))),
@@ -132,15 +135,15 @@ prepInputsLCC <- function(year = 2010,
   else
     method <- intersect("ngb", method)
 
-  out <- prepInputs(targetFile = filename,
-                    archive = archive,
-                    url = url,
-                    destinationPath = asPath(destinationPath),
-                    studyArea = studyArea,
-                    rasterToMatch = rasterToMatch,
-                    method = method,
-                    datatype = "INT2U",
-                    filename2 = filename2, ...)
+  fullArgs <- append(dots,
+                     list("destinationPath" = asPath(destinationPath),
+                          "studyArea" = studyArea,
+                          "rasterToMatch" = rasterToMatch,
+                          "method" = method,
+                          "datatype" = "INT2U",
+                          "filename2" = filename2))
+
+  out <- do.call(prepInputs, fullArgs)
   out[] <- as.integer(as.vector(values(out)))
   out
 }
