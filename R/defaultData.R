@@ -512,3 +512,288 @@ defaultClimateDataProj <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI"),
   outs <- c(as.list(MATProj), as.list(PPT_wtProj), as.list(PPT_smProj), as.list(CMIProj))
   outs
 }
+
+
+
+#' Make a mask of areas that suitable/unsuitable for permafrost
+#'
+#' Uses a land-cover map and a wetlands maps to create a mask
+#'  of areas suitable for permafrost presence. By default, it
+#'  assumes suitable and unsuitable land-cover classification
+#'  follows [Hermosilla et al. (2022)](https://www.sciencedirect.com/science/article/pii/S0034425721005009?via%3Dihub#bb0465).
+#'  See details below.
+#'
+#' @param rstLCC a land-cover raster. Should already have been cropped to
+#'   `studyArea`.
+#' @param wetlands a wetlands raster (with `1L` and `NA`s only). Should already
+#'   have been cropped to `studyArea`.
+#' @param suitableCls land-cover classes (in `rstLCC`) suitable
+#'  for permafrost presence
+#' @param unsuitableCls land-cover classes (in `rstLCC`) unsuitable
+#'  for permafrost presence
+#' @param studyArea a polygon of the study area to mask the
+#'  output raster to.
+#' @param cacheTags passed to `reproducible::Cache`
+#'
+#' @details Suitable areas are classified as `1L` and unsuitable
+#'  areas as `0L` in the output raster.
+#'  Unsuitable land-cover classes are:
+#'    * non-forested ecozone, which was not mapped for LC (0)
+#'    * water (20)
+#'    * snow/ice (31)
+#'    * rock/rubble (32)
+#'    * exposed/barren land (33)
+#'    * wetland (80)
+#'    * wetland-treed (81)
+#'  Wetland areas in `wetlands` (coded as 1L, i.e. wetland presence)
+#'  are also coded as unsuitable.
+#'
+#' @return a raster layer with `1`s and `0`s for pixels with suitable
+#'  and unsuitable land cover for permafrost, respectively.
+#'
+#' @importFrom terra classify subst mask
+#' @importFrom reproducible Cache postProcess
+#'
+#' @export
+makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 220, 230),
+                            unsuitableCls = c(0, 20, 31, 32, 33, 80, 81),
+                            studyArea, cacheTags) {
+  unsuit <- cbind(unsuitableCls, NA_integer_)
+  suit <- cbind(suitableCls, 1L)
+  m <- rbind(unsuit, suit)
+
+  rstLCC <- Cache(classify,
+                  x = rstLCC,
+                  rcl = m,
+                  userTags = c(cacheTags, "rstLCC", "suitablePermafrost"),
+                  omitArgs = c("userTags"))
+  rstLCC <- Cache(mask,
+                  x = rstLCC,
+                  mask = wetlands,
+                  inverse = TRUE,
+                  userTags = c(cacheTags, "rstLCC", "suitablePermafrost"),
+                  omitArgs = c("userTags"))
+
+  if (getOption("LandR.assertions", TRUE)) {
+    test <- unique(rstLCC[!is.na(as.vector(values(wetlands)))])
+    if (any(!is.na(test))) {
+      stop("Something went wrong. All wetland areas should have 'NA' in suitable areas for permafrost")
+    }
+  }
+
+  ## covert NAs to zeros then mask again
+  rstLCC <- subst(rstLCC, NA, 0L)
+  rstLCC <- postProcess(x = rstLCC,
+                        studyArea = studyArea,
+                        useSAcrs = FALSE,
+                        userTags = c(cacheTags, "rstLCC", "suitablePermafrost"),
+                        omitArgs = c("userTags"))
+
+  return(rstLCC)
+}
+
+
+
+#' Create permafrost P/A layer
+#'
+#' Creates a permafrost presence/absence raster layer based
+#'  on information about land-cover suitability for permafrost
+#'  (a raster layer at high resolution) and % of permafrost
+#'  present (a polygon layer that groups several cells of the
+#'  land-cover layer, i.e. at a larger spatial scale). The function
+#'  has been designed to be looped over polygons, and so only processes
+#'  only polygon at a time.
+#'
+#' @param gridPoly a `SpatVector`, `PackedSpatVector` or `character`.
+#'  The full polygon layer containing information about % permafrost
+#'  (as a `SpatVector` or `PackedSpatVector`) or the file name to that
+#'  layer.
+#' @param ras a `SpatRaster`, `PackedSpatRaster` or `character`.
+#'  The land-cover suitability for permafrost raster layer (as a
+#'  `SpatRaster` or `PackedSpatRaster`) or the file name to that layer.
+#'  Suitable cells are coded as `rasClass`.
+#' @param saveOut logical. Should the processed rasters for the focal
+#'  polygon be saved (as the file name returned) or directly returned?
+#'  If parallelising, choose to save, as `SpatRasters` cannot be serialized.
+#' @param saveDir character. The directiory to save output rasters.
+#' @param id character or numeric. The polygon ID in `gridPoly[IDcol]`
+#'  to process (the focal polygon).
+#' @param IDcol character. Column name in `gridPoly` containing polygon IDs.
+#' @param rasClass Class
+#'
+#' @return a file name or the permafrost presence/absence raster for the focal
+#'  polygon.
+#'
+#' @importFrom terra rast vect unwrap writeRaster as.polygons as.points as.lines
+#' @importFrom terra mask crop cellFromXY crds disagg distance expanse nearby fillHoles
+#' @importFrom data.table as.data.table
+#' @export
+assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
+                             id = NULL, IDcol = "OBJECTID", rasClass = 1L) {
+  message(cyan("Preparing layers..."))
+
+  if (is(gridPoly, "PackedSpatVector")) {
+    gridPoly <- unwrap(gridPoly)
+  }
+  if (is(ras, "PackedSpatRaster")) {
+    ras <- unwrap(ras)
+  }
+
+  if (is(gridPoly, "character")) {
+    gridPoly <- vect(gridPoly)
+  }
+
+  if (is(ras, "character")) {
+    ras <- rast(ras)
+  }
+
+  if (is.null(id)) {
+    id <- gridPoly[[IDcol]][1,]
+  }
+  idd <- which(gridPoly[[IDcol]] == id)
+  landscape <- gridPoly[idd]
+  sub_ras <- crop(ras, landscape)
+  sub_ras <- mask(sub_ras, landscape)
+
+  permpercent <- as.numeric(landscape[["Permafrost"]])
+
+  ## and in pixels
+  suitablePixNo <- sum(as.vector(sub_ras[]) == rasClass, na.rm = TRUE)
+  permpercentPix <- as.numeric(round((permpercent/100)*ncell(sub_ras)))
+
+  ## if there's less permafrost than suitable areas
+  ## find the largest patch and a point that is distant from its edge
+  ## then assign permafrost starting from this point
+  ## until the percentage is reached
+
+  ## make storage raster
+  sub_rasOut <- sub_ras
+  sub_rasOut[] <- NA_integer_
+
+  message(cyan("Assiging permafrost..."))
+  if (suitablePixNo > permpercentPix) {
+    ## make polygons
+    sub_poly <- as.polygons(sub_ras) |> disagg()
+    names(sub_poly) <- "patchType"
+    ## subset to patches of interest
+    sub_poly <- sub_poly[sub_poly$patchType == rasClass, ]
+    sub_poly$ID <- 1:nrow(sub_poly)
+
+    ## order by patch area
+    sub_poly$area <- expanse(sub_poly)
+    sub_poly <- sub_poly[order(sub_poly$area, decreasing = TRUE),]
+
+    ## otherwise, start with largest, with a while loop
+    ## for each polygon, find the point most distant from the edge
+
+    ## make points from raster
+    sub_points <- as.points(sub_ras)
+
+    convertedPix <- 0L  # "counter"
+    pixToConvert <- permpercentPix # "counter"
+    i <- 1L # "counter"
+
+    while (convertedPix < pixToConvert & i <= nrow(sub_poly)) {
+      patch <- sub_poly[i, ]
+      patch_edge <- as.lines(patch)
+      patch_points <- mask(sub_points, patch)
+
+      if (length(patch_points) <= pixToConvert) {
+        cellIDs <- cellFromXY(sub_rasOut, crds(patch_points))
+        sub_rasOut[cellIDs] <- 1L
+
+        convertedPix <- convertedPix + length(patch_points)
+        pixToConvert <- pixToConvert - length(patch_points)
+      } else {
+        ## find distance from edges -- each row is a point and each columns is a line feature
+        dists <- as.data.table(distance(patch_points, patch_edge))
+        dists <- rowMeans(dists)  ## average distance to all lines
+        patch_points$dists <- dists
+        # plot(patch_points, "dists", type = "continuous", col = viridis::inferno(100))
+
+        ## pixID of most distant point
+        startPointID <- which.max(patch_points$dists)
+        startPoint <- patch_points[startPointID,]
+        ngbPoints <- patch_points[-startPointID]
+
+        ngbPointsIDs <- nearby(startPoint, ngbPoints, k = pixToConvert-1)  ## the start point counts
+        ngbPointsIDs <- ngbPointsIDs[, colnames(ngbPointsIDs) != "id", drop = FALSE]
+
+        pointsToConvert <- rbind(startPoint, ngbPoints[ngbPointsIDs[1,]])
+
+        cellIDs <- cellFromXY(sub_rasOut, crds(pointsToConvert))
+        sub_rasOut[cellIDs] <- 1L
+
+        convertedPix <- convertedPix + length(pointsToConvert)
+        pixToConvert <- pixToConvert - length(pointsToConvert)
+      }
+      i <- i + 1L
+    }
+    if (i > nrow(sub_poly) & convertedPix < pixToConvert) {
+      browser()  ## something's up
+    }
+  }
+  ## if there's more permafrost than suitable areas
+  ## assign all suitable areas as permafrost, then increase
+  ## with a buffer
+  if (suitablePixNo <= permpercentPix) {
+    pixToConvert <- permpercentPix
+    ## make points from raster
+    sub_points <- as.points(sub_ras, values = TRUE)
+    names(sub_points) <- "patchType"
+
+    patch_points <- sub_points[sub_points$patchType == rasClass]
+
+    cellIDs <- cellFromXY(sub_rasOut, crds(patch_points))
+    sub_rasOut[cellIDs] <- 1L
+
+    ## if there are not enough points within the patches,
+    ## try tro fill neighbouring pixels (leave holes alone s we want to be
+    ## able to start from a swiss cheese pattern)
+    pixToConvert2 <- pixToConvert - length(patch_points)
+
+    if (pixToConvert2 > 0) {
+      sub_poly <- as.polygons(sub_ras) |> disagg()
+      names(sub_poly) <- "patchType"
+      sub_poly <- sub_poly[sub_poly$patchType == rasClass]
+
+      ## enlarge largest polygon
+      sub_poly$area <- expanse(sub_poly)
+      sub_poly <- sub_poly[order(sub_poly$area, decreasing = TRUE)]
+
+      i <- 1L
+      while (i <= nrow(sub_poly) & pixToConvert2 > 0) {
+        patch <- sub_poly[i, ]
+        patch_filled <- fillHoles(patch)
+
+        ## find points within buffer
+        outPatchPoints <- sub_points[sub_points$patchType != rasClass]
+        outPatchPoints <- mask(outPatchPoints, patch_filled, inverse = TRUE)
+
+        ngbPointsIDs <- nearby(patch_filled, outPatchPoints,
+                               distance = unique(res(sub_ras)), centroids = FALSE)
+        pointsToConvert <- outPatchPoints[ngbPointsIDs[,"to_id"]]
+        # plot(pointsToConvert, add = TRUE)
+
+        cellIDs <- cellFromXY(sub_rasOut, crds(pointsToConvert))
+        sub_rasOut[cellIDs] <- 1L
+
+        pixToConvert2 <- pixToConvert2 - length(pointsToConvert)
+        i <- i + 1L
+      }
+    }
+  }
+
+  message(cyan("Done!"))
+  if (saveOut) {
+    tmpFile <- paste0(tempfile(), ".tif")
+    if (!is.null(saveDir)) {
+      if (!dir.exists(saveDir)) dir.create(saveDir, showWarnings = FALSE)
+      tmpFile <- file.path(saveDir, basename(tmpFile))
+    }
+    writeRaster(sub_rasOut, tmpFile)
+    return(tmpFile)
+  } else {
+    return(sub_rasOut)
+  }
+}
