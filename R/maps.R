@@ -116,6 +116,16 @@ prepInputsLCC <- function(year = 2010,
     dots$url <- url
     dots$targetFile <- filename
     dots$archive <- archive
+  } else {
+    ## try to guess targetFile/archive if not passed
+    urlFile <- basename(dots$url)
+    if (grepl("\\.zip$", urlFile) & is.null(dots$archive)) {
+      dots$archive  <- urlFile
+    } else {
+      if (is.null(dots$targetFile)) {
+        dots$targetFile <- urlFile
+      }
+    }
   }
 
   if (identical(eval(parse(text = getOption("reproducible.rasterRead"))),
