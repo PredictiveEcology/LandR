@@ -121,84 +121,84 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
 
   if ("elevation" %in% vars) {
     outs[["elevation"]] <- Cache(prepInputs,
-                               targetFile = "elevation.tif",
-                               url = "https://s3-us-west-2.amazonaws.com/www.cacpd.org/CMIP6/elevation.tif",
-                               destinationPath = destinationPath,
-                               alsoExtract = NA,
-                               overwrite = TRUE,
-                               # rasterToMatch = rasterToMatch,
-                               studyArea = studyArea,   ## keep coarse res.
-                               useSAcrs = FALSE,
-                               userTags = c(userTags, "elevation"),
-                               omitArgs = c("userTags"))
+                                 targetFile = "elevation.tif",
+                                 url = "https://s3-us-west-2.amazonaws.com/www.cacpd.org/CMIP6/elevation.tif",
+                                 destinationPath = destinationPath,
+                                 alsoExtract = NA,
+                                 overwrite = TRUE,
+                                 # rasterToMatch = rasterToMatch,
+                                 studyArea = studyArea,   ## keep coarse res.
+                                 useSAcrs = FALSE,
+                                 userTags = c(userTags, "elevation"),
+                                 omitArgs = c("userTags"))
   }
   ## Mean annual temperature (mean of all of the monthly mean temperatures)
   bioClimURL <- paste0("https://s3-us-west-2.amazonaws.com/www.cacpd.org/",
                        "CMIP6/normals/Normal_1981_2010_bioclim.zip")
   if ("MAT" %in% vars) {
     outs[["MAT"]] <- Cache(prepInputs,
-                         targetFile = "Normal_1981_2010_MAT.tif",
-                         archive = "data/Normal_1981_2010_bioclim.zip",
-                         url = bioClimURL,
-                         destinationPath = destinationPath,
-                         alsoExtract = NA,
-                         overwrite = TRUE,
-                         # rasterToMatch = rasterToMatch,
-                         studyArea = studyArea,   ## keep coarse res.
-                         useSAcrs = FALSE,
-                         userTags = c(userTags, "MAT"),
-                         omitArgs = c("userTags"))
+                           targetFile = "Normal_1981_2010_MAT.tif",
+                           archive = "data/Normal_1981_2010_bioclim.zip",
+                           url = bioClimURL,
+                           destinationPath = destinationPath,
+                           alsoExtract = NA,
+                           overwrite = TRUE,
+                           # rasterToMatch = rasterToMatch,
+                           studyArea = studyArea,   ## keep coarse res.
+                           useSAcrs = FALSE,
+                           userTags = c(userTags, "MAT"),
+                           omitArgs = c("userTags"))
   }
 
   ## Precipitation of warmest quarter (total precipitation over warmest quarter of the year)
   ## assuming warmest quarter to be June-August
   if ("PPT_sm" %in% vars) {
     outs[["PPT_sm"]] <- Cache(prepInputs,
-                            targetFile = "Normal_1981_2010_PPT_sm.tif",
-                            archive = "data/Normal_1981_2010_bioclim.zip",
-                            url = bioClimURL,
-                            destinationPath = destinationPath,
-                            alsoExtract = NA,
-                            overwrite = TRUE,
-                            # rasterToMatch = rasterToMatch,
-                            studyArea = studyArea,   ## keep coarse res.
-                            useSAcrs = FALSE,
-                            userTags = c(userTags, "PPT_sm"),
-                            omitArgs = c("userTags"))
+                              targetFile = "Normal_1981_2010_PPT_sm.tif",
+                              archive = "data/Normal_1981_2010_bioclim.zip",
+                              url = bioClimURL,
+                              destinationPath = destinationPath,
+                              alsoExtract = NA,
+                              overwrite = TRUE,
+                              # rasterToMatch = rasterToMatch,
+                              studyArea = studyArea,   ## keep coarse res.
+                              useSAcrs = FALSE,
+                              userTags = c(userTags, "PPT_sm"),
+                              omitArgs = c("userTags"))
   }
 
   ## Precipitation of coldest quarter (total precipitation over the coldest quarter of the year)
   ## assuming coldest quarter to be December-February
   if ("PPT_wt" %in% vars) {
     outs[["PPT_wt"]] <- Cache(prepInputs,
-                            targetFile = "Normal_1981_2010_PPT_wt.tif",
-                            archive = "data/Normal_1981_2010_bioclim.zip",
-                            url = bioClimURL,
-                            destinationPath = destinationPath,
-                            alsoExtract = NA,
-                            overwrite = TRUE,
-                            # rasterToMatch = rasterToMatch,
-                            studyArea = studyArea,   ## keep coarse res.
-                            useSAcrs = FALSE,
-                            userTags = c(userTags, "PPT_wt"),
-                            omitArgs = c("userTags"))
+                              targetFile = "Normal_1981_2010_PPT_wt.tif",
+                              archive = "data/Normal_1981_2010_bioclim.zip",
+                              url = bioClimURL,
+                              destinationPath = destinationPath,
+                              alsoExtract = NA,
+                              overwrite = TRUE,
+                              # rasterToMatch = rasterToMatch,
+                              studyArea = studyArea,   ## keep coarse res.
+                              useSAcrs = FALSE,
+                              userTags = c(userTags, "PPT_wt"),
+                              omitArgs = c("userTags"))
   }
 
   ## Annual climate moisture index (CMI = P PET, where P is annual precipitation and PET is annual potential evapotranspiration)
   ## this is Hogg's CMI
   if ("CMI" %in% vars) {
     outs[["CMI"]] <- Cache(prepInputs,
-                         targetFile = "Normal_1981_2010_CMI.tif",
-                         archive = "data/Normal_1981_2010_bioclim.zip",
-                         url = bioClimURL,
-                         destinationPath = destinationPath,
-                         alsoExtract = NA,
-                         overwrite = TRUE,
-                         # rasterToMatch = rasterToMatch,
-                         studyArea = studyArea,   ## keep coarse res.
-                         useSAcrs = FALSE,
-                         userTags = c(userTags, "CMI"),
-                         omitArgs = c("userTags"))
+                           targetFile = "Normal_1981_2010_CMI.tif",
+                           archive = "data/Normal_1981_2010_bioclim.zip",
+                           url = bioClimURL,
+                           destinationPath = destinationPath,
+                           alsoExtract = NA,
+                           overwrite = TRUE,
+                           # rasterToMatch = rasterToMatch,
+                           studyArea = studyArea,   ## keep coarse res.
+                           useSAcrs = FALSE,
+                           userTags = c(userTags, "CMI"),
+                           omitArgs = c("userTags"))
   }
 
   ## --------------------------------------------------------
@@ -735,8 +735,11 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
       }
       i <- i + 1L
     }
+
     if (i > nrow(sub_poly) & convertedPix < pixToConvert) {
-      browser()  ## something's up
+      warning(paste("Ran out of patches in polygon", id, "but they have enough",
+                    "area to assign permafrost to."))
+      return(NA_character_)
     }
   }
   ## if there's more permafrost than suitable areas
