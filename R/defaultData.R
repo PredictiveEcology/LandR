@@ -797,7 +797,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
       if (!dir.exists(saveDir)) dir.create(saveDir, showWarnings = FALSE)
       tmpFile <- file.path(saveDir, basename(tmpFile))
     }
-    writeRaster(sub_rasOut, tmpFile)
+    writeRaster(sub_rasOut, tmpFile, overwrite = TRUE)
     return(tmpFile)
   } else {
     return(sub_rasOut)
