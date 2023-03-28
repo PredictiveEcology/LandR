@@ -672,7 +672,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   sub_rasOut <- sub_ras
   sub_rasOut[] <- NA_integer_
 
-  message(cyan("Assiging permafrost..."))
+  message(cyan("Assigning permafrost..."))
   if (suitablePixNo > permpercentPix) {
     ## make polygons
     sub_poly <- as.polygons(sub_ras) |> disagg()
@@ -788,7 +788,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 
   message(cyan("Done!"))
   if (saveOut) {
-    tmpFile <- paste0(tempfile(), ".tif")
+    tmpFile <- paste0("permafrost_polyID", id, ".tif")
     if (!is.null(saveDir)) {
       if (!dir.exists(saveDir)) dir.create(saveDir, showWarnings = FALSE)
       tmpFile <- file.path(saveDir, basename(tmpFile))
