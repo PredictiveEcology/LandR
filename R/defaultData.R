@@ -718,10 +718,14 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         startPoint <- patch_points[startPointID,]
         ngbPoints <- patch_points[-startPointID]
 
-        ngbPointsIDs <- nearby(startPoint, ngbPoints, k = pixToConvert-1)  ## the start point counts
-        ngbPointsIDs <- ngbPointsIDs[, colnames(ngbPointsIDs) != "id", drop = FALSE]
+        ## assign permafrost to nearby neighbours (starting point is always assigned)
+        pointsToConvert <- startPoint
+        if (pixToConvert > 1) {
+          ngbPointsIDs <- nearby(startPoint, ngbPoints, k = pixToConvert-1)  ## the start point counts
+          ngbPointsIDs <- ngbPointsIDs[, colnames(ngbPointsIDs) != "id", drop = FALSE]
 
-        pointsToConvert <- rbind(startPoint, ngbPoints[ngbPointsIDs[1,]])
+          pointsToConvert <- rbind(pointsToConvert, ngbPoints[ngbPointsIDs[1,]])
+        }
 
         cellIDs <- cellFromXY(sub_rasOut, crds(pointsToConvert))
         sub_rasOut[cellIDs] <- 1L
