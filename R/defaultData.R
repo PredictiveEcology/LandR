@@ -554,7 +554,9 @@ defaultClimateDataProj <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI"),
 #'  and unsuitable land cover for permafrost, respectively.
 #'
 #' @importFrom terra classify subst mask
+#' @importFrom raster raster
 #' @importFrom reproducible Cache postProcess
+#' @importFrom SpaDES.tools spread2
 #'
 #' @export
 makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 220, 230),
@@ -668,10 +670,6 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   ## then assign permafrost starting from this point
   ## until the percentage is reached
 
-  ## make storage raster
-  sub_rasOut <- sub_ras
-  sub_rasOut[] <- NA_integer_
-
   message(cyan("Assigning permafrost..."))
   ## if there are more suitable areas than permafrost start
   ## "filling in" from focal pixels using distance to edges
@@ -684,71 +682,38 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
     sub_poly <- sub_poly[sub_poly$patchType == rasClass, ]
     sub_poly$ID <- 1:nrow(sub_poly)
 
-    ## order by patch area
-    sub_poly$area <- expanse(sub_poly)
-    sub_poly <- sub_poly[order(sub_poly$area, decreasing = TRUE),]
+    ## now make sub_ras with poly IDs
+    sub_ras2 <- rasterize(sub_poly, sub_ras, field = "ID")
+    # terra::plot(sub_ras2, col = viridis::viridis(length(sub_poly)))
 
-    ## otherwise, start with largest, with a while loop
-    ## for each polygon, find the point most distant from the edge
+    ## compute distances to edges.
+    ## first make an "inverse" raster with NAs
+    sub_rasDist <- sub_ras2
+    sub_rasDist[] <- 1L
+    sub_rasDist <- mask(sub_rasDist, sub_ras2, inverse = TRUE)   ## use sub_ras2, because 0s were NAed
+    sub_rasDist <- distance(sub_rasDist)
 
-    ## make points from raster
-    sub_points <- as.points(sub_ras)
+    ## make "probabilities" by scaling 0-1
+    spreadProb <- sub_rasDist/max(sub_rasDist[], na.rm = TRUE)
+    # terra::plot(spreadProb, col = viridis::inferno(100))
 
-    convertedPix <- 0L  # "counter"
-    pixToConvert <- permpercentPix # "counter"
-    i <- 1L # "counter"
-
-    while (convertedPix < pixToConvert & i <= nrow(sub_poly)) {
-      patch <- sub_poly[i, ]
-      patch_edge <- as.lines(patch)
-      patch_points <- mask(sub_points, patch)
-
-      if (length(patch_points) <= pixToConvert) {
-        cellIDs <- cellFromXY(sub_rasOut, crds(patch_points))
-        sub_rasOut[cellIDs] <- 1L
-
-        convertedPix <- convertedPix + length(patch_points)
-        pixToConvert <- pixToConvert - length(patch_points)
-      } else {
-        ## find distance from edges -- each row is a point and each columns is a line feature
-        dists <- as.data.table(distance(patch_points, patch_edge))
-        dists <- rowMeans(dists)  ## average distance to all lines
-        patch_points$dists <- dists
-        # plot(patch_points, "dists", type = "continuous", col = viridis::inferno(100))
-
-        ## pixID of most distant point
-        startPointID <- which.max(patch_points$dists)
-        startPoint <- patch_points[startPointID,]
-        ngbPoints <- patch_points[-startPointID]
-
-        ## assign permafrost to nearby neighbours (starting point is always assigned)
-        pointsToConvert <- startPoint
-        if (pixToConvert > 1) {
-          ngbPointsIDs <- nearby(startPoint, ngbPoints, k = pixToConvert-1)  ## the start point counts
-          ngbPointsIDs <- ngbPointsIDs[, colnames(ngbPointsIDs) != "id", drop = FALSE]
-
-          pointsToConvert <- rbind(pointsToConvert, ngbPoints[ngbPointsIDs[1,]])
-        }
-
-        cellIDs <- cellFromXY(sub_rasOut, crds(pointsToConvert))
-        sub_rasOut[cellIDs] <- 1L
-
-        convertedPix <- convertedPix + length(pointsToConvert)
-        pixToConvert <- pixToConvert - length(pointsToConvert)
-      }
-      i <- i + 1L
-    }
-
-    if (i > nrow(sub_poly) & convertedPix < pixToConvert) {
-      warning(paste("Ran out of patches in polygon", id, "but they have enough",
-                    "area to assign permafrost to."))
-      return(NA_character_)
-    }
+    ## we may need to try several times until we get the number of pixels
+    ## at each attempt increase spreadProb
+    sub_rasOut <- assignPresences(assignProb = spreadProb,
+                                  landscape = sub_ras2,
+                                  pixToConvert = permpercentPix,
+                                  probWeight = 0.5, numStartsDenom = 10)
+    # terra::plot(sub_rasOut, col = viridis::inferno(100))
   }
+
   ## if there's more permafrost than suitable areas
   ## assign all suitable areas as permafrost, then increase
   ## with a buffer (starting with largest patch)
   if (suitablePixNo <= permpercentPix) {
+    ## make storage raster
+    sub_rasOut <- sub_ras
+    sub_rasOut[] <- NA_integer_
+
     pixToConvert <- permpercentPix
     ## make points from raster
     sub_points <- as.points(sub_ras, values = TRUE)
@@ -796,6 +761,11 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
     }
   }
 
+  if (sum(!is.na(sub_rasOut[])) < permpercentPix) {
+    warning(paste("Couldn't assign permafrost to enough pixels."))
+    return(NA_character_)
+  }
+
   message(cyan("Done!"))
   if (saveOut) {
     tmpFile <- paste0("permafrost_polyID", id, ".tif")
@@ -808,4 +778,101 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   } else {
     return(sub_rasOut)
   }
+}
+
+#' Assign presences to patches based on a raster or presence
+#'   probabilities
+#'
+#' @param assignProb a SpatRaster of presence probabilities
+#' @param landscape a SpatRaster of the entire lanscape with NAs outside
+#'   patches
+#' @param pixToConvert numeric. Number of pixels to convert to presence
+#'   across `landscape`. If `NULL`, `round(sum(!is.na(landscape[]))/2)`
+#'   pixels will be converted to presences.
+#' @param probWeight numeric. If `pixToConvert` cannot be reached
+#'  `assignProb` will be weighted using `assignProb^probWeight`
+#'  and the algorothm will try again.
+#' @param numStartsDenom integer. Used to calculate the number of starting pixels
+#'  to assign presences (at each try; as `pixToConvert/numStartsDenom`)
+#'
+#' @details This function attempts to iteratively assign
+#'  presences starting in `pixToConvert/numStartsDenom` pixels
+#'  sampled from areas with high probabilities in `assignProb` (weighted if
+#'  `probWeight != 1`).
+#'  For each starting pixel, it assigns a maximum of `numStartsDenom * probWeight`
+#'  pixels. If not enough pixels are assigned presences (i.e. the number of
+#'  presences does not reach `pixToConvert`), the function tries again
+#'  after increasing `assignProb` by a factor of `1.5` (with values > 1 capped at 1).
+#'  If too many pixels are assigned presences, pixels are sampled according to
+#'  `assignProb ^ 10` (where `assignProb` corresponds to the original supplied values.)
+#'
+#' @return a SpatRaster
+#' @importFrom SpaDES.tools spread
+#' @importFrom raster raster
+#' @importFrom terra rast
+#' @importFrom data.table data.table
+#'
+#' @export
+assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeight = 1,
+                            numStartsDenom = 10) {
+  if (is.null(pixToConvert)) {
+    pixToConvert <- round(sum(!is.na(landscape[]))/2)
+  }
+
+  if (probWeight < 0.5 || probWeight > 7)
+    stop("probWeight must be between 0.5 and 7")
+
+  ## save original probabilites for later
+  assignProbOrig <- as.vector(assignProb[])
+
+  ## if the mean is too high, then bring it down to 0.35 to avoid creating
+  ## square patches
+  meanSP <- mean(assignProb[], na.rm = TRUE)
+  if (meanSP > 0.35)
+    assignProb <- assignProb / meanSP * 0.35
+
+  convertedPix <- 0
+
+  while (convertedPix < pixToConvert) {
+    ## exponentiate probabilities to provide more weight to pixels further from edges
+    assignProbEx <- assignProb^probWeight
+    # terra::plot(assignProbEx, col = viridis::inferno(100))
+
+    ## try to spread in from many focal pixels
+    numStarts <- ceiling(pixToConvert/numStartsDenom)
+    startPoints <- sample(1:ncell(assignProbEx), size = numStarts, prob = assignProbEx[])
+
+    # temp <- assignProbEx
+    # temp[] <- NA_integer_
+    # temp[startPoints] <- 1L
+    # terra::plot(assignProbEx, col = viridis::inferno(100))
+    # terra::plot(temp, add = TRUE, col = "blue")
+
+    outRas <- SpaDES.tools::spread(landscape = raster(landscape),
+                                   loci = startPoints,
+                                   assignProb = raster(assignProbEx),
+                                   maxSize = numStartsDenom * probWeight)
+    outRas <- rast(outRas) |>
+      mask(mask = landscape)
+    convertedPix <- sum(!is.na(outRas[]))
+
+    ## increase spread probabilities in case we need to try again
+    assignProb <- min(assignProb * 1.5, 1)
+  }
+
+  ## if we spread too much remove pixels that are closest to edges
+  if (convertedPix > pixToConvert) {
+    ## "convert" to distances
+    DT <- data.table(cells = 1:ncell(outRas), dists = assignProbOrig)
+    DT <- DT[dists > 0 & !is.na(dists)][order(dists, decreasing = TRUE)]
+
+    # pixToRm <- DT[(pixToConvert + 1):nrow(DT), cells] ## creates concave patches
+    pixToKeep <- sample(DT$cells, pixToConvert, prob = DT$dists^10)  ## creates a little more noise
+
+    outRas[] <- NA_integer_
+    outRas[pixToKeep] <- 1L
+  }
+  convertedPix <- sum(!is.na(outRas[]))
+  message(convertedPix, " were converted")
+  return(outRas)
 }
