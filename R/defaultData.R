@@ -673,9 +673,12 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   sub_rasOut[] <- NA_integer_
 
   message(cyan("Assigning permafrost..."))
+  ## if there are more suitable areas than permafrost start
+  ## "filling in" from focal pixels using distance to edges
+  ## as the probability of a pixel being selected (more distant = higher prob)
   if (suitablePixNo > permpercentPix) {
-    ## make polygons
-    sub_poly <- as.polygons(sub_ras) |> disagg()
+    ## make polygons, so that we can identify separate patches in raster
+    sub_poly <- as.polygons(sub_ras) |> disagg()   ## 0s in sub_ras are ignored
     names(sub_poly) <- "patchType"
     ## subset to patches of interest
     sub_poly <- sub_poly[sub_poly$patchType == rasClass, ]
@@ -744,7 +747,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   }
   ## if there's more permafrost than suitable areas
   ## assign all suitable areas as permafrost, then increase
-  ## with a buffer
+  ## with a buffer (starting with largest patch)
   if (suitablePixNo <= permpercentPix) {
     pixToConvert <- permpercentPix
     ## make points from raster
@@ -757,7 +760,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
     sub_rasOut[cellIDs] <- 1L
 
     ## if there are not enough points within the patches,
-    ## try tro fill neighbouring pixels (leave holes alone s we want to be
+    ## try to fill neighbouring pixels (leave holes alone s we want to be
     ## able to start from a swiss cheese pattern)
     pixToConvert2 <- pixToConvert - length(patch_points)
 
