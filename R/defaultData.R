@@ -631,6 +631,7 @@ makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 
 #' @importFrom terra rast vect unwrap writeRaster as.polygons as.points as.lines
 #' @importFrom terra mask crop cellFromXY crds disagg distance expanse nearby fillHoles
 #' @importFrom data.table as.data.table
+#' @importFrom crayon cyan
 #' @export
 assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
                              id = NULL, IDcol = "OBJECTID", rasClass = 1L) {
