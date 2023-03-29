@@ -670,6 +670,10 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   ## then assign permafrost starting from this point
   ## until the percentage is reached
 
+  ## make storage raster
+  sub_rasOut <- sub_ras
+  sub_rasOut[] <- NA_integer_
+
   message(cyan("Assigning permafrost..."))
   ## if there are more suitable areas than permafrost start
   ## "filling in" from focal pixels using distance to edges
@@ -710,10 +714,6 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   ## assign all suitable areas as permafrost, then increase
   ## with a buffer (starting with largest patch)
   if (suitablePixNo <= permpercentPix) {
-    ## make storage raster
-    sub_rasOut <- sub_ras
-    sub_rasOut[] <- NA_integer_
-
     pixToConvert <- permpercentPix
     ## make points from raster
     sub_points <- as.points(sub_ras, values = TRUE)
@@ -763,7 +763,6 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 
   if (sum(!is.na(sub_rasOut[])) < permpercentPix) {
     warning(paste("Couldn't assign permafrost to enough pixels."))
-    return(NA_character_)
   }
 
   message(cyan("Done!"))
