@@ -655,7 +655,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   idd <- which(gridPoly[[IDcol]] == id)
   landscape <- gridPoly[idd]
   sub_ras <- crop(ras, landscape)
-  sub_ras <- mask(sub_ras, landscape)
+  sub_ras <- mask(sub_ras, landscape, touches = FALSE)
 
   permpercent <- as.numeric(landscape[["Permafrost"]])
 
