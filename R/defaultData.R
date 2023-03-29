@@ -556,7 +556,6 @@ defaultClimateDataProj <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI"),
 #' @importFrom terra classify subst mask
 #' @importFrom raster raster
 #' @importFrom reproducible Cache postProcess
-#' @importFrom SpaDES.tools spread2
 #'
 #' @export
 makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 220, 230),
