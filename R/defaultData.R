@@ -664,11 +664,13 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 
   ## and in pixels
   suitablePixNo <- sum(as.vector(sub_ras[]) == rasClass, na.rm = TRUE)
-  ## use max(..., 1) to guaranteed that values lower than 1, get one pixel.
+  permpercentPix <- (permpercent/100)*ncell(sub_ras)  ## don't round here, otherwise values <0.5 become 0.
   permpercentPix <- round((permpercent/100)*ncell(sub_ras))
 
+  ## use max(..., 1) to guarantee that values lower than 1, get one pixel.
   if (permpercentPix > 0)
     permpercentPix <- max(permpercentPix, 1)
+
 
   ## if there's less permafrost than suitable areas
   ## find the largest patch and a point that is distant from its edge
@@ -727,12 +729,11 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 
     ## if there are not enough points within the patches,
     ## try to fill neighbouring pixels (leave holes alone s we want to be
-    ## able to start from a swiss cheese pattern)
-    pixToConvert2 <- pixToConvert - length(cellIDs)
+      ## able to start from a swiss cheese pattern)
+      pixToConvert2 <- pixToConvert - length(cellIDs)
 
-
-    while (pixToConvert2 > 0) {
-      sub_poly <- as.polygons(sub_rasOut) |> disagg()
+      while (pixToConvert2 > 0) {
+        sub_poly <- as.polygons(sub_rasOut) |> disagg()
 
       sub_poly_filled <- fillHoles(sub_poly)
       sub_poly_filled <- rasterize(sub_poly_filled, sub_ras)
@@ -832,7 +833,7 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
 
   ## if the mean is too high, then bring it down to 0.35 to avoid creating
   ## square patches
-  meanSP <- mean(assignProb[], na.rm = TRUE)
+  meanSP <- mean(assignProbOrig, na.rm = TRUE)
   if (meanSP > 0.35)
     assignProb <- assignProb / meanSP * 0.35
 
