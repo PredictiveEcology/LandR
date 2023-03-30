@@ -665,12 +665,12 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   ## and in pixels
   suitablePixNo <- sum(as.vector(sub_ras[]) == rasClass, na.rm = TRUE)
   permpercentPix <- (permpercent/100)*ncell(sub_ras)  ## don't round here, otherwise values <0.5 become 0.
-  permpercentPix <- round((permpercent/100)*ncell(sub_ras))
 
   ## use max(..., 1) to guarantee that values lower than 1, get one pixel.
   if (permpercentPix > 0)
     permpercentPix <- max(permpercentPix, 1)
 
+  permpercentPix <- round(permpercentPix)
 
   ## if there's less permafrost than suitable areas
   ## find the largest patch and a point that is distant from its edge
