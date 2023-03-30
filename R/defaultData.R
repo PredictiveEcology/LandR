@@ -719,54 +719,55 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   ## with a buffer (starting with largest patch)
   if (suitablePixNo <= permpercentPix & permpercentPix > 0) {
     pixToConvert <- permpercentPix
-    ## make points from raster
-    sub_points <- as.points(sub_ras, values = TRUE)
-    names(sub_points) <- "patchType"
 
-    patch_points <- sub_points[sub_points$patchType == rasClass]
-
-    cellIDs <- cellFromXY(sub_rasOut, crds(patch_points))
+    ## convert all available cells
+    cellIDs <- which(as.vector(sub_ras[]) == rasClass)
     sub_rasOut[cellIDs] <- 1L
 
     ## if there are not enough points within the patches,
     ## try to fill neighbouring pixels (leave holes alone s we want to be
     ## able to start from a swiss cheese pattern)
-    pixToConvert2 <- pixToConvert - length(patch_points)
+    pixToConvert2 <- pixToConvert - length(cellIDs)
 
-    if (pixToConvert2 > 0) {
-      sub_poly <- as.polygons(sub_ras) |> disagg()
-      names(sub_poly) <- "patchType"
-      sub_poly <- sub_poly[sub_poly$patchType == rasClass]
 
-      ## enlarge largest polygon
-      sub_poly$area <- expanse(sub_poly)
-      sub_poly <- sub_poly[order(sub_poly$area, decreasing = TRUE)]
+    while (pixToConvert2 > 0) {
+      sub_poly <- as.polygons(sub_rasOut) |> disagg()
 
-      i <- 1L
-      while (i <= nrow(sub_poly) & pixToConvert2 > 0) {
-        patch <- sub_poly[i, ]
-        patch_filled <- fillHoles(patch)
+      sub_poly_filled <- fillHoles(sub_poly)
+      sub_poly_filled <- rasterize(sub_poly_filled, sub_ras)
 
-        ## find points within buffer
-        outPatchPoints <- sub_points[sub_points$patchType != rasClass]
-        outPatchPoints <- mask(outPatchPoints, patch_filled, inverse = TRUE)
+      ## buffer around patch
+      sub_poly_filledBuffer <- buffer(sub_poly_filled, width = unique(res(sub_poly_filled)),
+                                      background = NA)
+      cellIDs <- which(as.vector(sub_poly_filledBuffer[]) == 1)
 
-        ngbPointsIDs <- nearby(patch_filled, outPatchPoints,
-                               distance = unique(res(sub_ras)), centroids = FALSE)
-        pointsToConvert <- outPatchPoints[ngbPointsIDs[,"to_id"]]
-        # plot(pointsToConvert, add = TRUE)
+      ## remove cellIDs that have been converted already
+      vals <- sub_rasOut[cellIDs][]
+      cellIDs <- cellIDs[is.na(vals)]
 
-        cellIDs <- cellFromXY(sub_rasOut, crds(pointsToConvert))
-        sub_rasOut[cellIDs] <- 1L
+      ## check that we don't have too many cells. if we do, keep
+      ## pixels around larger patches
+      if (length(cellIDs) > pixToConvert2) {
+        sub_rasOut2 <- sub_rasOut
+        sub_rasOut2[cellIDs] <- 1L
 
-        pixToConvert2 <- pixToConvert2 - length(pointsToConvert)
-        i <- i + 1L
+        sub_poly2 <- as.polygons(sub_rasOut2) |> disagg()
+        sub_poly2$area <- expanse(sub_poly2)
+        sub_rasOutArea <- rasterize(sub_poly2, sub_rasOut2, field = "area")
+
+        DT <- data.table(cells = 1:ncell(sub_rasOutArea), area = as.vector(sub_rasOutArea[]))
+        DT <- DT[complete.cases(DT)][cells %in% cellIDs]
+        DT <- DT[order(area, decreasing = TRUE)]
+        cellIDs <- DT[1:pixToConvert2, cells]
       }
+      sub_rasOut[cellIDs] <- 1L
+
+      pixToConvert2 <- pixToConvert2 - length(cellIDs)
     }
   }
 
   if (sum(!is.na(sub_rasOut[])) < permpercentPix) {
-    warning(paste("Couldn't assign permafrost to enough pixels."))
+    warning(paste("Couldn't assign permafrost to enough pixels. id:", id))
   }
 
   message(cyan("Done!"))
