@@ -723,9 +723,10 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   if (suitablePixNo <= permpercentPix & permpercentPix > 0) {
     pixToConvert <- permpercentPix
 
-    ## convert all available cells
-    cellIDs <- which(as.vector(sub_ras[]) == rasClass)
-    sub_rasOut[cellIDs] <- 1L
+    if (suitablePixNo > 0) {
+      ## convert all available cells
+      cellIDs <- which(as.vector(sub_ras[]) == rasClass)
+      sub_rasOut[cellIDs] <- 1L
 
     ## if there are not enough points within the patches,
     ## try to fill neighbouring pixels (leave holes alone s we want to be
@@ -765,6 +766,17 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
       sub_rasOut[cellIDs] <- 1L
 
       pixToConvert2 <- pixToConvert2 - length(cellIDs)
+      }
+    } else {
+      ## there may be no available pixels, in which case permafrost can be assigned
+      ## starting in a random polygon within unsuitable areas (hence equal prob below)
+      spreadProb <- subst(sub_ras, c(NA, 0L), c(0L, 1L))
+
+      sub_rasOut <- assignPresences(assignProb = spreadProb,
+                                    landscape = sub_ras,
+                                    pixToConvert = pixToConvert,
+                                    probWeight = 1, numStartsDenom = 10)
+
     }
   }
 
