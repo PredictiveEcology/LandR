@@ -663,7 +663,11 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 
   ## and in pixels
   suitablePixNo <- sum(as.vector(sub_ras[]) == rasClass, na.rm = TRUE)
-  permpercentPix <- as.numeric(round((permpercent/100)*ncell(sub_ras)))
+  ## use max(..., 1) to guaranteed that values lower than 1, get one pixel.
+  permpercentPix <- round((permpercent/100)*ncell(sub_ras))
+
+  if (permpercentPix > 0)
+    permpercentPix <- max(permpercentPix, 1)
 
   ## if there's less permafrost than suitable areas
   ## find the largest patch and a point that is distant from its edge
@@ -678,7 +682,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   ## if there are more suitable areas than permafrost start
   ## "filling in" from focal pixels using distance to edges
   ## as the probability of a pixel being selected (more distant = higher prob)
-  if (suitablePixNo > permpercentPix) {
+  if (suitablePixNo > permpercentPix & permpercentPix > 0) {
     ## make polygons, so that we can identify separate patches in raster
     sub_poly <- as.polygons(sub_ras) |> disagg()   ## 0s in sub_ras are ignored
     names(sub_poly) <- "patchType"
@@ -713,7 +717,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   ## if there's more permafrost than suitable areas
   ## assign all suitable areas as permafrost, then increase
   ## with a buffer (starting with largest patch)
-  if (suitablePixNo <= permpercentPix) {
+  if (suitablePixNo <= permpercentPix & permpercentPix > 0) {
     pixToConvert <- permpercentPix
     ## make points from raster
     sub_points <- as.points(sub_ras, values = TRUE)
