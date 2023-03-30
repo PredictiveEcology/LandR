@@ -227,144 +227,166 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
 
   ## --------------------------------------------------------
   ## Permafrost and thermokarst data
-  ## not using raster::shapefile results in a lot of alignment issues!
-  ## the URL supplied cannot be used to retrieve the data:
   if (any(c("permafrost", "thermokarst", "thermXperm") %in% vars)) {
-    cmd <- paste("curl --header 'Host: app.nwtgeoscience.ca'",
-                 "--user-agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0'",
-                 "--header 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8'",
-                 "--header 'Accept-Language: en-CA,en-US;q=0.7,en;q=0.3'",
-                 "--header 'Content-Type: application/x-www-form-urlencoded'",
-                 "--header 'Origin: https://app.nwtgeoscience.ca'",
-                 "--referer 'https://app.nwtgeoscience.ca/Journal.aspx?refnum=2020-010'",
-                 "--cookie 'ASP.NET_SessionId=vzqpm3xbcsv0oorjkxjd2cy3'",
-                 "--header 'Upgrade-Insecure-Requests: 1'",
-                 "--header 'Sec-Fetch-Dest: document'",
-                 "--header 'Sec-Fetch-Mode: navigate'",
-                 "--header 'Sec-Fetch-Site: same-origin'",
-                 "--header 'Sec-Fetch-User: ?1'",
-                 "--request POST",
-                 "--data-urlencode",
-                 paste0("'__VIEWSTATE=VgcB84SNFQjOzui1LrkB/baCjwp+82NVTO63xsRzN3tIbPwB8",
-                        "PoWe79ARC2a847RWR4FqYMEn6c16kqkMF5E6R8b6CCNoK3+E+e+uLDuTU5yqjU",
-                        "0pPxhn3Djn/jJ6+VEl/6NkdFIieo/HDBwZYq9cp2Gj6R7OlR4D37gxjO7m9JbvI",
-                        "WDJHA6X0qa8Z/+dR/lm8c9edrHUl76DXVAB+ja6wVt5ry8clL/U5bgWzHZG4hcC",
-                        "D2L5Wh+ScFUQD++qTrCxloNafdxCMwfBDB1t4/pBz0NTKUz+zRiS7hSY7kl/1dM",
-                        "88UISQgkEZTkCtdTNCvTnBq3okXggHDmTU9zZhAP9hfnsJbymnhqioh+Fh50kEd",
-                        "s9IN1v2SVKVqoQvqy8bAiaBQw2ej7YwmJDeYiGcTS93Ig6Q1QF4xZ2dgKbpnsT2",
-                        "KhB3RCtqQiCjJOPvZ48aH4w1RGISj+nV/vDDGkkq0/HvKvHEUa9NxbzsCkXNvFz",
-                        "QteyQcPC48cG8WDgVVgY2gwmnGNM14eohVXtb58IlTyQ3uQgpw7lsc2nwyMKqp0",
-                        "RoIqD7d2F7H62MaPXQhU3iTntBTOWCzYfUaF1tFHoMnOReM2suFS7z0J0X2c3E9",
-                        "8hDV5vjrgixkqNsvQdifeW0rf4JQ68a0I/yePF9G7U2Rt+r2aneXd5eE8dLB+vY",
-                        "K0Lbjh3JGAlxteN0r+73W3KNTZEAh/yu7+zbyebgSKnwcV6B4fld1utvgusVhHM",
-                        "IR9KlIluB4NVB/s01CbuLtQ/mAvs5zJn7yQ9pkyB8V0grZdC0Nbj/aoZyDd6jrB",
-                        "GbbgYMVnXz13aDodQgQKWbAoqMDqA0cgw6bXffY6UTh7KxXtWVYgnxpJ47CyzK5",
-                        "cyiPO/RsqcBYCkz3ETVLutx1Rr04x/UymqR6xyoRehjGM+l9N4B3GkmDy0B0D09",
-                        "4t7bcn7jxQLh9DJC7VlzKlWbrgE4HJTCV+dCBTeSAUC+KIGKjxWXoF04GzHCcEbN",
-                        "i/57wPJ5s='"),
-                 "--data-urlencode '__VIEWSTATEGENERATOR=4A21451A'",
-                 "--data-urlencode",
-                 paste0("'__EVENTVALIDATION=kSI1vOPq7X5qViNicd5Yp7wqlvVE0N/Qqn4+2sgSPE/gk",
-                        "pUsNlHYEm37WmFa44YryKY7rd+/1sxYaWwb6gVVymojca9ybYAYibQbUVGiOvHNm",
-                        "aUkJn7LEJW8NIGn0vvp'"),
-                 "--data-urlencode 'btnDownload=Download' 'https://app.nwtgeoscience.ca/Journal.aspx?refnum=2020-010'",
-                 "--output 'DOI_2020-010.zip'")
-
-    fileBash <- normPath(file.path(destinationPath, "curlCommand.sh"))
-    cat(paste("cd", destinationPath), file = fileBash, sep = "\n")
-    cat(cmd, file = fileBash, append = TRUE, sep = "\n")
-
-    out <- tryCatch(shell(fileBash), error = function(e) e)
-    if (is(out, "error")) {
-      warning("Could not download DOI_2020-010.zip (permafrost data).",
-              " Please download manually from 'https://doi.org/10.46887/2020-010' and put zip file in ",
-              destinationPath)
-    }
-    file.remove(fileBash)
-
-    permafrost <- Cache(prepInputs,
-                        targetFile = "Final_Organics_TaigaPlains.shp",
-                        alsoExtract = "similar",
-                        archive = "DOI_2020-010.zip",
-                        destinationPath = destinationPath,
-                        studyArea = studyArea,
-                        useSAcrs = FALSE,
-                        overwrite = TRUE,
-                        fun = "terra::vect",
-                        # useCache = "overwrite",
-                        userTags = c(userTags, "permafrost"),
-                        omitArgs = c("userTags"))
-
-    # ## "rasterize" amount of permafrost
-    # ## make a points object to extract values in native CRS
-    # pixIDs <- which(!is.na(as.vector(rasterToMatch[])))
-    # pixIDsCoords <- as.data.frame(xyFromCell(rasterToMatch, cell = pixIDs))
-    # pixIDsPoints <- vect(pixIDsCoords, geom = c("x", "y"), crs = crs(rasterToMatch))
-    # pixIDs <- data.table(ID = 1:length(pixIDs), pixelIndex = pixIDs)   ## these will be the points IDs
-    #
-    # permafrostData <- genericExtract(x = permafrost, y = pixIDsPoints, field = "Permafrost")
-    # permafrostData[is.na(Permafrost), Permafrost := 0] ## In NA's in RTM mean 0% permafrost (as rasterize(..., background = 0))
-    #
-    # ## points in between polys could touch more than one, take min value
-    # ## for a conservative estimate of permafrost
-    # if (any(duplicated(permafrostData$ID))) {
-    #   suppressWarnings({
-    #     permafrostData <- permafrostData[, list(Permafrost = min(Permafrost, na.rm = TRUE)),
-    #                                      by = ID]
-    #   })
-    # }
-    # permafrostData <- pixIDs[permafrostData, on = .(ID)]
-    # permafrostRas <- rasterToMatch
-    # permafrostRas[permafrostData$pixelIndex] <- permafrostData$Permafrost
-    # permafrostRas <- mask(permafrostRas, rasterToMatch)
-    #
-    # ## "rasterize" amount of thermokarst
-    # thermokarstData <- genericExtract(x = permafrost, y = pixIDsPoints, field = "Degree_Of_")
-    # thermokarstData[, thermokarst := factor(Degree_Of_, levels = c("None", "Low", "Medium", "High"),
-    #                                        labels = c(0, 1, 2, 3))]
-    # thermokarstData[, thermokarst := as.integer(as.character(thermokarst))]
-    #
-    # ## /!\ there are "NAs"/"NULLs" in thermokarst areas (Degree_Of) that have permafrost.
-    # ## These are probably true zeros
-    # ## note: this has to be done after rasterizing -- doing it before lead to mismatches
-    # thermokarstData <- thermokarstData[permafrostData, on = .(ID)]
-    # thermokarstData[is.na(thermokarst) & !is.na(Permafrost), thermokarst := 0L]
-    #
-    # ## points in between polys could touch more than one, take min value
-    # ## for a pessimistic estimate of thermokarst
-    # if (any(duplicated(thermokarstData$ID))) {
-    #   suppressWarnings({
-    #     thermokarstData <- thermokarstData[, list(thermokarst = max(thermokarst, na.rm = TRUE)),
-    #                                      by = ID]
-    #   })
-    # }
-    # thermokarstData <- pixIDs[thermokarstData, on = .(ID)]
-    # thermokarstRas <- rasterToMatch
-    # thermokarstRas[thermokarstData$pixelIndex] <- thermokarstData$thermokarst
-    # thermokarstRas <- mask(thermokarstRas, rasterToMatch)
-    #
-    # levelsthermokarstRas <- data.frame(VALUE = c(0, 1, 2, 3), LEGEND = c("None", "Low", "Medium", "High"))
-    # levels(thermokarstRas) <- levelsthermokarstRas
-    #
-    # if ("permafrost" %in% vars) {
-    #   outs[["permafrost"]] <- permafrostRas
-    # }
-    #
-    # if ("thermokarst" %in% vars) {
-    #   outs[["thermokarst"]] <- thermokarstRas
-    # }
-    #
-    # ## combine thermokarst and permafrost layers
-    # ## high thermokarst in low permafrost areas != than in high permafrost areas (especially for veg)
-    # ## perhaps multiplying is misleading too. is 25% PCC * 2 thermokarst (medium) the same as 50% permafrost * 1 (low) thermokarst?
-    # ## actually we're lucky with Gibson's data because the permafrost classes are not multiples of each other - however this approach is not ideal when they are...
-    # if ("thermXperm" %in% vars) {
-    #   outs[["thermXperm"]] <- thermokarstRas*permafrostRas
-    # }
-
+    permafrost <- getPermafrostDataGibson(destinationPath, studyArea, userTags)
     outs[["permafrostPoly"]] <- permafrost
   }
   outs
+}
+
+
+#' Download permafrost/thermokarst layer
+#'
+#' Downloads and crops/masks permafrost peatland complex cover and amount of thermokarst
+#' spatial data from Gibson et al. (2021)
+#'
+#' @param studyArea a spatial polygon  (`sf`, `sp` or `SpatVector`) used to crop
+#'   and mask data layers. Passed to `reproducible::Cache` and `reproducible::prepInputs`
+#' @param destinationPath passed to `reproducible::Cache` and `reproducible::prepInputs`
+#' @param userTags passed to `reproducible::Cache` and `reproducible::prepInputs`
+#'
+#' @return Carolyn Gisbon's output polygon layer of % PPC and thermokarst state
+#'
+#' @importFrom reproducible prepInputs normPath
+#' @export
+getPermafrostDataGibson <- function(destinationPath, studyArea, userTags) {
+
+  # outs <- list()
+  ## the URL supplied cannot be used to retrieve the data:
+  cmd <- paste("curl --header 'Host: app.nwtgeoscience.ca'",
+               "--user-agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0'",
+               "--header 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8'",
+               "--header 'Accept-Language: en-CA,en-US;q=0.7,en;q=0.3'",
+               "--header 'Content-Type: application/x-www-form-urlencoded'",
+               "--header 'Origin: https://app.nwtgeoscience.ca'",
+               "--referer 'https://app.nwtgeoscience.ca/Journal.aspx?refnum=2020-010'",
+               "--cookie 'ASP.NET_SessionId=vzqpm3xbcsv0oorjkxjd2cy3'",
+               "--header 'Upgrade-Insecure-Requests: 1'",
+               "--header 'Sec-Fetch-Dest: document'",
+               "--header 'Sec-Fetch-Mode: navigate'",
+               "--header 'Sec-Fetch-Site: same-origin'",
+               "--header 'Sec-Fetch-User: ?1'",
+               "--request POST",
+               "--data-urlencode",
+               paste0("'__VIEWSTATE=VgcB84SNFQjOzui1LrkB/baCjwp+82NVTO63xsRzN3tIbPwB8",
+                      "PoWe79ARC2a847RWR4FqYMEn6c16kqkMF5E6R8b6CCNoK3+E+e+uLDuTU5yqjU",
+                      "0pPxhn3Djn/jJ6+VEl/6NkdFIieo/HDBwZYq9cp2Gj6R7OlR4D37gxjO7m9JbvI",
+                      "WDJHA6X0qa8Z/+dR/lm8c9edrHUl76DXVAB+ja6wVt5ry8clL/U5bgWzHZG4hcC",
+                      "D2L5Wh+ScFUQD++qTrCxloNafdxCMwfBDB1t4/pBz0NTKUz+zRiS7hSY7kl/1dM",
+                      "88UISQgkEZTkCtdTNCvTnBq3okXggHDmTU9zZhAP9hfnsJbymnhqioh+Fh50kEd",
+                      "s9IN1v2SVKVqoQvqy8bAiaBQw2ej7YwmJDeYiGcTS93Ig6Q1QF4xZ2dgKbpnsT2",
+                      "KhB3RCtqQiCjJOPvZ48aH4w1RGISj+nV/vDDGkkq0/HvKvHEUa9NxbzsCkXNvFz",
+                      "QteyQcPC48cG8WDgVVgY2gwmnGNM14eohVXtb58IlTyQ3uQgpw7lsc2nwyMKqp0",
+                      "RoIqD7d2F7H62MaPXQhU3iTntBTOWCzYfUaF1tFHoMnOReM2suFS7z0J0X2c3E9",
+                      "8hDV5vjrgixkqNsvQdifeW0rf4JQ68a0I/yePF9G7U2Rt+r2aneXd5eE8dLB+vY",
+                      "K0Lbjh3JGAlxteN0r+73W3KNTZEAh/yu7+zbyebgSKnwcV6B4fld1utvgusVhHM",
+                      "IR9KlIluB4NVB/s01CbuLtQ/mAvs5zJn7yQ9pkyB8V0grZdC0Nbj/aoZyDd6jrB",
+                      "GbbgYMVnXz13aDodQgQKWbAoqMDqA0cgw6bXffY6UTh7KxXtWVYgnxpJ47CyzK5",
+                      "cyiPO/RsqcBYCkz3ETVLutx1Rr04x/UymqR6xyoRehjGM+l9N4B3GkmDy0B0D09",
+                      "4t7bcn7jxQLh9DJC7VlzKlWbrgE4HJTCV+dCBTeSAUC+KIGKjxWXoF04GzHCcEbN",
+                      "i/57wPJ5s='"),
+               "--data-urlencode '__VIEWSTATEGENERATOR=4A21451A'",
+               "--data-urlencode",
+               paste0("'__EVENTVALIDATION=kSI1vOPq7X5qViNicd5Yp7wqlvVE0N/Qqn4+2sgSPE/gk",
+                      "pUsNlHYEm37WmFa44YryKY7rd+/1sxYaWwb6gVVymojca9ybYAYibQbUVGiOvHNm",
+                      "aUkJn7LEJW8NIGn0vvp'"),
+               "--data-urlencode 'btnDownload=Download' 'https://app.nwtgeoscience.ca/Journal.aspx?refnum=2020-010'",
+               "--output 'DOI_2020-010.zip'")
+
+  fileBash <- normPath(file.path(destinationPath, "curlCommand.sh"))
+  cat(paste("cd", destinationPath), file = fileBash, sep = "\n")
+  cat(cmd, file = fileBash, append = TRUE, sep = "\n")
+
+  out <- tryCatch(shell(fileBash), error = function(e) e)
+  if (is(out, "error")) {
+    warning("Could not download DOI_2020-010.zip (permafrost data).",
+            " Please download manually from 'https://doi.org/10.46887/2020-010' and put zip file in ",
+            destinationPath)
+  }
+  file.remove(fileBash)
+
+  permafrost <- Cache(prepInputs,
+                      targetFile = "Final_Organics_TaigaPlains.shp",
+                      alsoExtract = "similar",
+                      archive = "DOI_2020-010.zip",
+                      destinationPath = destinationPath,
+                      studyArea = studyArea,
+                      useSAcrs = FALSE,
+                      overwrite = TRUE,
+                      fun = "terra::vect",
+                      # useCache = "overwrite",
+                      userTags = c(userTags, "permafrost"),
+                      omitArgs = c("userTags"))
+
+  # ## "rasterize" amount of permafrost
+  # ## make a points object to extract values in native CRS
+  # pixIDs <- which(!is.na(as.vector(rasterToMatch[])))
+  # pixIDsCoords <- as.data.frame(xyFromCell(rasterToMatch, cell = pixIDs))
+  # pixIDsPoints <- vect(pixIDsCoords, geom = c("x", "y"), crs = crs(rasterToMatch))
+  # pixIDs <- data.table(ID = 1:length(pixIDs), pixelIndex = pixIDs)   ## these will be the points IDs
+  #
+  # permafrostData <- genericExtract(x = permafrost, y = pixIDsPoints, field = "Permafrost")
+  # permafrostData[is.na(Permafrost), Permafrost := 0] ## In NA's in RTM mean 0% permafrost (as rasterize(..., background = 0))
+  #
+  # ## points in between polys could touch more than one, take min value
+  # ## for a conservative estimate of permafrost
+  # if (any(duplicated(permafrostData$ID))) {
+  #   suppressWarnings({
+  #     permafrostData <- permafrostData[, list(Permafrost = min(Permafrost, na.rm = TRUE)),
+  #                                      by = ID]
+  #   })
+  # }
+  # permafrostData <- pixIDs[permafrostData, on = .(ID)]
+  # permafrostRas <- rasterToMatch
+  # permafrostRas[permafrostData$pixelIndex] <- permafrostData$Permafrost
+  # permafrostRas <- mask(permafrostRas, rasterToMatch)
+  #
+  # ## "rasterize" amount of thermokarst
+  # thermokarstData <- genericExtract(x = permafrost, y = pixIDsPoints, field = "Degree_Of_")
+  # thermokarstData[, thermokarst := factor(Degree_Of_, levels = c("None", "Low", "Medium", "High"),
+  #                                        labels = c(0, 1, 2, 3))]
+  # thermokarstData[, thermokarst := as.integer(as.character(thermokarst))]
+  #
+  # ## /!\ there are "NAs"/"NULLs" in thermokarst areas (Degree_Of) that have permafrost.
+  # ## These are probably true zeros
+  # ## note: this has to be done after rasterizing -- doing it before lead to mismatches
+  # thermokarstData <- thermokarstData[permafrostData, on = .(ID)]
+  # thermokarstData[is.na(thermokarst) & !is.na(Permafrost), thermokarst := 0L]
+  #
+  # ## points in between polys could touch more than one, take min value
+  # ## for a pessimistic estimate of thermokarst
+  # if (any(duplicated(thermokarstData$ID))) {
+  #   suppressWarnings({
+  #     thermokarstData <- thermokarstData[, list(thermokarst = max(thermokarst, na.rm = TRUE)),
+  #                                      by = ID]
+  #   })
+  # }
+  # thermokarstData <- pixIDs[thermokarstData, on = .(ID)]
+  # thermokarstRas <- rasterToMatch
+  # thermokarstRas[thermokarstData$pixelIndex] <- thermokarstData$thermokarst
+  # thermokarstRas <- mask(thermokarstRas, rasterToMatch)
+  #
+  # levelsthermokarstRas <- data.frame(VALUE = c(0, 1, 2, 3), LEGEND = c("None", "Low", "Medium", "High"))
+  # levels(thermokarstRas) <- levelsthermokarstRas
+  #
+  # if ("permafrost" %in% vars) {
+  #   outs[["permafrost"]] <- permafrostRas
+  # }
+  #
+  # if ("thermokarst" %in% vars) {
+  #   outs[["thermokarst"]] <- thermokarstRas
+  # }
+  #
+  # ## combine thermokarst and permafrost layers
+  # ## high thermokarst in low permafrost areas != than in high permafrost areas (especially for veg)
+  # ## perhaps multiplying is misleading too. is 25% PCC * 2 thermokarst (medium) the same as 50% permafrost * 1 (low) thermokarst?
+  # ## actually we're lucky with Gibson's data because the permafrost classes are not multiples of each other - however this approach is not ideal when they are...
+  # if ("thermXperm" %in% vars) {
+  #   outs[["thermXperm"]] <- thermokarstRas*permafrostRas
+  # }
+
+  # outs[["permafrostPoly"]] <- permafrost
+  permafrost
 }
 
 
@@ -674,7 +696,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 
   if (skipThisPoly) {
     warning(paste0("None of 'ras' touch polygon id ", id,
-                  ".\n  You may want to consider extending 'ras'."))
+                   ".\n  You may want to consider extending 'ras'."))
   } else {
     permpercent <- as.numeric(landscape[["Permafrost"]])
 
