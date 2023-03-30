@@ -728,44 +728,61 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
       cellIDs <- which(as.vector(sub_ras[]) == rasClass)
       sub_rasOut[cellIDs] <- 1L
 
-    ## if there are not enough points within the patches,
-    ## try to fill neighbouring pixels (leave holes alone s we want to be
+      ## if there are not enough points within the patches,
+      ## try to fill neighbouring pixels (leave holes alone s we want to be
       ## able to start from a swiss cheese pattern)
       pixToConvert2 <- pixToConvert - length(cellIDs)
 
       while (pixToConvert2 > 0) {
         sub_poly <- as.polygons(sub_rasOut) |> disagg()
 
-      sub_poly_filled <- fillHoles(sub_poly)
-      sub_poly_filled <- rasterize(sub_poly_filled, sub_ras)
+        sub_poly_filled <- fillHoles(sub_poly)
+        sub_poly_filled <- rasterize(sub_poly_filled, sub_ras)
 
-      ## buffer around patch
-      sub_poly_filledBuffer <- buffer(sub_poly_filled, width = unique(res(sub_poly_filled)),
-                                      background = NA)
-      cellIDs <- which(as.vector(sub_poly_filledBuffer[]) == 1)
+        ## buffer around patch
+        sub_poly_filledBuffer <- buffer(sub_poly_filled, width = unique(res(sub_poly_filled)),
+                                        background = NA)
+        cellIDs <- which(as.vector(sub_poly_filledBuffer[]) == 1)
 
-      ## remove cellIDs that have been converted already
-      vals <- sub_rasOut[cellIDs][]
-      cellIDs <- cellIDs[is.na(vals)]
+        ## remove cellIDs that have been converted already
+        vals <- sub_rasOut[cellIDs][]
+        cellIDs <- cellIDs[is.na(vals)]
 
-      ## check that we don't have too many cells. if we do, keep
-      ## pixels around larger patches
-      if (length(cellIDs) > pixToConvert2) {
-        sub_rasOut2 <- sub_rasOut
-        sub_rasOut2[cellIDs] <- 1L
+        ## check that we don't have too many cells. if we do, keep
+        ## pixels around larger patches
+        if (length(cellIDs) > pixToConvert2) {
+          sub_rasOut2 <- sub_rasOut
+          sub_rasOut2[cellIDs] <- 1L
 
-        sub_poly2 <- as.polygons(sub_rasOut2) |> disagg()
-        sub_poly2$area <- expanse(sub_poly2)
-        sub_rasOutArea <- rasterize(sub_poly2, sub_rasOut2, field = "area")
+          sub_poly2 <- as.polygons(sub_rasOut2) |> disagg()
+          sub_poly2$area <- expanse(sub_poly2)
+          sub_rasOutArea <- rasterize(sub_poly2, sub_rasOut2, field = "area")
 
-        DT <- data.table(cells = 1:ncell(sub_rasOutArea), area = as.vector(sub_rasOutArea[]))
-        DT <- DT[complete.cases(DT)][cells %in% cellIDs]
-        DT <- DT[order(area, decreasing = TRUE)]
-        cellIDs <- DT[1:pixToConvert2, cells]
-      }
-      sub_rasOut[cellIDs] <- 1L
+          DT <- data.table(cells = 1:ncell(sub_rasOutArea), area = as.vector(sub_rasOutArea[]))
+          DT <- DT[complete.cases(DT)][cells %in% cellIDs]
+          DT <- DT[order(area, decreasing = TRUE)]
+          cellIDs <- DT[1:pixToConvert2, cells]
+        }
 
-      pixToConvert2 <- pixToConvert2 - length(cellIDs)
+        ## we may have exhausted areas to fill outside the holes
+        ## so we begin filing small holes
+        if (length(cellIDs) < 1) {
+          sub_poly <- as.polygons(sub_rasOut) |> disagg()
+          sub_poly_holes <- fillHoles(sub_poly, inverse = TRUE) |> disagg()
+          sub_poly_holes$area <- expanse(sub_poly_holes)
+
+          sub_rasHolesArea <- rasterize(sub_poly_holes, sub_rasOut, field = "area")
+
+          DT <- data.table(cells = 1:ncell(sub_rasHolesArea), area = as.vector(sub_rasHolesArea[]))
+          DT <- DT[complete.cases(DT)]
+          setorder(DT, area, cells)
+
+          cellIDs <- DT[1:pixToConvert2, cells]
+        }
+
+        sub_rasOut[cellIDs] <- 1L
+
+        pixToConvert2 <- pixToConvert2 - length(cellIDs)
       }
     } else {
       ## there may be no available pixels, in which case permafrost can be assigned
