@@ -657,151 +657,164 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   }
   idd <- which(gridPoly[[IDcol]] == id)
   landscape <- gridPoly[idd]
-  sub_ras <- crop(ras, landscape)
-  sub_ras <- mask(sub_ras, landscape, touches = FALSE)
+  sub_ras <- crop(ras, landscape, mask = TRUE, touches = FALSE)
+  ## certain polygons may be in ras boundaries and so small
+  ## that they don't overlap any cell centroids. So try again with touches = TRUE
+  if (isFALSE(any(!is.na(as.vector(sub_ras[]))))) {
+    sub_ras <- crop(ras, landscape, mask = TRUE)
+  }
 
-  permpercent <- as.numeric(landscape[["Permafrost"]])
-
-  ## and in pixels
-  suitablePixNo <- sum(as.vector(sub_ras[]) == rasClass, na.rm = TRUE)
-  permpercentPix <- (permpercent/100)*ncell(sub_ras)  ## don't round here, otherwise values <0.5 become 0.
-
-  ## use max(..., 1) to guarantee that values lower than 1, get one pixel.
-  if (permpercentPix > 0)
-    permpercentPix <- max(permpercentPix, 1)
-
-  permpercentPix <- round(permpercentPix)
-
-  ## if there's less permafrost than suitable areas
-  ## find the largest patch and a point that is distant from its edge
-  ## then assign permafrost starting from this point
-  ## until the percentage is reached
+  ## the solution may not have worked and there may simply be no
+  ## raster cells intersected by this polygon.
+  skipThisPoly <- isFALSE(any(!is.na(as.vector(sub_ras[]))))
 
   ## make storage raster
   sub_rasOut <- sub_ras
   sub_rasOut[] <- NA_integer_
 
-  message(cyan("Assigning permafrost..."))
-  ## if there are more suitable areas than permafrost start
-  ## "filling in" from focal pixels using distance to edges
-  ## as the probability of a pixel being selected (more distant = higher prob)
-  if (suitablePixNo > permpercentPix & permpercentPix > 0) {
-    ## make polygons, so that we can identify separate patches in raster
-    sub_poly <- as.polygons(sub_ras) |> disagg()   ## 0s in sub_ras are ignored
-    names(sub_poly) <- "patchType"
-    ## subset to patches of interest
-    sub_poly <- sub_poly[sub_poly$patchType == rasClass, ]
-    sub_poly$ID <- 1:nrow(sub_poly)
+  if (skipThisPoly) {
+    warning(paste0("None of 'ras' touch polygon id ", id,
+                  ".\n  You may want to consider extending 'ras'."))
+  } else {
+    permpercent <- as.numeric(landscape[["Permafrost"]])
 
-    ## now make sub_ras with poly IDs
-    sub_ras2 <- rasterize(sub_poly, sub_ras, field = "ID")
-    # terra::plot(sub_ras2, col = viridis::viridis(length(sub_poly)))
+    ## and in pixels
+    suitablePixNo <- sum(as.vector(sub_ras[]) == rasClass, na.rm = TRUE)
+    permpercentPix <- (permpercent/100)*ncell(sub_ras)  ## don't round here, otherwise values <0.5 become 0.
 
-    ## compute distances to edges.
-    ## first make an "inverse" raster with NAs
-    sub_rasDist <- sub_ras2
-    sub_rasDist[] <- 1L
-    sub_rasDist <- mask(sub_rasDist, sub_ras2, inverse = TRUE)   ## use sub_ras2, because 0s were NAed
-    sub_rasDist <- distance(sub_rasDist)
+    ## use max(..., 1) to guarantee that values lower than 1, get one pixel.
+    if (permpercentPix > 0)
+      permpercentPix <- max(permpercentPix, 1)
 
-    ## make "probabilities" by scaling 0-1
-    spreadProb <- sub_rasDist/max(sub_rasDist[], na.rm = TRUE)
-    # terra::plot(spreadProb, col = viridis::inferno(100))
+    permpercentPix <- round(permpercentPix)
 
-    ## we may need to try several times until we get the number of pixels
-    ## at each attempt increase spreadProb
-    sub_rasOut <- assignPresences(assignProb = spreadProb,
-                                  landscape = sub_ras2,
-                                  pixToConvert = permpercentPix,
-                                  probWeight = 0.5, numStartsDenom = 10)
-    # terra::plot(sub_rasOut, col = viridis::inferno(100))
-  }
+    ## if there's less permafrost than suitable areas
+    ## find the largest patch and a point that is distant from its edge
+    ## then assign permafrost starting from this point
+    ## until the percentage is reached
 
-  ## if there's more permafrost than suitable areas
-  ## assign all suitable areas as permafrost, then increase
-  ## with a buffer (starting with largest patch)
-  if (suitablePixNo <= permpercentPix & permpercentPix > 0) {
-    pixToConvert <- permpercentPix
+    message(cyan("Assigning permafrost..."))
+    ## if there are more suitable areas than permafrost start
+    ## "filling in" from focal pixels using distance to edges
+    ## as the probability of a pixel being selected (more distant = higher prob)
+    if (suitablePixNo > permpercentPix & permpercentPix > 0) {
+      ## make polygons, so that we can identify separate patches in raster
+      sub_poly <- as.polygons(sub_ras) |> disagg()   ## 0s in sub_ras are ignored
+      names(sub_poly) <- "patchType"
+      ## subset to patches of interest
+      sub_poly <- sub_poly[sub_poly$patchType == rasClass, ]
+      sub_poly$ID <- 1:nrow(sub_poly)
 
-    if (suitablePixNo > 0) {
-      ## convert all available cells
-      cellIDs <- which(as.vector(sub_ras[]) == rasClass)
-      sub_rasOut[cellIDs] <- 1L
+      ## now make sub_ras with poly IDs
+      sub_ras2 <- rasterize(sub_poly, sub_ras, field = "ID")
+      # terra::plot(sub_ras2, col = viridis::viridis(length(sub_poly)))
 
-      ## if there are not enough points within the patches,
-      ## try to fill neighbouring pixels (leave holes alone s we want to be
-      ## able to start from a swiss cheese pattern)
-      pixToConvert2 <- pixToConvert - length(cellIDs)
+      ## compute distances to edges.
+      ## first make an "inverse" raster with NAs
+      sub_rasDist <- sub_ras2
+      sub_rasDist[] <- 1L
+      sub_rasDist <- mask(sub_rasDist, sub_ras2, inverse = TRUE)   ## use sub_ras2, because 0s were NAed
+      sub_rasDist <- distance(sub_rasDist)
 
-      while (pixToConvert2 > 0) {
-        sub_poly <- as.polygons(sub_rasOut) |> disagg()
+      ## make "probabilities" by scaling 0-1
+      spreadProb <- sub_rasDist/max(sub_rasDist[], na.rm = TRUE)
+      # terra::plot(spreadProb, col = viridis::inferno(100))
 
-        sub_poly_filled <- fillHoles(sub_poly)
-        sub_poly_filled <- rasterize(sub_poly_filled, sub_ras)
+      ## we may need to try several times until we get the number of pixels
+      ## at each attempt increase spreadProb
+      sub_rasOut <- assignPresences(assignProb = spreadProb,
+                                    landscape = sub_ras2,
+                                    pixToConvert = permpercentPix,
+                                    probWeight = 0.5, numStartsDenom = 10)
+      # terra::plot(sub_rasOut, col = viridis::inferno(100))
+    }
 
-        ## buffer around patch
-        sub_poly_filledBuffer <- buffer(sub_poly_filled, width = unique(res(sub_poly_filled)),
-                                        background = NA)
-        cellIDs <- which(as.vector(sub_poly_filledBuffer[]) == 1)
+    ## if there's more permafrost than suitable areas
+    ## assign all suitable areas as permafrost, then increase
+    ## with a buffer (starting with largest patch)
+    if (suitablePixNo <= permpercentPix & permpercentPix > 0) {
+      pixToConvert <- permpercentPix
 
-        ## remove cellIDs that have been converted already
-        vals <- sub_rasOut[cellIDs][]
-        cellIDs <- cellIDs[is.na(vals)]
-
-        ## check that we don't have too many cells. if we do, keep
-        ## pixels around larger patches
-        if (length(cellIDs) > pixToConvert2) {
-          sub_rasOut2 <- sub_rasOut
-          sub_rasOut2[cellIDs] <- 1L
-
-          sub_poly2 <- as.polygons(sub_rasOut2) |> disagg()
-          sub_poly2$area <- expanse(sub_poly2)
-          sub_rasOutArea <- rasterize(sub_poly2, sub_rasOut2, field = "area")
-
-          DT <- data.table(cells = 1:ncell(sub_rasOutArea), area = as.vector(sub_rasOutArea[]))
-          DT <- DT[complete.cases(DT)][cells %in% cellIDs]
-          DT <- DT[order(area, decreasing = TRUE)]
-          cellIDs <- DT[1:pixToConvert2, cells]
-        }
-
-        ## we may have exhausted areas to fill outside the holes
-        ## so we begin filing small holes
-        if (length(cellIDs) < 1) {
-          sub_poly <- as.polygons(sub_rasOut) |> disagg()
-          sub_poly_holes <- fillHoles(sub_poly, inverse = TRUE) |> disagg()
-          sub_poly_holes$area <- expanse(sub_poly_holes)
-
-          sub_rasHolesArea <- rasterize(sub_poly_holes, sub_rasOut, field = "area")
-
-          DT <- data.table(cells = 1:ncell(sub_rasHolesArea), area = as.vector(sub_rasHolesArea[]))
-          DT <- DT[complete.cases(DT)]
-          setorder(DT, area, cells)
-
-          cellIDs <- DT[1:pixToConvert2, cells]
-        }
-
+      if (suitablePixNo > 0) {
+        ## convert all available cells
+        cellIDs <- which(as.vector(sub_ras[]) == rasClass)
         sub_rasOut[cellIDs] <- 1L
 
-        pixToConvert2 <- pixToConvert2 - length(cellIDs)
+        ## if there are not enough points within the patches,
+        ## try to fill neighbouring pixels (leave holes alone s we want to be
+        ## able to start from a swiss cheese pattern)
+        pixToConvert2 <- pixToConvert - length(cellIDs)
+
+        while (pixToConvert2 > 0) {
+          sub_poly <- as.polygons(sub_rasOut) |> disagg()
+
+          sub_poly_filled <- fillHoles(sub_poly)
+          sub_poly_filled <- rasterize(sub_poly_filled, sub_ras)
+
+          ## buffer around patch
+          sub_poly_filledBuffer <- buffer(sub_poly_filled, width = unique(res(sub_poly_filled)),
+                                          background = NA)
+          cellIDs <- which(as.vector(sub_poly_filledBuffer[]) == 1)
+
+          ## remove cellIDs that have been converted already
+          vals <- sub_rasOut[cellIDs][]
+          cellIDs <- cellIDs[is.na(vals)]
+
+          ## check that we don't have too many cells. if we do, keep
+          ## pixels around larger patches
+          if (length(cellIDs) > pixToConvert2) {
+            sub_rasOut2 <- sub_rasOut
+            sub_rasOut2[cellIDs] <- 1L
+
+            sub_poly2 <- as.polygons(sub_rasOut2) |> disagg()
+            sub_poly2$area <- expanse(sub_poly2)
+            sub_rasOutArea <- rasterize(sub_poly2, sub_rasOut2, field = "area")
+
+            DT <- data.table(cells = 1:ncell(sub_rasOutArea), area = as.vector(sub_rasOutArea[]))
+            DT <- DT[complete.cases(DT)][cells %in% cellIDs]
+            DT <- DT[order(area, decreasing = TRUE)]
+            cellIDs <- DT[1:pixToConvert2, cells]
+          }
+
+          ## we may have exhausted areas to fill outside the holes
+          ## so we begin filing small holes
+          if (length(cellIDs) < 1) {
+            sub_poly <- as.polygons(sub_rasOut) |> disagg()
+            sub_poly_holes <- fillHoles(sub_poly, inverse = TRUE) |> disagg()
+            sub_poly_holes$area <- expanse(sub_poly_holes)
+
+            sub_rasHolesArea <- rasterize(sub_poly_holes, sub_rasOut, field = "area")
+
+            DT <- data.table(cells = 1:ncell(sub_rasHolesArea), area = as.vector(sub_rasHolesArea[]))
+            DT <- DT[complete.cases(DT)]
+            setorder(DT, area, cells)
+
+            cellIDs <- DT[1:pixToConvert2, cells]
+          }
+
+          sub_rasOut[cellIDs] <- 1L
+
+          pixToConvert2 <- pixToConvert2 - length(cellIDs)
+        }
+      } else {
+        ## there may be no available pixels, in which case permafrost can be assigned
+        ## starting in a random polygon within unsuitable areas (hence equal prob below)
+        spreadProb <- subst(sub_ras, c(NA, 0L), c(0L, 1L))
+
+        sub_rasOut <- assignPresences(assignProb = spreadProb,
+                                      landscape = sub_ras,
+                                      pixToConvert = pixToConvert,
+                                      probWeight = 1, numStartsDenom = 10)
+
       }
-    } else {
-      ## there may be no available pixels, in which case permafrost can be assigned
-      ## starting in a random polygon within unsuitable areas (hence equal prob below)
-      spreadProb <- subst(sub_ras, c(NA, 0L), c(0L, 1L))
-
-      sub_rasOut <- assignPresences(assignProb = spreadProb,
-                                    landscape = sub_ras,
-                                    pixToConvert = pixToConvert,
-                                    probWeight = 1, numStartsDenom = 10)
-
     }
+
+    if (sum(!is.na(sub_rasOut[])) < permpercentPix) {
+      warning(paste("Couldn't assign permafrost to enough pixels. id:", id))
+    }
+    message(cyan("Done!"))
   }
 
-  if (sum(!is.na(sub_rasOut[])) < permpercentPix) {
-    warning(paste("Couldn't assign permafrost to enough pixels. id:", id))
-  }
-
-  message(cyan("Done!"))
   if (saveOut) {
     tmpFile <- paste0("permafrost_polyID", id, ".tif")
     if (!is.null(saveDir)) {
