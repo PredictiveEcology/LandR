@@ -249,7 +249,7 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
 #'
 #' @importFrom reproducible prepInputs normPath
 #' @export
-getPermafrostDataGibson <- function(destinationPath, studyArea, userTags) {
+getPermafrostDataGibson <- function(destinationPath, studyArea, cacheTags) {
 
   # outs <- list()
   ## the URL supplied cannot be used to retrieve the data:
@@ -315,7 +315,7 @@ getPermafrostDataGibson <- function(destinationPath, studyArea, userTags) {
                       overwrite = TRUE,
                       fun = "terra::vect",
                       # useCache = "overwrite",
-                      userTags = c(userTags, "permafrost"),
+                      userTags = c(cacheTags, "permafrost"),
                       omitArgs = c("userTags"))
 
   # ## "rasterize" amount of permafrost
