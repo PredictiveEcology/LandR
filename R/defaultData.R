@@ -806,6 +806,9 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
             sub_poly_holes$area <- expanse(sub_poly_holes)
 
             sub_rasHolesArea <- rasterize(sub_poly_holes, sub_rasOut, field = "area")
+            ## there may be patches inside holes (like islands) that need
+            ## to be masked out, as they are ignored by fillHoles
+            sub_rasHolesArea <- mask(sub_rasHolesArea, sub_rasOut, inverse = TRUE)
 
             DT <- data.table(cells = 1:ncell(sub_rasHolesArea), area = as.vector(sub_rasHolesArea[]))
             DT <- DT[complete.cases(DT)]
