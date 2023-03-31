@@ -799,7 +799,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
           }
 
           ## we may have exhausted areas to fill outside the holes
-          ## so we begin filing small holes
+          ## so we fill holes (preferentially the smaller ones)
           if (length(cellIDs) < 1) {
             sub_poly <- as.polygons(sub_rasOut) |> disagg()
             sub_poly_holes <- fillHoles(sub_poly, inverse = TRUE) |> disagg()
