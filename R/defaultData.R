@@ -247,7 +247,7 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
 #' @param studyArea a spatial polygon  (`sf`, `sp` or `SpatVector`) used to crop
 #'   and mask data layers. Passed to `reproducible::Cache` and `reproducible::prepInputs`
 #' @param destinationPath passed to `reproducible::Cache` and `reproducible::prepInputs`
-#' @param userTags passed to `reproducible::Cache` and `reproducible::prepInputs`
+#' @param cacheTags passed to `reproducible::Cache` and `reproducible::prepInputs`
 #'
 #' @return Carolyn Gisbon's output polygon layer of % PPC and thermokarst state
 #'

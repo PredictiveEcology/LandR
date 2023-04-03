@@ -22,11 +22,12 @@ utils::globalVariables(c(
 #'   permafrost raster creation). Defaults to no parallelisation (1 thread)
 #' @param outPath character. A folder path where temporary permafrost rasters
 #'   will be saved. Note that these *will not* be deleted at the end of this function
-#' @cacheTags character. Common tags to use across `reproducible::Cache` calls. These will
+#' @param cacheTags character. Common tags to use across `reproducible::Cache` calls. These will
 #'   be appended to other tags distinguishing the nested `reproducible::Cache` calls.
 #' @param destinationPath character. Passed to `reproducible::prepInputs` and the
 #'   location where the final permafrost layer will be saved.
 #' @param studyArea character. Passed to `reproducible::postProcess`.
+#' @param .studyAreaName character. A string to append to `filename2` in `postProcess`.
 #'
 #' @return a `SpatRaster` of permafrost presences (1) and absences (0) with the
 #'   same properties as the land-cover and wetland rasters, cropped and masked
@@ -41,7 +42,7 @@ utils::globalVariables(c(
 #' @export
 makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath"),
                               cacheTags = NULL, destinationPath = getOption("reproducible.destinationPath"),
-                              studyArea = NULL) {
+                              studyArea = NULL, .studyAreaName = NULL) {
   permafrostSA <- Cache(prepInputs,
                         targetFile = "TP_DP_StudyBoundary.shp",
                         alsoExtract = "similar",
