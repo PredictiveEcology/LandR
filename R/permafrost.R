@@ -160,7 +160,7 @@ makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath
 #' @param outFilename name of output permafrost raster file
 #' @param dPath directory where output permafrost raster file will be written.
 #'
-#' @importFrom terra writeRaster
+#' @importFrom terra writeRaster sprc
 .assignPermafrostWrapper <- function(gridPoly, ras, id, saveDir, cores, outFilename, dPath) {
   if (cores > 1) {
     message("Creating permafrost layer with parallelisation")
@@ -325,9 +325,9 @@ makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 
 #' @return a file name or the permafrost presence/absence raster for the focal
 #'  polygon.
 #'
-#' @importFrom terra rast vect unwrap writeRaster as.polygons as.points as.lines
-#' @importFrom terra mask crop cellFromXY crds disagg distance expanse nearby fillHoles
-#' @importFrom data.table as.data.table
+#' @importFrom terra rast vect unwrap writeRaster as.polygons
+#' @importFrom terra mask crop disagg distance expanse fillHoles buffer
+#' @importFrom data.table as.data.table setorder
 #' @importFrom crayon cyan
 #' @export
 assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
