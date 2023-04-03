@@ -27,12 +27,17 @@ utils::globalVariables(c(
 #'   climate moisture index, CMI) obtained from AdaptWest for the reference period 1980-2010
 #'   (https://s3-us-west-2.amazonaws.com/www.cacpd.org/CMIP6/normals/Normal_1981_2010_bioclim.zip),
 #'   elevation (from https://adaptwest.databasin.org/pages/adaptwest-climatena/) - at 1 Km resolution -
-#'   a binary map of wetlands (from Wulder et al. 2018), permafrost peatland complex cover and amount
-#'   of thermokarst (from Gibson et al. 2021) -- which are combined to produce a compound variable called
-#'   'thermXperm' -- and a map of time since fire (considering fire perimeters from the Canadian Wildland
-#'   Fire Information System.
+#'   a binary map of wetlands (from Wulder et al. 2018), permafrost peatland complex cover and level
+#'   of thermokarst (from Gibson et al. 2021), and a map of time since fire (considering fire perimeters from the Canadian Wildland
+#'   Fire Information System. All layers are `SpatRasters` except for "permafrostPoly", which is a
+#'   polygon layer containing permafrost peatland complex cover ("Permafrost" column)
+#'   and level of thermokarst ("Degree_Of_" column), amongst other information.
 #'
-#' @return named list of `SpatRasters`, with names following `vars`.
+#' @return named list of `SpatRasters` (and a `SpatVector`), with names following `vars`,
+#'   except for "permafrost", "thermokarst", which are both in the "permafrostPoly" `SpatVector`.
+#'
+#' @references Gibson, C., Morse, P. D., Kelly, J. M., Turetsky, M. R., Baltzer, J. L., Gingras-Hill, T., & Kokelj, S. V. (2020). Thermokarst Mapping Collective: Protocol for organic permafrost terrain and preliminary inventory from the Taiga Plains test area, Northwest Territories (NWT Open Report 2020-010, p. 29). Northwest Territories Geological Survey.
+#' @references Wulder, M., Li, Z., Campbell, E., White, J., Hobart, G., Hermosilla, T., & Coops, N. (2018). A National Assessment of Wetland Status and Trends for Canada’s Forested Ecosystems Using 33 Years of Earth Observation Satellite Data. Remote Sensing, 10(10), 1623. https://doi.org/10.3390/rs10101623
 #'
 #' @importFrom reproducible Cache prepInputs postProcess normPath
 #' @importFrom sf st_as_sf st_write st_crs st_crs<- st_transform st_intersection
