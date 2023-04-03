@@ -10,7 +10,8 @@ makePermafrostRas(
   outPath = getOption("spades.outputPath"),
   cacheTags = NULL,
   destinationPath = getOption("reproducible.destinationPath"),
-  studyArea = NULL
+  studyArea = NULL,
+  .studyAreaName = NULL
 )
 }
 \arguments{
@@ -20,10 +21,15 @@ permafrost raster creation). Defaults to no parallelisation (1 thread)}
 \item{outPath}{character. A folder path where temporary permafrost rasters
 will be saved. Note that these \emph{will not} be deleted at the end of this function}
 
+\item{cacheTags}{character. Common tags to use across \code{reproducible::Cache} calls. These will
+be appended to other tags distinguishing the nested \code{reproducible::Cache} calls.}
+
 \item{destinationPath}{character. Passed to \code{reproducible::prepInputs} and the
 location where the final permafrost layer will be saved.}
 
 \item{studyArea}{character. Passed to \code{reproducible::postProcess}.}
+
+\item{.studyAreaName}{character. A string to append to \code{filename2} in \code{postProcess}.}
 }
 \value{
 a \code{SpatRaster} of permafrost presences (1) and absences (0) with the

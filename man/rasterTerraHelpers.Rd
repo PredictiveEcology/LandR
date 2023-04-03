@@ -22,7 +22,7 @@ isInt(ras)
 reclass(ras, tab)
 }
 \arguments{
-\item{ras}{a Raster* or SpatRaster object}
+\item{ras}{a Raster*, or SpatRaster object}
 
 \item{NAval}{the value to use as \code{NA}}
 
@@ -30,6 +30,9 @@ reclass(ras, tab)
 
 \item{crs}{passed to \code{raster::projectRaster(..., crs = crs)}
 and \code{terra::project(..., y = crs)}}
+
+\item{tab}{matrix of values to reclassify. See \code{terra::classify}
+and \code{raster::reclassify}.}
 }
 \value{
 a raster with attributed NA values

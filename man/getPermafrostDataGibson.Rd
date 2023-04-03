@@ -12,7 +12,7 @@ getPermafrostDataGibson(destinationPath, studyArea, cacheTags)
 \item{studyArea}{a spatial polygon  (\code{sf}, \code{sp} or \code{SpatVector}) used to crop
 and mask data layers. Passed to \code{reproducible::Cache} and \code{reproducible::prepInputs}}
 
-\item{userTags}{passed to \code{reproducible::Cache} and \code{reproducible::prepInputs}}
+\item{cacheTags}{passed to \code{reproducible::Cache} and \code{reproducible::prepInputs}}
 }
 \value{
 Carolyn Gisbon's output polygon layer of \% PPC and thermokarst state
