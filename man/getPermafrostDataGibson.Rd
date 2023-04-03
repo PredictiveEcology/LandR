@@ -4,7 +4,7 @@
 \alias{getPermafrostDataGibson}
 \title{Download permafrost/thermokarst layer}
 \usage{
-getPermafrostDataGibson(destinationPath, studyArea, userTags)
+getPermafrostDataGibson(destinationPath, studyArea, cacheTags)
 }
 \arguments{
 \item{destinationPath}{passed to \code{reproducible::Cache} and \code{reproducible::prepInputs}}
