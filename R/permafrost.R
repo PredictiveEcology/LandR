@@ -8,6 +8,146 @@ utils::globalVariables(c(
 ## LandR may not be the best package for these functions, but they will live
 ## here for now.
 
+#' Source and prepare permafrost, wetland and land-cover
+#'   data and create a permafrost presence-absence raster
+#'
+#' Obtains permafrost peatland complex % data from Gibson et al. (2021),
+#'    land-cover data for 2017 from Hermosilla et al. (2022) and wetland
+#'    presence/absence data from Wulder et al. (2018), which are crossed
+#'    to create a permafrost raster layer.
+#'    See `?makeSuitForPerm` and `?assignPermafrost` for details on how this
+#'    is achieved.
+#'
+#' @param cores integer. Number of threads to use for parallelisation (during
+#'   permafrost raster creation). Defaults to no parallelisation (1 thread)
+#' @param outPath character. A folder path where temporary permafrost rasters
+#'   will be saved. Note that these *will not* be deleted at the end of this function
+#' @cacheTags character. Common tags to use across `reproducible::Cache` calls. These will
+#'   be appended to other tags distinguishing the nested `reproducible::Cache` calls.
+#' @param destinationPath character. Passed to `reproducible::prepInputs` and the
+#'   location where the final permafrost layer will be saved.
+#' @param studyArea character. Passed to `reproducible::postProcess`.
+#'
+#' @return a `SpatRaster` of permafrost presences (1) and absences (0) with the
+#'   same properties as the land-cover and wetland rasters, cropped and masked
+#'   to `studyArea`.
+#'
+#' @references Gibson, C., Morse, P. D., Kelly, J. M., Turetsky, M. R., Baltzer, J. L., Gingras-Hill, T., & Kokelj, S. V. (2020). Thermokarst Mapping Collective: Protocol for organic permafrost terrain and preliminary inventory from the Taiga Plains test area, Northwest Territories (NWT Open Report 2020-010, p. 29). Northwest Territories Geological Survey.
+#' @references Hermosilla, T., Bastyr, A., Coops, N. C., White, J. C., & Wulder, M. A. (2022). Mapping the presence and distribution of tree species in Canada’s forested ecosystems. Remote Sensing of Environment, 282, 113276. https://doi.org/10.1016/j.rse.2022.113276
+#' @references Wulder, M., Li, Z., Campbell, E., White, J., Hobart, G., Hermosilla, T., & Coops, N. (2018). A National Assessment of Wetland Status and Trends for Canada’s Forested Ecosystems Using 33 Years of Earth Observation Satellite Data. Remote Sensing, 10(10), 1623. https://doi.org/10.3390/rs10101623
+#'
+#' @importFrom reproducible Cache prepInputs postProcess studyAreaName CacheDigest
+#' @importFrom terra writeRaster writeVector project subst mask
+#' @export
+makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath"),
+                              cacheTags = NULL, destinationPath = getOption("reproducible.destinationPath"),
+                              studyArea = NULL) {
+  permafrostSA <- Cache(prepInputs,
+                        targetFile = "TP_DP_StudyBoundary.shp",
+                        alsoExtract = "similar",
+                        archive = "DOI_2020-010.zip",
+                        overwrite = TRUE,
+                        fun = "terra::vect",
+                        # useCache = "overwrite",
+                        userTags = c(cacheTags, "permafrostSA"),
+                        omitArgs = c("userTags"))
+  permafrostSAName <- studyAreaName(permafrostSA)
+
+  permafrostPoly <- Cache(getPermafrostDataGibson,
+                          destinationPath = destinationPath,
+                          studyArea = permafrostSA,
+                          cacheTags = cacheTags,
+                          userTags = c(cacheTags, "default", "permafrost"),
+                          omitArgs = c("userTags"))
+
+  rstLCC <- Cache(prepInputs,
+                  targetFile = "CA_forest_VLCE2_2017.tif",
+                  alsoExtract = "similar",
+                  archive = "CA_forest_VLCE2_2017.zip",
+                  studyArea = permafrostSA,
+                  useSAcrs = FALSE,
+                  overwrite = TRUE,
+                  filename2 = .suffix("rstLCCPermafrost.tif", paste0("_", permafrostSAName)),
+                  url = "https://opendata.nfis.org/downloads/forest_change/CA_forest_VLCE2_2017.zip",
+                  userTags = c(cacheTags, "rstLCC", "permafrost", permafrostSAName),
+                  omitArgs = c("userTags", "overwrite"))
+
+
+  wetlands <- Cache(prepInputs,
+                    targetFile = "CA_wetlands_post2000.tif",
+                    archive = "CA_wetlands_post2000.zip",
+                    studyArea = permafrostSA,
+                    useSAcrs = FALSE,
+                    overwrite = TRUE,
+                    filename2 = .suffix("wetlandsPermafrost.tif", paste0("_", permafrostSAName)),
+                    url = "https://opendata.nfis.org/downloads/forest_change/CA_wetlands_post2000.zip",
+                    userTags = c(cacheTags, "wetlands", "permafrost", permafrostSAName),
+                    omitArgs = c("userTags"))
+
+  cTags <- c(cacheTags, "suitForPerm", permafrostSAName)
+  suitForPerm <- Cache(makeSuitForPerm,
+                       rstLCC = rstLCC,
+                       wetlands = wetlands,
+                       studyArea = permafrostSA,
+                       cacheTags = cTags,
+                       userTags = cTags,
+                       omitArgs = c("userTags"))
+
+  ## project permafrost polygons if need be
+  if (!.compareCRS(permafrostPoly, suitForPerm)) {
+    permafrostPoly <- project(permafrostPoly, crs(suitForPerm))
+  }
+
+  ## avoid large cached file by digesting earlier.
+  preDigest <- CacheDigest(suitForPerm, permafrostPoly)
+  preDigest <- preDigest$outputHash
+
+  ## pass spatial objs as file names for compatibility with parallelisation
+  tempFileRas <- paste0(tempfile(), ".tif")
+  tempFileVect <- paste0(tempfile(), ".gpkg")
+  writeRaster(suitForPerm, filename = tempFileRas)
+  writeVector(permafrostPoly, filename = tempFileVect)
+
+  # test <- list.files(outPath, "tempFiles"))
+  # test <- sub("permafrost_polyID", "", sub("\\.tif", "", test))
+  # Couldn't assign permafrost to enough pixels. id: 207217
+  permafrostRas <- Cache(assignPermafrostWrapper,
+                         gridPoly = tempFileVect,
+                         ras = tempFileRas,
+                         id = permafrostPoly$OBJECTID,
+                         # id = setdiff(permafrostPoly$OBJECTID, test),
+                         # id = 206782, ## a tiny polygon in SA edge
+                         cores = cores,
+                         # cores = 1L, ## test
+                         saveDir = file.path(outPath, "tempFiles"),
+                         outFilename = .suffix(file.path(destinationPath, "permafrost.tif"), paste0("_", permafrostSAName)),
+                         dPath = destinationPath,
+                         .cacheExtra = list(preDigest),
+                         userTags = c(cacheTags, "permafrost", permafrostSAName),
+                         omitArgs = c("userTags", "gridPoly", "ras", "cores", "saveDir",
+                                      "outFilename", "dPath"))
+
+  file.remove(tempFileRas, tempFileVect)
+
+  ## set NAs to 0s inside permafrost study area
+  permafrostRas <- subst(permafrostRas, NA, 0)
+  permafrostSA <- project(permafrostSA, crs(permafrostRas))
+  permafrostRas <- mask(permafrostRas, permafrostSA)
+
+  ## now crop/mask to SA
+  permafrostRas <- postProcess(permafrostRas,
+                               studyArea = studyArea,
+                               useSAcrs = FALSE,
+                               filename2 = .suffix(file.path(destinationPath, "permafrost.tif"), paste0("_", .studyAreaName)),
+                               overwrite = TRUE,
+                               userTags = c(cacheTags, "permafrost", .studyAreaName),
+                               omitArgs = c("userTags", "filename2"))
+  ## make sure layer name is "permafrost"
+  names(permafrostRas) <- "permafrost"
+  permafrostRas
+}
+
+
 #' Make a mask of areas that suitable/unsuitable for permafrost
 #'
 #' Uses a land-cover map and a wetlands map to create a mask
