@@ -6,7 +6,7 @@ utils::globalVariables(c(
 ## FUNCTIONS TO SOURCE AND PREPARE DEFAULT DATA
 ## -----------------------------------------------
 
-## LandR may not be the best pacakge for these funcitons, but they will live
+## LandR may not be the best package for these functions, but they will live
 ## here for now.
 
 #' Default environmental variables
