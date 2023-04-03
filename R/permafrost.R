@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "Degree_Of_", "Permafrost", "thermokarst", "dists"
+  "Degree_Of_", "Permafrost", "thermokarst", "dists", "cells", "area"
 ))
 
 ## ------------------------------------------------------
