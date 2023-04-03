@@ -39,8 +39,7 @@ utils::globalVariables(c(
 #' @importFrom terra aggregate mask rasterize rast levels values values<-
 #' @export
 defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevation",
-                                      "timeSinceFire", "wetlands", "permafrost", "thermokarst",
-                                      "thermXperm"),
+                                      "timeSinceFire", "wetlands", "permafrost", "thermokarst"),
                              studyArea, userTags, destinationPath, rasterToMatch) {
   vars <- match.arg(vars, several.ok = TRUE)
 
@@ -224,9 +223,10 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
     rm(sa)
   }
 
+
   ## --------------------------------------------------------
   ## Permafrost and thermokarst data
-  if (any(c("permafrost", "thermokarst", "thermXperm") %in% vars)) {
+  if (any(c("permafrost", "thermokarst") %in% vars)) {
     permafrost <- getPermafrostDataGibson(destinationPath, studyArea, userTags)
     outs[["permafrostPoly"]] <- permafrost
   }
