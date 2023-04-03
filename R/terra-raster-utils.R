@@ -11,6 +11,7 @@ utils::globalVariables(c(
 #'
 #' @param ras a Raster*, or SpatRaster object
 #' @param NAval the value to use as `NA`
+#'
 #' @return a raster with attributed NA values
 #'
 #' @rdname rasterTerraHelpers
@@ -188,6 +189,9 @@ isInt <- function(ras) {
 }
 
 
+#' @param ras a Raster*, or SpatRaster object
+#' @param tab matrix of values to reclassify. See `terra::classify`
+#'   and `raster::reclassify`.
 #' @export
 #' @rdname rasterTerraHelpers
 #' @return
