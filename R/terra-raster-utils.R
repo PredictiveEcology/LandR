@@ -252,8 +252,12 @@ genericExtract <- function(x, y, field = NULL, ...) {
     y <- project(y, y = crs(x, proj = TRUE))
   }
 
-  out <- terra::extract(x = x, y = y, ...) |>
-    as.data.table()
+  if (is(x, "SpatVector")) {
+    out <- terra::extract(x = x, y = y)
+  } else {
+    out <- terra::extract(x = x, y = y, ...)
+  }
+  out <- as.data.table(out)
 
   if (!is.null(field)) {
     if (all(field %in% names(x))) {
