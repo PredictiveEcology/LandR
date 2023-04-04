@@ -261,8 +261,9 @@ genericExtract <- function(x, y, field = NULL, ...) {
 
   if (!is.null(field)) {
     if (all(field %in% names(x))) {
-      out <- out[, .SD, .SDcols = c("id.y", field)]
-      setnames(out, "id.y", "ID")
+      IDcol <- names(out)[1]
+      out <- out[, .SD, .SDcols = c(IDcol, field)]
+      setnames(out, IDcol, "ID")
     }
   }
 
