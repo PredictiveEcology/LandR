@@ -277,54 +277,87 @@ genericExtract <- function(x, y, field = NULL, ...) {
 #' A function that creates a `ggplot` of a raster
 #'   layer. Can be used with `SpaDES.core::Plots`
 #'
-#' @param ras \code{SpatRaster} or \code{RasterLayer}
+#' @param x `SpatRaster`, `RasterLayer`, `SpatVector` or `sf` object
 #' @param plotTitle character. A title for the plot passed to
-#'   \code{ggplot::labs(title = plotTitle)}
+#'   `ggplot::labs(title = plotTitle)`.
+#' @param field character. If x is `sf` or `SpatVector`, a field
+#'   to plot.
 #'
 #' @importFrom ggplot2 geom_raster scale_fill_viridis_c coord_equal theme_classic
-#' @importFrom ggplot2 facet_wrap labs aes
-#' @importFrom terra nlyr rast ncell is.factor
+#' @importFrom ggplot2 geom_sf coord_sf scale_fill_viridis_d facet_wrap labs aes
+#' @importFrom terra nlyr rast vect ncell is.factor
+#' @importFrom rlang sym
 #' @export
-plotRast <- function(ras, plotTitle) {
-  if (inherits(ras, c("Raster", "SpatRaster"))) {
-    if (!is(ras, "SpatRaster")) {
-      ras <- rast(ras)
+plotSpatial <- function(x, plotTitle, field = NULL) {
+
+  if (inherits(x, c("Raster", "SpatRaster"))) {
+    plotRaster <- TRUE
+  } else if (inherits(x, c("SpatVector", "sf"))) {
+    plotRaster <- FALSE
+  } else {
+    stop("x must be a SpatRaster, RasterLayer, SpatVector or sf object")
+  }
+
+  if (inherits(x, c("Raster"))) {
+    x <- rast(x)
+  }
+
+  if (inherits(x, "SpatVector")) {
+    x <- st_as_sf(x)
+  }
+
+  if (plotRaster) {
+    if (!requireNamespace("rasterVis")) {
+      stop("Please install 'rasterVis'")
     }
+    maxpixels <- ncell(x)
+    if (maxpixels > 1E6) {
+      message("Raster to plot has >1E6 pixels -- 'maxpixels' set to 1E6 to avoid overly long plotting times")
+      maxpixels <- 1E6
+    }
+    plot1 <- rasterVis::gplot(x, maxpixels = maxpixels)
+
+    if (terra::is.factor(x)) {
+      ## need to do this manually for NAs
+      cols <- rasVals <- unique(as.vector(x[]))
+      cols[!is.na(cols)] <- viridis::cividis(sum(!is.na(cols)))
+      names(cols) <- rasVals
+      cols[is.na(rasVals)] <- "grey"
+
+      plot1 <- plot1 +
+        geom_raster(aes(fill = as.character(value))) +
+        scale_fill_manual(values = cols, guide = "legend")
+    } else {
+      plot1 <- plot1 +
+        geom_raster(aes(fill = value)) +
+        scale_fill_viridis_c(option = "cividis", na.value = "grey")
+    }
+    plot1 <- plot1 + coord_equal() +
+      theme_classic()
+
   } else {
-    stop("ras must be a 'terra'/'raster' raster layer")
-  }
+    if (!requireNamespace("rlang")) {
+      stop("Please install 'rlang'")
+    }
+    plot1 <- ggplot() + theme_classic()  ## theme needs to come before fill scale because it overrides it in geom_sf
 
-  if (!requireNamespace("rasterVis")) {
-    stop("Please install 'rasterVis'")
-  }
-  maxpixels <- ncell(ras)
-  if (maxpixels > 1E6) {
-    message("Raster to plot has >1E6 pixels -- 'maxpixels' set to 1E6 to avoid overly long plotting times")
-    maxpixels <- 1E6
-  }
-  plot1 <- rasterVis::gplot(ras, maxpixels = maxpixels)
-
-  if (terra::is.factor(ras)) {
-    ## need to do this manually for NAs
-    cols <- rasVals <- unique(as.vector(ras[]))
-    cols[!is.na(cols)] <- viridis::cividis(sum(!is.na(cols)))
-    names(cols) <- rasVals
-    cols[is.na(rasVals)] <- "grey"
-
+    if (is.null(field)) {
+      plot1 <- plot1 +
+        geom_sf(data = x)
+    } else {
+      plot1 <- plot1 +
+        geom_sf(data = x, aes(fill = !!sym(field))) +
+        scale_fill_viridis_d(option = "cividis", na.value = "grey")
+    }
     plot1 <- plot1 +
-      geom_raster(aes(fill = as.character(value))) +
-      scale_fill_manual(values = cols, guide = "legend")
-  } else {
-    plot1 <- plot1 +
-      geom_raster(aes(fill = value)) +
-      scale_fill_viridis_c(option = "cividis", na.value = "grey")
+      coord_sf()
   }
-  plot1 <- plot1 + coord_equal() +
-    theme_classic()
 
-  if (nlyr(ras) > 1) {
-    plot1 <- plot1 + facet_wrap(~ variable)
-    plotTitle <- paste0(plotTitle, " -- ", paste(names(ras), collapse = " and "))
+  if (plotRaster) {
+    if (nlyr(x) > 1) {
+      plot1 <- plot1 + facet_wrap(~ variable)
+      plotTitle <- paste0(plotTitle, " -- ", paste(names(x), collapse = " and "))
+    }
   }
 
   plot1 <- plot1 +

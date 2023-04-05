@@ -8,7 +8,7 @@ version 1.1.0
 * drop support for R < 4.2 due to change in dependency package `MuMIn` (Sept 2022)
 * new functions to download a set of default biogeoclimatic variables used across
 several modules. These functions may only be here temporarily.
-* new raster/terra utility functions
+* new raster/terra utility and plotting functions
 * new functions related to producing default permafrost input data for modules.
 These functions may only be here temporarily.
 
