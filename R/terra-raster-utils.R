@@ -297,7 +297,12 @@ plotRast <- function(ras, plotTitle) {
   if (!requireNamespace("rasterVis")) {
     stop("Please install 'rasterVis'")
   }
-  plot1 <- rasterVis::gplot(ras, maxpixels = ncell(ras))
+  maxpixels <- ncell(ras)
+  if (maxpixels > 1E6) {
+    message("Raster to plot has >1E6 pixels -- 'maxpixels' set to 1E6 to avoid overly long plotting times")
+    maxpixels <- 1E6
+  }
+  plot1 <- rasterVis::gplot(ras, maxpixels = maxpixels)
 
   if (terra::is.factor(ras)) {
     ## need to do this manually for NAs
