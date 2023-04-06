@@ -531,7 +531,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 #' Assign presences to patches based on a raster or presence
 #'   probabilities
 #'
-#' @param assignProb a SpatRaster of presence probabilities
+#' @param assignProb a SpatRaster of presence probabilities (NAs allowed)
 #' @param landscape a SpatRaster of the entire lanscape with NAs outside
 #'   patches
 #' @param pixToConvert numeric. Number of pixels to convert to presence
@@ -588,7 +588,9 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
 
     ## try to spread in from many focal pixels
     numStarts <- ceiling(pixToConvert/numStartsDenom)
-    startPoints <- sample(1:ncell(assignProbEx), size = numStarts, prob = assignProbEx[])
+    probs <- as.vector(assignProbEx[])
+    probs[is.na(probs)] <- 0
+    startPoints <- sample(1:ncell(assignProbEx), size = numStarts, prob = probs)
 
     # temp <- assignProbEx
     # temp[] <- NA_integer_
