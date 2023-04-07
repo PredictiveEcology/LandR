@@ -604,9 +604,12 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
                                    loci = startPoints,
                                    spreadProb = raster(assignProbEx),
                                    maxSize = numStarts ^ probWeight)
+    outRas[outRas == 0] <- NA   ## 0s mean no successful spread
     outRas <- rast(outRas) |>
       mask(mask = landscape)
-    convertedPix <- sum(!is.na(outRas[]))
+
+    outRas[!is.na(as.vector(outRas[]))] <- 1L
+    convertedPix <- sum(as.vector(outRas[]), na.rm = TRUE)
 
     ## increase spread probabilities in case we need to try again
     assignProb <- min(assignProb * 1.5, 1)
