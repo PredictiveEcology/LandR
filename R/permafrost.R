@@ -567,8 +567,10 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
     pixToConvert <- round(sum(!is.na(landscape[]))/2)
   }
 
-  if (probWeight < 0.5 || probWeight > 7)
-    stop("probWeight must be between 0.5 and 7")
+  if (probWeight < 0.5)
+    warning("probWeight < 0.5 may create very fragmented patterns")
+  if (probWeight > 7)
+    warning("probWeight > 7 may create very clumped patterns")
 
   ## save original probabilites for later
   assignProbOrig <- as.vector(assignProb[])
