@@ -590,9 +590,12 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
 
     ## try to spread in from many focal pixels
     numStarts <- ceiling(pixToConvert/numStartsDenom)
+    ## draw starting points from areas furthest from edge
     probs <- as.vector(assignProbEx[])
     probs[is.na(probs)] <- 0
     startPoints <- sample(1:ncell(assignProbEx), size = numStarts, prob = probs)
+
+    maxSize <- numStarts ^ probWeight
 
     # temp <- assignProbEx
     # temp[] <- NA_integer_
@@ -605,7 +608,7 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
     outRas <- SpaDES.tools::spread(landscape = raster(landscape),
                                    loci = startPoints,
                                    spreadProb = raster(assignProbEx),
-                                   maxSize = numStarts ^ probWeight)
+                                   maxSize = maxSize)
     outRas[outRas == 0] <- NA   ## 0s mean no successful spread
     outRas <- rast(outRas) |>
       mask(mask = landscape)
