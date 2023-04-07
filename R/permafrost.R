@@ -623,7 +623,7 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
   ## if we spread too much remove pixels that are closest to edges
   if (convertedPix > pixToConvert) {
     ## "convert" to distances
-    DT <- data.table(cells = 1:ncell(outRas), dists = assignProbOrig)
+    DT <- data.table(cells = 1:ncell(outRas), dists = assignProbOrig^probWeight)
     DT <- DT[dists > 0 & !is.na(dists)][order(dists, decreasing = TRUE)]
 
     # pixToRm <- DT[(pixToConvert + 1):nrow(DT), cells] ## creates concave patches
