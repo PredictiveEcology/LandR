@@ -598,6 +598,8 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
     # terra::plot(assignProbEx, col = viridis::inferno(100))
     # terra::plot(temp, add = TRUE, col = "blue")
 
+    assignProbEx[as.vector(assignProbEx[]) > 1] <- 1  ## otherwise spread throws an error (Error in sample.int(length(x), ...) : invalid 'size' argument)
+
     outRas <- SpaDES.tools::spread(landscape = raster(landscape),
                                    loci = startPoints,
                                    assignProb = raster(assignProbEx),
