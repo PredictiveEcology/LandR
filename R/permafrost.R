@@ -602,7 +602,7 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
 
     outRas <- SpaDES.tools::spread(landscape = raster(landscape),
                                    loci = startPoints,
-                                   assignProb = raster(assignProbEx),
+                                   spreadProb = raster(assignProbEx),
                                    maxSize = numStartsDenom * probWeight)
     outRas <- rast(outRas) |>
       mask(mask = landscape)
