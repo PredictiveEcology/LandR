@@ -11,7 +11,8 @@ makePermafrostRas(
   cacheTags = NULL,
   destinationPath = getOption("reproducible.destinationPath"),
   studyArea = NULL,
-  .studyAreaName = NULL
+  .studyAreaName = NULL,
+  ...
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ location where the final permafrost layer will be saved.}
 \item{studyArea}{character. Passed to \code{reproducible::postProcess}.}
 
 \item{.studyAreaName}{character. A string to append to \code{filename2} in \code{postProcess}.}
+
+\item{...}{further arguments passed to \code{assignPermafrost}}
 }
 \value{
 a \code{SpatRaster} of permafrost presences (1) and absences (0) with the

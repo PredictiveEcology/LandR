@@ -10,8 +10,11 @@ assignPermafrost(
   saveOut = TRUE,
   saveDir = NULL,
   id = NULL,
+  permafrostcol = "Permafrost",
+  thermokarstcol = NULL,
   IDcol = "OBJECTID",
-  rasClass = 1L
+  rasClass = 1L,
+  useMidpoint = TRUE
 )
 }
 \arguments{
@@ -34,9 +37,20 @@ If parallelising, choose to save, as \code{SpatRasters} cannot be serialized.}
 \item{id}{character or numeric. The polygon ID in \code{gridPoly[IDcol]}
 to process (the focal polygon).}
 
+\item{permafrostcol}{character. Column name in \code{gridPoly} containing polygon amount
+of permafrost (in \%).}
+
+\item{thermokarstcol}{character. Optional. Column name in \code{gridPoly} containing
+permafrost condition (thermokarst or degree of vulnerability). The function
+expects levels "low", "medium" or "high". See details below.}
+
 \item{IDcol}{character. Column name in \code{gridPoly} containing polygon IDs.}
 
 \item{rasClass}{Class}
+
+\item{useMidpoint}{logical. If TRUE the midpoint of thermokarst percentage ranges
+is used to recalculate the amount of pixels to be converted to permafrost. Only
+applicable if \code{thermokarstcol} is not NULL.}
 }
 \value{
 a file name or the permafrost presence/absence raster for the focal
@@ -50,4 +64,20 @@ present (a polygon layer that groups several cells of the
 land-cover layer, i.e. at a larger spatial scale). The function
 has been designed to be looped over polygons, and so only processes
 only polygon at a time.
+}
+\details{
+If \code{thermokarstcol} is not NULL, the function expects one of "low",
+"medium" or "high" in \code{gridPoly[[thermokarstcol]]}, each corresponding to the
+following thermokarst percentages:
+\itemize{
+\item low: 0-33\%
+\item medium: 34-66\%
+\item high: 67-100\%
+If \code{useMidpoint == TRUE} the midpoint value of each range is used as the percentage
+of pixels that have been thawed already and are not to be converted to permafrost
+('thawedPercent' below). Otherwise, 'thawedPercent' is randomly drawn from a uniform
+distribution bounded by the range mininum and maximum. The final number of pixels to convert
+to permafrost ('pixToConvert' below) is then calculated as:
+pixToConvert = no. of suitable pixels \* (\code{gridPoly[[Permafrost]]} \* (100-thawedPercent))
+}
 }
