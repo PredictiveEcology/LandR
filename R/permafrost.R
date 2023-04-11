@@ -507,13 +507,14 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         sub_rasOut[cellIDs] <- 1L
 
         ## if there are not enough points within the patches,
-        ## try to fill neighbouring pixels (leave holes alone s we want to be
-        ## able to start from a swiss cheese pattern)
+        ## try to fill neighbouring pixels (leave holes alone at first
+        ## as we want to start from a swiss-cheese pattern)
         pixToConvert2 <- pixToConvert - length(cellIDs)
 
         while (pixToConvert2 > 0) {
           sub_poly <- as.polygons(sub_rasOut) |> disagg()
 
+          ## don't fill holes first to keep a swiss-cheese pattern
           sub_poly_filled <- fillHoles(sub_poly)
           sub_poly_filled <- rasterize(sub_poly_filled, sub_ras)
 
@@ -610,13 +611,12 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 #' @param landscape a SpatRaster of the entire lanscape with NAs outside
 #'   patches
 #' @param pixToConvert numeric. Number of pixels to convert to presence
-#'   across `landscape`. If `NULL`, `round(sum(!is.na(landscape[]))/2)`
-#'   pixels will be converted to presences.
-#' @param probWeight numeric. If `pixToConvert` cannot be reached
-#'  `assignProb` will be weighted using `assignProb^probWeight`
-#'  and the algorothm will try again.
+#'   across `landscape`. If `NULL`, it will convert `round(sum(!is.na(landscape[]))/2)`
+#'   pixels.
+#' @param probWeight numeric. A weight for `assignProb` (`assignProb^probWeight`)
+#'  which affects the degree of clumping (higher weights result in clumpier patterns)
 #' @param numStartsDenom integer. Used to calculate the number of starting pixels
-#'  to assign presences (at each try; as `pixToConvert/numStartsDenom`)
+#'  (as `pixToConvert/numStartsDenom`) at each try of assigning presences.
 #'
 #' @details This function attempts to iteratively assign
 #'  presences starting in `pixToConvert/numStartsDenom` pixels
@@ -628,6 +628,116 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 #'  after increasing `assignProb` by a factor of `1.5` (with values > 1 capped at 1).
 #'  If too many pixels are assigned presences, pixels are sampled according to
 #'  `assignProb ^ 10` (where `assignProb` corresponds to the original supplied values.)
+#'
+#' @examples
+#' library(terra)
+#' library(raster)
+#' set.seed(123)
+#' ras <- raster(extent(0, 100, 0, 100), res = 1, vals = 0)
+#' ras[] <- 1L
+#' ras_nas <- randomPolygons(raster(extent(0, 100, 0, 100), res = 1, vals = 0), numTypes = 200)
+#' ras_nas[ras_nas[] %in% sample(ras_nas[], 120)] <- NA
+#' ras <- mask(ras, ras_nas)
+#' ras <- rast(ras)
+
+#' ## NA patches to calculate distance
+#' ras_nas <- ras
+#' ras_nas[] <- 1L
+#' ras_nas <- mask(ras_nas, ras, inverse = TRUE)
+#' plot(ras, col = "lightgreen")
+#' plot(ras_nas, add = TRUE, col = "coral")
+#'
+#' ## distance from NAs
+#' ras_distance <- distance(ras_nas)
+#' plot(ras_distance)
+#'
+#' spreadProbRas <- ras_distance/minmax(ras_distance)["max",]
+#' # spreadProbRas <- mask(spreadProbRas, ras)
+#' # spreadProbRas[is.na(spreadProbRas[])] <- 0
+#' spreadProbRas[as.vector(spreadProbRas[]) == 0] <- NA
+#' plot(spreadProbRas)
+#'
+#' ## varying pixels and weights
+#' weights <- seq(0.5, 7, length.out = 5)
+#' ## we are in a case where we want fewer pixels than available
+#' pixToConvert <- round(sum(!is.na(ras[]))/4 * seq(0.5, 2, length.out = length(weights)))
+#' tests <- Map(probWeight = weights,   ## not much difference in clumping levels
+#'              pixToConvert = pixToConvert,
+#'              numStartsDenom = pixToConvert/10,
+#'              f = assignPresences,
+#'              MoreArgs = list(assignProb = spreadProbRas,
+#'                              landscape = ras))
+#'
+#' names(tests) <- paste(paste("Prob. weight", weights),
+#'                       paste("no pix", c(pixToConvert)),
+#'                       sep = ";")
+#'
+#' plot(rast(tests), col = "lightblue")
+#'
+#' ## Function to iterate over several landscape configurations,
+#' ## weights and no. pixels desired.
+#' testFun <- function(NAgroups = 5, varyWeights = TRUE, varyPixels = TRUE) {
+#'   set.seed(123)
+#'   ras <- raster(extent(0, 100, 0, 100), res = 1, vals = 0)
+#'   ras[] <- 1L
+#'   ras_nas <- randomPolygons(raster(extent(0, 100, 0, 100), res = 1, vals = 0), numTypes = 200)
+#'   ras_nas[ras_nas[] %in% sample(unique(ras_nas[]), NAgroups)] <- NA
+#'   ras <- mask(ras, ras_nas)
+#'   ras <- rast(ras)
+#'   ## NA patches to calculate distance
+#'   ras_nas <- ras
+#'   ras_nas[] <- 1L
+#'   ras_nas <- mask(ras_nas, ras, inverse = TRUE)
+#'
+#'   ## distance from NAs
+#'   ras_distance <- distance(ras_nas)
+#'
+#'   spreadProbRas <- ras_distance/minmax(ras_distance)["max",]
+#'   spreadProbRas[as.vector(spreadProbRas[]) == 0] <- NA
+#'
+#'   ## varying weights
+#'   if (varyWeights) {
+#'     weights <- c(2, 3, 7)   ## higher values increase aggregation (decrease edge:area)
+#'   } else {
+#'     weights <- rep(2, 3)
+#'   }
+#'
+#'   ## we are in a case where we want fewer pixels than available
+#'   totalPix <- ncell(ras)
+#'   totalAvailPix <- sum(!is.na(ras[]))
+#'   pixToConvert <- round(totalAvailPix/4)
+#'   availToNARatio <- totalAvailPix/totalPix
+#'
+#'   ## varying no. pixels to convert
+#'   if (varyPixels) {
+#'     pixToConvert <- round(pixToConvert * c(0.5, 1, 1.5))
+#'   }
+#'
+#'   ## for landscapes with very high availToNARatio we
+#'   ## bump the weights to increase aggregation
+#'   weights <- weights*(1+availToNARatio*2)
+#'
+#'   if (!varyWeights & !varyPixels) {
+#'     weights <- unique(weights)
+#'     pixToConvert <- unique(pixToConvert)
+#'   }
+#'
+#'   tests <- Map(probWeight = weights,   ## not much difference in clumping levels
+#'                pixToConvert = pixToConvert,
+#'                numStartsDenom = pixToConvert/10,
+#'                f = assignPresences,
+#'                MoreArgs = list(assignProb = spreadProbRas,
+#'                                landscape = ras))
+#'   if (length(tests) == 1) {
+#'     tests <- tests[[1]]
+#'   } else {
+#'     tests <- rast(tests)
+#'   }
+#'   names(tests) <- paste(paste("Prob. weight", weights),
+#'                         paste("no pix", pixToConvert),
+#'                         sep = ";")
+#'   return(tests)
+#' }
 #'
 #' @return a SpatRaster
 #' @importFrom SpaDES.tools spread
