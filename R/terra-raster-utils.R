@@ -286,7 +286,6 @@ genericExtract <- function(x, y, field = NULL, ...) {
 #' @importFrom ggplot2 geom_raster scale_fill_viridis_c coord_equal theme_classic
 #' @importFrom ggplot2 geom_sf coord_sf scale_fill_viridis_d facet_wrap labs aes
 #' @importFrom terra nlyr rast vect ncell is.factor
-#' @importFrom rlang sym
 #' @export
 plotSpatial <- function(x, plotTitle, field = NULL) {
 
