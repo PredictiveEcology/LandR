@@ -632,6 +632,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 #' @examples
 #' library(terra)
 #' library(raster)
+#' library(SpaDES.tools)
 #' set.seed(123)
 #' ras <- raster(extent(0, 100, 0, 100), res = 1, vals = 0)
 #' ras[] <- 1L
