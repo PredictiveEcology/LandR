@@ -28,6 +28,8 @@ utils::globalVariables(c(
 #'   location where the final permafrost layer will be saved.
 #' @param studyArea character. Passed to `reproducible::postProcess`.
 #' @param .studyAreaName character. A string to append to `filename2` in `postProcess`.
+#' @param ... further arguments passed to `assignPermafrost`
+#'
 #'
 #' @return a `SpatRaster` of permafrost presences (1) and absences (0) with the
 #'   same properties as the land-cover and wetland rasters, cropped and masked
@@ -42,7 +44,7 @@ utils::globalVariables(c(
 #' @export
 makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath"),
                               cacheTags = NULL, destinationPath = getOption("reproducible.destinationPath"),
-                              studyArea = NULL, .studyAreaName = NULL) {
+                              studyArea = NULL, .studyAreaName = NULL, ...) {
   permafrostSA <- Cache(prepInputs,
                         targetFile = "TP_DP_StudyBoundary.shp",
                         alsoExtract = "similar",
@@ -112,21 +114,34 @@ makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath
   # test <- list.files(outPath, "tempFiles"))
   # test <- sub("permafrost_polyID", "", sub("\\.tif", "", test))
   # Couldn't assign permafrost to enough pixels. id: 207217
-  permafrostRas <- Cache(.assignPermafrostWrapper,
-                         gridPoly = tempFileVect,
-                         ras = tempFileRas,
-                         id = permafrostPoly$OBJECTID,
-                         # id = setdiff(permafrostPoly$OBJECTID, test),
-                         # id = 206782, ## a tiny polygon in SA edge
-                         cores = cores,
-                         # cores = 1L, ## test
-                         saveDir = file.path(outPath, "tempFiles"),
-                         outFilename = .suffix(file.path(destinationPath, "permafrost.tif"), paste0("_", permafrostSAName)),
-                         dPath = destinationPath,
-                         .cacheExtra = list(preDigest),
-                         userTags = c(cacheTags, "permafrost", permafrostSAName),
-                         omitArgs = c("userTags", "gridPoly", "ras", "cores", "saveDir",
-                                      "outFilename", "dPath"))
+
+  argsList <- list(id = permafrostPoly$OBJECTID,
+                   # id = setdiff(permafrostPoly$OBJECTID, test),
+                   # id = 206782, ## a tiny polygon in SA edge
+                   cores = cores,
+                   # cores = 1L, ## test
+                   outFilename = .suffix(file.path(destinationPath, "permafrost.tif"), paste0("_", permafrostSAName)),
+                   dPath = destinationPath,
+                   ## further arguments passed to assignPermafrost:
+                   gridPoly = tempFileVect,
+                   ras = tempFileRas,
+                   saveDir = file.path(outPath, "tempFiles"))
+
+  dots <- list(...)
+  notRecognised <- dots[!names(dots) %in% names(formals("assignPermafrost"))]
+  if (length(notRecognised)) {
+    stop("The following arguments do not match any 'assignPermafrost' arguments:",
+         "\n", paste(names(notRecognised), collapse = ", "))
+  }
+
+  dots <- dots[names(dots) %in% names(formals("assignPermafrost"))]
+  argsList <- append(argsList, dots)
+
+  permafrostRas <- do.call(.assignPermafrostWrapper, argsList) |>
+    Cache(.cacheExtra = list(preDigest),
+          userTags = c(cacheTags, "permafrost", permafrostSAName),
+          omitArgs = c("userTags", "gridPoly", "ras", "cores", "saveDir",
+                       "outFilename", "dPath"))
 
   file.remove(tempFileRas, tempFileVect)
 
@@ -151,17 +166,16 @@ makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath
 
 #' Wrapper for `assignPermafrost`
 #'
-#' @param gridPoly passed to `assignPermafrost`
-#' @param ras passed to `assignPermafrost`
-#' @param id passed to `assignPermafrost`
-#' @param saveDir passed to `assignPermafrost`
 #' @param cores how many threads to use for parallelisation. If
 #'  `1`, no parallelisation occurs
+#' @param id passed to `assignPermafrost`
 #' @param outFilename name of output permafrost raster file
 #' @param dPath directory where output permafrost raster file will be written.
+#' @param ... further arguments passed to `assignPermafrost`, like `gridPoly`
+#'  `ras`, etc.
 #'
 #' @importFrom terra writeRaster sprc
-.assignPermafrostWrapper <- function(gridPoly, ras, id, saveDir, cores, outFilename, dPath) {
+.assignPermafrostWrapper <- function(id, cores, outFilename, dPath, ...) {
   if (cores > 1) {
     message("Creating permafrost layer with parallelisation")
     if (.Platform$OS.type == "unix") {
@@ -190,12 +204,19 @@ makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath
     applyFUN <- Map
   }
 
+  dots <- list(...)
+  notRecognised <- dots[!names(dots) %in% names(formals("assignPermafrost"))]
+  if (length(notRecognised)) {
+    stop("The following arguments do not match any 'assignPermafrost' arguments:",
+         "\n", paste(names(notRecognised), collapse = ", "))
+  }
+
+  assignPermafrostArgs <- dots[names(dots) %in% names(formals("assignPermafrost"))]
+
   ## use do.call so that future.seed can be added if running in parallel
   applyFUNArgs <- list(f = assignPermafrost,
                        id = id,
-                       MoreArgs = list(gridPoly = gridPoly,
-                                       ras = ras,
-                                       saveDir = saveDir))
+                       MoreArgs = assignPermafrostArgs)
   if (cores > 1) {
     applyFUNArgs <- append(applyFUNArgs, list(future.seed = TRUE))
   }
@@ -320,18 +341,41 @@ makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 
 #' @param id character or numeric. The polygon ID in `gridPoly[IDcol]`
 #'  to process (the focal polygon).
 #' @param IDcol character. Column name in `gridPoly` containing polygon IDs.
+#' @param permafrostcol character. Column name in `gridPoly` containing polygon amount
+#'  of permafrost (in %).
+#' @param thermokarstcol character. Optional. Column name in `gridPoly` containing
+#'  permafrost condition (thermokarst or degree of vulnerability). The function
+#'  expects levels "low", "medium" or "high". See details below.
+#' @param useMidpoint logical. If TRUE the midpoint of thermokarst percentage ranges
+#'  is used to recalculate the amount of pixels to be converted to permafrost. Only
+#'  applicable if `thermokarstcol` is not NULL.
 #' @param rasClass Class
 #'
 #' @return a file name or the permafrost presence/absence raster for the focal
 #'  polygon.
 #'
+#' @details If `thermokarstcol` is not NULL, the function expects one of "low",
+#'  "medium" or "high" in `gridPoly[[thermokarstcol]]`, each corresponding to the
+#'  following thermokarst percentages:
+#'  * low: 0-33%
+#'  * medium: 34-66%
+#'  * high: 67-100%
+#'  If `useMidpoint == TRUE` the midpoint value of each range is used as the percentage
+#'  of pixels that have been thawed already and are not to be converted to permafrost
+#'  ('thawedPercent' below). Otherwise, 'thawedPercent' is randomly drawn from a uniform
+#'  distribution bounded by the range mininum and maximum. The final number of pixels to convert
+#'  to permafrost ('pixToConvert' below) is then calculated as:
+#'  pixToConvert = no. of suitable pixels \* (`gridPoly[[Permafrost]]` \* (100-thawedPercent))
+#'
 #' @importFrom terra rast vect unwrap writeRaster as.polygons
 #' @importFrom terra mask crop disagg distance expanse fillHoles buffer
 #' @importFrom data.table as.data.table setorder
 #' @importFrom crayon cyan
+#' @importFrom SpaDES.tools neutralLandscapeMap
 #' @export
 assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
-                             id = NULL, IDcol = "OBJECTID", rasClass = 1L) {
+                             id = NULL, permafrostcol = "Permafrost", thermokarstcol = NULL,
+                             IDcol = "OBJECTID", rasClass = 1L, useMidpoint = TRUE) {
   message(cyan("Preparing layers..."))
 
   if (is(gridPoly, "PackedSpatVector")) {
@@ -373,10 +417,22 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
     warning(paste0("None of 'ras' touch polygon id ", id,
                    ".\n  You may want to consider extending 'ras'."))
   } else {
-    permpercent <- as.numeric(landscape[["Permafrost"]])
+    ## extract % PPC and thermokarst level from polygon
+    permpercent <- as.numeric(landscape[[permafrostcol]])
 
-    ## and in pixels
+    if (!is.null(thermokarstcol)) {
+      thermLevel <- tolower(landscape[[thermokarstcol]])
+      thermPercent <- .thermPercent(thermLevel, useMidpoint)
+
+      ## remove "thermokarsted" % amount
+      ## because % thermokarst is relative to % PPC (gridPoly[[permafrostcol]])
+      ## we cannot simply subtract
+      permpercent <- permpercent * ((100-thermPercent)/100)
+    }
+
+    ## How many suitable pixels are there?
     suitablePixNo <- sum(as.vector(sub_ras[]) == rasClass, na.rm = TRUE)
+    ## how many pixels do we need to convert (relative to full landscape)
     permpercentPix <- (permpercent/100)*ncell(sub_ras)  ## don't round here, otherwise values <0.5 become 0.
 
     ## use max(..., 1) to guarantee that values lower than 1, get one pixel.
@@ -417,13 +473,26 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
       spreadProb <- sub_rasDist/max(sub_rasDist[], na.rm = TRUE)
       # terra::plot(spreadProb, col = viridis::inferno(100))
 
-      ## we may need to try several times until we get the number of pixels
-      ## at each attempt increase spreadProb
+      ## thermokarst levels (also) affect degree of fragmentation
+      if (!is.null(thermokarstcol)) {
+        weight <- .thermWeight(thermLevel)
+      } else {
+        weight <- 3 ## a good average level of aggregation
+      }
+
+      ## in landscapes with very high availRatio, assignPresences
+      ## results in very disaggregated/fragmented patterns. So we
+      ## bump the weights to increase the aggregation
+      availRatio <- suitablePixNo/ncell(sub_ras)
+      weight <- weight*(1+availRatio*2)
+
       sub_rasOut <- assignPresences(assignProb = spreadProb,
                                     landscape = sub_ras2,
                                     pixToConvert = permpercentPix,
-                                    probWeight = 0.5, numStartsDenom = 10)
-      # terra::plot(sub_rasOut, col = viridis::inferno(100))
+                                    probWeight = weight,
+                                    numStartsDenom = permpercentPix/10)   ## 10 starting locations.
+      # terra::plot(sub_ras, col = viridis::inferno(2, direction = -1))
+      # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
     }
 
     ## if there's more permafrost than suitable areas
@@ -498,13 +567,19 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         }
       } else {
         ## there may be no available pixels, in which case permafrost can be assigned
-        ## starting in a random polygon within unsuitable areas (hence equal prob below)
-        spreadProb <- subst(sub_ras, c(NA, 0L), c(0L, 1L))
+        ## starting in random pixels within unsuitable areas, using a neutral landscape
+        ## of probabilities (to ensure some degree of agglomeration)
+        spreadProb <- neutralLandscapeMap(sub_ras, type = "nlm_gaussianfield",
+                                          autocorr_range = 100, mag_var = 50)
+        weight <- 100   ## weights have to be "stupidly" high to ensure clumping
 
         sub_rasOut <- assignPresences(assignProb = spreadProb,
                                       landscape = sub_ras,
                                       pixToConvert = pixToConvert,
-                                      probWeight = 1, numStartsDenom = 10)
+                                      probWeight = weight,
+                                      numStartsDenom = pixToConvert/10)
+        # terra::plot(sub_ras, col = viridis::inferno(2, direction = -1))
+        # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
 
       }
     }
@@ -623,11 +698,11 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
   ## if we spread too much remove pixels that are closest to edges
   if (convertedPix > pixToConvert) {
     ## "convert" to distances
-    DT <- data.table(cells = 1:ncell(outRas), dists = assignProbOrig^probWeight)
+    DT <- data.table(cells = 1:ncell(outRas), dists = assignProbOrig)
     DT <- DT[dists > 0 & !is.na(dists)][order(dists, decreasing = TRUE)]
 
-    # pixToRm <- DT[(pixToConvert + 1):nrow(DT), cells] ## creates concave patches
-    pixToKeep <- sample(DT$cells, pixToConvert, prob = DT$dists^10)  ## creates a little more noise
+    # pixToKeep <- DT[1:pixToConvert, cells] ## creates concave patches
+    pixToKeep <- sample(DT$cells, pixToConvert, prob = DT$dists^probWeight)  ## creates a little more noise
 
     outRas[] <- NA_integer_
     outRas[pixToKeep] <- 1L
@@ -636,3 +711,23 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
   message(convertedPix, " were converted")
   return(outRas)
 }
+
+
+.thermPercent <- function(thermLevel = c("low", "medium", "high"), useMidpoint) {
+  thermLevel <- match.arg(thermLevel)
+  switch(thermLevel,
+         "low" = ifelse(useMidpoint, mean(c(0, 33)), round(runif(1, 0, 33))),
+         "medium" = ifelse(useMidpoint, mean(c(34, 66)), round(runif(1, 34, 66))),
+         "high" = ifelse(useMidpoint, mean(c(67, 100)), round(runif(1, 67, 100))))
+}
+
+.thermWeight <- function(thermLevel = c("low", "medium", "high")) {
+  ## higher weights increase the level of aggregation, and thus are more suited
+  ## for lower thermokarst levels
+  thermLevel <- match.arg(thermLevel)
+  switch(thermLevel,
+         "low" = 7,
+         "medium" = 3,
+         "high" = 2)
+}
+
