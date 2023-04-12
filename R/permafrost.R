@@ -839,7 +839,7 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
   ## for lower thermokarst levels
   thermLevel <- match.arg(thermLevel)
   switch(thermLevel,
-         "low" = 7,
+         "low" = 4,
          "medium" = 3,
          "high" = 2)
 }
