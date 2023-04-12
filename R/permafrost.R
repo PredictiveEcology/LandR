@@ -482,11 +482,15 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         weight <- 3 ## a good average level of aggregation
       }
 
-      ## in landscapes with very high availRatio, assignPresences
-      ## results in very disaggregated/fragmented patterns. So we
-      ## bump the weights to increase the aggregation
+      ## in landscapes with very high availRatio, we can end up with very
+      ## disaggregated/fragmented patterns if the weight < 7 and the number of
+      ## starting pixels is high.
+      ## So we bump the weights and keep a low no. starting pixels to increase
+      ## aggregation. When availRatio is very low, increase number of starting pixels
       availRatio <- suitablePixNo/ncell(sub_ras)
-      weight <- weight*(1+availRatio*2)
+      if (availRatio > 0.5) {
+        weight <- weight*(1+availRatio*2)
+      }
 
       ## the number of starting pixels varies with availRatio
       ## with a negative exponential decay. If weight is high, we'll
