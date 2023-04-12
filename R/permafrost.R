@@ -117,16 +117,16 @@ makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath
 
   argsList <- list(
     id = permafrostPoly$OBJECTID,
-                   # id = setdiff(permafrostPoly$OBJECTID, test),
+    # id = setdiff(permafrostPoly$OBJECTID, test),
     # id = c(99, 401, 27557, 200841, 206782), ## several different cases
-                   cores = cores,
-                   # cores = 1L, ## test
-                   outFilename = .suffix(file.path(destinationPath, "permafrost.tif"), paste0("_", permafrostSAName)),
-                   dPath = destinationPath,
-                   ## further arguments passed to assignPermafrost:
-                   gridPoly = tempFileVect,
-                   ras = tempFileRas,
-                   saveDir = file.path(outPath, "tempFiles"))
+    cores = cores,
+    # cores = 1L, ## test
+    outFilename = .suffix(file.path(destinationPath, "permafrost.tif"), paste0("_", permafrostSAName)),
+    dPath = destinationPath,
+    ## further arguments passed to assignPermafrost:
+    gridPoly = tempFileVect,
+    ras = tempFileRas,
+    saveDir = file.path(outPath, "tempFiles"))
 
   dots <- list(...)
   notRecognised <- dots[!names(dots) %in% names(formals("assignPermafrost"))]
@@ -505,7 +505,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
                                     pixToConvert = permpercentPix,
                                     probWeight = weight,
                                     numStartsDenom = permpercentPix/noStartPix)
-      # terra::plot(sub_ras, col = viridis::inferno(2, direction = -1))
+      # terra::plot(sub_ras)
       # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
     }
 
@@ -559,42 +559,42 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         vals <- sub_rasOut[cellIDs][]
         cellIDs <- cellIDs[is.na(vals)]
 
-          ## check that we don't have too many cells. if we do, keep
-          ## pixels around larger patches
-          if (length(cellIDs) > pixToConvert2) {
-            sub_rasOut2 <- sub_rasOut
-            sub_rasOut2[cellIDs] <- 1L
+        ## check that we don't have too many cells. if we do, keep
+        ## pixels around larger patches
+        if (length(cellIDs) > pixToConvert2) {
+          sub_rasOut2 <- sub_rasOut
+          sub_rasOut2[cellIDs] <- 1L
 
-            sub_poly2 <- as.polygons(sub_rasOut2) |> disagg()
-            sub_poly2$area <- expanse(sub_poly2)
-            sub_rasOutArea <- rasterize(sub_poly2, sub_rasOut2, field = "area")
+          sub_poly2 <- as.polygons(sub_rasOut2) |> disagg()
+          sub_poly2$area <- expanse(sub_poly2)
+          sub_rasOutArea <- rasterize(sub_poly2, sub_rasOut2, field = "area")
 
-            DT <- data.table(cells = 1:ncell(sub_rasOutArea), area = as.vector(sub_rasOutArea[]))
-            DT <- DT[complete.cases(DT)][cells %in% cellIDs]
-            DT <- DT[order(area, decreasing = TRUE)]
-            cellIDs <- DT[1:pixToConvert2, cells]
-          }
+          DT <- data.table(cells = 1:ncell(sub_rasOutArea), area = as.vector(sub_rasOutArea[]))
+          DT <- DT[complete.cases(DT)][cells %in% cellIDs]
+          DT <- DT[order(area, decreasing = TRUE)]
+          cellIDs <- DT[1:pixToConvert2, cells]
+        }
 
-          ## we may have exhausted areas to fill outside the holes
-          ## so we fill holes (preferentially the smaller ones)
-          if (length(cellIDs) < 1) {
-            sub_poly <- as.polygons(sub_rasOut) |> disagg()
-            sub_poly_holes <- fillHoles(sub_poly, inverse = TRUE) |> disagg()
-            sub_poly_holes$area <- expanse(sub_poly_holes)
+        ## we may have exhausted areas to fill outside the holes
+        ## so we fill holes (preferentially the smaller ones)
+        if (length(cellIDs) < 1) {
+          sub_poly <- as.polygons(sub_rasOut) |> disagg()
+          sub_poly_holes <- fillHoles(sub_poly, inverse = TRUE) |> disagg()
+          sub_poly_holes$area <- expanse(sub_poly_holes)
 
-            sub_rasHolesArea <- rasterize(sub_poly_holes, sub_rasOut, field = "area")
-            ## there may be patches inside holes (like islands) that need
-            ## to be masked out, as they are ignored by fillHoles
-            sub_rasHolesArea <- mask(sub_rasHolesArea, sub_rasOut, inverse = TRUE)
+          sub_rasHolesArea <- rasterize(sub_poly_holes, sub_rasOut, field = "area")
+          ## there may be patches inside holes (like islands) that need
+          ## to be masked out, as they are ignored by fillHoles
+          sub_rasHolesArea <- mask(sub_rasHolesArea, sub_rasOut, inverse = TRUE)
 
-            DT <- data.table(cells = 1:ncell(sub_rasHolesArea), area = as.vector(sub_rasHolesArea[]))
-            DT <- DT[complete.cases(DT)]
-            setorder(DT, area, cells)
+          DT <- data.table(cells = 1:ncell(sub_rasHolesArea), area = as.vector(sub_rasHolesArea[]))
+          DT <- DT[complete.cases(DT)]
+          setorder(DT, area, cells)
 
-            cellIDs <- DT[1:pixToConvert2, cells]
-          }
+          cellIDs <- DT[1:pixToConvert2, cells]
+        }
 
-          sub_rasOut[cellIDs] <- 1L
+        sub_rasOut[cellIDs] <- 1L
         # pixToConvert2 <- pixToConvert2 - length(cellIDs)  ## only needed for the while, when using buffers
 
         # terra::plot(sub_ras)
