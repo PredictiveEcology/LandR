@@ -488,11 +488,19 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
       availRatio <- suitablePixNo/ncell(sub_ras)
       weight <- weight*(1+availRatio*2)
 
+      ## the number of starting pixels varies with availRatio
+      ## with a negative exponential decay. If weight is high, we'll
+      ## have a high degree of clumping which can lead to it being harder to
+      ## generate presences, so we multiply the no. pixels by weight.
+      # plot(((exp(seq(0, 1, length.out = 100)))^-4)*200 ~ seq(0,1,  length.out = 100), xlab = "availRatio", ylab = "noStartPix")
+      noStartPix <- round((exp(availRatio)^-5)*200*weight)
+      noStartPix <- pmax(noStartPix, 7)   ## don't go lower than 7
+
       sub_rasOut <- assignPresences(assignProb = spreadProb,
                                     landscape = sub_ras2,
                                     pixToConvert = permpercentPix,
                                     probWeight = weight,
-                                    numStartsDenom = permpercentPix/10)   ## 10 starting locations.
+                                    numStartsDenom = permpercentPix/noStartPix)
       # terra::plot(sub_ras, col = viridis::inferno(2, direction = -1))
       # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
     }
