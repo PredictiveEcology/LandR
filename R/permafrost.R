@@ -111,13 +111,14 @@ makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath
   writeRaster(suitForPerm, filename = tempFileRas)
   writeVector(permafrostPoly, filename = tempFileVect)
 
-  # test <- list.files(outPath, "tempFiles"))
+  # test <- list.files(file.path(outPath, "tempFiles"))
   # test <- sub("permafrost_polyID", "", sub("\\.tif", "", test))
   # Couldn't assign permafrost to enough pixels. id: 207217
 
-  argsList <- list(id = permafrostPoly$OBJECTID,
+  argsList <- list(
+    id = permafrostPoly$OBJECTID,
                    # id = setdiff(permafrostPoly$OBJECTID, test),
-                   # id = 206782, ## a tiny polygon in SA edge
+    # id = c(99, 401, 27557, 200841, 206782), ## several different cases
                    cores = cores,
                    # cores = 1L, ## test
                    outFilename = .suffix(file.path(destinationPath, "permafrost.tif"), paste0("_", permafrostSAName)),
@@ -470,7 +471,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
       sub_rasDist <- distance(sub_rasDist)
 
       ## make "probabilities" by scaling 0-1
-      spreadProb <- sub_rasDist/max(sub_rasDist[], na.rm = TRUE)
+      spreadProb <- sub_rasDist/minmax(sub_rasDist)["max",]
       # terra::plot(spreadProb, col = viridis::inferno(100))
 
       ## thermokarst levels (also) affect degree of fragmentation
@@ -579,7 +580,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
                                       pixToConvert = pixToConvert,
                                       probWeight = weight,
                                       numStartsDenom = pixToConvert/10)
-        # terra::plot(sub_ras, col = viridis::inferno(2, direction = -1))
+        # terra::plot(sub_ras)
         # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
 
       }
@@ -758,7 +759,7 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
   if (probWeight > 7)
     warning("probWeight > 7 may create very clumped patterns")
 
-  ## save original probabilites for later
+  ## save original probabilities for later
   assignProbOrig <- as.vector(assignProb[])
 
   ## if the mean is too high, then bring it down to 0.35 to avoid creating
@@ -800,6 +801,7 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
       mask(mask = landscape)
 
     outRas[!is.na(as.vector(outRas[]))] <- 1L
+    # terra::plot(outRas, col = viridis::inferno(100))
     convertedPix <- sum(as.vector(outRas[]), na.rm = TRUE)
 
     ## increase spread probabilities in case we need to try again
