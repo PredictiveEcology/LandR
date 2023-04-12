@@ -472,6 +472,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 
       ## make "probabilities" by scaling 0-1
       spreadProb <- sub_rasDist/minmax(sub_rasDist)["max",]
+      spreadProb <- mask(spreadProb, sub_ras)   ## only NAs here are respected by spread
       # terra::plot(spreadProb, col = viridis::inferno(100))
 
       ## thermokarst levels (also) affect degree of fragmentation
