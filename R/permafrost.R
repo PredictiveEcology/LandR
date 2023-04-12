@@ -762,21 +762,22 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
   ## save original probabilities for later
   assignProbOrig <- as.vector(assignProb[])
 
-  ## if the mean is too high, then bring it down to 0.35 to avoid creating
-  ## square patches
-  meanSP <- mean(assignProbOrig, na.rm = TRUE)
-  if (meanSP > 0.35)
-    assignProb <- assignProb / meanSP * 0.35
-
   convertedPix <- 0
 
+  ## exponentiate probabilities to provide more weight to pixels further from edges
+  assignProbEx <- assignProb^probWeight
+  # terra::plot(assignProbEx, col = viridis::inferno(100))
+
+  numStarts <- ceiling(pixToConvert/numStartsDenom)
+
   while (convertedPix < pixToConvert) {
-    ## exponentiate probabilities to provide more weight to pixels further from edges
-    assignProbEx <- assignProb^probWeight
-    # terra::plot(assignProbEx, col = viridis::inferno(100))
+    ## if the mean is too high, then bring it down to 0.35 to avoid creating
+    ## square patches
+    meanSP <- mean(as.vector(assignProbEx[]), na.rm = TRUE)
+    if (meanSP > 0.35)
+      assignProbEx <- assignProbEx / meanSP * 0.35
 
     ## try to spread in from many focal pixels
-    numStarts <- ceiling(pixToConvert/numStartsDenom)
     ## draw starting points from areas furthest from edge
     probs <- as.vector(assignProbEx[])
     probs[is.na(probs)] <- 0
@@ -805,7 +806,9 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
     convertedPix <- sum(as.vector(outRas[]), na.rm = TRUE)
 
     ## increase spread probabilities in case we need to try again
-    assignProb <- min(assignProb * 1.5, 1)
+    assignProbEx <- min(assignProbEx * 1.5, 1)
+    ## also increase no starting points
+    numStarts <- numStarts + 10
   }
 
   ## if we spread too much remove pixels that are closest to edges
