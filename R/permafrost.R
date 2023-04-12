@@ -525,21 +525,39 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         ## as we want to start from a swiss-cheese pattern)
         pixToConvert2 <- pixToConvert - length(cellIDs)
 
-        while (pixToConvert2 > 0) {
-          sub_poly <- as.polygons(sub_rasOut) |> disagg()
+        # while (pixToConvert2 > 0) {   ## only needed when using buffers
+        sub_poly <- as.polygons(sub_rasOut) |> disagg()
 
-          ## don't fill holes first to keep a swiss-cheese pattern
-          sub_poly_filled <- fillHoles(sub_poly)
-          sub_poly_filled <- rasterize(sub_poly_filled, sub_ras)
+        ## don't fill holes first to keep a swiss-cheese pattern
+        sub_poly_filled <- fillHoles(sub_poly)
+        sub_ras_filled <- rasterize(sub_poly_filled, sub_ras)
 
-          ## buffer around patch
-          sub_poly_filledBuffer <- buffer(sub_poly_filled, width = unique(res(sub_poly_filled)),
-                                          background = NA)
-          cellIDs <- which(as.vector(sub_poly_filledBuffer[]) == 1)
+        ## calculate distance to patch from NAs
+        sub_ras_filledDist <- sub_ras_filled
+        sub_ras_filledDist <- distance(sub_ras_filledDist)
+        ## higher spreadProb closest to patches
+        spreadProb <- sub_ras_filledDist^-1
+        spreadProb <- subst(spreadProb, Inf, 0)
+        spreadProb <- mask(spreadProb, sub_ras)   ## only NAs here are respected by spread
 
-          ## remove cellIDs that have been converted already
-          vals <- sub_rasOut[cellIDs][]
-          cellIDs <- cellIDs[is.na(vals)]
+        sub_ras_filledBuffer <- assignPresences(assignProb = spreadProb,
+                                                landscape = sub_ras,
+                                                pixToConvert = pixToConvert2,
+                                                probWeight = 5,
+                                                numStartsDenom = pixToConvert2/10)
+        # terra::plot(sub_ras)
+        # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
+        # terra::plot(sub_ras_filledBuffer, col = "darkblue", add = TRUE)
+
+        ## buffer around patch -- this is creating square patterns when starting from a single pixel
+        # sub_ras_filledBuffer <- buffer(sub_ras_filled, width = unique(res(sub_poly_filled)),
+        # background = NA)
+        cellIDs <- which(as.vector(sub_ras_filledBuffer[]) == 1)
+
+        ## remove cellIDs that have been converted already -- shouldn't be necessary with assignPresences
+        ## but kept here in case we switch to buffer again.
+        vals <- sub_rasOut[cellIDs][]
+        cellIDs <- cellIDs[is.na(vals)]
 
           ## check that we don't have too many cells. if we do, keep
           ## pixels around larger patches
@@ -577,9 +595,11 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
           }
 
           sub_rasOut[cellIDs] <- 1L
+        # pixToConvert2 <- pixToConvert2 - length(cellIDs)  ## only needed for the while, when using buffers
 
-          pixToConvert2 <- pixToConvert2 - length(cellIDs)
-        }
+        # terra::plot(sub_ras)
+        # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
+        # }
       } else {
         ## there may be no available pixels, in which case permafrost can be assigned
         ## starting in random pixels within unsuitable areas, using a neutral landscape
