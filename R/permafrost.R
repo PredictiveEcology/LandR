@@ -28,6 +28,8 @@ utils::globalVariables(c(
 #'   location where the final permafrost layer will be saved.
 #' @param studyArea character. Passed to `reproducible::postProcess`.
 #' @param .studyAreaName character. A string to append to `filename2` in `postProcess`.
+#' @param doMissing logical. If TRUE, the permafrost layer will only be computed in
+#'   polygon IDs missing from raster file names in `outPath`.
 #' @param ... further arguments passed to `assignPermafrost`
 #'
 #'
@@ -44,7 +46,7 @@ utils::globalVariables(c(
 #' @export
 makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath"),
                               cacheTags = NULL, destinationPath = getOption("reproducible.destinationPath"),
-                              studyArea = NULL, .studyAreaName = NULL, ...) {
+                              studyArea = NULL, .studyAreaName = NULL, doMissing = FALSE, ...) {
   permafrostSA <- Cache(prepInputs,
                         targetFile = "TP_DP_StudyBoundary.shp",
                         alsoExtract = "similar",
@@ -111,13 +113,15 @@ makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath
   writeRaster(suitForPerm, filename = tempFileRas)
   writeVector(permafrostPoly, filename = tempFileVect)
 
-  # test <- list.files(file.path(outPath, "tempFiles"))
-  # test <- sub("permafrost_polyID", "", sub("\\.tif", "", test))
-  # Couldn't assign permafrost to enough pixels. id: 207217
+  toDoIDs <- permafrostPoly$OBJECTID
+  if (doMissing) {
+    doneIDs <- list.files(file.path(outPath, "tempFiles"))
+    doneIDs <- sub("permafrost_polyID", "", sub("\\.tif", "", doneIDs))
+    toDoIDs <- setdiff(toDoIDs, doneIDs)
+  }
 
   argsList <- list(
-    id = permafrostPoly$OBJECTID,
-    # id = setdiff(permafrostPoly$OBJECTID, test),
+    id = toDoIDs,
     # id = c(99, 401, 27557, 200841, 206782), ## several different cases
     cores = cores,
     # cores = 1L, ## test
