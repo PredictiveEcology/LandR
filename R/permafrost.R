@@ -502,6 +502,8 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
       noStartPix <- round((exp(availRatio)^-5)*200*weight)
       noStartPix <- pmax(noStartPix, 7)   ## don't go lower than 7
 
+      noStartPix <- pmin(suitablePixNo, noStartPix)   ## can't have more than the number of suitable pixels.
+
       sub_rasOut <- assignPresences(assignProb = spreadProb,
                                     landscape = sub_ras2,
                                     pixToConvert = permpercentPix,
