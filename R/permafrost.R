@@ -165,76 +165,6 @@ makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath
 }
 
 
-#' Wrapper for `assignPermafrost`
-#'
-#' @param cores how many threads to use for parallelisation. If
-#'  `1`, no parallelisation occurs
-#' @param id passed to `assignPermafrost`
-#' @param outFilename name of output permafrost raster file
-#' @param dPath directory where output permafrost raster file will be written.
-#' @param ... further arguments passed to `assignPermafrost`, like `gridPoly`
-#'  `ras`, etc.
-#'
-#' @importFrom terra writeRaster sprc
-.assignPermafrostWrapper <- function(id, cores, outFilename, dPath, ...) {
-  if (cores > 1) {
-    message("Creating permafrost layer with parallelisation")
-    if (.Platform$OS.type == "unix") {
-      cl <- parallel::makeForkCluster(cores)
-    } else {
-      if (!requireNamespace("parallelly")) {
-        stop("install 'parallelly'")
-      }
-      cl <- parallelly::makeClusterPSOCK(cores, rscript_libs = .libPaths())
-    }
-
-    on.exit(parallel::stopCluster(cl), add = TRUE)
-    parallel::clusterEvalQ(cl, {
-      library("MASS")
-
-      ## limit spawning of additional threads from workers
-      data.table::setDTthreads(1)
-      RhpcBLASctl::blas_set_num_threads(1)
-      RhpcBLASctl::omp_set_num_threads(1)
-    })
-
-    future::plan(future::cluster, workers = cl)
-    applyFUN <- future.apply::future_Map
-  } else {
-    message("Creating permafrost layer sequentially")
-    applyFUN <- Map
-  }
-
-  dots <- list(...)
-  notRecognised <- dots[!names(dots) %in% names(formals("assignPermafrost"))]
-  if (length(notRecognised)) {
-    stop("The following arguments do not match any 'assignPermafrost' arguments:",
-         "\n", paste(names(notRecognised), collapse = ", "))
-  }
-
-  assignPermafrostArgs <- dots[names(dots) %in% names(formals("assignPermafrost"))]
-
-  ## use do.call so that future.seed can be added if running in parallel
-  applyFUNArgs <- list(f = assignPermafrost,
-                       id = id,
-                       MoreArgs = assignPermafrostArgs)
-  if (cores > 1) {
-    applyFUNArgs <- append(applyFUNArgs, list(future.seed = TRUE))
-  }
-  permafrostRasFiles <- do.call(applyFUN, applyFUNArgs)
-
-  ## read rasters and merge -- this should also be Cached.
-  permafrostRasLs <- lapply(permafrostRasFiles, rast)
-  permafrostRas <- sprc(permafrostRasLs)
-  permafrostRas <- terra::merge(permafrostRas)
-
-  message("Permafrost layer done!")
-
-  writeRaster(permafrostRas, filename = outFilename, overwrite = TRUE)
-  return(permafrostRas)
-}
-
-
 #' Make a mask of areas that suitable/unsuitable for permafrost
 #'
 #' Uses a land-cover map and a wetlands map to create a mask
@@ -315,6 +245,74 @@ makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 
   return(rstLCC)
 }
 
+#' Wrapper for `assignPermafrost`
+#'
+#' @param cores how many threads to use for parallelisation. If
+#'  `1`, no parallelisation occurs
+#' @param id passed to `assignPermafrost`
+#' @param outFilename name of output permafrost raster file
+#' @param dPath directory where output permafrost raster file will be written.
+#' @param ... further arguments passed to `assignPermafrost`, like `gridPoly`
+#'  `ras`, etc.
+#'
+#' @importFrom terra writeRaster sprc
+.assignPermafrostWrapper <- function(id, cores, outFilename, dPath, ...) {
+  if (cores > 1) {
+    message("Creating permafrost layer with parallelisation")
+    if (.Platform$OS.type == "unix") {
+      cl <- parallel::makeForkCluster(cores)
+    } else {
+      if (!requireNamespace("parallelly")) {
+        stop("install 'parallelly'")
+      }
+      cl <- parallelly::makeClusterPSOCK(cores, rscript_libs = .libPaths())
+    }
+
+    on.exit(parallel::stopCluster(cl), add = TRUE)
+    parallel::clusterEvalQ(cl, {
+      library("MASS")
+
+      ## limit spawning of additional threads from workers
+      data.table::setDTthreads(1)
+      RhpcBLASctl::blas_set_num_threads(1)
+      RhpcBLASctl::omp_set_num_threads(1)
+    })
+
+    future::plan(future::cluster, workers = cl)
+    applyFUN <- future.apply::future_Map
+  } else {
+    message("Creating permafrost layer sequentially")
+    applyFUN <- Map
+  }
+
+  dots <- list(...)
+  notRecognised <- dots[!names(dots) %in% names(formals("assignPermafrost"))]
+  if (length(notRecognised)) {
+    stop("The following arguments do not match any 'assignPermafrost' arguments:",
+         "\n", paste(names(notRecognised), collapse = ", "))
+  }
+
+  assignPermafrostArgs <- dots[names(dots) %in% names(formals("assignPermafrost"))]
+
+  ## use do.call so that future.seed can be added if running in parallel
+  applyFUNArgs <- list(f = assignPermafrost,
+                       id = id,
+                       MoreArgs = assignPermafrostArgs)
+  if (cores > 1) {
+    applyFUNArgs <- append(applyFUNArgs, list(future.seed = TRUE))
+  }
+  permafrostRasFiles <- do.call(applyFUN, applyFUNArgs)
+
+  ## read rasters and merge -- this should also be Cached.
+  permafrostRasLs <- lapply(permafrostRasFiles, rast)
+  permafrostRas <- sprc(permafrostRasLs)
+  permafrostRas <- terra::merge(permafrostRas)
+
+  message("Permafrost layer done!")
+
+  writeRaster(permafrostRas, filename = outFilename, overwrite = TRUE)
+  return(permafrostRas)
+}
 
 
 #' Create permafrost P/A layer
