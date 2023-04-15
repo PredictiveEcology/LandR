@@ -423,9 +423,15 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
     ## extract % PPC and thermokarst level from polygon
     permpercent <- as.numeric(landscape[[permafrostcol]])
 
-    if (!is.null(thermokarstcol)) {
+    if (!is.null(thermokarstcol) & permpercent > 0) {
       thermLevel <- tolower(landscape[[thermokarstcol]])
-      thermPercent <- .thermPercent(thermLevel, useMidpoint)
+      ## there is at least one polygon with permafrost > 0 and NA thermokarst.
+      ## We assume 0 thermokarst
+      if (is.na(thermLevel)) {
+        thermPercent <- 0
+      } else {
+        thermPercent <- .thermPercent(thermLevel, useMidpoint)
+      }
 
       ## remove "thermokarsted" % amount
       ## because % thermokarst is relative to % PPC (gridPoly[[permafrostcol]])
