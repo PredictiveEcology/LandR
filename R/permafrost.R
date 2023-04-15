@@ -456,10 +456,16 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
     ## until the percentage is reached
 
     message(cyan("Assigning permafrost..."))
-    ## if there are more suitable areas than permafrost start
-    ## "filling in" from focal pixels using distance to edges
+    ## if there are more suitable areas than permafrost:
+    ## A) start "filling in" from focal pixels using distance to edges
     ## as the probability of a pixel being selected (more distant = higher prob)
+    ## or B) fill largest patches first
+    ## (Ceres tried option A alone, but assignPresences got stuck in fragmented landscape very often
+    ## and it was hard to find a suitable weight/statPixel combination across varying degrees
+    ## of fragmentation)
     if (suitablePixNo > permpercentPix & permpercentPix > 0) {
+      pixToConvert <- permpercentPix
+
       ## make polygons, so that we can identify separate patches in raster
       sub_poly <- as.polygons(sub_ras) |> disagg()   ## 0s in sub_ras are ignored
       names(sub_poly) <- "patchType"
@@ -471,52 +477,82 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
       sub_ras2 <- rasterize(sub_poly, sub_ras, field = "ID")
       # terra::plot(sub_ras2, col = viridis::viridis(length(sub_poly)))
 
-      ## compute distances to edges.
-      ## first make an "inverse" raster with NAs
-      sub_rasDist <- sub_ras2
-      sub_rasDist[] <- 1L
-      sub_rasDist <- mask(sub_rasDist, sub_ras2, inverse = TRUE)   ## use sub_ras2, because 0s were NAed
-      sub_rasDist <- distance(sub_rasDist)
+      patchSizes <- as.data.table(table(sub_ras2[]))
+      patchSizes <- patchSizes[order(N, decreasing = TRUE)]
+      patchFillFirst <- which(cumsum(patchSizes$N) <= pixToConvert)
+      patchFillFirst <- as.integer(as.character(patchSizes[patchFillFirst, V1]))
 
-      ## make "probabilities" by scaling 0-1
-      spreadProb <- sub_rasDist/minmax(sub_rasDist)["max",]
-      spreadProb <- mask(spreadProb, sub_ras)   ## only NAs here are respected by spread
-      # terra::plot(spreadProb, col = viridis::inferno(100))
+      sub_rasOut[as.vector(sub_ras2[]) %in% patchFillFirst] <- 1L
+      # terra::plot(sub_ras)
+      # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
 
-      ## thermokarst levels (also) affect degree of fragmentation
-      if (!is.null(thermokarstcol)) {
-        weight <- .thermWeight(thermLevel)
+      pixToConvert <- pixToConvert - sum(as.vector(sub_rasOut[]) == 1, na.rm = TRUE)
+
+      ## the code bellow was often getting stuck in fragmented landscapes
+      ## so we use it to fill in the missing pixels only.
+      if (pixToConvert > 0) {
+        ## compute distances to edges of patches that need to be filled
+        sub_ras2 <- subst(sub_ras, c(0), NA_integer_)
+        sub_ras2 <- mask(sub_ras2, sub_rasOut, inverse = TRUE)
+
+        ## first make an "inverse" raster with NAs where patches are
+        sub_rasDist <- sub_ras
+        sub_rasDist[] <- 1L
+        sub_rasDist <- mask(sub_rasDist, sub_ras2, inverse = TRUE)   ## use sub_ras2, because 0s were NAed
+        sub_rasDist <- distance(sub_rasDist)   ## compute distance from pathes (NAs) to edges
+
+        ## make "probabilities" by scaling 0-1
+        spreadProb <- sub_rasDist/minmax(sub_rasDist)["max",]
+        spreadProb <- mask(spreadProb, sub_ras2)   ## only NAs here are respected by spread
+        # terra::plot(spreadProb, col = viridis::inferno(100))
+
+        suitablePixNo2 <- sum(sub_ras2[] == 1, na.rm = TRUE)
+        availRatio <- suitablePixNo2/ncell(sub_ras)
+
+        ## April 14th 2023: Ceres could not find a robust way of varying weights with
+        ## thermokarst while ensuring feasible computation times and sensible patterns
+        ## (small weights create very random patches with there availRatio is high, large
+        ## weights massively increase computation times when availRatio is <0.30 )
+        if (FALSE) {
+          ## thermokarst levels (also) affect degree of fragmentation
+          if (!is.null(thermokarstcol)) {
+            weight <- .thermWeight(thermLevel)
       } else {
         weight <- 3 ## a good average level of aggregation
       }
 
       ## in landscapes with very high availRatio, we can end up with very
       ## disaggregated/fragmented patterns if the weight < 7 and the number of
-      ## starting pixels is high.
-      ## So we bump the weights and keep a low no. starting pixels to increase
-      ## aggregation. When availRatio is very low, increase number of starting pixels
-      availRatio <- suitablePixNo/ncell(sub_ras)
-      if (availRatio > 0.5) {
-        weight <- weight*(1+availRatio*2)
-      }
+          ## starting pixels is high.
+          ## So we bump the weights and keep a low no. starting pixels to increase
+          ## aggregation. When availRatio is very low, increase number of starting pixels
+          if (availRatio > 0.5) {
+            weight <- weight*(1+availRatio*2)
+          }
+        } else {
+          weight <- 1  ## use probs as they are
+        }
 
-      ## the number of starting pixels varies with availRatio
-      ## with a negative exponential decay. If weight is high, we'll
+        ## the number of starting pixels varies with availRatio
+        ## with a negative exponential decay. If weight is high, we'll
       ## have a high degree of clumping which can lead to it being harder to
       ## generate presences, so we multiply the no. pixels by weight.
       # plot(((exp(seq(0, 1, length.out = 100)))^-4)*200 ~ seq(0,1,  length.out = 100), xlab = "availRatio", ylab = "noStartPix")
-      noStartPix <- round((exp(availRatio)^-5)*200*weight)
-      noStartPix <- pmax(noStartPix, 7)   ## don't go lower than 7
+        noStartPix <- round((exp(availRatio)^-5)*200*weight)
+        noStartPix <- pmax(noStartPix, 7)   ## don't go lower than 7
 
-      noStartPix <- pmin(suitablePixNo, noStartPix)   ## can't have more than the number of suitable pixels.
+        noStartPix <- pmin(suitablePixNo2, noStartPix)   ## can't have more than the number of suitable pixels.
 
-      sub_rasOut <- assignPresences(assignProb = spreadProb,
-                                    landscape = sub_ras2,
-                                    pixToConvert = permpercentPix,
-                                    probWeight = weight,
-                                    numStartsDenom = permpercentPix/noStartPix)
-      # terra::plot(sub_ras)
-      # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
+        sub_rasOut2 <- assignPresences(assignProb = spreadProb,
+                                       landscape = sub_ras2,
+                                       pixToConvert = pixToConvert,
+                                       probWeight = weight,
+                                       numStartsDenom = pixToConvert/noStartPix)
+        # terra::plot(sub_ras)
+        # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
+        # terra::plot(sub_rasOut2, col = "darkblue", add = TRUE)
+        sub_rasOut <- cover(sub_rasOut, sub_rasOut2)
+      }
     }
 
     ## if there's more permafrost than suitable areas
