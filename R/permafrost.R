@@ -441,8 +441,10 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 
     ## How many suitable pixels are there?
     suitablePixNo <- sum(as.vector(sub_ras[]) == rasClass, na.rm = TRUE)
-    ## how many pixels do we need to convert (relative to full landscape)
-    permpercentPix <- (permpercent/100)*ncell(sub_ras)  ## don't round here, otherwise values <0.5 become 0.
+
+    ## how many pixels do we need to convert (relative to all non-NA pixels -- note that ncell would count NAs)
+    allPix <- sum(!is.na(sub_ras[]))
+    permpercentPix <- (permpercent/100)*allPix  ## don't round here, otherwise values <0.5 become 0.
 
     ## use max(..., 1) to guarantee that values lower than 1, get one pixel.
     if (permpercentPix > 0)
@@ -507,7 +509,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         # terra::plot(spreadProb, col = viridis::inferno(100))
 
         suitablePixNo2 <- sum(sub_ras2[] == 1, na.rm = TRUE)
-        availRatio <- suitablePixNo2/ncell(sub_ras)
+        availRatio <- suitablePixNo2/allPix
 
         ## April 14th 2023: Ceres could not find a robust way of varying weights with
         ## thermokarst while ensuring feasible computation times and sensible patterns
