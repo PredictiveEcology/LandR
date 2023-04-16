@@ -569,29 +569,45 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         sub_rasOut[cellIDs] <- 1L
 
         ## if there are not enough points within the patches,
-        ## try to fill neighbouring pixels (leave holes alone at first
-        ## as we want to start from a swiss-cheese pattern)
+        ## try to fill neighbouring pixels, closer to edges
         pixToConvert2 <- pixToConvert - length(cellIDs)
 
-        # while (pixToConvert2 > 0) {   ## only needed when using buffers
-        sub_poly <- as.polygons(sub_rasOut) |> disagg()
+        sub_ras_filled <- sub_rasOut
 
-        ## don't fill holes first to keep a swiss-cheese pattern
-        sub_poly_filled <- fillHoles(sub_poly)
-        sub_ras_filled <- rasterize(sub_poly_filled, sub_ras)
+        ## no longer necessary with assignPresences.
+        if (FALSE) {
+          ## leave holes alone at first as we want to start from a
+          ## swiss-cheese pattern
+          # while (pixToConvert2 > 0) {   ## only needed when using buffers
+          sub_poly <- as.polygons(sub_rasOut) |> disagg()   ## when using buffers
+          ## don't fill holes first to keep a swiss-cheese pattern
+          sub_poly_filled <- fillHoles(sub_poly)
+          sub_ras_filled <- rasterize(sub_poly_filled, sub_ras)
+        }
 
         ## calculate distance to patch from NAs
-        sub_ras_filledDist <- sub_ras_filled
-        sub_ras_filledDist <- distance(sub_ras_filledDist)
-        ## higher spreadProb closest to patches
-        spreadProb <- sub_ras_filledDist^-1
-        spreadProb <- subst(spreadProb, Inf, 0)
+        sub_ras_filledDist <- distance(sub_ras_filled)
+        ## to reverse to higher spreadProb closest to patches
+        ## first rescale to 0-1 by dividing by max, then subtract 1
+        ## and take abs (all -1s are converted to 0s) This is better than taking the inverse and recalling
+        spreadProb <- (sub_ras_filledDist/minmax(sub_ras_filledDist)["max",])
+        spreadProb <- spreadProb - 1
+        spreadProb <- subst(spreadProb, -1, 0)
+        spreadProb <- abs(spreadProb)
         spreadProb <- mask(spreadProb, sub_ras)   ## only NAs here are respected by spread
+
+        weight <- 5
+
+        suitablePixNo2 <- sum(spreadProb[] > 0, na.rm = TRUE)
+        availRatio <- suitablePixNo2/allPix
+        noStartPix <- round((exp(availRatio)^-5)*200*weight)
+        noStartPix <- pmax(noStartPix, 7)   ## don't go lower than 7
+        noStartPix <- pmin(suitablePixNo2, noStartPix)   ## can't have more than the number of suitable pixels.
 
         sub_ras_filledBuffer <- assignPresences(assignProb = spreadProb,
                                                 landscape = sub_ras,
                                                 pixToConvert = pixToConvert2,
-                                                probWeight = 5,
+                                                probWeight = weight,
                                                 numStartsDenom = pixToConvert2/10)
         # terra::plot(sub_ras)
         # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
@@ -607,9 +623,11 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         vals <- sub_rasOut[cellIDs][]
         cellIDs <- cellIDs[is.na(vals)]
 
-        ## check that we don't have too many cells. if we do, keep
-        ## pixels around larger patches
-        if (length(cellIDs) > pixToConvert2) {
+        ## this is no longer necessary with assignPresences
+        if (FALSE) {
+          ## check that we don't have too many cells. if we do, keep
+          ## pixels around larger patches
+          if (length(cellIDs) > pixToConvert2) {
           sub_rasOut2 <- sub_rasOut
           sub_rasOut2[cellIDs] <- 1L
 
@@ -637,9 +655,10 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 
           DT <- data.table(cells = 1:ncell(sub_rasHolesArea), area = as.vector(sub_rasHolesArea[]))
           DT <- DT[complete.cases(DT)]
-          setorder(DT, area, cells)
+            setorder(DT, area, cells)
 
-          cellIDs <- DT[1:pixToConvert2, cells]
+            cellIDs <- DT[1:pixToConvert2, cells]
+          }
         }
 
         sub_rasOut[cellIDs] <- 1L
