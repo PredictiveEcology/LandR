@@ -539,10 +539,9 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         ## with a negative exponential decay. If weight is high, we'll
       ## have a high degree of clumping which can lead to it being harder to
       ## generate presences, so we multiply the no. pixels by weight.
-      # plot(((exp(seq(0, 1, length.out = 100)))^-4)*200 ~ seq(0,1,  length.out = 100), xlab = "availRatio", ylab = "noStartPix")
+        # plot(((exp(seq(0, 1, length.out = 100)))^-4)*200 ~ seq(0,1,  length.out = 100), xlab = "availRatio", ylab = "noStartPix")
         noStartPix <- round((exp(availRatio)^-5)*200*weight)
         noStartPix <- pmax(noStartPix, 7)   ## don't go lower than 7
-
         noStartPix <- pmin(suitablePixNo2, noStartPix)   ## can't have more than the number of suitable pixels.
 
         sub_rasOut2 <- assignPresences(assignProb = spreadProb,
