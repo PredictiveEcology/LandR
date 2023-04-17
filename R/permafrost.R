@@ -426,9 +426,10 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
     if (!is.null(thermokarstcol) & permpercent > 0) {
       thermLevel <- tolower(landscape[[thermokarstcol]])
       ## there is at least one polygon with permafrost > 0 and NA thermokarst.
-      ## We assume 0 thermokarst
+      ## We assume 0 thermokarst, which belongs to low thermLevel
       if (is.na(thermLevel)) {
         thermPercent <- 0
+        thermLevel <- "low"
       } else {
         thermPercent <- .thermPercent(thermLevel, useMidpoint)
       }
