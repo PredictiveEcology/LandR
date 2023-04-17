@@ -464,7 +464,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
     ## as the probability of a pixel being selected (more distant = higher prob)
     ## or B) fill largest patches first
     ## (Ceres tried option A alone, but assignPresences got stuck in fragmented landscape very often
-    ## and it was hard to find a suitable weight/statPixel combination across varying degrees
+    ## and it was hard to find a suitable weight/startPixel combination across varying degrees
     ## of fragmentation)
     if (suitablePixNo > permpercentPix & permpercentPix > 0) {
       pixToConvert <- permpercentPix
@@ -603,7 +603,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         spreadProb <- abs(spreadProb)
         spreadProb <- mask(spreadProb, sub_ras)   ## only NAs here are respected by spread
 
-        weight <- 5
+        weight <- 5    ## should ensure a good degree of clumping
 
         suitablePixNo2 <- sum(spreadProb[] > 0, na.rm = TRUE)
         availRatio <- suitablePixNo2/allPix
