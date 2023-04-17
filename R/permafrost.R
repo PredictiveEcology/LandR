@@ -875,7 +875,7 @@ assignPresences <- function(assignProb, landscape, pixToConvert = NULL, probWeig
   assignProbEx <- assignProb^probWeight
   # terra::plot(assignProbEx, col = viridis::inferno(100))
 
-  numStarts <- ceiling(pixToConvert/numStartsDenom)
+  numStarts <- round(pixToConvert/numStartsDenom)
 
   while (convertedPix < pixToConvert) {
     ## if the mean is too high, then bring it down to 0.35 to avoid creating
