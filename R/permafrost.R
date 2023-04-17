@@ -509,6 +509,13 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         spreadProb <- mask(spreadProb, sub_ras2)   ## only NAs here are respected by spread
         # terra::plot(spreadProb, col = viridis::inferno(100))
 
+        ## weight probabilities by patch size
+        patchSizes[, V1 := as.integer(V1)]
+        sub_rasPS <- rasterize(sub_poly, sub_ras, field = "ID")
+        sub_rasPS <- classify(sub_rasPS, patchSizes)
+        sub_rasPS <- sub_rasPS/minmax(sub_rasPS)["max",]   ## normalize
+        spreadProb <- spreadProb * sub_rasPS
+
         suitablePixNo2 <- sum(sub_ras2[] == 1, na.rm = TRUE)
         availRatio <- suitablePixNo2/allPix
 
