@@ -179,7 +179,7 @@ makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath
                                omitArgs = c("userTags", "filename2"))
   ## make sure layer name is "permafrost"
   names(permafrostRas) <- "permafrost"
-  permafrostRas
+  return(permafrostRas)
 }
 
 
@@ -319,7 +319,7 @@ makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 
     applyFUNArgs <- append(applyFUNArgs, list(future.seed = TRUE))
   }
   permafrostRasFiles <- do.call(applyFUN, applyFUNArgs)
-
+  return(permafrostRasFiles)
 }
 
 
