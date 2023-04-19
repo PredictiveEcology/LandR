@@ -73,8 +73,8 @@ Remotes:
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/quickPlot@development,
-    PredictiveEcology/reproducible@development,
-    PredictiveEcology/SpaDES.tools@development
+    PredictiveEcology/reproducible@terra-migration,
+    PredictiveEcology/SpaDES.tools@terra-migration
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
