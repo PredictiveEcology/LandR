@@ -579,9 +579,10 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         ## try to fill neighbouring pixels, closer to edges
         pixToConvert2 <- pixToConvert - length(cellIDs)
 
-        sub_ras_filled <- sub_rasOut
+        if (pixToConvert2 > 0) {
+          sub_ras_filled <- sub_rasOut
 
-        ## no longer necessary with assignPresences.
+          ## no longer necessary with assignPresences.
         if (FALSE) {
           ## leave holes alone at first as we want to start from a
           ## swiss-cheese pattern
@@ -671,9 +672,9 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         sub_rasOut[cellIDs] <- 1L
         # pixToConvert2 <- pixToConvert2 - length(cellIDs)  ## only needed for the while, when using buffers
 
-        # terra::plot(sub_ras)
-        # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
-        # }
+          # terra::plot(sub_ras)
+          # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
+        }
       } else {
         ## there may be no available pixels, in which case permafrost can be assigned
         ## starting in random pixels within unsuitable areas, using a neutral landscape
