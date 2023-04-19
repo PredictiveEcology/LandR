@@ -519,15 +519,19 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         suitablePixNo2 <- sum(sub_ras2[] == 1, na.rm = TRUE)
         availRatio <- suitablePixNo2/allPix
 
+
+        ## Thermokarst levels (also) affect degree of fragmentation
         ## April 14th 2023: Ceres could not find a robust way of varying weights with
         ## thermokarst while ensuring feasible computation times and sensible patterns
         ## (small weights create very random patches when availRatio is high, large
         ## weights massively increase computation times when availRatio is <0.30 )
+        ## April 18th 2023: thermokarst effects on weights were reintroduced and seem to
+        ## be working as well as possible, when the midpoint is used in .thermPercent.
+        ## Computation times are long (>10h for 12000 polygons)
         # if (FALSE) {
-        ## thermokarst levels (also) affect degree of fragmentation
         if (!is.null(thermokarstcol)) {
           weight <- .thermWeight(thermLevel)
-      } else {
+        } else {
         weight <- 3 ## a good average level of aggregation
       }
 
