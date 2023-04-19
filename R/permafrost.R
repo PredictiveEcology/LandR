@@ -536,14 +536,14 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         if (!is.null(thermokarstcol)) {
           weight <- .thermWeight(thermLevel)
         } else {
-        weight <- 3 ## a good average level of aggregation
-      }
+          weight <- 3 ## a good average level of aggregation
+        }
 
-      ## in landscapes with very high availRatio, we can end up with very
-      ## disaggregated/fragmented patterns if the weight < 7 and the number of
-          ## starting pixels is high.
-          ## So we bump the weights and keep a low no. starting pixels to increase
-          ## aggregation. When availRatio is very low, increase number of starting pixels
+        ## in landscapes with very high availRatio, we can end up with very
+        ## disaggregated/fragmented patterns if the weight < 7 and the number of
+        ## starting pixels is high.
+        ## So we bump the weights and keep a low no. starting pixels to increase
+        ## aggregation. When availRatio is very low, increase number of starting pixels
         if (availRatio > 0.5) {
           weight <- weight*(1+availRatio*2)
         }
@@ -553,8 +553,8 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 
         ## the number of starting pixels varies with availRatio
         ## with a negative exponential decay. If weight is high, we'll
-      ## have a high degree of clumping which can lead to it being harder to
-      ## generate presences, so we multiply the no. pixels by weight.
+        ## have a high degree of clumping which can lead to it being harder to
+        ## generate presences, so we multiply the no. pixels by weight.
         # plot(((exp(seq(0, 1, length.out = 100)))^-4)*200 ~ seq(0,1,  length.out = 100), xlab = "availRatio", ylab = "noStartPix")
         noStartPix <- round((exp(availRatio)^-5)*200*weight)
         noStartPix <- pmax(noStartPix, 7)   ## don't go lower than 7
@@ -590,95 +590,97 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         if (pixToConvert2 > 0) {
           sub_ras_filled <- sub_rasOut
 
-          ## no longer necessary with assignPresences.
-        if (FALSE) {
-          ## leave holes alone at first as we want to start from a
-          ## swiss-cheese pattern
-          # while (pixToConvert2 > 0) {   ## only needed when using buffers
-          sub_poly <- as.polygons(sub_rasOut) |> disagg()   ## when using buffers
-          ## don't fill holes first to keep a swiss-cheese pattern
-          sub_poly_filled <- fillHoles(sub_poly)
-          sub_ras_filled <- rasterize(sub_poly_filled, sub_ras)
-        }
-
-        ## calculate distance to patch from NAs
-        sub_ras_filledDist <- distance(sub_ras_filled)
-        ## to reverse to higher spreadProb closest to patches
-        ## first rescale to 0-1 by dividing by max, then subtract 1
-        ## and take abs (all -1s are converted to 0s) This is better than taking the inverse and recalling
-        spreadProb <- (sub_ras_filledDist/minmax(sub_ras_filledDist)["max",])
-        spreadProb <- spreadProb - 1
-        spreadProb <- subst(spreadProb, -1, 0)
-        spreadProb <- abs(spreadProb)
-        spreadProb <- mask(spreadProb, sub_ras)   ## only NAs here are respected by spread
-
-        weight <- 5    ## should ensure a good degree of clumping
-
-        suitablePixNo2 <- sum(spreadProb[] > 0, na.rm = TRUE)
-        availRatio <- suitablePixNo2/allPix
-        noStartPix <- round((exp(availRatio)^-5)*200*weight)
-        noStartPix <- pmax(noStartPix, 7)   ## don't go lower than 7
-        noStartPix <- pmin(suitablePixNo2, noStartPix)   ## can't have more than the number of suitable pixels.
-
-        sub_ras_filledBuffer <- assignPresences(assignProb = spreadProb,
-                                                landscape = sub_ras,
-                                                pixToConvert = pixToConvert2,
-                                                probWeight = weight,
-                                                numStartsDenom = pixToConvert2/10)
-        # terra::plot(sub_ras)
-        # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
-        # terra::plot(sub_ras_filledBuffer, col = "darkblue", add = TRUE)
-
-        ## buffer around patch -- this is creating square patterns when starting from a single pixel
-        # sub_ras_filledBuffer <- buffer(sub_ras_filled, width = unique(res(sub_poly_filled)),
-        # background = NA)
-        cellIDs <- which(as.vector(sub_ras_filledBuffer[]) == 1)
-
-        ## remove cellIDs that have been converted already -- shouldn't be necessary with assignPresences
-        ## but kept here in case we switch to buffer again.
-        vals <- sub_rasOut[cellIDs][]
-        cellIDs <- cellIDs[is.na(vals)]
-
-        ## this is no longer necessary with assignPresences
-        if (FALSE) {
-          ## check that we don't have too many cells. if we do, keep
-          ## pixels around larger patches
-          if (length(cellIDs) > pixToConvert2) {
-          sub_rasOut2 <- sub_rasOut
-          sub_rasOut2[cellIDs] <- 1L
-
-          sub_poly2 <- as.polygons(sub_rasOut2) |> disagg()
-          sub_poly2$area <- expanse(sub_poly2)
-          sub_rasOutArea <- rasterize(sub_poly2, sub_rasOut2, field = "area")
-
-          DT <- data.table(cells = 1:ncell(sub_rasOutArea), area = as.vector(sub_rasOutArea[]))
-          DT <- DT[complete.cases(DT)][cells %in% cellIDs]
-          DT <- DT[order(area, decreasing = TRUE)]
-          cellIDs <- DT[1:pixToConvert2, cells]
-        }
-
-        ## we may have exhausted areas to fill outside the holes
-        ## so we fill holes (preferentially the smaller ones)
-        if (length(cellIDs) < 1) {
-          sub_poly <- as.polygons(sub_rasOut) |> disagg()
-          sub_poly_holes <- fillHoles(sub_poly, inverse = TRUE) |> disagg()
-          sub_poly_holes$area <- expanse(sub_poly_holes)
-
-          sub_rasHolesArea <- rasterize(sub_poly_holes, sub_rasOut, field = "area")
-          ## there may be patches inside holes (like islands) that need
-          ## to be masked out, as they are ignored by fillHoles
-          sub_rasHolesArea <- mask(sub_rasHolesArea, sub_rasOut, inverse = TRUE)
-
-          DT <- data.table(cells = 1:ncell(sub_rasHolesArea), area = as.vector(sub_rasHolesArea[]))
-          DT <- DT[complete.cases(DT)]
-            setorder(DT, area, cells)
-
-            cellIDs <- DT[1:pixToConvert2, cells]
+          ## no longer necessary with assignPresences, bcs it creates a fragmented
+          ## pattern by itself
+          if (FALSE) {
+            ## leave holes alone at first as we want to start from a
+            ## swiss-cheese pattern
+            # while (pixToConvert2 > 0) {   ## only needed when using buffers
+            sub_poly <- as.polygons(sub_rasOut) |> disagg()   ## when using buffers
+            ## don't fill holes first to keep a swiss-cheese pattern
+            sub_poly_filled <- fillHoles(sub_poly)
+            sub_ras_filled <- rasterize(sub_poly_filled, sub_ras)
           }
-        }
 
-        sub_rasOut[cellIDs] <- 1L
-        # pixToConvert2 <- pixToConvert2 - length(cellIDs)  ## only needed for the while, when using buffers
+          ## calculate distance to patch from NAs
+          sub_ras_filledDist <- distance(sub_ras_filled)
+          ## to reverse to higher spreadProb closest to patches
+          ## first rescale to 0-1 by dividing by max, then subtract 1
+          ## and take abs (all -1s are converted to 0s) This is better than taking the inverse and recalling
+          spreadProb <- (sub_ras_filledDist/minmax(sub_ras_filledDist)["max",])
+          spreadProb <- spreadProb - 1
+          spreadProb <- subst(spreadProb, -1, 0)
+          spreadProb <- abs(spreadProb)
+          spreadProb <- mask(spreadProb, sub_ras)   ## only NAs here are respected by spread
+
+          weight <- 5    ## should ensure a good degree of clumping
+
+          suitablePixNo2 <- sum(spreadProb[] > 0, na.rm = TRUE)
+          availRatio <- suitablePixNo2/allPix
+          noStartPix <- round((exp(availRatio)^-5)*200*weight)
+          noStartPix <- pmax(noStartPix, 7)   ## don't go lower than 7
+          noStartPix <- pmin(suitablePixNo2, noStartPix)   ## can't have more than the number of suitable pixels.
+
+          sub_ras_filledBuffer <- assignPresences(assignProb = spreadProb,
+                                                  landscape = sub_ras,
+                                                  pixToConvert = pixToConvert2,
+                                                  probWeight = weight,
+                                                  numStartsDenom = pixToConvert2/10)
+          # terra::plot(sub_ras)
+          # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
+          # terra::plot(sub_ras_filledBuffer, col = "darkblue", add = TRUE)
+
+          ## buffer around patch -- this is creating square patterns when starting from a single pixel
+          # sub_ras_filledBuffer <- buffer(sub_ras_filled, width = unique(res(sub_poly_filled)),
+          # background = NA)
+          cellIDs <- which(as.vector(sub_ras_filledBuffer[]) == 1)
+
+          ## remove cellIDs that have been converted already -- shouldn't be necessary with assignPresences
+          ## but kept here in case we switch to buffer again.
+          vals <- sub_rasOut[cellIDs][]
+          cellIDs <- cellIDs[is.na(vals)]
+
+          ## this is no longer necessary with assignPresences
+          if (FALSE) {
+            ## check that we don't have too many cells. if we do, keep
+            ## pixels around larger patches
+            if (length(cellIDs) > pixToConvert2) {
+              sub_rasOut2 <- sub_rasOut
+              sub_rasOut2[cellIDs] <- 1L
+
+              sub_poly2 <- as.polygons(sub_rasOut2) |> disagg()
+              sub_poly2$area <- expanse(sub_poly2)
+              sub_rasOutArea <- rasterize(sub_poly2, sub_rasOut2, field = "area")
+
+              DT <- data.table(cells = 1:ncell(sub_rasOutArea), area = as.vector(sub_rasOutArea[]))
+              DT <- DT[complete.cases(DT)][cells %in% cellIDs]
+              DT <- DT[order(area, decreasing = TRUE)]
+              cellIDs <- DT[1:pixToConvert2, cells]
+            }
+
+            ## This will no longer happen with assignPresences
+            ## we may have exhausted areas to fill outside the holes
+            ## so we fill holes (preferentially the smaller ones)
+            if (length(cellIDs) < 1) {
+              sub_poly <- as.polygons(sub_rasOut) |> disagg()
+              sub_poly_holes <- fillHoles(sub_poly, inverse = TRUE) |> disagg()
+              sub_poly_holes$area <- expanse(sub_poly_holes)
+
+              sub_rasHolesArea <- rasterize(sub_poly_holes, sub_rasOut, field = "area")
+              ## there may be patches inside holes (like islands) that need
+              ## to be masked out, as they are ignored by fillHoles
+              sub_rasHolesArea <- mask(sub_rasHolesArea, sub_rasOut, inverse = TRUE)
+
+              DT <- data.table(cells = 1:ncell(sub_rasHolesArea), area = as.vector(sub_rasHolesArea[]))
+              DT <- DT[complete.cases(DT)]
+              setorder(DT, area, cells)
+
+              cellIDs <- DT[1:pixToConvert2, cells]
+            }
+          }
+
+          sub_rasOut[cellIDs] <- 1L
+          # pixToConvert2 <- pixToConvert2 - length(cellIDs)  ## only needed for the while, when using buffers
 
           # terra::plot(sub_ras)
           # terra::plot(sub_rasOut, col = "lightblue", add = TRUE)
