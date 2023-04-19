@@ -114,8 +114,9 @@ makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath
   writeVector(permafrostPoly, filename = tempFileVect)
 
   toDoIDs <- permafrostPoly$OBJECTID
+  tempSaveDir <- file.path(outPath, "tempFiles")
   if (doMissing) {
-    doneIDs <- list.files(file.path(outPath, "tempFiles"))
+    doneIDs <- list.files(tempSaveDir)
     doneIDs <- sub("permafrost_polyID", "", sub("\\.tif", "", doneIDs))
     toDoIDs <- setdiff(toDoIDs, doneIDs)
   }
@@ -125,12 +126,11 @@ makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath
     # id = c(99, 401, 27557, 200841, 206782), ## several different cases
     cores = cores,
     # cores = 1L, ## test
-    outFilename = .suffix(file.path(destinationPath, "permafrost.tif"), paste0("_", permafrostSAName)),
     dPath = destinationPath,
     ## further arguments passed to assignPermafrost:
     gridPoly = tempFileVect,
     ras = tempFileRas,
-    saveDir = file.path(outPath, "tempFiles"))
+    saveDir = tempSaveDir)
 
   dots <- list(...)
   notRecognised <- dots[!names(dots) %in% names(formals("assignPermafrost"))]
@@ -142,13 +142,27 @@ makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath
   dots <- dots[names(dots) %in% names(formals("assignPermafrost"))]
   argsList <- append(argsList, dots)
 
-  permafrostRas <- do.call(.assignPermafrostWrapper, argsList) |>
-    Cache(.cacheExtra = list(preDigest),
+  permafrostFiles <- do.call(.assignPermafrostWrapper, argsList) |>
+    Cache(.cacheExtra = list(preDigest, toDoIDs),
           userTags = c(cacheTags, "permafrost", permafrostSAName),
           omitArgs = c("userTags", "gridPoly", "ras", "cores", "saveDir",
-                       "outFilename", "dPath"))
+                       "dPath"))
 
   file.remove(tempFileRas, tempFileVect)
+
+  ## read rasters and merge
+  if (doMissing) {
+    ## re-make list with all files
+    permafrostRasFiles <- list.files(tempSaveDir, full.names = TRUE)
+  }
+  permafrostRasLs <- lapply(permafrostRasFiles, rast)
+  permafrostRas <- sprc(permafrostRasLs)
+  permafrostRas <- terra::merge(permafrostRas)
+
+  message("Permafrost layer done!")
+
+  outFilename <- .suffix(file.path(destinationPath, "permafrost.tif"), paste0("_", permafrostSAName))
+  writeRaster(permafrostRas, filename = outFilename, overwrite = TRUE)
 
   ## set NAs to 0s inside permafrost study area
   permafrostRas <- subst(permafrostRas, NA, 0)
@@ -254,13 +268,12 @@ makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 
 #' @param cores how many threads to use for parallelisation. If
 #'  `1`, no parallelisation occurs
 #' @param id passed to `assignPermafrost`
-#' @param outFilename name of output permafrost raster file
 #' @param dPath directory where output permafrost raster file will be written.
 #' @param ... further arguments passed to `assignPermafrost`, like `gridPoly`
 #'  `ras`, etc.
 #'
 #' @importFrom terra writeRaster sprc
-.assignPermafrostWrapper <- function(id, cores, outFilename, dPath, ...) {
+.assignPermafrostWrapper <- function(id, cores, dPath, ...) {
   if (cores > 1) {
     message("Creating permafrost layer with parallelisation")
     if (.Platform$OS.type == "unix") {
@@ -307,15 +320,6 @@ makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 
   }
   permafrostRasFiles <- do.call(applyFUN, applyFUNArgs)
 
-  ## read rasters and merge -- this should also be Cached.
-  permafrostRasLs <- lapply(permafrostRasFiles, rast)
-  permafrostRas <- sprc(permafrostRasLs)
-  permafrostRas <- terra::merge(permafrostRas)
-
-  message("Permafrost layer done!")
-
-  writeRaster(permafrostRas, filename = outFilename, overwrite = TRUE)
-  return(permafrostRas)
 }
 
 
