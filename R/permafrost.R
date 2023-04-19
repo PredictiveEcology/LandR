@@ -521,12 +521,12 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 
         ## April 14th 2023: Ceres could not find a robust way of varying weights with
         ## thermokarst while ensuring feasible computation times and sensible patterns
-        ## (small weights create very random patches with there availRatio is high, large
+        ## (small weights create very random patches when availRatio is high, large
         ## weights massively increase computation times when availRatio is <0.30 )
-        if (FALSE) {
-          ## thermokarst levels (also) affect degree of fragmentation
-          if (!is.null(thermokarstcol)) {
-            weight <- .thermWeight(thermLevel)
+        # if (FALSE) {
+        ## thermokarst levels (also) affect degree of fragmentation
+        if (!is.null(thermokarstcol)) {
+          weight <- .thermWeight(thermLevel)
       } else {
         weight <- 3 ## a good average level of aggregation
       }
@@ -536,12 +536,12 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
           ## starting pixels is high.
           ## So we bump the weights and keep a low no. starting pixels to increase
           ## aggregation. When availRatio is very low, increase number of starting pixels
-          if (availRatio > 0.5) {
-            weight <- weight*(1+availRatio*2)
-          }
-        } else {
-          weight <- 1  ## use probs as they are
+        if (availRatio > 0.5) {
+          weight <- weight*(1+availRatio*2)
         }
+        # } else {
+        #   weight <- 1  ## use probs as they are
+        # }
 
         ## the number of starting pixels varies with availRatio
         ## with a negative exponential decay. If weight is high, we'll
