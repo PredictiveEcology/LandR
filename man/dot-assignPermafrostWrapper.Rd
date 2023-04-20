@@ -4,15 +4,13 @@
 \alias{.assignPermafrostWrapper}
 \title{Wrapper for \code{assignPermafrost}}
 \usage{
-.assignPermafrostWrapper(id, cores, outFilename, dPath, ...)
+.assignPermafrostWrapper(id, cores, dPath, ...)
 }
 \arguments{
 \item{id}{passed to \code{assignPermafrost}}
 
 \item{cores}{how many threads to use for parallelisation. If
 \code{1}, no parallelisation occurs}
-
-\item{outFilename}{name of output permafrost raster file}
 
 \item{dPath}{directory where output permafrost raster file will be written.}
 

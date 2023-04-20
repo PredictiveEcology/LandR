@@ -12,6 +12,7 @@ makePermafrostRas(
   destinationPath = getOption("reproducible.destinationPath"),
   studyArea = NULL,
   .studyAreaName = NULL,
+  doMissing = FALSE,
   ...
 )
 }
@@ -31,6 +32,9 @@ location where the final permafrost layer will be saved.}
 \item{studyArea}{character. Passed to \code{reproducible::postProcess}.}
 
 \item{.studyAreaName}{character. A string to append to \code{filename2} in \code{postProcess}.}
+
+\item{doMissing}{logical. If TRUE, the permafrost layer will only be computed in
+polygon IDs missing from raster file names in \code{outPath}.}
 
 \item{...}{further arguments passed to \code{assignPermafrost}}
 }
