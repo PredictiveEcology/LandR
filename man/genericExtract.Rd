@@ -9,11 +9,11 @@ genericExtract(x, y, field = NULL, ...)
 \arguments{
 \item{x}{a raster or polygon object (\code{sp}, \code{raster} or \code{terra})}
 
-\item{y}{a points spatial object (\code{sp}, \code{sf}, or \code{terra})}
+\item{y}{a points or polygons spatial object (\code{sp}, \code{sf}, or \code{terra})}
 
 \item{field}{character. The field(s) to extract when x is a polygon.
 If \code{NULL}, all fields are extracted and returned. IDs of y are always
-returned (\code{ID} column) .}
+returned (\code{ID} column).}
 
 \item{...}{passed to \code{terra::extract}}
 }
@@ -24,4 +24,11 @@ y point IDs
 \description{
 Extracts points from raster layers using the
 original raster layer projection.
+}
+\details{
+If \code{x} and \code{y} are both polygons, \code{extract} often outputs \code{NA}
+due to misalignments (this can happen even when x == y), even after
+\code{snap(y, x)}. To circumvent this problem, \code{intersect} is used internally
+and, if the \code{extract} argument \code{fun} is passed, it is applied to values
+of \code{y} per polygon ID of \code{x}
 }
