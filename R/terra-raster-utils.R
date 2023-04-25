@@ -214,21 +214,29 @@ reclass <- function(ras, tab) {
 #'   original raster layer projection.
 #'
 #' @param x a raster or polygon object (`sp`, `raster` or `terra`)
-#' @param y a points spatial object (`sp`, `sf`, or `terra`)
+#' @param y a points or polygons spatial object (`sp`, `sf`, or `terra`)
 #' @param field character. The field(s) to extract when x is a polygon.
 #'   If `NULL`, all fields are extracted and returned. IDs of y are always
-#'   returned (`ID` column) .
+#'   returned (`ID` column).
 #' @param ... passed to `terra::extract`
 #'
 #' @return a data.table with extracted values and an `ID` column of
 #'   y point IDs
 #'
-#' @importFrom terra rast vect project extract
+#' @details
+#'  If `x` and `y` are both polygons, `extract` often outputs `NA`
+#'  due to misalignments (this can happen even when x == y), even after
+#'  `snap(y, x)`. To circumvent this problem, `intersect` is used internally
+#'  and, if the `extract` argument `fun` is passed, it is applied to values
+#'  of `y` per polygon ID of `x`
+#'
+#'
+#' @importFrom terra rast vect project extract is.points intersect
 #' @importFrom data.table as.data.table
 #' @export
 genericExtract <- function(x, y, field = NULL, ...) {
-  if (inherits(x, c("SpatVector", "Spatial", "sf", "sfc", "POLYGON"))) {
-    if (inherits(x, c("Spatial", "sf", "sfc", "POLYGON"))) {
+  if (inherits(x, c("SpatVector", "Spatial", "sf", "sfc"))) {
+    if (!is(y, c("SpatVector"))) {
       x <- vect(x)
     }
   } else {
@@ -241,8 +249,8 @@ genericExtract <- function(x, y, field = NULL, ...) {
     }
   }
 
-  if (!inherits(y, c("SpatVector", "Spatial", "sf", "sfc", "POINT"))) {
-    stop("y must be `terra`/`raster`/ `sf` points")
+  if (!inherits(y, c("SpatVector", "Spatial", "sf", "sfc"))) {
+    stop("y must be `terra`/`raster`/ `sf` points/polygons")
   }
   if (!is(y, c("SpatVector"))) {
     y <- vect(y)
@@ -253,7 +261,26 @@ genericExtract <- function(x, y, field = NULL, ...) {
   }
 
   if (is(x, "SpatVector")) {
-    out <- terra::extract(x = x, y = y)
+    if (is.points(y)) {
+      out <- terra::extract(x = x, y = y)
+    } else {
+      ## Even when polygons should be the same, there may be small
+      ## misalignments that generate NAs (even after snapping)
+      names(y) <- toupper(names(y))
+      if (!"ID" %in% names(y)) {
+        y$ID <- 1:length(y)
+      }
+      out <- terra::intersect(x = x, y = y)
+      out <- as.data.table(out)
+
+      dots <- list(...)
+      if ("fun" %in% names(dots)) {
+        if (is.null(field)) {
+          field <- names(x)
+        }
+        out <- out[, lapply(.SD, get(dots$fun), ...), .SDcols = field, by = "ID"]
+      }
+    }
   } else {
     out <- terra::extract(x = x, y = y, ...)
   }
@@ -264,6 +291,8 @@ genericExtract <- function(x, y, field = NULL, ...) {
       IDcol <- names(out)[1]
       out <- out[, .SD, .SDcols = c(IDcol, field)]
       setnames(out, IDcol, "ID")
+    } else {
+      stop(paste(field, "not found in x"))
     }
   }
 
