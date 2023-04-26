@@ -316,7 +316,7 @@ genericExtract <- function(x, y, field = NULL, ...) {
 #' @importFrom ggplot2 geom_sf coord_sf scale_fill_viridis_d facet_wrap labs aes
 #' @importFrom terra nlyr rast vect ncell is.factor
 #' @export
-plotSpatial <- function(x, plotTitle, field = NULL) {
+plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
 
   if (inherits(x, c("Raster", "SpatRaster"))) {
     plotRaster <- TRUE
@@ -328,11 +328,19 @@ plotSpatial <- function(x, plotTitle, field = NULL) {
 
   if (inherits(x, c("Raster"))) {
     x <- rast(x)
+    if (is.null(limits)) {
+      limits <- range(as.vector(x[]))
+    }
   }
 
   if (inherits(x, "SpatVector")) {
     x <- st_as_sf(x)
+    if (is.null(limits) & !is.null(field)) {
+      limits <- range(as.vector(x[, field]))
+    }
   }
+
+
 
   if (plotRaster) {
     if (!requireNamespace("rasterVis")) {
@@ -354,11 +362,11 @@ plotSpatial <- function(x, plotTitle, field = NULL) {
 
       plot1 <- plot1 +
         geom_raster(aes(fill = as.character(value))) +
-        scale_fill_manual(values = cols, guide = "legend")
+        scale_fill_manual(values = cols, guide = "legend", limits = limits)
     } else {
       plot1 <- plot1 +
         geom_raster(aes(fill = value)) +
-        scale_fill_viridis_c(option = "cividis", na.value = "grey")
+        scale_fill_viridis_c(option = "cividis", na.value = "grey", limits = limits)
     }
     plot1 <- plot1 + coord_equal() +
       theme_classic()
@@ -377,10 +385,10 @@ plotSpatial <- function(x, plotTitle, field = NULL) {
         geom_sf(data = x, aes(fill = !!sym(field)))
        if (inherits(x[[field]], c("character", "factor"))) {
          plot1 <- plot1 +
-           scale_fill_viridis_d(option = "cividis", na.value = "grey")
+           scale_fill_viridis_d(option = "cividis", na.value = "grey", limits = limits)
        }  else {
          plot1 <- plot1 +
-           scale_fill_viridis_c(option = "cividis", na.value = "grey")
+           scale_fill_viridis_c(option = "cividis", na.value = "grey", limits = limits)
        }
     }
     plot1 <- plot1 +
