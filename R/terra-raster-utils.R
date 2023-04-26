@@ -374,8 +374,14 @@ plotSpatial <- function(x, plotTitle, field = NULL) {
         geom_sf(data = x)
     } else {
       plot1 <- plot1 +
-        geom_sf(data = x, aes(fill = !!sym(field))) +
-        scale_fill_viridis_d(option = "cividis", na.value = "grey")
+        geom_sf(data = x, aes(fill = !!sym(field)))
+       if (inherits(x[[field]], c("character", "factor"))) {
+         plot1 <- plot1 +
+           scale_fill_viridis_d(option = "cividis", na.value = "grey")
+       }  else {
+         plot1 <- plot1 +
+           scale_fill_viridis_c(option = "cividis", na.value = "grey")
+       }
     }
     plot1 <- plot1 +
       coord_sf()
