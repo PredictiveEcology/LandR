@@ -1394,7 +1394,7 @@ columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 #' An expanded `cohortData` `data.table` with a new `pixelIndex` column.
 #'
 #' @export
-#' @importFrom raster getValues ncell
+#' @importFrom terra ncell
 addPixels2CohortData <- function(cohortData, pixelGroupMap,
                                  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
                                  doAssertion = getOption("LandR.assertions", TRUE)) {
@@ -1404,7 +1404,7 @@ addPixels2CohortData <- function(cohortData, pixelGroupMap,
   )
 
   pixelGroupTable <- na.omit(data.table(
-    pixelGroup = getValues(pixelGroupMap),
+    pixelGroup = as.vector(pixelGroupMap[]),
     pixelIndex = 1:ncell(pixelGroupMap)
   ))
   pixelCohortData <- cohortData[pixelGroupTable,

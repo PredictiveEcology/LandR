@@ -315,11 +315,11 @@ assertPixelCohortData <- function(pixelCohortData, pixelGroupMap,
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     uniquePixelsInCohorts <- pixelGroupMap[][unique(pixelCohortData$pixelIndex)]
-    pixelsOnMap <- sum(!is.na(pixelGroupMap[]), na.rm = TRUE)
+    pixelsOnMap <- sum(!is.na(as.vector(pixelGroupMap[])), na.rm = TRUE)
     lenUniquePixelsInCohorts <- length(unique(pixelCohortData$pixelIndex))
-    lenBurnedPixels <- sum(pixelGroupMap[] == 0, na.rm = TRUE) # 30927
+    lenBurnedPixels <- sum(as.vector(pixelGroupMap[]) == 0, na.rm = TRUE) # 30927
     pixelsRegeneratedOnZeros <- sum(uniquePixelsInCohorts == 0)
-    allPixelsNotInCohortData <- pixelGroupMap[][-unique(pixelCohortData$pixelIndex)]
+    allPixelsNotInCohortData <- as.vector(pixelGroupMap[])[-unique(pixelCohortData$pixelIndex)]
     numPixelsNoRegen <- sum(allPixelsNotInCohortData == 0, na.rm = TRUE)
     tableB <- sum(!is.na(allPixelsNotInCohortData)) # 25166
 
@@ -328,7 +328,8 @@ assertPixelCohortData <- function(pixelCohortData, pixelGroupMap,
                        lenUniquePixelsInCohorts)
 
     uniqueAllPixelsNotInCohortData <- unique(allPixelsNotInCohortData)
-    test1 <- all(uniqueAllPixelsNotInCohortData %in% c(NA, 0L))
+    ## after converting to `terra` NAs sometimes appear as NaNs
+    test1 <- all(uniqueAllPixelsNotInCohortData %in% c(NA, NaN, 0L))
     if (!test1 | !test2 | !test3) {
       stop("Every value on pixelGroupMap >0 must have a pixelIndex in pixelCohortData.\n",
            "This test is failing, i.e., there are some pixelGroups in pixelGroupMap",
