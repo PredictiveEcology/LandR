@@ -42,7 +42,7 @@ Imports:
     quickPlot,
     raster,
     RColorBrewer,
-    reproducible (>= 1.2.16.9018),
+    reproducible (>= 2.0.2),
     sf,
     sp,
     SpaDES.tools (>= 1.0.3),
