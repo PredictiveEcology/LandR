@@ -4,7 +4,7 @@
 \alias{plotSpatial}
 \title{PLOT RASTER FUNCTION}
 \usage{
-plotSpatial(x, plotTitle, field = NULL)
+plotSpatial(x, plotTitle, limits = NULL, field = NULL)
 }
 \arguments{
 \item{x}{\code{SpatRaster}, \code{RasterLayer}, \code{SpatVector} or \code{sf} object}

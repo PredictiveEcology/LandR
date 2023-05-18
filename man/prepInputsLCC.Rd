@@ -31,23 +31,17 @@ If not in same CRS, then it will be \code{spTransform}ed to
 CRS of \code{x} before masking. Currently, this function will not reproject the
 \code{x}. Optional in \code{postProcess}.}
 
-\item{rasterToMatch}{Template \verb{Raster*} object used for cropping (so extent should be
-the extent of desired outcome) and reprojecting (including changing the
-resolution and projection).
-See details in \code{\link[reproducible:postProcess]{postProcess()}}.}
+\item{rasterToMatch}{Template \verb{Raster*} object passed to the \code{to} argument of
+\code{\link[reproducible:projectTo]{projectTo()}}, thus will changing the
+resolution and projection of \code{x}.
+See details in \code{\link[reproducible:postProcessTo]{postProcessTo()}}.}
 
 \item{method}{passed to \code{terra::intersect} or \code{raster::intersect},
 and \code{reproducible::prepInputs}}
 
-\item{filename2}{\code{filename2} is optional, and is either
-NULL (no writing of outputs to disk), or several options
-for writing the object to disk. If
-\code{TRUE} (the default), it will give it a file name determined by
-\code{.prefix(basename(filename1), prefix)}. If
-a character string, it will use this as its file name. See
-\code{\link[reproducible:determineFilename]{determineFilename()}}.}
+\item{filename2}{File name passed to \code{\link[reproducible:writeTo]{writeTo()}}.}
 
-\item{...}{Passed to \code{raster::crop}}
+\item{...}{Passed into \code{\link[reproducible:writeTo]{writeTo()}}}
 }
 \description{
 A wrapper around \code{prepInputs} for the Canadian Land Cover Classification product(s).
