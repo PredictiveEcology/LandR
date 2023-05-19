@@ -29,7 +29,7 @@ library(reproducible)
 
 options("reproducible.useTerra" = TRUE, "reproducible.rasterRead" = "terra::rast")
 
-randomPoly <- vect(randomStudyArea())
+randomPoly <- randomStudyArea()
 randomPoly
 ras2match <- rast(res = 10, ext = ext(randomPoly), crs = crs(randomPoly))
 ras2match <- rasterize(randomPoly, ras2match)
