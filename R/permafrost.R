@@ -155,9 +155,8 @@ makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath
     ## re-make list with all files
     permafrostRasFiles <- list.files(tempSaveDir, full.names = TRUE)
   }
-  permafrostRasLs <- lapply(permafrostRasFiles, rast)
-  permafrostRas <- sprc(permafrostRasLs)
-  permafrostRas <- terra::merge(permafrostRas)
+
+  permafrostRas <- Cache(.mergeRasterFiles(rasFileLs = permafrostRasFiles))
 
   message("Permafrost layer done!")
 
