@@ -466,7 +466,7 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
 
 #' @export
 #' @importFrom map mapAdd maps
-#' @importFrom raster addLayer dropLayer maxValue minValue stack unstack
+#' @importFrom terra rast minmax app
 #' @rdname prepSpeciesLayers
 
 ## TODO: add terra compatible methods.
@@ -520,27 +520,26 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   FRIlayerNamesFiles <- paste0(FRIlayerNames, "_fri_", sA, "_", res, "m.tif")
   FRIlccname <- paste0("lcc_fri_", sA, "_", res, "m.tif")
 
-  sppLayers <- raster::stack(lapply(FRIlayerNamesFiles, function(f) {
+  sppLayers <- rast(lapply(FRIlayerNamesFiles, function(f) {
     prepInputs(url = url, studyArea = studyArea, rasterToMatch = rasterToMatch,
                destinationPath = destinationPath, targetFile = f, filename2 = NULL,
-               alsoExtract = NA, method = "ngb")
+               alsoExtract = NA, method = "near")
   }))
   names(sppLayers) <- FRIlayerNames
 
-  if (!all(raster::minValue(sppLayers) >= 0)) stop("problem with minValue of species layers stack (< 0)")
-  if (!all(raster::maxValue(sppLayers) <= 100)) stop("problem with maxValue of species layers stack (> 100)")
+  if (!all(minmax(sppLayers)[1,] >= 0)) stop("problem with minValue of species layers stack (< 0)")
+  if (!all(minmax(sppLayers)[2,] <= 100)) stop("problem with maxValue of species layers stack (> 100)")
 
   ## merge species layers (currently only Popu; TODO: pine?)
   idsPopu <- grep("Popu", FRIlayerNames)
-  mergedPopu <- calc(stack(sppLayers[[idsPopu]]), sum, na.rm = TRUE)
-
-  sppLayers <- dropLayer(sppLayers, idsPopu)
+  mergedPopu <- app(c(sppLayers[[idsPopu]]), sum, na.rm = TRUE)
+  sppLayers <- sppLayers[[!names(sppLayers) %in% names(sppLayers)[idsPopu]]]
   sppLayers[["Popu_sp"]] <- mergedPopu ## NOTE: addLayer sporadically fails to add layer, w/o warning
 
   idThuj <- grep("Thuj_spp", names(sppLayers))
   names(sppLayers[[idThuj]]) <- "Thuj_sp"
 
-  stack(sppLayers) ## ensure it's still a stack
+  sppLayers
 }
 
 #' @template destinationPath
