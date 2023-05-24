@@ -74,7 +74,7 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
   message(blue("Make initial ecoregionGroups ", Sys.time()))
 
   if (!isTRUE(.compareRas(ecoregionRst, rstLCCAdj,
-                          res = TRUE, orig = TRUE, stopOnError = FALSE)))
+                          res = TRUE, stopOnError = FALSE)))
     stop("problem with rasters ecoregionRst and rstLCCAdj -- they don't have same metadata")
 
   ecoregionFiles <- Cache(ecoregionProducer,
