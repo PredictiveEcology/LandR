@@ -78,7 +78,7 @@ Remotes:
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/quickPlot@development,
-    PredictiveEcology/reproducible@development
+    PredictiveEcology/reproducible@development,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
 Language: en-CA
