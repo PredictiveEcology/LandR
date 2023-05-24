@@ -452,7 +452,7 @@ defaultClimateDataProj <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI"),
     MATfiles <- sub("bioclim.zip", "MAT.tif", basename(bioClimURLs))
     userTags <- lapply(MATfiles, function(x) c(userTags, x))
     MATProj <- Map(f = prepInputs,
-                   archive = bioClimURLs,
+                   archive = basename(bioClimURLs),
                    targetFile = MATfiles,
                    userTags = userTags,
                    url = bioClimURLs,
@@ -475,7 +475,7 @@ defaultClimateDataProj <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI"),
     PPT_smfiles <- sub("bioclim.zip", "PPT_sm.tif", basename(bioClimURLs))
     userTags <- lapply(PPT_smfiles, function(x) c(userTags, x))
     PPT_smProj <- Map(f = prepInputs,
-                      archive = bioClimURLs,
+                      archive = basename(bioClimURLs),
                       targetFile = PPT_smfiles,
                       userTags = userTags,
                       url = bioClimURLs,
@@ -498,7 +498,7 @@ defaultClimateDataProj <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI"),
     PPT_wtfiles <- sub("bioclim.zip", "PPT_wt.tif", basename(bioClimURLs))
     userTags <- lapply(PPT_wtfiles, function(x) c(userTags, x))
     PPT_wtProj <- Map(f = prepInputs,
-                      archive = bioClimURLs,
+                      archive = basename(bioClimURLs),
                       targetFile = PPT_wtfiles,
                       userTags = userTags,
                       url = bioClimURLs,
@@ -521,7 +521,7 @@ defaultClimateDataProj <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI"),
     CMIfiles <- sub("bioclim.zip", "CMI.tif", basename(bioClimURLs))
     userTags <- lapply(CMIfiles, function(x) c(userTags, x))
     CMIProj <- Map(f = prepInputs,
-                   archive = bioClimURLs,
+                   archive = basename(bioClimURLs),
                    targetFile = CMIfiles,
                    userTags = userTags,
                    url = bioClimURLs,
