@@ -2,7 +2,6 @@ utils::globalVariables(c(
   "variable", "value"
 ))
 
-
 ## TODO: Ceres: these functions can be improved by using options(reproducible...),
 ## but for now I didn't want to assume those options were directly affecting
 ## these objects
@@ -300,15 +299,18 @@ genericExtract <- function(x, y, field = NULL, ...) {
 }
 
 
-
 #' PLOT RASTER FUNCTION
 #'
 #' A function that creates a `ggplot` of a raster
 #'   layer. Can be used with `SpaDES.core::Plots`
 #'
 #' @param x `SpatRaster`, `RasterLayer`, `SpatVector` or `sf` object
+#'
 #' @param plotTitle character. A title for the plot passed to
 #'   `ggplot::labs(title = plotTitle)`.
+#'
+#' @param limits TODO
+#'
 #' @param field character. If x is `sf` or `SpatVector`, a field
 #'   to plot.
 #'
@@ -339,8 +341,6 @@ plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
       limits <- range(as.vector(x[, field]))
     }
   }
-
-
 
   if (plotRaster) {
     if (!requireNamespace("rasterVis")) {

@@ -45,7 +45,7 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
     if (!inherits(mask, c("RasterLayer", "SpatRaster"))) {
       stop("mask must be a raster layer")
     }
-    LandR:::.compareRas(LandCoverClassifiedMap, mask)
+    .compareRas(LandCoverClassifiedMap, mask)
   }
 
   oldClass <- minFn(LandCoverClassifiedMap):maxFn(LandCoverClassifiedMap)
@@ -60,7 +60,7 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 
   cols <- colorRampPalette(c("blue", "red"))(2)
   if (is(rstFlammable, "SpatRaster"))
-    coltab(rstFlammable, layer=1) <- cols
+    coltab(rstFlammable, layer = 1) <- cols
   else
     setColors(rstFlammable, n = 2) <- cols
 

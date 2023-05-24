@@ -12,6 +12,8 @@ plotSpatial(x, plotTitle, limits = NULL, field = NULL)
 \item{plotTitle}{character. A title for the plot passed to
 \code{ggplot::labs(title = plotTitle)}.}
 
+\item{limits}{TODO}
+
 \item{field}{character. If x is \code{sf} or \code{SpatVector}, a field
 to plot.}
 }
