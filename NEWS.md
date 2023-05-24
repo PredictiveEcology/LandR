@@ -2,6 +2,11 @@ bug reports <https://github.com/PredictiveEcology/LandR/issues>
 
 version 1.1.0
 =============
+* further adaptations to `terra` package
+* fix bug in `prepInputLCC`: `orig` argument no longer accepted by `terra::compareGeom`
+
+version 1.1.0
+=============
 * move LandWeb-specific functions to `LandWebUtils` package (#86)
 * `Colors` -- new function to help with `terra` migration.
 * `prepInputsFireYear` can now handle `rasterToMatch` that is a `SpatRaster`
