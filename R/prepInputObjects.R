@@ -570,20 +570,20 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #' options("reproducible.useTerra" = TRUE, "reproducible.rasterRead" = "terra::rast")
 #'
 #' randomPoly <- randomStudyArea()
-#' randomPoly
 #' ras2match <- rast(res = 10, ext = ext(randomPoly), crs = crs(randomPoly))
 #' ras2match <- rasterize(randomPoly, ras2match)
 #' tempDir <- tempdir()
 #' cacheRepo <- file.path(tempDir, "cache")
 #'
 #' ## ideally, get the firePerimenters layer first
-#' firePerimeters <- Cache(prepInputsFireYear,
-#'                         url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
-#'                         "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-#'                         destinationPath = tempDir,
-#'                         rasterToMatch = ras2match)
-#'
-#'
+#' firePerimeters <- Cache({
+#'   prepInputsFireYear(
+#'     url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
+#'                  "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
+#'     destinationPath = tempDir,
+#'     rasterToMatch = ras2match
+#'   )
+#' })
 prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950) {
   dots <- list(...)
   a <- if (is.null(dots$fun)) {
