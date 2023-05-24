@@ -279,10 +279,14 @@ makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 
     if (.Platform$OS.type == "unix") {
       cl <- parallel::makeForkCluster(cores)
     } else {
-      if (!requireNamespace("parallelly")) {
+      if (!requireNamespace("parallelly", quietly = TRUE)) {
         stop("install 'parallelly'")
       }
       cl <- parallelly::makeClusterPSOCK(cores, rscript_libs = .libPaths())
+    }
+
+    if (!requireNamespace("RhpcBLASctl", quietly = TRUE)) {
+      stop("install 'RhpcBLASctl'")
     }
 
     on.exit(parallel::stopCluster(cl), add = TRUE)
@@ -374,11 +378,11 @@ makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 
 #'  to permafrost ('pixToConvert' below) is then calculated as:
 #'  pixToConvert = no. of suitable pixels \* (`gridPoly[[Permafrost]]` \* (100-thawedPercent))
 #'
-#' @importFrom terra rast vect unwrap writeRaster as.polygons
-#' @importFrom terra mask crop disagg distance expanse fillHoles buffer
-#' @importFrom data.table as.data.table setorder
 #' @importFrom crayon cyan
+#' @importFrom data.table as.data.table setorder
 #' @importFrom SpaDES.tools neutralLandscapeMap
+#' @importFrom terra as.polygons buffer crop disagg distance expanse fillHoles
+#' @importFrom terra mask minmax rast vect unwrap writeRaster
 #' @export
 assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
                              id = NULL, permafrostcol = "Permafrost", thermokarstcol = NULL,
@@ -441,7 +445,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
       ## remove "thermokarsted" % amount
       ## because % thermokarst is relative to % PPC (gridPoly[[permafrostcol]])
       ## we cannot simply subtract
-      permpercent <- permpercent * ((100-thermPercent)/100)
+      permpercent <- permpercent * ((100 - thermPercent) / 100)
     }
 
     ## How many suitable pixels are there?
@@ -509,7 +513,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         sub_rasDist <- distance(sub_rasDist)   ## compute distance from pathes (NAs) to edges
 
         ## make "probabilities" by scaling 0-1
-        spreadProb <- sub_rasDist/minmax(sub_rasDist)["max",]
+        spreadProb <- sub_rasDist / minmax(sub_rasDist)["max",]
         spreadProb <- mask(spreadProb, sub_ras2)   ## only NAs here are respected by spread
         # terra::plot(spreadProb, col = viridis::inferno(100))
 
@@ -517,7 +521,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         patchSizes[, V1 := as.integer(V1)]
         sub_rasPS <- rasterize(sub_poly, sub_ras, field = "ID")
         sub_rasPS <- classify(sub_rasPS, patchSizes)
-        sub_rasPS <- sub_rasPS/minmax(sub_rasPS)["max",]   ## normalize
+        sub_rasPS <- sub_rasPS / minmax(sub_rasPS)["max",]   ## normalize
         spreadProb <- spreadProb * sub_rasPS
 
         suitablePixNo2 <- sum(sub_ras2[] == 1, na.rm = TRUE)
