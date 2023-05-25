@@ -13,8 +13,8 @@
 several modules, and subset data layers from different time periods according to 
 a year. These functions may only be here temporarily.
 * new `raster`/`terra` utility and plotting functions
-* new functions related to producing default permafrost input data for modules. These 
-functions may only be here temporarily.
+* new functions related to producing default permafrost input data for modules.
+  These functions may only be here temporarily.
 
 # LandR 1.0.9
 
