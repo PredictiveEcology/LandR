@@ -360,7 +360,7 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
 #' @export
 #' @importFrom data.table data.table rbindlist
 #' @importFrom map mapAdd maps
-#' @importFrom raster crop extend maxValue minValue origin origin<- stack unstack
+#' @importFrom raster crop dropLayer extend maxValue minValue origin origin<- stack unstack
 #' @rdname prepSpeciesLayers
 #'
 ## TODO: add terra compatible methods.
@@ -414,7 +414,7 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
 #' @export
 #' @importFrom data.table data.table rbindlist
 #' @importFrom map mapAdd maps
-#' @importFrom raster crop extend maxValue minValue origin origin<- stack unstack
+#' @importFrom raster crop dropLayer extend maxValue minValue origin origin<- stack unstack
 #' @rdname prepSpeciesLayers
 #'
 ## TODO: add terra compatible methods.
