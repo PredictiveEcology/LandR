@@ -24,8 +24,7 @@ cohort information on burnt pixels and the following (optional) columns:
 \code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}.}
 
 \item{postFirePixelCohortData}{an empty \code{cohortData}-like table with columns:
-\code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB} removed;
-and \code{pixelIndex} added.}
+\code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB} removed; and \code{pixelIndex} added.}
 
 \item{postFireRegenSummary}{a \code{data.table} summarizing for which species
 serotiny/resprouting were activated and in how many pixels, for each year.
@@ -37,9 +36,9 @@ Only necessary if \code{calibrate = TRUE}.}
 of establishment, given a site's light conditions (\code{X0}-\code{X5}) for each level
 of a species shade tolerance (\code{1}-\code{5}).}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{species}-{ecoregion}-specific species
-trait values. Ecoregion refers to "ecolocation", a categorical variable grouping sites with similar
-biophysical characteristics. The table should have at least the following columns: \code{speciesCode} and
+\item{speciesEcoregion}{A \code{data.table} with \code{species}-\code{ecoregion}-specific species trait values.
+Ecoregion refers to "ecolocation", a categorical variable grouping sites with similar biophysical
+characteristics. The table should have at least the following columns: \code{speciesCode} and
 \code{ecoregionGroup}, character representation of species and ecoregion groups respectively,
 \code{maxB} the maximum biomass for the species in a given 'ecoregion', \code{maxANPP} the maximum
 aboveground net primary productivity and \code{SEP} the species establishment probability.}

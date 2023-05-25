@@ -24,8 +24,8 @@ speciesInStudyArea(studyArea, url = NULL, speciesPresentRas = NULL)
 \item{minPctCover}{An integer indicating what percent cover a species must have
 in a pixel to be considered present in that pixel.}
 
-\item{studyArea}{A \code{SpatialPolygons*} object used as the principle study region,
-passed to \code{\link[reproducible]{prepInputs}}.}
+\item{studyArea}{A \verb{SpatialPolygons*} object used as the principle study region,
+passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
 \item{url}{A url to get a \code{speciesPresence} raster e.g., from \code{peciesPresentFromKNN}}
 

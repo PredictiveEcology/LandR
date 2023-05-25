@@ -792,17 +792,18 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 }
 
 
-#' Assess non-forested pixels based on species cover data
-#' and land-cover
+#' Assess non-forested pixels based on species cover data and land-cover
 #'
 #' @template speciesLayers
-#' @param omitNonTreedPixels logical. Should pixels with
-#'   classes in \code{forestedLCCClasses} be included as non-forested?
-#' @param forestedLCCClasses vector of non-forested land-cover classes in
-#'   \code{rstLCC}
+#'
+#' @param omitNonTreedPixels logical. Should pixels with classes in `forestedLCCClasses` be
+#'                           included as non-forested?
+#'
+#' @param forestedLCCClasses vector of non-forested land-cover classes in `rstLCC`
+#'
 #' @template rstLCC
 #'
-#' @return a logical vector of length \code{ncell(rstLCC)}
+#' @return a logical vector of length `ncell(rstLCC)`
 #'   where `TRUE` indicates non-forested pixels where there is no
 #'   species cover data, or a non-forested land-cover class
 #'

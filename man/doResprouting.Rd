@@ -24,8 +24,7 @@ cohort information on burnt pixels and the following (optional) columns:
 \code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}.}
 
 \item{postFirePixelCohortData}{an empty \code{cohortData}-like table with columns:
-\code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB} removed;
-and \code{pixelIndex} added.}
+\code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB} removed; and \code{pixelIndex} added.}
 
 \item{postFireRegenSummary}{a data.table summarizing for which species serotiny/resprouting were
 activated and in how many pixels, for each year. Only necessary if \code{calibrate = TRUE}.}
