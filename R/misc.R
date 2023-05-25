@@ -173,15 +173,15 @@ scheduleDisturbance <- function(disturbanceLayer, currentYear) {
 
 #' Search/return for current data layers
 #'
-#' @param dataLayers a named list/stack of SpatRasters with
+#' @param dataLayers a named list/stack of `SpatRasters` with
 #'   data layers to be searched (i.e., data layers for multiple simulation
-#'   periods). Names *must* be suffixed with "*_<year>", where
+#'   periods). Names *must* be suffixed with `"*_<year>"`, where
 #'   "<year>" is the *first year* of the data period to use. For instance,
-#'   if layers available are "temperature_2021" and "temperature_2041"
-#'   and `currentYear` is 2025, "temperature_2021" will be used.
-#'   If `currentYear` is 2050, "temperature_2041" will be used.
+#'   if layers available are `"temperature_2021"` and `"temperature_2041"`
+#'   and `currentYear` is 2025, `"temperature_2021"` will be used.
+#'   If `currentYear` is 2050, `"temperature_2041"` will be used.
 #'   If `currentYear` is 2020, the function will error as there are no
-#'   climate layers availabe for periods before 2021.
+#'   climate layers available for periods before 2021.
 #' @param currentYear the year for which we want find climate data for.
 #'
 #' @return a filtered list of data layers

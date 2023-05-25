@@ -39,9 +39,8 @@ polygon IDs missing from raster file names in \code{outPath}.}
 \item{...}{further arguments passed to \code{assignPermafrost}}
 }
 \value{
-a \code{SpatRaster} of permafrost presences (1) and absences (0) with the
-same properties as the land-cover and wetland rasters, cropped and masked
-to \code{studyArea}.
+a \code{SpatRaster} of permafrost presences (1) and absences (0) with the same
+properties as the land-cover and wetland rasters, cropped and masked to \code{studyArea}.
 }
 \description{
 Obtains permafrost peatland complex \% data from Gibson et al. (2021),
@@ -52,9 +51,18 @@ See \code{?makeSuitForPerm} and \code{?assignPermafrost} for details on how this
 is achieved.
 }
 \references{
-Gibson, C., Morse, P. D., Kelly, J. M., Turetsky, M. R., Baltzer, J. L., Gingras-Hill, T., & Kokelj, S. V. (2020). Thermokarst Mapping Collective: Protocol for organic permafrost terrain and preliminary inventory from the Taiga Plains test area, Northwest Territories (NWT Open Report 2020-010, p. 29). Northwest Territories Geological Survey.
+Gibson, C., Morse, P. D., Kelly, J. M., Turetsky, M. R., Baltzer, J. L.,
+Gingras-Hill, T., & Kokelj, S. V. (2020). Thermokarst Mapping Collective:
+Protocol for organic permafrost terrain and preliminary inventory from the Taiga
+Plains test area, Northwest Territories (NWT Open Report 2020-010, p. 29).
+Northwest Territories Geological Survey.
 
-Hermosilla, T., Bastyr, A., Coops, N. C., White, J. C., & Wulder, M. A. (2022). Mapping the presence and distribution of tree species in Canada’s forested ecosystems. Remote Sensing of Environment, 282, 113276. https://doi.org/10.1016/j.rse.2022.113276
+Hermosilla, T., Bastyr, A., Coops, N. C., White, J. C., & Wulder, M. A. (2022).
+Mapping the presence and distribution of tree species in Canada's forested ecosystems.
+Remote Sensing of Environment, 282, 113276. https://doi.org/10.1016/j.rse.2022.113276
 
-Wulder, M., Li, Z., Campbell, E., White, J., Hobart, G., Hermosilla, T., & Coops, N. (2018). A National Assessment of Wetland Status and Trends for Canada’s Forested Ecosystems Using 33 Years of Earth Observation Satellite Data. Remote Sensing, 10(10), 1623. https://doi.org/10.3390/rs10101623
+Wulder, M., Li, Z., Campbell, E., White, J., Hobart, G., Hermosilla, T., &
+Coops, N. (2018). A National Assessment of Wetland Status and Trends for Canada's
+Forested Ecosystems Using 33 Years of Earth Observation Satellite Data.
+Remote Sensing, 10(10), 1623. https://doi.org/10.3390/rs10101623
 }

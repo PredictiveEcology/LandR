@@ -36,15 +36,15 @@ a \code{species} table from a LANDIS project.}
 \item{dispersalFn}{An expression that can take a "dis" argument. See details.
 Default is "Ward" (temporarily unused, as it is hard coded inside Rcpp function)}
 
-\item{b}{Landis Ward seed dispersal calibration coefficient (set to 0.01 in Landis)}
+\item{b}{LANDIS Ward seed dispersal calibration coefficient (set to 0.01 in LANDIS)}
 
-\item{k}{Landis Ward seed dispersal the probability that seed will disperse within
-the effective distance (eg., 0.95)}
+\item{k}{LANDIS Ward seed dispersal the probability that seed will disperse within
+the effective distance (e.g., 0.95)}
 
-\item{plot.it}{Deprecated. If TRUE, then plot the raster at every interaction, so one can watch the
-LANDISDisp event grow.}
+\item{plot.it}{Deprecated. If TRUE, then plot the raster at every interaction,
+so one can watch the \code{LANDISDisp} event grow.}
 
-\item{successionTimestep}{integer. The time in timeunits between succession (i.e., dispersal) events.}
+\item{successionTimestep}{integer. The time in time units between succession (i.e., dispersal) events.}
 
 \item{verbose}{Numeric. \code{0} is not verbose, with increasing numbers indicating
 increasing levels of verbosity (currently up to 2)}

@@ -26,7 +26,7 @@ classes in \code{forestedLCCClasses} be included as non-forested?}
 }
 \value{
 a logical vector of length \code{ncell(rstLCC)}
-where TRUEs indicate non-forested pixels where there is no
+where \code{TRUE} indicates non-forested pixels where there is no
 species cover data, or a non-forested land-cover class
 }
 \description{

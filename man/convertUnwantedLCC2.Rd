@@ -26,7 +26,7 @@ is closer after \code{nIterations}}
 \item{invalidClasses}{classes that are not valid options}
 }
 \value{
-A \code{rasterLayer} with values in classesToReplace converted to adjacent values or NA.
+A \code{rasterLayer} with values in \code{classesToReplace} converted to adjacent values or NA.
 }
 \description{
 This will search around the pixels on \code{rstLCC} that have

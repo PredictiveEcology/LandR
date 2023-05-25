@@ -701,16 +701,15 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
 }
 
 
-#' Convert NA's in speciesLayers to zeros
+#' Convert `NA` values in `speciesLayers` to zeros
 #'
-#' Pixels that have NAs but are inside `rasterToMatch`
-#' may need to be converted to 0s as they can could still potentially
-#' be forested
+#' Pixels that are `NA` but are inside `rasterToMatch` may need to be converted to `0`,
+#' as they can could still potentially be forested
 #'
 #' @template speciesLayers
 #' @template rasterToMatch
 #'
-#' @return the `speciesLayers` with 0s in pixels that had NAs
+#' @return the `speciesLayers` with `0` in pixels that had `NA`
 #'
 #' @export
 #' @importFrom raster stack

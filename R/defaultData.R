@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "TSLF", "latitude", "longitude", "Degree_Of_", "Permafrost", "thermokarst"
+  "Degree_Of_", "latitude", "longitude", "Permafrost", "thermokarst", "TSLF"
 ))
 
 ## -----------------------------------------------
@@ -12,7 +12,7 @@ utils::globalVariables(c(
 #' Default environmental variables
 #'
 #' Downloads a set of default environmental variable rasters to model
-#' maxB, SEP and thermokarst (amongst others).
+#' `maxB`, SEP and thermokarst (among others).
 #'
 #' @param vars character. Variables to download.
 #' @param studyArea a spatial polygon  (`sf`, `sp` or `SpatVector`) used to crop
@@ -29,15 +29,22 @@ utils::globalVariables(c(
 #'   elevation (from https://adaptwest.databasin.org/pages/adaptwest-climatena/) - at 1 Km resolution -
 #'   a binary map of wetlands (from Wulder et al. 2018), permafrost peatland complex cover and level
 #'   of thermokarst (from Gibson et al. 2021), and a map of time since fire (considering fire perimeters from the Canadian Wildland
-#'   Fire Information System. All layers are `SpatRasters` except for "permafrostPoly", which is a
+#'   Fire Information System. All layers are `SpatRaster`s except for `"permafrostPoly"`, which is a
 #'   polygon layer containing permafrost peatland complex cover ("Permafrost" column)
-#'   and level of thermokarst ("Degree_Of_" column), amongst other information.
+#'   and level of thermokarst ("Degree_Of_" column), among other information.
 #'
-#' @return named list of `SpatRasters` (and a `SpatVector`), with names following `vars`,
-#'   except for "permafrost", "thermokarst", which are both in the "permafrostPoly" `SpatVector`.
+#' @return named list of `SpatRaster`s (and a `SpatVector`), with names following `vars`,
+#'   except for "permafrost", "thermokarst", which are both in the `"permafrostPoly"` `SpatVector`.
 #'
-#' @references Gibson, C., Morse, P. D., Kelly, J. M., Turetsky, M. R., Baltzer, J. L., Gingras-Hill, T., & Kokelj, S. V. (2020). Thermokarst Mapping Collective: Protocol for organic permafrost terrain and preliminary inventory from the Taiga Plains test area, Northwest Territories (NWT Open Report 2020-010, p. 29). Northwest Territories Geological Survey.
-#' @references Wulder, M., Li, Z., Campbell, E., White, J., Hobart, G., Hermosilla, T., & Coops, N. (2018). A National Assessment of Wetland Status and Trends for Canada’s Forested Ecosystems Using 33 Years of Earth Observation Satellite Data. Remote Sensing, 10(10), 1623. https://doi.org/10.3390/rs10101623
+#' @references Gibson, C., Morse, P. D., Kelly, J. M., Turetsky, M. R., Baltzer, J. L.,
+#'             Gingras-Hill, T., & Kokelj, S. V. (2020). Thermokarst Mapping Collective: Protocol
+#'             for organic permafrost terrain and preliminary inventory from the Taiga Plains
+#'             test area, Northwest Territories (NWT Open Report 2020-010, p. 29).
+#'             Northwest Territories Geological Survey.
+#' @references Wulder, M., Li, Z., Campbell, E., White, J., Hobart, G., Hermosilla, T., &
+#'             Coops, N. (2018). A National Assessment of Wetland Status and Trends for Canada's
+#'             Forested Ecosystems Using 33 Years of Earth Observation Satellite Data.
+#'             Remote Sensing, 10(10), 1623. https://doi.org/10.3390/rs10101623
 #'
 #' @importFrom reproducible Cache prepInputs postProcess normPath
 #' @importFrom sf st_as_sf st_write st_crs st_crs<- st_transform st_intersection
@@ -397,11 +404,11 @@ getPermafrostDataGibson <- function(destinationPath, studyArea, cacheTags) {
 #' Default future projections (forecasts) of climate variables
 #'
 #' Downloads a set of default climate variables' forecasts as rasters -- used
-#' to model maxB, SEP and thermokarst (amongst others).
+#' to model `maxB`, SEP and thermokarst (among others).
 #'
 #' @param vars character. Variables to download.
 #' @param climateGCM character. The Global Circulation Model, GCM, (or ensemble) to use.
-#' @param climateSSP character. The Socio-economic Shared Pathway, SSP (i.e. emisions scenario) to use.
+#' @param climateSSP character. The Socio-economic Shared Pathway, SSP (i.e. emissions scenario) to use.
 #' @param periods character. The year periods to use.
 #' @param studyArea a spatial polygon  (`sf`, `sp` or `SpatVector`) used to crop
 #'   and mask data layers. Passed to `reproducible::Cache` and `reproducible::prepInputs`
@@ -413,9 +420,9 @@ getPermafrostDataGibson <- function(destinationPath, studyArea, cacheTags) {
 #' @details By default this function downloads four bioclimatic variables (mean annual temperature
 #'   MAT, precipitation of warmest quarter, PPT_sm, precipitation of coldest quarter, PPT_wt, annual
 #'   climate moisture index, CMI) obtained from AdaptWest for 20 year periods between 2001 and 2100
-#'   (see https://adaptwest.databasin.org/pages/adaptwest-climatena/) - at 1 Km resolution].
+#'   (see https://adaptwest.databasin.org/pages/adaptwest-climatena/) - at 1 km resolution].
 #'
-#' @return named list of `SpatRasters`, with names following `vars`.
+#' @return named list of `SpatRaster`s, with names following `vars`.
 #'
 #' @importFrom reproducible Cache prepInputs postProcess
 #' @export
@@ -515,7 +522,8 @@ defaultClimateDataProj <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI"),
     names(PPT_wtProj) <- paste0("PPT_wt_", sub("_.*", "", periods))
   }
 
-  ## Annual climate moisture index (CMI = P PET, where P is annual precipitation and PET is annual potential evapotranspiration)
+  ## Annual climate moisture index (CMI = P PET, where P is annual precipitation and PET is annual
+  ## potential evapotranspiration)
   ## this is Hogg's CMI
   if ("CMI" %in% vars) {
     CMIfiles <- sub("bioclim.zip", "CMI.tif", basename(bioClimURLs))

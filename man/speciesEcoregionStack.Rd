@@ -2,7 +2,7 @@
 % Please edit documentation in R/ecoregions.R
 \name{speciesEcoregionStack}
 \alias{speciesEcoregionStack}
-\title{Create Stacks of the speciesEcoregion content}
+\title{Create Stacks of the \code{speciesEcoregion} content}
 \usage{
 speciesEcoregionStack(
   ecoregionMap,
@@ -25,7 +25,6 @@ aboveground net primary productivity and \code{SEP} the species establishment pr
 Default is \code{c("establishprob", "maxB", "maxANPP")}}
 }
 \description{
-This will output a list of RasterStack objects. Each \code{RasterStack} show
-raster maps of one of the columns listed in \code{columns} and each
-\code{RasterLayer} will be one species.
+This will output a list of \code{RasterStack} objects. Each \code{RasterStack} show raster maps
+of one of the columns listed in \code{columns} and each \code{RasterLayer} will be one species.
 }

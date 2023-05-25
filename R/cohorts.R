@@ -803,7 +803,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @template rstLCC
 #'
 #' @return a logical vector of length \code{ncell(rstLCC)}
-#'   where TRUEs indicate non-forested pixels where there is no
+#'   where `TRUE` indicates non-forested pixels where there is no
 #'   species cover data, or a non-forested land-cover class
 #'
 #' @export

@@ -2,8 +2,7 @@
 % Please edit documentation in R/permafrost.R
 \name{assignPresences}
 \alias{assignPresences}
-\title{Assign presences to patches based on a raster or presence
-probabilities}
+\title{Assign presences to patches based on a raster or presence probabilities}
 \usage{
 assignPresences(
   assignProb,
@@ -14,14 +13,12 @@ assignPresences(
 )
 }
 \arguments{
-\item{assignProb}{a SpatRaster of presence probabilities (NAs allowed)}
+\item{assignProb}{a \code{SpatRaster} of presence probabilities (\code{NA} allowed)}
 
-\item{landscape}{a SpatRaster of the entire lanscape with NAs outside
-patches}
+\item{landscape}{a \code{SpatRaster} of the entire landscape with \code{NA} outside patches}
 
-\item{pixToConvert}{numeric. Number of pixels to convert to presence
-across \code{landscape}. If \code{NULL}, it will convert \code{round(sum(!is.na(landscape[]))/2)}
-pixels.}
+\item{pixToConvert}{numeric. Number of pixels to convert to presence across \code{landscape}.
+If \code{NULL}, it will convert \code{round(sum(!is.na(landscape[]))/2)} pixels.}
 
 \item{probWeight}{numeric. A weight for \code{assignProb} (\code{assignProb^probWeight})
 which affects the degree of clumping (higher weights result in clumpier patterns)}
@@ -30,11 +27,10 @@ which affects the degree of clumping (higher weights result in clumpier patterns
 (as \code{pixToConvert/numStartsDenom}) at each try of assigning presences.}
 }
 \value{
-a SpatRaster
+a \code{SpatRaster} object
 }
 \description{
-Assign presences to patches based on a raster or presence
-probabilities
+Assign presences to patches based on a raster or presence probabilities
 }
 \details{
 This function attempts to iteratively assign

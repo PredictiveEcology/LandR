@@ -23,24 +23,26 @@ prepSpeciesTable(
 
 \item{cacheTags}{User tags to pass to \code{Cache}.}
 
-\item{speciesTable}{The raw species traits table, with \emph{at least} the following columns:
-\code{speciesCode} an character representation of species, \code{Area} a character of
-geographical area within a species range for which trait values are relevant,
-\code{longevity} species longevity in years, \code{sexualmature} age in years at sexual maturity,
-\code{shadetolerance} numeric value between 1-5 of relative shade tolerance (with respect to oteher species),
-\code{seeddistance_eff} the "effective" seed dispersal distance, \code{seeddistance_max} a
-numeric with the maximum seed dispersal distance, and \code{mortalityshape} and \code{growthcureve} to growth
-curve shape parameters. Other columns (e.g. fire-related traits) can also be included depeding on LandR modules in use.
-Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015) for further detail.}
+\item{speciesTable}{The raw species traits table, with \strong{at least} the following columns:
+\itemize{
+\item \code{speciesCode} an character representation of species;
+\item \code{Area} a character of geographical area within a species range for which trait values are relevant;
+\item \code{longevity} species longevity in years, \code{sexualmature} age in years at sexual maturity;
+\item \code{shadetolerance} numeric value between 1-5 of relative shade tolerance (with respect to other species);
+\item \code{seeddistance_eff} the "effective" seed dispersal distance;
+\item \code{seeddistance_max} a numeric with the maximum seed dispersal distance;
+\item \code{mortalityshape} and \code{growthcurve}: growth curve shape parameters.
+Other columns (e.g. fire-related traits) can also be included depending on LandR modules in use.
+Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015)
+for further detail.
+}}
 
 \item{speciesLayers}{Deprecated.}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
-For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
-this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use
-\code{data("sppEquivalencies_CA", "LandR")}.}
+For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.
 For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},

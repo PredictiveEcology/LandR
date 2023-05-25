@@ -7,7 +7,7 @@
 \alias{asInt}
 \alias{isInt}
 \alias{reclass}
-\title{Set NA value in Raster/SpatRaster}
+\title{Set NA values in \code{Raster}/\code{SpatRaster}}
 \usage{
 .NAvalueFlag(ras, NAval)
 
@@ -22,11 +22,11 @@ isInt(ras)
 reclass(ras, tab)
 }
 \arguments{
-\item{ras}{a Raster*, or SpatRaster object}
+\item{ras}{a \code{Raster}, or \code{SpatRaster} object}
 
 \item{NAval}{the value to use as \code{NA}}
 
-\item{rasList}{a list of Raster* or SpatRaster layers}
+\item{rasList}{a list of \code{Raster} or \code{SpatRaster} objects}
 
 \item{crs}{passed to \code{raster::projectRaster(..., crs = crs)}
 and \code{terra::project(..., y = crs)}}

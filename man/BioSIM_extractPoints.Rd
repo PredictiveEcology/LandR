@@ -16,5 +16,5 @@ BioSIM_extractPoints(x)
 Extract point locations from DEM raster to pass to \code{BioSIM} functions
 }
 \seealso{
-prepInputsCanDEM
+\code{\link[=prepInputsCanDEM]{prepInputsCanDEM()}}
 }

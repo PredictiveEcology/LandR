@@ -153,10 +153,11 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   Plot(vtmPlot, title = title)
 }
 
-#' Helper for setting Raster or SpatRaster colors
+#' Helper for setting Raster or `SpatRaster` colors
 #'
-#' This is a wrapper to help with migration to terra. Currently can only be used
-#' for a single layer `SpatRaster` or a `RasterLayer`
+#' This is a wrapper to help with migration to \pkg{terra}.
+#' Currently can only be used for a single layer `SpatRaster` or a `RasterLayer`.
+#'
 #' @export
 #' @importFrom terra coltab<- ncell
 #' @importFrom quickPlot setColors
@@ -182,7 +183,7 @@ Colors <- function(ras, cols, n = NULL) {
     if (!is(cols, "data.frame")) {
       if (length(cols) < length(theSeq)) {
         message("not enough colours, interpolating")
-        cols <- colorRampPalette(cols)(length(theSeq)+1)
+        cols <- colorRampPalette(cols)(length(theSeq) + 1)
       }
     }
     coltab(ras, layer = 1) <- cols

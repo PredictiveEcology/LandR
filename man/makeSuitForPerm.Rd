@@ -59,5 +59,7 @@ are also coded as unsuitable.
 }
 }
 \references{
-Hermosilla, T., Bastyr, A., Coops, N. C., White, J. C., & Wulder, M. A. (2022). Mapping the presence and distribution of tree species in Canada’s forested ecosystems. Remote Sensing of Environment, 282, 113276. https://doi.org/10.1016/j.rse.2022.113276
+Hermosilla, T., Bastyr, A., Coops, N. C., White, J. C., & Wulder, M. A. (2022).
+Mapping the presence and distribution of tree species in Canada's forested ecosystems.
+Remote Sensing of Environment, 282, 113276. https://doi.org/10.1016/j.rse.2022.113276
 }

@@ -27,7 +27,7 @@ or a non-forested land-cover class
 
 * drop support for R 3.6
 * `prepInputsStandAgeMap`can now accept `firePerimeters` layer, avoiding inner download if layer is present.
-* new assertion (`assertSppVectors`) to check that species mathc between vectors (e.g. tables, colours and species list vector)
+* new assertion (`assertSppVectors`) to check that species match between vectors (e.g. tables, colours and species list vector)
 * new function `sppHarmonize` that deals with the 3 potential ways for a user to input the `sim$sppEquiv`, `P(sim)$sppEquivCol`, and `sim$sppNameVector`
 * update Eliot's email address
 * new functions: `speciesInStudyArea` and `species
@@ -73,8 +73,8 @@ data suffered data imputation in `Biomass_borealDataPrep`
 
 # LandR 1.0.1
 
-* Complete rewrite of `LANDISDisp` now (back to) native R. It is about 15x faster than the Rcpp implementation, and much simpler, with about 30% of the number of lines of code. It was inspired by the "spiral" approach as was used in the Rcpp in the pre-1.0.0 version of `LandR`, but much more efficiently as it is now correctly identifies *every* pixel outward from a center pixel using `raster::focalWeight`, with the maximum of the `seeddispersal_max` across all species. RAM use appears under control, even for large problems (tested on 50M pixel Raster with 8M potential Source pixels and 500,000 Receiving pixels, with a peak additional RAM of 3 GB during `LANDISDisp`)
-`LANDISDisp` now accommodates sub-cellSize dispersal distances, using the original Ward Dispersal equation. Previously, the sub-pixel dispersal was treated as if it was starting from the centre of the pixel. So, if less than a full pixel, then very little horizontal transfer. This has the effect that there will be a large increase in horizontal transfer for the species that have small `seeddistance_max` (i.e., less than cell size)
+* Complete rewrite of `LANDISDisp` now (back to) native R. It is about 15x faster than the Rcpp implementation, and much simpler, with about 30% of the number of lines of code. It was inspired by the "spiral" approach as was used in the Rcpp in the pre-1.0.0 version of `LandR`, but much more efficiently as it is now correctly identifies *every* pixel outward from a centre pixel using `raster::focalWeight`, with the maximum of the `seeddispersal_max` across all species. RAM use appears under control, even for large problems (tested on 50M pixel Raster with 8M potential Source pixels and 500,000 Receiving pixels, with a peak additional RAM of 3 GB during `LANDISDisp`)
+`LANDISDisp` now accommodates sub-`cellSize` dispersal distances, using the original Ward Dispersal equation. Previously, the sub-pixel dispersal was treated as if it was starting from the centre of the pixel. So, if less than a full pixel, then very little horizontal transfer. This has the effect that there will be a large increase in horizontal transfer for the species that have small `seeddistance_max` (i.e., less than cell size)
 * add new function `prepSpeciesLayers_ONFRI`
 
 ## Bugfixes

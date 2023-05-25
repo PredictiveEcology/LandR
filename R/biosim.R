@@ -25,7 +25,7 @@ installBioSIM <- function(lib) {
 #' @importFrom raster crs xyFromCell
 #' @importFrom sf st_as_sf st_coordinates
 #' @importFrom sp SpatialPoints
-#' @seealso prepInputsCanDEM
+#' @seealso [prepInputsCanDEM()]
 BioSIM_extractPoints <- function(x) {
   nonNA <- which(!is.na(x[]))
   xy <- xyFromCell(x, cell = nonNA)

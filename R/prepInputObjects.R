@@ -493,22 +493,24 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' Wrapper on `prepInputs` that will rasterize fire polygons.
 #'
 #' @template studyAreaName
+#'
 #' @template cacheTags
+#'
 #' @param ... arguments passed to `prepInputs` and `Cache`. If the following arguments
 #'   are not provided, the following values will be used:
 #'   \itemize{
-#'     \item{url: by default, the 2001 kNN stand biomass map is downloaded from
+#'     \item{`url`: by default, the 2001 kNN stand biomass map is downloaded from
 #'       the NRCan National Forest Inventory}
-#'     \item{useSAcrs: FALSE}
-#'     \item{method: "bilinear"}
-#'     \item{datatype: "INT2U"}
-#'     \item{filename2: `suffix("rawBiomassMap.tif", paste0("_", studyAreaName))`}
-#'     \item{overwrite: TRUE}
-#'     \item{userTags: `c(cacheTags, "rawBiomassMap")`}
-#'     \item{omitArgs: `c("destinationPath", "targetFile", "userTags", "stable")`}
+#'     \item{`useSAcrs`: `FALSE`}
+#'     \item{`method`: `"bilinear"`}
+#'     \item{`datatype`: `"INT2U"`}
+#'     \item{`filename2`: `suffix("rawBiomassMap.tif", paste0("_", studyAreaName))`}
+#'     \item{`overwrite`: `TRUE`}
+#'     \item{`userTags`: `c(cacheTags, "rawBiomassMap")`}
+#'     \item{`omitArgs`: `c("destinationPath", "targetFile", "userTags", "stable")`}
 #'   }
 #'
-#' @return a rawBiomassMap raster
+#' @return a `rawBiomassMap` raster
 #' @export
 #' @importFrom reproducible Cache prepInputs
 prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {

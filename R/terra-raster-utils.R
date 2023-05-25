@@ -6,9 +6,9 @@ utils::globalVariables(c(
 ## but for now I didn't want to assume those options were directly affecting
 ## these objects
 
-#' Set NA value in Raster/SpatRaster
+#' Set NA values in `Raster`/`SpatRaster`
 #'
-#' @param ras a Raster*, or SpatRaster object
+#' @param ras a `Raster`, or `SpatRaster` object
 #' @param NAval the value to use as `NA`
 #'
 #' @return a raster with attributed NA values
@@ -29,10 +29,9 @@ utils::globalVariables(c(
   ras
 }
 
-
 #' Make stacked raster
 #'
-#' @param rasList a list of Raster* or SpatRaster layers
+#' @param rasList a list of `Raster` or `SpatRaster` objects
 #'
 #' @return a stacked raster
 #'
@@ -55,7 +54,7 @@ utils::globalVariables(c(
 
 #' Project raster extent
 #'
-#' @param ras a Raster* or SpatRaster object
+#' @param ras a `Raster` or `SpatRaster` object
 #' @param crs passed to `raster::projectRaster(..., crs = crs)`
 #'   and `terra::project(..., y = crs)`
 #'
@@ -81,18 +80,19 @@ utils::globalVariables(c(
 #'
 #' TODO: Move to `reproducible`
 #'
-#' Note: this function internally converts Raster* to
-#' `SpatRaster` to allow using `compareGeom` and benefit
-#' from its complexity
-#' @param ras1 a Raster* or SpatRaster object
-#' @param ... additional Raster* or SpatRaster objects, and arguments
-#'   passed to `terra::compareGeom`
+#' Note: this function internally converts `Raster` to `SpatRaster` to allow using `compareGeom()`,
+#' and benefit from its complexity.
 #'
-#' @importFrom terra compareGeom rast
-#' @rdname compare
-#' @export
+#' @param ras1 a `Raster` or `SpatRaster` object
+#' @param ... additional `Raster` or `SpatRaster` objects, and arguments
+#'            passed to `terra::compareGeom()`.
+#'
 #' @return the projected extent
 #'
+#' @export
+#' @importFrom terra compareGeom rast
+#'
+#' @rdname compare
 .compareRas <- function(ras1, ...) {
   mc <- match.call()
 
@@ -132,8 +132,8 @@ utils::globalVariables(c(
 #' TODO: Move to `reproducible`
 #' TODO: expand to multiple objects
 #'
-#' @param ras1 a Raster* or SpatRaster object
-#' @param ras2 a Raster* or SpatRaster object
+#' @param ras1 a `Raster` or `SpatRaster` object
+#' @param ras2 a `Raster` or `SpatRaster` object
 #' @export
 #' @rdname compare
 #' @importFrom sf st_crs
@@ -188,7 +188,7 @@ isInt <- function(ras) {
 }
 
 
-#' @param ras a Raster*, or SpatRaster object
+#' @param ras a `Raster`, or `SpatRaster` object
 #' @param tab matrix of values to reclassify. See `terra::classify`
 #'   and `raster::reclassify`.
 #' @export
@@ -301,8 +301,7 @@ genericExtract <- function(x, y, field = NULL, ...) {
 
 #' PLOT RASTER FUNCTION
 #'
-#' A function that creates a `ggplot` of a raster
-#'   layer. Can be used with `SpaDES.core::Plots`
+#' A function that creates a `ggplot` of a raster layer. Can be used with `SpaDES.core::Plots`.
 #'
 #' @param x `SpatRaster`, `RasterLayer`, `SpatVector` or `sf` object
 #'
@@ -311,8 +310,7 @@ genericExtract <- function(x, y, field = NULL, ...) {
 #'
 #' @param limits TODO
 #'
-#' @param field character. If x is `sf` or `SpatVector`, a field
-#'   to plot.
+#' @param field character. If `x` is `sf` or `SpatVector`, a field to plot.
 #'
 #' @importFrom ggplot2 geom_raster scale_fill_viridis_c coord_equal theme_classic
 #' @importFrom ggplot2 geom_sf coord_sf scale_fill_viridis_d facet_wrap labs aes sym
