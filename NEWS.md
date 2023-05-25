@@ -1,6 +1,6 @@
 bug reports <https://github.com/PredictiveEcology/LandR/issues>
 
-version 1.1.0
+version 1.1.0.9000
 =============
 * further adaptations to `terra` package
 * fix bug in `prepInputLCC`: `orig` argument no longer accepted by `terra::compareGeom`
