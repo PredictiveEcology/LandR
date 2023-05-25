@@ -14,10 +14,8 @@ plotSpatial(x, plotTitle, limits = NULL, field = NULL)
 
 \item{limits}{TODO}
 
-\item{field}{character. If x is \code{sf} or \code{SpatVector}, a field
-to plot.}
+\item{field}{character. If \code{x} is \code{sf} or \code{SpatVector}, a field to plot.}
 }
 \description{
-A function that creates a \code{ggplot} of a raster
-layer. Can be used with \code{SpaDES.core::Plots}
+A function that creates a \code{ggplot} of a raster layer. Can be used with \code{SpaDES.core::Plots}.
 }

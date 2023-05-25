@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{Colors}
 \alias{Colors}
-\title{Helper for setting Raster or SpatRaster colors}
+\title{Helper for setting Raster or \code{SpatRaster} colors}
 \usage{
 Colors(ras, cols, n = NULL)
 }
@@ -16,8 +16,8 @@ see \code{terra::coltab}}
 \verb{quickPlot::setColors(ras, n = n) <- }. If missing, then \code{n} will be \code{length(cols)}}
 }
 \description{
-This is a wrapper to help with migration to terra. Currently can only be used
-for a single layer \code{SpatRaster} or a \code{RasterLayer}
+This is a wrapper to help with migration to \pkg{terra}.
+Currently can only be used for a single layer \code{SpatRaster} or a \code{RasterLayer}.
 }
 \examples{
 \donttest{

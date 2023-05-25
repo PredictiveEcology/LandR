@@ -216,7 +216,7 @@ test_that("test large files", {
 
   if (interactive()) {
     whichTest <- 0 # 0 for full test (slow), 1 (manual interactive) or 2 (medium)
-    dp <- "~/tmp"
+    dp <- switch(Sys.info()[["user"]], emcintir = "~/tmp", tempdir())
   } else {
     whichTest <- 2
     dp <- tempdir()
@@ -228,25 +228,25 @@ test_that("test large files", {
   url1 <- "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI"
   dtSrc <- prepInputs(
     url = url1,
-    targetFile = "dtSrc.rds",
+    targetFile = "dispersalMarch2021/dtSrc.rds",
     fun = "readRDS",
     destinationPath = dp, overwrite = TRUE
   )
   dtRcv <- prepInputs(
     url = url1,
-    targetFile = "dtRcv.rds",
+    targetFile = "dispersalMarch2021/dtRcv.rds",
     fun = "readRDS",
     destinationPath = dp
   )
   pixelGroupMap <- prepInputs(
     url = url1,
-    targetFile = "pixelGroupMap.rds",
+    targetFile = "dispersalMarch2021/pixelGroupMap.rds",
     fun = "readRDS",
     destinationPath = dp
   )
   speciesTable <- prepInputs(
     url = url1,
-    targetFile = "speciesTable.rds",
+    targetFile = "dispersalMarch2021/speciesTable.rds",
     fun = "readRDS",
     destinationPath = dp
   )
@@ -351,8 +351,12 @@ test_that("test large files", {
     spMap[[sppp]][rcvd] <- 3
     spMap[[sppp]][intersect(src, rcvd)] <- 4
 
-    levels(spMap[[sppp]]) <- data.frame(ID = 0:4, type = c("OtherForest", "Source", "Didn't receive", "Received", "Src&Rcvd"))
+    levels(spMap[[sppp]]) <- data.frame(
+      ID = 0:4,
+      type = c("OtherForest", "Source", "Didn't receive", "Received", "Src&Rcvd")
+    )
   }
+
   if (FALSE) { # (interactive()) {
     clearPlot()
     sp <- spMap[-1]

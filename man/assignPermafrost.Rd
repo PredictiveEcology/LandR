@@ -32,7 +32,7 @@ Suitable cells are coded as \code{rasClass}.}
 polygon be saved (as the file name returned) or directly returned?
 If parallelising, choose to save, as \code{SpatRasters} cannot be serialized.}
 
-\item{saveDir}{character. The directiory to save output rasters.}
+\item{saveDir}{character. The directory to save output rasters.}
 
 \item{id}{character or numeric. The polygon ID in \code{gridPoly[IDcol]}
 to process (the focal polygon).}
@@ -75,9 +75,9 @@ following thermokarst percentages:
 \item high: 67-100\%
 If \code{useMidpoint == TRUE} the midpoint value of each range is used as the percentage
 of pixels that have been thawed already and are not to be converted to permafrost
-('thawedPercent' below). Otherwise, 'thawedPercent' is randomly drawn from a uniform
-distribution bounded by the range mininum and maximum. The final number of pixels to convert
-to permafrost ('pixToConvert' below) is then calculated as:
-pixToConvert = no. of suitable pixels \* (\code{gridPoly[[Permafrost]]} \* (100-thawedPercent))
+(\code{thawedPercent} below). Otherwise, \code{thawedPercent} is randomly drawn from a uniform
+distribution bounded by the range minimum and maximum. The final number of pixels to convert
+to permafrost (\code{pixToConvert} below) is then calculated as:
+\verb{pixToConvert = no. of suitable pixels \\* (gridPoly[[Permafrost]] \\* (100-thawedPercent))}.
 }
 }

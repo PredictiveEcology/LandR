@@ -493,22 +493,24 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' Wrapper on `prepInputs` that will rasterize fire polygons.
 #'
 #' @template studyAreaName
+#'
 #' @template cacheTags
+#'
 #' @param ... arguments passed to `prepInputs` and `Cache`. If the following arguments
 #'   are not provided, the following values will be used:
 #'   \itemize{
-#'     \item{url: by default, the 2001 kNN stand biomass map is downloaded from
+#'     \item{`url`: by default, the 2001 kNN stand biomass map is downloaded from
 #'       the NRCan National Forest Inventory}
-#'     \item{useSAcrs: FALSE}
-#'     \item{method: "bilinear"}
-#'     \item{datatype: "INT2U"}
-#'     \item{filename2: `suffix("rawBiomassMap.tif", paste0("_", studyAreaName))`}
-#'     \item{overwrite: TRUE}
-#'     \item{userTags: `c(cacheTags, "rawBiomassMap")`}
-#'     \item{omitArgs: `c("destinationPath", "targetFile", "userTags", "stable")`}
+#'     \item{`useSAcrs`: `FALSE`}
+#'     \item{`method`: `"bilinear"`}
+#'     \item{`datatype`: `"INT2U"`}
+#'     \item{`filename2`: `suffix("rawBiomassMap.tif", paste0("_", studyAreaName))`}
+#'     \item{`overwrite`: `TRUE`}
+#'     \item{`userTags`: `c(cacheTags, "rawBiomassMap")`}
+#'     \item{`omitArgs`: `c("destinationPath", "targetFile", "userTags", "stable")`}
 #'   }
 #'
-#' @return a rawBiomassMap raster
+#' @return a `rawBiomassMap` raster
 #' @export
 #' @importFrom reproducible Cache prepInputs
 prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
@@ -554,7 +556,7 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #' @param fireField field used to rasterize fire polys
 #' @param earliestYear the earliest fire date to allow
 #'
-#' @return a raster layer of fire perimeters with fire year values.
+#' @return a `SpatRaster` layer of fire perimeters with fire year values.
 #'
 #' @export
 #' @importFrom fasterize fasterize
@@ -569,30 +571,37 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #'
 #' options("reproducible.useTerra" = TRUE, "reproducible.rasterRead" = "terra::rast")
 #'
-#' randomPoly <- randomStudyArea()
-#' randomPoly
+#' targetCRS <- crs(randomStudyArea())
+#' randomPoly <- randomStudyArea(
+#'   center = vect(cbind(-115, 50), crs = targetCRS),
+#'   size = 1e+7,
+#' )
+#' buffExt <- buffer(randomPoly, 1e+3) |> ext()
 #' ras2match <- rast(res = 10, ext = ext(randomPoly), crs = crs(randomPoly))
 #' ras2match <- rasterize(randomPoly, ras2match)
-#' tempDir <- tempdir()
-#' cacheRepo <- file.path(tempDir, "cache")
 #'
-#' ## ideally, get the firePerimenters layer first
-#' firePerimeters <- Cache(prepInputsFireYear,
-#'                         url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
-#'                         "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-#'                         destinationPath = tempDir,
-#'                         rasterToMatch = ras2match)
+#' firePerimeters <- prepInputsFireYear(
+#'   url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
+#'                "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
+#'   destinationPath = tempdir(),
+#'   rasterToMatch = ras2match,
+#'   earliestYear = 1930
+#' )
 #'
-#'
+#' if (interactive()) {
+#'   plot(firePerimeters)
+#'   plot(randomPoly, add = TRUE)
+#' }
 prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950) {
   dots <- list(...)
   a <- if (is.null(dots$fun)) {
     Cache(prepInputs, rasterToMatch = rasterToMatch, fun = "terra::vect", ...) |>
-      st_as_sf() |>
-      st_zm() #NFDB data has incomplete z coordinates resulting in errors
+      st_as_sf()
   } else {
     if (grepl("st_read", dots$fun)) {
-      Cache(prepInputs, ...)
+      Cache(prepInputs, rasterToMatch = rasterToMatch, ...)  |>
+        st_as_sf() |>
+        st_zm() #NFDB data has incomplete z coordinates resulting in errors
     } else {
       Cache(prepInputs, rasterToMatch = rasterToMatch, ...) |>
         st_as_sf()
@@ -606,17 +615,23 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
       warning("Chosen fireField will be coerced to numeric")
       d[[fireField]] <- as.numeric(as.factor(d[[fireField]]))
     }
-    if (requireNamespace("terra", quietly = TRUE) && is(rasterToMatch, "SpatRaster")) {
+    if (is(rasterToMatch, "SpatRaster") && requireNamespace("terra", quietly = TRUE)) {
       fireRas <- terra::rasterize(d, rasterToMatch, field = fireField)
       fireRas[!is.na(terra::values(fireRas)) & terra::values(fireRas) < earliestYear] <- NA
     } else {
       fireRas <- fasterize(d, raster = rasterToMatch, field = fireField)
       fireRas[!is.na(getValues(fireRas)) & getValues(fireRas) < earliestYear] <- NA
     }
-    return(fireRas)
   } else {
-    return(NULL)
+    if (is(rasterToMatch, "SpatRaster") && requireNamespace("terra", quietly = TRUE)) {
+      fireRas <- terra::rast(rasterToMatch, vals = NA)
+    } else {
+      fireRas <- raster::raster(rasterToMatch)
+      values(fireRas) <- NA
+    }
   }
+
+  return(fireRas)
 }
 
 #' Replace stand age with time since last fire

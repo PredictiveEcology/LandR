@@ -14,19 +14,19 @@ prepRawBiomassMap(studyAreaName, cacheTags, ...)
 \item{...}{arguments passed to \code{prepInputs} and \code{Cache}. If the following arguments
 are not provided, the following values will be used:
 \itemize{
-\item{url: by default, the 2001 kNN stand biomass map is downloaded from
+\item{\code{url}: by default, the 2001 kNN stand biomass map is downloaded from
 the NRCan National Forest Inventory}
-\item{useSAcrs: FALSE}
-\item{method: "bilinear"}
-\item{datatype: "INT2U"}
-\item{filename2: \code{suffix("rawBiomassMap.tif", paste0("_", studyAreaName))}}
-\item{overwrite: TRUE}
-\item{userTags: \code{c(cacheTags, "rawBiomassMap")}}
-\item{omitArgs: \code{c("destinationPath", "targetFile", "userTags", "stable")}}
+\item{\code{useSAcrs}: \code{FALSE}}
+\item{\code{method}: \code{"bilinear"}}
+\item{\code{datatype}: \code{"INT2U"}}
+\item{\code{filename2}: \code{suffix("rawBiomassMap.tif", paste0("_", studyAreaName))}}
+\item{\code{overwrite}: \code{TRUE}}
+\item{\code{userTags}: \code{c(cacheTags, "rawBiomassMap")}}
+\item{\code{omitArgs}: \code{c("destinationPath", "targetFile", "userTags", "stable")}}
 }}
 }
 \value{
-a rawBiomassMap raster
+a \code{rawBiomassMap} raster
 }
 \description{
 Create the \code{rawBiomassMap} raster containing biomass estimates for

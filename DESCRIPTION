@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2023-05-24
-Version: 1.1.0.9046
+Date: 2023-05-25
+Version: 1.1.0.9047
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -41,13 +41,11 @@ Imports:
     methods,
     MuMIn (>= 1.42.5),
     parallel,
-    parallelly,
     pemisc (>= 0.0.4.9009),
     quickPlot,
     raster,
     RColorBrewer,
     reproducible (>= 2.0.2),
-    RhpcBLASctl,
     sf,
     sp,
     SpaDES.tools (>= 2.0.0),
@@ -55,7 +53,8 @@ Imports:
     terra,
     tidyterra,
     tools,
-    utils
+    utils,
+    viridis
 Suggests:
     BioSIM,
     covr,
@@ -64,9 +63,11 @@ Suggests:
     googledrive (>= 2.0.0),
     httr,
     knitr,
+    parallelly,
     qs,
     rasterVis,
     RCurl,
+    RhpcBLASctl,
     rlang,
     roxygen2,
     rmarkdown,

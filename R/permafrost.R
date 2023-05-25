@@ -33,13 +33,21 @@ utils::globalVariables(c(
 #' @param ... further arguments passed to `assignPermafrost`
 #'
 #'
-#' @return a `SpatRaster` of permafrost presences (1) and absences (0) with the
-#'   same properties as the land-cover and wetland rasters, cropped and masked
-#'   to `studyArea`.
+#' @return a `SpatRaster` of permafrost presences (1) and absences (0) with the same
+#'   properties as the land-cover and wetland rasters, cropped and masked to `studyArea`.
 #'
-#' @references Gibson, C., Morse, P. D., Kelly, J. M., Turetsky, M. R., Baltzer, J. L., Gingras-Hill, T., & Kokelj, S. V. (2020). Thermokarst Mapping Collective: Protocol for organic permafrost terrain and preliminary inventory from the Taiga Plains test area, Northwest Territories (NWT Open Report 2020-010, p. 29). Northwest Territories Geological Survey.
-#' @references Hermosilla, T., Bastyr, A., Coops, N. C., White, J. C., & Wulder, M. A. (2022). Mapping the presence and distribution of tree species in Canada’s forested ecosystems. Remote Sensing of Environment, 282, 113276. https://doi.org/10.1016/j.rse.2022.113276
-#' @references Wulder, M., Li, Z., Campbell, E., White, J., Hobart, G., Hermosilla, T., & Coops, N. (2018). A National Assessment of Wetland Status and Trends for Canada’s Forested Ecosystems Using 33 Years of Earth Observation Satellite Data. Remote Sensing, 10(10), 1623. https://doi.org/10.3390/rs10101623
+#' @references Gibson, C., Morse, P. D., Kelly, J. M., Turetsky, M. R., Baltzer, J. L.,
+#'             Gingras-Hill, T., & Kokelj, S. V. (2020). Thermokarst Mapping Collective:
+#'             Protocol for organic permafrost terrain and preliminary inventory from the Taiga
+#'             Plains test area, Northwest Territories (NWT Open Report 2020-010, p. 29).
+#'             Northwest Territories Geological Survey.
+#' @references Hermosilla, T., Bastyr, A., Coops, N. C., White, J. C., & Wulder, M. A. (2022).
+#'             Mapping the presence and distribution of tree species in Canada's forested ecosystems.
+#'             Remote Sensing of Environment, 282, 113276. https://doi.org/10.1016/j.rse.2022.113276
+#' @references Wulder, M., Li, Z., Campbell, E., White, J., Hobart, G., Hermosilla, T., &
+#'             Coops, N. (2018). A National Assessment of Wetland Status and Trends for Canada's
+#'             Forested Ecosystems Using 33 Years of Earth Observation Satellite Data.
+#'             Remote Sensing, 10(10), 1623. https://doi.org/10.3390/rs10101623
 #'
 #' @importFrom reproducible Cache prepInputs postProcess studyAreaName CacheDigest
 #' @importFrom terra writeRaster writeVector project subst mask
@@ -218,7 +226,9 @@ makePermafrostRas <- function(cores = 1L, outPath = getOption("spades.outputPath
 #' @return a raster layer with `1`s and `0`s for pixels with suitable
 #'  and unsuitable land cover for permafrost, respectively.
 #'
-#' @references Hermosilla, T., Bastyr, A., Coops, N. C., White, J. C., & Wulder, M. A. (2022). Mapping the presence and distribution of tree species in Canada’s forested ecosystems. Remote Sensing of Environment, 282, 113276. https://doi.org/10.1016/j.rse.2022.113276
+#' @references Hermosilla, T., Bastyr, A., Coops, N. C., White, J. C., & Wulder, M. A. (2022).
+#'             Mapping the presence and distribution of tree species in Canada's forested ecosystems.
+#'             Remote Sensing of Environment, 282, 113276. https://doi.org/10.1016/j.rse.2022.113276
 #'
 #' @importFrom terra classify subst mask
 #' @importFrom raster raster
@@ -278,10 +288,14 @@ makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 
     if (.Platform$OS.type == "unix") {
       cl <- parallel::makeForkCluster(cores)
     } else {
-      if (!requireNamespace("parallelly")) {
+      if (!requireNamespace("parallelly", quietly = TRUE)) {
         stop("install 'parallelly'")
       }
       cl <- parallelly::makeClusterPSOCK(cores, rscript_libs = .libPaths())
+    }
+
+    if (!requireNamespace("RhpcBLASctl", quietly = TRUE)) {
+      stop("install 'RhpcBLASctl'")
     }
 
     on.exit(parallel::stopCluster(cl), add = TRUE)
@@ -343,7 +357,7 @@ makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 
 #' @param saveOut logical. Should the processed rasters for the focal
 #'  polygon be saved (as the file name returned) or directly returned?
 #'  If parallelising, choose to save, as `SpatRasters` cannot be serialized.
-#' @param saveDir character. The directiory to save output rasters.
+#' @param saveDir character. The directory to save output rasters.
 #' @param id character or numeric. The polygon ID in `gridPoly[IDcol]`
 #'  to process (the focal polygon).
 #' @param IDcol character. Column name in `gridPoly` containing polygon IDs.
@@ -368,16 +382,16 @@ makeSuitForPerm <- function(rstLCC, wetlands, suitableCls = c(40, 50, 100, 210, 
 #'  * high: 67-100%
 #'  If `useMidpoint == TRUE` the midpoint value of each range is used as the percentage
 #'  of pixels that have been thawed already and are not to be converted to permafrost
-#'  ('thawedPercent' below). Otherwise, 'thawedPercent' is randomly drawn from a uniform
-#'  distribution bounded by the range mininum and maximum. The final number of pixels to convert
-#'  to permafrost ('pixToConvert' below) is then calculated as:
-#'  pixToConvert = no. of suitable pixels \* (`gridPoly[[Permafrost]]` \* (100-thawedPercent))
+#'  (`thawedPercent` below). Otherwise, `thawedPercent` is randomly drawn from a uniform
+#'  distribution bounded by the range minimum and maximum. The final number of pixels to convert
+#'  to permafrost (`pixToConvert` below) is then calculated as:
+#'  `pixToConvert = no. of suitable pixels \* (gridPoly[[Permafrost]] \* (100-thawedPercent))`.
 #'
-#' @importFrom terra rast vect unwrap writeRaster as.polygons
-#' @importFrom terra mask crop disagg distance expanse fillHoles buffer
-#' @importFrom data.table as.data.table setorder
 #' @importFrom crayon cyan
+#' @importFrom data.table as.data.table setorder
 #' @importFrom SpaDES.tools neutralLandscapeMap
+#' @importFrom terra as.polygons buffer crop disagg distance expanse fillHoles
+#' @importFrom terra mask minmax rast vect unwrap writeRaster
 #' @export
 assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
                              id = NULL, permafrostcol = "Permafrost", thermokarstcol = NULL,
@@ -440,7 +454,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
       ## remove "thermokarsted" % amount
       ## because % thermokarst is relative to % PPC (gridPoly[[permafrostcol]])
       ## we cannot simply subtract
-      permpercent <- permpercent * ((100-thermPercent)/100)
+      permpercent <- permpercent * ((100 - thermPercent) / 100)
     }
 
     ## How many suitable pixels are there?
@@ -508,7 +522,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         sub_rasDist <- distance(sub_rasDist)   ## compute distance from pathes (NAs) to edges
 
         ## make "probabilities" by scaling 0-1
-        spreadProb <- sub_rasDist/minmax(sub_rasDist)["max",]
+        spreadProb <- sub_rasDist / minmax(sub_rasDist)["max",]
         spreadProb <- mask(spreadProb, sub_ras2)   ## only NAs here are respected by spread
         # terra::plot(spreadProb, col = viridis::inferno(100))
 
@@ -516,7 +530,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
         patchSizes[, V1 := as.integer(V1)]
         sub_rasPS <- rasterize(sub_poly, sub_ras, field = "ID")
         sub_rasPS <- classify(sub_rasPS, patchSizes)
-        sub_rasPS <- sub_rasPS/minmax(sub_rasPS)["max",]   ## normalize
+        sub_rasPS <- sub_rasPS / minmax(sub_rasPS)["max",]   ## normalize
         spreadProb <- spreadProb * sub_rasPS
 
         suitablePixNo2 <- sum(sub_ras2[] == 1, na.rm = TRUE)
@@ -722,15 +736,12 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
   }
 }
 
-#' Assign presences to patches based on a raster or presence
-#'   probabilities
+#' Assign presences to patches based on a raster or presence probabilities
 #'
-#' @param assignProb a SpatRaster of presence probabilities (NAs allowed)
-#' @param landscape a SpatRaster of the entire lanscape with NAs outside
-#'   patches
-#' @param pixToConvert numeric. Number of pixels to convert to presence
-#'   across `landscape`. If `NULL`, it will convert `round(sum(!is.na(landscape[]))/2)`
-#'   pixels.
+#' @param assignProb a `SpatRaster` of presence probabilities (`NA` allowed)
+#' @param landscape a `SpatRaster` of the entire landscape with `NA` outside patches
+#' @param pixToConvert numeric. Number of pixels to convert to presence across `landscape`.
+#'                     If `NULL`, it will convert `round(sum(!is.na(landscape[]))/2)` pixels.
 #' @param probWeight numeric. A weight for `assignProb` (`assignProb^probWeight`)
 #'  which affects the degree of clumping (higher weights result in clumpier patterns)
 #' @param numStartsDenom integer. Used to calculate the number of starting pixels
@@ -858,7 +869,7 @@ assignPermafrost <- function(gridPoly, ras, saveOut = TRUE, saveDir = NULL,
 #'   return(tests)
 #' }
 #'
-#' @return a SpatRaster
+#' @return a `SpatRaster` object
 #' @importFrom SpaDES.tools spread
 #' @importFrom raster raster
 #' @importFrom terra rast

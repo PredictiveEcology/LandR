@@ -7,15 +7,15 @@
 currentDataLayers(dataLayers, currentYear)
 }
 \arguments{
-\item{dataLayers}{a named list/stack of SpatRasters with
+\item{dataLayers}{a named list/stack of \code{SpatRasters} with
 data layers to be searched (i.e., data layers for multiple simulation
-periods). Names \emph{must} be suffixed with "*_\if{html}{\out{<year>}}", where
+periods). Names \emph{must} be suffixed with \code{"*_<year>"}, where
 "\if{html}{\out{<year>}}" is the \emph{first year} of the data period to use. For instance,
-if layers available are "temperature_2021" and "temperature_2041"
-and \code{currentYear} is 2025, "temperature_2021" will be used.
-If \code{currentYear} is 2050, "temperature_2041" will be used.
+if layers available are \code{"temperature_2021"} and \code{"temperature_2041"}
+and \code{currentYear} is 2025, \code{"temperature_2021"} will be used.
+If \code{currentYear} is 2050, \code{"temperature_2041"} will be used.
 If \code{currentYear} is 2020, the function will error as there are no
-climate layers availabe for periods before 2021.}
+climate layers available for periods before 2021.}
 
 \item{currentYear}{the year for which we want find climate data for.}
 }

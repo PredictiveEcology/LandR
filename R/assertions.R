@@ -139,7 +139,7 @@ assertUniqueCohortData <- function(cohortData, columns,
 #'
 #' @template ecoregionMap
 #' @template speciesEcoregion
-#' @param minRelativeB TODO: add description
+#' @param minRelativeB numeric; minimum relative biomass
 #'
 #' @export
 #' @importFrom utils str

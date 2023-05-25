@@ -20,7 +20,7 @@ defaultClimateDataProj(
 
 \item{climateGCM}{character. The Global Circulation Model, GCM, (or ensemble) to use.}
 
-\item{climateSSP}{character. The Socio-economic Shared Pathway, SSP (i.e. emisions scenario) to use.}
+\item{climateSSP}{character. The Socio-economic Shared Pathway, SSP (i.e. emissions scenario) to use.}
 
 \item{periods}{character. The year periods to use.}
 
@@ -35,15 +35,15 @@ and mask data layers. Passed to \code{reproducible::Cache} and \code{reproducibl
 the default permafrost layer and fire perimeters.}
 }
 \value{
-named list of \code{SpatRasters}, with names following \code{vars}.
+named list of \code{SpatRaster}s, with names following \code{vars}.
 }
 \description{
 Downloads a set of default climate variables' forecasts as rasters -- used
-to model maxB, SEP and thermokarst (amongst others).
+to model \code{maxB}, SEP and thermokarst (among others).
 }
 \details{
 By default this function downloads four bioclimatic variables (mean annual temperature
 MAT, precipitation of warmest quarter, PPT_sm, precipitation of coldest quarter, PPT_wt, annual
 climate moisture index, CMI) obtained from AdaptWest for 20 year periods between 2001 and 2100
-(see https://adaptwest.databasin.org/pages/adaptwest-climatena/) - at 1 Km resolution].
+(see https://adaptwest.databasin.org/pages/adaptwest-climatena/) - at 1 km resolution].
 }

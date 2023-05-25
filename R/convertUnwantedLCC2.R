@@ -19,7 +19,7 @@ utils::globalVariables(c(
 #'
 #'
 #' @return
-#' A `rasterLayer` with values in classesToReplace converted to adjacent values or NA.
+#' A `rasterLayer` with values in `classesToReplace` converted to adjacent values or NA.
 #'
 #' @author Eliot McIntire Ian Eddy
 #' @export

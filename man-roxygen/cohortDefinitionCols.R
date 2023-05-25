@@ -1,2 +1,2 @@
-#' @param cohortDefinitionCols the columns in \code{cohortData} that define unique cohorts
+#' @param cohortDefinitionCols the columns in `cohortData` that define unique cohorts
 #'

@@ -141,8 +141,7 @@ assertSppVectors(
 pixels what were LCC 34:36}
 
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
-\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
-and \code{sumB}.}
+\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
 \item{rmZeroBiomassQuote}{An expression to evaluate, in the form of \code{quote(B>0)},
 used to select cohorts with biomass.}
@@ -157,9 +156,9 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 \item{cohortDataNo34to36}{A \code{cohortData} \code{data.table} with only the
 pixels what were LCC 34:36}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{species}-{ecoregion}-specific species
-trait values. Ecoregion refers to "ecolocation", a categorical variable grouping sites with similar
-biophysical characteristics. The table should have at least the following columns: \code{speciesCode} and
+\item{speciesEcoregion}{A \code{data.table} with \code{species}-\code{ecoregion}-specific species trait values.
+Ecoregion refers to "ecolocation", a categorical variable grouping sites with similar biophysical
+characteristics. The table should have at least the following columns: \code{speciesCode} and
 \code{ecoregionGroup}, character representation of species and ecoregion groups respectively,
 \code{maxB} the maximum biomass for the species in a given 'ecoregion', \code{maxANPP} the maximum
 aboveground net primary productivity and \code{SEP} the species establishment probability.}
@@ -169,7 +168,7 @@ aboveground net primary productivity and \code{SEP} the species establishment pr
 \item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique ecoregion groupings,
 which group together pixels of similar biophysical characteristics.}
 
-\item{minRelativeB}{TODO: add description}
+\item{minRelativeB}{numeric; minimum relative biomass}
 
 \item{obj}{A data.frame or data.table-like object}
 
@@ -223,18 +222,18 @@ validation}
 
 \item{years}{years}
 
-\item{standAgeMap}{A \code{rasterLayer} of stand ages with attribute "imputedPixID"}
+\item{standAgeMap}{A \code{rasterLayer} of stand ages with attribute \code{"imputedPixID"}}
 
 \item{sppNameVector}{A character vector of species to use. These species must all
 be from one naming convention, i.e., from one column in the \code{sppEquiv}.}
 
 \item{sppColorVect}{A named vector of colours to use for plotting.
 The names must conform with species name convention used
-(see LandR::sppEquivalencies_CA for possible naming
+(see \link{sppEquivalencies_CA} for possible naming
 conventions) and should also contain a colour for 'Mixed',
-when a mixed forest type is supported  (see vegLeadingProportion
-parameter in LandR::vegTypeGenerator for details on mixed
-fores types).}
+when a mixed forest type is supported  (see \code{vegLeadingProportion}
+parameter in \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} for details on mixed
+forest types).}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.}
 }

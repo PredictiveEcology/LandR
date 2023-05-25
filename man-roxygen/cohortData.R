@@ -1,3 +1,2 @@
-#' @param cohortData A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
-#'   \code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
-#'   and \code{sumB}.
+#' @param cohortData A `data.table` with columns: `pixelGroup`, `ecoregionGroup`,
+#'   `speciesCode`, and optionally `age`, `B`, `mortality`, `aNPPAct`, and `sumB`.

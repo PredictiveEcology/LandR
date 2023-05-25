@@ -12,8 +12,8 @@ Default: \url{http://sis.agr.gc.ca/cansis/nsdb/ecostrat/zone/ecozone_shp.zip}.}
 
 \item{destinationPath}{path to data directory where objects will be downloaded or saved to}
 
-\item{studyArea}{A \code{SpatialPolygons*} object used as the principle study region,
-passed to \code{\link[reproducible]{prepInputs}}.}
+\item{studyArea}{A \verb{SpatialPolygons*} object used as the principle study region,
+passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}

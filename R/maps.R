@@ -637,7 +637,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #'               Defaults to 10.
 #'
 #' @param url the source url for the data, default is KNN 2011 dataset
-#' (\url{https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/})
+#' (<https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/>)
 #'
 #' @param ... Additional arguments passed to [reproducible::Cache()]
 #'            and [equivalentName()]. Also valid: `outputPath`, and `studyAreaName`.

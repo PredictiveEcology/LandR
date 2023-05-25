@@ -14,11 +14,11 @@ should contain species cover data in the study area}
 
 \item{sppColorVect}{A named vector of colours to use for plotting.
 The names must conform with species name convention used
-(see LandR::sppEquivalencies_CA for possible naming
+(see \link{sppEquivalencies_CA} for possible naming
 conventions) and should also contain a colour for 'Mixed',
-when a mixed forest type is supported  (see vegLeadingProportion
-parameter in LandR::vegTypeGenerator for details on mixed
-fores types).}
+when a mixed forest type is supported  (see \code{vegLeadingProportion}
+parameter in \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} for details on mixed
+forest types).}
 }
 \value{
 A \code{list} with the \code{speciesLayers} and \code{sppColorVect}

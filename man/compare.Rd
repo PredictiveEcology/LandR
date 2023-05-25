@@ -10,12 +10,12 @@
 .compareCRS(ras1, ras2)
 }
 \arguments{
-\item{ras1}{a Raster* or SpatRaster object}
+\item{ras1}{a \code{Raster} or \code{SpatRaster} object}
 
-\item{...}{additional Raster* or SpatRaster objects, and arguments
-passed to \code{terra::compareGeom}}
+\item{...}{additional \code{Raster} or \code{SpatRaster} objects, and arguments
+passed to \code{terra::compareGeom()}.}
 
-\item{ras2}{a Raster* or SpatRaster object}
+\item{ras2}{a \code{Raster} or \code{SpatRaster} object}
 }
 \value{
 the projected extent
@@ -27,7 +27,6 @@ TODO: Move to \code{reproducible}
 TODO: expand to multiple objects
 }
 \details{
-Note: this function internally converts Raster* to
-\code{SpatRaster} to allow using \code{compareGeom} and benefit
-from its complexity
+Note: this function internally converts \code{Raster} to \code{SpatRaster} to allow using \code{compareGeom()},
+and benefit from its complexity.
 }

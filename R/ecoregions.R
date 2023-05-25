@@ -129,11 +129,11 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
 }
 
 
-#' Create Stacks of the speciesEcoregion content
+#' Create Stacks of the `speciesEcoregion` content
 #'
-#' This will output a list of RasterStack objects. Each `RasterStack` show
-#' raster maps of one of the columns listed in `columns` and each
-#' `RasterLayer` will be one species.
+#' This will output a list of `RasterStack` objects. Each `RasterStack` show raster maps
+#' of one of the columns listed in `columns` and each `RasterLayer` will be one species.
+#'
 #' @importFrom data.table data.table setDTthreads
 #' @rawNamespace import(data.table, except = getNamespaceExports("data.table"))
 #' @importFrom pemisc factorValues2

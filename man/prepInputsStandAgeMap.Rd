@@ -55,7 +55,7 @@ is missing.}
 raster operations (i.e., the one used throughout the simulation).}
 
 \item{startTime}{date of the last fire year to be considered (e.g., start of fire
-period counting backwords). If missing, last fire year available will be used.}
+period counting backwards). If missing, last fire year available will be used.}
 }
 \value{
 a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
