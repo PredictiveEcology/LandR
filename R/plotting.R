@@ -7,9 +7,10 @@ utils::globalVariables(c(
 #' Create raster of leading vegetation types and `Plot` a bar chart summary
 #' and a vegetation type map. NOTE: plot order will follow `colors` order.
 #'
-#' @param speciesStack A `RasterStack` of percent-cover-by-species layers.
+#' @param speciesStack A `SpatRaster`, `RasterStack` or `RasterBrick`
+#'   of percent-cover-by-species layers.
 #'
-#' @param vtm An optional vegetation type map (`RasterLayer`).
+#' @param vtm An optional vegetation type map (`RasterLayer` or `SpatRaster`).
 #'            If not supplied, will be produced internally by `makeVegTypeMap`.
 #'
 #' @template vegLeadingProportion
@@ -27,14 +28,20 @@ utils::globalVariables(c(
 #' @export
 #' @importFrom data.table data.table setkeyv
 #' @importFrom ggplot2 aes element_blank element_text geom_bar ggplot guide_legend guides
-#' @importFrom ggplot2 scale_fill_manual scale_x_discrete theme
+#' @importFrom ggplot2 scale_fill_manual scale_x_discrete theme geom_raster
 #' @importFrom pemisc factorValues2
 #' @importFrom quickPlot Plot setColors<-
 #' @importFrom raster factorValues maxValue minValue
 #' @importFrom reproducible Cache
 #' @importFrom stats na.omit
+#' @importFrom tidyterra geom_spatraster
 plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
                     sppEquiv, sppEquivCol, colors, title = "Leading vegetation types") {
+
+  if (is(speciesStack, "RasterBrick")) {
+    speciesStack <- raster::stack(speciesStack)
+  }
+
   colorsEN <- equivalentName(names(colors), sppEquiv, "EN_generic_short")
   colDT <- data.table(cols = colors, species = colorsEN,
                       speciesOrig = names(colors),
@@ -52,7 +59,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   speciesStack <- speciesStack[[newStackOrder]]
 
   if (is.null(vtm)) {
-    if (!is.null(speciesStack))
+    if (!is.null(speciesStack)) {
       vtm <- Cache(vegTypeMapGenerator,
                    x = speciesStack,
                    vegLeadingProportion = vegLeadingProportion,
@@ -61,15 +68,19 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
                    sppEquivCol = sppEquivCol,
                    colors = colors,
                    doAssertion = getOption("LandR.assertions", TRUE))
-    else
+    } else
       stop("plotVTM requires either a speciesStack of percent cover or a",
            " vegetation type map (vtm).")
   }
 
   ## the ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
-  facLevels <- raster::levels(vtm)[[1]]
-  vtmTypes <- as.character(factorValues2(vtm, facLevels$ID, att = 2)) ## 'species', 'Species', 'VALUE'
+  if (is(vtm, "RasterLayer")) {
+    facLevels <- raster::levels(vtm)[[1]]
+  } else {
+    facLevels <- levels(vtm)[[1]]
+  }
+  vtmTypes <- as.character(factorValues2(vtm, na.omit(as.vector(unique(vtm[]))), att = 2)) ## 'species', 'Species', 'VALUE'
   vtmCols <- colors[match(vtmTypes, names(colors))]
   whMixed <- which(vtmTypes == "Mixed")
 
@@ -79,7 +90,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   facLevels$Species <- vtmTypes #nolint
 
   ## plot initial types bar chart
-  facVals <- factorValues2(vtm, vtm[], att = 2, na.rm = TRUE) ## 'species', 'Species', 'VALUE'
+  facVals <- factorValues2(vtm, as.vector(vtm[]), att = 2, na.rm = TRUE) ## 'species', 'Species', 'VALUE'
   df <- data.table(species = as.character(facVals), stringsAsFactors = FALSE)
   df <- df[!is.na(df$species)]
 
@@ -98,7 +109,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   }
 
   # Needs to be factor so ggplot2 knows that there may be missing levels
-  df$species <- factor(df$species, levels = colDT$species, ordered = FALSE)
+  df$species <- factor(df$species, levels = unique(colDT$species), ordered = FALSE)
 
   cols2 <- colDT$cols
   names(cols2) <- colDT$species
@@ -115,12 +126,76 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 
   ## plot inital types raster
   levels(vtm) <- facLevels
-  setColors(vtm, length(vtmTypes)) <- vtmCols ## setColors for factors must have an
-                                              ## entry for each row in raster::levels
+  if (is(vtm, "RasterLayer")) {
+    setColors(vtm, length(vtmTypes)) <- vtmCols ## setColors for factors must have an
+    ## entry for each row in raster::levels
+  } else {
+    ## TODO: setColors needs to be adapted to SpatRaster...
+  }
 
-  Plot(vtm, title = title)
+  cols2 <- colDT$cols
+  names(cols2) <- colDT$speciesOrig
+
+  labs <- colDT$species
+  names(labs) <- colDT$speciesOrig
+
+  vtmPlot <- if (is(vtm, "RasterLayer")) {
+     ggplot() + geom_raster(data = vtm)
+  } else {
+    ggplot() + geom_spatraster(data = vtm)
+  }
+  vtmPlot <- vtmPlot +
+    scale_fill_manual(values = cols2,  labels = labs,
+                        na.value = "grey80") +
+    theme(legend.text = element_text(size = 6), legend.title = element_blank(),
+          axis.text = element_text(size = 6))
+
+  Plot(vtmPlot, title = title)
 }
 
+#' Helper for setting Raster or `SpatRaster` colors
+#'
+#' This is a wrapper to help with migration to \pkg{terra}.
+#' Currently can only be used for a single layer `SpatRaster` or a `RasterLayer`.
+#'
+#' @export
+#' @importFrom terra coltab<- ncell
+#' @importFrom quickPlot setColors
+#' @param ras A `Raster*` or `SpatRaster` class object.
+#' @param cols a character vector of colours. See examples. Can also be a `data.frame`,
+#'   see `terra::coltab`
+#' @param n A numeric scalar giving the number of colours to create. Passed to
+#'   `quickPlot::setColors(ras, n = n) <- `. If missing, then `n` will be `length(cols)`
+#' @examples
+#' \donttest{
+#' cols <- colorRampPalette(c("blue", "red"))(12)
+#' ras <- terra::rast(matrix(1:100, 10, 10))
+#' ras <- Colors(ras, cols)
+#' terra::plot(ras)
+#'
+#' ras <- raster::raster(matrix(1:100, 10, 10))
+#' ras <- Colors(ras, cols)
+#' raster::plot(ras)
+#' }
+Colors <- function(ras, cols, n = NULL) {
+  if (is(ras, "SpatRaster")) {
+    theSeq <- round(minFn(ras)):round(maxFn(ras))
+    if (!is(cols, "data.frame")) {
+      if (length(cols) < length(theSeq)) {
+        message("not enough colours, interpolating")
+        cols <- colorRampPalette(cols)(length(theSeq) + 1)
+      }
+    }
+    coltab(ras, layer = 1) <- cols
+  } else {
+    if (is.null(n)) {
+      n <- length(cols)
+    }
+    setColors(ras, n = n) <- cols
+  }
+
+  ras
+}
 #' Create species colour vector from a `sppEquiv` table
 #'
 #' @template sppEquiv

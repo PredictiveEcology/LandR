@@ -39,17 +39,16 @@ Must contain the columns: \code{pixelIndex}, \code{speciesCode}, \code{ecoregion
 The remaining 4 (see \code{cohortData}) will be created with \code{0}s.}
 
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
-\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
-and \code{sumB}.}
+\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
 number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
 \item{currentTime}{The current simulation time e.g., \code{time(sim)}.}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{species}-{ecoregion}-specific species
-trait values. Ecoregion refers to "ecolocation", a categorical variable grouping sites with similar
-biophysical characteristics. The table should have at least the following columns: \code{speciesCode} and
+\item{speciesEcoregion}{A \code{data.table} with \code{species}-\code{ecoregion}-specific species trait values.
+Ecoregion refers to "ecolocation", a categorical variable grouping sites with similar biophysical
+characteristics. The table should have at least the following columns: \code{speciesCode} and
 \code{ecoregionGroup}, character representation of species and ecoregion groups respectively,
 \code{maxB} the maximum biomass for the species in a given 'ecoregion', \code{maxANPP} the maximum
 aboveground net primary productivity and \code{SEP} the species establishment probability.}
@@ -67,10 +66,10 @@ In LANDIS-II, this is called "Succession Timestep". This is used here}
 \item{initialB}{the initial biomass of new cohorts. Defaults to 10.
 If \code{NULL} or \code{NA}, initial cohort biomass is calculated as in LANDIS-II Biomass Succession
 Extension v3.2.1 (Scheller & Miranda, 2015):
-\code{initialB = asInteger(
-  pmin(maxANPP,
-  asInteger(pmax(1, maxANPP \* exp(-1.6 \* sumB / maxB_eco)))
-  ))}
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{initialB = asInteger(pmin(maxANPP, asInteger(pmax(1, maxANPP \\* exp(-1.6 \\* sumB / maxB_eco)))))
+}\if{html}{\out{</div>}}
+
 where \code{maxANPP} and \code{maxB_eco} are the maximum ANPP and B parameters of the species
 in question within the pixel's \code{ecolocation}, and \code{sumB} is the total stand biomass
 excluding cohorts with ages less than \code{successionTimestep}.}

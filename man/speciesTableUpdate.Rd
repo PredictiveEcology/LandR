@@ -9,26 +9,27 @@ speciesTableUpdate(species, speciesTable, sppEquiv, sppEquivCol)
 \arguments{
 \item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
 
-\item{speciesTable}{The raw species traits table, with \emph{at least} the following columns:
-\code{speciesCode} an character representation of species, \code{Area} a character of
-geographical area within a species range for which trait values are relevant,
-\code{longevity} species longevity in years, \code{sexualmature} age in years at sexual maturity,
-\code{shadetolerance} numeric value between 1-5 of relative shade tolerance (with respect to oteher species),
-\code{seeddistance_eff} the "effective" seed dispersal distance, \code{seeddistance_max} a
-numeric with the maximum seed dispersal distance, and \code{mortalityshape} and \code{growthcureve} to growth
-curve shape parameters. Other columns (e.g. fire-related traits) can also be included depeding on LandR modules in use.
-Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015) for further detail.}
+\item{speciesTable}{The raw species traits table, with \strong{at least} the following columns:
+\itemize{
+\item \code{speciesCode} an character representation of species;
+\item \code{Area} a character of geographical area within a species range for which trait values are relevant;
+\item \code{longevity} species longevity in years, \code{sexualmature} age in years at sexual maturity;
+\item \code{shadetolerance} numeric value between 1-5 of relative shade tolerance (with respect to other species);
+\item \code{seeddistance_eff} the "effective" seed dispersal distance;
+\item \code{seeddistance_max} a numeric with the maximum seed dispersal distance;
+\item \code{mortalityshape} and \code{growthcurve}: growth curve shape parameters.
+Other columns (e.g. fire-related traits) can also be included depending on LandR modules in use.
+Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015)
+for further detail.
+}}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
-For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
-this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use
-\code{data("sppEquivalencies_CA", "LandR")}.}
+For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.
-For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
-Only necessary if \code{mixedType == 2}.
+For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 }
 \value{
@@ -48,10 +49,10 @@ Note that BSW and BP areas correspond more closely to the region considered in T
 Burton & Cumming (1995), while MC will correspond to both tables.
 }
 \details{
-Of the above species, shade tolerance values are changed for Abies sp, Picea sp, and Tsuga sp.
-to reflect western boreal shade tolerances better.
+Of the above species, shade tolerance values are changed for \emph{Abies spp}, \emph{Picea spp},
+and \emph{Tsuga spp.} to reflect western boreal shade tolerances better.
 
-When different longectivity/shade tolerance trait values exist for a given species, the minimum
+When different longetivity/shade tolerance trait values exist for a given species, the minimum
 value across \code{Area}'s (BSW, BP, MC) is kept.
 
 ATTENTION: if none of species in \code{species} are from BSW, BP or MC area this function will not

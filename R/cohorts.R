@@ -61,7 +61,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
                              initialB = 10,
                              verbose = getOption("LandR.verbose", TRUE),
                              doAssertion = getOption("LandR.assertions", TRUE)) {
-  maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
+  maxPixelGroup <- as.integer(maxFn(pixelGroupMap))
 
   if (!is.null(treedFirePixelTableSinceLastDisp)) {
     ## only set to 0 the pixels that became empty (have no survivors)
@@ -186,7 +186,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 
   if (doAssertion) {
     maxPixelGroupFromCohortData <- max(outs$cohortData$pixelGroup)
-    maxPixelGroup <- as.integer(maxValue(outs$pixelGroupMap))
+    maxPixelGroup <- as.integer(maxFn(outs$pixelGroupMap))
     test1 <- (!identical(maxPixelGroup, maxPixelGroupFromCohortData))
     if (test1) {
       stop(
@@ -693,7 +693,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     )
     out <- out[initialPixels != pixels] # rm pixels which are same as initialPixels --> these are known wrong
     iterations <- iterations + 1
-    out[, lcc := rstLCC[][pixels]]
+    out[, lcc := as.vector(rstLCC[])[pixels]]
     out[lcc %in% c(classesToReplace), lcc := NA]
     out <- na.omit(out)
     out5 <- availableERC_by_Sp[out[, state := NULL],
@@ -792,18 +792,19 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 }
 
 
-#' Assess non-forested pixels based on species cover data
-#' and land-cover
+#' Assess non-forested pixels based on species cover data and land-cover
 #'
 #' @template speciesLayers
-#' @param omitNonTreedPixels logical. Should pixels with
-#'   classes in \code{forestedLCCClasses} be included as non-forested?
-#' @param forestedLCCClasses vector of non-forested land-cover classes in
-#'   \code{rstLCC}
+#'
+#' @param omitNonTreedPixels logical. Should pixels with classes in `forestedLCCClasses` be
+#'                           included as non-forested?
+#'
+#' @param forestedLCCClasses vector of non-forested land-cover classes in `rstLCC`
+#'
 #' @template rstLCC
 #'
-#' @return a logical vector of length \code{ncell(rstLCC)}
-#'   where TRUEs indicate non-forested pixels where there is no
+#' @return a logical vector of length `ncell(rstLCC)`
+#'   where `TRUE` indicates non-forested pixels where there is no
 #'   species cover data, or a non-forested land-cover class
 #'
 #' @export
@@ -1394,7 +1395,7 @@ columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 #' An expanded `cohortData` `data.table` with a new `pixelIndex` column.
 #'
 #' @export
-#' @importFrom raster getValues ncell
+#' @importFrom terra ncell
 addPixels2CohortData <- function(cohortData, pixelGroupMap,
                                  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
                                  doAssertion = getOption("LandR.assertions", TRUE)) {
@@ -1404,7 +1405,7 @@ addPixels2CohortData <- function(cohortData, pixelGroupMap,
   )
 
   pixelGroupTable <- na.omit(data.table(
-    pixelGroup = getValues(pixelGroupMap),
+    pixelGroup = as.vector(pixelGroupMap[]),
     pixelIndex = 1:ncell(pixelGroupMap)
   ))
   pixelCohortData <- cohortData[pixelGroupTable,
@@ -1434,7 +1435,6 @@ addPixels2CohortData <- function(cohortData, pixelGroupMap,
 #'
 #' @export
 #' @importFrom data.table data.table
-#' @importFrom raster maxValue
 addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
                                   cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
@@ -1444,7 +1444,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 
   noPixelsXGroup <- data.table(
     noPixels = tabulate(pixelGroupMap[]),
-    pixelGroup = c(1:maxValue(pixelGroupMap))
+    pixelGroup = c(1:maxFn(pixelGroupMap))
   )
 
   pixelCohortData <- cohortData[noPixelsXGroup, on = "pixelGroup", nomatch = 0]
@@ -1755,7 +1755,7 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
   cohortData <- copy(cohortData)
   provenanceTable <- copy(provenanceTable)
 
-  maxPixelGroup <- as.integer(maxValue(pixelGroupMap))
+  maxPixelGroup <- as.integer(maxFn(pixelGroupMap))
 
   if (!is.null(treedHarvestPixelTable)) {
     pixelGroupMap[treedHarvestPixelTable$pixelIndex] <- 0L
@@ -1836,7 +1836,7 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
 
   if (doAssertion) {
     maxPixelGroupFromCohortData <- max(outs$cohortData$pixelGroup)
-    maxPixelGroup <- as.integer(maxValue(outs$pixelGroupMap))
+    maxPixelGroup <- as.integer(maxFn(outs$pixelGroupMap))
     test1 <- (!identical(maxPixelGroup, maxPixelGroupFromCohortData))
     if (test1) {
       stop(

@@ -16,10 +16,8 @@ sppHarmonize(
 \arguments{
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
-For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
-this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use
-\code{data("sppEquivalencies_CA", "LandR")}.}
+For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{sppNameVector}{A character vector of species to use. These species must all
 be from one naming convention, i.e., from one column in the \code{sppEquiv}.}
@@ -31,17 +29,17 @@ it will default to \code{"Boreal"}.}
 
 \item{sppColorVect}{A named vector of colours to use for plotting.
 The names must conform with species name convention used
-(see LandR::sppEquivalencies_CA for possible naming
+(see \link{sppEquivalencies_CA} for possible naming
 conventions) and should also contain a colour for 'Mixed',
-when a mixed forest type is supported  (see vegLeadingProportion
-parameter in LandR::vegTypeGenerator for details on mixed
-fores types).}
+when a mixed forest type is supported  (see \code{vegLeadingProportion}
+parameter in \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} for details on mixed
+forest types).}
 
 \item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
 threshold a species needs to pass to be considered "leading".}
 
-\item{studyArea}{A \code{SpatialPolygons*} object used as the principle study region,
-passed to \code{\link[reproducible]{prepInputs}}.}
+\item{studyArea}{A \verb{SpatialPolygons*} object used as the principle study region,
+passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 }
 \value{
 Returns a named list with the same names as the arguments. These should

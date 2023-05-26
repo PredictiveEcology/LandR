@@ -60,22 +60,22 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
                            printSummary = TRUE,
                            doAssertion = getOption("LandR.assertions", TRUE)) {
   if (missing(rasterToMatch)) {
-    rasterToMatch <- raster(speciesLayers[[1]])
+    rasterToMatch <- rasterRead(speciesLayers[[1]])
     rasterToMatch[] <- 0
     rasterToMatch[is.na(speciesLayers[[1]])] <- NA
   }
 
   if (missing(ecoregionFiles)) {
     ecoregionFiles <- list()
-    ecoregionFiles$ecoregionMap <- raster(rasterToMatch)
-    rtmNotNA <- which(!is.na(rasterToMatch[]))
+    ecoregionFiles$ecoregionMap <- rasterRead(rasterToMatch)
+    rtmNotNA <- which(!is.na(as.vector(rasterToMatch[])))
     ecoregionFiles$ecoregionMap[rtmNotNA] <- seq_along(rtmNotNA)
-    initialEcoregionCodeVals <- ecoregionFiles$ecoregionMap[]
+    initialEcoregionCodeVals <- as.vector(ecoregionFiles$ecoregionMap[])
   } else {
     initialEcoregionCodeVals <- factorValues2(
       ecoregionFiles$ecoregionMap,
-      ecoregionFiles$ecoregionMap[],
-      att = 5)
+      as.vector(values(ecoregionFiles$ecoregionMap)),
+      att = "ecoregion_lcc")
   }
 
   # message(blue("Round age to nearest pixelGroupAgeClass, which is", pixelGroupAgeClass))
@@ -91,7 +91,7 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
   pixelTable <- data.table(initialEcoregionCode = iec,
                            cover = coverMatrix,
                            pixelIndex = seq(ncell(rasterToMatch)),
-                           rasterToMatch = rasterToMatch[]
+                           rasterToMatch = as.vector(values(rasterToMatch))
   )
   if (!missing(standAgeMap)) {
     set(pixelTable, NULL, "age", asInteger(standAgeMap[]))
@@ -103,7 +103,7 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
   }
 
   if (!missing(rstLCC)) {
-    set(pixelTable, NULL, "lcc", rstLCC[])
+    set(pixelTable, NULL, "lcc", as.vector(values(rstLCC)))
   }
 
   #pixelTable <- data.table(#age = asInteger(ceiling(asInteger(standAgeMap[]) /
@@ -270,12 +270,12 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
 #' @return The `biomassMap`, a raster of total stand biomass per pixel.
 #'
 #' @export
-#' @importFrom raster raster
+#' @importFrom terra rast
 makeBiomassMap <-  function(pixelCohortData, rasterToMatch) {
   pixelData <- unique(pixelCohortData, by = "pixelIndex")
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
-  biomassMap <- raster(rasterToMatch)
+  biomassMap <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(rasterToMatch)
   # suppress this message call no non-missing arguments to min;
   # returning Inf min(x@data@values, na.rm = TRUE)
   suppressWarnings(biomassMap[pixelData$pixelIndex] <- pixelData$totalBiomass)
@@ -339,7 +339,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
   pixelData <- unique(pixelCohortData, by = "pixelIndex")
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
-  pixelGroupMap <- raster(rasterToMatch)
+  pixelGroupMap <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(rasterToMatch)
 
   ## suppress this message call no non-missing arguments to min;
   ## returning Inf min(x@data@values, na.rm = TRUE)
@@ -383,11 +383,11 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @examples
 #' \dontrun{
 #' library(SpaDES.tools)
-#' library(raster)
+#' library(terra)
 #' library(reproducible)
-#' randomPoly <- randomStudyArea(size = 1e7)
+#' randomPoly <- vect(randomStudyArea(size = 1e7))
 #' randomPoly
-#' ras2match <- raster(res = 250, ext = extent(randomPoly), crs = crs(randomPoly))
+#' ras2match <- rast(res = 250, ext = ext(randomPoly), crs = crs(randomPoly))
 #' ras2match <- rasterize(randomPoly, ras2match)
 #' tempDir <- tempdir()
 #'
@@ -403,13 +403,12 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' firePerimeters <- Cache(prepInputsFireYear,
 #'                         url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
 #'                         "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-#'                         fun = "sf::st_read",
 #'                         destinationPath = tempDir,
 #'                         rasterToMatch = ras2match)
 #'
 #' standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
-#'                                     firePerimeters = firePerimeters,
-#'                                     rasterToMatch = ras2match)
+#'                                   firePerimeters = firePerimeters,
+#'                                   rasterToMatch = ras2match)
 #' attr(standAge, "imputedPixID")
 #'
 #' ## not providing firePerimeters is still possible, but will be deprecated
@@ -494,22 +493,24 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' Wrapper on `prepInputs` that will rasterize fire polygons.
 #'
 #' @template studyAreaName
+#'
 #' @template cacheTags
+#'
 #' @param ... arguments passed to `prepInputs` and `Cache`. If the following arguments
 #'   are not provided, the following values will be used:
 #'   \itemize{
-#'     \item{url: by default, the 2001 kNN stand biomass map is downloaded from
+#'     \item{`url`: by default, the 2001 kNN stand biomass map is downloaded from
 #'       the NRCan National Forest Inventory}
-#'     \item{useSAcrs: FALSE}
-#'     \item{method: "bilinear"}
-#'     \item{datatype: "INT2U"}
-#'     \item{filename2: `suffix("rawBiomassMap.tif", paste0("_", studyAreaName))`}
-#'     \item{overwrite: TRUE}
-#'     \item{userTags: `c(cacheTags, "rawBiomassMap")`}
-#'     \item{omitArgs: `c("destinationPath", "targetFile", "userTags", "stable")`}
+#'     \item{`useSAcrs`: `FALSE`}
+#'     \item{`method`: `"bilinear"`}
+#'     \item{`datatype`: `"INT2U"`}
+#'     \item{`filename2`: `suffix("rawBiomassMap.tif", paste0("_", studyAreaName))`}
+#'     \item{`overwrite`: `TRUE`}
+#'     \item{`userTags`: `c(cacheTags, "rawBiomassMap")`}
+#'     \item{`omitArgs`: `c("destinationPath", "targetFile", "userTags", "stable")`}
 #'   }
 #'
-#' @return a rawBiomassMap raster
+#' @return a `rawBiomassMap` raster
 #' @export
 #' @importFrom reproducible Cache prepInputs
 prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
@@ -555,7 +556,7 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #' @param fireField field used to rasterize fire polys
 #' @param earliestYear the earliest fire date to allow
 #'
-#' @return a raster layer of fire perimeters with fire year values.
+#' @return a `SpatRaster` layer of fire perimeters with fire year values.
 #'
 #' @export
 #' @importFrom fasterize fasterize
@@ -564,36 +565,43 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #' @importFrom sf st_cast st_transform st_zm
 #'
 #' @examples
-#' if (require("googledrive")) {
-#'   library(SpaDES.tools)
-#'   library(raster)
-#'   library(reproducible)
+#' library(SpaDES.tools)
+#' library(terra)
+#' library(reproducible)
 #'
-#'   randomPoly <- randomStudyArea()
-#'   randomPoly
-#'   ras2match <- raster(res = 10, ext = extent(randomPoly), crs = crs(randomPoly))
-#'   ras2match <- rasterize(randomPoly, ras2match)
-#'   tempDir <- tempdir()
-#'   cacheRepo <- file.path(tempDir, "cache")
+#' options("reproducible.useTerra" = TRUE, "reproducible.rasterRead" = "terra::rast")
 #'
-#'   ## ideally, get the firePerimenters layer first
-#'   firePerimeters <- Cache(prepInputsFireYear,
-#'                           url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
-#'                                        "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-#'                           fun = "sf::st_read",
-#'                           destinationPath = tempDir,
-#'                           rasterToMatch = ras2match)
+#' targetCRS <- crs(randomStudyArea())
+#' randomPoly <- randomStudyArea(
+#'   center = vect(cbind(-115, 50), crs = targetCRS),
+#'   size = 1e+7,
+#' )
+#' buffExt <- buffer(randomPoly, 1e+3) |> ext()
+#' ras2match <- rast(res = 10, ext = ext(randomPoly), crs = crs(randomPoly))
+#' ras2match <- rasterize(randomPoly, ras2match)
+#'
+#' firePerimeters <- prepInputsFireYear(
+#'   url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
+#'                "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
+#'   destinationPath = tempdir(),
+#'   rasterToMatch = ras2match,
+#'   earliestYear = 1930
+#' )
+#'
+#' if (interactive()) {
+#'   plot(firePerimeters)
+#'   plot(randomPoly, add = TRUE)
 #' }
-#'
 prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950) {
   dots <- list(...)
   a <- if (is.null(dots$fun)) {
     Cache(prepInputs, rasterToMatch = rasterToMatch, fun = "terra::vect", ...) |>
-      st_as_sf() |>
-      st_zm() #NFDB data has incomplete z coordinates resulting in errors
+      st_as_sf()
   } else {
     if (grepl("st_read", dots$fun)) {
-      Cache(prepInputs, ...)
+      Cache(prepInputs, rasterToMatch = rasterToMatch, ...)  |>
+        st_as_sf() |>
+        st_zm() #NFDB data has incomplete z coordinates resulting in errors
     } else {
       Cache(prepInputs, rasterToMatch = rasterToMatch, ...) |>
         st_as_sf()
@@ -607,17 +615,23 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
       warning("Chosen fireField will be coerced to numeric")
       d[[fireField]] <- as.numeric(as.factor(d[[fireField]]))
     }
-    if (requireNamespace("terra", quietly = TRUE) && is(rasterToMatch, "SpatRaster")) {
+    if (is(rasterToMatch, "SpatRaster") && requireNamespace("terra", quietly = TRUE)) {
       fireRas <- terra::rasterize(d, rasterToMatch, field = fireField)
       fireRas[!is.na(terra::values(fireRas)) & terra::values(fireRas) < earliestYear] <- NA
     } else {
       fireRas <- fasterize(d, raster = rasterToMatch, field = fireField)
       fireRas[!is.na(getValues(fireRas)) & getValues(fireRas) < earliestYear] <- NA
     }
-    return(fireRas)
   } else {
-    return(NULL)
+    if (is(rasterToMatch, "SpatRaster") && requireNamespace("terra", quietly = TRUE)) {
+      fireRas <- terra::rast(rasterToMatch, vals = NA)
+    } else {
+      fireRas <- raster::raster(rasterToMatch)
+      values(fireRas) <- NA
+    }
   }
+
+  return(fireRas)
 }
 
 #' Replace stand age with time since last fire
@@ -638,11 +652,11 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 #' @examples
 #' \dontrun{
 #' library(SpaDES.tools)
-#' library(raster)
+#' library(terra)
 #' library(reproducible)
-#' randomPoly <- randomStudyArea(size = 1e7)
+#' randomPoly <- vect(randomStudyArea(size = 1e7))
 #' randomPoly
-#' ras2match <- raster(res = 250, ext = extent(randomPoly), crs = crs(randomPoly))
+#' ras2match <- rast(res = 250, ext = ext(randomPoly), crs = crs(randomPoly))
 #' ras2match <- rasterize(randomPoly, ras2match)
 #' tempDir <- tempdir()
 #'
@@ -654,7 +668,6 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 #' firePerimeters <- Cache(prepInputsFireYear,
 #'                         url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
 #'                         "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-#'                         fun = "sf::st_read",
 #'                         destinationPath = tempDir,
 #'                         rasterToMatch = ras2match)
 #' standAge <- replaceAgeInFires(standAge, firePerimeters)
@@ -729,15 +742,15 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
       rasterToMatchLarge <- templateRas
     }
 
-    if (!anyNA(rasterToMatchLarge[])) {
-      whZeros <- rasterToMatchLarge[] == 0
+    if (!anyNA(as.vector(rasterToMatchLarge[]))) {
+      whZeros <- as.vector(rasterToMatchLarge[]) == 0
       if (sum(whZeros) > 0) {# means there are zeros instead of NAs for RTML --> change
         rasterToMatchLarge[whZeros] <- NA
         message("There were no NAs on the rasterToMatchLarge, but there were zeros; converting these zeros to NA")
       }
     }
 
-    RTMvals <- rasterToMatchLarge[]
+    RTMvals <- as.vector(rasterToMatchLarge[])
     rasterToMatchLarge[!is.na(RTMvals)] <- 1
 
     rasterToMatchLarge <- Cache(

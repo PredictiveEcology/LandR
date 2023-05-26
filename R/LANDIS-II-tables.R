@@ -122,10 +122,10 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #' Note that BSW and BP areas correspond more closely to the region considered in Table 2 of
 #' Burton & Cumming (1995), while MC will correspond to both tables.
 #'
-#' Of the above species, shade tolerance values are changed for Abies sp, Picea sp, and Tsuga sp.
-#' to reflect western boreal shade tolerances better.
+#' Of the above species, shade tolerance values are changed for *Abies spp*, *Picea spp*,
+#' and *Tsuga spp.* to reflect western boreal shade tolerances better.
 #'
-#' When different longectivity/shade tolerance trait values exist for a given species, the minimum
+#' When different longetivity/shade tolerance trait values exist for a given species, the minimum
 #' value across `Area`'s (BSW, BP, MC) is kept.
 #'
 #' ATTENTION: if none of species in `species` are from BSW, BP or MC area this function will not
@@ -150,7 +150,6 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #' @importFrom crayon red
 #'
 #' @rdname speciesTableUpdate
-
 speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   ## if "Area"is a column in the (final) traits table, then check and warn the user for area
   ## mismatches

@@ -19,17 +19,17 @@ utils::globalVariables(c(
 #'
 #'
 #' @return
-#' A `rasterLayer` with values in classesToReplace converted to adjacent values or NA.
+#' A `rasterLayer` with values in `classesToReplace` converted to adjacent values or NA.
 #'
 #' @author Eliot McIntire Ian Eddy
 #' @export
 #' @importFrom data.table as.data.table is.data.table rbindlist setnames
-#' @importFrom raster raster ncell getValues
+#' @importFrom terra ncell
 #' @importFrom SpaDES.tools spread2
 convertUnwantedLCC2 <- function(classesToReplace = 34:36, rstLCC, nIterations = 6, defaultNewValue = NA,
                                 invalidClasses = NA) {
 
-  lccDT <- data.table(pixelIndex = 1:ncell(rstLCC), lcc = getValues(rstLCC))
+  lccDT <- data.table(pixelIndex = 1:ncell(rstLCC), lcc = as.vector(rstLCC))
 
   theUnwantedPixels <- lccDT[!is.na(lcc) & lcc %in% classesToReplace]$pixelIndex
   # lccShort <- lccDT[pixelIndex %in% theUnwantedPixels] #keep for joining

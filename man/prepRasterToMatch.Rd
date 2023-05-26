@@ -16,8 +16,8 @@ prepRasterToMatch(
 )
 }
 \arguments{
-\item{studyArea}{A \code{SpatialPolygons*} object used as the principle study region,
-passed to \code{\link[reproducible]{prepInputs}}.}
+\item{studyArea}{A \verb{SpatialPolygons*} object used as the principle study region,
+passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
 \item{studyAreaLarge}{same as \code{studyArea}, but larger and completely
 covering it.}

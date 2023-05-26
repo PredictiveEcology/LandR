@@ -43,14 +43,14 @@ utils::globalVariables(c(
 #' @param dispersalFn  An expression that can take a "dis" argument. See details.
 #'   Default is "Ward" (temporarily unused, as it is hard coded inside Rcpp function)
 #'
-#' @param plot.it  Deprecated. If TRUE, then plot the raster at every interaction, so one can watch the
-#' LANDISDisp event grow.
-#' @param b  Landis Ward seed dispersal calibration coefficient (set to 0.01 in Landis)
+#' @param plot.it  Deprecated. If TRUE, then plot the raster at every interaction,
+#'                 so one can watch the `LANDISDisp` event grow.
+#' @param b  LANDIS Ward seed dispersal calibration coefficient (set to 0.01 in LANDIS)
 #'
-#' @param k  Landis Ward seed dispersal the probability that seed will disperse within
-#' the effective distance (eg., 0.95)
+#' @param k  LANDIS Ward seed dispersal the probability that seed will disperse within
+#' the effective distance (e.g., 0.95)
 #'
-#' @param successionTimestep integer. The time in timeunits between succession (i.e., dispersal) events.
+#' @param successionTimestep integer. The time in time units between succession (i.e., dispersal) events.
 #'
 #' @param verbose Numeric. `0` is not verbose, with increasing numbers indicating
 #'   increasing levels of verbosity (currently up to 2)
@@ -61,7 +61,7 @@ utils::globalVariables(c(
 #' `seedSrc` raster.
 #'
 #' @importFrom data.table setDT setattr set
-#' @importFrom raster xyFromCell focalWeight rowColFromCell cellFromRowCol
+#' @importFrom raster cellFromRowCol focalWeight rowColFromCell xyFromCell
 #' @importFrom stats na.omit
 #' @importFrom SpaDES.tools runifC
 #' @export

@@ -24,19 +24,19 @@ speciesInStudyArea(studyArea, url = NULL, speciesPresentRas = NULL)
 \item{minPctCover}{An integer indicating what percent cover a species must have
 in a pixel to be considered present in that pixel.}
 
-\item{studyArea}{A \code{SpatialPolygons*} object used as the principle study region,
-passed to \code{\link[reproducible]{prepInputs}}.}
+\item{studyArea}{A \verb{SpatialPolygons*} object used as the principle study region,
+passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
-\item{url}{A url to get a speciesPresence raster e.g., from \code{peciesPresentFromKNN}}
+\item{url}{A url to get a \code{speciesPresence} raster e.g., from \code{peciesPresentFromKNN}}
 
 \item{speciesPresentRas}{A factor raster where the character string is a string of
 species names, separated by 2 underscores, sorted alphabetically. Can be produced
 with \code{speciesPresentFromKNN}}
 }
 \value{
-A terra rast object with 2 layers, "speciesPresent" is a factor rast, with
+A \code{SpatRaster} object with 2 layers: \code{"speciesPresent"} is a factor, with
 a legend (i.e., it is numbers on a map, that correspond to a legend) and
-"numberSpecies" which represents the number of species in each pixel.
+\code{"numberSpecies"} which represents the number of species in each pixel.
 
 A named list of length 2: \code{speciesRas} is a factor \code{RasterLayer}
 and \code{speciesList} is a character string containing the unique, sorted

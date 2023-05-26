@@ -1,1 +1,1 @@
-#' @param pixelCohortData The full \code{cohortData} \code{data.table}
+#' @param pixelCohortData The full `cohortData` `data.table`

@@ -9,16 +9,19 @@ projectTo <- utils::getFromNamespace("projectTo", "reproducible")
 #'
 #' This will download all KNN layers in (Boreal) Forest of Canada, and make
 #' a factor raster at resolution provided by `res` (larger is faster).
+#'
 #' @param year Default (and only implemented) is 2011. This will download the 2011 KNN data layers
+#'
 #' @param dPath A character string indicating where to download all the KNN layers
+#'
 #' @param res The resolution (one dimension, in m) for the resulting raster
+#'
 #' @param minPctCover An integer indicating what percent cover a species must have
 #'   in a pixel to be considered present in that pixel.
 #'
-#' @return
-#' A terra rast object with 2 layers, "speciesPresent" is a factor rast, with
+#' @return A `SpatRaster` object with 2 layers: `"speciesPresent"` is a factor, with
 #' a legend (i.e., it is numbers on a map, that correspond to a legend) and
-#' "numberSpecies" which represents the number of species in each pixel.
+#' `"numberSpecies"` which represents the number of species in each pixel.
 #'
 #' @examples
 #' \dontrun{
@@ -106,13 +109,14 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 #' from `speciesPresentFromKNN`.
 #'
 #' @template studyArea
-#' @param url A url to get a speciesPresence raster e.g., from `peciesPresentFromKNN`
+#'
+#' @param url A url to get a `speciesPresence` raster e.g., from `peciesPresentFromKNN`
+#'
 #' @param speciesPresentRas A factor raster where the character string is a string of
 #'   species names, separated by 2 underscores, sorted alphabetically. Can be produced
 #'   with `speciesPresentFromKNN`
 #'
-#' @return
-#' A named list of length 2: `speciesRas` is a factor `RasterLayer`
+#' @return A named list of length 2: `speciesRas` is a factor `RasterLayer`
 #' and `speciesList` is a character string containing the unique, sorted
 #' species on the `speciesRas`, for convenience.
 #'

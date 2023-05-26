@@ -8,8 +8,7 @@ calcSeverityB(cohortData, burnedPixelCohortData)
 }
 \arguments{
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
-\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
-and \code{sumB}.}
+\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
 \item{burnedPixelCohortData}{An expanded \code{cohortData} \code{data.table} with pixel-level
 cohort information on burnt pixels and the following (optional) columns:

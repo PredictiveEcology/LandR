@@ -12,8 +12,7 @@
 #'
 #' @export
 #' @importFrom data.table as.data.table data.table
-#' @importFrom fasterize fasterize
-#' @importFrom raster getValues levels raster
+#' @importFrom terra rasterize levels
 #' @importFrom reproducible Cache fixErrors paddedFloatToChar
 #' @importFrom sf st_as_sf st_crs st_transform
 prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerField = NULL,
@@ -39,17 +38,27 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
       ecoregionMapSF[["ecoregionLayerField"]] <- as.factor(ecoDT$ecoregionLayerField)
       rm(ecoDT)
     }
-    ecoregionRst <- fasterize::fasterize(ecoregionMapSF, raster = rasterToMatchLarge,
-                                         field = "ecoregionLayerField")
+
+    ## terra::rasterize creates a factor raster from a factor field, but uses "0" as the first value
+    ## we will instead create integer field starting at 1.
+    ecoregionMapSF$ecoregionLayerFieldInt <- as.integer(ecoregionMapSF$ecoregionLayerField)
+    ecoregionRst <- rasterize(ecoregionMapSF, rasterToMatchLarge,
+                              field = "ecoregionLayerFieldInt")
+    # ecoregionRst <- fasterize::fasterize(ecoregionMapSF, rasterToMatchLarge,
+    #                                      field = "ecoregionLayerField")
     rm(ecoregionLayer)
     if (is.factor(ecoregionMapSF$ecoregionLayerField)) {
       appendEcoregionFactor <- TRUE
       #Preserve factor values
       uniqVals <- unique(ecoregionMapSF$ecoregionLayerField)
-      df <- data.frame(ID = seq_len(length(uniqVals)),
+      uniqIDs <- unique(ecoregionMapSF$ecoregionLayerFieldInt)
+      df <- data.frame(ID = uniqIDs,
                        ecoregionName = uniqVals,
                        stringsAsFactors = FALSE)
       levels(ecoregionRst) <- df #this will preserve the factors
+
+      ecoregionTable <- as.data.table(df)
+      ecoregionTable[, ID := as.factor(paddedFloatToChar(ID, max(nchar(ID))))]
     }
   } else {
     if (!length(ecoregionRst@data@attributes) == 0) {
@@ -64,8 +73,8 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
 
   message(blue("Make initial ecoregionGroups ", Sys.time()))
 
-  if (!isTRUE(compareRaster(ecoregionRst, rstLCCAdj,
-                           res = TRUE, orig = TRUE, stopiffalse = FALSE)))
+  if (!isTRUE(.compareRas(ecoregionRst, rstLCCAdj,
+                          res = TRUE, stopOnError = FALSE)))
     stop("problem with rasters ecoregionRst and rstLCCAdj -- they don't have same metadata")
 
   ecoregionFiles <- Cache(ecoregionProducer,
@@ -75,8 +84,6 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
                           omitArgs = c("userTags"))
 
   if (appendEcoregionFactor) {
-    ecoregionTable <- as.data.table(ecoregionRst@data@attributes[[1]])
-    ecoregionTable[, ID := as.factor(paddedFloatToChar(ID, max(nchar(ID))))]
     ecoregionFiles$ecoregion <- ecoregionFiles$ecoregion[ecoregionTable, on = c("ecoregion" = "ID")] |>
       na.omit()
     setnames(ecoregionFiles$ecoregion, old = "ecoregion_lcc", new = "ecoregionGroup")

@@ -24,11 +24,11 @@ utils::globalVariables(c(
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
                             nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
                             mask = NULL, filename2 = NULL) {
-  if (!is(LandCoverClassifiedMap, "RasterLayer")) {
-    stop("Need a classified land cover map. Currently only accepts 'LCC2005'")
+  if (!inherits(LandCoverClassifiedMap, c("RasterLayer", "SpatRaster"))) {
+    stop("Need a classified land cover map that is a RasterLayer or SpatRaster")
   }
 
-  if (!is.integer(LandCoverClassifiedMap[])) {
+  if (!isInt(LandCoverClassifiedMap)) {
     stop("LandCoverClassifiedMap must be an integer")
   }
 
@@ -42,25 +42,34 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
   }
 
   if (!is.null(mask)) {
-    if (!is(mask, "Raster")) {
+    if (!inherits(mask, c("RasterLayer", "SpatRaster"))) {
       stop("mask must be a raster layer")
     }
-    compareRaster(LandCoverClassifiedMap, mask)
+    .compareRas(LandCoverClassifiedMap, mask)
   }
 
   oldClass <- minFn(LandCoverClassifiedMap):maxFn(LandCoverClassifiedMap)
   newClass <- ifelse(oldClass %in% nonFlammClasses, 0L, 1L) ## NOTE: 0 codes for NON-flammable
   flammableTable <- cbind(oldClass, newClass)
-  rstFlammable <- ratify(reclassify(LandCoverClassifiedMap, flammableTable))
+
+  reclassed <- reclass(LandCoverClassifiedMap, flammableTable)
+  rstFlammable <- if (is(reclassed, "SpatRaster")) terra::as.factor(reclassed) else ratify(reclassed)
+
   if (!is.null(filename2))
     rstFlammable <- writeRaster(rstFlammable, filename = filename2, overwrite = TRUE)
 
-  setColors(rstFlammable, n = 2) <- colorRampPalette(c("blue", "red"))(2)
+  cols <- colorRampPalette(c("blue", "red"))(2)
+  if (is(rstFlammable, "SpatRaster"))
+    coltab(rstFlammable, layer = 1) <- cols
+  else
+    setColors(rstFlammable, n = 2) <- cols
+
   if (!is.null(mask)) {
     rstFlammable <- mask(rstFlammable, mask)
   }
 
-  rstFlammable[] <- as.integer(rstFlammable[])
+  rstFlammable <- asInt(rstFlammable)
+  # rstFlammable[] <- as.integer(rstFlammable[])
   rstFlammable
 }
 
@@ -77,11 +86,13 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #' @inheritParams reproducible::prepInputs
 #'
 #' @param year Numeric, either 2010 or 2015. See note re: backwards compatibility for 2005.
-#' @param method One of 'ngb' or 'near' depending on the class of the object (`Raster*` or `SpatRas`)
+#' @param method passed to `terra::intersect` or `raster::intersect`,
+#'   and `reproducible::prepInputs`
 #'
 #' @export
-#' @importFrom raster values values<-
 #' @importFrom reproducible asPath prepInputs
+#' @importFrom terra values intersect
+#' @importFrom raster intersect
 prepInputsLCC <- function(year = 2010,
                           destinationPath = asPath("."),
                           studyArea = NULL,
@@ -140,10 +151,10 @@ prepInputsLCC <- function(year = 2010,
                           "rasterToMatch" = rasterToMatch,
                           "method" = method,
                           "datatype" = "INT2U",
-
                           "filename2" = filename2))
+
   out <- do.call(prepInputs, fullArgs)
-  values(out) <- as.integer(values(out))
+  out[] <- as.integer(as.vector(values(out)))
   out
 }
 
@@ -180,7 +191,7 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 
 #' Generate vegetation type map
 #'
-#' @param x Either a `cohortData` object or a `speciesCover` `RasterStack`
+#' @param x Either a `cohortData` object or a `speciesCover` `RasterStack`/`SpatRaster`
 #'
 #' @template pixelGroupMap
 #'
@@ -213,64 +224,70 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 #' @importFrom utils data
 #' @rdname vegTypeMapGenerator
 vegTypeMapGenerator <- function(x, ...) {
-  UseMethod("vegTypeMapGenerator")
+  UseMethod("vegTypeMapGenerator", x)
 }
 
 #' @export
 #' @rdname vegTypeMapGenerator
-vegTypeMapGenerator.RasterStack <- function(x, ..., doAssertion = getOption("LandR.assertions", FALSE)) {
-  pixelTable <- suppressMessages(makePixelTable(x, printSummary = FALSE, doAssertion = doAssertion))
-  sppCols <- grep("cover", colnames(pixelTable), value = TRUE)
-  cohortTable <- suppressMessages(.createCohortData(pixelTable, sppColumns = sppCols, rescale = FALSE, doAssertion = doAssertion))
-  cohortTable <- cohortTable[cover > 0]
-  pixelGroupMap <- raster(x)
-  pixelGroupMap[pixelTable[["pixelIndex"]]] <- pixelTable[["initialEcoregionCode"]]
-  vegTypeMap <- vegTypeMapGenerator(x = cohortTable,
-                                    pixelGroupMap = pixelGroupMap,
-                                    pixelGroupColName = "initialEcoregionCode",
-                                    doAssertion = doAssertion,
-                                    ...)
+vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.assertions", FALSE)) {
+  if (inherits(x, c("Raster", "SpatRaster"))) {
+    pixelTable <- suppressMessages(makePixelTable(x, printSummary = FALSE, doAssertion = doAssertion))
+    sppCols <- grep("cover", colnames(pixelTable), value = TRUE)
+    cohortTable <- suppressMessages(.createCohortData(pixelTable, sppColumns = sppCols, rescale = FALSE, doAssertion = doAssertion))
+    cohortTable <- cohortTable[cover > 0]
+    pixelGroupMap <- rasterRead(x[[1]])  ## works in x is multi or single layer
+    names(pixelGroupMap) <- names(rasterRead())
+    pixelGroupMap[pixelTable[["pixelIndex"]]] <- pixelTable[["initialEcoregionCode"]]
+    vegTypeMap <- vegTypeMapGenerator(x = cohortTable,
+                                      pixelGroupMap = pixelGroupMap,
+                                      pixelGroupColName = "initialEcoregionCode",
+                                      doAssertion = doAssertion,
+                                      ...)
 
-  if (FALSE) { # This is the old version -- Eliot & Alex July 11, 2019
-    sumVegPct <- sum(speciesStack) ## TODO: how is the sum >100 ?
+    if (FALSE) { # This is the old version -- Eliot & Alex July 11, 2019
+      sumVegPct <- sum(speciesStack) ## TODO: how is the sum >100 ?
 
-    if (isTRUE(mixed)) {
-      ## create "mixed" layer, which is given a value slightly higher than any other layer,
-      ## if it is deemed a mixed pixel.
-      ## All layers must be below vegLeadingProportion to be called Mixed.
-      ## This check turns stack to binary: 1 if < vegLeadingProportion; 0 if more than.
-      ## Then, sum should be numLayers of all are below vegLeadingProportion
-      whMixed <- which(sum(speciesStack < (100 * vegLeadingProportion))[] == numLayers(speciesStack))
-      MixedRas <- speciesStack[[1]]
-      MixedRas[!is.na(speciesStack[[1]][])] <- 0
-      MixedRas[whMixed] <- max(maxFn(speciesStack)) * 1.01
+      if (isTRUE(mixed)) {
+        ## create "mixed" layer, which is given a value slightly higher than any other layer,
+        ## if it is deemed a mixed pixel.
+        ## All layers must be below vegLeadingProportion to be called Mixed.
+        ## This check turns stack to binary: 1 if < vegLeadingProportion; 0 if more than.
+        ## Then, sum should be numLayers of all are below vegLeadingProportion
+        whMixed <- which(sum(speciesStack < (100 * vegLeadingProportion))[] == numLayers(speciesStack))
+        MixedRas <- speciesStack[[1]]
+        MixedRas[!is.na(speciesStack[[1]][])] <- 0
+        MixedRas[whMixed] <- max(maxFn(speciesStack)) * 1.01
 
-      speciesStack$Mixed <- MixedRas
-    }
-
-    a <- speciesStack[]
-    nas <- is.na(a[, 1])
-    maxes <- apply(a[!nas, ], 1, function(x) {
-      whMax <- which(x == max(x, na.rm = TRUE))
-      if (length(whMax) > 1) {
-        whMax <- sample(whMax, size = 1)
+        speciesStack$Mixed <- MixedRas
       }
-      return(whMax)
-    })
 
-    vegTypeMap <- raster(speciesStack[[1]])
+      a <- speciesStack[]
+      nas <- is.na(a[, 1])
+      maxes <- apply(a[!nas, ], 1, function(x) {
+        whMax <- which(x == max(x, na.rm = TRUE))
+        if (length(whMax) > 1) {
+          whMax <- sample(whMax, size = 1)
+        }
+        return(whMax)
+      })
 
-    vegTypeMap[!nas] <- maxes
+      vegTypeMap <- raster(speciesStack[[1]])
 
-    layerNames <- names(speciesStack)
-    names(layerNames) <- layerNames
-    levels(vegTypeMap) <- data.frame(ID = seq(layerNames), Species = names(layerNames),
-                                     stringsAsFactors = TRUE)
-    vegTypeMap
+      vegTypeMap[!nas] <- maxes
 
+      layerNames <- names(speciesStack)
+      names(layerNames) <- layerNames
+      levels(vegTypeMap) <- data.frame(ID = seq(layerNames), Species = names(layerNames),
+                                       stringsAsFactors = TRUE)
+      vegTypeMap
+
+    }
+    return(vegTypeMap)
+  } else {
+    stop("x should be a Raster or SpatRaster")
   }
-  return(vegTypeMap)
 }
+
 
 #' @export
 #' @importFrom SpaDES.tools inRange
@@ -511,7 +528,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       pixelGroupData3[["leading"]] <- factor(pixelGroupData3[["leading"]])
     }
 
-    vegTypeMap <- raster(pixelGroupMap)
+    vegTypeMap <- rasterRead(pixelGroupMap)
+    names(vegTypeMap) <- names(rasterRead())
 
     vegTypeMap[pixelGroupData3[["pixelIndex"]]] <- pixelGroupData3[["leading"]]
     levels(vegTypeMap) <- data.frame(ID = seq_along(levels(pixelGroupData3[["leading"]])),
@@ -536,10 +554,17 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
   assertSppVectors(sppEquiv = sppEquiv, sppEquivCol = sppEquivCol,
                    sppColorVect = colors)
 
-  levels(vegTypeMap) <- cbind(levels(vegTypeMap)[[1]],
-                              colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
-                              stringsAsFactors = FALSE)
-  setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
+  rasLevels <- levels(vegTypeMap)[[1]]
+  if (!is.null(dim(rasLevels))) {
+    levels(vegTypeMap) <- cbind(rasLevels,
+                                colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
+                                stringsAsFactors = FALSE)
+    if (is(vegTypeMap, "RasterLayer")) {
+      setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
+    } else {
+      ## TODO: setColors needs to be adapted to SpatRaster...
+    }
+  }
 
   if (isTRUE(doAssertion)) {
     if (sum(!is.na(vegTypeMap[])) < 100)
@@ -553,7 +578,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       pgs <- pgs[!dups]
       ids <- ids[!dups]
     }
-    leadingTest <- factorValues2(vegTypeMap, vegTypeMap[ids], att = 2)
+
+    leadingTest <- factorValues2(vegTypeMap, vegTypeMap[][ids], att = 2)
     names(pgs) <- leadingTest
     pgTest <- pixelGroupData[get(pixelGroupColName) %in% pgs]
     whNA <- unique(unlist(sapply(pgTest, function(xx) which(is.na(xx)))))
@@ -611,7 +637,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #'               Defaults to 10.
 #'
 #' @param url the source url for the data, default is KNN 2011 dataset
-#' (\url{https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/})
+#' (<https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/>)
 #'
 #' @param ... Additional arguments passed to [reproducible::Cache()]
 #'            and [equivalentName()]. Also valid: `outputPath`, and `studyAreaName`.
@@ -954,8 +980,8 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
                           destinationPath) {
   ## check if there are any layers/values in the lowQualityStack
   ## if not return the HQ one
-  if (!is(lowQualityStack, "RasterStack") &
-      all(is.na(getValues(lowQualityStack)))) {
+  if (!(is(lowQualityStack, "RasterStack") || is(lowQualityStack, "SpatRaster")) &
+      all(is.na(lowQualityStack[]))) {
     highQualityStack
   } else {
     ## check if HQ resolution > LQ resolutions
@@ -963,8 +989,8 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
       ncell(highQualityStack) * prod(res(highQualityStack))
 
     ## make table of species layers in HQ and LQ
-    dt1 <- data.table(SPP = layerNames(highQualityStack), HQ = layerNames(highQualityStack))
-    dt2 <- data.table(SPP = layerNames(lowQualityStack), LQ = layerNames(lowQualityStack))
+    dt1 <- data.table(SPP = names(highQualityStack), HQ = names(highQualityStack))
+    dt2 <- data.table(SPP = names(lowQualityStack), LQ = names(lowQualityStack))
     setkey(dt1, SPP); setkey(dt2, SPP)
     dtj <- merge(dt1, dt2, all = TRUE)
     dtj[, c("HQ", "LQ") := list(!is.na(HQ), !is.na(LQ))]
@@ -983,7 +1009,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
     }
     names(stackRas) <- dtj$SPP
 
-    stack(stackRas)
+    .stack(stackRas)
   }
 }
 
@@ -999,8 +1025,9 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' @param HQ `data.table` column of whether `SPP` is present in HQ layers
 #' @param LQ `data.table` column of whether `SPP` is present in LQ layers
 #'
-#' @importFrom raster compareRaster crs extent filename NAvalue<- projectExtent raster res
-#' @importFrom raster writeRaster xmax xmin ymax ymin
+#' @importFrom terra crs ext res rast
+#' @importFrom terra writeRaster xmax xmin ymax ymin
+#' @importFrom reproducible Filenames cropInputs projectInputs
 #' @keywords internal
 .overlay <- function(SPP, HQ, LQ, hqLarger, highQualityStack, lowQualityStack, #nolint
                      outputFilenameSuffix = "overlay", destinationPath) {
@@ -1009,13 +1036,12 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
     if (HQ & LQ) {
       ## check equality of raster attributes and correct if necessary
       if (!all(
-        isTRUE(all.equal(extent(lowQualityStack), extent(highQualityStack))),
+        isTRUE(all.equal(ext(lowQualityStack), ext(highQualityStack))),
         isTRUE(all.equal(crs(lowQualityStack), crs(highQualityStack))),
         isTRUE(all.equal(res(lowQualityStack), res(highQualityStack))))) {
         message("  ", SPP, " extents, or resolution, or projection did not match; ",
                 "using gdalwarp to make them overlap")
-        LQRastName <- basename(tempfile(fileext = ".tif"))
-        if (!nzchar(filename(lowQualityStack[[SPP]]))) {
+        if (!nzchar(Filenames(lowQualityStack[[SPP]]))) {
           LQCurName <- basename(tempfile(fileext = ".tif"))
           lowQualityStack[[SPP]][] <- as.integer(lowQualityStack[[SPP]][])
 
@@ -1024,46 +1050,79 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
                                                 filename = LQCurName,
                                                 datatype = "INT2U", NAflag = NAval)
           ## NAvals need to be converted back to NAs
-          NAvalue(lowQualityStack[[SPP]]) <- NAval
+          lowQualityStack[[SPP]] <- .NAvalueFlag(lowQualityStack[[SPP]], NAval)
         }
 
-        LQRastInHQcrs <- projectExtent(lowQualityStack, crs = crs(highQualityStack))
+        LQRastName <- basename(tempfile(fileext = ".tif"))
+        LQRastInHQcrs <- .projectExtent(lowQualityStack, crs = crs(highQualityStack))
+
+        ## create a template raster to use as RTM
+        templateRas <- rast(ext = LQRastInHQcrs, crs = crs(highQualityStack),
+                            res = res(highQualityStack))
+
         # project LQ raster into HQ dimensions
-        gdalUtilities::gdalwarp(overwrite = TRUE,
-                                dstalpha = TRUE,
-                                s_srs = as.character(crs(lowQualityStack[[SPP]])),
-                                t_srs = as.character(crs(highQualityStack[[SPP]])),
-                                multi = TRUE, of = "GTiff",
-                                tr = res(highQualityStack),
-                                te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
-                                       xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
-                                filename(lowQualityStack[[SPP]]), ot = "Byte",
-                                LQRastName)
+        ## TODO: moving away from gdal and using postProcess --
+        ## gdal code is kept for now in case edge cases of non-alignment arise
+        # gdalUtilities::gdalwarp(overwrite = TRUE,
+        #                         dstalpha = TRUE,
+        #                         s_srs = crs(lowQualityStack[[SPP]], proj = TRUE),
+        #                         t_srs = crs(highQualityStack[[SPP]], proj = TRUE),
+        #                         multi = TRUE, of = "GTiff",
+        #                         tr = res(highQualityStack),
+        #                         te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
+        #                                xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
+        #                         .filename(lowQualityStack[[SPP]]), ot = "Byte",
+        #                         LQRastName)
 
-        LQRast <- raster(LQRastName)
-        LQRast[] <- LQRast[]
-        unlink(LQRastName)
+        # LQRast <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(LQRastName)
+        # LQRast[] <- LQRast[]
+        # ## `terra` imports two layers (?). the second has 255 (NA) everywhere
+        # if (length(names(LQRast)) > 1) {
+        #   LQRast <- LQRast[[1]]
+        # }
+        # LQRast[LQRast[] == 255] <- NA_integer_
+        #
+        # unlink(LQRastName)
+        # try(unlink(LQCurName), silent = TRUE)
 
-        try(unlink(LQCurName), silent = TRUE)
+        ## TODO: postProcess returns NaN values and always tries to mask despite maskWithRTM = FALSE
+        # LQRast <- postProcess(LQRast, rasterToMatch = templateRas,
+        #                         maskWithRTM = FALSE)  ## not working
+        LQRast <- cropInputs(lowQualityStack[[SPP]], rasterToMatch = templateRas)
+        LQRast <- projectInputs(LQRast, rasterToMatch = templateRas,
+                                maskWithRTM = FALSE)
 
         if (hqLarger) {
-          tmpHQName <- basename(tempfile(fileext = ".tif"))
+          ## TODO: moving away from gdal and using postProcess --
+          ## gdal code is kept for now in case edge cases of non-alignment arise
+          # tmpHQName <- basename(tempfile(fileext = ".tif"))
+          #
+          # gdalUtilities::gdalwarp(overwrite = TRUE,
+          #                         dstalpha = TRUE,
+          #                         s_srs = crs(highQualityStack[[SPP]], proj = TRUE),
+          #                         t_srs = crs(highQualityStack[[SPP]], proj = TRUE),
+          #                         multi = TRUE, of = "GTiff",
+          #                         tr = res(highQualityStack),
+          #                         te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
+          #                                xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
+          #                         ot = "Byte",
+          #                         srcfile = .filename(highQualityStack[[SPP]]),
+          #                         dstfile = tmpHQName)
+          # HQRast <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(tmpHQName)
+          # HQRast[] <- HQRast[]
+          # ## `terra` imports two layers (?). the second has 255 (NA) everywhere
+          # if (length(names(HQRast)) > 1) {
+          #   HQRast <- HQRast[[1]]
+          # }
+          # HQRast[HQRast[] == 255] <- NA_integer_
+          # unlink(tmpHQName)
 
-          gdalUtilities::gdalwarp(overwrite = TRUE,
-                                  dstalpha = TRUE,
-                                  s_srs = as.character(crs(highQualityStack[[SPP]])),
-                                  t_srs = as.character(crs(highQualityStack[[SPP]])),
-                                  multi = TRUE, of = "GTiff",
-                                  tr = res(highQualityStack),
-                                  te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
-                                         xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
-                                  ot = "Byte",
-                                  srcfile = filename(highQualityStack[[SPP]]),
-                                  dstfile = tmpHQName)
-          HQRast <- raster(tmpHQName)
-          HQRast[] <- HQRast[]
-          HQRast[HQRast[] == 255] <- NA_integer_
-          unlink(tmpHQName)
+          ## TODO: postProcess returns NaN values and always tries to mask despite maskWithRTM = FALSE
+          # HQRast <- postProcess(HQRast, rasterToMatch = templateRas,
+          #                       maskWithRTM = FALSE)  ## not working
+          HQRast <- cropInputs(highQualityStack[[SPP]], rasterToMatch = templateRas)
+          HQRast <- projectInputs(HQRast, rasterToMatch = templateRas,
+                                  maskWithRTM = FALSE)
         } else {
           HQRast <- highQualityStack[[SPP]]
         }
@@ -1073,10 +1132,14 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
       }
 
       message("  Writing new, overlaid ", SPP, " raster to disk.")
-      if (!compareRaster(LQRast, HQRast))
+      ## TODO: .compareRas (compareGeom) is less tolerant than st_crs, but projecting
+      ## manually is a pain (we can't use postProcess because it also uses st_crs internally)
+      ## for now use st_crs to compare CRS, but this is unlikely to be the best
+      if (!.compareRas(LQRast, HQRast) ||
+          st_crs(LQRast) != st_crs(HQRast))
         stop("Stacks not identical, something is wrong with overlayStacks function.")
 
-      NAs <- is.na(HQRast[])
+      NAs <- is.na(as.vector(HQRast[]))
 
       ## complete missing HQ data with LQ data
       HQRast[NAs] <- LQRast[][NAs]
@@ -1088,7 +1151,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
       names(HQRast) <- SPP
 
       ## NAvals need to be converted back to NAs
-      NAvalue(HQRast) <- NAval
+      HQRast <- .NAvalueFlag(HQRast, NAval)
 
       return(HQRast)
     } else {
@@ -1146,7 +1209,10 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
       newLayerName <- names(sppMerges)[i]
 
       fname <- .suffix(file.path(dPath, paste0(column, "_", newLayerName, ".tif")), suffix)
-      a <- calc(stack(speciesLayers[sumSpecies]), sum, na.rm = TRUE)
+      if (is(speciesLayers[sumSpecies][1], "Raster"))
+        a <- calc(stack(speciesLayers[sumSpecies]), sum, na.rm = TRUE)
+      else
+        a <- sum(rast(speciesLayers[sumSpecies]), na.rm = TRUE)
       names(a) <- newLayerName
       a <- writeRaster(a, filename = fname, overwrite = TRUE, ...)
       ## replace spp rasters by the summed one
@@ -1214,3 +1280,4 @@ aggregateRasByDT <- function(ras, newRas, fn = sum) {
   names(newRasOut) <- names(ras)
   newRasOut
 }
+

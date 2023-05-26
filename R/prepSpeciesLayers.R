@@ -18,6 +18,7 @@ utils::globalVariables(c(
 #' @export
 #' @importFrom data.table data.table fread melt set setkey
 #' @importFrom reproducible asPath Cache
+#' @importFrom terra values
 loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
                        type = c("cover", "age")) {
   # The ones we want
@@ -74,7 +75,7 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
     CASFRIattrLong <- CASFRIattrLong[!is.na(AGE) & AGE > -1]
   }
 
-  CASFRIdt <- data.table(GID = CASFRIRas[], rastInd = 1:ncell(CASFRIRas))
+  CASFRIdt <- data.table(GID = as.vector(values(CASFRIRas)), rastInd = 1:ncell(CASFRIRas))
   CASFRIdt <- CASFRIdt[!is.na(GID)]
   #CASFRIdt <- CASFRIdt[isNA == FALSE]
   setkey(CASFRIdt, GID)
@@ -99,8 +100,8 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 #' @export
 #' @importFrom data.table setkey
 #' @importFrom reproducible asPath Cache
-#' @importFrom raster crs crs<- NAvalue<- raster setValues stack writeRaster
-#' @importFrom sf %>%
+#' @importFrom raster crs crs<- NAvalue<- raster stack writeRaster
+#' @importFrom terra crs rast writeRaster
 CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
                             sppEquiv, sppEquivCol, destinationPath) {
   # The ones we want
@@ -117,7 +118,8 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 
   ## create list and template raster
   spRasts <- list()
-  spRas <- raster(CASFRIRas) %>% setValues(., NA_integer_)
+  spRas <- CASFRIRas
+  spRas[] <- NA_integer_
 
   ## NOT SURE IF THESE LINES ABOUT NA are relevant -- Eliot Dec 7
   ## selected spp absent from CASFRI data
@@ -138,7 +140,8 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
                                                        paste0("CASFRI_", sp, ".tif"))),
                            overwrite = TRUE, datatype = "INT2U", NAflag = NAval)
     ## NAvals need to be converted back to NAs
-    NAvalue(spRasts[[sp]]) <- NAval
+    spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
+
   }
 
   sppTODO <- unique(names(sppListMergesCASFRI))
@@ -151,7 +154,8 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
       message("  Merging ", paste(spCASFRI, collapse = ", "), "; becoming: ", sp)
     aa2 <- CASFRIattrLong[value %in% spCASFRI][, min(100L, sum(pct)), by = GID]
     setkey(aa2, GID)
-    cc <- aa2[CASFRIdt] %>% na.omit()
+    cc <- aa2[CASFRIdt] |>
+      na.omit()
     rm(aa2)
     spRasts[[sp]][cc$rastInd] <- cc$V1
     message("  ", sp, " writing to disk")
@@ -163,9 +167,9 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
                                                              paste0("CASFRI_", sp, ".tif"))),
                                  datatype = "INT1U", overwrite = TRUE, NAflag = NAval)
     ## NAvals need to be converted back to NAs
-    NAvalue(spRasts[[sp]]) <- NAval
+    spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
 
-    if (is(spRasts[[sp]], "Raster")) {
+    if (is(spRasts[[sp]], "Raster") || is(spRasts[[sp]], "SpatRaster")) {
       # Rasters need to have their disk-backed value assigned, but not shapefiles
       # This is a bug in writeRaster was spotted with crs of rastTmp became
       # +proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
@@ -177,7 +181,14 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     message("  ", sp, " done")
   }
 
-  raster::stack(spRasts)
+  ## if the original raster was `RasterLayer`, those in the list will be also.
+  spRasts <- if (is(CASFRIRas, "Raster")) {
+    raster::stack(spRasts)
+  } else {
+    rast(spRasts)
+  }
+
+  return(spRasts)
 }
 
 #' Prepare species layers
@@ -283,7 +294,6 @@ prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
                      url = url,
                      alsoExtract = c(CASFRItiffFile, CASFRIattrFile, CASFRIheaderFile),
                      destinationPath = destinationPath,
-                     fun = "raster::raster",
                      studyArea = studyArea,
                      rasterToMatch = rasterToMatch,
                      method = "bilinear", ## ignore warning re: ngb (#5)
@@ -333,7 +343,6 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
                          archive = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.zip"),
                          alsoExtract = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.hdr"),
                          destinationPath = destinationPath,
-                         fun = "raster::raster",
                          studyArea = studyArea,
                          rasterToMatch = rasterToMatch,
                          method = "bilinear", ## ignore warning re: ngb (#5)
@@ -351,8 +360,10 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
 #' @export
 #' @importFrom data.table data.table rbindlist
 #' @importFrom map mapAdd maps
-#' @importFrom raster crop extend maxValue minValue origin origin<- stack unstack
+#' @importFrom raster crop dropLayer extend maxValue minValue origin origin<- stack unstack
 #' @rdname prepSpeciesLayers
+#'
+## TODO: add terra compatible methods.
 prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
                                               url = NULL,
                                               studyArea, rasterToMatch,
@@ -403,8 +414,10 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
 #' @export
 #' @importFrom data.table data.table rbindlist
 #' @importFrom map mapAdd maps
-#' @importFrom raster crop extend maxValue minValue origin origin<- stack unstack
+#' @importFrom raster crop dropLayer extend maxValue minValue origin origin<- stack unstack
 #' @rdname prepSpeciesLayers
+#'
+## TODO: add terra compatible methods.
 prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
                                     url = NULL,
                                     studyArea, rasterToMatch,
@@ -453,8 +466,10 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
 
 #' @export
 #' @importFrom map mapAdd maps
-#' @importFrom raster addLayer dropLayer maxValue minValue stack unstack
+#' @importFrom terra rast minmax app
 #' @rdname prepSpeciesLayers
+
+## TODO: add terra compatible methods.
 prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
                                     url = NULL,
                                     studyArea, rasterToMatch,
@@ -505,27 +520,26 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   FRIlayerNamesFiles <- paste0(FRIlayerNames, "_fri_", sA, "_", res, "m.tif")
   FRIlccname <- paste0("lcc_fri_", sA, "_", res, "m.tif")
 
-  sppLayers <- raster::stack(lapply(FRIlayerNamesFiles, function(f) {
+  sppLayers <- rast(lapply(FRIlayerNamesFiles, function(f) {
     prepInputs(url = url, studyArea = studyArea, rasterToMatch = rasterToMatch,
                destinationPath = destinationPath, targetFile = f, filename2 = NULL,
-               alsoExtract = NA, method = "ngb")
+               alsoExtract = NA, method = "near")
   }))
   names(sppLayers) <- FRIlayerNames
 
-  if (!all(raster::minValue(sppLayers) >= 0)) stop("problem with minValue of species layers stack (< 0)")
-  if (!all(raster::maxValue(sppLayers) <= 100)) stop("problem with maxValue of species layers stack (> 100)")
+  if (!all(minmax(sppLayers)[1,] >= 0)) stop("problem with minValue of species layers stack (< 0)")
+  if (!all(minmax(sppLayers)[2,] <= 100)) stop("problem with maxValue of species layers stack (> 100)")
 
   ## merge species layers (currently only Popu; TODO: pine?)
   idsPopu <- grep("Popu", FRIlayerNames)
-  mergedPopu <- calc(stack(sppLayers[[idsPopu]]), sum, na.rm = TRUE)
-
-  sppLayers <- dropLayer(sppLayers, idsPopu)
+  mergedPopu <- app(c(sppLayers[[idsPopu]]), sum, na.rm = TRUE)
+  sppLayers <- sppLayers[[!names(sppLayers) %in% names(sppLayers)[idsPopu]]]
   sppLayers[["Popu_sp"]] <- mergedPopu ## NOTE: addLayer sporadically fails to add layer, w/o warning
 
   idThuj <- grep("Thuj_spp", names(sppLayers))
   names(sppLayers[[idThuj]]) <- "Thuj_sp"
 
-  stack(sppLayers) ## ensure it's still a stack
+  sppLayers
 }
 
 #' @template destinationPath
@@ -568,7 +582,8 @@ prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, s
 #'
 #' @export
 #' @importFrom reproducible asPath Cache
-#' @importFrom raster NAvalue<- raster rasterOptions setValues stack
+#' @importFrom raster rasterOptions
+#' @importFrom terra terraOptions writeRaster
 makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPath) {
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
@@ -599,10 +614,11 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
 
   ## create list and template raster
   spRasts <- list()
-  spRas <- raster(PickellRaster) |>
-    setValues(NA_integer_)
+  spRas <- PickellRaster
+  spRas[] <- NA_integer_
 
   rasterOptions(maxmemory = 1e9)
+  terraOptions(memmax = 1L)
 
   ## converting existing species codes into percentages
   for (sp in PickellSpp) {
@@ -620,7 +636,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
                                                            paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
         ## NAvals need to be converted back to NAs
-        NAvalue(spRasts[[sp]]) <- NAval
+        spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
       }
     }
 
@@ -637,7 +653,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
                                                            paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
         ## NAvals need to be converted back to NAs
-        NAvalue(spRasts[[sp]]) <- NAval
+        spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
       }
     }
 
@@ -658,7 +674,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
                                                            paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
         ## NAvals need to be converted back to NAs
-        NAvalue(spRasts[[sp]]) <- NAval
+        spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
       }
     }
 
@@ -675,26 +691,25 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
                                                            paste0("Pickell_", sp, ".tif"))),
                                overwrite = TRUE, datatype = "INT2U", NAflag = NAval)
         ## NAvals need to be converted back to NAs
-        NAvalue(spRasts[[sp]]) <- NAval
+        spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
       }
     }
   }
 
   ## species in Pickell's data
-  raster::stack(spRasts)
+  .stack(spRasts)
 }
 
 
-#' Convert NA's in speciesLayers to zeros
+#' Convert `NA` values in `speciesLayers` to zeros
 #'
-#' Pixels that have NAs but are inside `rasterToMatch`
-#' may need to be converted to 0s as they can could still potentially
-#' be forested
+#' Pixels that are `NA` but are inside `rasterToMatch` may need to be converted to `0`,
+#' as they can could still potentially be forested
 #'
 #' @template speciesLayers
 #' @template rasterToMatch
 #'
-#' @return the `speciesLayers` with 0s in pixels that had NAs
+#' @return the `speciesLayers` with `0` in pixels that had `NA`
 #'
 #' @export
 #' @importFrom raster stack

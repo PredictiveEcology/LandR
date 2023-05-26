@@ -55,7 +55,7 @@ is missing.}
 raster operations (i.e., the one used throughout the simulation).}
 
 \item{startTime}{date of the last fire year to be considered (e.g., start of fire
-period counting backwords). If missing, last fire year available will be used.}
+period counting backwards). If missing, last fire year available will be used.}
 }
 \value{
 a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
@@ -69,11 +69,11 @@ data to update ages of recently burned pixels. To suppress this, pass NULL/NA \c
 \examples{
 \dontrun{
 library(SpaDES.tools)
-library(raster)
+library(terra)
 library(reproducible)
-randomPoly <- randomStudyArea(size = 1e7)
+randomPoly <- vect(randomStudyArea(size = 1e7))
 randomPoly
-ras2match <- raster(res = 250, ext = extent(randomPoly), crs = crs(randomPoly))
+ras2match <- rast(res = 250, ext = ext(randomPoly), crs = crs(randomPoly))
 ras2match <- rasterize(randomPoly, ras2match)
 tempDir <- tempdir()
 
@@ -89,13 +89,12 @@ attr(standAge, "imputedPixID")
 firePerimeters <- Cache(prepInputsFireYear,
                         url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
                         "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-                        fun = "sf::st_read",
                         destinationPath = tempDir,
                         rasterToMatch = ras2match)
 
 standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
-                                    firePerimeters = firePerimeters,
-                                    rasterToMatch = ras2match)
+                                  firePerimeters = firePerimeters,
+                                  rasterToMatch = ras2match)
 attr(standAge, "imputedPixID")
 
 ## not providing firePerimeters is still possible, but will be deprecated

@@ -17,31 +17,37 @@ raster operations (i.e., the one used throughout the simulation).}
 \item{earliestYear}{the earliest fire date to allow}
 }
 \value{
-a raster layer of fire perimeters with fire year values.
+a \code{SpatRaster} layer of fire perimeters with fire year values.
 }
 \description{
 Create a raster of fire perimeters
 }
 \examples{
-if (require("googledrive")) {
-  library(SpaDES.tools)
-  library(raster)
-  library(reproducible)
+library(SpaDES.tools)
+library(terra)
+library(reproducible)
 
-  randomPoly <- randomStudyArea()
-  randomPoly
-  ras2match <- raster(res = 10, ext = extent(randomPoly), crs = crs(randomPoly))
-  ras2match <- rasterize(randomPoly, ras2match)
-  tempDir <- tempdir()
-  cacheRepo <- file.path(tempDir, "cache")
+options("reproducible.useTerra" = TRUE, "reproducible.rasterRead" = "terra::rast")
 
-  ## ideally, get the firePerimenters layer first
-  firePerimeters <- Cache(prepInputsFireYear,
-                          url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
-                                       "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-                          fun = "sf::st_read",
-                          destinationPath = tempDir,
-                          rasterToMatch = ras2match)
+targetCRS <- crs(randomStudyArea())
+randomPoly <- randomStudyArea(
+  center = vect(cbind(-115, 50), crs = targetCRS),
+  size = 1e+7,
+)
+buffExt <- buffer(randomPoly, 1e+3) |> ext()
+ras2match <- rast(res = 10, ext = ext(randomPoly), crs = crs(randomPoly))
+ras2match <- rasterize(randomPoly, ras2match)
+
+firePerimeters <- prepInputsFireYear(
+  url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
+               "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
+  destinationPath = tempdir(),
+  rasterToMatch = ras2match,
+  earliestYear = 1930
+)
+
+if (interactive()) {
+  plot(firePerimeters)
+  plot(randomPoly, add = TRUE)
 }
-
 }

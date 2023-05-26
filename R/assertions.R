@@ -139,7 +139,7 @@ assertUniqueCohortData <- function(cohortData, columns,
 #'
 #' @template ecoregionMap
 #' @template speciesEcoregion
-#' @param minRelativeB TODO: add description
+#' @param minRelativeB numeric; minimum relative biomass
 #'
 #' @export
 #' @importFrom utils str
@@ -148,9 +148,13 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
                        doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     erg <- list()
-    if (!missing(ecoregionMap))
+    if (!missing(ecoregionMap)) {
       erg[[1]] <- sort(na.omit(unique(factorValues2(ecoregionMap, ecoregionMap[],
                                                     att = "ecoregionGroup"))))
+      if (is.character(erg[[1]])) { # this can happed if SpatRaster
+        erg[[1]] <- factor(erg[[1]])
+      }
+    }
     if (!missing(cohortData))
       erg[[2]] <- sort(unique(cohortData$ecoregionGroup))
     if (!missing(speciesEcoregion))
@@ -311,11 +315,11 @@ assertPixelCohortData <- function(pixelCohortData, pixelGroupMap,
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     uniquePixelsInCohorts <- pixelGroupMap[][unique(pixelCohortData$pixelIndex)]
-    pixelsOnMap <- sum(!is.na(pixelGroupMap[]), na.rm = TRUE)
+    pixelsOnMap <- sum(!is.na(as.vector(pixelGroupMap[])), na.rm = TRUE)
     lenUniquePixelsInCohorts <- length(unique(pixelCohortData$pixelIndex))
-    lenBurnedPixels <- sum(pixelGroupMap[] == 0, na.rm = TRUE) # 30927
+    lenBurnedPixels <- sum(as.vector(pixelGroupMap[]) == 0, na.rm = TRUE) # 30927
     pixelsRegeneratedOnZeros <- sum(uniquePixelsInCohorts == 0)
-    allPixelsNotInCohortData <- pixelGroupMap[][-unique(pixelCohortData$pixelIndex)]
+    allPixelsNotInCohortData <- as.vector(pixelGroupMap[])[-unique(pixelCohortData$pixelIndex)]
     numPixelsNoRegen <- sum(allPixelsNotInCohortData == 0, na.rm = TRUE)
     tableB <- sum(!is.na(allPixelsNotInCohortData)) # 25166
 
@@ -324,7 +328,8 @@ assertPixelCohortData <- function(pixelCohortData, pixelGroupMap,
                        lenUniquePixelsInCohorts)
 
     uniqueAllPixelsNotInCohortData <- unique(allPixelsNotInCohortData)
-    test1 <- all(uniqueAllPixelsNotInCohortData %in% c(NA, 0L))
+    ## after converting to `terra` NAs sometimes appear as NaNs
+    test1 <- all(uniqueAllPixelsNotInCohortData %in% c(NA, NaN, 0L))
     if (!test1 | !test2 | !test3) {
       stop("Every value on pixelGroupMap >0 must have a pixelIndex in pixelCohortData.\n",
            "This test is failing, i.e., there are some pixelGroups in pixelGroupMap",
@@ -396,21 +401,24 @@ assertFireToleranceDif <- function(burnedPixelCohortData,
 #'   `biomass > 0` to be considered present in the study area.
 #'   Defaults to 1.
 #'
+#' @importFrom raster unstack
+#'
 #' @export
 #' @rdname assertions
 assertSpeciesLayers <- function(speciesLayers, thresh,
                                 doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    ## covert to list if not a stack
-    if (!is(speciesLayers, "RasterStack")) {
-      speciesLayers <- list(speciesLayers)
-
-      test1 <- vapply(speciesLayers, FUN = function(x)
-        all(is.na(getValues(x))), FUN.VALUE = logical(1))
-    } else {
-      test1 <- vapply(1:nlayers(speciesLayers), FUN = function(x)
-        all(is.na(getValues(speciesLayers[[x]]))), FUN.VALUE = logical(1))
+    ## covert to list if not a stack or single/multi layer SpatRaster
+    if (is(speciesLayers, "RasterStack")) {
+      speciesLayers <- unstack(speciesLayers)
     }
+    ## convert to list if only one RasterLayer
+    if (is(speciesLayers, "RasterLayer")) {
+      speciesLayers <- list(speciesLayers)
+    }
+
+    test1 <- vapply(speciesLayers, FUN = function(x)
+      all(is.na(as.vector(values(x)))), FUN.VALUE = logical(1))
 
     if (all(test1))
       stop("no pixels found were found with species % cover >=", thresh,
@@ -543,8 +551,8 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
 assertStandAgeMapAttr <- function(standAgeMap,
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    if (!is(standAgeMap, "RasterLayer")) {
-      stop("standAgeMap should be a RasterLayer")
+    if (!inherits(standAgeMap, c("RasterLayer", "SpatRaster"))) {
+      stop("standAgeMap should be a RasterLayer or SpatRaster")
     }
     if (is.null(attr(standAgeMap, "imputedPixID"))) {
       stop("standAgeMap should have a 'imputedPixID' attribute.",

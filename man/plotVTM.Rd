@@ -15,9 +15,10 @@ plotVTM(
 )
 }
 \arguments{
-\item{speciesStack}{A \code{RasterStack} of percent-cover-by-species layers.}
+\item{speciesStack}{A \code{SpatRaster}, \code{RasterStack} or \code{RasterBrick}
+of percent-cover-by-species layers.}
 
-\item{vtm}{An optional vegetation type map (\code{RasterLayer}).
+\item{vtm}{An optional vegetation type map (\code{RasterLayer} or \code{SpatRaster}).
 If not supplied, will be produced internally by \code{makeVegTypeMap}.}
 
 \item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
@@ -25,14 +26,11 @@ threshold a species needs to pass to be considered "leading".}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
-For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
-this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use
-\code{data("sppEquivalencies_CA", "LandR")}.}
+For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.
-For functions that have \code{mixedType} e.g., \code{vegTypeMapGenerator},
-Only necessary if \code{mixedType == 2}.
+For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
 \item{colors}{Named vector of colour codes, named using species names. NOTE:
