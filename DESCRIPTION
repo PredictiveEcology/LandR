@@ -19,7 +19,7 @@ Authors@R: c(
            role = c("aut"), comment = c(ORCID = "0000-0003-4036-977X")),
     person("Ian M S", "Eddy", email = "ian.eddy@nrcan-rncan.gc.ca",
            role = c("aut"), comment = c(ORCID = "0000-0001-7397-2116")),
-    person(paste("Her Majesty the Queen in Right of Canada,",
+    person(paste("His Majesty the King in Right of Canada,",
                  "as represented by the Minister of Natural Resources Canada"),
            role = "cph")
     )
