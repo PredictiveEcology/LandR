@@ -73,6 +73,7 @@ Suggests:
     rmarkdown,
     spelling,
     testthat,
+    withr,
     XML
 Remotes:
     PredictiveEcology/map@development,
