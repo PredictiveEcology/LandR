@@ -29,6 +29,7 @@ testthat::test_that("test prepRawBiomassMap", {
 
   ## use SA for cropping/masking, not proj
   ## new args
+  reproducible::clearCache(userTags = "test", ask = FALSE)
   rawBiomassMap <- suppressWarnings({
     prepRawBiomassMap(url = biomassURL,
                                      studyAreaName = "test",
@@ -52,6 +53,7 @@ testthat::test_that("test prepRawBiomassMap", {
 
   ## use SA for cropping/masking & proj (via RTM)
   ## new args
+  reproducible::clearCache(userTags = "test", ask = FALSE)
   rawBiomassMap <- prepRawBiomassMap(url = biomassURL,
                                      studyAreaName = "test",
                                      cacheTags = "test",
@@ -72,7 +74,9 @@ testthat::test_that("test prepRawBiomassMap", {
   expect_true(compareGeom(rawBiomassMap, rawBiomassMap2, rowcol = TRUE, res = TRUE, stopOnError = FALSE))
   expect_false(any(rawBiomassMap[] != rawBiomassMap2[], na.rm = TRUE))
   expect_false(all(is.na(rawBiomassMap[]) == is.na(RTM[])))
+  expect_false(all(is.na(rawBiomassMap2[]) == is.na(RTM[])))
 
+  reproducible::clearCache(userTags = "test", ask = FALSE)
   ## new args
   rawBiomassMap <- prepRawBiomassMap(url = biomassURL,
                                      studyAreaName = "test",
@@ -82,6 +86,7 @@ testthat::test_that("test prepRawBiomassMap", {
                                      projectTo = RTM)
 
   ## old args
+  reproducible::clearCache(userTags = "test", ask = FALSE)
   rawBiomassMap2 <- prepRawBiomassMap(url = biomassURL,
                                       studyAreaName = "test",
                                       cacheTags = "test",
@@ -92,4 +97,5 @@ testthat::test_that("test prepRawBiomassMap", {
   expect_true(compareGeom(rawBiomassMap, rawBiomassMap2, rowcol = TRUE, res = TRUE, stopOnError = FALSE))
   expect_false(any(rawBiomassMap[] != rawBiomassMap2[], na.rm = TRUE))
   expect_true(all(is.na(rawBiomassMap[]) == is.na(RTM[])))
+  expect_true(all(is.na(rawBiomassMap2[]) == is.na(RTM[])))
 })
