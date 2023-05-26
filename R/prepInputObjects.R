@@ -520,9 +520,7 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
                        "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
                        "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
   }
-  if (is.null(Args$useSAcrs)) {
-    Args$useSAcrs <- FALSE
-  }
+
   if (is.null(Args$method)) {
     Args$method <- "bilinear"
   }
