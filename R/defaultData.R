@@ -16,7 +16,8 @@ utils::globalVariables(c(
 #'
 #' @param vars character. Variables to download.
 #' @param studyArea a spatial polygon  (`sf`, `sp` or `SpatVector`) used to crop
-#'   and mask data layers. Passed to `reproducible::Cache` and `reproducible::prepInputs`
+#'   and mask data layers. Passed to `reproducible::Cache` and
+#'   `reproducible::prepInputs(to = studyArea, projectTo = NA, ...)`
 #' @param rasterToMatch a raster layer (`RasterLayer` or `SpatRaster`). Only used to `rasterize`
 #'   the default permafrost layer and fire perimeters.
 #' @param userTags passed to `reproducible::Cache` and `reproducible::prepInputs`
@@ -138,8 +139,8 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
                                  alsoExtract = NA,
                                  overwrite = TRUE,
                                  # rasterToMatch = rasterToMatch,
-                                 studyArea = studyArea,   ## keep coarse res.
-                                 useSAcrs = FALSE,
+                                 to = studyArea,   ## keep coarse res.
+                                 projectTo = NA,   ## use original crs
                                  userTags = c(userTags, "elevation"),
                                  omitArgs = c("userTags"))
   }
@@ -155,8 +156,8 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
                            alsoExtract = NA,
                            overwrite = TRUE,
                            # rasterToMatch = rasterToMatch,
-                           studyArea = studyArea,   ## keep coarse res.
-                           useSAcrs = FALSE,
+                           to = studyArea,   ## keep coarse res.
+                           projectTo = NA,   ## use original crs
                            userTags = c(userTags, "MAT"),
                            omitArgs = c("userTags"))
   }
@@ -172,8 +173,8 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
                               alsoExtract = NA,
                               overwrite = TRUE,
                               # rasterToMatch = rasterToMatch,
-                              studyArea = studyArea,   ## keep coarse res.
-                              useSAcrs = FALSE,
+                              to = studyArea,   ## keep coarse res.
+                              projectTo = NA,   ## use original crs
                               userTags = c(userTags, "PPT_sm"),
                               omitArgs = c("userTags"))
   }
@@ -189,8 +190,8 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
                               alsoExtract = NA,
                               overwrite = TRUE,
                               # rasterToMatch = rasterToMatch,
-                              studyArea = studyArea,   ## keep coarse res.
-                              useSAcrs = FALSE,
+                              to = studyArea,   ## keep coarse res.
+                              projectTo = NA,   ## use original crs
                               userTags = c(userTags, "PPT_wt"),
                               omitArgs = c("userTags"))
   }
@@ -206,8 +207,8 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
                            alsoExtract = NA,
                            overwrite = TRUE,
                            # rasterToMatch = rasterToMatch,
-                           studyArea = studyArea,   ## keep coarse res.
-                           useSAcrs = FALSE,
+                           to = studyArea,   ## keep coarse res.
+                           projectTo = NA,   ## use original crs
                            userTags = c(userTags, "CMI"),
                            omitArgs = c("userTags"))
   }
@@ -222,8 +223,8 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
                       url = "https://opendata.nfis.org/downloads/forest_change/CA_wetlands_post2000.zip",
                       destinationPath = destinationPath,
                       # rasterToMatch = rasterToMatch,
-                      studyArea = studyArea,   ## keep coarse res.
-                      useSAcrs = FALSE,
+                      to = studyArea,   ## keep coarse res.
+                      projectTo = NA,   ## use original crs
                       method = "near",
                       overwrite = TRUE,
                       userTags = c(userTags, "wetlands"),
@@ -253,7 +254,8 @@ defaultEnvirData <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI", "elevati
 #'
 #' @param studyArea a spatial polygon  (`sf`, `sp` or `SpatVector`) used to crop
 #'   and mask data layers. Passed to `reproducible::Cache` and `reproducible::prepInputs`
-#' @param destinationPath passed to `reproducible::Cache` and `reproducible::prepInputs`
+#' @param destinationPath passed to `reproducible::Cache` and
+#' `reproducible::prepInputs(to = studyArea, projectTo = NA, ...)`
 #' @param cacheTags passed to `reproducible::Cache` and `reproducible::prepInputs`
 #'
 #' @return Carolyn Gisbon's output polygon layer of % PPC and thermokarst state
@@ -321,8 +323,8 @@ getPermafrostDataGibson <- function(destinationPath, studyArea, cacheTags) {
                       alsoExtract = "similar",
                       archive = "DOI_2020-010.zip",
                       destinationPath = destinationPath,
-                      studyArea = studyArea,
-                      useSAcrs = FALSE,
+                      to = studyArea,   ## keep coarse res.
+                      projectTo = NA,   ## use original crs
                       overwrite = TRUE,
                       fun = "terra::vect",
                       # useCache = "overwrite",
@@ -411,7 +413,8 @@ getPermafrostDataGibson <- function(destinationPath, studyArea, cacheTags) {
 #' @param climateSSP character. The Socio-economic Shared Pathway, SSP (i.e. emissions scenario) to use.
 #' @param periods character. The year periods to use.
 #' @param studyArea a spatial polygon  (`sf`, `sp` or `SpatVector`) used to crop
-#'   and mask data layers. Passed to `reproducible::Cache` and `reproducible::prepInputs`
+#'   and mask data layers. Passed to `reproducible::Cache` and
+#'   `reproducible::prepInputs(to = studyArea, projectTo = NA, ...)`
 #' @param rasterToMatch a raster layer (`RasterLayer` or `SpatRaster`). Only used to `rasterize`
 #'   the default permafrost layer and fire perimeters.
 #' @param userTags passed to `reproducible::Cache` and `reproducible::prepInputs`
@@ -468,8 +471,8 @@ defaultClimateDataProj <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI"),
                      alsoExtract = NA,
                      overwrite = TRUE,
                      # rasterToMatch = rasterToMatch,
-                     studyArea = studyArea,   ## keep coarse res.
-                     useSAcrs = FALSE,
+                     to = studyArea,   ## keep coarse res.
+                     projectTo = NA,   ## use original crs
                      omitArgs = c("userTags"))) |>
       Cache(userTags = c(userTags, "MATProj"),
             omitArgs = c("userTags"))
@@ -491,8 +494,8 @@ defaultClimateDataProj <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI"),
                         alsoExtract = NA,
                         overwrite = TRUE,
                         # rasterToMatch = rasterToMatch,
-                        studyArea = studyArea,   ## keep coarse res.
-                        useSAcrs = FALSE,
+                        to = studyArea,   ## keep coarse res.
+                        projectTo = NA,   ## use original crs
                         omitArgs = c("userTags"))) |>
       Cache(userTags = c(userTags, "PPT_smProj"),
             omitArgs = c("userTags"))
@@ -514,8 +517,8 @@ defaultClimateDataProj <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI"),
                         alsoExtract = NA,
                         overwrite = TRUE,
                         # rasterToMatch = rasterToMatch,
-                        studyArea = studyArea,   ## keep coarse res.
-                        useSAcrs = FALSE,
+                        to = studyArea,   ## keep coarse res.
+                        projectTo = NA,   ## use original crs
                         omitArgs = c("userTags"))) |>
       Cache(userTags = c(userTags, "PPT_wtProj"),
             omitArgs = c("userTags"))
@@ -538,8 +541,8 @@ defaultClimateDataProj <- function(vars = c("MAT", "PPT_wt", "PPT_sm", "CMI"),
                      alsoExtract = NA,
                      overwrite = TRUE,
                      # rasterToMatch = rasterToMatch,
-                     studyArea = studyArea,   ## keep coarse res.
-                     useSAcrs = FALSE,
+                     to = studyArea,   ## keep coarse res.
+                     projectTo = NA,   ## use original crs
                      omitArgs = c("userTags"))) |>
       Cache(userTags = c(userTags, "CMIProj"),
             omitArgs = c("userTags"))
