@@ -501,7 +501,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'   \itemize{
 #'     \item{`url`: by default, the 2001 kNN stand biomass map is downloaded from
 #'       the NRCan National Forest Inventory}
-#'     \item{`useSAcrs`: `FALSE`}
+#'     \item{`useSAcrs` and `projectTo`: `FALSE` and `NA`}
 #'     \item{`method`: `"bilinear"`}
 #'     \item{`datatype`: `"INT2U"`}
 #'     \item{`filename2`: `suffix("rawBiomassMap.tif", paste0("_", studyAreaName))`}
@@ -523,6 +523,11 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
   if (is.null(Args$useSAcrs)) {
     Args$useSAcrs <- FALSE
   }
+
+  if (is.null(Args$projectTo)) {
+    Args$projectTo <- NA
+  }
+
   if (is.null(Args$method)) {
     Args$method <- "bilinear"
   }
