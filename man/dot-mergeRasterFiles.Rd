@@ -8,7 +8,7 @@ raster}
 .mergeRasterFiles(rasFileLs)
 }
 \arguments{
-\item{a}{\code{list} of raster file paths.}
+\item{rasFileLs}{a \code{list} of raster file paths.}
 }
 \value{
 A \code{SpatRaster}

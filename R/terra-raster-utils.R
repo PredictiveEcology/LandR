@@ -410,7 +410,7 @@ plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
 #' Load and merge a list of raster files into a single larger
 #'  raster
 #'
-#' @param a `list` of raster file paths.
+#' @param rasFileLs a `list` of raster file paths.
 #'
 #' @returns A `SpatRaster`
 #'
