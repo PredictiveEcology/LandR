@@ -8,10 +8,10 @@ ecoregionProducer(ecoregionMaps, ecoregionName = NULL, rasterToMatch)
 }
 \arguments{
 \item{ecoregionMaps}{a \code{list} with two rasters, one with ecoregions (e.g. ecodistricts)
-and another with land cover (e.g. LCC)}
+and another with land cover (e.g. LCC).}
 
 \item{ecoregionName}{the name describing the type of ecoregions in first map
-(e.g. \code{"ecoDistrict"}) if passing a polygon file}
+(e.g. \code{"ecoDistrict"}) if passing a polygon file.}
 
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
