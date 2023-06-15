@@ -35,7 +35,8 @@ testthat::test_that("test prepRawBiomassMap", {
                       studyAreaName = "test",
                       cacheTags = "test",
                       cropTo = studyArea,
-                      maskTo = studyArea)
+                      maskTo = studyArea,
+                      projectTo = NA)
   })
 
   ## old args
@@ -43,15 +44,14 @@ testthat::test_that("test prepRawBiomassMap", {
     prepRawBiomassMap(url = biomassURL,
                       studyAreaName = "test",
                       cacheTags = "test",
-                      studyArea = studyArea,
-                      useSAcrs = FALSE)
+                      studyArea = studyArea)
   })
 
   expect_false(crs(studyArea) == crs(rawBiomassMap))
   expect_true(compareGeom(rawBiomassMap, rawBiomassMap2, rowcol = TRUE, res = TRUE, stopOnError = FALSE))
   expect_false(any(rawBiomassMap[] != rawBiomassMap2[], na.rm = TRUE))
 
-  ## use SA for cropping/masking & proj (via RTM)
+  ## use SA for cropping/masking, proj with RTM
   ## new args
   reproducible::clearCache(userTags = "test", ask = FALSE)
   rawBiomassMap <- prepRawBiomassMap(url = biomassURL,
@@ -66,7 +66,6 @@ testthat::test_that("test prepRawBiomassMap", {
                                       studyAreaName = "test",
                                       cacheTags = "test",
                                       studyArea = studyArea,
-                                      useSAcrs = FALSE,
                                       rasterToMatch = RTM,
                                       maskWithRTM = FALSE)
 
@@ -76,14 +75,26 @@ testthat::test_that("test prepRawBiomassMap", {
   expect_false(all(is.na(rawBiomassMap[]) == is.na(RTM[])))
   expect_false(all(is.na(rawBiomassMap2[]) == is.na(RTM[])))
 
-  reproducible::clearCache(userTags = "test", ask = FALSE)
+
+  ## use RTM for everything
   ## new args
+  # rawBiomassMap <- prepRawBiomassMap(url = biomassURL,
+  #                                    studyAreaName = "test",
+  #                                    cacheTags = "test",
+  #                                    to = RTM,
+  #                                    projectTo = crs(studyArea))   ## this is failing; reported issue #331-reproducible
+
+  reproducible::clearCache(userTags = "test", ask = FALSE)
   rawBiomassMap <- prepRawBiomassMap(url = biomassURL,
                                      studyAreaName = "test",
                                      cacheTags = "test",
-                                     cropTo = studyArea,
-                                     maskTo = RTM,
-                                     projectTo = RTM)
+                                     to = RTM)   ## for some reason when not interactive the masking doesn't happen if only supplying `to`
+
+  rawBiomassMap <- prepRawBiomassMap(url = biomassURL,
+                                     studyAreaName = "test",
+                                     cacheTags = "test",
+                                     to = RTM)   ## for some reason when not interactive the masking doesn't happen if only supplying `to`
+  expect_true(all(is.na(rawBiomassMap[]) == is.na(RTM[])))
 
   ## old args
   reproducible::clearCache(userTags = "test", ask = FALSE)
@@ -92,11 +103,11 @@ testthat::test_that("test prepRawBiomassMap", {
                                       cacheTags = "test",
                                       studyArea = studyArea,
                                       rasterToMatch = RTM,
-                                      maskWithRTM = TRUE,
-                                      useSAcrs = TRUE)
+                                      maskWithRTM = TRUE #,
+                                      # useSAcrs = TRUE    ## due to issue #331-reproducible we can't reproduce this.
+                                      )
 
   expect_true(compareGeom(rawBiomassMap, rawBiomassMap2, rowcol = TRUE, res = TRUE, stopOnError = FALSE))
   expect_false(any(rawBiomassMap[] != rawBiomassMap2[], na.rm = TRUE))
-  expect_true(all(is.na(rawBiomassMap[]) == is.na(RTM[])))
   # expect_true(all(is.na(rawBiomassMap2[]) == is.na(RTM[])))    ### May 25 2023, reported as issue #330 on reproducible
 })
