@@ -23,7 +23,7 @@ prepInputsStandAgeMap(
 )
 }
 \arguments{
-\item{...}{additional arguments passed to \code{prepInputs}.}
+\item{...}{additional arguments passed to \code{prepInputs}}
 
 \item{ageURL}{url where age map is downloaded}
 
@@ -39,17 +39,9 @@ prepInputsStandAgeMap(
 
 \item{filename2}{passed to \code{prepInputs} of stand age map}
 
-\item{firePerimeters}{fire raster layer fire year values.}
+\item{fireURL}{url to download fire polygons used to update age map. If NULL or NA age imputation is bypassed.}
 
-\item{fireURL}{url to download fire polygons used to update age map. If NULL or NA age
-imputation is bypassed. Requires passing `rasterToMatch`. Only used if \code{firePerimeters}
-is missing.}
-
-\item{fireFun}{passed to \code{prepInputs} of fire data. Only used if \code{firePerimeters}
-is missing.}
-
-\item{fireField}{field used to rasterize fire polys. Only used if \code{firePerimeters}
-is missing.}
+\item{fireFun}{passed to \code{prepInputs} of fire data}
 
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
@@ -63,8 +55,8 @@ for which ages were corrected. If no corrections were applied the attribute vect
 }
 \description{
 Create the \code{standAgeMap} raster containing age estimates for \code{pixelCohortData}.
-A separate \code{prepInputs} call will source Canadian National Fire Data Base
-data to update ages of recently burned pixels. To suppress this, pass NULL/NA \code{fireURl}
+A separate \code{prepInputs} call will source NDFB data used to update ages of recently burned
+pixels.
 }
 \examples{
 library(SpaDES.tools)
