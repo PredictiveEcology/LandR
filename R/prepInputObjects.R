@@ -564,9 +564,8 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #' @return a `SpatRaster` layer of fire perimeters with fire year values.
 #'
 #' @export
-#' @importFrom fasterize fasterize
 #' @importFrom raster crs getValues
-#' @importFrom reproducible Cache prepInputs
+#' @importFrom reproducible .requireNamespace Cache prepInputs
 #' @importFrom sf st_cast st_transform st_zm
 #'
 #' @examples
@@ -624,7 +623,8 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
       fireRas <- terra::rasterize(d, rasterToMatch, field = fireField)
       fireRas[!is.na(terra::values(fireRas)) & terra::values(fireRas) < earliestYear] <- NA
     } else {
-      fireRas <- fasterize(d, raster = rasterToMatch, field = fireField)
+      .requireNamespace("fasterize", stopOnFALSE = TRUE)
+      fireRas <- fasterize::fasterize(d, raster = rasterToMatch, field = fireField)
       fireRas[!is.na(getValues(fireRas)) & getValues(fireRas) < earliestYear] <- NA
     }
   } else {
@@ -649,7 +649,6 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 #'  for which ages were corrected. If no corrections were applied the attribute vector is `integer(0)`.
 #'
 #' @export
-#' @importFrom fasterize fasterize
 #' @importFrom raster crs
 #' @importFrom reproducible Cache prepInputs
 #' @importFrom sf st_cast st_transform

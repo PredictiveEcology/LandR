@@ -9,9 +9,11 @@ utils::globalVariables(c(
 #' Used internally in LandR modules to prepare maps for to make `cohortData`.
 #'
 #' @param ecoregionMaps a `list` with two rasters, one with ecoregions (e.g. ecodistricts)
-#' and another with land cover (e.g. LCC)
+#' and another with land cover (e.g. LCC).
+#'
 #' @param ecoregionName the name describing the type of ecoregions in first map
-#' (e.g. `"ecoDistrict"`) if passing a polygon file
+#' (e.g. `"ecoDistrict"`) if passing a polygon file.
+#'
 #' @template rasterToMatch
 #'
 #' @return
@@ -20,11 +22,12 @@ utils::globalVariables(c(
 #'
 #' @export
 #' @importFrom data.table as.data.table data.table
-#' @importFrom fasterize fasterize
 #' @importFrom raster getValues levels raster
 #' @importFrom sf st_as_sf
-#' @importFrom reproducible paddedFloatToChar
+#' @importFrom reproducible .requireNamespace paddedFloatToChar
 ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch) {
+  .requireNamespace("fasterize", stopOnFALSE = TRUE)
+
   # change the coordinate reference for all spatialpolygons
   message("ecoregionProducer 1: ", Sys.time())
   #ecoregionMapInStudy <- raster::intersect(ecoregionMapFull, fixErrors(aggregate(studyArea)))

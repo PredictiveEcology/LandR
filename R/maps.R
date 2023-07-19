@@ -1230,9 +1230,11 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
 #' @return `RasterLayer`
 #'
 #' @export
-#' @importFrom fasterize fasterize
 #' @importFrom sf st_as_sf
+#' @importFrom reproducible .requireNamespace
 fasterizeFromSp <- function(sp, raster, fieldName) {
+  .requireNamespace("fasterize", stopOnFALSE = TRUE)
+
   ## check if projections are the same
   if (!identical(crs(sp), crs(raster)))
     stop("fasterize will probably be wrong, as shp and raster projections do not match")

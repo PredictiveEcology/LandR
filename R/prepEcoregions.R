@@ -44,8 +44,7 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
     ecoregionMapSF$ecoregionLayerFieldInt <- as.integer(ecoregionMapSF$ecoregionLayerField)
     ecoregionRst <- rasterize(ecoregionMapSF, rasterToMatchLarge,
                               field = "ecoregionLayerFieldInt")
-    # ecoregionRst <- fasterize::fasterize(ecoregionMapSF, rasterToMatchLarge,
-    #                                      field = "ecoregionLayerField")
+
     rm(ecoregionLayer)
     if (is.factor(ecoregionMapSF$ecoregionLayerField)) {
       appendEcoregionFactor <- TRUE

@@ -14,17 +14,11 @@
 #' @return `RasterLayer`
 #'
 #' @export
-#' @importFrom fasterize fasterize
 #' @importFrom reproducible prepInputs
 #' @importFrom sf as_Spatial
 #' @importFrom sp proj4string
+#' @importFrom terra as.int rast rasterize
 prepEcozonesRst <- function(url, destinationPath, studyArea = NULL, rasterToMatch = NULL) {
-  if (!requireNamespace("terra", quietly = TRUE)) {
-    ## since terra is dependency of raster, it should already be installed, but just in case...
-    stop("Suggested package 'terra' not installed.\n",
-         "Install it using `install.packages('terra')`.")
-  }
-
   if (is.null(url)) {
     url <- "http://sis.agr.gc.ca/cansis/nsdb/ecostrat/zone/ecozone_shp.zip"
   }
@@ -51,9 +45,9 @@ prepEcozonesRst <- function(url, destinationPath, studyArea = NULL, rasterToMatc
   )
 
   ecozone_shp[["ZONE_NAME"]] <- as.factor(ecozone_shp[["ZONE_NAME"]])
-  ecozone <- fasterize::fasterize(ecozone_shp, raster(rasterToMatch), field = "ZONE_NAME", fun = "sum")
-  ecozone <- terra::rast(ecozone)
-  ecozone <- terra::as.int(ecozone)
+  ecozone <- rasterize(ecozone_shp, rast(rasterToMatch), field = "ZONE_NAME", fun = "sum")
+  ecozone <- rast(ecozone)
+  ecozone <- as.int(ecozone)
 
   if (is(rasterToMatch, "Raster")) {
     rasterToMatch <- terra::rast(rasterToMatch)
