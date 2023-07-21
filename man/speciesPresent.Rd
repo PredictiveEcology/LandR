@@ -52,6 +52,7 @@ from \code{speciesPresentFromKNN}.
 }
 \examples{
 \dontrun{
+if (requireNamespace("googledrive", quietly = TRUE)) {
   # Make the dataset
   speciesPresent <- speciesPresentFromKNN(dPath = "~/data/KNN")
 
@@ -67,6 +68,7 @@ from \code{speciesPresentFromKNN}.
   # Get species list
   sa <- LandR::randomStudyArea(size = 1e11)
   species <- LandR::speciesInStudyArea(sa)
+}
 }
 
 }
