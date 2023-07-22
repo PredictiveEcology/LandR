@@ -1,5 +1,5 @@
 testthat::test_that("test prepRawBiomassMap", {
-  testthat::skip_on_cran()   ## not necessary, but here in case LandR goes to CRAN
+  testthat::skip_on_cran() ## not necessary, but here in case LandR goes to CRAN
   testthat::skip_on_ci()
 
   withr::local_package("reproducible")
@@ -18,9 +18,11 @@ testthat::test_that("test prepRawBiomassMap", {
     options(opts)
   }, add = TRUE)
 
-  biomassURL <- paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                       "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
-                       "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
+  biomassURL <- paste0(
+    "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+    "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
+    "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif"
+  )
   studyArea <- randomStudyArea()
   RTM <- rast(res = 1, crs = crs(studyArea), ext = ext(studyArea))
   RTM[] <- 1L
@@ -74,7 +76,6 @@ testthat::test_that("test prepRawBiomassMap", {
   expect_false(any(rawBiomassMap[] != rawBiomassMap2[], na.rm = TRUE))
   expect_false(all(is.na(rawBiomassMap[]) == is.na(RTM[])))
   expect_false(all(is.na(rawBiomassMap2[]) == is.na(RTM[])))
-
 
   ## use RTM for everything
   ## new args
