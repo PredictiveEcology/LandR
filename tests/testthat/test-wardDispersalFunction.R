@@ -7,10 +7,11 @@ test_that("test Ward dispersal seeding algorithm", {
     # devtools::load_all("~/GitHub/LandR")
     outSummary <- list()
   }
-  library(LandR)
-  library(data.table)
-  library(raster)
-  library(quickPlot)
+
+  withr::local_package("data.table")
+  withr::local_package("raster")
+  withr::local_package("quickPlot")
+  withr::local_package("SpaDES.tools")
 
   # keep this here for interactive testing with a larger raster
   doLarge <- if (interactive()) FALSE else FALSE
@@ -53,7 +54,6 @@ test_that("test Ward dispersal seeding algorithm", {
   speciesTable[, seeddistance_max := SeedMaxDist]
   speciesTable[seeddistance_max > 2000, seeddistance_max := 2000]
 
-
   for (jj in 1:2) {
     species <- data.table::copy(speciesTable)
     if (jj == 1) {
@@ -74,7 +74,6 @@ test_that("test Ward dispersal seeding algorithm", {
       })
       species <- data.table(species)[, speciesCode := speciesCodes[seq_along(LandisCode)]]
     }
-
 
     successionTimestep <- 10
     seedReceive <- rbindlist(rcvSpByPG, idcol = "pixelGroup")
@@ -107,7 +106,6 @@ test_that("test Ward dispersal seeding algorithm", {
     a <- reducedPixelGroupMap[] %in% seedReceive$pixelGroup
     sum(a)
 
-    library(SpaDES.tools)
     if (is.factor(seedReceiveFull$speciesCode)) {
       sppNames <- levels(seedReceiveFull$speciesCode)
       sps <- sppNames
@@ -132,7 +130,6 @@ test_that("test Ward dispersal seeding algorithm", {
       ras
     })
 
-
     bigDispersers <- species$speciesCode[which(species$SeedMaxDist == 5000 & species$SeedEffDist == 1000)]
     lapply(spsOut, function(x) table(x[]))
     if (interactive()) {
@@ -152,6 +149,7 @@ test_that("test Ward dispersal seeding algorithm", {
     joinedTest <- joined[, all(i.speciesCode %in% speciesCode), by = "pixelGroup"]
     expect_true(all(joinedTest$V1))
   }
+
   if (!doLarge) {
     env <- new.env()
     env$cellSize <- res(Sum_of_species)[1]
@@ -222,8 +220,9 @@ test_that("test large files", {
     dp <- tempdir()
     googledrive::drive_deauth()
   }
-  library(reproducible)
-  library(quickPlot)
+
+  withr::local_package("reproducible")
+  withr::local_package("quickPlot")
 
   url1 <- "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI"
   dtSrc <- prepInputs(
@@ -392,11 +391,13 @@ test_that("test large files", {
 })
 
 test_that("test Ward 4 immediate neighbours", {
-  library(raster)
-  library(data.table)
-  pixelGroupMap <- raster(extent(0, 1250, 0, 1750), res = 250, vals = 0)
+  withr::local_package("data.table")
+  withr::local_package("raster")
+  withr::local_package("SpaDES.tools")
+
+  pixelGroupMap <- raster::raster(raster::extent(0, 1250, 0, 1750), res = 250, vals = 0)
   mp <- SpaDES.tools::middlePixel(pixelGroupMap)
-  rc <- rowColFromCell(pixelGroupMap, mp)
+  rc <- raster::rowColFromCell(pixelGroupMap, mp)
 
   pixelGroupMap[rc] <- 1
 
@@ -430,19 +431,22 @@ test_that("test Ward 4 immediate neighbours", {
   )
   # seeddistance_eff = c(75L, 400L, 30L, 100L, 80L, 60L, 400L),
   # seeddistance_max = c(100L, 5000L, 250L, 303L, 200L, 200L, 5000L)
-  cc <- xyFromCell(pixelGroupMap, 15)
-  raster::plot(pixelGroupMap)
+  cc <- raster::xyFromCell(pixelGroupMap, 15)
+
+  if (interactive()) {
+    raster::plot(pixelGroupMap)
+  }
+
   for (i in 1:100) {
-    speciesTab <-
-      structure(
-        list(
-          speciesCode = unique(dtRcv$speciesCode),
-          seeddistance_eff = sample(1L:round((res(pixelGroupMap)[1] / 2.1)), size = 7),
-          seeddistance_max = sample(round(res(pixelGroupMap)[1] / 1.9):(res(pixelGroupMap)[1]), size = 7)
-        ),
-        row.names = c(NA, -7L),
-        class = c("data.table", "data.frame")
-      )
+    speciesTab <- structure(
+      list(
+        speciesCode = unique(dtRcv$speciesCode),
+        seeddistance_eff = sample(1L:round((raster::res(pixelGroupMap)[1] / 2.1)), size = 7),
+        seeddistance_max = sample(round(res(pixelGroupMap)[1] / 1.9):(raster::res(pixelGroupMap)[1]), size = 7)
+      ),
+      row.names = c(NA, -7L),
+      class = c("data.table", "data.frame")
+    )
     seed <- sample(1e6, 1)
     # seed <- 163330
     set.seed(seed)
@@ -461,11 +465,13 @@ test_that("test Ward 4 immediate neighbours", {
 })
 
 test_that("test Ward random collection of neighbours", {
-  library(raster)
-  library(data.table)
-  pixelGroupMap <- raster(extent(0, 1250, 0, 1750), res = 250, vals = 0)
+  withr::local_package("data.table")
+  withr::local_package("raster")
+  withr::local_package("SpaDES.tools")
+
+  pixelGroupMap <- raster::raster(raster::extent(0, 1250, 0, 1750), res = 250, vals = 0)
   mp <- SpaDES.tools::middlePixel(pixelGroupMap)
-  rc <- rowColFromCell(pixelGroupMap, mp)
+  rc <- raster::rowColFromCell(pixelGroupMap, mp)
 
   pixelGroupMap[rc] <- 1
 
@@ -494,15 +500,18 @@ test_that("test Ward random collection of neighbours", {
     speciesCode = lets[1:7]
   )))
 
-  cc <- xyFromCell(pixelGroupMap, 15)
-  raster::plot(pixelGroupMap)
+  cc <- raster::xyFromCell(pixelGroupMap, 15)
+
+  if (interactive()) {
+    raster::plot(pixelGroupMap)
+  }
+
   for (i in 1:100) {
-    speciesTab <-
-      data.table(
-        speciesCode = as.factor(LETTERS[1:10]),
-        seeddistance_eff = c(100, 100, 100, 100, 250, 250, 250, 250, 300, 300),
-        seeddistance_max = c(100, 200, 250, 300, 250, 300, 490, 1240, 400, 500)
-      )
+    speciesTab <- data.table(
+      speciesCode = as.factor(LETTERS[1:10]),
+      seeddistance_eff = c(100, 100, 100, 100, 250, 250, 250, 250, 300, 300),
+      seeddistance_max = c(100, 200, 250, 300, 250, 300, 490, 1240, 400, 500)
+    )
     seed <- sample(1e6, 1)
     set.seed(seed)
     out <- LANDISDisp(dtSrc,
