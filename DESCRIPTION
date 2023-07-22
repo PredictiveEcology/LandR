@@ -76,6 +76,7 @@ Suggests:
     withr,
     XML
 Remotes:
+    achubaty/BioSimClient_R,
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/quickPlot@development,
