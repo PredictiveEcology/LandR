@@ -171,7 +171,7 @@ scheduleDisturbance <- function(disturbanceLayer, currentYear) {
 
 ## TODO: rename the function "logTrunc"? implement a ceiling?
 
-#' Search/return for current data layers
+#' Search/return for data layers corresponding to a given year
 #'
 #' @param dataLayers a named list/stack of `SpatRasters` with
 #'   data layers to be searched (i.e., data layers for multiple simulation
@@ -185,7 +185,7 @@ scheduleDisturbance <- function(disturbanceLayer, currentYear) {
 #' @param currentYear the year for which we want find climate data for.
 #'
 #' @return a filtered list of data layers
-
+#' @export
 currentDataLayers <- function(dataLayers, currentYear) {
   availYears <- as.integer(gsub("[^0-9]", "", names(dataLayers)))
   availYears <- unique(availYears[!is.na(availYears)])
