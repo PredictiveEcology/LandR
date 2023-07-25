@@ -19,7 +19,7 @@ test_that("test download kNN SpeciesLayers with kNN website - all species", {
   if (FALSE) {
     # devtools::load_all("../LandR")
   }
-  library(raster)
+  withr::local_package("raster")
 
   mainDir <- tempdir()
   dPath <- file.path(mainDir, "inputs")
@@ -91,7 +91,7 @@ test_that("test download kNN SpeciesLayers with kNN website - three species", {
     # devtools::load_all("../LandR")
   }
 
-  library(raster)
+  withr::local_package("raster")
   mainDir <- tempdir()
   dPath <- file.path(mainDir, "inputs")
   cPath <- file.path(mainDir, "cache")
@@ -150,7 +150,7 @@ test_that("test download kNN SpeciesLayers bad website - three species", {
     # devtools::load_all("../LandR")
   }
 
-  library(raster)
+  withr::local_package("raster")
 
   mainDir <- tempdir()
   dPath <- file.path(mainDir, "inputs")

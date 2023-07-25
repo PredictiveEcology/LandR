@@ -25,6 +25,7 @@ projectTo <- utils::getFromNamespace("projectTo", "reproducible")
 #'
 #' @examples
 #' \dontrun{
+#' if (requireNamespace("googledrive", quietly = TRUE)) {
 #'   # Make the dataset
 #'   speciesPresent <- speciesPresentFromKNN(dPath = "~/data/KNN")
 #'
@@ -40,6 +41,7 @@ projectTo <- utils::getFromNamespace("projectTo", "reproducible")
 #'   # Get species list
 #'   sa <- LandR::randomStudyArea(size = 1e11)
 #'   species <- LandR::speciesInStudyArea(sa)
+#' }
 #' }
 #'
 #' @export
