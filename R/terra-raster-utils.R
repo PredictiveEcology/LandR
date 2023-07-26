@@ -405,19 +405,3 @@ plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
          fill = "")
   plot1
 }
-
-
-#' Load and merge a list of raster files into a single larger
-#'  raster
-#'
-#' @param rasFileLs a `list` of raster file paths.
-#'
-#' @returns A `SpatRaster`
-#'
-#' @importFrom terra rast merge sprc
-.mergeRasterFiles <- function(rasFileLs) {
-  loadedRasLs <- lapply(rasFileLs, rast)
-  rasCollection <- sprc(loadedRasLs)
-  mergedRas <- terra::merge(rasCollection)
-  return(mergedRas)
-}
