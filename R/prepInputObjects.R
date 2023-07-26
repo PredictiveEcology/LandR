@@ -557,7 +557,7 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #' @return a `SpatRaster` layer of fire perimeters with fire year values.
 #'
 #' @export
-#' @importFrom raster crs getValues
+#' @importFrom raster crs getValues values<-
 #' @importFrom reproducible .requireNamespace Cache prepInputs
 #' @importFrom sf st_cast st_transform st_zm
 #'

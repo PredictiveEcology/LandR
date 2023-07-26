@@ -29,8 +29,6 @@ Imports:
     crayon,
     data.table,
     fpCompare,
-    future,
-    future.apply,
     ggplot2,
     ggpubr,
     ggspatial,
