@@ -53,6 +53,8 @@ Imports:
     utils,
     viridis
 Suggests:
+    bbmle, 
+    biomod2 (>= 4.2-2),
     BioSIM,
     covr,
     curl,
@@ -75,6 +77,7 @@ Suggests:
     XML
 Remotes:
     achubaty/BioSimClient_R,
+    CeresBarros/biomod2@dev_currentCeres,
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/quickPlot@development,
