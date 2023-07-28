@@ -251,12 +251,12 @@ biomodProjWrapper <- function(bm.mod, proj.name = "testProj", new.env = NULL, ne
 biomodEnsembleFrcstWrapper <- function(bm.em, bm.proj = NULL, proj.name = NULL, new.env = NULL, new.env.xy = NULL,
                                        keep.in.memory = TRUE, ...) {
   if (requireNamespace("biomod2", quietly = TRUE)) {
-    if (!is.null("new.env.xy") & inherits(new.env, "data.table")) {
+    if (!is.null("new.env") & inherits(new.env, "data.table")) {
       new.env <- as.data.frame(new.env)
     }
 
-    if (!is.null("new.env.xy") & inherits(new.env, "data.table")) {
-      new.env.xy <- as.data.frame(inherits(new.env, "data.table"))
+    if (!is.null("new.env.xy") & inherits(new.env.xy, "data.table")) {
+      new.env.xy <- as.data.frame(new.env.xy)
     }
     bm.em.proj <- Cache(biomod2::BIOMOD_EnsembleForecasting,
                         bm.em = bm.em,
