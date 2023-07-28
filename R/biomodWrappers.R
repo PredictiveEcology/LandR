@@ -211,8 +211,8 @@ biomodProjWrapper <- function(bm.mod, proj.name = "testProj", new.env = NULL, ne
       new.env <- as.data.frame(new.env)
     }
 
-    if (!is.null("new.env.xy") & inherits(new.env, "data.table")) {
-      new.env.xy <- as.data.frame(inherits(new.env, "data.table"))
+    if (!is.null(new.env.xy) & inherits(new.env.xy, "data.table")) {
+      new.env.xy <- as.data.frame(new.env.xy)
     }
 
     ## there may be additional columns in the new data, biomod doesn't like this
