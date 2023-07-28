@@ -93,7 +93,9 @@ LazyData: true
 Collate: 
     'LANDIS-II-tables.R'
     'LandR-package.R'
+    'NLMs.R'
     'assertions.R'
+    'biomodWrappers.R'
     'biosim.R'
     'chooseName.R'
     'cohorts.R'
