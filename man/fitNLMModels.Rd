@@ -111,7 +111,7 @@ boundaries are applied. If TRUE, coefficient of the linear model on the A parame
 (intercept and k) are bound (intercept = observed maximum B * 1.5, k = 0.2). Alternatively, pass
 a named vector of parameter boundaries.}
 
-\item{nbWorkers}{integer. If > 1, the number of workers to use in \code{future_Map}, otherwise
+\item{nbWorkers}{integer. If > 1, the number of workers to use in \code{future.apply::future_apply}, otherwise
 no parallelisation is done.}
 }
 \description{
