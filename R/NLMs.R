@@ -79,14 +79,10 @@
 #'   boundaries are applied. If TRUE, coefficient of the linear model on the A parameter
 #'   (intercept and k) are bound (intercept = observed maximum B * 1.5, k = 0.2). Alternatively, pass
 #'   a named vector of parameter boundaries.
-#' @param nbWorkers integer. If > 1, the number of workers to use in `future_Map`, otherwise
+#' @param nbWorkers integer. If > 1, the number of workers to use in `future.apply::future_apply`, otherwise
 #'   no parallelisation is done.
 #'
 #' @importFrom crayon blue magenta
-#' @importFrom future.apply future_Map
-#' @importFrom future plan cluster
-#' @importFrom parallel makeForkCluster stopCluster clusterEvalQ
-#' @importFrom parallelly makeClusterPSOCK
 
 fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
                          predictorVarsCombos = NULL, maxNoCoefs = 4, doFwdSelection = FALSE,
@@ -555,11 +551,17 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
     }
 
     if (nbWorkers > 1) {
-      if (!requireNamespace("future.apply")) {
+      if (!requireNamespace("future", quietly = TRUE)) {
+        stop("install 'future'")
+      }
+      if (!requireNamespace("future.apply", quietly = TRUE)) {
         stop("install 'future.apply'")
       }
-      if (!requireNamespace("parallel")) {
+      if (!requireNamespace("parallel", quietly = TRUE)) {
         stop("install 'parallel'")
+      }
+      if (!requireNamespace("parallely", quietly = TRUE)) {
+        stop("install 'parallely'")
       }
 
       if (.Platform$OS.type == "unix") {
@@ -981,8 +983,6 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
 #' @param plotCIs should confidence intervals be calculated and plotted?
 #'
 #' @importFrom data.table data.table as.data.table
-#' @importFrom MASS mvrnorm
-#' @importFrom lqmm make.positive.definite
 
 .MLLMaxBplotData <- function(mll, nonLinModelQuoted, linModelQuoted, maxCover, data,
                              averageCovariates = TRUE, observedAge = FALSE, plotCIs = TRUE) {
@@ -1042,27 +1042,37 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
       plotCIs <- FALSE
     }
     if (plotCIs) {
+      if (!requireNamespace("MASS", quietly = TRUE)) {
+        stop("Package MASS not installed. Install using `install.packages('MASS')`.")
+      }
       ## generate new parameter values from a multivariate normal distribution
       ## see https://stats.stackexchange.com/questions/221426/95-confidence-intervals-on-prediction-of-censored-binomial-model-estimated-usin
       ## and Bolker's book Ecological Models and Data in R (here the solve(hessian)) is suggested as an alternative if using optim)
       newparams <- tryCatch({
         R.utils::withTimeout({
-          mvrnorm(10000, mu = bbmle::coef(mll), Sigma = solve(mll@details$hessian))
+          MASS::mvrnorm(10000, mu = bbmle::coef(mll), Sigma = solve(mll@details$hessian))
         }, timeout = 300) ## 5min
       }, TimeoutException = function(ex) {
         stop("Convergence timed-out.")
       }, error = function(e) e) ## may not work if matrix isn't postive definite
 
       if (is(newparams, "error") & any(grepl("not positive definite", newparams))) {
+        if (!requireNamespace("lqmm", quietly = TRUE)) {
+          stop("Package lqmm not installed. Install using `install.packages('lqmm')`.")
+        }
+
         ## try coercing to a positive definite matrix
         ## see https://stackoverflow.com/questions/69804459/multivariete-distribution-error-sigma-is-not-positive-definite
         ## note that this may be due to some variables being linear combinations of others, or bad model specification
         # https://stats.stackexchange.com/questions/30465/what-does-a-non-positive-definite-covariance-matrix-tell-me-about-my-data
-        SigmaMatrix <- tryCatch(make.positive.definite(solve(mll@details$hessian)), error = function(e) e)
+        SigmaMatrix <- tryCatch(lqmm::make.positive.definite(solve(mll@details$hessian)), error = function(e) e)
         if (isFALSE(is(SigmaMatrix, "error"))) {
+          if (!requireNamespace("MASS", quietly = TRUE)) {
+            stop("Package MASS not installed. Install using `install.packages('MASS')`.")
+          }
           newparams <- tryCatch({
             R.utils::withTimeout({
-              mvrnorm(10000, mu = bbmle::coef(mll), Sigma = SigmaMatrix)
+              MASS::mvrnorm(10000, mu = bbmle::coef(mll), Sigma = SigmaMatrix)
             }, timeout = 300) ## 5min
           }, TimeoutException = function(ex) {
             stop("Convergence timed-out.")
@@ -1314,8 +1324,6 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
 #' @param plotCIs should confidence intervals be calculated and plotted?
 #'
 #' @importFrom data.table data.table as.data.table
-#' @importFrom MASS mvrnorm
-#' @importFrom lqmm make.positive.definite
 #' @importFrom crayon magenta blue
 
 .MLLMaxBPartialPlotData <- function(mll, nonLinModelQuoted, linModelQuoted,
@@ -1366,34 +1374,43 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
       plotCIs <- FALSE
     }
     if (plotCIs) {
+      if (!requireNamespace("MASS", quietly = TRUE)) {
+        stop("Package MASS not installed. Install using `install.packages('MASS')`.")
+      }
       ## generate new parameter values from a multivariate normal distribution
       ## see https://stats.stackexchange.com/questions/221426/95-confidence-intervals-on-prediction-of-censored-binomial-model-estimated-usin
       ## and Bolker's book Ecological Models and Data in R (here the solve(hessian)) is suggested as an alternative if using optim)
       newparams <- tryCatch({
         R.utils::withTimeout({
-          mvrnorm(10000, mu = bbmle::coef(mll), Sigma = solve(mll@details$hessian))
+          MASS::mvrnorm(10000, mu = bbmle::coef(mll), Sigma = solve(mll@details$hessian))
         }, timeout = 300) ## 5min
       }, TimeoutException = function(ex) {
         stop("Convergence timed-out.")
       }, error = function(e) e) ## may not work if matrix isn't postive definite
 
       if (is(newparams, "error") & any(grepl("not positive definite", newparams))) {
+        if (!requireNamespace("lqmm", quietly = TRUE)) {
+          stop("Package lqmm not installed. Install using `install.packages('lqmm')`.")
+        }
         ## try coercing to a positive definite matrix
         ## see https://stackoverflow.com/questions/69804459/multivariete-distribution-error-sigma-is-not-positive-definite
         ## note that this may be due to some variables being linear combinations of others, or bad model specification
         # https://stats.stackexchange.com/questions/30465/what-does-a-non-positive-definite-covariance-matrix-tell-me-about-my-data
         SigmaMatrix <- tryCatch({
           R.utils::withTimeout({
-            make.positive.definite(solve(mll@details$hessian))
+            lqmm::make.positive.definite(solve(mll@details$hessian))
           }, timeout = 300) ## 5min
         }, TimeoutException = function(ex) {
           stop("Convergence timed-out.")
         }, error = function(e) e)
 
         if (isFALSE(is(SigmaMatrix, "error"))) {
+          if (!requireNamespace("MASS", quietly = TRUE)) {
+            stop("Package MASS not installed. Install using `install.packages('MASS')`.")
+          }
           newparams <- tryCatch({
             R.utils::withTimeout({
-              mvrnorm(10000, mu = bbmle::coef(mll), Sigma = SigmaMatrix)
+              MASS::mvrnorm(10000, mu = bbmle::coef(mll), Sigma = SigmaMatrix)
             }, timeout = 300) ## 5min
           }, TimeoutException = function(ex) {
             stop("Convergence timed-out.")
