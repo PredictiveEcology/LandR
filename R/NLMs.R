@@ -769,6 +769,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 #' @param model character. Non-linear model form used to estimate average maximum
 #'   biomass. One of "CR" (Chapman-Richards) or "Logistic".
 #'
+#' @export
 extractMaxB <- function(mll, newdata, average = FALSE, model = c("CR", "Logistic"))  {
   if (requireNamespace("bbmle", quietly = TRUE)) {
     if (is.null(dim(newdata))) {
