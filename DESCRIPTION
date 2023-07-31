@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     http://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2023-07-25
-Version: 1.1.0.9050
+Date: 2023-07-31
+Version: 1.1.0.9053
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -29,8 +29,6 @@ Imports:
     crayon,
     data.table,
     fpCompare,
-    future,
-    future.apply,
     ggplot2,
     ggpubr,
     ggspatial,
@@ -55,28 +53,35 @@ Imports:
     utils,
     viridis
 Suggests:
+    bbmle, 
+    biomod2 (>= 4.2-2),
     BioSIM,
     covr,
     curl,
     fasterize,
+    future,
+    future.apply,
     gdalUtilities,
     googledrive (>= 2.0.0),
     httr,
     knitr,
+    lqmm,
+    MASS,
     parallelly,
     qs,
     rasterVis,
     RCurl,
     RhpcBLASctl,
     rlang,
-    roxygen2,
     rmarkdown,
+    roxygen2,
     spelling,
     testthat,
     withr,
     XML
 Remotes:
     achubaty/BioSimClient_R,
+    CeresBarros/biomod2@dev_currentCeres,
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/quickPlot@development,
@@ -92,12 +97,13 @@ LazyData: true
 Collate: 
     'LANDIS-II-tables.R'
     'LandR-package.R'
+    'NLMs.R'
     'assertions.R'
+    'biomodWrappers.R'
     'biosim.R'
     'chooseName.R'
     'cohorts.R'
     'convertUnwantedLCC2.R'
-    'defaultData.R'
     'dem.R'
     'ecoregions.R'
     'ecozones.R'
@@ -109,7 +115,6 @@ Collate:
     'nullClimate.R'
     'overlayLCCs.R'
     'partitionBiomass.R'
-    'permafrost.R'
     'plot_summaries.R'
     'plotting.R'
     'prepEcoregions.R'

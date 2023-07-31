@@ -2,6 +2,7 @@
 
 * further adaptations to `terra` package
 * fix bug in `prepInputLCC`: `orig` argument no longer accepted by `terra::compareGeom`
+* new functions used to estimate maximum biomass (maxB) and species establishment probabilities (SEP)
 
 # LandR 1.1.0
 
