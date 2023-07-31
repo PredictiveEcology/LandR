@@ -506,7 +506,6 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
                                model = c("CR", "Logistic"), maxCover = 1L, cores = 1L,
                                starts = NULL, lower = NULL, upper = NULL, nbWorkers = 1L) {
   if (requireNamespace("bbmle", quietly = TRUE)) {
-    requireNamespace("R.utils")
     linModelQuoted <- lapply(linModelQuoted, as.formula, env = .GlobalEnv) # .GlobalEnv keeps object small. don't eval/parse!
     nonLinModelQuoted <- as.formula(nonLinModelQuoted, env = .GlobalEnv)
     data <- data[complete.cases(data),]
@@ -551,24 +550,27 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
     }
 
     if (nbWorkers > 1) {
+      if (!requireNamespace("MASS", quietly = TRUE)) {
+        stop("Package MASS not installed. Install using `install.packages('MASS')`.")
+      }
+
       if (!requireNamespace("future", quietly = TRUE)) {
-        stop("install 'future'")
+        stop("Package future not installed. Install using `install.packages('future')`.")
       }
       if (!requireNamespace("future.apply", quietly = TRUE)) {
-        stop("install 'future.apply'")
+        stop("Package future.apply not installed. Install using `install.packages('future.apply')`.")
       }
+
       if (!requireNamespace("parallel", quietly = TRUE)) {
-        stop("install 'parallel'")
-      }
-      if (!requireNamespace("parallely", quietly = TRUE)) {
-        stop("install 'parallely'")
+        stop("Package parallel not installed. Install using `install.packages('parallel')`.")
       }
 
       if (.Platform$OS.type == "unix") {
         cl <- parallel::makeForkCluster(nbWorkers)
       } else {
+
         if (!requireNamespace("parallelly")) {
-          stop("install 'parallelly'")
+          stop("Package parallelly not installed. Install using `install.packages('parallelly')`.")
         }
         cl <- parallelly::makeClusterPSOCK(nbWorkers, rscript_libs = .libPaths())
       }
@@ -723,6 +725,9 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 }
 
 .mllWrapper <- function(X, mle2Args) {
+  if (!requireNamespace("R.utils", quietly = TRUE)) {
+    stop("Package R.utils not installed. Install using `install.packages('R.utils')`.")
+  }
   if (!is.null(X)) {
     mle2Args$start <- as.list(X)
   }
@@ -1044,6 +1049,10 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
     if (plotCIs) {
       if (!requireNamespace("MASS", quietly = TRUE)) {
         stop("Package MASS not installed. Install using `install.packages('MASS')`.")
+      }
+
+      if (!requireNamespace("R.utils", quietly = TRUE)) {
+        stop("Package R.utils not installed. Install using `install.packages('R.utils')`.")
       }
       ## generate new parameter values from a multivariate normal distribution
       ## see https://stats.stackexchange.com/questions/221426/95-confidence-intervals-on-prediction-of-censored-binomial-model-estimated-usin
@@ -1376,6 +1385,10 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
     if (plotCIs) {
       if (!requireNamespace("MASS", quietly = TRUE)) {
         stop("Package MASS not installed. Install using `install.packages('MASS')`.")
+      }
+
+      if (!requireNamespace("R.utils", quietly = TRUE)) {
+        stop("Package R.utils not installed. Install using `install.packages('R.utils')`.")
       }
       ## generate new parameter values from a multivariate normal distribution
       ## see https://stats.stackexchange.com/questions/221426/95-confidence-intervals-on-prediction-of-censored-binomial-model-estimated-usin
