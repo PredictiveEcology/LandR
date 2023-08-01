@@ -502,6 +502,8 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 #'   with names being parameter names.
 #' @param lower passed to `mle2`
 #' @param upper passed to `mle2`
+#' @param nbWorkers integer. If > 1, the number of workers to use in `parallelly::makeClusterPSOCK(nbWorkers = .)`,
+#'  otherwise no parallellisation is done.
 #'
 #' @return a \code{list} with entries 'mll' (the maximum likelihood-estimated
 #' coefficients) and 'AICbest' (the AIC of the best models generating these
