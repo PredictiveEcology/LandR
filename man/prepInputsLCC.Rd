@@ -26,6 +26,8 @@ search for the file before attempting to download. Default for that option is
 \item{method}{passed to \code{terra::intersect} or \code{raster::intersect},
 and \code{reproducible::prepInputs}}
 
+\item{filename2}{passed to \code{reproducible::prepInputs}}
+
 \item{...}{Arguments passed to \code{terra::mask} (for \code{maskTo}), \code{terra::project} (for \code{projectTo})
 or \code{terra::writeRaster} (for \code{writeTo}) and not used for \code{cropTo}, as well \code{postProcess}'s
 \code{rasterToMatch} and \code{studyArea} arguments (see below). Commonly used arguments might be
