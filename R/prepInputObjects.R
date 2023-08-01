@@ -524,10 +524,6 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
     Args$useSAcrs <- FALSE
   }
 
-  if (is.null(Args$projectTo)) {
-    Args$projectTo <- NA
-  }
-
   if (is.null(Args$method)) {
     Args$method <- "bilinear"
   }
