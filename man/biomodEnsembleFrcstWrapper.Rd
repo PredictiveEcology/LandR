@@ -19,6 +19,8 @@ biomodEnsembleFrcstWrapper(
 
 \item{bm.proj}{output of \code{biomod2::BIOMOD_Projection}}
 
+\item{proj.name}{passed to \code{biomod2::BIOMOD_Projection}}
+
 \item{new.env}{passed to \code{biomod2::BIOMOD_EnsembleForecasting}}
 
 \item{new.env.xy}{passed to \code{biomod2::BIOMOD_EnsembleForecasting}}

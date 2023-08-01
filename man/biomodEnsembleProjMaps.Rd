@@ -4,7 +4,7 @@
 \alias{biomodEnsembleProjMaps}
 \title{Make maps from BIOMOD_EnsembleForecasting results}
 \usage{
-biomodEnsembleProjMaps(bm.em.proj, predModel, rasTemplate, rasterToMatch)
+biomodEnsembleProjMaps(bm.em.proj, predModel, rasTemplate, origCRS)
 }
 \arguments{
 \item{bm.em.proj}{output of \code{biomod2::BIOMOD_EnsembleForecasting}. Note that
@@ -15,6 +15,9 @@ as \code{rasTemplate}}
 \code{bm.em.proj@models.projected}}
 
 \item{rasTemplate}{a template RasterLayer or SpatRaster that can be used to map the projections}
+
+\item{origCRS}{character. The original CRS projection of \code{bm.em.proj@coord}, passed to
+\code{terra::vect(..., crs = .)}}
 }
 \value{
 a SpatRaster
