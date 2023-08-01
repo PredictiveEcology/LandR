@@ -1,3 +1,9 @@
+utils::globalVariables(c(
+  "..colsPred", "..colsResp", "..envCols", "..predictorVars", "..responseVar",
+  "..targetCovar", "full.name", "lower", "model", "pred1", "quant",
+  "upper", "x", "y"
+))
+
 #' FUNCTIONS TO FIT NON-LINEAR MODELS TO ESTIMATE MAXB
 
 #' Wrapper function to fit non-linear growth model per species.
@@ -83,6 +89,7 @@
 #'   no parallelisation is done.
 #'
 #' @importFrom crayon blue magenta
+#' @importFrom utils combn
 
 fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
                          predictorVarsCombos = NULL, maxNoCoefs = 4, doFwdSelection = FALSE,
@@ -501,6 +508,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 #' coefficients)
 #'
 #' @importFrom crayon cyan red
+#' @importFrom data.table last
 
 .fitNLMwCovariates <- function(data, nonLinModelQuoted, linModelQuoted, mllsOuterPrev,
                                model = c("CR", "Logistic"), maxCover = 1L, cores = 1L,
@@ -845,7 +853,8 @@ extractMaxB <- function(mll, newdata, average = FALSE, model = c("CR", "Logistic
 #'   changed to `maxCover`.
 #' @param plotCIs should confidence intervals be calculated and plotted?
 #'
-#' @importFrom ggplot2 ggplot geom_point labs geom_line geom_ribbon theme_classic scale_color_distiller
+#' @importFrom ggplot2 ggplot geom_point labs geom_line geom_ribbon theme_classic scale_color_distiller geom_hline stat_summary
+#' @importFrom stats quantile
 #'
 ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
                            plotTitle = NULL, nonLinModelQuoted, linModelQuoted,
@@ -988,6 +997,7 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
 #' @param plotCIs should confidence intervals be calculated and plotted?
 #'
 #' @importFrom data.table data.table as.data.table
+#' @importFrom stats quantile vcov
 
 .MLLMaxBplotData <- function(mll, nonLinModelQuoted, linModelQuoted, maxCover, data,
                              averageCovariates = TRUE, observedAge = FALSE, plotCIs = TRUE) {
@@ -1182,7 +1192,8 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
 #'
 #' @details Note that the original data, not the predicted values is shown.
 #'
-#' @importFrom ggplot2 ggplot geom_point labs geom_line geom_ribbon theme_classic scale_color_distiller
+#' @importFrom ggplot2 ggplot geom_point labs geom_line geom_ribbon theme_classic scale_color_distiller geom_hline stat_summary
+#' @importFrom stats quantile
 #'
 partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1, fixMaxCover = TRUE,
                                   xCovar = "age", showQuantiles = "allQuantiles", plotTitle = NULL,
@@ -1334,6 +1345,7 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
 #'
 #' @importFrom data.table data.table as.data.table
 #' @importFrom crayon magenta blue
+#' @importFrom stats quantile vcov
 
 .MLLMaxBPartialPlotData <- function(mll, nonLinModelQuoted, linModelQuoted,
                                     targetCovar = "cover", fixMaxCover = TRUE,
