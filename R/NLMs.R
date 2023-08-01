@@ -513,7 +513,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 #' @importFrom data.table last
 
 .fitNLMwCovariates <- function(data, nonLinModelQuoted, linModelQuoted, mllsOuterPrev,
-                               model = c("CR", "Logistic"), maxCover = 1L, cores = 1L,
+                               model = c("CR", "Logistic"), maxCover = 1L,
                                starts = NULL, lower = NULL, upper = NULL, nbWorkers = 1L) {
   if (requireNamespace("bbmle", quietly = TRUE)) {
     linModelQuoted <- lapply(linModelQuoted, as.formula, env = .GlobalEnv) # .GlobalEnv keeps object small. don't eval/parse!
