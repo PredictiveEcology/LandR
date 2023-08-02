@@ -20,6 +20,7 @@
 ## usethis namespace: start
 #' @importFrom crayon blue cyan green magenta red
 #' @importFrom data.table as.data.table copy data.table fread is.data.table last melt rbindlist
+#' @importFrom data.table copy
 #' @importFrom data.table set setattr setcolorder setDT setDTthreads setkey setkeyv setnames setorderv
 #' @importFrom fpCompare %==% %>>% %<<%
 #' @importFrom ggplot2 aes coord_equal coord_sf element_blank element_text facet_wrap
