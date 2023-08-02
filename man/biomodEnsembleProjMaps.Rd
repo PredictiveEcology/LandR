@@ -4,7 +4,7 @@
 \alias{biomodEnsembleProjMaps}
 \title{Make maps from BIOMOD_EnsembleForecasting results}
 \usage{
-biomodEnsembleProjMaps(bm.em.proj, predModel, rasTemplate, rasterToMatch)
+biomodEnsembleProjMaps(bm.em.proj, predModel, rasTemplate, origCRS)
 }
 \arguments{
 \item{bm.em.proj}{output of \code{biomod2::BIOMOD_EnsembleForecasting}. Note that

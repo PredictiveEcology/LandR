@@ -1,3 +1,7 @@
+utils::globalVariables(c(
+  "growthCurveSource", "inflationFactor", "mANPPproportion"
+))
+
 #' FUNCTIONS TO FIT NON-LINEAR MODELS TO ESTIMATE MAXB
 
 #' Wrapper function to fit non-linear growth model per species.

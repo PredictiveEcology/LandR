@@ -24,14 +24,22 @@ LANDISDisp(
 
 \item{dtRcv}{data.table}
 
-\item{pixelGroupMap}{map}
+\item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
+number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
-\item{speciesTable}{A data.table that should have at least 3 columns:
-\code{speciesCode} an integer representation of species, \code{seeddistance_max}
-a numeric with the maximum seed dispersal distance and \code{seeddistance_eff}
-the "effective" seed dispersal distance. These latter two are
-parameters passed to Ward dispersal kernel. This data.table can come from
-a \code{species} table from a LANDIS project.}
+\item{speciesTable}{A species traits table, with \strong{at least} the following columns:
+\itemize{
+\item \code{speciesCode} an character representation of species;
+\item \code{Area} a character of geographical area within a species range for which trait values are relevant;
+\item \code{longevity} species longevity in years, \code{sexualmature} age in years at sexual maturity;
+\item \code{shadetolerance} numeric value between 1-5 of relative shade tolerance (with respect to other species);
+\item \code{seeddistance_eff} the "effective" seed dispersal distance;
+\item \code{seeddistance_max} a numeric with the maximum seed dispersal distance;
+\item \code{mortalityshape} and \code{growthcurve}: growth curve shape parameters.
+Other columns (e.g. fire-related traits) can also be included depending on LandR modules in use.
+Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015)
+for further detail.
+}}
 
 \item{dispersalFn}{An expression that can take a "dis" argument. See details.
 Default is "Ward" (temporarily unused, as it is hard coded inside Rcpp function)}
@@ -44,7 +52,8 @@ the effective distance (e.g., 0.95)}
 \item{plot.it}{Deprecated. If TRUE, then plot the raster at every interaction,
 so one can watch the \code{LANDISDisp} event grow.}
 
-\item{successionTimestep}{integer. The time in time units between succession (i.e., dispersal) events.}
+\item{successionTimestep}{The time between successive seed dispersal events.
+In LANDIS-II, this is called "Succession Timestep".}
 
 \item{verbose}{Numeric. \code{0} is not verbose, with increasing numbers indicating
 increasing levels of verbosity (currently up to 2)}

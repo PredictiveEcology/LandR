@@ -27,7 +27,8 @@ number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}
 
 \item{currentTime}{The current simulation time e.g., \code{time(sim)}.}
 
-\item{successionTimestep}{succession timestep used in the simulation}
+\item{successionTimestep}{The time between successive seed dispersal events.
+In LANDIS-II, this is called "Succession Timestep".}
 
 \item{trackPlanting}{adds column that tracks planted cohorts if \code{TRUE}}
 }
