@@ -285,7 +285,7 @@ biomodEnsembleFrcstWrapper <- function(bm.em, bm.proj = NULL, proj.name = NULL, 
 #' @param predModel character. Which model predictions should be used. Chose one of
 #'   `bm.em.proj@models.projected`
 #' @param rasTemplate a template RasterLayer or SpatRaster that can be used to map the projections
-#' @param rasterToMatch SpatRaster. A raster with the original CRS projection of `bm.em.proj@coord`.
+#' @param origCRS character. The original CRS projection of `bm.em.proj@coord`.
 #'
 #' @return a SpatRaster
 #'

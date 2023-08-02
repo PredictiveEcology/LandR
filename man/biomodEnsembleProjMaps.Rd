@@ -16,7 +16,7 @@ as \code{rasTemplate}}
 
 \item{rasTemplate}{a template RasterLayer or SpatRaster that can be used to map the projections}
 
-\item{rasterToMatch}{SpatRaster. A raster with the original CRS projection of \code{bm.em.proj@coord}.}
+\item{origCRS}{character. The original CRS projection of \code{bm.em.proj@coord}.}
 }
 \value{
 a SpatRaster
