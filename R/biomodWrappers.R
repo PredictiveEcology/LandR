@@ -242,6 +242,7 @@ biomodProjWrapper <- function(bm.mod, proj.name = "testProj", new.env = NULL, ne
 #'
 #' @param bm.em output of `biomod2::BIOMOD_EnsembleModeling`
 #' @param bm.proj output of `biomod2::BIOMOD_Projection`
+#' @param proj.name passed to `biomod2::BIOMOD_Projection`
 #' @param new.env passed to `biomod2::BIOMOD_EnsembleForecasting`
 #' @param new.env.xy passed to `biomod2::BIOMOD_EnsembleForecasting`
 #' @param keep.in.memory passed to `biomod2::BIOMOD_EnsembleForecasting`
@@ -284,6 +285,7 @@ biomodEnsembleFrcstWrapper <- function(bm.em, bm.proj = NULL, proj.name = NULL, 
 #' @param predModel character. Which model predictions should be used. Chose one of
 #'   `bm.em.proj@models.projected`
 #' @param rasTemplate a template RasterLayer or SpatRaster that can be used to map the projections
+#' @param origCRS character. The original CRS projection of `bm.em.proj@coord`.
 #'
 #' @return a SpatRaster
 #'

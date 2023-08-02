@@ -75,6 +75,7 @@ Suggests:
     rlang,
     rmarkdown,
     roxygen2,
+    R.utils,
     spelling,
     testthat,
     withr,

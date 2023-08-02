@@ -15,6 +15,8 @@ as \code{rasTemplate}}
 \code{bm.em.proj@models.projected}}
 
 \item{rasTemplate}{a template RasterLayer or SpatRaster that can be used to map the projections}
+
+\item{origCRS}{character. The original CRS projection of \code{bm.em.proj@coord}.}
 }
 \value{
 a SpatRaster

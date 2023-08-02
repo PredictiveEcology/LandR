@@ -1,5 +1,7 @@
 utils::globalVariables(c(
-  "growthCurveSource", "inflationFactor", "mANPPproportion"
+  "..colsPred", "..colsResp", "..envCols", "..predictorVars", "..responseVar",
+  "..targetCovar", "full.name", "lower", "model", "pred1", "quant",
+  "upper", "x", "y", "growthCurveSource", "inflationFactor", "mANPPproportion"
 ))
 
 #' FUNCTIONS TO FIT NON-LINEAR MODELS TO ESTIMATE MAXB
@@ -87,6 +89,7 @@ utils::globalVariables(c(
 #'   no parallelisation is done.
 #'
 #' @importFrom crayon blue magenta
+#' @importFrom utils combn
 
 fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
                          predictorVarsCombos = NULL, maxNoCoefs = 4, doFwdSelection = FALSE,
@@ -499,18 +502,20 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 #'   with names being parameter names.
 #' @param lower passed to `mle2`
 #' @param upper passed to `mle2`
+#' @param nbWorkers integer. If > 1, the number of workers to use in `parallelly::makeClusterPSOCK(nbWorkers = .)`,
+#'  otherwise no parallellisation is done.
 #'
 #' @return a \code{list} with entries 'mll' (the maximum likelihood-estimated
 #' coefficients) and 'AICbest' (the AIC of the best models generating these
 #' coefficients)
 #'
 #' @importFrom crayon cyan red
+#' @importFrom data.table last
 
 .fitNLMwCovariates <- function(data, nonLinModelQuoted, linModelQuoted, mllsOuterPrev,
-                               model = c("CR", "Logistic"), maxCover = 1L, cores = 1L,
+                               model = c("CR", "Logistic"), maxCover = 1L,
                                starts = NULL, lower = NULL, upper = NULL, nbWorkers = 1L) {
   if (requireNamespace("bbmle", quietly = TRUE)) {
-    requireNamespace("R.utils")
     linModelQuoted <- lapply(linModelQuoted, as.formula, env = .GlobalEnv) # .GlobalEnv keeps object small. don't eval/parse!
     nonLinModelQuoted <- as.formula(nonLinModelQuoted, env = .GlobalEnv)
     data <- data[complete.cases(data),]
@@ -555,24 +560,27 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
     }
 
     if (nbWorkers > 1) {
+      if (!requireNamespace("MASS", quietly = TRUE)) {
+        stop("Package MASS not installed. Install using `install.packages('MASS')`.")
+      }
+
       if (!requireNamespace("future", quietly = TRUE)) {
-        stop("install 'future'")
+        stop("Package future not installed. Install using `install.packages('future')`.")
       }
       if (!requireNamespace("future.apply", quietly = TRUE)) {
-        stop("install 'future.apply'")
+        stop("Package future.apply not installed. Install using `install.packages('future.apply')`.")
       }
+
       if (!requireNamespace("parallel", quietly = TRUE)) {
-        stop("install 'parallel'")
-      }
-      if (!requireNamespace("parallely", quietly = TRUE)) {
-        stop("install 'parallely'")
+        stop("Package parallel not installed. Install using `install.packages('parallel')`.")
       }
 
       if (.Platform$OS.type == "unix") {
         cl <- parallel::makeForkCluster(nbWorkers)
       } else {
+
         if (!requireNamespace("parallelly")) {
-          stop("install 'parallelly'")
+          stop("Package parallelly not installed. Install using `install.packages('parallelly')`.")
         }
         cl <- parallelly::makeClusterPSOCK(nbWorkers, rscript_libs = .libPaths())
       }
@@ -727,6 +735,9 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 }
 
 .mllWrapper <- function(X, mle2Args) {
+  if (!requireNamespace("R.utils", quietly = TRUE)) {
+    stop("Package R.utils not installed. Install using `install.packages('R.utils')`.")
+  }
   if (!is.null(X)) {
     mle2Args$start <- as.list(X)
   }
@@ -844,7 +855,8 @@ extractMaxB <- function(mll, newdata, average = FALSE, model = c("CR", "Logistic
 #'   changed to `maxCover`.
 #' @param plotCIs should confidence intervals be calculated and plotted?
 #'
-#' @importFrom ggplot2 ggplot geom_point labs geom_line geom_ribbon theme_classic scale_color_distiller
+#' @importFrom ggplot2 ggplot geom_point labs geom_line geom_ribbon theme_classic scale_color_distiller geom_hline stat_summary
+#' @importFrom stats quantile
 #'
 ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
                            plotTitle = NULL, nonLinModelQuoted, linModelQuoted,
@@ -987,6 +999,7 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
 #' @param plotCIs should confidence intervals be calculated and plotted?
 #'
 #' @importFrom data.table data.table as.data.table
+#' @importFrom stats quantile vcov
 
 .MLLMaxBplotData <- function(mll, nonLinModelQuoted, linModelQuoted, maxCover, data,
                              averageCovariates = TRUE, observedAge = FALSE, plotCIs = TRUE) {
@@ -1048,6 +1061,10 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
     if (plotCIs) {
       if (!requireNamespace("MASS", quietly = TRUE)) {
         stop("Package MASS not installed. Install using `install.packages('MASS')`.")
+      }
+
+      if (!requireNamespace("R.utils", quietly = TRUE)) {
+        stop("Package R.utils not installed. Install using `install.packages('R.utils')`.")
       }
       ## generate new parameter values from a multivariate normal distribution
       ## see https://stats.stackexchange.com/questions/221426/95-confidence-intervals-on-prediction-of-censored-binomial-model-estimated-usin
@@ -1177,7 +1194,8 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
 #'
 #' @details Note that the original data, not the predicted values is shown.
 #'
-#' @importFrom ggplot2 ggplot geom_point labs geom_line geom_ribbon theme_classic scale_color_distiller
+#' @importFrom ggplot2 ggplot geom_point labs geom_line geom_ribbon theme_classic scale_color_distiller geom_hline stat_summary
+#' @importFrom stats quantile
 #'
 partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1, fixMaxCover = TRUE,
                                   xCovar = "age", showQuantiles = "allQuantiles", plotTitle = NULL,
@@ -1329,6 +1347,7 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
 #'
 #' @importFrom data.table data.table as.data.table
 #' @importFrom crayon magenta blue
+#' @importFrom stats quantile vcov
 
 .MLLMaxBPartialPlotData <- function(mll, nonLinModelQuoted, linModelQuoted,
                                     targetCovar = "cover", fixMaxCover = TRUE,
@@ -1380,6 +1399,10 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
     if (plotCIs) {
       if (!requireNamespace("MASS", quietly = TRUE)) {
         stop("Package MASS not installed. Install using `install.packages('MASS')`.")
+      }
+
+      if (!requireNamespace("R.utils", quietly = TRUE)) {
+        stop("Package R.utils not installed. Install using `install.packages('R.utils')`.")
       }
       ## generate new parameter values from a multivariate normal distribution
       ## see https://stats.stackexchange.com/questions/221426/95-confidence-intervals-on-prediction-of-censored-binomial-model-estimated-usin

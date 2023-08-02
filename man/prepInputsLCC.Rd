@@ -7,8 +7,6 @@
 prepInputsLCC(
   year = 2010,
   destinationPath = asPath("."),
-  studyArea = NULL,
-  rasterToMatch = NULL,
   method = c("ngb", "near"),
   filename2 = NULL,
   ...
@@ -25,23 +23,16 @@ To prevent repeated downloads in different locations, the user can also set
 search for the file before attempting to download. Default for that option is
 \code{NULL} meaning do not search locally.}
 
-\item{studyArea}{\verb{SpatialPolygons*} object used for masking and possibly cropping
-if no \code{rasterToMatch} is provided.
-If not in same CRS, then it will be \code{spTransform}ed to
-CRS of \code{x} before masking. Currently, this function will not reproject the
-\code{x}. Optional in \code{postProcess}.}
-
-\item{rasterToMatch}{Template \verb{Raster*} object passed to the \code{to} argument of
-\code{\link[reproducible:projectTo]{projectTo()}}, thus will changing the
-resolution and projection of \code{x}.
-See details in \code{\link[reproducible:postProcessTo]{postProcessTo()}}.}
-
 \item{method}{passed to \code{terra::intersect} or \code{raster::intersect},
 and \code{reproducible::prepInputs}}
 
-\item{filename2}{File name passed to \code{\link[reproducible:writeTo]{writeTo()}}.}
+\item{filename2}{passed to \code{reproducible::prepInputs}}
 
-\item{...}{Passed into \code{\link[reproducible:writeTo]{writeTo()}}}
+\item{...}{Arguments passed to \code{terra::mask} (for \code{maskTo}), \code{terra::project} (for \code{projectTo})
+or \code{terra::writeRaster} (for \code{writeTo}) and not used for \code{cropTo}, as well \code{postProcess}'s
+\code{rasterToMatch} and \code{studyArea} arguments (see below). Commonly used arguments might be
+\code{method}, \code{touches}, and \code{datatype}. If \code{filename} is passed, it will be ignored; use
+\verb{writeTo = }.}
 }
 \description{
 A wrapper around \code{prepInputs} for the Canadian Land Cover Classification product(s).

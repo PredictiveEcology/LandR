@@ -11,7 +11,6 @@
   mllsOuterPrev,
   model = c("CR", "Logistic"),
   maxCover = 1L,
-  cores = 1L,
   starts = NULL,
   lower = NULL,
   upper = NULL,
@@ -51,6 +50,9 @@ with names being parameter names.}
 \item{lower}{passed to \code{mle2}}
 
 \item{upper}{passed to \code{mle2}}
+
+\item{nbWorkers}{integer. If > 1, the number of workers to use in \code{parallelly::makeClusterPSOCK(nbWorkers = .)},
+otherwise no parallellisation is done.}
 }
 \value{
 a \code{list} with entries 'mll' (the maximum likelihood-estimated

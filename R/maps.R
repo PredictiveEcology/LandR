@@ -81,13 +81,14 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #' A privately hosted version of the data is available to maintain backwards compatibility,
 #' but new users/projects should use the 2010 (or newer) data.
 #'
-#' @inheritParams reproducible::cropInputs
+#' @inheritParams reproducible::cropTo
 #' @inheritParams reproducible::postProcess
 #' @inheritParams reproducible::prepInputs
 #'
 #' @param year Numeric, either 2010 or 2015. See note re: backwards compatibility for 2005.
 #' @param method passed to `terra::intersect` or `raster::intersect`,
 #'   and `reproducible::prepInputs`
+#' @param filename2 passed to `reproducible::prepInputs`
 #'
 #' @export
 #' @importFrom reproducible asPath prepInputs
@@ -95,8 +96,6 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #' @importFrom raster intersect
 prepInputsLCC <- function(year = 2010,
                           destinationPath = asPath("."),
-                          studyArea = NULL,
-                          rasterToMatch = NULL,
                           method = c("ngb", "near"),
                           filename2 = NULL, ...) {
   dots <- list(...)
@@ -147,8 +146,6 @@ prepInputsLCC <- function(year = 2010,
 
   fullArgs <- append(dots,
                      list("destinationPath" = asPath(destinationPath),
-                          "studyArea" = studyArea,
-                          "rasterToMatch" = rasterToMatch,
                           "method" = method,
                           "datatype" = "INT2U",
                           "filename2" = filename2))
