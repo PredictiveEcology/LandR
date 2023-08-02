@@ -3,7 +3,7 @@ utils::globalVariables(c(
   "shadetolerance", "siteShade", "year"
 ))
 
-.extractFunction <- getFromNamespace(".extractFunction", "reproducible")
+.extractFunction <- utils::getFromNamespace(".extractFunction", "reproducible")
 
 #' Assign light probability
 #'
@@ -114,11 +114,10 @@ asInteger <- function(x)
 #'
 #' Imports the non-exported function `SpaDES.tools:::resample`.
 #'
-#' @importFrom utils getFromNamespace
 #' @keywords internal
 #' @rdname resample
 #' @seealso [SpaDES.tools::resample()]
-.resample <- getFromNamespace("resample", "SpaDES.tools")
+.resample <- utils::getFromNamespace("resample", "SpaDES.tools")
 
 #' Test whether disturbance should be scheduled
 #'

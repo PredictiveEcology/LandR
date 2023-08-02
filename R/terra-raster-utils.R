@@ -6,16 +6,15 @@ utils::globalVariables(c(
 ## but for now I didn't want to assume those options were directly affecting
 ## these objects
 
-#' Set NA values in `Raster`/`SpatRaster`
+#' Set NA values in `Raster` or `SpatRaster`
 #'
 #' @param ras a `Raster`, or `SpatRaster` object
+#'
 #' @param NAval the value to use as `NA`
 #'
 #' @return a raster with attributed NA values
 #'
 #' @rdname rasterTerraHelpers
-#' @importFrom raster NAvalue<-
-#' @importFrom terra NAflag<-
 .NAvalueFlag <- function(ras, NAval) {
   if (is(ras, "Raster")) {
     NAvalue(ras) <- NAval
@@ -36,8 +35,6 @@ utils::globalVariables(c(
 #' @return a stacked raster
 #'
 #' @rdname rasterTerraHelpers
-#' @importFrom raster stack
-#' @importFrom terra rast
 .stack <- function(rasList) {
   isRaster <- sapply(rasList, function(ras) is(ras, "Raster"))
   isSpatRas <- sapply(rasList, function(ras) is(ras, "SpatRaster"))
@@ -55,14 +52,12 @@ utils::globalVariables(c(
 #' Project raster extent
 #'
 #' @param ras a `Raster` or `SpatRaster` object
-#' @param crs passed to `raster::projectRaster(..., crs = crs)`
-#'   and `terra::project(..., y = crs)`
+#'
+#' @param crs passed to `raster::projectRaster(..., crs = crs)` and `terra::project(..., y = crs)`
 #'
 #' @return the projected extent
 #'
 #' @rdname rasterTerraHelpers
-#' @importFrom raster projectExtent
-#' @importFrom terra ext project
 .projectExtent <- function(ras, crs) {
   if (is(ras, "Raster")) {
     return(projectExtent(ras, crs = crs))
@@ -80,18 +75,15 @@ utils::globalVariables(c(
 #'
 #' TODO: Move to `reproducible`
 #'
-#' Note: this function internally converts `Raster` to `SpatRaster` to allow using `compareGeom()`,
+#' @note this function internally converts `Raster` to `SpatRaster` to allow using `compareGeom()`,
 #' and benefit from its complexity.
 #'
-#' @param ras1 a `Raster` or `SpatRaster` object
 #' @param ... additional `Raster` or `SpatRaster` objects, and arguments
 #'            passed to `terra::compareGeom()`.
 #'
 #' @return the projected extent
 #'
 #' @export
-#' @importFrom terra compareGeom rast
-#'
 #' @rdname compare
 .compareRas <- function(ras1, ...) {
   mc <- match.call()
@@ -127,43 +119,41 @@ utils::globalVariables(c(
   return(out)
 }
 
-#' Compare two raster's projections
+#' Compare two rasters' projections
 #'
 #' TODO: Move to `reproducible`
 #' TODO: expand to multiple objects
 #'
-#' @param ras1 a `Raster` or `SpatRaster` object
-#' @param ras2 a `Raster` or `SpatRaster` object
+#' @param ras1,ras2 a `Raster` or `SpatRaster` object
+#'
 #' @export
 #' @rdname compare
-#' @importFrom sf st_crs
 .compareCRS <- function(ras1, ras2) {
   st_crs(ras1) == st_crs(ras2)
 }
 
-#' Method to read raster
+#' Determine the function with which to read a raster
 #'
 #' TODO: Move to `reproducible`
-#' @param ... passed to `terra::rast` or
-#'   `raster::raster`
+#'
+#' @param ... passed to `terra::rast` or `raster::raster`
 #'
 #' @return the function
+#'
 #' @export
-rasterRead <- function(...)
+rasterRead <- function(...) {
   eval(parse(text = getOption("reproducible.rasterRead")))(...)
-
-
+}
 
 #' Helpers for transition to `terra`
 #'
-#' These all create a single function that can be used for either `Raster` or `SpatRaster`
-#' objects.
+#' These all create a single function that can be used for either `Raster` or `SpatRaster` objects.
+#'
+#' @return
+#' `asInt` returns a `*Raster` with values converted to `integer`, if they weren't already.
 #'
 #' @export
 #' @rdname rasterTerraHelpers
-#' @return
-#' `asInt` returns a `*Raster` with values converted to `integer`, if they weren't already.
-#' @importFrom terra as.int
 asInt <- function(ras) {
   if (!isInt(ras)) {
     if (inherits(ras, "SpatRaster"))
@@ -179,7 +169,6 @@ asInt <- function(ras) {
 #' @rdname rasterTerraHelpers
 #' @return
 #' `isInt` returns a logical as per `is.integer`.
-#' @importFrom terra is.int
 isInt <- function(ras) {
   if (inherits(ras, "SpatRaster"))
     is.int(ras)
@@ -187,17 +176,16 @@ isInt <- function(ras) {
     is.integer(values(ras))
 }
 
-
 #' @param ras a `Raster`, or `SpatRaster` object
-#' @param tab matrix of values to reclassify. See `terra::classify`
-#'   and `raster::reclassify`.
-#' @export
-#' @rdname rasterTerraHelpers
+#'
+#' @param tab matrix of values to reclassify. See `terra::classify` and `raster::reclassify`.
+#'
 #' @return
 #' `reclass` returns a `*Raster` with values reclassified as per `terra::classify`
-#'   and `raster::reclassify`.
-#' @importFrom terra classify
-#' @importFrom raster reclassify
+#' and `raster::reclassify`.
+#'
+#' @export
+#' @rdname rasterTerraHelpers
 reclass <- function(ras, tab) {
   if (is(ras, "SpatRaster")) {
     classify(ras, tab)
@@ -206,32 +194,27 @@ reclass <- function(ras, tab) {
   }
 }
 
-
-#' GENERIC EXTRACT POINTS
+#' Generic extract points
 #'
-#' Extracts points from raster layers using the
-#'   original raster layer projection.
-#'
-#' @param x a raster or polygon object (`sp`, `raster` or `terra`)
-#' @param y a points or polygons spatial object (`sp`, `sf`, or `terra`)
-#' @param field character. The field(s) to extract when x is a polygon.
-#'   If `NULL`, all fields are extracted and returned. IDs of y are always
-#'   returned (`ID` column).
-#' @param ... passed to `terra::extract`
-#'
-#' @return a data.table with extracted values and an `ID` column of
-#'   y point IDs
+#' Extracts points from raster layers using the original raster layer projection.
 #'
 #' @details
-#'  If `x` and `y` are both polygons, `extract` often outputs `NA`
-#'  due to misalignments (this can happen even when x == y), even after
-#'  `snap(y, x)`. To circumvent this problem, `intersect` is used internally
-#'  and, if the `extract` argument `fun` is passed, it is applied to values
-#'  of `y` per polygon ID of `x`
+#' If `x` and `y` are both polygons, `extract` often outputs `NA` due to misalignments
+#' (this can happen even when `x == y`), even after `snap(y, x)`.
+#' To circumvent this problem, `intersect` is used internally and,
+#' if the `extract` argument `fun` is passed, it is applied to values of `y` per polygon ID of `x`.
 #'
+#' @param x a raster or polygon object (`sp`, `raster` or `terra`)
 #'
-#' @importFrom terra rast vect project extract is.points intersect
-#' @importFrom data.table as.data.table
+#' @param y a points or polygons spatial object (`sp`, `sf`, or `terra`)
+#'
+#' @param field character. The field(s) to extract when x is a polygon.
+#' If `NULL`, all fields are extracted and returned. IDs of y are always returned (`ID` column).
+#'
+#' @param ... passed to `terra::extract`
+#'
+#' @return a `data.table` with extracted values and an `ID` column of y point IDs
+#'
 #' @export
 genericExtract <- function(x, y, field = NULL, ...) {
   if (inherits(x, c("SpatVector", "Spatial", "sf", "sfc"))) {
@@ -298,23 +281,18 @@ genericExtract <- function(x, y, field = NULL, ...) {
   out
 }
 
-
-#' PLOT RASTER FUNCTION
+#' Create a `ggplot` of a raster or `sf` object.
 #'
-#' A function that creates a `ggplot` of a raster layer. Can be used with `SpaDES.core::Plots`.
+#' Can be used with `SpaDES.core::Plots`.
 #'
 #' @param x `SpatRaster`, `RasterLayer`, `SpatVector` or `sf` object
 #'
-#' @param plotTitle character. A title for the plot passed to
-#'   `ggplot::labs(title = plotTitle)`.
+#' @param plotTitle character. A title for the plot passed to `ggplot::labs(title = plotTitle)`.
 #'
 #' @param limits TODO
 #'
 #' @param field character. If `x` is `sf` or `SpatVector`, a field to plot.
 #'
-#' @importFrom ggplot2 geom_raster scale_fill_viridis_c coord_equal theme_classic
-#' @importFrom ggplot2 geom_sf coord_sf scale_fill_viridis_d facet_wrap labs aes sym
-#' @importFrom terra nlyr rast vect ncell is.factor
 #' @export
 plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
 
@@ -341,7 +319,7 @@ plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
   }
 
   if (plotRaster) {
-    if (!requireNamespace("rasterVis")) {
+    if (!requireNamespace("rasterVis", quietly = TRUE)) {
       stop("Please install 'rasterVis'")
     }
     maxpixels <- ncell(x)
@@ -370,7 +348,7 @@ plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
       theme_classic()
 
   } else {
-    if (!requireNamespace("rlang")) {
+    if (!requireNamespace("rlang", quietly = TRUE)) {
       stop("Please install 'rlang'")
     }
     plot1 <- ggplot() + theme_classic()  ## theme needs to come before fill scale because it overrides it in geom_sf

@@ -26,8 +26,8 @@ are provided all fitted models will be plotted, with plot labels corresponding t
 
 \item{data}{data for estimation of maximum biomass. Should contain at least
 an 'age' column. Note that other covariates will be averaged and 'cover' values
-will be replaced with the maximum cover value (\code{maxCover}). If \code{mll} is a list
-data is assumed to be the same for the two models.}
+will be replaced with the maximum cover value (\code{maxCover}).
+If \code{mll} is a list, data is assumed to be the same for the two models.}
 
 \item{targetCovar}{the covariate for which variation in maxB values will be shown per
 age value. Defaults to showing how maxB values change with "cover" at any given age.
@@ -41,7 +41,7 @@ not averaged and is fixed to \code{maxCover}.}
 
 \item{xCovar}{the variable shown in the x axis. Defaults to "age". When \code{xCovar == "age"}
 the output plots are not true "Partial Effects" plots. Instead, they show the variation
-is B values across values of \code{targetCovar} for each value of age.}
+is \code{B} values across values of \code{targetCovar} for each value of age.}
 
 \item{showQuantiles}{controls whether quantile predictions will be shown. If
 "allQuantiles", quantile values (5\%, 25\%, 50\%, 75\%, 95\%) of B will be
@@ -70,7 +70,7 @@ scaled between 0 and \code{maxCover}. List names and length must the same as in 
 }
 \description{
 Plots the maximum biomass estimates along an age gradient as a function
-of abother target covariate, with all others held at average values.
+of another target covariate, with all others held at average values.
 }
 \details{
 Note that the original data, not the predicted values is shown.

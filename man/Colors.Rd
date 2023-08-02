@@ -30,4 +30,5 @@ ras <- raster::raster(matrix(1:100, 10, 10))
 ras <- Colors(ras, cols)
 raster::plot(ras)
 }
+
 }

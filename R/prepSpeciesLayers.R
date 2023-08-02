@@ -16,9 +16,6 @@ utils::globalVariables(c(
 #' @return TODO: description needed
 #'
 #' @export
-#' @importFrom data.table data.table fread melt set setkey
-#' @importFrom reproducible asPath Cache
-#' @importFrom terra values
 loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
                        type = c("cover", "age")) {
   # The ones we want
@@ -98,10 +95,6 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 #' @return TODO: description needed
 #'
 #' @export
-#' @importFrom data.table setkey
-#' @importFrom reproducible asPath Cache
-#' @importFrom raster crs crs<- NAvalue<- raster stack writeRaster
-#' @importFrom terra crs rast writeRaster
 CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
                             sppEquiv, sppEquivCol, destinationPath) {
   # The ones we want
@@ -210,7 +203,6 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 #' @return TODO: description needed
 #'
 #' @export
-#' @importFrom reproducible asPath Cache prepInputs
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
                                   url = NULL,
@@ -358,12 +350,7 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
 }
 
 #' @export
-#' @importFrom data.table data.table rbindlist
-#' @importFrom map mapAdd maps
-#' @importFrom raster crop dropLayer extend maxValue minValue origin origin<- stack unstack
 #' @rdname prepSpeciesLayers
-#'
-## TODO: add terra compatible methods.
 prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
                                               url = NULL,
                                               studyArea, rasterToMatch,
@@ -371,6 +358,8 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
                                               sppEquivCol, ...) {
   if (is.null(url))
     url <- "https://drive.google.com/file/d/1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1"
+
+  ## TODO: add terra compatible methods.
 
   # The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
@@ -412,12 +401,7 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
 }
 
 #' @export
-#' @importFrom data.table data.table rbindlist
-#' @importFrom map mapAdd maps
-#' @importFrom raster crop dropLayer extend maxValue minValue origin origin<- stack unstack
 #' @rdname prepSpeciesLayers
-#'
-## TODO: add terra compatible methods.
 prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
                                     url = NULL,
                                     studyArea, rasterToMatch,
@@ -465,11 +449,7 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
 }
 
 #' @export
-#' @importFrom map mapAdd maps
-#' @importFrom terra rast minmax app
 #' @rdname prepSpeciesLayers
-
-## TODO: add terra compatible methods.
 prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
                                     url = NULL,
                                     studyArea, rasterToMatch,
@@ -581,9 +561,6 @@ prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, s
 #' @return TODO: description needed
 #'
 #' @export
-#' @importFrom reproducible asPath Cache
-#' @importFrom raster rasterOptions
-#' @importFrom terra terraOptions writeRaster
 makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPath) {
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
@@ -712,7 +689,6 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
 #' @return the `speciesLayers` with `0` in pixels that had `NA`
 #'
 #' @export
-#' @importFrom raster stack
 NAcover2zero <- function(speciesLayers, rasterToMatch) {
   if (!requireNamespace("terra", quietly = TRUE)) {
     ## since terra is dependency of raster, it should already be installed, but just in case...

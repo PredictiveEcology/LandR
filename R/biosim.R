@@ -7,7 +7,6 @@ utils::globalVariables(c(
 #' @inheritParams utils::install.packages
 #'
 #' @export
-#' @importFrom utils install.packages
 installBioSIM <- function(lib) {
   install.packages("https://sourceforge.net/projects/repiceasource/files/latest",
                    lib, repos = NULL,  type = "source")
@@ -21,10 +20,6 @@ installBioSIM <- function(lib) {
 #'
 #' @return `data.table` with columns `Name`, `Long`, `Lat`, `Elev`.
 #' @export
-#' @importFrom data.table data.table setnames
-#' @importFrom raster crs xyFromCell
-#' @importFrom sf st_as_sf st_coordinates
-#' @importFrom sp SpatialPoints
 #' @seealso [prepInputsCanDEM()]
 BioSIM_extractPoints <- function(x) {
   nonNA <- which(!is.na(x[]))
@@ -48,11 +43,6 @@ BioSIM_extractPoints <- function(x) {
 #'
 #' @return `RasterStack`
 #' @export
-#' @importFrom data.table setDT
-#' @importFrom raster cellFromXY raster stack
-#' @importFrom reproducible Cache
-#' @importFrom sf st_as_sf st_coordinates st_crs st_transform
-#' @importFrom sp CRS SpatialPoints
 BioSIM_getWindAnnual <- function(dem, years, climModel = "GCM4", rcp = "RCP45") {
   if (requireNamespace("BioSIM", quietly = TRUE)) {
     locations <- BioSIM_extractPoints(dem)
@@ -116,12 +106,8 @@ BioSIM_getWindAnnual <- function(dem, years, climModel = "GCM4", rcp = "RCP45") 
 #' @param rcp RCP scenario to use. one of `"RCP45"` or `"RCP85"`.
 #'
 #' @return `RasterStack`
+#'
 #' @export
-#' @importFrom data.table setDT
-#' @importFrom raster cellFromXY raster stack
-#' @importFrom reproducible Cache
-#' @importFrom sf st_as_sf st_coordinates st_crs st_transform
-#' @importFrom sp CRS SpatialPoints
 BioSIM_getWindMonthly <- function(dem, years, months, climModel = "GCM4", rcp = "RCP45") {
   if (requireNamespace("BioSIM", quietly = TRUE)) {
     locations <- BioSIM_extractPoints(dem)
@@ -172,11 +158,6 @@ BioSIM_getWindMonthly <- function(dem, years, months, climModel = "GCM4", rcp = 
 #'
 #' @return `RasterStack`
 #' @export
-#' @importFrom data.table setDT
-#' @importFrom raster cellFromXY raster stack
-#' @importFrom reproducible Cache
-#' @importFrom sf st_as_sf st_coordinates st_crs st_transform
-#' @importFrom sp CRS SpatialPoints
 BioSIM_getMPBSLR <- function(dem, years, SLR = "R", climModel = "GCM4", rcp = "RCP45") {
   if (requireNamespace("BioSIM", quietly = TRUE)) {
     SLR2use <- switch(SLR,

@@ -15,7 +15,6 @@
 #'   `mortPred` and `growthPred`.
 #'
 #' @export
-#' @importFrom data.table data.table
 calculateClimateEffect <- function(cohortData, ...) {
   predObj <- unique(cohortData[, .(pixelGroup, age, speciesCode)])
   predObj[, `:=`(mortPred = 100, growthPred = 100)]

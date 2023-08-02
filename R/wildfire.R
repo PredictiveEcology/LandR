@@ -7,8 +7,6 @@
 #' @return a raster with values representing fire year 1985-2015
 #'
 #' @export
-#' @importFrom reproducible preProcess postProcessTerra
-#' @importFrom raster extension
 getWildfire_NFI <- function(dPath, rasterToMatch, url = NULL) {
   if (!requireNamespace("terra", quietly = TRUE)) {
     ## since terra is dependency of raster, it should already be installed, but just in case...

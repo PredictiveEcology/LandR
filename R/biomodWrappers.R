@@ -1,28 +1,38 @@
+utils::globalVariables(c(
+  "..envCols", "..predictorVars", "..responseVar", "full.name", "x", "y"
+))
+
 ## BIOMOD FUNCTION WRAPPERS USED TO ESTIMATE SEP
 ## for caching, looping and parallelizing
 
 #' BIOMOD_Modeling wrapper
+#'
 #' @param sp character of species name to subset `responseVarData` table
+#'
 #' @param responseVar character vector, or list of character vectors, of response
 #'   variable (column) to subset `responseVarData` table. If a list, it should
 #'   be named according to `sp`, for subsetting.
+#'
 #' @param responseVarData a data.table or list of data.tables with response data
 #'   (species presences/absence data). If a list, it should be named according to
 #'    `sp`, for subsetting. If the response variable is not binary, values > 0 will be
 #'   converted to 1s.
+#'
 #' @param predictorVars character vector, or list of character vectors, of environmental
 #'   variables (columns) to subset `predictorVarsData` table. If a list, it should
 #'   be named according to `sp`, for subsetting.
+#'
 #' @param predictorVarsData environmental data.
+#'
 #' @param responseVarData a data.table or list of data.tables with environmental data.
 #'   If a list, it should be named according to `sp`, for subsetting.#'
+#'
 #' @param dir.name passed to `biomod2::BIOMOD_FormatingData`
+#'
 #' @param BIOMOD_ModelingArgs a named list of arguments passed to `biomod2::BIOMOD_Modeling`
+#'
 #' @param ... further arguments passed to `reproducible::Cache`
 #'
-#' @importFrom data.table as.data.table
-#' @importFrom stats complete.cases
-#' @importFrom crayon blue
 #' @export
 biomodModelingWrapper <- function(sp, responseVar, responseVarData, predictorVars, predictorVarsData,
                                   dir.name, BIOMOD_ModelingArgs = list(
@@ -238,19 +248,25 @@ biomodProjWrapper <- function(bm.mod, proj.name = "testProj", new.env = NULL, ne
 }
 
 
-#' BIOMOD_EnsembleForecasting wrapper
+#' Simple wrapper around `biomod2::BIOMOD_EnsembleForecasting()`
 #'
 #' @param bm.em output of `biomod2::BIOMOD_EnsembleModeling`
+#'
 #' @param bm.proj output of `biomod2::BIOMOD_Projection`
+#'
 #' @param proj.name passed to `biomod2::BIOMOD_Projection`
+#'
 #' @param new.env passed to `biomod2::BIOMOD_EnsembleForecasting`
+#'
 #' @param new.env.xy passed to `biomod2::BIOMOD_EnsembleForecasting`
+#'
 #' @param keep.in.memory passed to `biomod2::BIOMOD_EnsembleForecasting`
+#'
 #' @param ... passed to `reproducible::Cache`
 #'
 #' @export
-biomodEnsembleFrcstWrapper <- function(bm.em, bm.proj = NULL, proj.name = NULL, new.env = NULL, new.env.xy = NULL,
-                                       keep.in.memory = TRUE, ...) {
+biomodEnsembleFrcstWrapper <- function(bm.em, bm.proj = NULL, proj.name = NULL, new.env = NULL,
+                                       new.env.xy = NULL, keep.in.memory = TRUE, ...) {
   if (requireNamespace("biomod2", quietly = TRUE)) {
     if (!is.null("new.env") & inherits(new.env, "data.table")) {
       new.env <- as.data.frame(new.env)
@@ -277,20 +293,21 @@ biomodEnsembleFrcstWrapper <- function(bm.em, bm.proj = NULL, proj.name = NULL, 
 }
 
 
-#' Make maps from BIOMOD_EnsembleForecasting results
+#' Make maps from `BIOMOD_EnsembleForecasting()` results
 #'
-#' @param bm.em.proj output of `biomod2::BIOMOD_EnsembleForecasting`. Note that
-#'   x, y coordinates extracted from `bm.em.proj@coord` must be in the same projection
-#'   as `rasTemplate`
+#' @param bm.em.proj output of `biomod2::BIOMOD_EnsembleForecasting()`.
+#'   Note that `x` and `y`coordinates extracted from `bm.em.proj@coord` must be in the same
+#'   projection as `rasTemplate`.
+#'
 #' @param predModel character. Which model predictions should be used. Chose one of
-#'   `bm.em.proj@models.projected`
-#' @param rasTemplate a template RasterLayer or SpatRaster that can be used to map the projections
+#'   `bm.em.proj@models.projected`.
+#'
+#' @param rasTemplate a template `RasterLayer` or `SpatRaster` that can be used to map the projections
+#'
 #' @param origCRS character. The original CRS projection of `bm.em.proj@coord`.
 #'
-#' @return a SpatRaster
+#' @return a `SpatRaster` object
 #'
-#' @importFrom terra rast extract vect crs
-#' @importFrom data.table as.data.table
 #' @export
 biomodEnsembleProjMaps <- function(bm.em.proj, predModel, rasTemplate, origCRS) {
   if (requireNamespace("biomod2", quietly = TRUE)) {
@@ -322,18 +339,19 @@ biomodEnsembleProjMaps <- function(bm.em.proj, predModel, rasTemplate, origCRS) 
     }
 
     if (any(duplicated(predDT$ID))) {
-      stop("There seem to be several SEP predictions for the same cell",
-           ".\n  Try passing 'predModel'.")
+      stop("There seem to be several SEP predictions for the same cell.\n",
+           "Try passing 'predModel'.")
     }
 
     predDT <- predDT[predDataCoords, on = "ID", nomatch = NA]
 
-    rasTemplate[predDT$pixelIndex] <- predDT[["SEPpred"]]/1000   ## to save disk space BIOMOD saves probs multiplied by 1000
+    ## to save disk space BIOMOD saves probs multiplied by 1000
+    rasTemplate[predDT$pixelIndex] <- predDT[["SEPpred"]] / 1000
     names(rasTemplate) <- predModel
 
     return(rasTemplate)
   } else {
-    stop("Package biomod2 not installed. Install using: `remotes::install_github('CeresBarros/biomod2@dev_currentCeres')`.")
+    stop("Package biomod2 not installed. Install using:",
+         " `remotes::install_github('CeresBarros/biomod2@dev_currentCeres')`.")
   }
 }
-

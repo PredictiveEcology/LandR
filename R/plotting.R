@@ -26,15 +26,6 @@ utils::globalVariables(c(
 #'
 #' @author Eliot McIntire
 #' @export
-#' @importFrom data.table data.table setkeyv
-#' @importFrom ggplot2 aes element_blank element_text geom_bar ggplot guide_legend guides
-#' @importFrom ggplot2 scale_fill_manual scale_x_discrete theme geom_raster
-#' @importFrom pemisc factorValues2
-#' @importFrom quickPlot Plot setColors<-
-#' @importFrom raster factorValues maxValue minValue
-#' @importFrom reproducible Cache
-#' @importFrom stats na.omit
-#' @importFrom tidyterra geom_spatraster
 plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
                     sppEquiv, sppEquivCol, colors, title = "Leading vegetation types") {
 
@@ -158,14 +149,14 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 #' This is a wrapper to help with migration to \pkg{terra}.
 #' Currently can only be used for a single layer `SpatRaster` or a `RasterLayer`.
 #'
-#' @export
-#' @importFrom terra coltab<- ncell
-#' @importFrom quickPlot setColors
 #' @param ras A `Raster*` or `SpatRaster` class object.
+#'
 #' @param cols a character vector of colours. See examples. Can also be a `data.frame`,
 #'   see `terra::coltab`
+#'
 #' @param n A numeric scalar giving the number of colours to create. Passed to
 #'   `quickPlot::setColors(ras, n = n) <- `. If missing, then `n` will be `length(cols)`
+#'
 #' @examples
 #' \donttest{
 #' cols <- colorRampPalette(c("blue", "red"))(12)
@@ -177,6 +168,8 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 #' ras <- Colors(ras, cols)
 #' raster::plot(ras)
 #' }
+#'
+#' @export
 Colors <- function(ras, cols, n = NULL) {
   if (is(ras, "SpatRaster")) {
     theSeq <- round(minFn(ras)):round(maxFn(ras))
@@ -196,6 +189,7 @@ Colors <- function(ras, cols, n = NULL) {
 
   ras
 }
+
 #' Create species colour vector from a `sppEquiv` table
 #'
 #' @template sppEquiv
@@ -209,8 +203,6 @@ Colors <- function(ras, cols, n = NULL) {
 #' plus any extra names passed with `newVals`.
 #'
 #' @export
-#' @importFrom RColorBrewer brewer.pal brewer.pal.info
-#' @importFrom stats na.omit
 sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
   sppColorNames <- c(na.omit(unique(sppEquiv[[sppEquivCol]])), newVals)
 
@@ -228,9 +220,6 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
   sppColors
 }
 
-#' @importFrom ggplot2 ggplot scale_fill_distiller theme labs stat unit
-#' @importFrom ggspatial layer_spatial annotation_north_arrow north_arrow_minimal
-#' @importFrom ggpubr theme_pubr
 plotFunction <- function(ras, studyArea, limits = NULL) {
   if (is.null(limits))
     limits <- range(getValues(ras), na.rm = TRUE)

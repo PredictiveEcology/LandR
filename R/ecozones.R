@@ -14,10 +14,6 @@
 #' @return `RasterLayer`
 #'
 #' @export
-#' @importFrom reproducible prepInputs
-#' @importFrom sf as_Spatial
-#' @importFrom sp proj4string
-#' @importFrom terra as.int rast rasterize
 prepEcozonesRst <- function(url, destinationPath, studyArea = NULL, rasterToMatch = NULL) {
   if (is.null(url)) {
     url <- "http://sis.agr.gc.ca/cansis/nsdb/ecostrat/zone/ecozone_shp.zip"

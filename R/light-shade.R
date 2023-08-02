@@ -12,7 +12,6 @@ utils::globalVariables(c(".", ":=", "X1", "X2", "X3", "X4", "X5", "maxMaxB", "pr
 #' @return `cohortData` table with a `siteShade` column
 #'
 #' @export
-#' @importFrom data.table data.table set setkey
 calcSiteShade <- function(currentTime, cohortData, speciesEcoregion, minRelativeB) {
   # the siteshade was calculated based on the code:
   # https://github.com/LANDIS-II-Foundation/Extensions-Succession/blob/master/biomass-succession/trunk/src/PlugIn.cs

@@ -31,7 +31,7 @@ data is assumed to be the same for the two models.}
 
 \item{xCovar}{the variable shown in the x axis. Defaults to \code{age}.}
 
-\item{plotTitle}{character. Passed to ggplot2::labs(title)}
+\item{plotTitle}{character. Passed to \code{ggplot2::labs(title)}.}
 
 \item{nonLinModelQuoted}{a named list of non-linear equations as a \code{call}
 (quoted expression) passed to \code{mle2(minuslog1)}. See \code{?mle}.
@@ -59,6 +59,5 @@ changed to \code{maxCover}.}
 \item{plotCIs}{should confidence intervals be calculated and plotted?}
 }
 \description{
-Plots a maximum biomass estimated at maximum 'cover'
-(or dominance) levels as a function of age
+Plots a maximum biomass estimated at maximum 'cover' (or dominance) levels as a function of age.
 }

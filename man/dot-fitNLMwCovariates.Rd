@@ -55,9 +55,8 @@ with names being parameter names.}
 otherwise no parallellisation is done.}
 }
 \value{
-a \code{list} with entries 'mll' (the maximum likelihood-estimated
-coefficients) and 'AICbest' (the AIC of the best models generating these
-coefficients)
+a \code{list} with entries \code{mll} (the maximum likelihood-estimated
+coefficients) and \code{AICbest} (the AIC of the best models generating these coefficients)
 }
 \description{
 Uses likelihood parameter estimation to fit non linear models

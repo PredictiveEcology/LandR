@@ -26,8 +26,6 @@ landisIIrepo <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/"
 #' @param cacheTags User tags to pass to `Cache`.
 #'
 #' @export
-#' @importFrom data.table data.table
-#' @importFrom reproducible asPath Cache prepInputs
 #' @rdname speciesTable
 getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
   if (is.null(url))
@@ -146,9 +144,6 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #' @return An updated species `data.table`
 #'
 #' @export
-#' @importFrom data.table data.table
-#' @importFrom crayon red
-#'
 #' @rdname speciesTableUpdate
 speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
   ## if "Area"is a column in the (final) traits table, then check and warn the user for area
@@ -254,10 +249,6 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
 #' @param dPath The destination path.
 #'
 #' @param cacheTags User tags to pass to `Cache`.
-#'
-#' @export
-#' @importFrom data.table data.table setcolorder
-#' @importFrom reproducible asPath Cache prepInputs
 #'
 #' @return A `data.table` with columns ... TODO
 #'
@@ -366,9 +357,6 @@ prepInputsMainInput <- function(url = NULL, dPath = tempdir(), cacheTags = NULL)
 #' @return A `data.table`
 #'
 #' @export
-#' @importFrom data.table data.table
-#' @importFrom reproducible Cache prepInputs
-#' @importFrom utils count.fields
 #' @rdname prepInputsEcoregion
 prepInputsEcoregion <- function(url = NULL, dPath, cacheTags = NULL) {
   if (is.null(url))
@@ -412,9 +400,6 @@ prepInputsEcoregion <- function(url = NULL, dPath, cacheTags = NULL) {
 #' @return A `data.table`
 #'
 #' @export
-#' @importFrom data.table data.table
-#' @importFrom reproducible Cache prepInputs
-#' @importFrom utils count.fields
 #' @rdname prepInputsSpeciesEcoregion
 prepInputsSpeciesEcoregion <- function(url = NULL, dPath, cacheTags = NULL) {
   if (is.null(url))

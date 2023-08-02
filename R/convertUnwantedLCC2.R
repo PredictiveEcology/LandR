@@ -23,9 +23,6 @@ utils::globalVariables(c(
 #'
 #' @author Eliot McIntire Ian Eddy
 #' @export
-#' @importFrom data.table as.data.table is.data.table rbindlist setnames
-#' @importFrom terra ncell
-#' @importFrom SpaDES.tools spread2
 convertUnwantedLCC2 <- function(classesToReplace = 34:36, rstLCC, nIterations = 6, defaultNewValue = NA,
                                 invalidClasses = NA) {
 

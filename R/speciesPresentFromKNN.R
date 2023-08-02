@@ -45,9 +45,6 @@ projectTo <- utils::getFromNamespace("projectTo", "reproducible")
 #' }
 #'
 #' @export
-#' @importFrom data.table as.data.table setorderv melt.data.table
-#' @importFrom reproducible asPath Cache
-#' @importFrom sf st_crs
 #' @rdname speciesPresent
 speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, minPctCover = 10) {
   if (!requireNamespace("terra", quietly = TRUE)) {
@@ -123,9 +120,6 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 #' species on the `speciesRas`, for convenience.
 #'
 #' @export
-#' @importFrom pemisc factorValues2
-#' @importFrom raster raster
-#' @importFrom reproducible preProcess
 #' @rdname speciesPresent
 speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL) {
   if (is.null(speciesPresentRas)) {
@@ -172,7 +166,6 @@ forestOutline <- function(x) {
 ## TODO: randomized URL changes
 borealForestURL <- "https://d278fo2rk9arr5.cloudfront.net/downloads/boreal.zip"
 
-#' @importFrom sf as_Spatial st_as_sf st_intersects st_read st_transform
 #' @keywords internal
 SA_ERIntersect <- function(x, studyArea) {
   if (!requireNamespace("terra", quietly = TRUE)) {
@@ -188,7 +181,6 @@ SA_ERIntersect <- function(x, studyArea) {
   terra::vect(sf::as_Spatial(ecoregions[studyAreaER,]))
 }
 
-#' @importFrom reproducible postProcessTerra
 #' @keywords internal
 loadAndAggregateKNN <- function(dPath, res, sa) {
   if (!requireNamespace("terra", quietly = TRUE)) {

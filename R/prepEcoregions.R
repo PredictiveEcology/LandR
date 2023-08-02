@@ -11,10 +11,6 @@
 #' @param pixelsToRm a vector of pixels to remove
 #'
 #' @export
-#' @importFrom data.table as.data.table data.table
-#' @importFrom terra rasterize levels
-#' @importFrom reproducible Cache fixErrors paddedFloatToChar
-#' @importFrom sf st_as_sf st_crs st_transform
 prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerField = NULL,
                            rasterToMatchLarge, rstLCCAdj, pixelsToRm, cacheTags) {
 

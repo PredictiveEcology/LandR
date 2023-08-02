@@ -65,11 +65,9 @@ equivalentNameAsList <- function(value, df, multi) {
 #' @param sppEquivCol Optional. Column in `sppEquivalencies_CA` to use for equivalent names
 #'   when `sppEquiv` not provided (i.e., when `sppEquivalencies_CA` is used instead).
 #'
-#' @export
-#' @importFrom data.table setDT setnames data.table
-#'
 #' @return A `data.table` with potentially all columns in `sppEquivalencies_CA`.
 #'
+#' @export
 sppEquivCheck <- function(sppEquiv, ensureColumns = NULL, sppEquivCol = NULL) {
   sppEquivalencies_CA <- get(data("sppEquivalencies_CA", package = "LandR",
                                   envir = environment()), inherits = FALSE)

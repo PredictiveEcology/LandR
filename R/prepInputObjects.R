@@ -14,8 +14,6 @@ utils::globalVariables(c(
 #'   containing only the species that have trait values in `species`
 #'
 #' @export
-#' @importFrom crayon blue
-#' @importFrom stats complete.cases
 checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
   missTraits <- setdiff(names(speciesLayers), species$species)
   missTraits <- c(missTraits, setdiff(species$species,
@@ -51,10 +49,6 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #'  biomass in g/m^2.
 #'
 #' @export
-#' @importFrom crayon blue
-#' @importFrom data.table data.table
-#' @importFrom pemisc factorValues2
-#' @importFrom raster ncell
 makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
                            biomassMap, rasterToMatch, rstLCC, #pixelGroupAgeClass = 1,
                            printSummary = TRUE,
@@ -177,7 +171,6 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
 #'   `maxB`, `maxANPP` and `establishprob`
 #'
 #' @export
-#' @importFrom data.table rbindlist
 makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataShortNoCover,
                                  species, modelCover, modelBiomass, successionTimestep, currentYear) {
   if (!is.null(modelBiomass$scaledVarsModelB)) {
@@ -270,7 +263,6 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
 #' @return The `biomassMap`, a raster of total stand biomass per pixel.
 #'
 #' @export
-#' @importFrom terra rast
 makeBiomassMap <-  function(pixelCohortData, rasterToMatch) {
   pixelData <- unique(pixelCohortData, by = "pixelIndex")
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
@@ -334,7 +326,6 @@ minRelativeBDefaults <- function() data.frame(X1 = 0.15, ## 0.2
 #' @return a raster with pixel groups
 #'
 #' @export
-#' @importFrom raster raster
 makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
   pixelData <- unique(pixelCohortData, by = "pixelIndex")
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
@@ -377,8 +368,6 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #'  for which ages were corrected. If no corrections were applied the attribute vector is `integer(0)`.
 #'
 #' @export
-#' @importFrom raster crs
-#' @importFrom reproducible Cache prepInputs
 #'
 #' @examples
 #' \dontrun{
@@ -511,8 +500,8 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'   }
 #'
 #' @return a `rawBiomassMap` raster
+#'
 #' @export
-#' @importFrom reproducible Cache prepInputs
 prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
   Args <- list(...)
   if (is.null(Args$url)) {
@@ -560,9 +549,6 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #' @return a `SpatRaster` layer of fire perimeters with fire year values.
 #'
 #' @export
-#' @importFrom raster crs getValues values<-
-#' @importFrom reproducible .requireNamespace Cache prepInputs
-#' @importFrom sf st_cast st_transform st_zm
 #'
 #' @examples
 #' library(SpaDES.tools)
@@ -645,9 +631,6 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 #'  for which ages were corrected. If no corrections were applied the attribute vector is `integer(0)`.
 #'
 #' @export
-#' @importFrom raster crs
-#' @importFrom reproducible Cache prepInputs
-#' @importFrom sf st_cast st_transform
 #'
 #' @examples
 #' \dontrun{
@@ -706,9 +689,6 @@ replaceAgeInFires <- function(standAgeMap, firePerimeters, startTime) {
 #' @template cacheTags
 #'
 #' @export
-#'
-#' @importFrom raster compareRaster
-#' @importFrom reproducible Cache postProcessTerra fixErrors writeOutputs .suffix
 prepRasterToMatch <- function(studyArea, studyAreaLarge,
                               rasterToMatch, rasterToMatchLarge,
                               destinationPath,

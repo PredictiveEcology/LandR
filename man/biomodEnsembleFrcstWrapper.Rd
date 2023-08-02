@@ -2,7 +2,7 @@
 % Please edit documentation in R/biomodWrappers.R
 \name{biomodEnsembleFrcstWrapper}
 \alias{biomodEnsembleFrcstWrapper}
-\title{BIOMOD_EnsembleForecasting wrapper}
+\title{Simple wrapper around \code{biomod2::BIOMOD_EnsembleForecasting()}}
 \usage{
 biomodEnsembleFrcstWrapper(
   bm.em,
@@ -30,5 +30,5 @@ biomodEnsembleFrcstWrapper(
 \item{...}{passed to \code{reproducible::Cache}}
 }
 \description{
-BIOMOD_EnsembleForecasting wrapper
+Simple wrapper around \code{biomod2::BIOMOD_EnsembleForecasting()}
 }
