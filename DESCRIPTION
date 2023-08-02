@@ -82,7 +82,7 @@ Suggests:
     XML
 Remotes:
     CeresBarros/biomod2@dev_currentCeres,
-    RNCan/BioSimClient_R,
+    amc/BioSimClient_R,
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/quickPlot@development,
