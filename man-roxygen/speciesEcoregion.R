@@ -4,3 +4,5 @@
 #' `ecoregionGroup`, character representation of species and ecoregion groups respectively,
 #' `maxB` the maximum biomass for the species in a given 'ecoregion', `maxANPP` the maximum
 #' aboveground net primary productivity and `SEP` the species establishment probability.
+#' May contain columns `inflationFactor`  (used to adjust `maxB`) and `mANPPproportion`
+#' (used to calculate `maxANPP`).

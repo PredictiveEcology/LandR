@@ -28,7 +28,8 @@ makeSpeciesEcoregion(
 
 \item{modelBiomass}{statistical model of species biomass}
 
-\item{successionTimestep}{The time between successive seed dispersal events.}
+\item{successionTimestep}{The time between successive seed dispersal events.
+In LANDIS-II, this is called "Succession Timestep".}
 
 \item{currentYear}{\code{time(sim)}}
 }

@@ -31,14 +31,9 @@ utils::globalVariables(c(
 #'
 #' @param dtRcv data.table
 #'
-#' @param pixelGroupMap map
+#' @template pixelGroupMap
 #'
-#' @param speciesTable A data.table that should have at least 3 columns:
-#'   `speciesCode` an integer representation of species, `seeddistance_max`
-#'   a numeric with the maximum seed dispersal distance and `seeddistance_eff`
-#'   the "effective" seed dispersal distance. These latter two are
-#'   parameters passed to Ward dispersal kernel. This data.table can come from
-#'   a `species` table from a LANDIS project.
+#' @template speciesTable
 #'
 #' @param dispersalFn  An expression that can take a "dis" argument. See details.
 #'   Default is "Ward" (temporarily unused, as it is hard coded inside Rcpp function)
@@ -50,7 +45,7 @@ utils::globalVariables(c(
 #' @param k  LANDIS Ward seed dispersal the probability that seed will disperse within
 #' the effective distance (e.g., 0.95)
 #'
-#' @param successionTimestep integer. The time in time units between succession (i.e., dispersal) events.
+#' @template successionTimestep
 #'
 #' @param verbose Numeric. `0` is not verbose, with increasing numbers indicating
 #'   increasing levels of verbosity (currently up to 2)

@@ -153,7 +153,7 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
 #' @template species
 #' @param modelCover statistical model of species presence/absence
 #' @param modelBiomass statistical model of species biomass
-#' @param successionTimestep The time between successive seed dispersal events.
+#' @template successionTimestep
 #' @param currentYear `time(sim)`
 #'
 #' @section `establishprob`:

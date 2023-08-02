@@ -292,7 +292,7 @@ biomodEnsembleFrcstWrapper <- function(bm.em, bm.proj = NULL, proj.name = NULL, 
 #' @importFrom terra rast extract vect crs
 #' @importFrom data.table as.data.table
 #' @export
-biomodEnsembleProjMaps <- function(bm.em.proj, predModel, rasTemplate, rasterToMatch) {
+biomodEnsembleProjMaps <- function(bm.em.proj, predModel, rasTemplate, origCRS) {
   if (requireNamespace("biomod2", quietly = TRUE)) {
     if (!predModel %in% bm.em.proj@models.projected) {
       stop("Can't find model ", predModel,
@@ -306,7 +306,7 @@ biomodEnsembleProjMaps <- function(bm.em.proj, predModel, rasTemplate, rasterToM
     ## need to get RTM cell ID _actually_ used in the models
     ## as the data is joined and potentially reduced by biomodModelingWrapper
     predDataCoords <- bm.em.proj@coord
-    predDataCoords <- vect(predDataCoords, geom = c("x", "y"), crs = crs(rasterToMatch, proj = TRUE))
+    predDataCoords <- vect(predDataCoords, geom = c("x", "y"), crs = origCRS)
     predDataCoords <- as.data.table(terra::extract(rasTemplate, predDataCoords, cells = TRUE))  ## needs pkg name here
     setnames(predDataCoords, "cell", "pixelIndex")
 

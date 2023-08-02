@@ -35,10 +35,8 @@ jobs:
             any::covr
             any::sf
             any::XML
-            BioSIM=?ignore
             fastshp=?ignore
             NLMR=?ignore
-            J4R=?ignore
             PredictiveEcology/quickPlot@development
             PredictiveEcology/reproducible@development
             PredictiveEcology/Require@development
@@ -50,8 +48,6 @@ jobs:
           pak::pkg_install("remotes")
           remotes::install_github("ropensci/NLMR")
           remotes::install_github("s-u/fastshp")
-          install.packages("https://sourceforge.net/projects/repiceasource/files/latest", repos = NULL,  type = "source") ## J4R
-          install.packages("https://sourceforge.net/projects/biosimclient.mrnfforesttools.p/files/latest", repos = NULL,  type = "source") ## BioSIM
         shell: Rscript {0}
 
       - name: Test coverage

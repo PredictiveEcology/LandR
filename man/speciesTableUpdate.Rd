@@ -9,7 +9,7 @@ speciesTableUpdate(species, speciesTable, sppEquiv, sppEquivCol)
 \arguments{
 \item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
 
-\item{speciesTable}{The raw species traits table, with \strong{at least} the following columns:
+\item{speciesTable}{A species traits table, with \strong{at least} the following columns:
 \itemize{
 \item \code{speciesCode} an character representation of species;
 \item \code{Area} a character of geographical area within a species range for which trait values are relevant;
