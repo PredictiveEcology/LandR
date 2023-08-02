@@ -1,4 +1,4 @@
-#' @param speciesTable The raw species traits table, with **at least** the following columns:
+#' @param speciesTable A species traits table, with **at least** the following columns:
 #'  - `speciesCode` an character representation of species;
 #'  - `Area` a character of geographical area within a species range for which trait values are relevant;
 #'  - `longevity` species longevity in years, `sexualmature` age in years at sexual maturity;

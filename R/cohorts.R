@@ -36,8 +36,7 @@ utils::globalVariables(c(
 #'   and `pixelGroup`.
 #'   This will be used in conjunction with `cohortData` and `pixelGroupMap`
 #'   to ensure that everything matches correctly.
-#' @param successionTimestep The time between successive seed dispersal events.
-#'   In LANDIS-II, this is called "Succession Timestep". This is used here
+#' @template successionTimestep
 #' @param verbose Integer, where increasing number is increasing verbosity. Currently,
 #'    only level 1 exists; but this may change.
 #' @template initialB
@@ -1632,7 +1631,7 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 #' @template cohortData
 #' @template pixelGroupMap
 #' @template currentTime
-#' @param successionTimestep succession timestep used in the simulation
+#' @template successionTimestep
 #' @param trackPlanting adds column that tracks planted cohorts if `TRUE`
 #' @param initialB the initial biomass of new cohorts. Defaults to ten.
 #'
@@ -1720,8 +1719,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, initi
 #' @param treedHarvestPixelTable A data.table with at least 2 columns, `pixelIndex` and `pixelGroup`.
 #'   This will be used in conjunction with `cohortData` and `pixelGroupMap`
 #'   to ensure that everything matches correctly.
-#' @param successionTimestep The time between successive seed dispersal events.
-#'   In LANDIS-II, this is called "Succession Timestep". This is used here
+#' @template successionTimestep
 #' @param provenanceTable A `data.table` with three columns:
 #' New cohorts are initiated at the `ecoregionGroup` `speciesEcoregion` from the
 #' corresponding `speciesEcoregion` listed in the `Provenance` column
