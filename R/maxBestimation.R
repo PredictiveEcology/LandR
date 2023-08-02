@@ -1478,8 +1478,12 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
 #' @export
 modifySpeciesAndSpeciesEcoregionTable <- function(speciesEcoregion, speciesTable) {
 
-  if (is.null(speciesTable[["mANPPproportion"]])) {
-    stop("please supply a species table with inflationFactor and mANPPproportion")
+  if (is.null(speciesTable[["mANPPproportion"]]) | speciesTable[["inflationFactor"]]) {
+    stop("please supply a 'speciesTable' with inflationFactor and mANPPproportion")
+  }
+
+  if (is.null(speciesTable[["maxB"]])) {
+    stop("please supply a 'speciesEcoregion' with maxB")
   }
 
   speciesTable[, growthCurveSource := 'estimated']
