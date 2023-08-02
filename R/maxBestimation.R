@@ -1501,9 +1501,20 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
 #'
 #' @export
 modifySpeciesAndSpeciesEcoregionTable <- function(speciesEcoregion, speciesTable) {
+  ## break links to original tables
+  speciesEcoregion <- copy(speciesEcoregion)
+  speciesTable <- copy(speciesTable)
 
-  if (is.null(speciesTable[["mANPPproportion"]]) | is.null(speciesTable[["inflationFactor"]])) {
-    stop("please supply a 'speciesTable' with inflationFactor and mANPPproportion")
+  if (is.null(speciesTable[["inflationFactor"]])) {
+    message("'speciesTable' is missing the column inflationFactor")
+    message("maxB will not be adjusted")
+    speciesTable[, inflationFactor := 1]
+  }
+
+  if (is.null(speciesTable[["mANPPproportion"]])) {
+    message("'speciesTable' is missing the column mANPPproportion")
+    message("maxANPP will be estimated as (adjusted) maxB / 30")
+    speciesTable[, mANPPproportion := 10/3]
   }
 
   if (is.null(speciesEcoregion[["maxB"]])) {
