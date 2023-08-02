@@ -24,7 +24,7 @@ Default \code{FALSE}.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{http://landr.predictiveecology.org}
+  \item \url{https://landr.predictiveecology.org}
   \item \url{https://github.com/PredictiveEcology/LandR}
   \item Report bugs at \url{https://github.com/PredictiveEcology/LandR/issues}
 }
