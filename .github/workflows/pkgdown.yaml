@@ -38,6 +38,7 @@ jobs:
             any::sf
             any::XML
             local::.
+            BioSIM=?ignore
             fastshp=?ignore
             NLMR=?ignore
             PredictiveEcology/quickPlot@development
@@ -50,6 +51,7 @@ jobs:
       - name: Install additional package dependencies
         run: |
           pak::pkg_install("remotes")
+          remotes::install_github("RNCan/BioSimClient_R")
           remotes::install_github("ropensci/NLMR")
           remotes::install_github("s-u/fastshp")
         shell: Rscript {0}
