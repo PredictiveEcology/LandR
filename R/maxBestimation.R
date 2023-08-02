@@ -1530,7 +1530,7 @@ modifySpeciesAndSpeciesEcoregionTable <- function(speciesEcoregion, speciesTable
   newSpeciesEcoregion[!is.na(inflationFactor), maxB := asInteger(maxB * inflationFactor)]
 
   newSpeciesEcoregion[, maxANPP := asInteger(maxB * mANPPproportion/100)]
-  cols <- names(speciesEcoregion)
+  cols <- unique(c(names(speciesEcoregion), "maxB", "maxANPP"))  ## original table could be lacking maxANPP
   newSpeciesEcoregion <- newSpeciesEcoregion[, .SD, .SDcols = cols]
   newSpeciesEcoregion[, speciesCode := as.factor(speciesCode)]
   newSpeciesEcoregion[, maxB := asInteger(maxB)]
