@@ -26,8 +26,6 @@ utils::globalVariables(c(
 #'     `postFireRegenSummary`, the updated `postFireRegenSummary`, if `calibrate = TRUE`.
 #'
 #' @export
-#' @importFrom fpCompare %>>% %<<%
-#' @importFrom stats runif
 doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
                        postFireRegenSummary = NULL, species, sufficientLight,
                        speciesEcoregion, currentTime, treedFirePixelTableSinceLastDisp,

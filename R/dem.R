@@ -9,9 +9,6 @@
 #' @return `RasterLayer`
 #'
 #' @export
-#' @importFrom raster crs<- raster
-#' @importFrom sp CRS
-#' @importFrom reproducible postProcess prepInputs projectInputs
 prepInputsCanDEM <- function(studyArea, rasterToMatch, destinationPath) {
   dem_url <- "https://drive.google.com/file/d/1Cd4J5I2LHGUJosDQgfKrb_T93ZVSWCkt/"
 

@@ -80,10 +80,10 @@ values in total). Parameter ranges are estimated from data following Fekedulegn 
 as follows:
 \itemize{
 \item{range of \code{A} starting values (B0 parameter in Fekedulegn et al. 1999)
-varies between \eqn{ObsMaxB \times 0.3} and \eqn{ObsMaxB \times 0.9}, where ObsMaxB is the
-maximum observed B across the full dataset (not the sampled data for fitting)}
+varies between \eqn{ObsMaxB \times 0.3} and \eqn{ObsMaxB \times 0.9}, where $$ObsMaxB$$ is
+the maximum observed B across the full dataset (not the sampled data for fitting)}
 \item{\code{k} (CR model) and \code{p} (Logistic model; both are B2 parameter in
-Fekedulegn et al. 1999) are estimated as a constant rate to get to ObsMaxB,
+Fekedulegn et al. 1999) are estimated as a constant rate to get to $$ObsMaxB$$,
 calculated as \eqn{\frac{\frac{Bobs2 - Bobs1}{age2 - age1}}{ObsMaxB}}, where \emph{B1/2} and
 \emph{age1/2} are are observed values at two points in time. We draw 100 samples
 of two \emph{age} values, and corresponding \emph{B}, to calculate a sample of rates.
@@ -102,14 +102,14 @@ where to draw starting values.}
 
 \item{lowerBounds}{a named vector of lower parameter boundaries. If FALSE, no lower
 boundaries are applied. If TRUE, coefficients of the linear model on the A
-parameter (intercept, cover, k and p) are bound (intercept = observed maximum B * 0.5,
-cover = 0, k = 0.05 and p = 1). Alternatively, pass a named vector of parameter
-boundaries.}
+parameter (intercept, cover, k and p) are bound (\verb{intercept = observed maximum B * 0.5},
+\code{cover = 0}, \code{k = 0.05} and \code{p = 1}).
+Alternatively, pass a named vector of parameter boundaries.}
 
 \item{upperBounds}{a named vector of upper parameter boundaries. If FALSE, no lower
 boundaries are applied. If TRUE, coefficient of the linear model on the A parameter
-(intercept and k) are bound (intercept = observed maximum B * 1.5, k = 0.2). Alternatively, pass
-a named vector of parameter boundaries.}
+(\code{intercept} and \code{k}) are bound (\verb{intercept = observed maximum B * 1.5}, \code{k = 0.2}).
+Alternatively, pass a named vector of parameter boundaries.}
 
 \item{nbWorkers}{integer. If > 1, the number of workers to use in \code{future.apply::future_apply}, otherwise
 no parallelisation is done.}

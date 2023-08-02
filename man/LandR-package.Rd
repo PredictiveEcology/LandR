@@ -15,10 +15,9 @@ processes. Models are implemented as 'SpaDES' modules.
 
 
 \code{LandR} packages use the following \code{\link[=options]{options()}} to configure behaviour:
-
 \itemize{
-\item \code{LandR.assertions}: If \code{TRUE}, additional code checks are run
-during function calls. Default \code{FALSE}.
+\item \code{LandR.assertions}: If \code{TRUE}, additional code checks are run during function calls.
+Default \code{FALSE}.
 }
 }
 

@@ -55,15 +55,8 @@ utils::globalVariables(c(
 #' @return A numeric vector of raster pixel indices, in the same resolution and extent as
 #' `seedSrc` raster.
 #'
-#' @importFrom data.table setDT setattr set
-#' @importFrom raster cellFromRowCol focalWeight rowColFromCell xyFromCell
-#' @importFrom stats na.omit
-#' @importFrom SpaDES.tools runifC
-#' @export
-#' @docType methods
-#'
 #' @author Eliot McIntire
-#'
+#' @export
 #' @name LANDISDisp
 #' @rdname LANDISDisp
 #'

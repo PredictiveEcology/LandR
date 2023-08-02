@@ -1,7 +1,7 @@
 utils::globalVariables(c(
-  "..colsPred", "..colsResp", "..envCols", "..predictorVars", "..responseVar",
-  "..targetCovar", "full.name", "lower", "model", "pred1", "quant",
-  "upper", "x", "y", "growthCurveSource", "inflationFactor", "mANPPproportion"
+  "..colsPred", "..colsResp", "..envCols", "..predictorVars",  "..responseVar", "..targetCovar",
+  "full.name", "growthCurveSource", "inflationFactor", "lower", "mANPPproportion", "model",
+  "pred1",  "quant", "upper", "x", "y"
 ))
 
 #' FUNCTIONS TO FIT NON-LINEAR MODELS TO ESTIMATE MAXB
@@ -15,39 +15,51 @@ utils::globalVariables(c(
 #'   to add is determined by `maxNoCoefs`.
 #'
 #' @param sp species name -- only used for messaging.
+#'
 #' @param predictorVarsData a `data.table` of predictor variables including
 #'    those in `predictorVars` and `age`, as well as `pixelIndex`.
 #'    Note that `age` should be in the original scale (e.g., not logged).
+#'
 #' @param sppVarsB s `data.table` of species biomass (`B`) and `pixelIndex`.
+#'
 #' @param predictorVars character vector of predictor variables to be included
 #'   in the linear component of the model affecting the asymptote (need to correspond to
 #'   `names(predictorVarsData[[sp]])`) the same predictors will be considered for all
 #'   species.
+#'
 #' @param predictorVarsCombos a list of sets of covariates in `predictorVars` to add to
 #'    the fitted models. If this list has several entries with sets of covariates,
 #'    each will be fitted as part of the model selection process.
+#'
 #' @param doFwdSelection should covariates be added one at a time to the
 #'    linear component of the model? If `TRUE`, and `is.null(predictorVarsCombos)`,
 #'    then each entry in `predictorVarsCombos` is used as the set of covariates to
 #'    test. Otherwise, `predictorVarsCombos` will be created from combinations of
 #'    `predictorVars`, with `maxNoCoefs` determining the maximum number of covariates
 #'     to add. If `FALSE` the full model is fitted.
+#'
 #' @param maxNoCoefs how many covariates from `predictorVars` should be added to
 #'    the linear component of the model affecting the asymptote? Note that the
 #'    more covariates are added the longer the model takes to fit, as all
 #'    combinations are attempted. For 2 or more covariates, only combinations with
 #'    "cover" are attempted.
+#'
 #' @param sampleSize how many data points should be randomly sampled to fit the model?
 #'   If `NA` the full dataset will be used. Note that this may result in long
 #'   computation times. Biomass data will be binned into 10 regular bins before sampling points in number
 #'   equal to `sampleSize`.
+#'
 #' @param Ntries how many times should the models be fit with new randomly
 #'   generated starting values? Only used if `randomStarts == TRUE`.
+#'
 #' @param maxCover numeric. Value indicating maximum cover/dominance.
+#'
 #' @param models character vector of models to fit. Only Chapman-Richards ('CR')
 #'   and 'Logistic' can be chosen at the moment.
+#'
 #' @param modelOutputsPrev previous outputs of `fitNLMmodels`. The model will try
 #'   refitting and comparing AIC with the last results.
+#'
 #' @param randomStarts logical. Should random starting values of A, k and p non-linear
 #'   parameters be picked from a range sensible values, or should all combinations
 #'   of values within this range be used? If FALSE, the default, the starting values
@@ -57,10 +69,10 @@ utils::globalVariables(c(
 #'   as follows:
 #'   \itemize{
 #'     \item{range of `A` starting values (B0 parameter in Fekedulegn et al. 1999)
-#'     varies between \eqn{ObsMaxB \times 0.3} and \eqn{ObsMaxB \times 0.9}, where ObsMaxB is the
-#'     maximum observed B across the full dataset (not the sampled data for fitting)}
+#'     varies between \eqn{ObsMaxB \times 0.3} and \eqn{ObsMaxB \times 0.9}, where $$ObsMaxB$$ is
+#'     the maximum observed B across the full dataset (not the sampled data for fitting)}
 #'     \item{`k` (CR model) and `p` (Logistic model; both are B2 parameter in
-#'     Fekedulegn et al. 1999) are estimated as a constant rate to get to ObsMaxB,
+#'     Fekedulegn et al. 1999) are estimated as a constant rate to get to $$ObsMaxB$$,
 #'     calculated as \eqn{\frac{\frac{Bobs2 - Bobs1}{age2 - age1}}{ObsMaxB}}, where *B1/2* and
 #'     *age1/2* are are observed values at two points in time. We draw 100 samples
 #'     of two *age* values, and corresponding *B*, to calculate a sample of rates.
@@ -76,21 +88,21 @@ utils::globalVariables(c(
 #'     values 1 to 5, and use the minimum and maximum to determine the range from
 #'     where to draw starting values.}
 #'   }
+#'
 #' @param lowerBounds a named vector of lower parameter boundaries. If FALSE, no lower
 #'   boundaries are applied. If TRUE, coefficients of the linear model on the A
-#'   parameter (intercept, cover, k and p) are bound (intercept = observed maximum B * 0.5,
-#'   cover = 0, k = 0.05 and p = 1). Alternatively, pass a named vector of parameter
-#'   boundaries.
+#'   parameter (intercept, cover, k and p) are bound (`intercept = observed maximum B * 0.5`,
+#'   `cover = 0`, `k = 0.05` and `p = 1`).
+#'   Alternatively, pass a named vector of parameter boundaries.
+#'
 #' @param upperBounds a named vector of upper parameter boundaries. If FALSE, no lower
 #'   boundaries are applied. If TRUE, coefficient of the linear model on the A parameter
-#'   (intercept and k) are bound (intercept = observed maximum B * 1.5, k = 0.2). Alternatively, pass
-#'   a named vector of parameter boundaries.
+#'   (`intercept` and `k`) are bound (`intercept = observed maximum B * 1.5`, `k = 0.2`).
+#'   Alternatively, pass a named vector of parameter boundaries.
+#'
 #' @param nbWorkers integer. If > 1, the number of workers to use in `future.apply::future_apply`, otherwise
 #'   no parallelisation is done.
 #'
-#' @importFrom crayon blue magenta
-#' @importFrom utils combn
-
 fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
                          predictorVarsCombos = NULL, maxNoCoefs = 4, doFwdSelection = FALSE,
                          sampleSize = 3000, Ntries = 2000, maxCover = 1L, models = c("CR", "Logistic"),
@@ -472,31 +484,30 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
   return(modelOutputsPrev)
 }
 
-
 #' Fit non-linear growth model under various starting conditions
 #'
 #' Uses likelihood parameter estimation to fit non linear models
 #' while attempting several starting values.
 #'
-#' @param data a \code{data.table} or \code{data.frame} with all covariates
+#' @param data a `data.table` or `data.frame` with all covariates
 #'   and the response variable. Note that incomplete lines are removed.
-#' @param nonLinModelQuoted The non-linear equation as a \code{call}
-#'   (quoted expression) passed to \code{mle2(minuslog1)}. See \code{?mle}.
+#' @param nonLinModelQuoted The non-linear equation as a `call`
+#'   (quoted expression) passed to `mle2(minuslog1)`. See `?mle`.
 #'   Accepts equations with three parameters 'A', 'p' and 'k'.
 #' @param linModelQuoted A list of linear equations/modes relating each
-#'   parameter ('A', 'p' and 'k') with a set of covariates. A \code{call}
-#'   (quoted expression) passed to \code{mle2(..., parameters)}. Note that for the
+#'   parameter ('A', 'p' and 'k') with a set of covariates. A `call`
+#'   (quoted expression) passed to `mle2(..., parameters)`. Note that for the
 #'   purpose of tree growth, the linear equation determining 'A' should include a
 #'   'cover' predictor indicating the tree cover or dominance in the stand. Should be
-#'   scaled between 0 and \code{maxCover}.
-#' @param mllsOuterPrev the output of a previous \code{fitNLMwCovariates} run which
+#'   scaled between 0 and `maxCover`.
+#' @param mllsOuterPrev the output of a previous `fitNLMwCovariates` run which
 #'   is used to extract last best AIC and maximum biomass estimate and judge if new
 #'   iterations are better.
 #' @param model character. Non-linear model form used to estimate average maximum
 #'   biomass. One of "CR" (Chapman-Richards) or "Logistic". In both cases, maximum biomass
 #'   is equivalent to the 'A' asymptote parameter, which is estimated using observed mean
-#'   values of predictors entering its linear equation and \code{cover == maxCover}, if this
-#'   predictor is included (as it should). Passed to \code{extractMaxB}
+#'   values of predictors entering its linear equation and `cover == maxCover`, if this
+#'   predictor is included (as it should). Passed to `extractMaxB`
 #' @param maxCover numeric. Value indicating maximum cover/dominance.
 #' @param starts `data.table` or `data.frame` of parameter starting values. Will be coerced to named list
 #'   with names being parameter names.
@@ -505,13 +516,9 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 #' @param nbWorkers integer. If > 1, the number of workers to use in `parallelly::makeClusterPSOCK(nbWorkers = .)`,
 #'  otherwise no parallellisation is done.
 #'
-#' @return a \code{list} with entries 'mll' (the maximum likelihood-estimated
-#' coefficients) and 'AICbest' (the AIC of the best models generating these
-#' coefficients)
+#' @return a `list` with entries `mll` (the maximum likelihood-estimated
+#' coefficients) and `AICbest` (the AIC of the best models generating these coefficients)
 #'
-#' @importFrom crayon cyan red
-#' @importFrom data.table last
-
 .fitNLMwCovariates <- function(data, nonLinModelQuoted, linModelQuoted, mllsOuterPrev,
                                model = c("CR", "Logistic"), maxCover = 1L,
                                starts = NULL, lower = NULL, upper = NULL, nbWorkers = 1L) {
@@ -579,7 +586,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
         cl <- parallel::makeForkCluster(nbWorkers)
       } else {
 
-        if (!requireNamespace("parallelly")) {
+        if (!requireNamespace("parallelly", quietly = TRUE)) {
           stop("Package parallelly not installed. Install using `install.packages('parallelly')`.")
         }
         cl <- parallelly::makeClusterPSOCK(nbWorkers, rscript_libs = .libPaths())
@@ -771,7 +778,6 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
   return(mll)
 }
 
-
 #' Maximum biomass estimator
 #'
 #' Estimation of maximum biomass as the A parameter in the Chapman-Richards and
@@ -779,7 +785,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 #'   product of its linear coefficients. It is assumed that all coefficients are
 #'   related additively.
 #'
-#' @param mll the output of an \code{bbmle::mle2} call (the fitted non-linear model),
+#' @param mll the output of an `bbmle::mle2` call (the fitted non-linear model),
 #'   from which coefficient values will be extracted
 #' @param newdata data for estimation of 'A'
 #' @param average should 'A' be estimated for average values of its predictors.
@@ -821,42 +827,47 @@ extractMaxB <- function(mll, newdata, average = FALSE, model = c("CR", "Logistic
 
 #' Plot estimated maximum biomass by age
 #'
-#' Plots a maximum biomass estimated at maximum 'cover'
-#'   (or dominance) levels as a function of age
+#' Plots a maximum biomass estimated at maximum 'cover' (or dominance) levels as a function of age.
 #'
-#' @param mll a named list with outputs of an \code{bbmle::mle2} call (the fitted non-linear
+#' @param mll a named list with outputs of an `bbmle::mle2` call (the fitted non-linear
 #'  model), from which coefficient values will be extracted. If several model outputs
 #'  are provided all fitted models will be plotted, with plot labels corresponding to list names.
+#'
 #' @param data data for estimation of maximum biomass. Should contain at least
 #'  an 'age' column. Note that other covariates will be averaged and 'cover' values
-#'  will be replaced with the maximum cover value (\code{maxCover}). If `mll` is a list
+#'  will be replaced with the maximum cover value (`maxCover`). If `mll` is a list
 #'  data is assumed to be the same for the two models.
+#'
 #' @param maxCover numeric. Value indicating maximum cover/dominance.
+#'
 #' @param xCovar the variable shown in the x axis. Defaults to `age`.
-#' @param plotTitle character. Passed to ggplot2::labs(title)
-#' @param nonLinModelQuoted a named list of non-linear equations as a \code{call}
-#'   (quoted expression) passed to \code{mle2(minuslog1)}. See \code{?mle}.
+#'
+#' @param plotTitle character. Passed to `ggplot2::labs(title)`.
+#'
+#' @param nonLinModelQuoted a named list of non-linear equations as a `call`
+#'   (quoted expression) passed to `mle2(minuslog1)`. See `?mle`.
 #'   Accepts equations with three parameters 'A', 'p' and 'k'. List names and
 #'   length must the same as in `mll`.
+#'
 #' @param linModelQuoted A named list of lists of linear equations/modes relating each
-#'   parameter ('A', 'p' and 'k') with a set of covariates. A \code{call}
-#'   (quoted expression) passed to \code{mle2(..., parameters)}. Note that for the
+#'   parameter ('A', 'p' and 'k') with a set of covariates. A `call`
+#'   (quoted expression) passed to `mle2(..., parameters)`. Note that for the
 #'   purpose of tree growth, the linear equation determining 'A' should include a
 #'   'cover' predictor indicating the tree cover or dominance in the stand. Should be
-#'   scaled between 0 and \code{maxCover}. List names and length must the same as in `mll`.
+#'   scaled between 0 and `maxCover`. List names and length must the same as in `mll`.
+#'
 #' @param averageCovariates should covariates other than age/cover be averaged for
 #'   biomass predictions? If not, for each age (at maximum cover) there will be as
 #'   many predictions as other covariate values. If `observedAge == TRUE` and
 #'   `averageCovariates == FALSE` then the original data is used, with cover
 #'   changed to `maxCover`.
+#'
 #' @param observedAge should observed age values be used, or should these be generated
 #'   as `round(seq(min(age), max(age)*1.5, length.out = 100), 0)`? If `observedAge == TRUE` and
 #'   `averageCovariates == FALSE` then the original data is used, with cover
 #'   changed to `maxCover`.
-#' @param plotCIs should confidence intervals be calculated and plotted?
 #'
-#' @importFrom ggplot2 ggplot geom_point labs geom_line geom_ribbon theme_classic scale_color_distiller geom_hline stat_summary
-#' @importFrom stats quantile
+#' @param plotCIs should confidence intervals be calculated and plotted?
 #'
 ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
                            plotTitle = NULL, nonLinModelQuoted, linModelQuoted,
@@ -972,35 +983,39 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
 
 #' Prepare data for model plotting
 #'
-#' @param mll outputs of an \code{bbmle::mle2} call (the fitted non-linear
+#' @param mll outputs of an `bbmle::mle2` call (the fitted non-linear
 #'  model), from which coefficient values will be extracted.
+#'
 #' @param data data for estimation of maximum biomass. Should contain at least
 #'  an 'age' column. Note that other covariates will be averaged and 'cover' values
-#'  will be replaced with the maximum cover value (\code{maxCover}).
+#'  will be replaced with the maximum cover value (`maxCover`).
+#'
 #' @param maxCover numeric. Value indicating maximum cover/dominance.
-#' @param nonLinModelQuoted The non-linear equation as a \code{call}
-#'   (quoted expression) passed to \code{mle2(minuslog1)}. See \code{?mle}.
+#'
+#' @param nonLinModelQuoted The non-linear equation as a `call`
+#'   (quoted expression) passed to `mle2(minuslog1)`. See `?mle`.
 #'   Accepts equations with three parameters 'A', 'p' and 'k'.
+#'
 #' @param linModelQuoted A list of linear equations/modes relating each
-#'   parameter ('A', 'p' and 'k') with a set of covariates. A \code{call}
-#'   (quoted expression) passed to \code{mle2(..., parameters)}. Note that for the
+#'   parameter ('A', 'p' and 'k') with a set of covariates. A `call`
+#'   (quoted expression) passed to `mle2(..., parameters)`. Note that for the
 #'   purpose of tree growth, the linear equation determining 'A' should include a
 #'   'cover' predictor indicating the tree cover or dominance in the stand. Should be
-#'   scaled between 0 and \code{maxCover}.
+#'   scaled between 0 and `maxCover`.
+#'
 #' @param averageCovariates should covariates other than age/cover be averaged for
 #'   biomass predictions? If not, for each age (at maximum cover) there will be as
 #'   many predictions as other covariate values. If `observedAge == TRUE` and
 #'   `averageCovariates == FALSE` then the original data is used, with cover
 #'   changed to `maxCover`.
+#'
 #' @param observedAge should observed age values be used, or should these be generated
 #'   as `round(seq(min(age), max(age)*1.5, length.out = 100), 0)`? If `observedAge == TRUE` and
 #'   `averageCovariates == FALSE` then the original data is used, with cover
 #'   changed to `maxCover`.
+#'
 #' @param plotCIs should confidence intervals be calculated and plotted?
 #'
-#' @importFrom data.table data.table as.data.table
-#' @importFrom stats quantile vcov
-
 .MLLMaxBplotData <- function(mll, nonLinModelQuoted, linModelQuoted, maxCover, data,
                              averageCovariates = TRUE, observedAge = FALSE, plotCIs = TRUE) {
   if (requireNamespace("bbmle", quietly = TRUE)) {
@@ -1119,20 +1134,20 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
   }
 }
 
-
 #' Get maximum biomass coefficient names
 #'
 #' Extracts the names of linear coefficients
 #'   for the maximum-biomass-equivalent parameter in
 #'   the non-linear growth equations
 #'
-#' @param mll the output of an \code{bbmle::mle2} call (the fitted non-linear model),
+#' @param mll the output of an `bbmle::mle2` call (the fitted non-linear model),
 #'   from which coefficient values will be extracted
+#'
 #' @param model character. Non-linear model form used to estimate average maximum
 #'   biomass. One of "CR" (Chapman-Richards) or "Logistic".
 #'
 #' @return a list of two vectors of parameter names one following
-#'   coefficient names in \code{mll} ('mllCoefNames'), the other using the original
+#'   coefficient names in `mll` ('mllCoefNames'), the other using the original
 #'   names as in the data used for model fitting ('origCoefNames')
 #'
 .getMaxBCoefs <- function(mll, model = c("CR", "Logistic")) {
@@ -1149,53 +1164,60 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
   }
 }
 
-
 #' Partial effect plots of maximum biomass estimates by age
 #'
 #' Plots the maximum biomass estimates along an age gradient as a function
-#'  of abother target covariate, with all others held at average values.
-#'
-#' @param mll a named list with outputs of an \code{bbmle::mle2} call (the fitted non-linear
-#'  model), from which coefficient values will be extracted. If several model outputs
-#'  are provided all fitted models will be plotted, with plot labels corresponding to list names.
-#' @param data data for estimation of maximum biomass. Should contain at least
-#'  an 'age' column. Note that other covariates will be averaged and 'cover' values
-#'  will be replaced with the maximum cover value (\code{maxCover}). If `mll` is a list
-#'  data is assumed to be the same for the two models.
-#' @param targetCovar the covariate for which variation in maxB values will be shown per
-#'  age value. Defaults to showing how maxB values change with "cover" at any given age.
-#'  Age values are generated as `round(seq(min(age), max(age)*1.5, length.out = 100), 0)`.
-#'  When `targetCovar != "cover"`, "cover" may be fixed at `maxCover`. See `fixMaxCover`.
-#' @param fixMaxCover logical. If `TRUE` and `targetCovar != "cover"`, cover is
-#'  not averaged and is fixed to `maxCover`.
-#' @param xCovar the variable shown in the x axis. Defaults to "age". When `xCovar == "age"`
-#'  the output plots are not true "Partial Effects" plots. Instead, they show the variation
-#'  is B values across values of `targetCovar` for each value of age.
-#' @param showQuantiles controls whether quantile predictions will be shown. If
-#'  "allQuantiles", quantile values (5%, 25%, 50%, 75%, 95%) of B will be
-#'  plotted as blue lines, with their respective asymptote values (quantile values
-#'  at maximum age) as dashed lines. If "maximum" the 100% quantile will be plotted.
-#'  If "none", only the 50% quantile line (average prediction) is plotted. Quantiles
-#'  are always calculated at `max(age)`.
-#' @param maxCover numeric. Value indicating maximum cover/dominance.
-#' @param plotTitle character. Passed to ggplot2::labs(title)
-#' @param nonLinModelQuoted a named list of non-linear equations as a \code{call}
-#'   (quoted expression) passed to \code{mle2(minuslog1)}. See \code{?mle}.
-#'   Accepts equations with three parameters 'A', 'p' and 'k'. List names and
-#'   length must the same as in `mll`.
-#' @param linModelQuoted A named list of lists of linear equations/modes relating each
-#'   parameter ('A', 'p' and 'k') with a set of covariates. A \code{call}
-#'   (quoted expression) passed to \code{mle2(..., parameters)}. Note that for the
-#'   purpose of tree growth, the linear equation determining 'A' should include a
-#'   'cover' predictor indicating the tree cover or dominance in the stand. Should be
-#'   scaled between 0 and \code{maxCover}. List names and length must the same as in `mll`.
-#' @param fun passed to `.MLLMaxBPartialPlotData`.
-#' @param plotCIs should confidence intervals be calculated and plotted?
+#' of another target covariate, with all others held at average values.
 #'
 #' @details Note that the original data, not the predicted values is shown.
 #'
-#' @importFrom ggplot2 ggplot geom_point labs geom_line geom_ribbon theme_classic scale_color_distiller geom_hline stat_summary
-#' @importFrom stats quantile
+#' @param mll a named list with outputs of an `bbmle::mle2` call (the fitted non-linear
+#' model), from which coefficient values will be extracted. If several model outputs
+#' are provided all fitted models will be plotted, with plot labels corresponding to list names.
+#'
+#' @param data data for estimation of maximum biomass. Should contain at least
+#' an 'age' column. Note that other covariates will be averaged and 'cover' values
+#' will be replaced with the maximum cover value (`maxCover`).
+#' If `mll` is a list, data is assumed to be the same for the two models.
+#'
+#' @param targetCovar the covariate for which variation in maxB values will be shown per
+#' age value. Defaults to showing how maxB values change with "cover" at any given age.
+#' Age values are generated as `round(seq(min(age), max(age)*1.5, length.out = 100), 0)`.
+#' When `targetCovar != "cover"`, "cover" may be fixed at `maxCover`. See `fixMaxCover`.
+#'
+#' @param fixMaxCover logical. If `TRUE` and `targetCovar != "cover"`, cover is
+#' not averaged and is fixed to `maxCover`.
+#'
+#' @param xCovar the variable shown in the x axis. Defaults to "age". When `xCovar == "age"`
+#' the output plots are not true "Partial Effects" plots. Instead, they show the variation
+#' is `B` values across values of `targetCovar` for each value of age.
+#'
+#' @param showQuantiles controls whether quantile predictions will be shown. If
+#' "allQuantiles", quantile values (5%, 25%, 50%, 75%, 95%) of B will be
+#' plotted as blue lines, with their respective asymptote values (quantile values
+#' at maximum age) as dashed lines. If "maximum" the 100% quantile will be plotted.
+#' If "none", only the 50% quantile line (average prediction) is plotted. Quantiles
+#' are always calculated at `max(age)`.
+#'
+#' @param maxCover numeric. Value indicating maximum cover/dominance.
+#'
+#' @param plotTitle character. Passed to ggplot2::labs(title)
+#'
+#' @param nonLinModelQuoted a named list of non-linear equations as a `call`
+#' (quoted expression) passed to `mle2(minuslog1)`. See `?mle`.
+#' Accepts equations with three parameters 'A', 'p' and 'k'. List names and
+#' length must the same as in `mll`.
+#'
+#' @param linModelQuoted A named list of lists of linear equations/modes relating each
+#' parameter ('A', 'p' and 'k') with a set of covariates. A `call`
+#' (quoted expression) passed to `mle2(..., parameters)`. Note that for the
+#' purpose of tree growth, the linear equation determining 'A' should include a
+#' 'cover' predictor indicating the tree cover or dominance in the stand. Should be
+#' scaled between 0 and `maxCover`. List names and length must the same as in `mll`.
+#'
+#' @param fun passed to `.MLLMaxBPartialPlotData`.
+#'
+#' @param plotCIs should confidence intervals be calculated and plotted?
 #'
 partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1, fixMaxCover = TRUE,
                                   xCovar = "age", showQuantiles = "allQuantiles", plotTitle = NULL,
@@ -1319,36 +1341,40 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
 
 #' Prepare data for model plotting
 #'
-#' @param mll outputs of an \code{bbmle::mle2} call (the fitted non-linear
-#'  model), from which coefficient values will be extracted.
+#' @param mll outputs of an `bbmle::mle2` call (the fitted non-linear model),
+#' from which coefficient values will be extracted.
+#'
 #' @param data data for estimation of maximum biomass. Should contain at least
-#'  an 'age' column. Note that other covariates will be averaged and 'cover' values
-#'  will be replaced with the maximum cover value (\code{maxCover}).
+#' an 'age' column. Note that other covariates will be averaged and 'cover' values
+#' will be replaced with the maximum cover value (`maxCover`).
+#'
 #' @param targetCovar the covariate for which variation in maxB values will be shown.
-#'  Defaults to showing how maxB values change with "cover". All other covariates except
-#'  "age" are averaged. Age values are generated as `round(seq(min(age), max(age)*1.5, length.out = 100), 0)`.
-#'  When `targetCovar != "cover"`, "cover" will be fixed at `maxCover`. See `fixMaxCover`.
+#' Defaults to showing how maxB values change with "cover". All other covariates except
+#' "age" are averaged. Age values are generated as `round(seq(min(age), max(age)*1.5, length.out = 100), 0)`.
+#' When `targetCovar != "cover"`, "cover" will be fixed at `maxCover`. See `fixMaxCover`.
+#'
 #' @param fixMaxCover logical. If `TRUE` and `targetCovar != "cover"`, cover is
 #'  not averaged and is fixed to `maxCover`.
+#'
 #' @param maxCover numeric. Value indicating maximum cover/dominance.
-#' @param nonLinModelQuoted The non-linear equation as a \code{call}
-#'   (quoted expression) passed to \code{mle2(minuslog1)}. See \code{?mle}.
-#'   Accepts equations with three parameters 'A', 'p' and 'k'.
+#'
+#' @param nonLinModelQuoted The non-linear equation as a `call`
+#' (quoted expression) passed to `mle2(minuslog1)`. See `?mle`.
+#' Accepts equations with three parameters 'A', 'p' and 'k'.
+#'
 #' @param linModelQuoted A list of linear equations/modes relating each
-#'   parameter ('A', 'p' and 'k') with a set of covariates. A \code{call}
-#'   (quoted expression) passed to \code{mle2(..., parameters)}. Note that for the
-#'   purpose of tree growth, the linear equation determining 'A' should include a
-#'   'cover' predictor indicating the tree cover or dominance in the stand. Should be
-#'   scaled between 0 and \code{maxCover}.
+#' parameter ('A', 'p' and 'k') with a set of covariates. A `call`
+#' (quoted expression) passed to `mle2(..., parameters)`. Note that for the
+#' purpose of tree growth, the linear equation determining 'A' should include a
+#' 'cover' predictor indicating the tree cover or dominance in the stand. Should be
+#' scaled between 0 and `maxCover`.
+#'
 #' @param fun The function to apply when summarizing other variables. By default,
-#'   the all other variables except age are  averaged (`"mean"`). Other options are:
-#'   `"median"`, `"min"`, `"max"`.
+#' the all other variables except age are  averaged (`"mean"`). Other options are:
+#' `"median"`, `"min"`, `"max"`.
+#'
 #' @param plotCIs should confidence intervals be calculated and plotted?
 #'
-#' @importFrom data.table data.table as.data.table
-#' @importFrom crayon magenta blue
-#' @importFrom stats quantile vcov
-
 .MLLMaxBPartialPlotData <- function(mll, nonLinModelQuoted, linModelQuoted,
                                     targetCovar = "cover", fixMaxCover = TRUE,
                                     maxCover = 1, data, fun = "mean", plotCIs = TRUE) {
@@ -1464,8 +1490,6 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
     stop("Package bbmle not installed. Install using `install.packages('bbmle')`.")
   }
 }
-
-
 
 #' Update `species` and `speciesEcoregion` tables
 #'

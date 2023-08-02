@@ -48,11 +48,6 @@ utils::globalVariables(c(
 #'
 #' @export
 #' @rdname updateCohortData
-#' @importFrom crayon green magenta
-#' @importFrom data.table copy rbindlist set setkey
-#' @importFrom raster getValues
-#' @importFrom reproducible paddedFloatToChar
-#' @importFrom stats na.omit
 updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                              speciesEcoregion, treedFirePixelTableSinceLastDisp = NULL,
                              successionTimestep,
@@ -239,9 +234,6 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 #'
 #' @return A `data.table` with a new `rbindlist`ed `cohortData`
 #'
-#' @importFrom data.table copy rbindlist set setkey
-#' @importFrom raster getValues
-#' @importFrom stats na.omit
 #' @rdname updateCohortData
 .initiateNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                                 cohortDefinitionCols = c("pixelGroup", "speciesCode", "age"),
@@ -347,9 +339,6 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 #' each updated based on missing `pixelGroups` in the other.
 #'
 #' @export
-#' @importFrom data.table rbindlist set setkey
-#' @importFrom raster getValues
-#' @importFrom stats na.omit
 rmMissingCohorts <- function(cohortData, pixelGroupMap,
                              cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
                              doAssertion = getOption("LandR.assertions", TRUE)) {
@@ -404,7 +393,6 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
 #' This should likely be added to the `pixelDataTable` object immediately.
 #'
 #' @export
-#' @importFrom data.table setkey setorderv
 generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
                                 columns = c("ecoregionGroup", "speciesCode", "age", "B")) {
   columnsOrig <- columns
@@ -591,10 +579,6 @@ describeCohortData <- function(cohortData) {
 #'
 #' @author Eliot McIntire
 #' @export
-#' @importFrom data.table as.data.table is.data.table rbindlist setnames
-#' @importFrom raster raster
-#' @importFrom reproducible paddedFloatToChar
-#' @importFrom SpaDES.tools spread2
 convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
                                availableERC_by_Sp, theUnwantedPixels,
                                ecoregionGroupVec, speciesEcoregion, pixelClassesToReplace,
@@ -841,8 +825,6 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
 #'   so all cover in `pixelGroup` or pixel sums to 100.
 #' @return `cohortData` (`data.table`) with attribute `"imputedPixID"`
 #'
-#' @importFrom crayon blue
-#' @importFrom data.table melt setattr setnames
 #' @keywords internal
 .createCohortData <- function(inputDataTable, # pixelGroupBiomassClass,
                               sppColumns,
@@ -1027,11 +1009,6 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
 #'
 #' @author Eliot McIntire
 #' @export
-#' @importFrom crayon blue green
-#' @importFrom data.table melt setattr setnames
-#' @importFrom reproducible Cache .sortDotsUnderscoreFirst messageDF
-#' @importFrom pemisc termsInData
-#' @rdname makeAndCleanInitialCohortData
 makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
                                           # pixelGroupBiomassClass,
                                           # pixelGroupAgeClass = 1,
@@ -1243,7 +1220,6 @@ subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
 #' @return An updated model formula.
 #'
 #' @export
-#' @importFrom stats terms update
 dropTerm <- function(form, term) {
   if (!is(form, "formula")) {
     form <- as.formula(form)
@@ -1288,10 +1264,6 @@ dropTerm <- function(form, term) {
 #' @param .specialData The custom dataset required for the model.
 #'
 #' @export
-#' @importFrom crayon blue magenta red
-#' @importFrom lme4 glmer lmer
-#' @importFrom MuMIn r.squaredGLMM
-#' @importFrom stats as.formula glm fitted predict
 statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData) {
   ## convert model call to vector of arguments
   modelArgs <- as.character(modelFn)
@@ -1394,7 +1366,6 @@ columnsForPixelGroups <- c("ecoregionGroup", "speciesCode", "age", "B")
 #' An expanded `cohortData` `data.table` with a new `pixelIndex` column.
 #'
 #' @export
-#' @importFrom terra ncell
 addPixels2CohortData <- function(cohortData, pixelGroupMap,
                                  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
                                  doAssertion = getOption("LandR.assertions", TRUE)) {
@@ -1433,7 +1404,6 @@ addPixels2CohortData <- function(cohortData, pixelGroupMap,
 #' column
 #'
 #' @export
-#' @importFrom data.table data.table
 addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
                                   cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
@@ -1504,9 +1474,6 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
 #' `data.table`s.
 #'
 #' @export
-#' @importFrom data.table melt setnames set
-#' @importFrom reproducible Cache
-#' @importFrom utils tail
 makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesEcoregion,
                                 pixelGroupBiomassClass, pixelGroupAgeClass, minAgeForGrouping = 0,
                                 rmImputedPix = FALSE, imputedPixID, pixelFateDT) {
@@ -1637,9 +1604,6 @@ makeCohortDataFiles <- function(pixelCohortData, columnsForPixelGroups, speciesE
 #'
 #' @return A `data.table` with a new `cohortData`
 #'
-#' @importFrom data.table copy rbindlist set setkey
-#' @importFrom raster getValues
-#' @importFrom stats na.omit
 #' @export
 plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, initialB = 10,
                             currentTime, successionTimestep, trackPlanting = FALSE) {
@@ -1737,11 +1701,6 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, initi
 #' `newPixelCohortData` inserted.
 #'
 #' @export
-#' @importFrom crayon green magenta
-#' @importFrom data.table copy rbindlist set setkey
-#' @importFrom raster getValues
-#' @importFrom reproducible paddedFloatToChar
-#' @importFrom stats na.omit
 #' @rdname updateCohortDataPostHarvest
 updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGroupMap, currentTime,
                                         speciesEcoregion, treedHarvestPixelTable = NULL,
@@ -1933,10 +1892,8 @@ pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
 #'
 #' @author Eliot McIntire, Ceres Barros, Alex Chubaty
 #' @export
-#' @importFrom data.table copy data.table setkey setorderv
-#' @importFrom utils data
-#'
 #' @rdname vegTypeGenerator
+#'
 #' @examples
 #' library(data.table)
 #' x <- data.table(
@@ -2162,7 +2119,6 @@ vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
   return(xx)
 }
 
-#' @importFrom SpaDES.tools inRange
 preambleVTG <- function(x, vegLeadingProportion, doAssertion, nrowCohortData) {
   if (!inRange(vegLeadingProportion, 0, 1)) {
     stop("vegLeadingProportion must be a proportion")

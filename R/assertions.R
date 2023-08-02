@@ -142,7 +142,6 @@ assertUniqueCohortData <- function(cohortData, columns,
 #' @param minRelativeB numeric; minimum relative biomass
 #'
 #' @export
-#' @importFrom utils str
 #' @rdname assertions
 assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
                        doAssertion = getOption("LandR.assertions", TRUE)) {
@@ -262,8 +261,6 @@ assertColumns <- function(obj, colClasses,
 #' TODO
 #'
 #' @export
-#' @importFrom crayon green
-#' @importFrom stats na.omit
 #' @rdname assertions
 assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1,
                              message = "", doAssertion = getOption("LandR.assertions", TRUE),
@@ -400,8 +397,6 @@ assertFireToleranceDif <- function(burnedPixelCohortData,
 #' @param thresh the minimum number of pixels where the species must have
 #'   `biomass > 0` to be considered present in the study area.
 #'   Defaults to 1.
-#'
-#' @importFrom raster unstack
 #'
 #' @export
 #' @rdname assertions

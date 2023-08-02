@@ -24,12 +24,6 @@
 #' @return list of filepaths corresponding to the images and/or objects written to disk
 #'
 #' @export
-#' @importFrom data.table data.table
-#' @importFrom grDevices dev.off png
-#' @importFrom parallel mclapply
-#' @importFrom raster calc maxValue minValue raster stack setValues writeRaster
-#' @importFrom RColorBrewer brewer.pal
-#' @importFrom SpaDES.tools rasterizeReduced
 plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, outputDir, treeSpecies,
                                defineLeading = .defineLeading, leadingPercentage = 0.8,
                                treeType = NULL, rasterToMatch) {

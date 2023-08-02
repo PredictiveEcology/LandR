@@ -34,7 +34,6 @@ Imports:
     ggspatial,
     grDevices,
     lme4,
-    map,
     methods,
     MuMIn (>= 1.42.5),
     parallel,

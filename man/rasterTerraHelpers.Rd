@@ -7,7 +7,7 @@
 \alias{asInt}
 \alias{isInt}
 \alias{reclass}
-\title{Set NA values in \code{Raster}/\code{SpatRaster}}
+\title{Set NA values in \code{Raster} or \code{SpatRaster}}
 \usage{
 .NAvalueFlag(ras, NAval)
 
@@ -28,11 +28,9 @@ reclass(ras, tab)
 
 \item{rasList}{a list of \code{Raster} or \code{SpatRaster} objects}
 
-\item{crs}{passed to \code{raster::projectRaster(..., crs = crs)}
-and \code{terra::project(..., y = crs)}}
+\item{crs}{passed to \code{raster::projectRaster(..., crs = crs)} and \code{terra::project(..., y = crs)}}
 
-\item{tab}{matrix of values to reclassify. See \code{terra::classify}
-and \code{raster::reclassify}.}
+\item{tab}{matrix of values to reclassify. See \code{terra::classify} and \code{raster::reclassify}.}
 }
 \value{
 a raster with attributed NA values
@@ -49,6 +47,5 @@ the projected extent
 and \code{raster::reclassify}.
 }
 \description{
-These all create a single function that can be used for either \code{Raster} or \code{SpatRaster}
-objects.
+These all create a single function that can be used for either \code{Raster} or \code{SpatRaster} objects.
 }

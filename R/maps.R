@@ -17,10 +17,6 @@ utils::globalVariables(c(
 #' @param filename2 See [reproducible::postProcess()]. Default `NULL`.
 #'
 #' @export
-#' @importFrom grDevices colorRampPalette
-#' @importFrom quickPlot setColors<-
-#' @importFrom raster compareRaster mask maxValue minValue ratify reclassify writeRaster
-#' @importFrom reproducible maxFn minFn
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
                             nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
                             mask = NULL, filename2 = NULL) {
@@ -91,9 +87,6 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #' @param filename2 passed to `reproducible::prepInputs`
 #'
 #' @export
-#' @importFrom reproducible asPath prepInputs
-#' @importFrom terra values intersect
-#' @importFrom raster intersect
 prepInputsLCC <- function(year = 2010,
                           destinationPath = asPath("."),
                           method = c("ngb", "near"),
@@ -173,9 +166,6 @@ prepInputsLCC <- function(year = 2010,
 #' @return A factor raster
 #'
 #' @export
-#' @importFrom quickPlot numLayers
-#' @importFrom raster levels maxValue raster
-#' @importFrom SpaDES.tools inRange
 #' @rdname LandR-deprecated
 makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
   .Deprecated("vegTypeMapGenerator")
@@ -213,12 +203,6 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 #'
 #' @author Eliot McIntire, Ceres Barros, Alex Chubaty
 #' @export
-#' @importFrom data.table copy data.table setkey setorderv
-#' @importFrom pemisc factorValues2
-#' @importFrom raster getValues projection projection<- setValues
-#' @importFrom reproducible maxFn
-#' @importFrom SpaDES.tools rasterizeReduced
-#' @importFrom utils data
 #' @rdname vegTypeMapGenerator
 vegTypeMapGenerator <- function(x, ...) {
   UseMethod("vegTypeMapGenerator", x)
@@ -286,10 +270,6 @@ vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.a
 }
 
 
-#' @export
-#' @importFrom SpaDES.tools inRange
-#' @rdname vegTypeMapGenerator
-#' @include cohorts.R
 #' @examples
 #' library(data.table)
 #' library(raster)
@@ -298,6 +278,11 @@ vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.a
 #' pixelGroupMap <- raster(extent(0,3, 0, 3), res = 1)
 #' pixelGroupMap[] <- sample(1:2, size = 9, replace = TRUE)
 #' vtm <- vegTypeMapGenerator(x, pixelGroupMap = pixelGroupMap)
+#'
+#' @export
+#' @include cohorts.R
+#'
+#' @rdname vegTypeMapGenerator
 vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportion = 0.8,
                                            mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,
                                            pixelGroupColName = "pixelGroup",
@@ -642,10 +627,6 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @return A raster stack of percent cover layers by species.
 #'
 #' @export
-#' @importFrom raster ncell raster
-#' @importFrom reproducible Cache .prefix basename2 maxFn preProcess
-#' @importFrom tools file_path_sans_ext
-#' @importFrom utils capture.output untar
 loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, sppEquiv, year = 2001,
                                  knnNamesCol = "KNN", sppEquivCol = "Boreal", thresh = 10, url = NULL,
                                  ...) {
@@ -922,10 +903,6 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
 #' @return A raster stack of percent cover layers by species.
 #'
 #' @export
-#' @importFrom raster ncell raster
-#' @importFrom reproducible basename2 Cache .prefix preProcess
-#' @importFrom tools file_path_sans_ext
-#' @importFrom utils capture.output untar
 #' @rdname LandR-deprecated
 loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                            knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
@@ -946,7 +923,6 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
 #' @param newLayerName name of the output raster layer
 #'
 #' @export
-#' @importFrom raster calc stack writeRaster
 sumRastersBySpecies <- function(speciesLayers, layersToSum, filenameToSave, newLayerName) {
   out <- raster::calc(raster::stack(speciesLayers[layersToSum]), sum)
   names(out) <- newLayerName
@@ -970,9 +946,6 @@ sumRastersBySpecies <- function(speciesLayers, layersToSum, filenameToSave, newL
 #' @template destinationPath
 #'
 #' @export
-#' @importFrom data.table data.table
-#' @importFrom quickPlot layerNames
-#' @importFrom raster ncell res stack
 overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffix = "overlay",
                           destinationPath) {
   ## check if there are any layers/values in the lowQualityStack
@@ -1022,9 +995,6 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' @param HQ `data.table` column of whether `SPP` is present in HQ layers
 #' @param LQ `data.table` column of whether `SPP` is present in LQ layers
 #'
-#' @importFrom terra crs ext res rast
-#' @importFrom terra writeRaster xmax xmin ymax ymin
-#' @importFrom reproducible Filenames cropInputs projectInputs
 #' @keywords internal
 .overlay <- function(SPP, HQ, LQ, hqLarger, highQualityStack, lowQualityStack, #nolint
                      outputFilenameSuffix = "overlay", destinationPath) {
@@ -1185,8 +1155,6 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' @param suffix TODO
 #' @param ... Additional arguments TODO
 #'
-#' @importFrom raster calc stack writeRaster
-#' @importFrom reproducible .suffix prepInputs
 #' @keywords internal
 mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dPath, ...) {
   stopifnot(!is.null(sppMerge), length(sppMerge) > 0)
@@ -1231,8 +1199,6 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
 #' @return `RasterLayer`
 #'
 #' @export
-#' @importFrom sf st_as_sf
-#' @importFrom reproducible .requireNamespace
 fasterizeFromSp <- function(sp, raster, fieldName) {
   .requireNamespace("fasterize", stopOnFALSE = TRUE)
 
@@ -1261,8 +1227,6 @@ fasterizeFromSp <- function(sp, raster, fieldName) {
 #' @return `RasterLayer`
 #'
 #' @export
-#' @importFrom data.table data.table
-#' @importFrom raster cellFromRowCol raster res rowColFromCell
 aggregateRasByDT <- function(ras, newRas, fn = sum) {
   whNonNA <- which(!is.na(ras[]))
   rc2 <- rowColFromCell(ras, whNonNA)

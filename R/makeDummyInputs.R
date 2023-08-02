@@ -9,8 +9,6 @@ utils::globalVariables(c())
 #' @return a `RasterLayer` object or, in the case of `makeDummyEcoregionFiles`, a list.
 #'
 #' @export
-#' @importFrom raster mask res
-#' @importFrom SpaDES.tools randomPolygons
 #' @rdname dummy-inputs
 makeDummyEcoregionMap <- function(rasterToMatch) {
   ecoregionMap <- randomPolygons(ras = rasterToMatch,
@@ -27,8 +25,6 @@ makeDummyEcoregionMap <- function(rasterToMatch) {
 #' @template rasterToMatch
 #'
 #' @export
-#' @importFrom raster mask crop res ncol nrow crs
-#' @importFrom SpaDES.tools neutralLandscapeMap
 #' @rdname dummy-inputs
 makeDummyRawBiomassMap <- function(rasterToMatch) {
   rawBiomassMap <- neutralLandscapeMap(rasterToMatch,
@@ -49,7 +45,6 @@ makeDummyRawBiomassMap <- function(rasterToMatch) {
 #'     throughout the simulation)
 #'
 #' @export
-#' @importFrom raster setValues
 #' @rdname dummy-inputs
 makeDummyStandAgeMap <- function(rawBiomassMap) {
   standAgeMap <- setValues(rawBiomassMap, asInteger(rescale(getValues(rawBiomassMap), c(1, 300))))
@@ -63,8 +58,6 @@ makeDummyStandAgeMap <- function(rawBiomassMap) {
 #' @template rasterToMatch
 #'
 #' @export
-#' @importFrom raster mask res
-#' @importFrom SpaDES.tools randomPolygons
 #' @rdname dummy-inputs
 makeDummyRstLCC <- function(rasterToMatch) {
   rstLCC <- randomPolygons(ras = rasterToMatch,
@@ -85,9 +78,6 @@ makeDummyRstLCC <- function(rasterToMatch) {
 #' @template rasterToMatch
 #'
 #' @export
-#' @importFrom data.table data.table
-#' @importFrom raster setValues
-#' @importFrom stats complete.cases
 #' @rdname dummy-inputs
 makeDummyEcoregionFiles <- function(ecoregionMap, rstLCC, rasterToMatch) {
   ecoregionstatus <- data.table(active = "yes",
@@ -109,7 +99,6 @@ makeDummyEcoregionFiles <- function(ecoregionMap, rstLCC, rasterToMatch) {
 #' @param x a `numeric` vector
 #' @param to a `numeric` vector of length 2. The new range of values.
 #' @export
-#' @importFrom fpCompare %==%
 rescale <- function(x, to) {
   ## This is a simple function copied from the scales package.
   ## (package too heavy to use one simple function)

@@ -2,25 +2,25 @@
 % Please edit documentation in R/biomodWrappers.R
 \name{biomodEnsembleProjMaps}
 \alias{biomodEnsembleProjMaps}
-\title{Make maps from BIOMOD_EnsembleForecasting results}
+\title{Make maps from \code{BIOMOD_EnsembleForecasting()} results}
 \usage{
 biomodEnsembleProjMaps(bm.em.proj, predModel, rasTemplate, origCRS)
 }
 \arguments{
-\item{bm.em.proj}{output of \code{biomod2::BIOMOD_EnsembleForecasting}. Note that
-x, y coordinates extracted from \code{bm.em.proj@coord} must be in the same projection
-as \code{rasTemplate}}
+\item{bm.em.proj}{output of \code{biomod2::BIOMOD_EnsembleForecasting()}.
+Note that \code{x} and \code{y}coordinates extracted from \code{bm.em.proj@coord} must be in the same
+projection as \code{rasTemplate}.}
 
 \item{predModel}{character. Which model predictions should be used. Chose one of
-\code{bm.em.proj@models.projected}}
+\code{bm.em.proj@models.projected}.}
 
-\item{rasTemplate}{a template RasterLayer or SpatRaster that can be used to map the projections}
+\item{rasTemplate}{a template \code{RasterLayer} or \code{SpatRaster} that can be used to map the projections}
 
 \item{origCRS}{character. The original CRS projection of \code{bm.em.proj@coord}.}
 }
 \value{
-a SpatRaster
+a \code{SpatRaster} object
 }
 \description{
-Make maps from BIOMOD_EnsembleForecasting results
+Make maps from \code{BIOMOD_EnsembleForecasting()} results
 }

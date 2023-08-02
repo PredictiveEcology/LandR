@@ -17,8 +17,8 @@
 )
 }
 \arguments{
-\item{mll}{outputs of an \code{bbmle::mle2} call (the fitted non-linear
-model), from which coefficient values will be extracted.}
+\item{mll}{outputs of an \code{bbmle::mle2} call (the fitted non-linear model),
+from which coefficient values will be extracted.}
 
 \item{nonLinModelQuoted}{The non-linear equation as a \code{call}
 (quoted expression) passed to \code{mle2(minuslog1)}. See \code{?mle}.

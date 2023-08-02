@@ -2,13 +2,12 @@
 % Please edit documentation in R/terra-raster-utils.R
 \name{rasterRead}
 \alias{rasterRead}
-\title{Method to read raster}
+\title{Determine the function with which to read a raster}
 \usage{
 rasterRead(...)
 }
 \arguments{
-\item{...}{passed to \code{terra::rast} or
-\code{raster::raster}}
+\item{...}{passed to \code{terra::rast} or \code{raster::raster}}
 }
 \value{
 the function

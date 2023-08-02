@@ -21,10 +21,6 @@ utils::globalVariables(c(
 #' its information per `pixelID`
 #'
 #' @export
-#' @importFrom data.table as.data.table data.table
-#' @importFrom raster getValues levels raster
-#' @importFrom sf st_as_sf
-#' @importFrom reproducible .requireNamespace paddedFloatToChar
 ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch) {
   .requireNamespace("fasterize", stopOnFALSE = TRUE)
 
@@ -88,7 +84,6 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch
 #' A `data.table` with ecoregion codes and their active status per `pixelID`.
 #'
 #' @export
-#' @importFrom data.table data.table
 makeEcoregionDT <- function(pixelCohortData, speciesEcoregion) {
   ## make a table of available ecoregions
   ecoregion <- data.table(
@@ -114,8 +109,6 @@ makeEcoregionDT <- function(pixelCohortData, speciesEcoregion) {
 #' @return A raster with ecoregion codes.
 #'
 #' @export
-#' @importFrom data.table data.table
-#' @importFrom raster levels raster
 makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
   pixelData <- unique(pixelCohortData, by = "pixelIndex")
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
@@ -124,10 +117,12 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
 
   # suppress this message call no non-missing arguments to min; returning Inf min(x@data@values, na.rm = TRUE)
   suppressWarnings(ecoregionMap[pixelData$pixelIndex] <- as.integer(pixelData$ecoregionGroup))
-  levels(ecoregionMap) <- data.frame(ID = seq(levels(pixelData$ecoregionGroup)),
-                                     ecoregion = gsub("_.*", "", levels(pixelData$ecoregionGroup)),
-                                     ecoregionGroup = levels(pixelData$ecoregionGroup),
-                                     stringsAsFactors = TRUE)
+  levels(ecoregionMap) <- data.frame(
+    ID = seq(levels(pixelData$ecoregionGroup)),
+    ecoregion = gsub("_.*", "", levels(pixelData$ecoregionGroup)),
+    ecoregionGroup = levels(pixelData$ecoregionGroup),
+    stringsAsFactors = TRUE
+  )
   return(ecoregionMap)
 }
 
@@ -137,10 +132,6 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
 #' This will output a list of `RasterStack` objects. Each `RasterStack` show raster maps
 #' of one of the columns listed in `columns` and each `RasterLayer` will be one species.
 #'
-#' @importFrom data.table data.table setDTthreads
-#' @rawNamespace import(data.table, except = getNamespaceExports("data.table"))
-#' @importFrom pemisc factorValues2
-#' @importFrom raster stack raster
 #' @template ecoregionMap
 #' @template speciesEcoregion
 #' @param columns The columns to use in the `speciesEcoregion` data.table.
