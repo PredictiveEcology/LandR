@@ -150,7 +150,7 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
     if (!missing(ecoregionMap)) {
       erg[[1]] <- sort(na.omit(unique(factorValues2(ecoregionMap, ecoregionMap[],
                                                     att = "ecoregionGroup"))))
-      if (is.character(erg[[1]])) { # this can happed if SpatRaster
+      if (is.character(erg[[1]])) { # this can happen if SpatRaster
         erg[[1]] <- factor(erg[[1]])
       }
     }
