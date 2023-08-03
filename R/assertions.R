@@ -241,7 +241,7 @@ assertColumns <- function(obj, colClasses,
   }
 }
 
-#' - `assertCohortData`: test that `pixelGroupMap` and `cohortData` match
+#' - `assertCohortData`: test that `pixelGroups` in `pixelGroupMap` and `cohortData` match
 #'
 #' @template cohortData
 #'
@@ -256,9 +256,6 @@ assertColumns <- function(obj, colClasses,
 #'   was called.
 #'
 #' @param verbose Controls message output. Defaults to `getOption("LandR.verbose")`
-#'
-#' @note
-#' TODO
 #'
 #' @export
 #' @rdname assertions
