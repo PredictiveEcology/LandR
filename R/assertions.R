@@ -259,7 +259,7 @@ assertColumns <- function(obj, colClasses,
 #'
 #' @export
 #' @rdname assertions
-assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiverge = 1,
+assertCohortData <- function(cohortData, pixelGroupMap, maxExpectedNumDiverge = 1,
                              message = "", doAssertion = getOption("LandR.assertions", TRUE),
                              verbose = getOption("LandR.verbose", TRUE),
                              cohortDefinitionCols = c("pixelGroup", "age", "speciesCode")) {
@@ -273,7 +273,6 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim, maxExpectedNumDiver
     test1 <- sum(!a %in% b)
     test2 <- sum(!b %in% a)
 
-    browser(expr = exists("aaaa"))
     cohortDataN <- cohortData[, .N, by = cohortDefinitionCols]
     test3 <- which(cohortDataN$N != 1)
     if (test1 > maxExpectedNumDiverge || test2 > maxExpectedNumDiverge) {
