@@ -446,7 +446,7 @@ assertRstLCChange <- function(rstLCChange, rasterToMatch,
 #' have matching classes. Specifically, whether all combinations of `ecoregionGroup`
 #' and `speciesCode` are in both objects, no more no less.
 #'
-#' @param cohortData A `cohortData` object
+#' @template cohortData
 #'
 #' @template speciesEcoregion
 #'

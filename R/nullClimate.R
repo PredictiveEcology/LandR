@@ -2,9 +2,11 @@
 #'
 #' Default climate effects function in the case where no climate effect is simulated
 #'
-#' @param cohortData a `cohortData` object that will be used to calculate the \%
-#'    reduction/increase of mortality and growth biomasses per cohort.
+#' @template cohortData
 #' @param ... additional arguments that are passed to LandR.CS
+#'
+#' @details the `cohortData` object is used to calculate the \%
+#'    reduction/increase of mortality and growth biomasses per cohort.
 #'
 #' @return `data.table` with `pixelGroup`, `age` and `speciesCode`, as well as
 #'   `mortPred` and `growthPred` columns with \% reduction/increase of mortality and

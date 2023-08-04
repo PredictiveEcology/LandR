@@ -137,11 +137,11 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
 #' Create `speciesEcoregion`
 #'
 #' Use statistically estimated `maxB`, `maxANPP` and establishment probabilities
-#' to generate `specieEcoregion` table.
+#' to generate `speciesEcoregion` table.
 #'
 #' See Details.
 #'
-#' @param cohortDataBiomass a subset of `cohortData`
+#' @param cohortDataBiomass a subset of `cohortData` object
 #' @param cohortDataShort a subset of `cohortData`
 #' @param cohortDataShortNoCover a subset of `cohortData`
 #' @template species
