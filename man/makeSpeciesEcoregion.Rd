@@ -16,13 +16,14 @@ makeSpeciesEcoregion(
 )
 }
 \arguments{
-\item{cohortDataBiomass}{a subset of \code{cohortData}}
+\item{cohortDataBiomass}{a subset of \code{cohortData} object}
 
 \item{cohortDataShort}{a subset of \code{cohortData}}
 
 \item{cohortDataShortNoCover}{a subset of \code{cohortData}}
 
-\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
+\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.
+Must have column \code{speciesCode}, with species names/IDs}
 
 \item{modelCover}{statistical model of species presence/absence}
 
@@ -35,7 +36,7 @@ In LANDIS-II, this is called "Succession Timestep".}
 }
 \description{
 Use statistically estimated \code{maxB}, \code{maxANPP} and establishment probabilities
-to generate \code{specieEcoregion} table.
+to generate \code{speciesEcoregion} table.
 }
 \details{
 See Details.

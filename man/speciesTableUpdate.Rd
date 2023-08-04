@@ -7,7 +7,8 @@
 speciesTableUpdate(species, speciesTable, sppEquiv, sppEquivCol)
 }
 \arguments{
-\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
+\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.
+Must have column \code{speciesCode}, with species names/IDs}
 
 \item{speciesTable}{A species traits table, with \strong{at least} the following columns:
 \itemize{

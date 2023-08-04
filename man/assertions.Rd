@@ -63,7 +63,6 @@ assertColumns(
 assertCohortData(
   cohortData,
   pixelGroupMap,
-  sim,
   maxExpectedNumDiverge = 1,
   message = "",
   doAssertion = getOption("LandR.assertions", TRUE),
@@ -179,8 +178,6 @@ which group together pixels of similar biophysical characteristics.}
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
 number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
-\item{sim}{If the \code{simList} is included, then the \code{browser()} call will be more useful.}
-
 \item{maxExpectedNumDiverge}{A numeric, length 1, indicating by how many they
 can diverge. Default 1.}
 
@@ -238,6 +235,8 @@ parameter in \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} for details on 
 forest types).}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.}
+
+\item{sim}{If the \code{simList} is included, then the \code{browser()} call will be more useful.}
 }
 \description{
 \itemize{
@@ -245,7 +244,4 @@ forest types).}
 }
 
 This is the full \code{pixelCohortData}, not the collapsed one.
-}
-\note{
-TODO
 }

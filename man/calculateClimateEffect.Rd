@@ -7,8 +7,8 @@
 calculateClimateEffect(cohortData, ...)
 }
 \arguments{
-\item{cohortData}{a \code{cohortData} object that will be used to calculate the \\%
-reduction/increase of mortality and growth biomasses per cohort.}
+\item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
+\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
 \item{...}{additional arguments that are passed to LandR.CS}
 }
@@ -23,4 +23,8 @@ This default, no climate effect, function outputs 100\\% for all cohorts for bot
 }
 \description{
 Default climate effects function in the case where no climate effect is simulated
+}
+\details{
+the \code{cohortData} object is used to calculate the \\%
+reduction/increase of mortality and growth biomasses per cohort.
 }

@@ -30,7 +30,8 @@ cohort information on burnt pixels and the following (optional) columns:
 serotiny/resprouting were activated and in how many pixels, for each year.
 Only necessary if \code{calibrate = TRUE}.}
 
-\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
+\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.
+Must have column \code{speciesCode}, with species names/IDs}
 
 \item{sufficientLight}{a \code{data.frame} (not \code{data.table}!) containing probability
 of establishment, given a site's light conditions (\code{X0}-\code{X5}) for each level
