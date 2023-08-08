@@ -175,8 +175,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 
   assertCohortData(outs$cohortData, outs$pixelGroupMap,
                    cohortDefinitionCols = cohortDefinitionCols,
-                   doAssertion = doAssertion, verbose = verbose
-  )
+                   doAssertion = doAssertion, verbose = verbose)
 
   if (doAssertion) {
     maxPixelGroupFromCohortData <- max(outs$cohortData$pixelGroup)
@@ -363,8 +362,7 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
   assertCohortData(cohortData, pixelGroupMap,
                    message = "rmMissingCohorts",
                    cohortDefinitionCols = cohortDefinitionCols,
-                   doAssertion = doAssertion
-  )
+                   doAssertion = doAssertion)
 
   if (NROW(unique(cohortData[pixelGroup == 67724]$ecoregionGroup)) > 1) stop()
 
@@ -1371,8 +1369,7 @@ addPixels2CohortData <- function(cohortData, pixelGroupMap,
                                  doAssertion = getOption("LandR.assertions", TRUE)) {
   assertCohortData(cohortData, pixelGroupMap,
                    cohortDefinitionCols = cohortDefinitionCols,
-                   doAssertion = doAssertion
-  )
+                   doAssertion = doAssertion)
 
   pixelGroupTable <- na.omit(data.table(
     pixelGroup = as.vector(pixelGroupMap[]),
@@ -1408,8 +1405,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
                                   cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
   assertCohortData(cohortData, pixelGroupMap,
-                   cohortDefinitionCols = cohortDefinitionCols, doAssertion = doAssertion
-  )
+                   cohortDefinitionCols = cohortDefinitionCols, doAssertion = doAssertion)
 
   noPixelsXGroup <- data.table(
     noPixels = tabulate(pixelGroupMap[]),
@@ -1788,8 +1784,7 @@ updateCohortDataPostHarvest <- function(newPixelCohortData, cohortData, pixelGro
 
   assertCohortData(outs$cohortData, outs$pixelGroupMap,
                    cohortDefinitionCols = cohortDefinitionCols,
-                   doAssertion = doAssertion, verbose = verbose
-  )
+                   doAssertion = doAssertion, verbose = verbose)
 
   if (doAssertion) {
     maxPixelGroupFromCohortData <- max(outs$cohortData$pixelGroup)
