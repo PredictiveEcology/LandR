@@ -357,7 +357,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
                                                  burnTime = currentTime)
 
   ## TODO: Ceres: I don't think we should be bring in the previously burnt pixelGroups at this point
-  ##  solution (?) code was ciopy-paste to before the export to sim
+  ##  solution (?) code was copy-pasted to before the export to sim
   # ## update past pixelGroup number to match current ones.
   # treedFirePixelTableSinceLastDispOrig[, pixelGroup := as.integer(as.vector(pixelGroupMap[]))[pixelIndex]]
   # # append previous year's
