@@ -1,3 +1,8 @@
+utils::globalVariables(c(
+  ":=", "..cols", "CFB", "ROS", "RSO",
+  "agesKilled", "severity", "severityToleranceDif"
+))
+
 #' Disturbance functions
 #'
 #' @template cohortData
