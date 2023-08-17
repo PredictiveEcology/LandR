@@ -139,7 +139,7 @@ assertUniqueCohortData <- function(cohortData, columns,
 #'
 #' @template ecoregionMap
 #' @template speciesEcoregion
-#' @param minRelativeB numeric; minimum relative biomass
+#' @template minRelativeB
 #'
 #' @export
 #' @rdname assertions
@@ -255,7 +255,7 @@ assertColumns <- function(obj, colClasses,
 #' @param message An optional message to print. This may help identify where this function
 #'   was called.
 #'
-#' @param verbose Controls message output. Defaults to `getOption("LandR.verbose")`
+#' @template verbose
 #'
 #' @export
 #' @rdname assertions

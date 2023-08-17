@@ -5,7 +5,7 @@ utils::globalVariables(c(".", ":=", "X1", "X2", "X3", "X4", "X5", "maxMaxB", "pr
 #' @template currentTime
 #' @template cohortData
 #' @template speciesEcoregion
-#' @param minRelativeB a `data.frame` with  the cut points to classify stand shadiness.
+#' @template minRelativeB a `data.frame` with  the cut points to classify stand shadiness.
 #'
 #' @seealso  [makeMinRelativeB()]
 #'

@@ -47,8 +47,7 @@ utils::globalVariables(c(
 #'
 #' @template successionTimestep
 #'
-#' @param verbose Numeric. `0` is not verbose, with increasing numbers indicating
-#'   increasing levels of verbosity (currently up to 2)
+#' @template verbose
 #'
 #' @param ...   Additional parameters. Currently none.
 #'

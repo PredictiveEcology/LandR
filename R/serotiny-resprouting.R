@@ -8,17 +8,14 @@ utils::globalVariables(c(
 #'
 #' @template burnedPixelCohortData
 #' @template postFirePixelCohortData
-#' @param postFireRegenSummary a `data.table` summarizing for which species
-#'     serotiny/resprouting were activated and in how many pixels, for each year.
-#'     Only necessary if `calibrate = TRUE`.
+#' @template postFireRegenSummary
 #' @template species
 #' @template sufficientLight
 #' @template speciesEcoregion
 #' @param currentTime integer. The current simulation time obtained with `time(sim)`
 #' @param treedFirePixelTableSinceLastDisp a vector of pixels that burnt and were forested
 #'     in the previous time step.
-#' @param calibrate logical. Determines whether to output `postFirePixelCohortData`.
-#'     Defaults to `FALSE`.
+#' @template calibrate
 #'
 #' @return  A list of objects:
 #'     `postFirePixelCohortData`, a `data.table` with the cohorts that undergo serotiny;
@@ -120,14 +117,13 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
 #'
 #' @template burnedPixelCohortData
 #' @template postFirePixelCohortData
-#' @param postFireRegenSummary a data.table summarizing for which species serotiny/resprouting were
-#'    activated and in how many pixels, for each year. Only necessary if `calibrate = TRUE`.
+#' @template postFireRegenSummary
 #' @param serotinyPixel a vector of pixels where serotiny was activated;
 #' @template species
 #' @template sufficientLight
 #' @param currentTime integer. The current simulation time obtained with `time(sim)`
 #' @param treedFirePixelTableSinceLastDisp a vector of pixels that burnt and were forested in the previous time step.
-#' @param calibrate logical. Determines whether to output `postFirePixelCohortData`. Defaults to FALSE
+#' @template calibrate
 #'
 #' @return  A list of objects:
 #'     `postFirePixelCohortData`, a `data.table` with the cohorts that undergo serotiny;

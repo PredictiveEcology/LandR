@@ -37,8 +37,7 @@ utils::globalVariables(c(
 #'   This will be used in conjunction with `cohortData` and `pixelGroupMap`
 #'   to ensure that everything matches correctly.
 #' @template successionTimestep
-#' @param verbose Integer, where increasing number is increasing verbosity. Currently,
-#'    only level 1 exists; but this may change.
+#' @template verbose
 #' @template initialB
 #' @template doAssertion
 #'
@@ -1691,8 +1690,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, initi
 #' @param trackPlanting if true, planted cohorts in `cohortData` are tracked with `TRUE`
 #' in column 'planted'
 #'
-#' @param verbose Integer, where increasing number is increasing verbosity. Currently,
-#'    only level 1 exists; but this may change.
+#' @template verbose
 #'
 #' @template doAssertion
 #'
