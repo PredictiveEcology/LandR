@@ -1,0 +1,15 @@
+#' `cohortData`
+#' `cohortDefinitionCols`
+#' `calibrate`
+#' `postFireRegenSummary`
+#' `rstCurrentBurn`
+#' `inactivePixelIndex`
+#' `pixelGroupMap`
+#' `currentTime`
+#' `rasterToMatch`
+#' `species`
+#' `sufficientLight`
+#' `speciesEcoregion`
+#' `initialB`
+#' `successionTimestep`
+#' `verbose`
