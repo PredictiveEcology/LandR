@@ -62,13 +62,13 @@ utils::globalVariables(c(
 #'
 #' @export
 #' @rdname Disturbances
-FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = P(sim)$cohortDefinitionCols,
-                            calibrate = P(sim)$calibrate, postFireRegenSummary = sim$postFireRegenSummary,
+FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = SpaDES.core::P(sim)$cohortDefinitionCols,
+                            calibrate = SpaDES.core::P(sim)$calibrate, postFireRegenSummary = sim$postFireRegenSummary,
                             rstCurrentBurn = sim$rstCurrentBurn, inactivePixelIndex = sim$inactivePixelIndex,
-                            pixelGroupMap = sim$pixelGroupMap, currentTime = time(sim), rasterToMatch = sim$rasterToMatch,
+                            pixelGroupMap = sim$pixelGroupMap, currentTime = SpaDES.core::time(sim), rasterToMatch = sim$rasterToMatch,
                             species = sim$species, sufficientLight = sim$sufficientLight,
-                            speciesEcoregion = sim$speciesEcoregion, initialB = P(sim)$initialB,
-                            successionTimestep = P(sim)$successionTimestep,
+                            speciesEcoregion = sim$speciesEcoregion, initialB = SpaDES.core::P(sim)$initialB,
+                            successionTimestep = SpaDES.core::P(sim)$successionTimestep,
                             verbose = getOption("LandR.verbose", TRUE)) {
   # the presence of valid fire can cause three processes:
   # 1. remove species cohorts from the pixels that have been affected.
@@ -279,15 +279,15 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
 #'
 #' @export
 #' @rdname Disturbances
-FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols = P(sim)$cohortDefinitionCols,
-                              calibrate = P(sim)$calibrate, LANDISPM = TRUE, postFireRegenSummary = sim$postFireRegenSummary,
+FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols = SpaDES.core::P(sim)$cohortDefinitionCols,
+                              calibrate = SpaDES.core::P(sim)$calibrate, LANDISPM = TRUE, postFireRegenSummary = sim$postFireRegenSummary,
                               rstCurrentBurn = sim$rstCurrentBurn, inactivePixelIndex = sim$inactivePixelIndex,
-                              pixelGroupMap = sim$pixelGroupMap, currentTime = time(sim), rasterToMatch = sim$rasterToMatch,
+                              pixelGroupMap = sim$pixelGroupMap, currentTime = SpaDES.core::time(sim), rasterToMatch = sim$rasterToMatch,
                               fireDamageTable = sim$fireDamageTable, fireRSORas = sim$fireRSORas, fireROSRas = sim$fireROSRas,
                               fireCFBRas = sim$fireCFBRas, species = sim$species, sufficientLight = sim$sufficientLight,
-                              speciesEcoregion = sim$speciesEcoregion, initialB = P(sim)$initialB,
+                              speciesEcoregion = sim$speciesEcoregion, initialB = SpaDES.core::P(sim)$initialB,
                               minRelativeB = sim$minRelativeB,
-                              successionTimestep = P(sim)$successionTimestep,
+                              successionTimestep = SpaDES.core::P(sim)$successionTimestep,
                               verbose = getOption("LandR.verbose", TRUE)) {
 
   # the presence of valid fire can cause three processes:
