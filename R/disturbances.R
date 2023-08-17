@@ -1,6 +1,6 @@
 utils::globalVariables(c(
   ":=", "..cols", "CFB", "ROS", "RSO",
-  "agesKilled", "severity", "severityToleranceDif"
+  "agesKilled", "severity", "severityToleranceDif", "sim"
 ))
 
 #' Disturbance functions
