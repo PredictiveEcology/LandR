@@ -281,7 +281,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
                               fireDamageTable = sim$fireDamageTable, fireRSORas = sim$fireRSORas, fireROSRas = sim$fireROSRas,
                               fireCFBRas = sim$fireCFBRas, species = sim$species, sufficientLight = sim$sufficientLight,
                               speciesEcoregion = sim$speciesEcoregion, initialB = P(sim)$initialB,
-                              minRelativeB = sim$minRelativeB
+                              minRelativeB = sim$minRelativeB,
                               successionTimestep = P(sim)$successionTimestep,
                               verbose = getOption("LandR.verbose", TRUE)) {
 
