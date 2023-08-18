@@ -251,9 +251,10 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
 #' @section Partial severity (i.e. mortality) fire disturbances:
 #'   `FireDisturbancePM()` simulates partial post-fire mortality, serotiny and regeneration
 #'    sequentially after a fire. The level of mortality depends of fire severity,
-#'    and, by default, follows the mechanisms in LANDIS-II Dynamic Fire System v3.0. Serotiny and regeneration
-#'    algorithms algorithms are based on those in LANDIS-II Biomass Succession extension, v3.2.1,
-#'    with modifications (see `FireDisturbance()`). Requires the following objects in `sim`:
+#'    and, by default, follows the mechanisms in LANDIS-II Dynamic Fire System v3.0.
+#'    Serotiny and regeneration algorithms algorithms are based on those in
+#'    LANDIS-II Biomass Succession extension, v3.2.1, with modifications (see `FireDisturbance()`).
+#'    Requires the following objects in `sim`:
 #'   @template FireDisturbance
 #'   - `fireDamageTable`
 #'   - `fireRSORas` (optional)
