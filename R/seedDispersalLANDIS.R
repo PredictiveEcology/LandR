@@ -217,7 +217,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     pgv <- pixelGroupMap[]
 
     rasVectorTemplate <- rep(NA_integer_, ncell(pixelGroupMap))
-    rasTemplate <- raster(pixelGroupMap)
+    rasTemplate <- rasterRead(pixelGroupMap)
     srcSpeciesCodes <- sort(unique(dtSrc$speciesCode))
     names(srcSpeciesCodes) <- as.character(srcSpeciesCodes)
     cellsCanSrc <- which(pgv %in% dtSrc$pixelGroup)

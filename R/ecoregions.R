@@ -113,7 +113,7 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
   pixelData <- unique(pixelCohortData, by = "pixelIndex")
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
-  ecoregionMap <-  eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(ecoregionFiles$ecoregionMap)
+  ecoregionMap <-  rasterRead(ecoregionFiles$ecoregionMap)
 
   # suppress this message call no non-missing arguments to min; returning Inf min(x@data@values, na.rm = TRUE)
   suppressWarnings(ecoregionMap[pixelData$pixelIndex] <- as.integer(pixelData$ecoregionGroup))
