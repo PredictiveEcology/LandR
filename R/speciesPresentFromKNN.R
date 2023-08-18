@@ -130,15 +130,23 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL) 
     speciesPresRas <- LandR:::rasterRead(speciesPres$targetFilePath)
   }
 
-  if (getOption("reproducible.useTerra", TRUE) && requireNamespace("terra")) {
-    bb <- postProcessTerra(speciesPresRas, studyArea = studyArea)
+  bb <- postProcess(x = speciesPresRas, studyArea = studyArea)
+
+  if (is(speciesPresRas, "RasterLayer")) {
+    rasLevs <- raster::levels(speciesPresRas)[[1]]
   } else {
-    bb <- postProcess(x = speciesPresRas, studyArea = studyArea)
+    rasLevs <- levels(speciesPresRas)[[1]]
   }
-  rasLevs <- raster::levels(speciesPresRas)[[1]]
+
   rasLevs <- rasLevs[rasLevs$ID %in% na.omit(as.vector(bb[])), ]
   levels(bb) <- rasLevs
-  bb <- raster::deratify(bb)
+
+  if (is(speciesPresRas, "RasterLayer")) {
+    bb <- raster::deratify(bb)
+  } else {
+    bb <- as.numeric(bb)
+  }
+
   speciesCommunities <- na.omit(factorValues2(bb, bb[], att = "category"))
   species <- as.character(speciesCommunities)
   species <- unique(unlist(strsplit(species, "__")))
