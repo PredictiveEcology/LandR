@@ -117,7 +117,8 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
     meanLeadingChange <- mask(crop(meanLeadingChange, rasterToMatch), rasterToMatch)
     writeRaster(meanLeadingChange, filename = fmeanLeadingChange, overwrite = TRUE)
 
-    maxV <- max(abs(round(minValue(meanLeadingChange), 1)), abs(round(maxValue(meanLeadingChange), 1)))
+    maxV <- max(abs(round(min(meanLeadingChange[], na.rm = TRUE), 1)),
+                abs(round(max(meanLeadingChange[], na.rm = TRUE), 1)))
     AT <- seq(-maxV, maxV, length.out = 12)
 
     pal <- RColorBrewer::brewer.pal(11, "RdYlBu")
