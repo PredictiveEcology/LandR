@@ -171,14 +171,14 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     origClassWasNumeric <- is.numeric(speciesTable[["speciesCode"]])
     if (is(dtSrc$speciesCode, "numeric")) {
       #if (length(unique(dtSrc$speciesCode)) != max(dtSrc$speciesCode)) {
-        # This is "numerics" that are no contiguous from 1
-        set(dtSrc, NULL, c("speciesCode"), factor(dtSrc[["speciesCode"]]))
-        origLevels <- levels(dtSrc[["speciesCode"]])
-        speciesTable <- speciesTable[as.numeric(origLevels), ]
-        set(speciesTable, NULL, c("speciesCode"),
-            factor(speciesTable[["speciesCode"]], levels = origLevels))
-        set(dtRcv, NULL, c("speciesCode"),
-            factor(dtRcv[["speciesCode"]], levels = origLevels))
+      # This is "numerics" that are no contiguous from 1
+      set(dtSrc, NULL, c("speciesCode"), factor(dtSrc[["speciesCode"]]))
+      origLevels <- levels(dtSrc[["speciesCode"]])
+      speciesTable <- speciesTable[as.numeric(origLevels), ]
+      set(speciesTable, NULL, c("speciesCode"),
+          factor(speciesTable[["speciesCode"]], levels = origLevels))
+      set(dtRcv, NULL, c("speciesCode"),
+          factor(dtRcv[["speciesCode"]], levels = origLevels))
       #}
     }
 
@@ -506,7 +506,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
                                                                  "seeddistance_eff"])
   set(distsBySpCode, NULL, "wardProb",
       pmin(1, dispersalFn(dist = distsBySpCode$dists, cellSize = cellSize, effDist = distsBySpCode$seeddistance_eff,
-              maxDist = distsBySpCode$seeddistance_max, k = k, b = b)))
+                          maxDist = distsBySpCode$seeddistance_max, k = k, b = b)))
   set(distsBySpCode, NULL, c("seeddistance_max", "seeddistance_eff"), NULL)
   setorderv(distsBySpCode, c("dists", "speciesCode"))
 
@@ -517,6 +517,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 
   # activeIndexShrinking <- activeFullIndex
   rc1 <- rowColFromCell(pixelGroupMap, rcvFull[["pixelIndex"]])
+  colnames(rc1) <- c("row", "col")   ## terra::rowColFromCell output has no colnames
   rowOrig <- rc1[, "row"]
   colOrig <- rc1[, "col"]
 
