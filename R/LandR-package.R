@@ -39,11 +39,11 @@
 #' @importFrom pemisc factorValues2 termsInData
 #' @importFrom quickPlot layerNames numLayers Plot setColors setColors<-
 #' @importFrom raster calc cellFromRowCol cellFromXY compareRaster crop crs crs<- dropLayer
-#' @importFrom raster extend extension factorValues focalWeight getValues intersect levels
+#' @importFrom raster extend extension factorValues focalWeight intersect levels
 #' @importFrom raster mask maxValue minValue NAvalue<- ncell ncol nrow origin origin<-
 #' @importFrom raster projection projection<- projectExtent
 #' @importFrom raster raster rasterOptions ratify reclassify res rowColFromCell
-#' @importFrom raster setValues stack unstack values<- writeRaster xyFromCell
+#' @importFrom raster stack unstack values<- writeRaster xyFromCell
 #' @importFrom RColorBrewer brewer.pal brewer.pal.info
 #' @importFrom reproducible .prefix .requireNamespace .sortDotsUnderscoreFirst .suffix
 #' @importFrom reproducible asPath basename2 Cache cropInputs Filenames fixErrors

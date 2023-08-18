@@ -435,7 +435,7 @@ assertRstLCChange <- function(rstLCChange, rasterToMatch,
     }
 
     ## check if it's a maks
-    temp <- setdiff(getValues(rstLCChange), c(1, NA))
+    temp <- setdiff(as.vector(rstLCChange[]), c(1, NA))
     if (length(temp))
       stop("rstLCChange should be a 'mask', with 1s in disturbed pixels and NAs everywhere else")
 

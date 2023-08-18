@@ -607,7 +607,7 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
     } else {
       .requireNamespace("fasterize", stopOnFALSE = TRUE)
       fireRas <- fasterize::fasterize(d, raster = rasterToMatch, field = fireField)
-      fireRas[!is.na(getValues(fireRas)) & getValues(fireRas) < earliestYear] <- NA
+      fireRas[!is.na(as.vector(fireRas[])) & as.vector(fireRas[]) < earliestYear] <- NA
     }
   } else {
     if (is(rasterToMatch, "SpatRaster") && requireNamespace("terra", quietly = TRUE)) {

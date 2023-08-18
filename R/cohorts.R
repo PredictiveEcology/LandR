@@ -243,7 +243,7 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
   namesNCD <- names(newPixelCohortData)
   if (!isTRUE("pixelGroup" %in% namesNCD)) {
     if (isTRUE("pixelIndex" %in% namesNCD)) {
-      newPixelCohortData[, pixelGroup := getValues(pixelGroupMap)[pixelIndex]]
+      newPixelCohortData[, pixelGroup := as.vector(pixelGroupMap[])[pixelIndex]]
     } else {
       stop("newPixelCohortData must have either pixelIndex or pixelGroup")
     }
@@ -342,7 +342,7 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
                              cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
                              doAssertion = getOption("LandR.assertions", TRUE)) {
   pgmValues <- data.table(
-    pixelGroup = getValues(pixelGroupMap),
+    pixelGroup = as.vector(pixelGroupMap[]),
     pixelIndex = seq(ncell(pixelGroupMap))
   )
 
@@ -1611,7 +1611,7 @@ plantNewCohorts <- function(newPixelCohortData, cohortData, pixelGroupMap, initi
   namesNCD <- names(newPixelCohortData)
   if (!isTRUE("pixelGroup" %in% namesNCD)) {
     if (isTRUE("pixelIndex" %in% namesNCD)) {
-      newPixelCohortData[, pixelGroup := getValues(pixelGroupMap)[pixelIndex]]
+      newPixelCohortData[, pixelGroup := as.vector(pixelGroupMap[])[pixelIndex]]
     } else {
       stop("newPixelCohortData must have either pixelIndex or pixelGroup")
     }
