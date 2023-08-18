@@ -151,7 +151,7 @@ speciesEcoregionStack <- function(ecoregionMap, speciesEcoregion,
   fvdt <- data.table(ecoregionGroup = as.character(fv), pixelID = whNonNAs)
   se2 <- fvdt[speciesEcoregion, on = "ecoregionGroup", allow.cartesian = TRUE]
   seList <- split(se2, by = "speciesCode")
-  rasTemplate <- raster(ecoregionMap)
+  rasTemplate <- rasterRead(ecoregionMap)
   names(columns) <- columns
   spp <- names(seList)
   stks <- lapply(columns, dtList = seList, rasTemplate = rasTemplate,

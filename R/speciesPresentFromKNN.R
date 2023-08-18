@@ -127,7 +127,7 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL) 
       url <- "https://drive.google.com/file/d/1Oj78jJBeha5L6XDBBdWDAfimgNjYc9UD/"
     }
     speciesPres <- preProcess(url = url)
-    speciesPresRas <- raster::raster(speciesPres$targetFilePath)
+    speciesPresRas <- LandR:::rasterRead(speciesPres$targetFilePath)
   }
 
   if (getOption("reproducible.useTerra", TRUE) && requireNamespace("terra")) {

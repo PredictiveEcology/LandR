@@ -252,7 +252,7 @@ vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.a
         return(whMax)
       })
 
-      vegTypeMap <- raster(speciesStack[[1]])
+      vegTypeMap <- rasterRead(speciesStack[[1]])
 
       vegTypeMap[!nas] <- maxes
 
@@ -1233,7 +1233,7 @@ aggregateRasByDT <- function(ras, newRas, fn = sum) {
   dt <- data.table(vals = ras[][whNonNA], ceiling(rc2 / disaggregateFactor))
   dt2 <- dt[, list(vals = fn(vals)), by = c("row", "col")]
   pixels <- cellFromRowCol(newRas, row = dt2$row, col = dt2$col)
-  newRasOut <- raster(newRas)
+  newRasOut <- rasterRead(newRas)
   newRasOut[pixels] <- dt2$vals
   names(newRasOut) <- names(ras)
   newRasOut

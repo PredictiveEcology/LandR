@@ -49,7 +49,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
 
       bothYears <- lapply(years, function(year) {
         cohortData <- qs::qread(file = file.path(resultsDir, paste0("cohortData_", year, "_year", year, ".qs")))
-        pixelGroupMap <- raster(file.path(resultsDir, paste0("pixelGroupMap_", year, "_year", year, ".tif")))
+        pixelGroupMap <- rasterRead(file.path(resultsDir, paste0("pixelGroupMap_", year, "_year", year, ".tif")))
 
         cohortDataReduced <- cohortData[, list(sumBio = sum(B, na.rm = TRUE)),
                                         by = c("speciesCode", "pixelGroup")]
