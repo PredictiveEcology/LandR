@@ -919,7 +919,13 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
 #'
 #' @export
 sumRastersBySpecies <- function(speciesLayers, layersToSum, filenameToSave, newLayerName) {
-  out <- raster::calc(raster::stack(speciesLayers[layersToSum]), sum)
+  speciesLayersStk <- .stack(speciesLayers[layersToSum])
+  if (is(speciesLayersStk, "SpatRaster")) {
+    out <- sum(speciesLayersStk)
+  } else {
+    out <- raster::calc(speciesLayersStk, sum)
+  }
+
   names(out) <- newLayerName
   writeRaster(out, filename = filenameToSave, datatype = "INT2U", overwrite = TRUE)
   out # Work around for Cache

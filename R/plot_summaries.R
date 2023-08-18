@@ -85,8 +85,13 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
       })
       names(bothYears) <- paste0("Year", years)
 
-      leadingStackChange <- raster::calc(raster::stack(bothYears[[2]], -bothYears[[1]]),
-                                         fun = sum, na.rm = TRUE)
+      bothYearsStk <- .stack(c(bothYears[[2]], -bothYears[[1]]))
+
+      if (is(bothYearsStk, "SpatRaster")) {
+        leadingStackChange <- sum(bothYearsStk, na.rm = TRUE)
+      } else {
+        leadingStackChange <- raster::calc(bothYearsStk, fun = sum, na.rm = TRUE)
+      }
 
       stopifnot(all(minValue(leadingStackChange) >= -1, maxValue(leadingStackChange) <= 1))
 
@@ -99,7 +104,12 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
     fmeanLeadingChange <- file.path(outputDir, studyAreaName,
                                     paste0("leadingChange_", studyAreaName, "_", climateScenario, ".tif"))
     if (length(allReps) > 1) {
-      meanLeadingChange <- raster::calc(raster::stack(allReps), mean, na.rm = TRUE)
+      allRepsStk <- .stack(allReps)
+      if (is(allRepsStk, "SpatRaster")) {
+        meanLeadingChange <- mean(allRepsStk, na.rm = TRUE)
+      } else {
+        meanLeadingChange <- raster::calc(allRepsStk, mean, na.rm = TRUE)
+      }
     } else {
       meanLeadingChange <- allReps[[1]]
     }
