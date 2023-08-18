@@ -863,13 +863,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
                                          sppEquiv, column = sppEquivCol)
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
 
-  ## return stack and updated species names vector
-  if (length(speciesLayers)) {
-    if (is(rasterToMatch, "Raster"))
-      raster::stack(speciesLayers)
-    else
-      terra::rast(speciesLayers)
-  }
+  ## return stack
+  .stack(speciesLayers)
 }
 
 #' Load kNN species layers from online data repository

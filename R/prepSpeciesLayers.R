@@ -175,11 +175,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
   }
 
   ## if the original raster was `RasterLayer`, those in the list will be also.
-  spRasts <- if (is(CASFRIRas, "Raster")) {
-    raster::stack(spRasts)
-  } else {
-    rast(spRasts)
-  }
+  spRasts <- .stack(spRasts)
 
   return(spRasts)
 }

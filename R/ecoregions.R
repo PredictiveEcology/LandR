@@ -174,6 +174,6 @@ createStack <- function(dtList, rasTemplate, column = "estblishprob", spp) {
         print("... Done!")
         rasTemplate
       })
-    raster::stack(outList)
 
+    .stack(outList)
 }
