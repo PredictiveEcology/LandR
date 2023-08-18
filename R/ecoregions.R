@@ -26,7 +26,7 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch
 
   # change the coordinate reference for all spatialpolygons
   message("ecoregionProducer 1: ", Sys.time())
-  #ecoregionMapInStudy <- raster::intersect(ecoregionMapFull, fixErrors(aggregate(studyArea)))
+  #ecoregionMapInStudy <- intersect(ecoregionMapFull, fixErrors(aggregate(studyArea)))
 
   # Alternative
   rstEcoregion <- list()

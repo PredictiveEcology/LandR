@@ -76,7 +76,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
                                      totalCol = "totalBiomass"),
                   .SDcols = names(biomassDT)[names(biomassDT) != "pixelID"]]
         biomassDT <- merge(biomassDT, treeType[, c("leading","newClass")])
-        allPixels <- data.table(pixelID = 1:raster::ncell(biomassStack))
+        allPixels <- data.table(pixelID = 1:ncell(biomassStack))
         biomassDTfilled <- merge(allPixels, biomassDT, all.x = TRUE, by = "pixelID")
         leadingSpeciesRaster <- raster::setValues(raster(biomassStack), biomassDTfilled[["newClass"]])
         names(leadingSpeciesRaster) <- paste("biomassMap", studyAreaName, climateScenario, sep = "_")
