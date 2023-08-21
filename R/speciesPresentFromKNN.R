@@ -127,7 +127,7 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL) 
       url <- "https://drive.google.com/file/d/1Oj78jJBeha5L6XDBBdWDAfimgNjYc9UD/"
     }
     speciesPres <- preProcess(url = url)
-    speciesPresRas <- LandR:::rasterRead(speciesPres$targetFilePath)
+    speciesPresRas <- rasterRead(speciesPres$targetFilePath)
   }
 
   bb <- postProcess(x = speciesPresRas, studyArea = studyArea)
