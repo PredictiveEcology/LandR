@@ -38,12 +38,8 @@
 #' @importFrom parallel mclapply
 #' @importFrom pemisc factorValues2 termsInData
 #' @importFrom quickPlot layerNames numLayers Plot setColors setColors<-
-#' @importFrom raster calc cellFromRowCol cellFromXY compareRaster crop crs crs<- dropLayer
-#' @importFrom raster extend extension factorValues focalWeight intersect levels
-#' @importFrom raster mask maxValue minValue NAvalue<- ncell ncol nrow origin origin<-
-#' @importFrom raster projection projection<- projectExtent
-#' @importFrom raster raster rasterOptions ratify reclassify res rowColFromCell
-#' @importFrom raster stack unstack values<- writeRaster xyFromCell
+#' @importFrom raster calc deratify dropLayer extension levels NAvalue<- projectExtent
+#' @importFrom raster raster rasterOptions ratify reclassify unstack
 #' @importFrom RColorBrewer brewer.pal brewer.pal.info
 #' @importFrom reproducible .prefix .requireNamespace .sortDotsUnderscoreFirst .suffix
 #' @importFrom reproducible asPath basename2 Cache cropInputs Filenames fixErrors
