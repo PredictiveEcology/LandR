@@ -39,7 +39,7 @@
 #' @importFrom pemisc factorValues2 termsInData
 #' @importFrom quickPlot layerNames numLayers Plot setColors setColors<-
 #' @importFrom raster calc deratify dropLayer extension levels NAvalue<- projectExtent
-#' @importFrom raster raster rasterOptions ratify reclassify unstack
+#' @importFrom raster raster rasterOptions ratify reclassify stack unstack
 #' @importFrom RColorBrewer brewer.pal brewer.pal.info
 #' @importFrom reproducible .prefix .requireNamespace .sortDotsUnderscoreFirst .suffix
 #' @importFrom reproducible asPath basename2 Cache cropInputs Filenames fixErrors
@@ -52,9 +52,10 @@
 #' @importFrom SpaDES.tools inRange neutralLandscapeMap randomPolygons rasterizeReduced runifC
 #' @importFrom SpaDES.tools spread2
 #' @importFrom stats as.formula complete.cases fitted glm na.omit predict quantile runif terms update vcov
-#' @importFrom terra app as.int cellFromRowCol classify coltab<- compareGeom crs ext extract focalMat
-#' @importFrom terra intersect is.factor is.int is.points levels minmax NAflag<- ncell nlyr project
+#' @importFrom terra app as.int cellFromRowCol classify coltab<- compareGeom crop crs crs<- ext extract focalMat
+#' @importFrom terra intersect is.factor is.int is.points levels mask minmax NAflag<- ncell nlyr project
 #' @importFrom terra rast rasterize res rowColFromCell terraOptions values vect writeRaster xmax xmin ymax ymin
+#' @importFrom terra xyFromCell
 #' @importFrom tidyterra geom_spatraster
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output combn count.fields data getFromNamespace install.packages
