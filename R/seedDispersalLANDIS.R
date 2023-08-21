@@ -734,7 +734,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 }
 
 spiralDistances <- function(pixelGroupMap, maxDis, cellSize) {
-  spiral <- which(focalWeight(pixelGroupMap, maxDis, type = "circle") > 0, arr.ind = TRUE) -
+  spiral <- which(focalMat(pixelGroupMap, maxDis, type = "circle") > 0, arr.ind = TRUE) -
     ceiling(maxDis/cellSize) - 1
   spiral <- cbind(spiral, dists = sqrt( (0 - spiral[,1]) ^ 2 + (0 - spiral[, 2]) ^ 2))
   spiral <- spiral[order(spiral[, "dists"], apply(abs(spiral), 1, sum),
