@@ -709,7 +709,7 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
         stop(paste("Please provide a template raster to make rasterToMatch(Large).",
                    "An option is to use 'rawBiomassMap'"))
       }
-      if (!compareRaster(templateRas, studyAreaLarge, stopiffalse = FALSE)) {
+      if (!.compareRas(templateRas, studyAreaLarge, stopOnError = FALSE)) {
         ## note that extents/origin may never align if the resolution and projection do not allow for it
         templateRas <- Cache(postProcessTerra,
                              templateRas,

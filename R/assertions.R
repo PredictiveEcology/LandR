@@ -428,8 +428,8 @@ assertRstLCChange <- function(rstLCChange, rasterToMatch,
                               doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     ## check conformity with RTM
-    if (!compareRaster(rstLCChange,
-                       rasterToMatch, stopiffalse = FALSE)) {
+    if (!.compareRas(rstLCChange,
+                     rasterToMatch, stopOnError = FALSE)) {
       stop("'rstLCChange' and 'rasterToMatch' differ in
          their properties. Please check")
     }
