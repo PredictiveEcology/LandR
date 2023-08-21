@@ -66,7 +66,7 @@ utils::globalVariables(c(
 #'   library(data.table)
 #'
 #'   # keep this here for interactive testing with a larger raster
-#'   rasterTemplate <- LandR:::rasterRead(extent(0, 2500, 0, 2500), res = 100)
+#'   rasterTemplate <- LandR:::rasterRead(ext(0, 2500, 0, 2500), res = 100)
 #'
 #'   # make a pixelGroupMap
 #'   pgs <- 4 # make even just because of approach below requires even
@@ -144,7 +144,7 @@ utils::globalVariables(c(
 #'     Plot(spMap, cols = "Set2")
 #'
 #'     # A summary
-#'     rr <- apply(raster::stack(spMap)[[-1]][] + 1, 2, tabulate)
+#'     rr <- apply(rast(spMap)[[-1]][] + 1, 2, tabulate)
 #'     rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"][1:NROW(rr)]
 #'     # next line only works if there are some places that are both source and potential to receive
 #'     # rr <- rbind(rr, propSrcRcved = round(rr[5,]/ (rr[5,]+rr[2,]), 2))
