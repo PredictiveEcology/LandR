@@ -275,7 +275,7 @@ vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.a
 #' library(terra)
 #' x <- data.table(pixelGroup = rep(1:2, each = 2), B = c(100, 200, 20, 400),
 #'                 speciesCode = rep(c("Pice_Gla", "Popu_Tre"), 2))
-#' pixelGroupMap <- rast(extent(0,3, 0, 3), res = 1)
+#' pixelGroupMap <- rast(ext(0,3, 0, 3), res = 1)
 #' pixelGroupMap[] <- sample(1:2, size = 9, replace = TRUE)
 #' vtm <- vegTypeMapGenerator(x, pixelGroupMap = pixelGroupMap)
 #'

@@ -66,7 +66,7 @@ utils::globalVariables(c(
 #'   library(data.table)
 #'
 #'   # keep this here for interactive testing with a larger raster
-#'   rasterTemplate <- LandR:::rasterRead(ext(0, 2500, 0, 2500), res = 100)
+#'   rasterTemplate <- LandR:::rasterRead(terra::ext(0, 2500, 0, 2500), res = 100)
 #'
 #'   # make a pixelGroupMap
 #'   pgs <- 4 # make even just because of approach below requires even
