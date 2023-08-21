@@ -247,7 +247,6 @@ assertColumns <- function(obj, colClasses,
 #'
 #' @template pixelGroupMap
 #' @template cohortDefinitionCols
-#' @param sim If the `simList` is included, then the `browser()` call will be more useful.
 #'
 #' @param maxExpectedNumDiverge A numeric, length 1, indicating by how many they
 #'   can diverge. Default 1.
