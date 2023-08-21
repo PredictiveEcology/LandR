@@ -614,7 +614,7 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
       fireRas <- rast(rasterToMatch, vals = NA)
     } else {
       fireRas <- raster::raster(rasterToMatch)
-      values(fireRas) <- NA
+      fireRas[] <- NA
     }
   }
 
