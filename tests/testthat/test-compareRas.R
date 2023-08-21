@@ -122,7 +122,7 @@ test_that("test .compareRas, .compareCRS -- vectors and rasters", {
   expect_error(.compareRas(v, ras))
   expect_false(.compareRas(v, ras, stopOnError = FALSE))
 
-  v2 <- project(v2, "EPSG:2169")
+  v2 <- project(v, "EPSG:2169")
   expect_error(.compareRas(ras, v2, ext = FALSE))
   expect_false(.compareRas(ras, v2, ext = FALSE, stopOnError = FALSE))
   expect_true(.compareRas(ras, v2, crs = FALSE, ext = FALSE))
