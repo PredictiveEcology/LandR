@@ -52,9 +52,9 @@
 #' @importFrom SpaDES.tools inRange neutralLandscapeMap randomPolygons rasterizeReduced runifC
 #' @importFrom SpaDES.tools spread2
 #' @importFrom stats as.formula complete.cases fitted glm na.omit predict quantile runif terms update vcov
-#' @importFrom terra app as.int classify coltab<- compareGeom crs ext extract
+#' @importFrom terra app as.int cellFromRowCol classify coltab<- compareGeom crs ext extract focalMat
 #' @importFrom terra intersect is.factor is.int is.points levels minmax NAflag<- ncell nlyr project
-#' @importFrom terra rast rasterize res terraOptions values vect writeRaster xmax xmin ymax ymin
+#' @importFrom terra rast rasterize res rowColFromCell terraOptions values vect writeRaster xmax xmin ymax ymin
 #' @importFrom tidyterra geom_spatraster
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils capture.output combn count.fields data getFromNamespace install.packages
