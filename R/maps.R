@@ -1103,8 +1103,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
       ## TODO: .compareRas (compareGeom) is less tolerant than st_crs, but projecting
       ## manually is a pain (we can't use postProcess because it also uses st_crs internally)
       ## for now use st_crs to compare CRS, but this is unlikely to be the best
-      if (!.compareRas(LQRast, HQRast) ||
-          st_crs(LQRast) != st_crs(HQRast))
+      if (!.compareRas(LQRast, HQRast, stopOnError = FALSE))
         stop("Stacks not identical, something is wrong with overlayStacks function.")
 
       NAs <- is.na(as.vector(HQRast[]))
