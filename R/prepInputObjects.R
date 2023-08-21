@@ -611,7 +611,7 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
     }
   } else {
     if (is(rasterToMatch, "SpatRaster") && requireNamespace("terra", quietly = TRUE)) {
-      fireRas <- terra::rast(rasterToMatch, vals = NA)
+      fireRas <- rast(rasterToMatch, vals = NA)
     } else {
       fireRas <- raster::raster(rasterToMatch)
       values(fireRas) <- NA
