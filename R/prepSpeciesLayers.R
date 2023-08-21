@@ -426,8 +426,8 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
 
   CCstack <- dropLayer(rs, which(grepl("LandType", CClayerNames2)))
 
-  if (!all(raster::minValue(CCstack) >= 0)) stop("problem with minValue of CCstack (< 0)")
-  if (!all(raster::maxValue(CCstack) <= 10)) stop("problem with maxValue of CCstack (> 10)")
+  if (!all(min(CCstack[], na.rm = TRUE) >= 0)) stop("problem with min. of CCstack (< 0)")
+  if (!all(max(CCstack[], na.rm = TRUE) <= 10)) stop("problem with max. of CCstack (> 10)")
 
   CCstack <- CCstack * 10 # convert back to percent
   NA_ids <- which(is.na(rs$LandType[]) |  # outside of studyArea polygon

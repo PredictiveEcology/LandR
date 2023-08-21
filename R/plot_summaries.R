@@ -94,7 +94,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
         leadingStackChange <- raster::calc(bothYearsStk, fun = sum, na.rm = TRUE)
       }
 
-      stopifnot(all(minValue(leadingStackChange) >= -1, maxValue(leadingStackChange) <= 1))
+      stopifnot(all(min(leadingStackChange[], na.rm = TRUE) >= -1, max(leadingStackChange, na.rm = TRUE) <= 1))
 
       leadingStackChange[is.na(rasterToMatch)] <- NA
       names(leadingStackChange) <- paste("leadingMapChange", studyAreaName, climateScenario, rep, sep = "_")
