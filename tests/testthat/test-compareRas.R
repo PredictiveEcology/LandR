@@ -1,7 +1,6 @@
 test_that("test .compareRas, .compareCRS -- rasters only", {
   require(reproducible)
   require(raster)
-  require(terra)
   opts <- options("reproducible.inputPaths" = NULL,
                   "reproducible.overwrite" = TRUE,
                   "reproducible.useTerra" = TRUE,
@@ -46,7 +45,6 @@ test_that("test .compareRas, .compareCRS -- rasters only", {
 test_that("test .compareRas, .compareCRS -- vectors only", {
   require(reproducible)
   require(raster)
-  require(terra)
   require(sf)
   opts <- options("reproducible.inputPaths" = NULL,
                   "reproducible.overwrite" = TRUE,
@@ -102,7 +100,6 @@ test_that("test .compareRas, .compareCRS -- vectors only", {
 test_that("test .compareRas, .compareCRS -- vectors and rasters", {
   require(reproducible)
   require(raster)
-  require(terra)
   require(sf)
   opts <- options("reproducible.inputPaths" = NULL,
                   "reproducible.overwrite" = TRUE,
