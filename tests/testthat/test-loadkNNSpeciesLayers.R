@@ -175,7 +175,7 @@ test_that("test download kNN SpeciesLayers bad website - three species", {
                                            thresh = 0)
   })
   expect_true(all(sppEquiv$KNN %in% names(speciesLayers)))
-  expect_true(compareRaster(RTM, speciesLayers, res = TRUE, orig = TRUE, stopiffalse = FALSE))
+  expect_true(LandR::.compareRas(RTM, speciesLayers, res = TRUE, stopOnError = FALSE))
 
   ## get all available species for 2011
   speciesLayers2011 <- prepSpeciesLayers_KNN(destinationPath = dPath,
