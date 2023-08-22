@@ -235,8 +235,6 @@ parameter in \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} for details on 
 forest types).}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.}
-
-\item{sim}{If the \code{simList} is included, then the \code{browser()} call will be more useful.}
 }
 \description{
 \itemize{
