@@ -54,8 +54,7 @@ so one can watch the \code{LANDISDisp} event grow.}
 \item{successionTimestep}{The time between successive seed dispersal events.
 In LANDIS-II, this is called "Succession Timestep".}
 
-\item{verbose}{Numeric. \code{0} is not verbose, with increasing numbers indicating
-increasing levels of verbosity (currently up to 2)}
+\item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
 
 \item{...}{Additional parameters. Currently none.}
 }
@@ -93,10 +92,9 @@ if (require("googledrive")) {
   seed <- sample(1e6, 1)
   set.seed(seed)
   library(data.table)
-  library(raster)
 
   # keep this here for interactive testing with a larger raster
-  rasterTemplate <- raster(extent(0, 2500, 0, 2500), res = 100)
+  rasterTemplate <- LandR:::rasterRead(terra::ext(0, 2500, 0, 2500), res = 100)
 
   # make a pixelGroupMap
   pgs <- 4 # make even just because of approach below requires even
@@ -148,11 +146,11 @@ if (require("googledrive")) {
     spMap$pixelGroupMap <- pixelGroupMap
     for (sppp in unique(output$speciesCode)) {
       spppChar <- paste0("Sp_", sppp)
-      spMap[[spppChar]] <- raster(pixelGroupMap)
+      spMap[[spppChar]] <- LandR:::rasterRead(pixelGroupMap)
       ss <- unique(seedSource[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
       spMap[[spppChar]][pixelGroupMap[] \%in\% ss$pixelGroup] <- 1
 
-      receivable <- raster(pixelGroupMap)
+      receivable <- LandR:::rasterRead(pixelGroupMap)
       srf <- unique(seedReceiveFull[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
       receivable[pixelGroupMap[] \%in\% srf$pixelGroup] <- 1
 
@@ -174,7 +172,7 @@ if (require("googledrive")) {
     Plot(spMap, cols = "Set2")
 
     # A summary
-    rr <- apply(raster::stack(spMap)[[-1]][] + 1, 2, tabulate)
+    rr <- apply(rast(spMap)[[-1]][] + 1, 2, tabulate)
     rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"][1:NROW(rr)]
     # next line only works if there are some places that are both source and potential to receive
     # rr <- rbind(rr, propSrcRcved = round(rr[5,]/ (rr[5,]+rr[2,]), 2))

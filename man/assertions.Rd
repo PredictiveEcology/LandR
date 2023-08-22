@@ -169,7 +169,7 @@ May contain columns \code{inflationFactor}  (used to adjust \code{maxB}) and \co
 \item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique ecoregion groupings,
 which group together pixels of similar biophysical characteristics.}
 
-\item{minRelativeB}{numeric; minimum relative biomass}
+\item{minRelativeB}{a \code{data.frame} with  the cut points to classify stand shadiness.}
 
 \item{obj}{A data.frame or data.table-like object}
 
@@ -235,8 +235,6 @@ parameter in \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} for details on 
 forest types).}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.}
-
-\item{sim}{If the \code{simList} is included, then the \code{browser()} call will be more useful.}
 }
 \description{
 \itemize{

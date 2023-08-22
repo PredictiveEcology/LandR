@@ -76,8 +76,7 @@ where \code{maxANPP} and \code{maxB_eco} are the maximum ANPP and B parameters o
 in question within the pixel's \code{ecolocation}, and \code{sumB} is the total stand biomass
 excluding cohorts with ages less than \code{successionTimestep}.}
 
-\item{verbose}{Integer, where increasing number is increasing verbosity. Currently,
-only level 1 exists; but this may change.}
+\item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
 
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.

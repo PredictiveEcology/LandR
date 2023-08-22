@@ -57,7 +57,7 @@ if (requireNamespace("googledrive", quietly = TRUE)) {
   speciesPresent <- speciesPresentFromKNN(dPath = "~/data/KNN")
 
   # To upload this:
-  speciesPresentRas <- raster::stack(speciesPresent)[[1]]
+  speciesPresentRas <- terra::rast(speciesPresent)[[1]]
   fn <- "SpeciesPresentInCanadianForests.tif"
   writeRaster(speciesPresentRas, file = fn)
   zipFn <- gsub(".tif", ".zip", fn)

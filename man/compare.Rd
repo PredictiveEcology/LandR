@@ -5,12 +5,12 @@
 \alias{.compareCRS}
 \title{Compare raster properties}
 \usage{
-.compareRas(ras1, ...)
+.compareRas(x, ...)
 
-.compareCRS(ras1, ras2)
+.compareCRS(x, y)
 }
 \arguments{
-\item{ras1, ras2}{a \code{Raster} or \code{SpatRaster} object}
+\item{x, y}{a \code{Raster}, \code{SpatRaster}, \code{sf}, \code{SpatVector}, or \code{Spatial} object}
 
 \item{...}{additional \code{Raster} or \code{SpatRaster} objects, and arguments
 passed to \code{terra::compareGeom()}.}

@@ -42,7 +42,8 @@ Must have column \code{speciesCode}, with species names/IDs}
 of establishment, given a site's light conditions (\code{X0}-\code{X5}) for each level
 of a species shade tolerance (\code{1}-\code{5}).}
 
-\item{calibrate}{logical. Determines whether to output \code{postFirePixelCohortData}. Defaults to FALSE}
+\item{calibrate}{logical. Determines whether to output \code{postFirePixelCohortData}.
+Defaults to FALSE}
 }
 \value{
 A list of objects:
