@@ -49,7 +49,11 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
   flammableTable <- cbind(oldClass, newClass)
 
   reclassed <- reclass(LandCoverClassifiedMap, flammableTable)
-  rstFlammable <- if (is(reclassed, "SpatRaster")) terra::as.factor(reclassed) else ratify(reclassed)
+  rstFlammable <- if (is(reclassed, "SpatRaster")) {
+    terra::as.factor(reclassed)
+  } else {
+    ratify(reclassed)
+  }
 
   if (!is.null(filename2))
     rstFlammable <- writeRaster(rstFlammable, filename = filename2, overwrite = TRUE)

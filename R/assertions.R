@@ -246,6 +246,7 @@ assertColumns <- function(obj, colClasses,
 #' @template cohortData
 #'
 #' @template pixelGroupMap
+#'
 #' @template cohortDefinitionCols
 #'
 #' @param maxExpectedNumDiverge A numeric, length 1, indicating by how many they
