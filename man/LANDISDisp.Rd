@@ -54,8 +54,7 @@ so one can watch the \code{LANDISDisp} event grow.}
 \item{successionTimestep}{The time between successive seed dispersal events.
 In LANDIS-II, this is called "Succession Timestep".}
 
-\item{verbose}{Numeric. \code{0} is not verbose, with increasing numbers indicating
-increasing levels of verbosity (currently up to 2)}
+\item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
 
 \item{...}{Additional parameters. Currently none.}
 }

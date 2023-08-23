@@ -26,9 +26,8 @@ cohort information on burnt pixels and the following (optional) columns:
 \item{postFirePixelCohortData}{an empty \code{cohortData}-like table with columns:
 \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB} removed; and \code{pixelIndex} added.}
 
-\item{postFireRegenSummary}{a \code{data.table} summarizing for which species
-serotiny/resprouting were activated and in how many pixels, for each year.
-Only necessary if \code{calibrate = TRUE}.}
+\item{postFireRegenSummary}{a data.table summarizing for which species serotiny/resprouting were
+activated and in how many pixels, for each year. Only necessary if \code{calibrate = TRUE}.}
 
 \item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.
 Must have column \code{speciesCode}, with species names/IDs}
@@ -52,7 +51,7 @@ May contain columns \code{inflationFactor}  (used to adjust \code{maxB}) and \co
 in the previous time step.}
 
 \item{calibrate}{logical. Determines whether to output \code{postFirePixelCohortData}.
-Defaults to \code{FALSE}.}
+Defaults to FALSE}
 }
 \value{
 A list of objects:

@@ -104,6 +104,7 @@ Collate:
     'cohorts.R'
     'convertUnwantedLCC2.R'
     'dem.R'
+    'disturbances.R'
     'ecoregions.R'
     'ecozones.R'
     'fireSeverity.R'
