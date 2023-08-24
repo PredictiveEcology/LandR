@@ -69,7 +69,7 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
   }
 
   rstFlammable <- asInt(rstFlammable)
-  # rstFlammable[] <- as.integer(rstFlammable[])
+  # rstFlammable[] <- as.integer(as.vector(rstFlammable[]))
   rstFlammable
 }
 
@@ -240,7 +240,7 @@ vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.a
         ## Then, sum should be numLayers of all are below vegLeadingProportion
         whMixed <- which(sum(speciesStack < (100 * vegLeadingProportion))[] == numLayers(speciesStack))
         MixedRas <- speciesStack[[1]]
-        MixedRas[!is.na(speciesStack[[1]][])] <- 0
+        MixedRas[!is.na(as.vector(speciesStack[[1]][]))] <- 0
         MixedRas[whMixed] <- max(maxFn(speciesStack)) * 1.01
 
         speciesStack$Mixed <- MixedRas
@@ -1015,7 +1015,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
                 "using gdalwarp to make them overlap")
         if (!nzchar(Filenames(lowQualityStack[[SPP]]))) {
           LQCurName <- basename(tempfile(fileext = ".tif"))
-          lowQualityStack[[SPP]][] <- as.integer(lowQualityStack[[SPP]][])
+          lowQualityStack[[SPP]][] <- as.integer(as.vector(lowQualityStack[[SPP]][]))
 
           NAval <- 65535L
           lowQualityStack[[SPP]] <- writeRaster(lowQualityStack[[SPP]],

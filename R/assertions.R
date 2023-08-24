@@ -148,7 +148,7 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
   if (doAssertion) {
     erg <- list()
     if (!missing(ecoregionMap)) {
-      erg[[1]] <- sort(na.omit(unique(factorValues2(ecoregionMap, ecoregionMap[],
+      erg[[1]] <- sort(na.omit(unique(factorValues2(ecoregionMap, as.vector(ecoregionMap[]),
                                                     att = "ecoregionGroup"))))
       if (is.character(erg[[1]])) { # this can happen if SpatRaster
         erg[[1]] <- factor(erg[[1]])
@@ -267,7 +267,7 @@ assertCohortData <- function(cohortData, pixelGroupMap, maxExpectedNumDiverge = 
     if (!isTRUE("pixelGroup" %in% names(cohortData))) {
       stop("cohortData must have pixelGroup")
     }
-    a <- sort(unique(na.omit(pixelGroupMap[])))
+    a <- sort(unique(na.omit(as.vector(pixelGroupMap[]))))
     b <- sort(unique(na.omit(cohortData$pixelGroup)))
     ## test1 and test2 can be 1 because there could be pixelGroup of 0, which is OK to not match
     test1 <- sum(!a %in% b)

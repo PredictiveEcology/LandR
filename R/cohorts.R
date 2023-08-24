@@ -791,14 +791,14 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClasses,
                               rstLCC) {
   # pixelsToRm <- rowSums(!is.na(sim$speciesLayers[])) == 0 # keep
-  pixelsToRm <- is.na(speciesLayers[[1]][]) # seems to be OK because seem to be NA on each layer for a given pixel
+  pixelsToRm <- is.na(as.vector(speciesLayers[[1]][])) # seems to be OK because seem to be NA on each layer for a given pixel
 
   ## remove non-forested if asked by user
   if (omitNonTreedPixels) {
     if (is.null(forestedLCCClasses))
       stop("No P(sim)$forestedLCCClasses provided, but P(sim)$omitNonTreedPixels is TRUE.
              \nPlease provide a vector of forested classes in P(sim)$forestedLCCClasses")
-    lccPixelsRemoveTF <- !(rstLCC[] %in% forestedLCCClasses)
+    lccPixelsRemoveTF <- !(as.vector(rstLCC[]) %in% forestedLCCClasses)
     pixelsToRm <- lccPixelsRemoveTF | pixelsToRm
   }
   pixelsToRm

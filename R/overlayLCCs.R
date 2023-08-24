@@ -93,12 +93,12 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
     names(namesForestedStack) <- namesForestedStack
 
     if (is.null(availableERC_by_Sp)) {
-      availableERC_by_Sp <- data.table(initialEcoregionCode = LCCs[[outputLayer]][])
+      availableERC_by_Sp <- data.table(initialEcoregionCode = as.vector(LCCs[[outputLayer]][]))
     }
 
     if (is.null(remapTable)) {
-      dt <- as.data.table(lapply(namesForestedStack, function(x) forestedStack[[x]][]))
-      dt[, ecoregionCode := LCCs[[outputLayer]][]]
+      dt <- as.data.table(lapply(namesForestedStack, function(x) as.vector(forestedStack[[x]][])))
+      dt[, ecoregionCode := as.vector(LCCs[[outputLayer]][])]
 
       # 1. Put in NAs
       if (!missing(NAcondition)) {
@@ -132,8 +132,8 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
 
       namesLCCs <- names(LCCs)
       names(namesLCCs) <- namesLCCs
-      dt <- as.data.table(lapply(namesLCCs, function(x) LCCs[[x]][]))
-      dt[, ecoregionCode := LCCs[[outputLayer]][]]
+      dt <- as.data.table(lapply(namesLCCs, function(x) as.vector(LCCs[[x]][])))
+      dt[, ecoregionCode := as.vector(LCCs[[outputLayer]][])]
       dt <- cbind(dt, availableERC_by_Sp)
       dt[, pixelIndex := seq(ncell(LCCs[[outputLayer]]))]
 

@@ -88,27 +88,27 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
                            rasterToMatch = as.vector(values(rasterToMatch))
   )
   if (!missing(standAgeMap)) {
-    set(pixelTable, NULL, "age", asInteger(standAgeMap[]))
-    set(pixelTable, NULL, "logAge", .logFloor(standAgeMap[]))
+    set(pixelTable, NULL, "age", asInteger(as.vector(standAgeMap[])))
+    set(pixelTable, NULL, "logAge", .logFloor(as.vector(standAgeMap[]))
   }
 
   if (!missing(biomassMap)) {
-    set(pixelTable, NULL, "totalBiomass", asInteger(biomassMap[] * 100) ) # change units)
+    set(pixelTable, NULL, "totalBiomass", asInteger(as.vector(biomassMap[]) * 100) ) # change units)
   }
 
   if (!missing(rstLCC)) {
-    set(pixelTable, NULL, "lcc", as.vector(values(rstLCC)))
+    set(pixelTable, NULL, "lcc", as.vector(rstLCC[]))
   }
 
-  #pixelTable <- data.table(#age = asInteger(ceiling(asInteger(standAgeMap[]) /
+  #pixelTable <- data.table(#age = asInteger(ceiling(asInteger(as.vector(standAgeMap[])) /
   #                           pixelGroupAgeClass) * pixelGroupAgeClass),
-  # logAge = .logFloor(standAgeMap[]),
+  # logAge = .logFloor(as.vector(standAgeMap[])),
   # initialEcoregionCode = factor(initialEcoregionCodeVals),
-  # totalBiomass = asInteger(biomassMap[] * 100), # change units
+  # totalBiomass = asInteger(as.vector(biomassMap[]) * 100), # change units
   # cover = coverMatrix,
   # pixelIndex = seq(ncell(rasterToMatch)),
-  # lcc = rstLCC[],
-  # rasterToMatch = rasterToMatch[])
+  # lcc = as.vector(rstLCC[]),
+  # rasterToMatch = as.vector(rasterToMatch[]))
 
   # Remove NAs from pixelTable
   ## 1) If in rasterToMatch
@@ -450,7 +450,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
     fun = ageFun,
     rasterToMatch = rasterToMatch
   )
-  standAgeMap[] <- asInteger(standAgeMap[])
+  standAgeMap[] <- asInteger(as.vector(standAgeMap[]))
 
   imputedPixID <- integer(0)
   if (getFires) {
@@ -662,8 +662,8 @@ replaceAgeInFires <- function(standAgeMap, firePerimeters, startTime) {
     startTime <- max(firePerimeters[], na.rm = TRUE)
   }
 
-  toChange <- !is.na(firePerimeters[]) & firePerimeters[] <= asInteger(startTime)
-  standAgeMap[] <- asInteger(standAgeMap[])
+  toChange <- !is.na(as.vector(firePerimeters[])) & as.vector(firePerimeters[]) <= asInteger(startTime)
+  standAgeMap[] <- asInteger(as.vector(standAgeMap[]))
   standAgeMap[toChange] <- asInteger(startTime) - asInteger(firePerimeters[][toChange])
   imputedPixID <- which(toChange)
 
@@ -762,14 +762,14 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
     }
     ## covert to 'mask'
     if (!anyNA(rasterToMatch[])) {
-      whZeros <- rasterToMatch[] == 0
+      whZeros <- as.vector(rasterToMatch[]) == 0
       if (sum(whZeros) > 0) {# means there are zeros instead of NAs for RTML --> change
         rasterToMatch[whZeros] <- NA
         message("There were no NAs on the RTM, but there were zeros; converting these zeros to NA")
       }
     }
 
-    RTMvals <- rasterToMatch[]
+    RTMvals <- as.vector(rasterToMatch[])
     rasterToMatch[!is.na(RTMvals)] <- 1
   }
 

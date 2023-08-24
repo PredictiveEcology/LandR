@@ -147,7 +147,7 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL) 
     bb <- as.numeric(bb)
   }
 
-  speciesCommunities <- na.omit(factorValues2(bb, bb[], att = "category"))
+  speciesCommunities <- na.omit(factorValues2(bb, as.vector(bb[]), att = "category"))
   species <- as.character(speciesCommunities)
   species <- unique(unlist(strsplit(species, "__")))
   return(list(speciesRas = bb, speciesList = species))

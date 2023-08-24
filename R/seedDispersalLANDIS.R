@@ -213,7 +213,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     # Create srcPixelMatrix -- which is the matrix representation
     #    of the dtSrc x speciesCode with NAs everywhere there is no
     #    species present
-    pgv <- pixelGroupMap[]
+    pgv <- as.vector(pixelGroupMap[])
 
     rasVectorTemplate <- rep(NA_integer_, ncell(pixelGroupMap))
     rasTemplate <- rasterRead(pixelGroupMap)
@@ -288,7 +288,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                             DistOfSuccess = numeric(0), ReasonForStop = character(0),
                             species = character(0))
   }
-  return(dtRcvLong[])
+  return(as.vector(dtRcvLong[]))
 }
 
 speciesCodeFromCommunity <- function(num) {

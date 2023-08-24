@@ -582,7 +582,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
   PickellSpp <- equivalentName(PickellSpp[needPickell], sppEquiv, sppEquivCol)
 
   ## bring to memory and replace water, non veg by NAs
-  PickellRaster[] <- PickellRaster[]
+  PickellRaster[] <- as.vector(PickellRaster[])
   PickellRaster[PickellRaster[] %in% c(230, 220, 255)] <- NA_integer_
 
   ## create list and template raster
@@ -693,7 +693,7 @@ NAcover2zero <- function(speciesLayers, rasterToMatch) {
   }
 
   tempRas <- rasterToMatch
-  tempRas[!is.na(tempRas[])] <- 0
+  tempRas[!is.na(as.vector(tempRas[]))] <- 0
   namesLayers <- names(speciesLayers)
 
   message("...making sure empty pixels inside study area have 0 cover, instead of NAs ...")
