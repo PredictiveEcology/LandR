@@ -277,7 +277,10 @@ assertCohortData <- function(cohortData, pixelGroupMap, sim = NULL, maxExpectedN
     test1 <- sum(!a %in% b)
     test2 <- sum(!b %in% a)
 
-    browser(expr = exists("aaaa", envir = sim))
+    if (!is.null(sim)) {
+      browser(expr = exists("aaaa", envir = sim))
+    }
+
     cohortDataN <- cohortData[, .N, by = cohortDefinitionCols]
     test3 <- which(cohortDataN$N != 1)
     if (test1 > maxExpectedNumDiverge || test2 > maxExpectedNumDiverge) {
