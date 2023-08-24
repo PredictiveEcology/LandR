@@ -89,7 +89,7 @@ A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
 A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
 }
 \description{
-This is a wrapper for  \code{generatePixelGroups}, \code{initiateNewCohort} and updates to
+This is a wrapper for \code{generatePixelGroups}, \code{initiateNewCohort} and updates to
 \code{pixelGroupMap} via assignment to new \code{pixelIndex} values in \code{newPixelCohortData}.
 By running these all together, there is less chance that they will diverge.
 There are some checks internally for consistency.
