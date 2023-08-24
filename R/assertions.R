@@ -641,3 +641,47 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
     }
   }
 }
+
+
+
+#' Assert post-fire disturbance mortality and regeneration
+#'
+#' @param cohortDataOrig object used in as `updateCohortData(cohortData = .)`
+#' @param pixelGroupMapOrig object used in as `updateCohortData(pixelGroupMap = .)`
+#' @param cohortDataNew `cohortData` output from `updateCohortData`
+#' @param pixelGroupMapNew `pixelGroupMap` output from `updateCohortData`
+#' @param postFirePixelCohortData object used in as `updateCohortData(newPixelCohortData = .)`
+#' @param burnedPixelCohortData `cohortData`-like object containing all dead, surviving and new cohorts
+#'   (i.e. activated by serotiny/resprouting)
+#' @template doAssertion
+#'
+#' @return NULL
+#' @export
+assertPostFireDist <- function(cohortDataOrig = tempCohortData, pixelGroupMapOrig = pixelGroupMap,
+                               cohortDataNew = outs$cohortData, pixelGroupMapNew = outs$pixelGroupMap,
+                               postFirePixelCohortData = postFirePixelCohortData,
+                               burnedPixelCohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    oldPCohortData <- addPixels2CohortData(cohortDataOrig, pixelGroupMapOrig, doAssertion = FALSE)
+    newPCohortData <- addPixels2CohortData(cohortDataNew, pixelGroupMapNew)
+    ## PGs with many pixels
+    testPGs <- oldPCohortData[pixelGroup %in% postFirePixelCohortData$pixelGroup, pixelGroup]
+    testPIs <- postFirePixelCohortData[pixelGroup %in% testPGs, pixelIndex]
+
+    cols <- c("pixelIndex", "speciesCode", "age")
+    test1 <- unique(newPCohortData[pixelIndex %in% testPIs, ..cols])
+    test2 <- unique(postFirePixelCohortData[pixelIndex %in% testPIs, ..cols])
+    setorderv(test1, cols)
+    setorderv(test2, cols)
+
+    if (!identical(test1, test2)) {
+      stop("Post-fire disturbances miscalculated:  missing survivor/regenerated cohorts")
+    }
+
+    test3 <- unique(burnedPixelCohortData[B == 0, ..cols])
+    test4 <- unique(newPCohortData[, ..cols])
+    if (nrow(newPCohortData[test3, on = cols, nomatch = 0L])) {
+      stop("Killed cohorts are still in cohortData table")
+    }
+  }
+}
