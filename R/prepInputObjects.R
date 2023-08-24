@@ -89,7 +89,7 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
   )
   if (!missing(standAgeMap)) {
     set(pixelTable, NULL, "age", asInteger(as.vector(standAgeMap[])))
-    set(pixelTable, NULL, "logAge", .logFloor(as.vector(standAgeMap[]))
+    set(pixelTable, NULL, "logAge", .logFloor(as.vector(standAgeMap[])))
   }
 
   if (!missing(biomassMap)) {
