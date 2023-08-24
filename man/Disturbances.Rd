@@ -7,32 +7,32 @@
 \usage{
 FireDisturbance(
   cohortData = sim$cohortData,
-  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
-  calibrate = FALSE,
+  cohortDefinitionCols = SpaDES.core::P(sim)$cohortDefinitionCols,
+  calibrate = SpaDES.core::P(sim)$calibrate,
   postFireRegenSummary = sim$postFireRegenSummary,
   rstCurrentBurn = sim$rstCurrentBurn,
   inactivePixelIndex = sim$inactivePixelIndex,
   pixelGroupMap = sim$pixelGroupMap,
-  currentTime = NULL,
+  currentTime = SpaDES.core::time(sim),
   rasterToMatch = sim$rasterToMatch,
   species = sim$species,
   sufficientLight = sim$sufficientLight,
   speciesEcoregion = sim$speciesEcoregion,
-  initialB = 10,
-  successionTimestep = 10L,
+  initialB = SpaDES.core::P(sim)$initialB,
+  successionTimestep = SpaDES.core::P(sim)$successionTimestep,
   verbose = getOption("LandR.verbose", TRUE)
 )
 
 FireDisturbancePM(
   cohortData = sim$cohortData,
-  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
-  calibrate = FALSE,
+  cohortDefinitionCols = SpaDES.core::P(sim)$cohortDefinitionCols,
+  calibrate = SpaDES.core::P(sim)$calibrate,
   LANDISPM = TRUE,
   postFireRegenSummary = sim$postFireRegenSummary,
   rstCurrentBurn = sim$rstCurrentBurn,
   inactivePixelIndex = sim$inactivePixelIndex,
   pixelGroupMap = sim$pixelGroupMap,
-  currentTime = NULL,
+  currentTime = SpaDES.core::time(sim),
   rasterToMatch = sim$rasterToMatch,
   fireDamageTable = sim$fireDamageTable,
   fireRSORas = sim$fireRSORas,
@@ -41,9 +41,9 @@ FireDisturbancePM(
   species = sim$species,
   sufficientLight = sim$sufficientLight,
   speciesEcoregion = sim$speciesEcoregion,
-  initialB = 10,
+  initialB = SpaDES.core::P(sim)$initialB,
   minRelativeB = sim$minRelativeB,
-  successionTimestep = 10L,
+  successionTimestep = SpaDES.core::P(sim)$successionTimestep,
   verbose = getOption("LandR.verbose", TRUE)
 )
 }
@@ -164,10 +164,9 @@ see \code{details} below. Requires the following objects in \code{sim}:
 
 \code{FireDisturbancePM()} simulates partial post-fire mortality, serotiny and regeneration
 sequentially after a fire. The level of mortality depends of fire severity,
-and, by default, follows the mechanisms in LANDIS-II Dynamic Fire System v3.0.
-Serotiny and regeneration algorithms algorithms are based on those in
-LANDIS-II Biomass Succession extension, v3.2.1, with modifications (see \code{FireDisturbance()}).
-Requires the following objects in \code{sim}:
+and, by default, follows the mechanisms in LANDIS-II Dynamic Fire System v3.0. Serotiny and regeneration
+algorithms algorithms are based on those in LANDIS-II Biomass Succession extension, v3.2.1,
+with modifications (see \code{FireDisturbance()}). Requires the following objects in \code{sim}:
 @template FireDisturbance
 \itemize{
 \item \code{fireDamageTable}

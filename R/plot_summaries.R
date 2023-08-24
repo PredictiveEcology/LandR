@@ -44,8 +44,8 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
     #    if conifer to decid = 1, if decid to conifer = -1, otherwise 0
     # 2. Create one single map of "proportion net conversion" sum of difference / Nreps
     allReps <- parallel::mclapply(1:Nreps, function(rep) {
-      runName <- sprintf("%s_%s_run%02d", studyAreaName, climateScenario, rep)
-      resultsDir <- file.path(outputDir, runName)
+      runName <- sprintf("%s_%s", studyAreaName, climateScenario)
+      resultsDir <- file.path(outputDir, runName, sprintf("rep%02d", rep))
 
       bothYears <- lapply(years, function(year) {
         cohortData <- qs::qread(file = file.path(resultsDir, paste0("cohortData_", year, "_year", year, ".qs")))
