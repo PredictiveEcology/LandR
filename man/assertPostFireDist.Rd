@@ -5,11 +5,11 @@
 \title{Assert post-fire disturbance mortality and regeneration}
 \usage{
 assertPostFireDist(
-  cohortDataOrig = tempCohortData,
-  pixelGroupMapOrig = pixelGroupMap,
-  cohortDataNew = outs$cohortData,
-  pixelGroupMapNew = outs$pixelGroupMap,
-  postFirePixelCohortData = postFirePixelCohortData,
+  cohortDataOrig,
+  pixelGroupMapOrig,
+  cohortDataNew,
+  pixelGroupMapNew,
+  postFirePixelCohortData,
   burnedPixelCohortData,
   doAssertion = getOption("LandR.assertions", TRUE)
 )

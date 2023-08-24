@@ -657,10 +657,8 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
 #'
 #' @return NULL
 #' @export
-assertPostFireDist <- function(cohortDataOrig = tempCohortData, pixelGroupMapOrig = pixelGroupMap,
-                               cohortDataNew = outs$cohortData, pixelGroupMapNew = outs$pixelGroupMap,
-                               postFirePixelCohortData = postFirePixelCohortData,
-                               burnedPixelCohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
+assertPostFireDist <- function(cohortDataOrig, pixelGroupMapOrig, cohortDataNew, pixelGroupMapNew,
+                               postFirePixelCohortData, burnedPixelCohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     oldPCohortData <- addPixels2CohortData(cohortDataOrig, pixelGroupMapOrig, doAssertion = FALSE)
     newPCohortData <- addPixels2CohortData(cohortDataNew, pixelGroupMapNew)
