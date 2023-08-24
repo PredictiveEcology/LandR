@@ -26,13 +26,12 @@ utils::globalVariables(c(
 #' @template verbose
 #'
 #' @section Stand-replacing fire disturbances:
-#'   `FireDisturbance()` simulates post-fire mortality, serotiny and regeneration sequentially occurring after a fire.
-#'   Post-fire mortality is assumed to be 100% (stand-replacement). The serotiny and regeneration
-#'   algorithms are based on those in LANDIS-II Biomass Succession extension, v3.2.1, with modifications
-#'   see `details` below. Requires the following objects in `sim`:
-#'   @template FireDisturbance
-#'
-#' @details For any given burnt pixel, the function begins by killing all cohorts
+#'  `FireDisturbance()` simulates post-fire mortality, serotiny and regeneration sequentially occurring after a fire.
+#'  Post-fire mortality is assumed to be 100% (stand-replacement). The serotiny and regeneration
+#'  algorithms are based on those in LANDIS-II Biomass Succession extension, v3.2.1, with modifications
+#'  see `details` below. Requires the following objects in `sim`:
+#'  @template FireDisturbance.
+#'  For any given burnt pixel, the function begins by killing all cohorts
 #'  (i.e. removing them from `cohortData`). Then it activates serotiny for
 #'  serotinous species that had been present pre-fire, and reprouting for reprouter
 #'  species. Whether a species successfully regenerates via serotiny or resprouting
@@ -44,16 +43,22 @@ utils::globalVariables(c(
 #'  and resprouting to occur in the same pixel to reflect the competitive advantage
 #'  of reprouters. However, for a given species only serotiny (takes precedence)
 #'  or resprouting can be activated.
+#'  The `species` table must contain the columns:
+#'   - `sexualmature` -- age at sexual maturity
+#'   - `postfireregen` -- post-fire regeneration strategy ("serotiny", "resprout" or "none")
+#'   - `shadetolerance` -- shade tolerance value relative to *other* species.
+#'   - `resproutage_min`, `resproutage_max` -- minimum and maximum age at which species can repsrout
+#'   - `resproutprob` -- probability of resporuting success (before light/shade suitability is assessed)
 #'
 #' @return a list of objects to be exported to sim:
-#'  * cohortData
-#'  * pixelGroupMap
-#'  * lastFireYear
-#'  * treedFirePixelTableSinceLastDisp
-#'  * serotinyResproutSuccessPixels
-#'  * severityBMap
-#'  * severityData
-#'  * postFireRegenSummary (if `calibrate == TRUE` and `!is.null(postFireRegenSummary)`)
+#'  - cohortData
+#'  - pixelGroupMap
+#'  - lastFireYear
+#'  - treedFirePixelTableSinceLastDisp
+#'  - serotinyResproutSuccessPixels
+#'  - severityBMap
+#'  - severityData
+#'  - postFireRegenSummary (if `calibrate == TRUE` and `!is.null(postFireRegenSummary)`)
 #'
 #' @references Scheller, R.M. & Miranda, B.R. (2015). LANDIS-II Biomass Succession v3.2 Extension  – User Guide.
 #' @references Scheller, R.M. & Mladenoff, D.J. (2004). A forest growth and biomass module for a landscape simulation model, LANDIS: design, validation, and application. Ecological Modelling, 180, 211–229.
@@ -79,7 +84,7 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
   # 1. remove species cohorts from the pixels that have been affected.
   # 2. initiate the post-fire regeneration
   # 3. change of cohortdata and pixelgroup map
-  # may be a supplemenatary function is needed to convert non-logical map
+  # may be a supplementary function is needed to convert non-logical map
   # to a logical map
   if (isTRUE(getOption("LandR.assertions"))) {
     if (!identical(NROW(cohortData), NROW(unique(cohortData, by = cohortDefinitionCols)))) {
@@ -144,7 +149,7 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
 
   ## select the pixels that have burned survivors and assess them
   burnedPixelTable <- treedFirePixelTableSinceLastDisp[pixelGroup %in% unique(burnedPixelCohortData$pixelGroup)]
-  ## expadn table to pixels
+  ## expand table to pixels
   burnedPixelCohortData <- burnedPixelTable[burnedPixelCohortData, allow.cartesian = TRUE,
                                             nomatch = 0, on = "pixelGroup"]
 
@@ -254,19 +259,28 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
 }
 
 #' @section Partial severity (i.e. mortality) fire disturbances:
-#'   `FireDisturbancePM()` simulates partial post-fire mortality, serotiny and regeneration
-#'    sequentially after a fire. The level of mortality depends of fire severity,
-#'    and, by default, follows the mechanisms in LANDIS-II Dynamic Fire System v3.0. Serotiny and regeneration
-#'    algorithms algorithms are based on those in LANDIS-II Biomass Succession extension, v3.2.1,
-#'    with modifications (see `FireDisturbance()`). Requires the following objects in `sim`:
-#'   @template FireDisturbance
+#'  `FireDisturbancePM()` simulates partial post-fire mortality, serotiny and regeneration
+#'  sequentially after a fire. The level of mortality depends of fire severity,
+#'  and, by default, follows the mechanisms in LANDIS-II Dynamic Fire System v3.0.
+#'  Serotiny and regeneration algorithms algorithms are based on those in
+#'  LANDIS-II Biomass Succession extension, v3.2.1, with modifications (see `FireDisturbance()`).
+#'  Requires the following objects in `sim`:
+#'  @template FireDisturbance
 #'   - `fireDamageTable`
 #'   - `fireRSORas` (optional)
 #'   - `fireROSRas`
 #'   - `fireCFBRas`
 #'   - `minRelativeB`
-#'   Rasters of fire behaviour properties (`fireRSORas`, `fireROSRas` and `fireCFBRas`)
-#'   can be calculated using the `cffdrs` package.
+#'  Rasters of fire behaviour properties (`fireRSORas`, `fireROSRas` and `fireCFBRas`)
+#'  can be calculated using the `cffdrs` package.
+#'  The `species` table must contain the columns:
+#'   - `firetolerance` -- fire tolerance value relative to *other* species.
+#'   - `longevity` -- maximum species age
+#'   - `sexualmature` -- age at sexual maturity
+#'   - `postfireregen` -- post-fire regeneration strategy ("serotiny", "resprout" or "none")
+#'   - `shadetolerance` -- shade tolerance value relative to *other* species.
+#'   - `resproutage_min`, `resproutage_max` -- minimum and maximum age at which species can repsrout
+#'   - `resproutprob` -- probability of resporuting success (before light/shade suitability is assessed)
 #'
 #' @param LANDISPM logical. Should partial mortality be calculated as in LANDIS-II Dynamic Fire System v3.0.
 #'   Must be `TRUE` for the time being.
