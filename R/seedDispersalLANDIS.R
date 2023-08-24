@@ -288,7 +288,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                             DistOfSuccess = numeric(0), ReasonForStop = character(0),
                             species = character(0))
   }
-  return(as.vector(dtRcvLong[]))
+  return(dtRcvLong[])
 }
 
 speciesCodeFromCommunity <- function(num) {
