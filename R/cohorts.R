@@ -12,7 +12,7 @@ utils::globalVariables(c(
 
 #' Add cohorts to `cohortData` and `pixelGroupMap`
 #'
-#' This is a wrapper for  `generatePixelGroups`, `initiateNewCohort` and updates to
+#' This is a wrapper for `generatePixelGroups`, `initiateNewCohort` and updates to
 #' `pixelGroupMap` via assignment to new `pixelIndex` values in `newPixelCohortData`.
 #' By running these all together, there is less chance that they will diverge.
 #' There are some checks internally for consistency.
@@ -101,13 +101,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
     pixelIndex <- which(pixelGroupMap[] %in% cohortData$pixelGroup)
 
     # remove unnecessary columns before making cohortDataLong
-    if ("prevMortality" %in% names(cohortData)) {
-      cohortData[, prevMortality := NULL]
-    }
-
-    if ("year" %in% names(newPixelCohortData)) {
-      newPixelCohortData[, year := NULL]
-    }
+    suppressWarnings(set(cohortData, j = "prevMortality", value = NULL))
+    suppressWarnings(set(newPixelCohortData, j = "year", value = NULL))
 
     cohortDataPixelIndex <- data.table(
       pixelIndex = pixelIndex,
@@ -274,11 +269,10 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
   set(newPixelCohortData, NULL, "age", 1L) ## set age to 1
 
   ## Ceres: this was causing new cohorts to be initialized with maxANPP.
-  ## instead, calculate total biomass of older cohorts
+  ## instead, remove column and calculate total biomass of older cohorts in cohortData
   # set(newPixelCohortData, NULL, "sumB", 0L)
-  if (!is.null(newPixelCohortData[["sumB"]])) {
-    set(newPixelCohortData, NULL, "sumB", NULL)
-  }
+  suppressWarnings(set(newPixelCohortData, j = "sumB", value = NULL))
+
   cohortData[age >= successionTimestep, oldSumB := sum(B, na.rm = TRUE), by = "pixelGroup"]
 
   newPixelCohortData <- unique(cohortData[, .(pixelGroup, oldSumB)],
@@ -300,13 +294,12 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
     )
     set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
   } else {
-    set(newPixelCohortData, NULL, "B", asInteger(initialB)) #Feb2022 change to 10 - maxANPP is unrealistic particularly with
+    set(newPixelCohortData, NULL, "B", asInteger(initialB)) #Feb2022 change to 10 - maxANPP is unrealistic, particularly with
     # high maxANPP needed to produce realistic growth curves
   }
 
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
-                                               mortality = 0L, aNPPAct = 0L
-  )]
+                                               mortality = 0L, aNPPAct = 0L)]
 
   if (getOption("LandR.assertions")) {
     if (isTRUE(NROW(unique(newPixelCohortData, by = cohortDefinitionCols)) != NROW(newPixelCohortData))) {
