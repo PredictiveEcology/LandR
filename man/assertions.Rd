@@ -57,7 +57,7 @@ assertColumns(
 assertCohortData(
   cohortData,
   pixelGroupMap,
-  sim,
+  sim = NULL,
   maxExpectedNumDiverge = 1,
   message = "",
   doAssertion = getOption("LandR.assertions", TRUE),

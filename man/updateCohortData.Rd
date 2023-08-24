@@ -100,9 +100,14 @@ with \code{cohortData}.
 \details{
 Does the following:
 \enumerate{
-\item add new cohort data into \code{cohortData};
+\item add \emph{new cohort} (not survivor) data into \code{cohortData};
 \item assign initial \code{B} and \code{age} for new cohort;
 \item assign the new \code{pixelGroup} to the pixels that have new cohort;
 \item update the \code{pixelGroup} map.
 }
+Note that if \code{newPixelCohortData} is generated after a disturbance
+it must contain a \code{type} column indicating the origin of the cohorts
+(e.g. "survivor", "serotiny", "resprouting"). "Survivor" cohorts will
+not be added to the output objects, as they are assumed to be accounted
+for in the input \code{cohortData} and, correspondingly, \code{pixelGroupMap}.
 }
