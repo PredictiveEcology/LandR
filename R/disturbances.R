@@ -601,10 +601,12 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
                                treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
                                successionTimestep = successionTimestep)
 
-      assertPostFireDist(cohortDataOrig = tempCohortData, pixelGroupMapOrig = pixelGroupMap,
+      assertPostFireDist(cohortData = tempCohortData,
+                         pixelGroupMap = pixelGroupMap,
                          cohortDataNew = outs$cohortData, pixelGroupMapNew = outs$pixelGroupMap,
                          postFirePixelCohortData = postFirePixelCohortData,
-                         burnedPixelCohortData, doAssertion = getOption("LandR.assertions", TRUE))
+                         burnedPixelCohortData = burnedPixelCohortData,
+                         doAssertion = getOption("LandR.assertions", TRUE))
 
       cohortData <- outs$cohortData
       pixelGroupMap <- outs$pixelGroupMap

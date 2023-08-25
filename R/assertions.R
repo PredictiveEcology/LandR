@@ -636,8 +636,8 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
 
 #' Assert post-fire disturbance mortality and regeneration
 #'
-#' @param cohortDataOrig object used in as `updateCohortData(cohortData = .)`
-#' @param pixelGroupMapOrig object used in as `updateCohortData(pixelGroupMap = .)`
+#' @param cohortData object used in as `updateCohortData(cohortData = .)`
+#' @param pixelGroupMap object used in as `updateCohortData(pixelGroupMap = .)`
 #' @param cohortDataNew `cohortData` output from `updateCohortData`
 #' @param pixelGroupMapNew `pixelGroupMap` output from `updateCohortData`
 #' @param postFirePixelCohortData object used in as `updateCohortData(newPixelCohortData = .)`
@@ -647,10 +647,10 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
 #'
 #' @return NULL
 #' @export
-assertPostFireDist <- function(cohortDataOrig, pixelGroupMapOrig, cohortDataNew, pixelGroupMapNew,
+assertPostFireDist <- function(cohortData, pixelGroupMap, cohortDataNew, pixelGroupMapNew,
                                postFirePixelCohortData, burnedPixelCohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    oldPCohortData <- addPixels2CohortData(cohortDataOrig, pixelGroupMapOrig, doAssertion = FALSE)
+    oldPCohortData <- addPixels2CohortData(cohortData, pixelGroupMap, doAssertion = FALSE)
     newPCohortData <- addPixels2CohortData(cohortDataNew, pixelGroupMapNew)
     ## PGs with many pixels
     testPGs <- oldPCohortData[pixelGroup %in% postFirePixelCohortData$pixelGroup, pixelGroup]
