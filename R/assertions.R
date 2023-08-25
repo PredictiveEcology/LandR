@@ -663,12 +663,12 @@ assertPostFireDist <- function(cohortDataOrig, pixelGroupMapOrig, cohortDataNew,
     }
 
     cols <- c("pixelIndex", "speciesCode", "age")
-    test3 <- unique(newPCohortData[pixelIndex %in% testPIs, ..cols])
-    test4 <- unique(postFirePixelCohortData[pixelIndex %in% testPIs, ..cols])
+    test2 <- unique(newPCohortData[pixelIndex %in% testPIs, ..cols])
+    test3 <- unique(postFirePixelCohortData[pixelIndex %in% testPIs, ..cols])
+    setorderv(test2, cols)
     setorderv(test3, cols)
-    setorderv(test4, cols)
 
-    if (!identical(test3, test4)) {
+    if (!identical(test2, test3)) {
       stop("Post-fire disturbances miscalculated: missing survivor/regenerated cohorts")
     }
 
