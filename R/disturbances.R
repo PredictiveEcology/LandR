@@ -587,22 +587,22 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
       ## 1) we need to create a table of unburt pixels, and burnt pixels with dead and surviving cohorts of burnt pixels,
       ## but not new cohorts (serotiny/resprout) -- these are added by updateCohortData
       ## 2) then remove dead cohorts for updateCohortData
-      genPGsPostDisturbance(cohortDataOrig = sim$cohortData,
-                            disturbedPixelTable = treedFirePixelTableSinceLastDisp,
-                            disturbedPixelCohortData = burnedPixelCohortData,
-                            pixelGroupMap = sim$pixelGroupMap,
-                            doAssertion = getOption("LandR.assertions", TRUE))
+      tempObjs <- genPGsPostDisturbance(cohortData = sim$cohortData,
+                                        pixelGroupMap = sim$pixelGroupMap,
+                                        disturbedPixelTable = treedFirePixelTableSinceLastDisp,
+                                        disturbedPixelCohortData = burnedPixelCohortData,
+                                        doAssertion = getOption("LandR.assertions", TRUE))
 
       outs <- updateCohortData(newPixelCohortData = postFirePixelCohortData,
-                               cohortData = tempCohortData,
-                               pixelGroupMap = pixelGroupMap,
+                               cohortData = tempObjs$cohortData,
+                               pixelGroupMap = tempObjs$pixelGroupMap,
                                currentTime = round(currentTime),
                                speciesEcoregion = speciesEcoregion,
                                treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
                                successionTimestep = successionTimestep)
 
-      assertPostFireDist(cohortData = tempCohortData,
-                         pixelGroupMap = pixelGroupMap,
+      assertPostFireDist(cohortData = tempObjs$cohortData,
+                         pixelGroupMap = tempObjs$pixelGroupMap,
                          cohortDataNew = outs$cohortData, pixelGroupMapNew = outs$pixelGroupMap,
                          postFirePixelCohortData = postFirePixelCohortData,
                          burnedPixelCohortData = burnedPixelCohortData,
