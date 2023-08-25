@@ -587,31 +587,11 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
       ## 1) we need to create a table of unburt pixels, and burnt pixels with dead and surviving cohorts of burnt pixels,
       ## but not new cohorts (serotiny/resprout) -- these are added by updateCohortData
       ## 2) then remove dead cohorts for updateCohortData
-      unburnedPCohortData <- addPixels2CohortData(copy(sim$cohortData), sim$pixelGroupMap)
-      unburnedPCohortData <- unburnedPCohortData[!pixelIndex %in% treedFirePixelTableSinceLastDisp$pixelIndex]
-      newPCohortData <- rbind(unburnedPCohortData, burnedPixelCohortData, fill = TRUE)
-
-      columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B")
-      cd <- newPCohortData[, c("pixelIndex", columnsForPG), with = FALSE]
-      newPCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = columnsForPG)]
-
-      pixelGroupMap <- sim$pixelGroupMap
-      pixelGroupMap[newPCohortData$pixelIndex] <- newPCohortData$pixelGroup
-
-      if (getOption("LandR.assertions", TRUE)) {
-        test <- setdiff(which(!is.na(pixelGroupMap[])), newPCohortData$pixelIndex)
-        if (any(pixelGroupMap[test] != 0)) {
-          stop("Bug in Biomass_regenerationPM: pixels w/o information in burnt and unburnt pixelCohortData tables")
-        }
-      }
-
-      ## collapse to PGs
-      tempCohortData <- copy(newPCohortData)
-      set(tempCohortData, NULL, "pixelIndex", NULL)
-      tempCohortData <- tempCohortData[!duplicated(tempCohortData)]
-
-      ## now remove dead cohorts, and keep only original columns
-      tempCohortData <- tempCohortData[B > 0, .SD, .SDcols = names(sim$cohortData)]
+      genPGsPostDisturbance(cohortDataOrig = sim$cohortData,
+                            disturbedPixelTable = treedFirePixelTableSinceLastDisp,
+                            disturbedPixelCohortData = burnedPixelCohortData,
+                            pixelGroupMap = sim$pixelGroupMap,
+                            doAssertion = getOption("LandR.assertions", TRUE))
 
       outs <- updateCohortData(newPixelCohortData = postFirePixelCohortData,
                                cohortData = tempCohortData,
@@ -658,3 +638,68 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
 
 
 # PeatlandThermokarst <- function()
+
+#' Re-generate new `pixelGroup`s in partially disturbed pixels.
+#'
+#' @details This function regenerates `pixelGroup`s in situations where
+#'  disturbances are not stand-replacing and create survivors/dead cohorts
+#'  in some, but potentially not all, pixels of a `pixelGroup`. This is
+#'  necessary to prevent reintroducing dead cohorts that were not affected
+#'  in the other pixels of the same, original, `pixelGroup`.
+#'  **ATTENTION** This function alone will not generate final `pixelGroups`,
+#'  and will likely need to be followed by an `updateCohortData` run.
+#'
+#' @param cohortData `data.table`. The pre-disturbance `cohortData` table
+#' @param pixelGroupMap `SpatRaster`. The pre-disturbance `pixelGroupMap`.
+#' @param disturbedPixelTable `data.table`. A table with at least the `pixelIndex`
+#'  of all disturbed pixels. Additional columns are ignored.
+#' @param disturbedPixelCohortData a `cohortData`-like table with information of dead,
+#'  and surviving, but *NOT* regenerating cohorts (cohorts for whom regeneration via, e.g., serotiny
+#'  or resprouting was succesfully activated), in *disturbed pixels only*. Dead cohorts should
+#'  age B == 0, surviving cohorts B > 0.
+#' @template doAssertion
+#'
+#' @return a named list with:
+#'  -   a `cohortData` table with the updated `pixelGroups`, as well as
+#'  survivor cohorts, but not dead cohorts.
+#'  -   a `pixelGroupMap` with the updated `pixelGroups` in disturbed pixels
+#'
+#' @export
+genPGsPostDisturbance <- function(cohortData, pixelGroupMap,
+                                  disturbedPixelTable, disturbedPixelCohortData,
+                                  doAssertion = getOption("LandR.assertions", TRUE)) {
+  ## check - are there duplicated cohorts, dead, surviving or regenerating in a given pixel?
+  cols <- c("pixelIndex", "speciesCode", "age", "B")
+  if (any(duplicated(disturbedPixelCohortData[, ..cols]))) {
+    stop("There are duplicated dead/surviving/regenerating cohorts for a given species/pixel combination")
+  }
+
+  unburnedPCohortData <- addPixels2CohortData(copy(cohortData), pixelGroupMap)
+  unburnedPCohortData <- unburnedPCohortData[!pixelIndex %in% disturbedPixelTable$pixelIndex]
+  newPCohortData <- rbind(unburnedPCohortData, disturbedPixelCohortData, fill = TRUE)
+
+  columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B")
+  cd <- newPCohortData[, c("pixelIndex", columnsForPG), with = FALSE]
+  newPCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = columnsForPG)]
+
+  ## update PGMap
+  pixelGroupMap[newPCohortData$pixelIndex] <- newPCohortData$pixelGroup
+
+  if (doAssertion) {
+    test <- setdiff(which(!is.na(pixelGroupMap[])), newPCohortData$pixelIndex)
+    if (any(pixelGroupMap[test] != 0)) {
+      stop("Bug in Biomass_regenerationPM: pixels w/o information in burnt and unburnt pixelCohortData tables")
+    }
+  }
+
+  ## collapse to PGs
+  tempCohortData <- copy(newPCohortData)
+  set(tempCohortData, NULL, "pixelIndex", NULL)
+  tempCohortData <- tempCohortData[!duplicated(tempCohortData)]
+
+  ## now remove dead cohorts, and keep only original columns
+  tempCohortData <- tempCohortData[B > 0, .SD, .SDcols = names(cohortDataOrig)]
+
+  return(list(cohortData = tempCohortData, pixelGroupMap = pixelGroupMap))
+}
+
