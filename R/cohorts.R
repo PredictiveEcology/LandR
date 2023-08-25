@@ -19,11 +19,16 @@ utils::globalVariables(c(
 #'
 #' Does the following:
 #' \enumerate{
-#'   \item add new cohort data into `cohortData`;
+#'   \item add *new cohort* (not survivor) data into `cohortData`;
 #'   \item assign initial `B` and `age` for new cohort;
 #'   \item assign the new `pixelGroup` to the pixels that have new cohort;
 #'   \item update the `pixelGroup` map.
 #' }
+#' Note that if `newPixelCohortData` is generated after a disturbance
+#'   it must contain a `type` column indicating the origin of the cohorts
+#'   (e.g. "survivor", "serotiny", "resprouting"). "Survivor" cohorts will
+#'   not be added to the output objects, as they are assumed to be accounted
+#'   for in the input `cohortData` and, correspondingly, `pixelGroupMap`.
 #'
 #' @template newPixelCohortData
 #' @template cohortData
@@ -109,6 +114,10 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
       pixelGroup = pixelGroupMap[][pixelIndex]
     )
     cdLong <- cohortDataPixelIndex[cohortData, on = "pixelGroup", allow.cartesian = TRUE]
+    if (!is.null(newPixelCohortData$type)) {
+      ## survivor cohorts are assumed to be in cohort data already.
+      newPixelCohortData <- newPixelCohortData[type != "survivor"]
+    }
     cohorts <- rbindlist(list(cdLong, newPixelCohortData), use.names = TRUE, fill = TRUE)
 
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B")
