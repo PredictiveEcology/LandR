@@ -36,7 +36,37 @@ activated and in how many pixels, for each year. Only necessary if \code{calibra
 \item{currentTime}{integer. The current simulation time obtained with \code{time(sim)}}
 
 \item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.
-Must have column \code{speciesCode}, with species names/IDs}
+Must have column \code{speciesCode}, with species names/IDs. The following is a
+list of default trait columns:
+\itemize{
+\item "species" same as "speciesCode" -- species ID name
+\item "speciesCode"
+\item "Area" -- inherited from LANDIS-II default table, the Canadian ecoregion
+from which traits where derived. Not used during the simulation
+\item "firetolerance" -- module\emph{relative} (to other species) fire tolerance
+\item "growthcurve" and "mortalityshape" -- growth curve shape parameters.
+\item "longevity" -- maximum species age
+\item "postfireregen" -- post-fire regeneration strategy ("serotiny", "resprout" or "none")
+\item "resproutprob" -- probability of resprouting
+\item "resproutage_min" -- minimum age at which species is capable of resprouting
+\item "resproutage_max" -- maximum age at which species is capable of resprouting
+\item "seeddistance_eff" -- effective dispersal distance
+\item "seeddistance_max" -- maximum dispersal distance
+\item "shadetolerance" -- \emph{relative} (to other species) shade tolerance
+\item "sexualmature" -- age at sexual maturity
+Known optional parameters added/needed by some modules (the user may add others for their own modules):
+\item "inflationFactor" -- \code{Biomass_speciesParameters} module: inflation factor for \code{maxB}
+\item "growthCurveSource" -- \code{Biomass_speciesParameters} module: how "growthcurve" was estimated
+\item "mANPPproportion" -- \code{Biomass_speciesParameters} module: multiplication factor to calculate \code{maxANPP} from \code{maxB}
+\item "thermokarsttol" -- \code{Biomass_disturbances} module: proportion of biomass surviving after thermokarst (i.e. permafrost thaw). Applied equally across cohorts.
+Parameters inherited from LANDIS-II default table, but not used in LandR at the moment:
+\item "leaflongevity"
+\item "wooddecayrate"
+\item "leafLignin"
+\item "hardsoft"
+Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015)
+for further detail.
+}}
 
 \item{sufficientLight}{a \code{data.frame} (not \code{data.table}!) containing probability
 of establishment, given a site's light conditions (\code{X0}-\code{X5}) for each level

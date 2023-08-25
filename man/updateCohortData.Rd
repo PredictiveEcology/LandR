@@ -89,7 +89,7 @@ A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
 A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
 }
 \description{
-This is a wrapper for  \code{generatePixelGroups}, \code{initiateNewCohort} and updates to
+This is a wrapper for \code{generatePixelGroups}, \code{initiateNewCohort} and updates to
 \code{pixelGroupMap} via assignment to new \code{pixelIndex} values in \code{newPixelCohortData}.
 By running these all together, there is less chance that they will diverge.
 There are some checks internally for consistency.
@@ -100,9 +100,14 @@ with \code{cohortData}.
 \details{
 Does the following:
 \enumerate{
-\item add new cohort data into \code{cohortData};
+\item add \emph{new cohort} (not survivor) data into \code{cohortData};
 \item assign initial \code{B} and \code{age} for new cohort;
 \item assign the new \code{pixelGroup} to the pixels that have new cohort;
 \item update the \code{pixelGroup} map.
 }
+Note that if \code{newPixelCohortData} is generated after a disturbance
+it must contain a \code{type} column indicating the origin of the cohorts
+(e.g. "survivor", "serotiny", "resprouting"). "Survivor" cohorts will
+not be added to the output objects, as they are assumed to be accounted
+for in the input \code{cohortData} and, correspondingly, \code{pixelGroupMap}.
 }

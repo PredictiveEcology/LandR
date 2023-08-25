@@ -7,32 +7,32 @@
 \usage{
 FireDisturbance(
   cohortData = sim$cohortData,
-  cohortDefinitionCols = SpaDES.core::P(sim)$cohortDefinitionCols,
-  calibrate = SpaDES.core::P(sim)$calibrate,
+  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+  calibrate = FALSE,
   postFireRegenSummary = sim$postFireRegenSummary,
   rstCurrentBurn = sim$rstCurrentBurn,
   inactivePixelIndex = sim$inactivePixelIndex,
   pixelGroupMap = sim$pixelGroupMap,
-  currentTime = SpaDES.core::time(sim),
+  currentTime = NULL,
   rasterToMatch = sim$rasterToMatch,
   species = sim$species,
   sufficientLight = sim$sufficientLight,
   speciesEcoregion = sim$speciesEcoregion,
-  initialB = SpaDES.core::P(sim)$initialB,
-  successionTimestep = SpaDES.core::P(sim)$successionTimestep,
+  initialB = 10,
+  successionTimestep = 10L,
   verbose = getOption("LandR.verbose", TRUE)
 )
 
 FireDisturbancePM(
   cohortData = sim$cohortData,
-  cohortDefinitionCols = SpaDES.core::P(sim)$cohortDefinitionCols,
-  calibrate = SpaDES.core::P(sim)$calibrate,
+  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+  calibrate = FALSE,
   LANDISPM = TRUE,
   postFireRegenSummary = sim$postFireRegenSummary,
   rstCurrentBurn = sim$rstCurrentBurn,
   inactivePixelIndex = sim$inactivePixelIndex,
   pixelGroupMap = sim$pixelGroupMap,
-  currentTime = SpaDES.core::time(sim),
+  currentTime = NULL,
   rasterToMatch = sim$rasterToMatch,
   fireDamageTable = sim$fireDamageTable,
   fireRSORas = sim$fireRSORas,
@@ -41,9 +41,9 @@ FireDisturbancePM(
   species = sim$species,
   sufficientLight = sim$sufficientLight,
   speciesEcoregion = sim$speciesEcoregion,
-  initialB = SpaDES.core::P(sim)$initialB,
+  initialB = 10,
   minRelativeB = sim$minRelativeB,
-  successionTimestep = SpaDES.core::P(sim)$successionTimestep,
+  successionTimestep = 10L,
   verbose = getOption("LandR.verbose", TRUE)
 )
 }
@@ -76,7 +76,37 @@ number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}
 raster operations (i.e., the one used throughout the simulation).}
 
 \item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.
-Must have column \code{speciesCode}, with species names/IDs}
+Must have column \code{speciesCode}, with species names/IDs. The following is a
+list of default trait columns:
+\itemize{
+\item "species" same as "speciesCode" -- species ID name
+\item "speciesCode"
+\item "Area" -- inherited from LANDIS-II default table, the Canadian ecoregion
+from which traits where derived. Not used during the simulation
+\item "firetolerance" -- module\emph{relative} (to other species) fire tolerance
+\item "growthcurve" and "mortalityshape" -- growth curve shape parameters.
+\item "longevity" -- maximum species age
+\item "postfireregen" -- post-fire regeneration strategy ("serotiny", "resprout" or "none")
+\item "resproutprob" -- probability of resprouting
+\item "resproutage_min" -- minimum age at which species is capable of resprouting
+\item "resproutage_max" -- maximum age at which species is capable of resprouting
+\item "seeddistance_eff" -- effective dispersal distance
+\item "seeddistance_max" -- maximum dispersal distance
+\item "shadetolerance" -- \emph{relative} (to other species) shade tolerance
+\item "sexualmature" -- age at sexual maturity
+Known optional parameters added/needed by some modules (the user may add others for their own modules):
+\item "inflationFactor" -- \code{Biomass_speciesParameters} module: inflation factor for \code{maxB}
+\item "growthCurveSource" -- \code{Biomass_speciesParameters} module: how "growthcurve" was estimated
+\item "mANPPproportion" -- \code{Biomass_speciesParameters} module: multiplication factor to calculate \code{maxANPP} from \code{maxB}
+\item "thermokarsttol" -- \code{Biomass_disturbances} module: proportion of biomass surviving after thermokarst (i.e. permafrost thaw). Applied equally across cohorts.
+Parameters inherited from LANDIS-II default table, but not used in LandR at the moment:
+\item "leaflongevity"
+\item "wooddecayrate"
+\item "leafLignin"
+\item "hardsoft"
+Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015)
+for further detail.
+}}
 
 \item{sufficientLight}{a \code{data.frame} (not \code{data.table}!) containing probability
 of establishment, given a site's light conditions (\code{X0}-\code{X5}) for each level
@@ -137,7 +167,13 @@ a list of objects to be exported to sim:
 \description{
 Disturbance functions
 }
-\details{
+\section{Stand-replacing fire disturbances}{
+
+\code{FireDisturbance()} simulates post-fire mortality, serotiny and regeneration sequentially occurring after a fire.
+Post-fire mortality is assumed to be 100\% (stand-replacement). The serotiny and regeneration
+algorithms are based on those in LANDIS-II Biomass Succession extension, v3.2.1, with modifications
+see \code{details} below. Requires the following objects in \code{sim}:
+@template FireDisturbance.
 For any given burnt pixel, the function begins by killing all cohorts
 (i.e. removing them from \code{cohortData}). Then it activates serotiny for
 serotinous species that had been present pre-fire, and reprouting for reprouter
@@ -150,23 +186,24 @@ Unlike in LANDIS-II Biomass Succession extension, v3.2.1, here we allow serotiny
 and resprouting to occur in the same pixel to reflect the competitive advantage
 of reprouters. However, for a given species only serotiny (takes precedence)
 or resprouting can be activated.
+The \code{species} table must contain the columns:
+\itemize{
+\item \code{sexualmature} -- age at sexual maturity
+\item \code{postfireregen} -- post-fire regeneration strategy ("serotiny", "resprout" or "none")
+\item \code{shadetolerance} -- shade tolerance value relative to \emph{other} species.
+\item \code{resproutage_min}, \code{resproutage_max} -- minimum and maximum age at which species can repsrout
+\item \code{resproutprob} -- probability of resporuting success (before light/shade suitability is assessed)
 }
-\section{Stand-replacing fire disturbances}{
-
-\code{FireDisturbance()} simulates post-fire mortality, serotiny and regeneration sequentially occurring after a fire.
-Post-fire mortality is assumed to be 100\% (stand-replacement). The serotiny and regeneration
-algorithms are based on those in LANDIS-II Biomass Succession extension, v3.2.1, with modifications
-see \code{details} below. Requires the following objects in \code{sim}:
-@template FireDisturbance
 }
 
 \section{Partial severity (i.e. mortality) fire disturbances}{
 
 \code{FireDisturbancePM()} simulates partial post-fire mortality, serotiny and regeneration
 sequentially after a fire. The level of mortality depends of fire severity,
-and, by default, follows the mechanisms in LANDIS-II Dynamic Fire System v3.0. Serotiny and regeneration
-algorithms algorithms are based on those in LANDIS-II Biomass Succession extension, v3.2.1,
-with modifications (see \code{FireDisturbance()}). Requires the following objects in \code{sim}:
+and, by default, follows the mechanisms in LANDIS-II Dynamic Fire System v3.0.
+Serotiny and regeneration algorithms algorithms are based on those in
+LANDIS-II Biomass Succession extension, v3.2.1, with modifications (see \code{FireDisturbance()}).
+Requires the following objects in \code{sim}:
 @template FireDisturbance
 \itemize{
 \item \code{fireDamageTable}
@@ -176,6 +213,14 @@ with modifications (see \code{FireDisturbance()}). Requires the following object
 \item \code{minRelativeB}
 Rasters of fire behaviour properties (\code{fireRSORas}, \code{fireROSRas} and \code{fireCFBRas})
 can be calculated using the \code{cffdrs} package.
+The \code{species} table must contain the columns:
+\item \code{firetolerance} -- fire tolerance value relative to \emph{other} species.
+\item \code{longevity} -- maximum species age
+\item \code{sexualmature} -- age at sexual maturity
+\item \code{postfireregen} -- post-fire regeneration strategy ("serotiny", "resprout" or "none")
+\item \code{shadetolerance} -- shade tolerance value relative to \emph{other} species.
+\item \code{resproutage_min}, \code{resproutage_max} -- minimum and maximum age at which species can repsrout
+\item \code{resproutprob} -- probability of resporuting success (before light/shade suitability is assessed)
 }
 }
 
