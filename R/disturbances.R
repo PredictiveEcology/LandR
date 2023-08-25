@@ -700,7 +700,7 @@ genPGsPostDisturbance <- function(cohortData, pixelGroupMap,
   tempCohortData <- tempCohortData[!duplicated(tempCohortData)]
 
   ## now remove dead cohorts, and keep only original columns
-  tempCohortData <- tempCohortData[B > 0, .SD, .SDcols = names(cohortDataOrig)]
+  tempCohortData <- tempCohortData[B > 0, .SD, .SDcols = names(cohortData)]
 
   return(list(cohortData = tempCohortData, pixelGroupMap = pixelGroupMap))
 }
