@@ -26,13 +26,12 @@ utils::globalVariables(c(
 #' @template verbose
 #'
 #' @section Stand-replacing fire disturbances:
-#'   `FireDisturbance()` simulates post-fire mortality, serotiny and regeneration sequentially occurring after a fire.
-#'   Post-fire mortality is assumed to be 100% (stand-replacement). The serotiny and regeneration
-#'   algorithms are based on those in LANDIS-II Biomass Succession extension, v3.2.1, with modifications
-#'   see `details` below. Requires the following objects in `sim`:
-#'   @template FireDisturbance
-#'
-#' @details For any given burnt pixel, the function begins by killing all cohorts
+#'  `FireDisturbance()` simulates post-fire mortality, serotiny and regeneration sequentially occurring after a fire.
+#'  Post-fire mortality is assumed to be 100% (stand-replacement). The serotiny and regeneration
+#'  algorithms are based on those in LANDIS-II Biomass Succession extension, v3.2.1, with modifications
+#'  see `details` below. Requires the following objects in `sim`:
+#'  @template FireDisturbance.
+#'  For any given burnt pixel, the function begins by killing all cohorts
 #'  (i.e. removing them from `cohortData`). Then it activates serotiny for
 #'  serotinous species that had been present pre-fire, and reprouting for reprouter
 #'  species. Whether a species successfully regenerates via serotiny or resprouting
@@ -44,16 +43,22 @@ utils::globalVariables(c(
 #'  and resprouting to occur in the same pixel to reflect the competitive advantage
 #'  of reprouters. However, for a given species only serotiny (takes precedence)
 #'  or resprouting can be activated.
+#'  The `species` table must contain the columns:
+#'   - `sexualmature` -- age at sexual maturity
+#'   - `postfireregen` -- post-fire regeneration strategy ("serotiny", "resprout" or "none")
+#'   - `shadetolerance` -- shade tolerance value relative to *other* species.
+#'   - `resproutage_min`, `resproutage_max` -- minimum and maximum age at which species can repsrout
+#'   - `resproutprob` -- probability of resporuting success (before light/shade suitability is assessed)
 #'
 #' @return a list of objects to be exported to sim:
-#'  * cohortData
-#'  * pixelGroupMap
-#'  * lastFireYear
-#'  * treedFirePixelTableSinceLastDisp
-#'  * serotinyResproutSuccessPixels
-#'  * severityBMap
-#'  * severityData
-#'  * postFireRegenSummary (if `calibrate == TRUE` and `!is.null(postFireRegenSummary)`)
+#'  - cohortData
+#'  - pixelGroupMap
+#'  - lastFireYear
+#'  - treedFirePixelTableSinceLastDisp
+#'  - serotinyResproutSuccessPixels
+#'  - severityBMap
+#'  - severityData
+#'  - postFireRegenSummary (if `calibrate == TRUE` and `!is.null(postFireRegenSummary)`)
 #'
 #' @references Scheller, R.M. & Miranda, B.R. (2015). LANDIS-II Biomass Succession v3.2 Extension  – User Guide.
 #' @references Scheller, R.M. & Mladenoff, D.J. (2004). A forest growth and biomass module for a landscape simulation model, LANDIS: design, validation, and application. Ecological Modelling, 180, 211–229.
@@ -62,19 +67,24 @@ utils::globalVariables(c(
 #'
 #' @export
 #' @rdname Disturbances
-FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = SpaDES.core::P(sim)$cohortDefinitionCols,
-                            calibrate = SpaDES.core::P(sim)$calibrate, postFireRegenSummary = sim$postFireRegenSummary,
+FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+                            calibrate = FALSE, postFireRegenSummary = sim$postFireRegenSummary,
                             rstCurrentBurn = sim$rstCurrentBurn, inactivePixelIndex = sim$inactivePixelIndex,
-                            pixelGroupMap = sim$pixelGroupMap, currentTime = SpaDES.core::time(sim), rasterToMatch = sim$rasterToMatch,
+                            pixelGroupMap = sim$pixelGroupMap, currentTime = NULL, rasterToMatch = sim$rasterToMatch,
                             species = sim$species, sufficientLight = sim$sufficientLight,
-                            speciesEcoregion = sim$speciesEcoregion, initialB = SpaDES.core::P(sim)$initialB,
-                            successionTimestep = SpaDES.core::P(sim)$successionTimestep,
+                            speciesEcoregion = sim$speciesEcoregion, initialB = 10,
+                            successionTimestep = 10L,
                             verbose = getOption("LandR.verbose", TRUE)) {
+  ## check
+  if (is.null(currentTime)) {
+    stop("Provide 'currentTime' as, e.g., time(sim).")
+  }
+
   # the presence of valid fire can cause three processes:
   # 1. remove species cohorts from the pixels that have been affected.
   # 2. initiate the post-fire regeneration
   # 3. change of cohortdata and pixelgroup map
-  # may be a supplemenatary function is needed to convert non-logical map
+  # may be a supplementary function is needed to convert non-logical map
   # to a logical map
   if (isTRUE(getOption("LandR.assertions"))) {
     if (!identical(NROW(cohortData), NROW(unique(cohortData, by = cohortDefinitionCols)))) {
@@ -139,7 +149,7 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
 
   ## select the pixels that have burned survivors and assess them
   burnedPixelTable <- treedFirePixelTableSinceLastDisp[pixelGroup %in% unique(burnedPixelCohortData$pixelGroup)]
-  ## expadn table to pixels
+  ## expand table to pixels
   burnedPixelCohortData <- burnedPixelTable[burnedPixelCohortData, allow.cartesian = TRUE,
                                             nomatch = 0, on = "pixelGroup"]
 
@@ -249,19 +259,28 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
 }
 
 #' @section Partial severity (i.e. mortality) fire disturbances:
-#'   `FireDisturbancePM()` simulates partial post-fire mortality, serotiny and regeneration
-#'    sequentially after a fire. The level of mortality depends of fire severity,
-#'    and, by default, follows the mechanisms in LANDIS-II Dynamic Fire System v3.0. Serotiny and regeneration
-#'    algorithms algorithms are based on those in LANDIS-II Biomass Succession extension, v3.2.1,
-#'    with modifications (see `FireDisturbance()`). Requires the following objects in `sim`:
-#'   @template FireDisturbance
+#'  `FireDisturbancePM()` simulates partial post-fire mortality, serotiny and regeneration
+#'  sequentially after a fire. The level of mortality depends of fire severity,
+#'  and, by default, follows the mechanisms in LANDIS-II Dynamic Fire System v3.0.
+#'  Serotiny and regeneration algorithms algorithms are based on those in
+#'  LANDIS-II Biomass Succession extension, v3.2.1, with modifications (see `FireDisturbance()`).
+#'  Requires the following objects in `sim`:
+#'  @template FireDisturbance
 #'   - `fireDamageTable`
 #'   - `fireRSORas` (optional)
 #'   - `fireROSRas`
 #'   - `fireCFBRas`
 #'   - `minRelativeB`
-#'   Rasters of fire behaviour properties (`fireRSORas`, `fireROSRas` and `fireCFBRas`)
-#'   can be calculated using the `cffdrs` package.
+#'  Rasters of fire behaviour properties (`fireRSORas`, `fireROSRas` and `fireCFBRas`)
+#'  can be calculated using the `cffdrs` package.
+#'  The `species` table must contain the columns:
+#'   - `firetolerance` -- fire tolerance value relative to *other* species.
+#'   - `longevity` -- maximum species age
+#'   - `sexualmature` -- age at sexual maturity
+#'   - `postfireregen` -- post-fire regeneration strategy ("serotiny", "resprout" or "none")
+#'   - `shadetolerance` -- shade tolerance value relative to *other* species.
+#'   - `resproutage_min`, `resproutage_max` -- minimum and maximum age at which species can repsrout
+#'   - `resproutprob` -- probability of resporuting success (before light/shade suitability is assessed)
 #'
 #' @param LANDISPM logical. Should partial mortality be calculated as in LANDIS-II Dynamic Fire System v3.0.
 #'   Must be `TRUE` for the time being.
@@ -279,16 +298,19 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
 #'
 #' @export
 #' @rdname Disturbances
-FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols = SpaDES.core::P(sim)$cohortDefinitionCols,
-                              calibrate = SpaDES.core::P(sim)$calibrate, LANDISPM = TRUE, postFireRegenSummary = sim$postFireRegenSummary,
+FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+                              calibrate = FALSE, LANDISPM = TRUE, postFireRegenSummary = sim$postFireRegenSummary,
                               rstCurrentBurn = sim$rstCurrentBurn, inactivePixelIndex = sim$inactivePixelIndex,
-                              pixelGroupMap = sim$pixelGroupMap, currentTime = SpaDES.core::time(sim), rasterToMatch = sim$rasterToMatch,
+                              pixelGroupMap = sim$pixelGroupMap, currentTime = NULL, rasterToMatch = sim$rasterToMatch,
                               fireDamageTable = sim$fireDamageTable, fireRSORas = sim$fireRSORas, fireROSRas = sim$fireROSRas,
                               fireCFBRas = sim$fireCFBRas, species = sim$species, sufficientLight = sim$sufficientLight,
-                              speciesEcoregion = sim$speciesEcoregion, initialB = SpaDES.core::P(sim)$initialB,
-                              minRelativeB = sim$minRelativeB,
-                              successionTimestep = SpaDES.core::P(sim)$successionTimestep,
+                              speciesEcoregion = sim$speciesEcoregion, initialB = 10,
+                              minRelativeB = sim$minRelativeB, successionTimestep = 10L,
                               verbose = getOption("LandR.verbose", TRUE)) {
+  ## check
+  if (is.null(currentTime)) {
+    stop("Provide 'currentTime' as, e.g., time(sim).")
+  }
 
   # the presence of valid fire can cause three processes:
   # 1. partially remove species cohorts from the pixels that have been affected.
@@ -486,7 +508,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
                                         speciesEcoregion, minRelativeB))
 
   burnedPixelCohortData <- siteShade[burnedPixelCohortData, on = "pixelGroup", nomatch = NA]
-  burnedPixelCohortData <- burnedPixelCohortData[is.na(siteShade), siteShade := 0]
+  burnedPixelCohortData[is.na(siteShade), siteShade := 0]
   rm(siteShade)
 
   ## clean burnedPixelCohortData from unnecessary columns
@@ -554,19 +576,37 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
       ## set ages to 1 here, because updateCohortData will only so so if there isn't an age column
       postFirePixelCohortData[is.na(age), age := 1L]
 
-      ## filter cohortData to only have unburnt pixels
-      unburnedCohortData <- addPixels2CohortData(copy(cohortData), pixelGroupMap)
-      unburnedCohortData <- unburnedCohortData[!pixelIndex %in% treedFirePixelTableSinceLastDisp$pixelIndex]
-      set(unburnedCohortData, NULL, "pixelIndex", NULL)  ## collapse pixel groups again
-      unburnedCohortData <- unburnedCohortData[!duplicated(unburnedCohortData)]
+      ## filter cohortData to only have unburnt pixels -- this is not sufficient!!!
+      ## in PGs where cohorts die in one but not other pixels, these cohorts from other pixels are added back where they were supposed to be removed.
+      # unburnedPCohortData <- addPixels2CohortData(copy(sim$cohortData), sim$pixelGroupMap)
+      # unburnedPCohortData <- unburnedPCohortData[!pixelIndex %in% treedFirePixelTableSinceLastDisp$pixelIndex]
+      # set(unburnedPCohortData, NULL, "pixelIndex", NULL)  ## collapse pixel groups again
+      # unburnedPCohortData <- unburnedPCohortData[!duplicated(unburnedPCohortData)]
+
+      ## redo PGs in all burnt pixels --
+      ## 1) we need to create a table of unburt pixels, and burnt pixels with dead and surviving cohorts of burnt pixels,
+      ## but not new cohorts (serotiny/resprout) -- these are added by updateCohortData
+      ## 2) then remove dead cohorts for updateCohortData
+      tempObjs <- genPGsPostDisturbance(cohortData = sim$cohortData,
+                                        pixelGroupMap = sim$pixelGroupMap,
+                                        disturbedPixelTable = treedFirePixelTableSinceLastDisp,
+                                        disturbedPixelCohortData = burnedPixelCohortData,
+                                        doAssertion = getOption("LandR.assertions", TRUE))
 
       outs <- updateCohortData(newPixelCohortData = postFirePixelCohortData,
-                               cohortData = unburnedCohortData,
-                               pixelGroupMap = pixelGroupMap,
+                               cohortData = tempObjs$cohortData,
+                               pixelGroupMap = tempObjs$pixelGroupMap,
                                currentTime = round(currentTime),
                                speciesEcoregion = speciesEcoregion,
                                treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
                                successionTimestep = successionTimestep)
+
+      assertPostFireDist(cohortData = tempObjs$cohortData,
+                         pixelGroupMap = tempObjs$pixelGroupMap,
+                         cohortDataNew = outs$cohortData, pixelGroupMapNew = outs$pixelGroupMap,
+                         postFirePixelCohortData = postFirePixelCohortData,
+                         burnedPixelCohortData = burnedPixelCohortData,
+                         doAssertion = getOption("LandR.assertions", TRUE))
 
       cohortData <- outs$cohortData
       pixelGroupMap <- outs$pixelGroupMap
@@ -597,3 +637,71 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
 
   return(outList)
 }
+
+
+# PeatlandThermokarst <- function()
+
+#' Re-generate new `pixelGroup`s in partially disturbed pixels.
+#'
+#' @details This function regenerates `pixelGroup`s in situations where
+#'  disturbances are not stand-replacing and create survivors/dead cohorts
+#'  in some, but potentially not all, pixels of a `pixelGroup`. This is
+#'  necessary to prevent reintroducing dead cohorts that were not affected
+#'  in the other pixels of the same, original, `pixelGroup`.
+#'  **ATTENTION** This function alone will not generate final `pixelGroups`,
+#'  and will likely need to be followed by an `updateCohortData` run.
+#'
+#' @param cohortData `data.table`. The pre-disturbance `cohortData` table
+#' @param pixelGroupMap `SpatRaster`. The pre-disturbance `pixelGroupMap`.
+#' @param disturbedPixelTable `data.table`. A table with at least the `pixelIndex`
+#'  of all disturbed pixels. Additional columns are ignored.
+#' @param disturbedPixelCohortData a `cohortData`-like table with information of dead,
+#'  and surviving, but *NOT* regenerating cohorts (cohorts for whom regeneration via, e.g., serotiny
+#'  or resprouting was succesfully activated), in *disturbed pixels only*. Dead cohorts should
+#'  age B == 0, surviving cohorts B > 0.
+#' @template doAssertion
+#'
+#' @return a named list with:
+#'  -   a `cohortData` table with the updated `pixelGroups`, as well as
+#'  survivor cohorts, but not dead cohorts.
+#'  -   a `pixelGroupMap` with the updated `pixelGroups` in disturbed pixels
+#'
+#' @export
+genPGsPostDisturbance <- function(cohortData, pixelGroupMap,
+                                  disturbedPixelTable, disturbedPixelCohortData,
+                                  doAssertion = getOption("LandR.assertions", TRUE)) {
+  ## check - are there duplicated cohorts, dead, surviving or regenerating in a given pixel?
+  cols <- c("pixelIndex", "speciesCode", "age", "B")
+  if (any(duplicated(disturbedPixelCohortData[, ..cols]))) {
+    stop("There are duplicated dead/surviving/regenerating cohorts for a given species/pixel combination")
+  }
+
+  unburnedPCohortData <- addPixels2CohortData(copy(cohortData), pixelGroupMap)
+  unburnedPCohortData <- unburnedPCohortData[!pixelIndex %in% disturbedPixelTable$pixelIndex]
+  newPCohortData <- rbind(unburnedPCohortData, disturbedPixelCohortData, fill = TRUE)
+
+  columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B")
+  cd <- newPCohortData[, c("pixelIndex", columnsForPG), with = FALSE]
+  newPCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = columnsForPG)]
+
+  ## update PGMap
+  pixelGroupMap[newPCohortData$pixelIndex] <- newPCohortData$pixelGroup
+
+  if (doAssertion) {
+    test <- setdiff(which(!is.na(pixelGroupMap[])), newPCohortData$pixelIndex)
+    if (any(pixelGroupMap[test] != 0)) {
+      stop("Bug in Biomass_regenerationPM: pixels w/o information in burnt and unburnt pixelCohortData tables")
+    }
+  }
+
+  ## collapse to PGs
+  tempCohortData <- copy(newPCohortData)
+  set(tempCohortData, NULL, "pixelIndex", NULL)
+  tempCohortData <- tempCohortData[!duplicated(tempCohortData)]
+
+  ## now remove dead cohorts, and keep only original columns
+  tempCohortData <- tempCohortData[B > 0, .SD, .SDcols = names(cohortData)]
+
+  return(list(cohortData = tempCohortData, pixelGroupMap = pixelGroupMap))
+}
+

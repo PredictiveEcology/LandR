@@ -631,3 +631,46 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
     }
   }
 }
+
+
+
+#' Assert post-fire disturbance mortality and regeneration
+#'
+#' @param cohortData object used in as `updateCohortData(cohortData = .)`
+#' @param pixelGroupMap object used in as `updateCohortData(pixelGroupMap = .)`
+#' @param cohortDataNew `cohortData` output from `updateCohortData`
+#' @param pixelGroupMapNew `pixelGroupMap` output from `updateCohortData`
+#' @param postFirePixelCohortData object used in as `updateCohortData(newPixelCohortData = .)`
+#' @param burnedPixelCohortData `cohortData`-like object containing all dead, surviving and new cohorts
+#'   (i.e. activated by serotiny/resprouting)
+#' @template doAssertion
+#'
+#' @return NULL
+#' @export
+assertPostFireDist <- function(cohortData, pixelGroupMap, cohortDataNew, pixelGroupMapNew,
+                               postFirePixelCohortData, burnedPixelCohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (doAssertion) {
+    oldPCohortData <- addPixels2CohortData(cohortData, pixelGroupMap, doAssertion = FALSE)
+    newPCohortData <- addPixels2CohortData(cohortDataNew, pixelGroupMapNew)
+    ## PGs with many pixels
+    testPGs <- oldPCohortData[pixelGroup %in% postFirePixelCohortData$pixelGroup, pixelGroup]
+    testPIs <- postFirePixelCohortData[pixelGroup %in% testPGs, pixelIndex]
+
+
+    test1 <- unique(burnedPixelCohortData[B == 0, ..cols])
+    if (nrow(newPCohortData[test1, on = cols, nomatch = 0L])) {
+      stop("Killed cohorts are still in cohortData table")
+    }
+
+    cols <- c("pixelIndex", "speciesCode", "age")
+    test2 <- unique(newPCohortData[pixelIndex %in% testPIs, ..cols])
+    test3 <- unique(postFirePixelCohortData[pixelIndex %in% testPIs, ..cols])
+    setorderv(test2, cols)
+    setorderv(test3, cols)
+
+    if (!identical(test2, test3)) {
+      stop("Post-fire disturbances miscalculated: missing survivor/regenerated cohorts")
+    }
+
+  }
+}

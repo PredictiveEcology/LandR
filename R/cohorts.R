@@ -12,18 +12,23 @@ utils::globalVariables(c(
 
 #' Add cohorts to `cohortData` and `pixelGroupMap`
 #'
-#' This is a wrapper for  `generatePixelGroups`, `initiateNewCohort` and updates to
+#' This is a wrapper for `generatePixelGroups`, `initiateNewCohort` and updates to
 #' `pixelGroupMap` via assignment to new `pixelIndex` values in `newPixelCohortData`.
 #' By running these all together, there is less chance that they will diverge.
 #' There are some checks internally for consistency.
 #'
 #' Does the following:
 #' \enumerate{
-#'   \item add new cohort data into `cohortData`;
+#'   \item add *new cohort* (not survivor) data into `cohortData`;
 #'   \item assign initial `B` and `age` for new cohort;
 #'   \item assign the new `pixelGroup` to the pixels that have new cohort;
 #'   \item update the `pixelGroup` map.
 #' }
+#' Note that if `newPixelCohortData` is generated after a disturbance
+#'   it must contain a `type` column indicating the origin of the cohorts
+#'   (e.g. "survivor", "serotiny", "resprouting"). "Survivor" cohorts will
+#'   not be added to the output objects, as they are assumed to be accounted
+#'   for in the input `cohortData` and, correspondingly, `pixelGroupMap`.
 #'
 #' @template newPixelCohortData
 #' @template cohortData
@@ -101,19 +106,18 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
     pixelIndex <- which(pixelGroupMap[] %in% cohortData$pixelGroup)
 
     # remove unnecessary columns before making cohortDataLong
-    if ("prevMortality" %in% names(cohortData)) {
-      cohortData[, prevMortality := NULL]
-    }
-
-    if ("year" %in% names(newPixelCohortData)) {
-      newPixelCohortData[, year := NULL]
-    }
+    suppressWarnings(set(cohortData, j = "prevMortality", value = NULL))
+    suppressWarnings(set(newPixelCohortData, j = "year", value = NULL))
 
     cohortDataPixelIndex <- data.table(
       pixelIndex = pixelIndex,
       pixelGroup = pixelGroupMap[][pixelIndex]
     )
     cdLong <- cohortDataPixelIndex[cohortData, on = "pixelGroup", allow.cartesian = TRUE]
+    if (!is.null(newPixelCohortData$type)) {
+      ## survivor cohorts are assumed to be in cohort data already.
+      newPixelCohortData <- newPixelCohortData[type != "survivor"]
+    }
     cohorts <- rbindlist(list(cdLong, newPixelCohortData), use.names = TRUE, fill = TRUE)
 
     columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B")
@@ -274,11 +278,10 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
   set(newPixelCohortData, NULL, "age", 1L) ## set age to 1
 
   ## Ceres: this was causing new cohorts to be initialized with maxANPP.
-  ## instead, calculate total biomass of older cohorts
+  ## instead, remove column and calculate total biomass of older cohorts in cohortData
   # set(newPixelCohortData, NULL, "sumB", 0L)
-  if (!is.null(newPixelCohortData[["sumB"]])) {
-    set(newPixelCohortData, NULL, "sumB", NULL)
-  }
+  suppressWarnings(set(newPixelCohortData, j = "sumB", value = NULL))
+
   cohortData[age >= successionTimestep, oldSumB := sum(B, na.rm = TRUE), by = "pixelGroup"]
 
   newPixelCohortData <- unique(cohortData[, .(pixelGroup, oldSumB)],
@@ -300,13 +303,12 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
     )
     set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
   } else {
-    set(newPixelCohortData, NULL, "B", asInteger(initialB)) #Feb2022 change to 10 - maxANPP is unrealistic particularly with
+    set(newPixelCohortData, NULL, "B", asInteger(initialB)) #Feb2022 change to 10 - maxANPP is unrealistic, particularly with
     # high maxANPP needed to produce realistic growth curves
   }
 
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
-                                               mortality = 0L, aNPPAct = 0L
-  )]
+                                               mortality = 0L, aNPPAct = 0L)]
 
   if (getOption("LandR.assertions")) {
     if (isTRUE(NROW(unique(newPixelCohortData, by = cohortDefinitionCols)) != NROW(newPixelCohortData))) {
