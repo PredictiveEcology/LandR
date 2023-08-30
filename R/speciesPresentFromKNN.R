@@ -30,7 +30,7 @@ projectTo <- utils::getFromNamespace("projectTo", "reproducible")
 #'   speciesPresent <- speciesPresentFromKNN(dPath = "~/data/KNN")
 #'
 #'   # To upload this:
-#'   speciesPresentRas <- raster::stack(speciesPresent)[[1]]
+#'   speciesPresentRas <- terra::rast(speciesPresent)[[1]]
 #'   fn <- "SpeciesPresentInCanadianForests.tif"
 #'   writeRaster(speciesPresentRas, file = fn)
 #'   zipFn <- gsub(".tif", ".zip", fn)
@@ -127,19 +127,27 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL) 
       url <- "https://drive.google.com/file/d/1Oj78jJBeha5L6XDBBdWDAfimgNjYc9UD/"
     }
     speciesPres <- preProcess(url = url)
-    speciesPresRas <- raster::raster(speciesPres$targetFilePath)
+    speciesPresRas <- rasterRead(speciesPres$targetFilePath)
   }
 
-  if (getOption("reproducible.useTerra", TRUE) && requireNamespace("terra")) {
-    bb <- postProcessTerra(speciesPresRas, studyArea = studyArea)
+  bb <- postProcess(x = speciesPresRas, studyArea = studyArea)
+
+  if (is(speciesPresRas, "RasterLayer")) {
+    rasLevs <- raster::levels(speciesPresRas)[[1]]
   } else {
-    bb <- postProcess(x = speciesPresRas, studyArea = studyArea)
+    rasLevs <- levels(speciesPresRas)[[1]]
   }
-  rasLevs <- raster::levels(speciesPresRas)[[1]]
-  rasLevs <- rasLevs[rasLevs$ID %in% na.omit(getValues(bb)), ]
+
+  rasLevs <- rasLevs[rasLevs$ID %in% na.omit(as.vector(bb[])), ]
   levels(bb) <- rasLevs
-  bb <- raster::deratify(bb)
-  speciesCommunities <- na.omit(factorValues2(bb, bb[], att = "category"))
+
+  if (is(speciesPresRas, "RasterLayer")) {
+    bb <- raster::deratify(bb)
+  } else {
+    bb <- as.numeric(bb)
+  }
+
+  speciesCommunities <- na.omit(factorValues2(bb, as.vector(bb[]), att = "category"))
   species <- as.character(speciesCommunities)
   species <- unique(unlist(strsplit(species, "__")))
   return(list(speciesRas = bb, speciesList = species))

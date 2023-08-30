@@ -175,11 +175,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
   }
 
   ## if the original raster was `RasterLayer`, those in the list will be also.
-  spRasts <- if (is(CASFRIRas, "Raster")) {
-    raster::stack(spRasts)
-  } else {
-    rast(spRasts)
-  }
+  spRasts <- .stack(spRasts)
 
   return(spRasts)
 }
@@ -382,8 +378,8 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   CCstack <- dropLayer(rs, which(grepl("LandType", CClayerNames)))
   CCstackNames <- names(CCstack)
 
-  if (!all(raster::minValue(CCstack) >= 0)) stop("problem with minValue of CCstack (< 0)")
-  if (!all(raster::maxValue(CCstack) <= 10)) stop("problem with maxValue of CCstack (> 10)")
+  if (!all(min(CCstack[], na.rm = TRUE) >= 0)) stop("problem with min. of CCstack (< 0)")
+  if (!all(max(CCstack[], na.rm = TRUE) <= 10)) stop("problem with max. of CCstack (> 10)")
 
   CCstack <- CCstack * 10 # convert back to percent
   NA_ids <- which(is.na(rs$LandType[]) |  # outside of studyArea polygon
@@ -430,8 +426,8 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
 
   CCstack <- dropLayer(rs, which(grepl("LandType", CClayerNames2)))
 
-  if (!all(raster::minValue(CCstack) >= 0)) stop("problem with minValue of CCstack (< 0)")
-  if (!all(raster::maxValue(CCstack) <= 10)) stop("problem with maxValue of CCstack (> 10)")
+  if (!all(min(CCstack[], na.rm = TRUE) >= 0)) stop("problem with min. of CCstack (< 0)")
+  if (!all(max(CCstack[], na.rm = TRUE) <= 10)) stop("problem with max. of CCstack (> 10)")
 
   CCstack <- CCstack * 10 # convert back to percent
   NA_ids <- which(is.na(rs$LandType[]) |  # outside of studyArea polygon
@@ -507,8 +503,8 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   }))
   names(sppLayers) <- FRIlayerNames
 
-  if (!all(minmax(sppLayers)[1,] >= 0)) stop("problem with minValue of species layers stack (< 0)")
-  if (!all(minmax(sppLayers)[2,] <= 100)) stop("problem with maxValue of species layers stack (> 100)")
+  if (!all(minmax(sppLayers)[1,] >= 0)) stop("problem with min. of species layers stack (< 0)")
+  if (!all(minmax(sppLayers)[2,] <= 100)) stop("problem with max. of species layers stack (> 100)")
 
   ## merge species layers (currently only Popu; TODO: pine?)
   idsPopu <- grep("Popu", FRIlayerNames)
@@ -586,7 +582,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
   PickellSpp <- equivalentName(PickellSpp[needPickell], sppEquiv, sppEquivCol)
 
   ## bring to memory and replace water, non veg by NAs
-  PickellRaster[] <- PickellRaster[]
+  PickellRaster[] <- as.vector(PickellRaster[])
   PickellRaster[PickellRaster[] %in% c(230, 220, 255)] <- NA_integer_
 
   ## create list and template raster
@@ -697,7 +693,7 @@ NAcover2zero <- function(speciesLayers, rasterToMatch) {
   }
 
   tempRas <- rasterToMatch
-  tempRas[!is.na(tempRas[])] <- 0
+  tempRas[!is.na(as.vector(tempRas[]))] <- 0
   namesLayers <- names(speciesLayers)
 
   message("...making sure empty pixels inside study area have 0 cover, instead of NAs ...")

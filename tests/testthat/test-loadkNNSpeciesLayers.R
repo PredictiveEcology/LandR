@@ -19,14 +19,13 @@ test_that("test download kNN SpeciesLayers with kNN website - all species", {
   if (FALSE) {
     # devtools::load_all("../LandR")
   }
-  withr::local_package("raster")
 
   mainDir <- tempdir()
   dPath <- file.path(mainDir, "inputs")
   cPath <- file.path(mainDir, "cache")
   set.seed(123)
   SA <- randomStudyArea(size = 10000000)
-  RTM <- raster(SA, res = 250)
+  RTM <- rast(SA, res = 250)
   sppEquiv <- sppEquivalencies_CA
   sppEquivCol <- "KNN"
 
@@ -56,7 +55,7 @@ test_that("test download kNN SpeciesLayers with kNN website - all species", {
                    "Needleleaf_Spp")
 
   expect_true(all(expectedSpp %in% names(speciesLayers)))
-  expect_true(compareRaster(RTM, speciesLayers, res = TRUE, orig = TRUE, stopiffalse = FALSE))
+  expect_true(.compareRas(RTM, speciesLayers, res = TRUE, stopiffalse = FALSE))
 
   ## get all available species for 2011
   httr::with_config(config = httr::config(ssl_verifypeer = .sslVerify), {
@@ -77,7 +76,7 @@ test_that("test download kNN SpeciesLayers with kNN website - all species", {
                    "Pinu_Spp", "Popu_Bal", "Popu_Tre",
                    "Pseu_Men", "Broadleaf_Spp", "Needleleaf_Spp")
   expect_true(all(expectedSpp %in% names(speciesLayers2011)))
-  expect_true(compareRaster(RTM, speciesLayers2011, res = TRUE, orig = TRUE, stopiffalse = FALSE))
+  expect_true(.compareRas(RTM, speciesLayers2011, res = TRUE, stopOnError = FALSE))
 
   options(reproducible.cachePath = opt_cachePath)
   unlink(mainDir, recursive = TRUE)
@@ -91,13 +90,12 @@ test_that("test download kNN SpeciesLayers with kNN website - three species", {
     # devtools::load_all("../LandR")
   }
 
-  withr::local_package("raster")
   mainDir <- tempdir()
   dPath <- file.path(mainDir, "inputs")
   cPath <- file.path(mainDir, "cache")
   set.seed(123)
   SA <- randomStudyArea(size = 10000000)
-  RTM <- raster(SA, res = 250)
+  RTM <- rast(SA, res = 250)
   sppEquiv <- sppEquivalencies_CA
   sppEquivCol <- "KNN"
 
@@ -120,7 +118,7 @@ test_that("test download kNN SpeciesLayers with kNN website - three species", {
                                           thresh = 0)
   })
   expect_true(all(sppEquiv$KNN %in% names(speciesLayers)))
-  expect_true(compareRaster(RTM, speciesLayers, res = TRUE, orig = TRUE, stopiffalse = FALSE))
+  expect_true(.compareRas(RTM, speciesLayers, res = TRUE, stopOnError = FALSE))
 
   ## get all available species for 2011
   httr::with_config(config = httr::config(ssl_verifypeer = .sslVerify), {
@@ -136,7 +134,7 @@ test_that("test download kNN SpeciesLayers with kNN website - three species", {
                                               thresh = 0)
   })
   expect_true(all(sppEquiv$KNN %in% names(speciesLayers2011)))
-  expect_true(compareRaster(RTM, speciesLayers2011, res = TRUE, orig = TRUE, stopiffalse = FALSE))
+  expect_true(.compareRas(RTM, speciesLayers2011, res = TRUE, stopOnError = FALSE))
 
   options(reproducible.cachePath = opt_cachePath)
   unlink(mainDir, recursive = TRUE)
@@ -150,14 +148,12 @@ test_that("test download kNN SpeciesLayers bad website - three species", {
     # devtools::load_all("../LandR")
   }
 
-  withr::local_package("raster")
-
   mainDir <- tempdir()
   dPath <- file.path(mainDir, "inputs")
   cPath <- file.path(mainDir, "cache")
   set.seed(123)
   SA <- randomStudyArea(size = 10000000)
-  RTM <- raster(SA, res = 250)
+  RTM <- rast(SA, res = 250)
   sppEquiv <- sppEquivalencies_CA
   sppEquivCol <- "KNN"
 
@@ -179,7 +175,7 @@ test_that("test download kNN SpeciesLayers bad website - three species", {
                                            thresh = 0)
   })
   expect_true(all(sppEquiv$KNN %in% names(speciesLayers)))
-  expect_true(compareRaster(RTM, speciesLayers, res = TRUE, orig = TRUE, stopiffalse = FALSE))
+  expect_true(LandR::.compareRas(RTM, speciesLayers, res = TRUE, stopOnError = FALSE))
 
   ## get all available species for 2011
   speciesLayers2011 <- prepSpeciesLayers_KNN(destinationPath = dPath,
@@ -192,7 +188,7 @@ test_that("test download kNN SpeciesLayers bad website - three species", {
                                              sppEquivCol = sppEquivCol,
                                              thresh = 0)
   expect_true(all(sppEquiv$KNN %in% names(speciesLayers2011)))
-  expect_true(compareRaster(RTM, speciesLayers2011, res = TRUE, orig = TRUE, stopiffalse = FALSE))
+  expect_true(.compareRas(RTM, speciesLayers2011, res = TRUE, stopOnError = FALSE))
 
   options(reproducible.cachePath = opt_cachePath)
   unlink(mainDir, recursive = TRUE)

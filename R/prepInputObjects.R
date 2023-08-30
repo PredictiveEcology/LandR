@@ -88,27 +88,27 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
                            rasterToMatch = as.vector(values(rasterToMatch))
   )
   if (!missing(standAgeMap)) {
-    set(pixelTable, NULL, "age", asInteger(standAgeMap[]))
-    set(pixelTable, NULL, "logAge", .logFloor(standAgeMap[]))
+    set(pixelTable, NULL, "age", asInteger(as.vector(standAgeMap[])))
+    set(pixelTable, NULL, "logAge", .logFloor(as.vector(standAgeMap[])))
   }
 
   if (!missing(biomassMap)) {
-    set(pixelTable, NULL, "totalBiomass", asInteger(biomassMap[] * 100) ) # change units)
+    set(pixelTable, NULL, "totalBiomass", asInteger(as.vector(biomassMap[]) * 100) ) # change units)
   }
 
   if (!missing(rstLCC)) {
-    set(pixelTable, NULL, "lcc", as.vector(values(rstLCC)))
+    set(pixelTable, NULL, "lcc", as.vector(rstLCC[]))
   }
 
-  #pixelTable <- data.table(#age = asInteger(ceiling(asInteger(standAgeMap[]) /
+  #pixelTable <- data.table(#age = asInteger(ceiling(asInteger(as.vector(standAgeMap[])) /
   #                           pixelGroupAgeClass) * pixelGroupAgeClass),
-  # logAge = .logFloor(standAgeMap[]),
+  # logAge = .logFloor(as.vector(standAgeMap[])),
   # initialEcoregionCode = factor(initialEcoregionCodeVals),
-  # totalBiomass = asInteger(biomassMap[] * 100), # change units
+  # totalBiomass = asInteger(as.vector(biomassMap[]) * 100), # change units
   # cover = coverMatrix,
   # pixelIndex = seq(ncell(rasterToMatch)),
-  # lcc = rstLCC[],
-  # rasterToMatch = rasterToMatch[])
+  # lcc = as.vector(rstLCC[]),
+  # rasterToMatch = as.vector(rasterToMatch[]))
 
   # Remove NAs from pixelTable
   ## 1) If in rasterToMatch
@@ -267,7 +267,7 @@ makeBiomassMap <-  function(pixelCohortData, rasterToMatch) {
   pixelData <- unique(pixelCohortData, by = "pixelIndex")
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
-  biomassMap <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(rasterToMatch)
+  biomassMap <- rasterRead(rasterToMatch)
   # suppress this message call no non-missing arguments to min;
   # returning Inf min(x@data@values, na.rm = TRUE)
   suppressWarnings(biomassMap[pixelData$pixelIndex] <- pixelData$totalBiomass)
@@ -330,7 +330,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
   pixelData <- unique(pixelCohortData, by = "pixelIndex")
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
-  pixelGroupMap <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(rasterToMatch)
+  pixelGroupMap <- rasterRead(rasterToMatch)
 
   ## suppress this message call no non-missing arguments to min;
   ## returning Inf min(x@data@values, na.rm = TRUE)
@@ -450,7 +450,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
     fun = ageFun,
     rasterToMatch = rasterToMatch
   )
-  standAgeMap[] <- asInteger(standAgeMap[])
+  standAgeMap[] <- asInteger(as.vector(standAgeMap[]))
 
   imputedPixID <- integer(0)
   if (getFires) {
@@ -607,14 +607,14 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
     } else {
       .requireNamespace("fasterize", stopOnFALSE = TRUE)
       fireRas <- fasterize::fasterize(d, raster = rasterToMatch, field = fireField)
-      fireRas[!is.na(getValues(fireRas)) & getValues(fireRas) < earliestYear] <- NA
+      fireRas[!is.na(as.vector(fireRas[])) & as.vector(fireRas[]) < earliestYear] <- NA
     }
   } else {
     if (is(rasterToMatch, "SpatRaster") && requireNamespace("terra", quietly = TRUE)) {
-      fireRas <- terra::rast(rasterToMatch, vals = NA)
+      fireRas <- rast(rasterToMatch, vals = NA)
     } else {
       fireRas <- raster::raster(rasterToMatch)
-      values(fireRas) <- NA
+      fireRas[] <- NA
     }
   }
 
@@ -662,8 +662,8 @@ replaceAgeInFires <- function(standAgeMap, firePerimeters, startTime) {
     startTime <- max(firePerimeters[], na.rm = TRUE)
   }
 
-  toChange <- !is.na(firePerimeters[]) & firePerimeters[] <= asInteger(startTime)
-  standAgeMap[] <- asInteger(standAgeMap[])
+  toChange <- !is.na(as.vector(firePerimeters[])) & as.vector(firePerimeters[]) <= asInteger(startTime)
+  standAgeMap[] <- asInteger(as.vector(standAgeMap[]))
   standAgeMap[toChange] <- asInteger(startTime) - asInteger(firePerimeters[][toChange])
   imputedPixID <- which(toChange)
 
@@ -709,7 +709,7 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
         stop(paste("Please provide a template raster to make rasterToMatch(Large).",
                    "An option is to use 'rawBiomassMap'"))
       }
-      if (!compareRaster(templateRas, studyAreaLarge, stopiffalse = FALSE)) {
+      if (!.compareRas(templateRas, studyAreaLarge, stopOnError = FALSE)) {
         ## note that extents/origin may never align if the resolution and projection do not allow for it
         templateRas <- Cache(postProcessTerra,
                              templateRas,
@@ -762,14 +762,14 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
     }
     ## covert to 'mask'
     if (!anyNA(rasterToMatch[])) {
-      whZeros <- rasterToMatch[] == 0
+      whZeros <- as.vector(rasterToMatch[]) == 0
       if (sum(whZeros) > 0) {# means there are zeros instead of NAs for RTML --> change
         rasterToMatch[whZeros] <- NA
         message("There were no NAs on the RTM, but there were zeros; converting these zeros to NA")
       }
     }
 
-    RTMvals <- rasterToMatch[]
+    RTMvals <- as.vector(rasterToMatch[])
     rasterToMatch[!is.na(RTMvals)] <- 1
   }
 

@@ -9,7 +9,6 @@ test_that("test Ward dispersal seeding algorithm", {
   }
 
   withr::local_package("data.table")
-  withr::local_package("raster")
   withr::local_package("quickPlot")
   withr::local_package("SpaDES.tools")
 
@@ -18,26 +17,26 @@ test_that("test Ward dispersal seeding algorithm", {
   if (doLarge) {
     set.seed(1234)
     message("Doing LARGE raster test -- should take more than 4 minutes")
-    reducedPixelGroupMap <- raster(
-      xmn = 50, xmx = 50 + 99 * 18000,
-      ymn = 50, ymx = 50 + 99 * 18000,
+    reducedPixelGroupMap <- rast(
+      xmin = 50, xmax = 50 + 99 * 18000,
+      ymin = 50, ymax = 50 + 99 * 18000,
       res = c(250, 250), val = 2
     )
     pgs <- 10000
     proportionRcvCells <- 0.01
     if (FALSE) { # medium sized for interaactive use
-      reducedPixelGroupMap <- raster(
-        xmn = 50, xmx = 50 + 99 * 300,
-        ymn = 50, ymx = 50 + 99 * 300,
+      reducedPixelGroupMap <- rast(
+        xmin = 50, xmax = 50 + 99 * 300,
+        ymin = 50, ymax = 50 + 99 * 300,
         res = c(250, 250), val = 2
       )
       proportionRcvCells <- 0.5
       pgs <- 30
     }
   } else {
-    reducedPixelGroupMap <- raster(
-      xmn = 50, xmx = 50 + 99 * 25,
-      ymn = 50, ymx = 50 + 99 * 25,
+    reducedPixelGroupMap <- rast(
+      xmin = 50, xmax = 50 + 99 * 25,
+      ymin = 50, ymax = 50 + 99 * 25,
       res = c(100, 100), val = 2
     )
     pgs <- 30
@@ -45,7 +44,7 @@ test_that("test Ward dispersal seeding algorithm", {
   }
 
   reducedPixelGroupMap <- SpaDES.tools::randomPolygons(reducedPixelGroupMap, numTypes = pgs)
-  Sum_of_species <- raster(reducedPixelGroupMap)
+  Sum_of_species <- rast(reducedPixelGroupMap)
   td <- tempdir()
   speciesTable <- reproducible::Cache(getSpeciesTable, dPath = td)
   speciesTable <- speciesTable[Area == "BSW"]
@@ -103,7 +102,7 @@ test_that("test Ward dispersal seeding algorithm", {
     Sum_of_species[outputSum[[pixelName]]] <- outputSum$speciesCode
 
     # Plotting
-    a <- reducedPixelGroupMap[] %in% seedReceive$pixelGroup
+    a <- as.vector(reducedPixelGroupMap[]) %in% seedReceive$pixelGroup
     sum(a)
 
     if (is.factor(seedReceiveFull$speciesCode)) {
@@ -117,12 +116,12 @@ test_that("test Ward dispersal seeding algorithm", {
     }
 
     spsOut <- lapply(sps, function(sp) {
-      ras <- raster(reducedPixelGroupMap)
+      ras <- rast(reducedPixelGroupMap)
       ras3 <- rasterizeReduced(seedReceiveFull[speciesCode == sp], reducedPixelGroupMap, "speciesCode", "pixelGroup")
-      ras[!is.na(ras3[])] <- 1
+      ras[!is.na(as.vector(ras3[]))] <- 1
 
       ras3 <- rasterizeReduced(seedSource[speciesCode == sp], reducedPixelGroupMap, "speciesCode", "pixelGroup")
-      ras[!is.na(ras3[])] <- 2
+      ras[!is.na(as.vector(ras3[]))] <- 2
 
       out <- output[speciesCode == sp]
       ras[out$pixelIndex] <- 3
@@ -141,7 +140,7 @@ test_that("test Ward dispersal seeding algorithm", {
     # i <<- i + 1;
 
     expect_true(all(unique(output$speciesCode) %in% unique(seedReceiveFull$speciesCode)))
-    expect_true(all(is.na(Sum_of_species[reducedPixelGroupMap[] > 15]))) # nothing regenerates in the pgs that don't have receive available
+    expect_true(all(is.na(Sum_of_species[as.vector(reducedPixelGroupMap[]) > 15]))) # nothing regenerates in the pgs that don't have receive available
 
     # Test whether each pixelGroup has only the species that could have arrived there
     output[, pixelGroup := reducedPixelGroupMap[pixelIndex]]
@@ -249,6 +248,10 @@ test_that("test large files", {
     fun = "readRDS",
     destinationPath = dp
   )
+
+  if (is(pixelGroupMap, "RasterLayer"))
+    pixelGroupMap <- terra::rast(pixelGroupMap)
+
   seed <- 1234
   set.seed(seed)
   dtSrc1 <- data.table::copy(dtSrc)
@@ -265,7 +268,7 @@ test_that("test large files", {
   if (whichTest == 1) { # 1 is for manual, interactive testing
     both <- dtSrc1[dtRcv1, on = c("speciesCode", "pixelGroup"), nomatch = 0]
 
-    pixelsWithSrcAndRcv <- which(pixelGroupMap[] %in% both$pixelGroup)
+    pixelsWithSrcAndRcv <- which(as.vector(pixelGroupMap[]) %in% both$pixelGroup)
 
     pixelsWithSrcAndRcv <- pixelsWithSrcAndRcv[diff(pixelsWithSrcAndRcv) == 1 &
       c(FALSE, diff(diff(pixelsWithSrcAndRcv) == 1) == 0)]
@@ -277,8 +280,8 @@ test_that("test large files", {
     dtRcv2 <- dtRcv1[pixelGroup %in% (pixGrs)]
 
     # verify
-    rcv <- which(pixelGroupMap[] %in% dtRcv2$pixelGroup)
-    src <- which(pixelGroupMap[] %in% dtSrc1$pixelGroup)
+    rcv <- which(as.vector(pixelGroupMap[]) %in% dtRcv2$pixelGroup)
+    src <- which(as.vector(pixelGroupMap[]) %in% dtSrc1$pixelGroup)
     expect_true(src %in% rcv) # src is one of the rcv
     expect_true(sum(diff(rcv) == 1) > 1) # there are 3 adjacent cells
   } else if (whichTest == 2) {
@@ -339,9 +342,9 @@ test_that("test large files", {
       newRasterCols = c("seeddistance_eff")
     )
 
-    forest <- which(!is.na(pixelGroupMap[]))
-    src <- which(!is.na(spMap[[sppp]][]))
-    recvable <- which(!is.na(receivable[]))
+    forest <- which(!is.na(as.vector(pixelGroupMap[])))
+    src <- which(!is.na(as.vector(spMap[[sppp]][])))
+    recvable <- which(!is.na(as.vector(receivable[])))
     rcvd <- out[speciesCode == sppp]$pixelIndex
 
     spMap[[sppp]][forest] <- 0
@@ -364,14 +367,15 @@ test_that("test large files", {
 
   rrDidntExist <- if (!exists("rr")) TRUE else FALSE
   suppressWarnings(rm(list = c("rr")))
-  rr <- apply(raster::stack(spMap)[[-1]][] + 1, 2, function(x) {
+
+  rr <- apply(terra::rast(spMap)[[-1]][] + 1, 2, function(x) {
     oo <- tabulate(x)
     if (length(oo) < 5) {
       oo <- c(oo, rep(0, 5 - length(oo)))
     }
     oo
   })
-  rownames(rr) <- raster::levels(spMap[[2]])[[1]][, "type"]
+  rownames(rr) <- terra::levels(spMap[[2]])[[1]][, "type"]
   rr <- t(rr)
   rr <- as.data.frame(rr)
   rr <- cbind(rr, propSrcRcved = round(rr[, 5] / (rr[, 5] + rr[, 2]), 5))
@@ -392,12 +396,11 @@ test_that("test large files", {
 
 test_that("test Ward 4 immediate neighbours", {
   withr::local_package("data.table")
-  withr::local_package("raster")
   withr::local_package("SpaDES.tools")
 
-  pixelGroupMap <- raster::raster(raster::extent(0, 1250, 0, 1750), res = 250, vals = 0)
+  pixelGroupMap <- terra::rast(terra::ext(0, 1250, 0, 1750), res = 250, vals = 0)
   mp <- SpaDES.tools::middlePixel(pixelGroupMap)
-  rc <- raster::rowColFromCell(pixelGroupMap, mp)
+  rc <- terra::rowColFromCell(pixelGroupMap, mp)
 
   pixelGroupMap[rc] <- 1
 
@@ -431,18 +434,18 @@ test_that("test Ward 4 immediate neighbours", {
   )
   # seeddistance_eff = c(75L, 400L, 30L, 100L, 80L, 60L, 400L),
   # seeddistance_max = c(100L, 5000L, 250L, 303L, 200L, 200L, 5000L)
-  cc <- raster::xyFromCell(pixelGroupMap, 15)
+  cc <- terra::xyFromCell(pixelGroupMap, 15)
 
   if (interactive()) {
-    raster::plot(pixelGroupMap)
+    terra::plot(pixelGroupMap)
   }
 
   for (i in 1:100) {
     speciesTab <- structure(
       list(
         speciesCode = unique(dtRcv$speciesCode),
-        seeddistance_eff = sample(1L:round((raster::res(pixelGroupMap)[1] / 2.1)), size = 7),
-        seeddistance_max = sample(round(res(pixelGroupMap)[1] / 1.9):(raster::res(pixelGroupMap)[1]), size = 7)
+        seeddistance_eff = sample(1L:round((terra::res(pixelGroupMap)[1] / 2.1)), size = 7),
+        seeddistance_max = sample(round(res(pixelGroupMap)[1] / 1.9):(terra::res(pixelGroupMap)[1]), size = 7)
       ),
       row.names = c(NA, -7L),
       class = c("data.table", "data.frame")
@@ -457,7 +460,7 @@ test_that("test Ward 4 immediate neighbours", {
     #  if (NROW(out[pixelIndex == 23]) == 3) {
     #    print(i); print(seed); out[, .N, by = "speciesCode"]; break}
 
-    pixSelf <- which(pixelGroupMap[] == 1)
+    pixSelf <- which(as.vector(pixelGroupMap[]) == 1)
     expect_true(NROW(speciesTab) == sum(out$pixelIndex == pixSelf))
     oo <- out[, .N, by = c("speciesCode")]
     expect_true(sum(oo$N) >= 34) # This will fail once in 1e6 times! It is OK if VERY VERY infrequently
@@ -466,12 +469,11 @@ test_that("test Ward 4 immediate neighbours", {
 
 test_that("test Ward random collection of neighbours", {
   withr::local_package("data.table")
-  withr::local_package("raster")
   withr::local_package("SpaDES.tools")
 
-  pixelGroupMap <- raster::raster(raster::extent(0, 1250, 0, 1750), res = 250, vals = 0)
+  pixelGroupMap <- terra::rast(terra::ext(0, 1250, 0, 1750), res = 250, vals = 0)
   mp <- SpaDES.tools::middlePixel(pixelGroupMap)
-  rc <- raster::rowColFromCell(pixelGroupMap, mp)
+  rc <- terra::rowColFromCell(pixelGroupMap, mp)
 
   pixelGroupMap[rc] <- 1
 
@@ -500,10 +502,10 @@ test_that("test Ward random collection of neighbours", {
     speciesCode = lets[1:7]
   )))
 
-  cc <- raster::xyFromCell(pixelGroupMap, 15)
+  cc <- terra::xyFromCell(pixelGroupMap, 15)
 
   if (interactive()) {
-    raster::plot(pixelGroupMap)
+    terra::plot(pixelGroupMap)
   }
 
   for (i in 1:100) {
@@ -519,7 +521,7 @@ test_that("test Ward random collection of neighbours", {
       successionTimestep = 1, verbose = 1
     )
 
-    pixSelf <- which(pixelGroupMap[] == 1)
+    pixSelf <- which(as.vector(pixelGroupMap[]) == 1)
     expect_true(NROW(speciesTab) == sum(out$pixelIndex == pixSelf))
     (oo <- out[, .N, by = c("speciesCode")])
     nn <- speciesTab[out, on = "speciesCode"]

@@ -26,7 +26,7 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch
 
   # change the coordinate reference for all spatialpolygons
   message("ecoregionProducer 1: ", Sys.time())
-  #ecoregionMapInStudy <- raster::intersect(ecoregionMapFull, fixErrors(aggregate(studyArea)))
+  #ecoregionMapInStudy <- intersect(ecoregionMapFull, fixErrors(aggregate(studyArea)))
 
   # Alternative
   rstEcoregion <- list()
@@ -113,7 +113,7 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
   pixelData <- unique(pixelCohortData, by = "pixelIndex")
   pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
-  ecoregionMap <-  eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(ecoregionFiles$ecoregionMap)
+  ecoregionMap <-  rasterRead(ecoregionFiles$ecoregionMap)
 
   # suppress this message call no non-missing arguments to min; returning Inf min(x@data@values, na.rm = TRUE)
   suppressWarnings(ecoregionMap[pixelData$pixelIndex] <- as.integer(pixelData$ecoregionGroup))
@@ -151,7 +151,7 @@ speciesEcoregionStack <- function(ecoregionMap, speciesEcoregion,
   fvdt <- data.table(ecoregionGroup = as.character(fv), pixelID = whNonNAs)
   se2 <- fvdt[speciesEcoregion, on = "ecoregionGroup", allow.cartesian = TRUE]
   seList <- split(se2, by = "speciesCode")
-  rasTemplate <- raster(ecoregionMap)
+  rasTemplate <- rasterRead(ecoregionMap)
   names(columns) <- columns
   spp <- names(seList)
   stks <- lapply(columns, dtList = seList, rasTemplate = rasTemplate,
@@ -174,6 +174,6 @@ createStack <- function(dtList, rasTemplate, column = "estblishprob", spp) {
         print("... Done!")
         rasTemplate
       })
-    raster::stack(outList)
 
+    .stack(outList)
 }

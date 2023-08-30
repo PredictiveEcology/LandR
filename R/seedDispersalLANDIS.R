@@ -64,10 +64,9 @@ utils::globalVariables(c(
 #'   seed <- sample(1e6, 1)
 #'   set.seed(seed)
 #'   library(data.table)
-#'   library(raster)
 #'
 #'   # keep this here for interactive testing with a larger raster
-#'   rasterTemplate <- raster(extent(0, 2500, 0, 2500), res = 100)
+#'   rasterTemplate <- LandR:::rasterRead(terra::ext(0, 2500, 0, 2500), res = 100)
 #'
 #'   # make a pixelGroupMap
 #'   pgs <- 4 # make even just because of approach below requires even
@@ -119,11 +118,11 @@ utils::globalVariables(c(
 #'     spMap$pixelGroupMap <- pixelGroupMap
 #'     for (sppp in unique(output$speciesCode)) {
 #'       spppChar <- paste0("Sp_", sppp)
-#'       spMap[[spppChar]] <- raster(pixelGroupMap)
+#'       spMap[[spppChar]] <- LandR:::rasterRead(pixelGroupMap)
 #'       ss <- unique(seedSource[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
 #'       spMap[[spppChar]][pixelGroupMap[] %in% ss$pixelGroup] <- 1
 #'
-#'       receivable <- raster(pixelGroupMap)
+#'       receivable <- LandR:::rasterRead(pixelGroupMap)
 #'       srf <- unique(seedReceiveFull[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
 #'       receivable[pixelGroupMap[] %in% srf$pixelGroup] <- 1
 #'
@@ -145,7 +144,7 @@ utils::globalVariables(c(
 #'     Plot(spMap, cols = "Set2")
 #'
 #'     # A summary
-#'     rr <- apply(raster::stack(spMap)[[-1]][] + 1, 2, tabulate)
+#'     rr <- apply(rast(spMap)[[-1]][] + 1, 2, tabulate)
 #'     rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"][1:NROW(rr)]
 #'     # next line only works if there are some places that are both source and potential to receive
 #'     # rr <- rbind(rr, propSrcRcved = round(rr[5,]/ (rr[5,]+rr[2,]), 2))
@@ -172,14 +171,14 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     origClassWasNumeric <- is.numeric(speciesTable[["speciesCode"]])
     if (is(dtSrc$speciesCode, "numeric")) {
       #if (length(unique(dtSrc$speciesCode)) != max(dtSrc$speciesCode)) {
-        # This is "numerics" that are no contiguous from 1
-        set(dtSrc, NULL, c("speciesCode"), factor(dtSrc[["speciesCode"]]))
-        origLevels <- levels(dtSrc[["speciesCode"]])
-        speciesTable <- speciesTable[as.numeric(origLevels), ]
-        set(speciesTable, NULL, c("speciesCode"),
-            factor(speciesTable[["speciesCode"]], levels = origLevels))
-        set(dtRcv, NULL, c("speciesCode"),
-            factor(dtRcv[["speciesCode"]], levels = origLevels))
+      # This is "numerics" that are no contiguous from 1
+      set(dtSrc, NULL, c("speciesCode"), factor(dtSrc[["speciesCode"]]))
+      origLevels <- levels(dtSrc[["speciesCode"]])
+      speciesTable <- speciesTable[as.numeric(origLevels), ]
+      set(speciesTable, NULL, c("speciesCode"),
+          factor(speciesTable[["speciesCode"]], levels = origLevels))
+      set(dtRcv, NULL, c("speciesCode"),
+          factor(dtRcv[["speciesCode"]], levels = origLevels))
       #}
     }
 
@@ -214,10 +213,10 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     # Create srcPixelMatrix -- which is the matrix representation
     #    of the dtSrc x speciesCode with NAs everywhere there is no
     #    species present
-    pgv <- pixelGroupMap[]
+    pgv <- as.vector(pixelGroupMap[])
 
     rasVectorTemplate <- rep(NA_integer_, ncell(pixelGroupMap))
-    rasTemplate <- raster(pixelGroupMap)
+    rasTemplate <- rasterRead(pixelGroupMap)
     srcSpeciesCodes <- sort(unique(dtSrc$speciesCode))
     names(srcSpeciesCodes) <- as.character(srcSpeciesCodes)
     cellsCanSrc <- which(pgv %in% dtSrc$pixelGroup)
@@ -507,7 +506,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
                                                                  "seeddistance_eff"])
   set(distsBySpCode, NULL, "wardProb",
       pmin(1, dispersalFn(dist = distsBySpCode$dists, cellSize = cellSize, effDist = distsBySpCode$seeddistance_eff,
-              maxDist = distsBySpCode$seeddistance_max, k = k, b = b)))
+                          maxDist = distsBySpCode$seeddistance_max, k = k, b = b)))
   set(distsBySpCode, NULL, c("seeddistance_max", "seeddistance_eff"), NULL)
   setorderv(distsBySpCode, c("dists", "speciesCode"))
 
@@ -518,6 +517,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 
   # activeIndexShrinking <- activeFullIndex
   rc1 <- rowColFromCell(pixelGroupMap, rcvFull[["pixelIndex"]])
+  colnames(rc1) <- c("row", "col")   ## terra::rowColFromCell output has no colnames
   rowOrig <- rc1[, "row"]
   colOrig <- rc1[, "col"]
 
@@ -734,7 +734,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 }
 
 spiralDistances <- function(pixelGroupMap, maxDis, cellSize) {
-  spiral <- which(focalWeight(pixelGroupMap, maxDis, type = "circle") > 0, arr.ind = TRUE) -
+  spiral <- which(focalMat(pixelGroupMap, maxDis, type = "circle") > 0, arr.ind = TRUE) -
     ceiling(maxDis/cellSize) - 1
   spiral <- cbind(spiral, dists = sqrt( (0 - spiral[,1]) ^ 2 + (0 - spiral[, 2]) ^ 2))
   spiral <- spiral[order(spiral[, "dists"], apply(abs(spiral), 1, sum),

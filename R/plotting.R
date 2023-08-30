@@ -222,7 +222,7 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
 
 plotFunction <- function(ras, studyArea, limits = NULL) {
   if (is.null(limits))
-    limits <- range(getValues(ras), na.rm = TRUE)
+    limits <- range(as.vector(ras[]), na.rm = TRUE)
   ggplot() +
     layer_spatial(ras, aes(fill = stat(band1))) +
     layer_spatial(data = studyArea, fill = "transparent", colour = "black") +

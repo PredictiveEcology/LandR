@@ -85,34 +85,79 @@ utils::globalVariables(c(
 #'
 #' @export
 #' @rdname compare
-.compareRas <- function(ras1, ...) {
+.compareRas <- function(x, ...) {
   mc <- match.call()
-
   dots <- list(...) # need to pass the ...
-  whRast <- vapply(dots, inherits, c("Raster", "SpatRaster"), FUN.VALUE = logical(1))
-  rasts <- append(list(ras1), dots[whRast])
 
-  rasts <- Map(function(ras) {
-    if (is(ras, "Raster")) {
-      rast(ras)
-    } else ras
-  }, ras = rasts)
+  ## subset spatial and non-spatial arguments
+  spatialDots <- vapply(dots, inherits, c("Raster", "SpatRaster", "Spatial", "sf", "SpatVector"), FUN.VALUE = logical(1))
 
-  dotsNotRasters <- dots[!whRast]
-  dotsNotRasters$crs <- FALSE
+  objs <- append(list(x), dots[spatialDots])
 
-  ras1 <- rasts[[1]]
+  otherArgs <- dots[!spatialDots]
 
-  for (i in 2:length(rasts)) {
-    out <- .compareCRS(ras1, rasts[[i]])
+  if (is.null(otherArgs$crs)) {
+    otherArgs$crs <- TRUE
+  }
+
+  if (is.null(otherArgs$ext)) {
+    otherArgs$ext <- TRUE
+  }
+
+  if (is.null(otherArgs$stopOnError)) {
+    otherArgs$stopOnError <- TRUE
+  }
+
+
+  whRast <- vapply(objs, inherits, c("Raster", "SpatRaster"), FUN.VALUE = logical(1))
+
+  if (any(whRast)) {
+    objs <- Map(function(ras) {
+      if (is(ras, "Raster")) {
+        rast(ras)
+      } else ras
+    }, ras = objs)
+  }
+
+  whSpatialSf <- vapply(objs, inherits, c("Spatial", "sf"), FUN.VALUE = logical(1))
+  if (any(whSpatialSf)) {
+    objs <- Map(function(vec) {
+      if (inherits(vec, c("Spatial", "sf"))) {
+        vect(vec)
+      } else vec
+    }, vec = objs)
+  }
+
+  x <- objs[[1]]
+
+  for (i in 2:length(objs)) {
+    out <- TRUE
+    if (isTRUE(otherArgs$crs)) {
+      out <- .compareCRS(x, objs[[i]])
+      otherArgs$crs <- FALSE ## prevent re-checking below.
+    }
+
     if (!isTRUE(out)) {
-      message(".compareCRS fail: ", format(mc[[i + 1]]), " is not same as ", format(mc[["ras1"]]))
-      break
+      if (isTRUE(otherArgs$stopOnError)) {
+        stop(".compareCRS fail: ", format(mc[[i + 1]]), " is not same as ", format(mc[["x"]]))
+      }
+      return(out)
     } else {
-      out <- do.call(compareGeom, append(list(ras1, rasts[[i]]), dotsNotRasters))
+      if (is(x, "SpatRaster") && is(objs[[i]], "SpatRaster")) {
+        ## note: compareGeom is failing even with 2 spatvect
+        out <- do.call(compareGeom, append(list(x, objs[[i]]), otherArgs))
+      } else {
+        if (isTRUE(otherArgs$ext)) {
+          out <- ext(x) == ext(objs[[i]])
+
+          if (isFALSE(out) && isTRUE(otherArgs$stopOnError)) {
+            stop(".compareRas fail: ", format(mc[[i + 1]]), " and ", format(mc[["x"]]), " have different extents.")
+          }
+        }
+      }
       if (!isTRUE(out)) {
-        message(".compareRas fail: ", format(mc[[i + 1]]), " is not same as ", format(mc[["ras1"]]))
-        break
+        message("compareGeom/.compareRas fail: ", format(mc[[i + 1]]), " is not same as ", format(mc[["x"]]))
+        return(out)
       }
     }
   }
@@ -124,12 +169,12 @@ utils::globalVariables(c(
 #' TODO: Move to `reproducible`
 #' TODO: expand to multiple objects
 #'
-#' @param ras1,ras2 a `Raster` or `SpatRaster` object
+#' @param x,y a `Raster`, `SpatRaster`, `sf`, `SpatVector`, or `Spatial` object
 #'
 #' @export
 #' @rdname compare
-.compareCRS <- function(ras1, ras2) {
-  st_crs(ras1) == st_crs(ras2)
+.compareCRS <- function(x, y) {
+  st_crs(x) == st_crs(y)
 }
 
 #' Determine the function with which to read a raster
@@ -359,13 +404,13 @@ plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
     } else {
       plot1 <- plot1 +
         geom_sf(data = x, aes(fill = !!sym(field)))
-       if (inherits(x[[field]], c("character", "factor"))) {
-         plot1 <- plot1 +
-           scale_fill_viridis_d(option = "cividis", na.value = "grey", limits = limits)
-       }  else {
-         plot1 <- plot1 +
-           scale_fill_viridis_c(option = "cividis", na.value = "grey", limits = limits)
-       }
+      if (inherits(x[[field]], c("character", "factor"))) {
+        plot1 <- plot1 +
+          scale_fill_viridis_d(option = "cividis", na.value = "grey", limits = limits)
+      }  else {
+        plot1 <- plot1 +
+          scale_fill_viridis_c(option = "cividis", na.value = "grey", limits = limits)
+      }
     }
     plot1 <- plot1 +
       coord_sf()

@@ -114,7 +114,7 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
 
   # if (!is.null(rstCurrentBurn)) { # anything related to fire disturbance
   #   if (extent(rstCurrentBurn) != extent(pixelGroupMap)) {
-  #     rstCurrentBurn <- raster::crop(rstCurrentBurn, extent(pixelGroupMap))
+  #     rstCurrentBurn <- crop(rstCurrentBurn, extent(pixelGroupMap))
   #   }
   # }
 

@@ -33,7 +33,7 @@ makeDummyRawBiomassMap <- function(rasterToMatch) {
                                        rescale = FALSE,
                                        verbose = FALSE)
 
-  rawBiomassMap[] <- round(abs(rawBiomassMap[]))
+  rawBiomassMap[] <- round(abs(as.vector(rawBiomassMap[])))
   return(rawBiomassMap)
 }
 
@@ -47,7 +47,8 @@ makeDummyRawBiomassMap <- function(rasterToMatch) {
 #' @export
 #' @rdname dummy-inputs
 makeDummyStandAgeMap <- function(rawBiomassMap) {
-  standAgeMap <- setValues(rawBiomassMap, asInteger(rescale(getValues(rawBiomassMap), c(1, 300))))
+  standAgeMap <- rawBiomassMap
+  standAgeMap[] <- asInteger(rescale(as.vector(rawBiomassMap[]), c(1, 300)))
   return(standAgeMap)
 }
 
@@ -81,7 +82,7 @@ makeDummyRstLCC <- function(rasterToMatch) {
 #' @rdname dummy-inputs
 makeDummyEcoregionFiles <- function(ecoregionMap, rstLCC, rasterToMatch) {
   ecoregionstatus <- data.table(active = "yes",
-                                ecoregion = unique(ecoregionMap[]))
+                                ecoregion = unique(as.vector(ecoregionMap[])))
   ecoregionstatus <- ecoregionstatus[complete.cases(ecoregionstatus)]
 
   ecoregionFiles <- Cache(ecoregionProducer,

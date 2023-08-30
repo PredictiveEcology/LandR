@@ -69,7 +69,7 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
   }
 
   rstFlammable <- asInt(rstFlammable)
-  # rstFlammable[] <- as.integer(rstFlammable[])
+  # rstFlammable[] <- as.integer(as.vector(rstFlammable[]))
   rstFlammable
 }
 
@@ -240,7 +240,7 @@ vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.a
         ## Then, sum should be numLayers of all are below vegLeadingProportion
         whMixed <- which(sum(speciesStack < (100 * vegLeadingProportion))[] == numLayers(speciesStack))
         MixedRas <- speciesStack[[1]]
-        MixedRas[!is.na(speciesStack[[1]][])] <- 0
+        MixedRas[!is.na(as.vector(speciesStack[[1]][]))] <- 0
         MixedRas[whMixed] <- max(maxFn(speciesStack)) * 1.01
 
         speciesStack$Mixed <- MixedRas
@@ -256,7 +256,7 @@ vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.a
         return(whMax)
       })
 
-      vegTypeMap <- raster(speciesStack[[1]])
+      vegTypeMap <- rasterRead(speciesStack[[1]])
 
       vegTypeMap[!nas] <- maxes
 
@@ -276,10 +276,10 @@ vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.a
 
 #' @examples
 #' library(data.table)
-#' library(raster)
+#' library(terra)
 #' x <- data.table(pixelGroup = rep(1:2, each = 2), B = c(100, 200, 20, 400),
 #'                 speciesCode = rep(c("Pice_Gla", "Popu_Tre"), 2))
-#' pixelGroupMap <- raster(extent(0,3, 0, 3), res = 1)
+#' pixelGroupMap <- rast(ext(0,3, 0, 3), res = 1)
 #' pixelGroupMap[] <- sample(1:2, size = 9, replace = TRUE)
 #' vtm <- vegTypeMapGenerator(x, pixelGroupMap = pixelGroupMap)
 #'
@@ -867,13 +867,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
                                          sppEquiv, column = sppEquivCol)
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
 
-  ## return stack and updated species names vector
-  if (length(speciesLayers)) {
-    if (is(rasterToMatch, "Raster"))
-      raster::stack(speciesLayers)
-    else
-      terra::rast(speciesLayers)
-  }
+  ## return stack
+  .stack(speciesLayers)
 }
 
 #' Load kNN species layers from online data repository
@@ -928,7 +923,13 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
 #'
 #' @export
 sumRastersBySpecies <- function(speciesLayers, layersToSum, filenameToSave, newLayerName) {
-  out <- raster::calc(raster::stack(speciesLayers[layersToSum]), sum)
+  speciesLayersStk <- .stack(speciesLayers[layersToSum])
+  if (is(speciesLayersStk, "SpatRaster")) {
+    out <- sum(speciesLayersStk)
+  } else {
+    out <- raster::calc(speciesLayersStk, sum)
+  }
+
   names(out) <- newLayerName
   writeRaster(out, filename = filenameToSave, datatype = "INT2U", overwrite = TRUE)
   out # Work around for Cache
@@ -1014,7 +1015,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
                 "using gdalwarp to make them overlap")
         if (!nzchar(Filenames(lowQualityStack[[SPP]]))) {
           LQCurName <- basename(tempfile(fileext = ".tif"))
-          lowQualityStack[[SPP]][] <- as.integer(lowQualityStack[[SPP]][])
+          lowQualityStack[[SPP]][] <- as.integer(as.vector(lowQualityStack[[SPP]][]))
 
           NAval <- 65535L
           lowQualityStack[[SPP]] <- writeRaster(lowQualityStack[[SPP]],
@@ -1106,8 +1107,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
       ## TODO: .compareRas (compareGeom) is less tolerant than st_crs, but projecting
       ## manually is a pain (we can't use postProcess because it also uses st_crs internally)
       ## for now use st_crs to compare CRS, but this is unlikely to be the best
-      if (!.compareRas(LQRast, HQRast) ||
-          st_crs(LQRast) != st_crs(HQRast))
+      if (!.compareRas(LQRast, HQRast, stopOnError = FALSE))
         stop("Stacks not identical, something is wrong with overlayStacks function.")
 
       NAs <- is.na(as.vector(HQRast[]))
@@ -1242,7 +1242,7 @@ aggregateRasByDT <- function(ras, newRas, fn = sum) {
   dt <- data.table(vals = ras[][whNonNA], ceiling(rc2 / disaggregateFactor))
   dt2 <- dt[, list(vals = fn(vals)), by = c("row", "col")]
   pixels <- cellFromRowCol(newRas, row = dt2$row, col = dt2$col)
-  newRasOut <- raster(newRas)
+  newRasOut <- rasterRead(newRas)
   newRasOut[pixels] <- dt2$vals
   names(newRasOut) <- names(ras)
   newRasOut

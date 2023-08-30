@@ -49,12 +49,12 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
 
       bothYears <- lapply(years, function(year) {
         cohortData <- qs::qread(file = file.path(resultsDir, paste0("cohortData_", year, "_year", year, ".qs")))
-        pixelGroupMap <- raster(file.path(resultsDir, paste0("pixelGroupMap_", year, "_year", year, ".tif")))
+        pixelGroupMap <- rasterRead(file.path(resultsDir, paste0("pixelGroupMap_", year, "_year", year, ".tif")))
 
         cohortDataReduced <- cohortData[, list(sumBio = sum(B, na.rm = TRUE)),
                                         by = c("speciesCode", "pixelGroup")]
 
-        biomassStack <- raster::stack(lapply(treeSpecies[["Species"]], function(tSp) {
+        biomassStack <- .stack(lapply(treeSpecies[["Species"]], function(tSp) {
           message(paste0("[", studyAreaName, "_", climateScenario, "]: creating biomass map for ",
                          tSp, " in year ", year, " [rep ", rep, "]"))
           r <- SpaDES.tools::rasterizeReduced(reduced = cohortDataReduced[speciesCode == tSp, ],
@@ -67,7 +67,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
         }))
         names(biomassStack) <- treeSpecies[["Species"]]
 
-        biomassDT <- data.table(pixelID = 1:raster::ncell(biomassStack), raster::getValues(biomassStack))
+        biomassDT <- data.table(pixelID = 1:ncell(biomassStack), biomassStack[])
         biomassDT[, totalBiomass := rowSums(.SD, na.rm = TRUE),
                   .SDcols = names(biomassDT)[names(biomassDT) != "pixelID"]]
         biomassDT <- biomassDT[totalBiomass != 0, ]
@@ -76,19 +76,25 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
                                      totalCol = "totalBiomass"),
                   .SDcols = names(biomassDT)[names(biomassDT) != "pixelID"]]
         biomassDT <- merge(biomassDT, treeType[, c("leading","newClass")])
-        allPixels <- data.table(pixelID = 1:raster::ncell(biomassStack))
+        allPixels <- data.table(pixelID = 1:ncell(biomassStack))
         biomassDTfilled <- merge(allPixels, biomassDT, all.x = TRUE, by = "pixelID")
-        leadingSpeciesRaster <- raster::setValues(raster(biomassStack), biomassDTfilled[["newClass"]])
+        leadingSpeciesRaster <- rasterRead(biomassStack)
+        leadingSpeciesRaster[] <- biomassDTfilled[["newClass"]]
         names(leadingSpeciesRaster) <- paste("biomassMap", studyAreaName, climateScenario, sep = "_")
 
         leadingSpeciesRaster
       })
       names(bothYears) <- paste0("Year", years)
 
-      leadingStackChange <- raster::calc(raster::stack(bothYears[[2]], -bothYears[[1]]),
-                                         fun = sum, na.rm = TRUE)
+      bothYearsStk <- .stack(c(bothYears[[2]], -bothYears[[1]]))
 
-      stopifnot(all(minValue(leadingStackChange) >= -1, maxValue(leadingStackChange) <= 1))
+      if (is(bothYearsStk, "SpatRaster")) {
+        leadingStackChange <- sum(bothYearsStk, na.rm = TRUE)
+      } else {
+        leadingStackChange <- raster::calc(bothYearsStk, fun = sum, na.rm = TRUE)
+      }
+
+      stopifnot(all(min(leadingStackChange[], na.rm = TRUE) >= -1, max(leadingStackChange[], na.rm = TRUE) <= 1))
 
       leadingStackChange[is.na(rasterToMatch)] <- NA
       names(leadingStackChange) <- paste("leadingMapChange", studyAreaName, climateScenario, rep, sep = "_")
@@ -99,14 +105,20 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
     fmeanLeadingChange <- file.path(outputDir, studyAreaName,
                                     paste0("leadingChange_", studyAreaName, "_", climateScenario, ".tif"))
     if (length(allReps) > 1) {
-      meanLeadingChange <- raster::calc(raster::stack(allReps), mean, na.rm = TRUE)
+      allRepsStk <- .stack(allReps)
+      if (is(allRepsStk, "SpatRaster")) {
+        meanLeadingChange <- mean(allRepsStk, na.rm = TRUE)
+      } else {
+        meanLeadingChange <- raster::calc(allRepsStk, mean, na.rm = TRUE)
+      }
     } else {
       meanLeadingChange <- allReps[[1]]
     }
     meanLeadingChange <- mask(crop(meanLeadingChange, rasterToMatch), rasterToMatch)
     writeRaster(meanLeadingChange, filename = fmeanLeadingChange, overwrite = TRUE)
 
-    maxV <- max(abs(round(minValue(meanLeadingChange), 1)), abs(round(maxValue(meanLeadingChange), 1)))
+    maxV <- max(abs(round(min(meanLeadingChange[], na.rm = TRUE), 1)),
+                abs(round(max(meanLeadingChange[], na.rm = TRUE), 1)))
     AT <- seq(-maxV, maxV, length.out = 12)
 
     pal <- RColorBrewer::brewer.pal(11, "RdYlBu")
