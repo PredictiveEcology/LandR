@@ -18,11 +18,12 @@ cohort information on burnt pixels and the following (optional) columns:
 }
 \value{
 \code{data.table} with columns \code{pixelIndex},
-\code{pixelGroup} and  \code{severityB}
+\code{pixelGroup} and \code{severityB} (absolute biomass lost)
+and \code{severityPropB} (proportion of biomass lost)
 }
 \description{
 Calculates fire severity as the loss of pre-fire to
-post-fire biomass.
+post-fire biomass (in absolute and percentual terms).
 }
 \note{
 if \code{burnedPixelCohortData} does not have a \code{B}
