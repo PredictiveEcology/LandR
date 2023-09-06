@@ -18,7 +18,7 @@ utils::globalVariables(c(
 #' @export
 #' @return `data.table` with columns `pixelIndex`,
 #'   `pixelGroup` and `severityB` (absolute biomass lost)
-#'   and `severityPercB` (% biomass lost)
+#'   and `severityPropB` (proportion of biomass lost)
 #'
 #'
 calcSeverityB <- function(cohortData, burnedPixelCohortData) {
@@ -42,7 +42,7 @@ calcSeverityB <- function(cohortData, burnedPixelCohortData) {
   ## calculate severity in terms of absolute biomass lost
   severityData[, severityB := prefireB - postfireB]
   ## calculate severity in terms of percent biomass lost
-  severityData[, severityPercB := severityB/prefireB]
+  severityData[, severityPropB := severityB/prefireB]
 
   ## drop prefireB and postfireB columns
   return(severityData[, .(pixelGroup, pixelIndex, severityB)])
