@@ -44,5 +44,5 @@ calcSeverityB <- function(cohortData, burnedPixelCohortData) {
   severityData[, severityPropB := severityB/prefireB]
 
   ## drop prefireB and postfireB columns
-  return(severityData[, .(pixelGroup, pixelIndex, severityB)])
+  return(severityData[, .(pixelGroup, pixelIndex, severityB, severityPropB)])
 }
