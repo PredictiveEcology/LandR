@@ -282,6 +282,8 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
 #'   - `resproutage_min`, `resproutage_max` -- minimum and maximum age at which species can repsrout
 #'   - `resproutprob` -- probability of resporuting success (before light/shade suitability is assessed)
 #'
+#' @param colsForPixelGroups character. `cohortData` columns used to find identical pixels in terms of
+#'   cohort composition, and group them into `pixelGroups`.
 #' @param LANDISPM logical. Should partial mortality be calculated as in LANDIS-II Dynamic Fire System v3.0.
 #'   Must be `TRUE` for the time being.
 #' @param fireDamageTable `data.table` defining upper age limit of cohorts killed by fire.
@@ -299,6 +301,7 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
 #' @export
 #' @rdname Disturbances
 FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+                              colsForPixelGroups = LandR::columnsForPixelGroups,
                               calibrate = FALSE, LANDISPM = TRUE, postFireRegenSummary = sim$postFireRegenSummary,
                               rstCurrentBurn = sim$rstCurrentBurn, inactivePixelIndex = sim$inactivePixelIndex,
                               pixelGroupMap = sim$pixelGroupMap, currentTime = NULL, rasterToMatch = sim$rasterToMatch,
@@ -674,6 +677,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
 #' @export
 genPGsPostDisturbance <- function(cohortData, pixelGroupMap,
                                   disturbedPixelTable, disturbedPixelCohortData,
+                                  colsForPixelGroups = LandR::columnsForPixelGroups,
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
   ## check - are there duplicated cohorts, dead, surviving or regenerating in a given pixel?
   cols <- c("pixelIndex", "speciesCode", "age", "B")
@@ -685,9 +689,8 @@ genPGsPostDisturbance <- function(cohortData, pixelGroupMap,
   unburnedPCohortData <- unburnedPCohortData[!pixelIndex %in% disturbedPixelTable$pixelIndex]
   newPCohortData <- rbind(unburnedPCohortData, disturbedPixelCohortData, fill = TRUE)
 
-  columnsForPG <- c("ecoregionGroup", "speciesCode", "age", "B")
-  cd <- newPCohortData[, c("pixelIndex", columnsForPG), with = FALSE]
-  newPCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = columnsForPG)]
+  cd <- newPCohortData[, c("pixelIndex", colsForPixelGroups), with = FALSE]
+  newPCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = colsForPixelGroups)]
 
   ## update PGMap
   pixelGroupMap[newPCohortData$pixelIndex] <- newPCohortData$pixelGroup
