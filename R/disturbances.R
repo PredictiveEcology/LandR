@@ -501,6 +501,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
   ## CALCULATE SIDE SHADE -----------------------------
   siteShade <- data.table(calcSiteShade(currentTime = round(currentTime), burnedPixelCohortData,
                                         speciesEcoregion, minRelativeB))
+  siteShade <- siteShade[, .(pixelGroup, siteShade)]
 
   burnedPixelCohortData <- siteShade[burnedPixelCohortData, on = "pixelGroup", nomatch = NA]
   burnedPixelCohortData[is.na(siteShade), siteShade := 0]
