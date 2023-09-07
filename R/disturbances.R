@@ -583,14 +583,19 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
       # set(unburnedPCohortData, NULL, "pixelIndex", NULL)  ## collapse pixel groups again
       # unburnedPCohortData <- unburnedPCohortData[!duplicated(unburnedPCohortData)]
 
-      ## redo PGs in all burnt pixels --
-      ## 1) we need to create a table of unburt pixels, and burnt pixels with dead and surviving cohorts of burnt pixels,
+      ## redo PGs in all burnt pixels
+      ## 1) we need to create a table of unburt pixels and burnt pixels with dead and surviving cohorts,
       ## but not new cohorts (serotiny/resprout) -- these are added by updateCohortData
-      ## 2) then remove dead cohorts for updateCohortData
+      ## 2) then remove dead cohorts for updateCohortData and redo PG
+      ## the PGs need to be done twice otherwise, once to account for cohorts that only died in some but not all pixels of a given
+      ## pixelGroup, and the second time to ensure that pixels that became similar after the death of some cohorts can
+      ## be grouped together.
+
       tempObjs <- genPGsPostDisturbance(cohortData = sim$cohortData,
                                         pixelGroupMap = sim$pixelGroupMap,
                                         disturbedPixelTable = treedFirePixelTableSinceLastDisp,
                                         disturbedPixelCohortData = burnedPixelCohortData,
+                                        colsForPixelGroups = colsForPixelGroups,
                                         doAssertion = getOption("LandR.assertions", TRUE))
 
       outs <- updateCohortData(newPixelCohortData = postFirePixelCohortData,
@@ -693,6 +698,12 @@ genPGsPostDisturbance <- function(cohortData, pixelGroupMap,
       stop("Bug in Biomass_regenerationPM: pixels w/o information in burnt and unburnt pixelCohortData tables")
     }
   }
+
+  ## remove dead cohorts and re-do pixelGroups
+  newPCohortData <- newPCohortData[B > 0]
+  cd <- newPCohortData[, c("pixelIndex", columnsForPixelGroups), with = FALSE]
+  newPCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = columnsForPixelGroups)]
+  pixelGroupMap[newPCohortData$pixelIndex] <- newPCohortData$pixelGroup
 
   ## collapse to PGs
   tempCohortData <- copy(newPCohortData)
