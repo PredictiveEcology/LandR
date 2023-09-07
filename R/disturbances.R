@@ -162,10 +162,6 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
   severityBMap[] <- rep(NA, ncell(rasterToMatch))
   severityBMap[severityData$pixelIndex] <- severityData$severityB
 
-  ## export DT and map
-  severityBMap <- severityBMap
-  severityData <- severityData
-
   ## CALCULATE SIDE SHADE -----------------------------
   # assume the fire burns all cohorts on site - siteShade calc is no longer part of serotiny.
   # sumB is not actually necessary, but added for consistency w/ Biomass_regenerationPM
@@ -494,10 +490,6 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
     severityBMap <- rasterToMatch
     severityBMap[] <- rep(NA, ncell(rasterToMatch))
     severityBMap[severityData$pixelIndex] <- severityData$severityB
-
-    ## export DT and map
-    severityBMap <- severityBMap
-    severityData <- severityData
   } else {
     ## TODO MAYBE KEEP THE SAME SEVERITY NOTION, BUT THEN USE cfb TO DETERMINE AMOUNT OF BIOMASS
     ## REMOVED PER COHORT ON AN INVERSE AGE WEIGHTED AWAY
@@ -619,9 +611,6 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
       cohortData <- outs$cohortData
       pixelGroupMap <- outs$pixelGroupMap
       pixelGroupMap <- as.int(pixelGroupMap)
-      ##########################################################
-      # rm missing cohorts (i.e., those pixelGroups that are gone due to the fire/treedFirePixelTableSinceLastDisp)
-      ##########################################################
     }
   }
 
