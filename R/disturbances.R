@@ -86,7 +86,7 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
   # 3. change of cohortdata and pixelgroup map
   # may be a supplementary function is needed to convert non-logical map
   # to a logical map
-  if (isTRUE(getOption("LandR.assertions"))) {
+  if (isTRUE(getOption("LandR.assertions", TRUE))) {
     if (!identical(NROW(cohortData), NROW(unique(cohortData, by = cohortDefinitionCols)))) {
       stop("cohortData has duplicated rows, i.e., multiple rows with the same pixelGroup, speciesCode and age")
     }
@@ -341,7 +341,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
     fireCFBRas[] <- valsCFB
   }
 
-  if (isTRUE(getOption("LandR.assertions"))) {
+  if (isTRUE(getOption("LandR.assertions", TRUE))) {
     if (!identical(NROW(cohortData), NROW(unique(cohortData, by = c("pixelGroup", "speciesCode", "age", "B"))))) {
       stop("cohortData has duplicated rows, i.e., multiple rows with the same pixelGroup, speciesCode and age")
     }
@@ -426,7 +426,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
   severityData <- severityData[, .(pixelIndex, pixelGroup, severity)]
 
   ## add severity to survivor table.
-  if (getOption("LandR.assertions"))
+  if (isTRUE(getOption("LandR.assertions", TRUE)))
     if (!all(burnedPixelCohortData$pixelGroup %in% severityData$pixelGroup)) {
       warning("Some burnt pixels no fire behaviour indices or severity.\n",
               "Please debug Biomass_regenerationPM::fireDisturbance")
@@ -460,7 +460,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
     burnedPixelCohortData <- fireDamageTable[burnedPixelCohortData, on = "severityToleranceDif",
                                              nomatch = NA]
 
-    if (getOption("LandR.assertions", TRUE)) {
+    if (isTRUE(getOption("LandR.assertions", TRUE))) {
       if (!all(is.na(burnedPixelCohortData[(severityToleranceDif > max(fireDamageTable$severityToleranceDif) &
                                             severityToleranceDif < min(fireDamageTable$severityToleranceDif)),
                                            agesKilled])))
