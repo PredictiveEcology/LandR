@@ -218,13 +218,13 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
       if (verbose > 0)
         message(blue("Post serotiny and resprouting"))
 
-      outs <- updateCohortData(newPixelCohortData = postFirePixelCohortData,
-                               cohortData = cohortData,
+      outs <- updateCohortData(newPixelCohortData = copy(postFirePixelCohortData),
+                               cohortData = copy(cohortData),
                                pixelGroupMap = pixelGroupMap,
                                currentTime = round(currentTime),
-                               speciesEcoregion = speciesEcoregion,
+                               speciesEcoregion = copy(speciesEcoregion),
                                cohortDefinitionCols = cohortDefinitionCols,
-                               treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
+                               treedFirePixelTableSinceLastDisp = copy(treedFirePixelTableSinceLastDisp),
                                initialB = initialB,
                                successionTimestep = successionTimestep)
 
@@ -593,16 +593,15 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
                                         colsForPixelGroups = colsForPixelGroups,
                                         doAssertion = getOption("LandR.assertions", TRUE))
 
-      outs <- updateCohortData(newPixelCohortData = postFirePixelCohortData,
-                               cohortData = tempObjs$cohortData,
+      outs <- updateCohortData(newPixelCohortData = copy(postFirePixelCohortData),
+                               cohortData = copy(tempObjs$cohortData),
                                pixelGroupMap = tempObjs$pixelGroupMap,
                                currentTime = round(currentTime),
-                               speciesEcoregion = speciesEcoregion,
-                               treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
+                               speciesEcoregion = copy(speciesEcoregion),
+                               treedFirePixelTableSinceLastDisp = copy(treedFirePixelTableSinceLastDisp),
                                successionTimestep = successionTimestep)
 
-      assertPostFireDist(cohortData = tempObjs$cohortData,
-                         pixelGroupMap = tempObjs$pixelGroupMap,
+      assertPostFireDist(cohortData = tempObjs$cohortData, pixelGroupMap = tempObjs$pixelGroupMap,
                          cohortDataNew = outs$cohortData, pixelGroupMapNew = outs$pixelGroupMap,
                          postFirePixelCohortData = postFirePixelCohortData,
                          burnedPixelCohortData = burnedPixelCohortData,
