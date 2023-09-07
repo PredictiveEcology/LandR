@@ -708,10 +708,8 @@ genPGsPostDisturbance <- function(cohortData, pixelGroupMap,
   ## collapse to PGs
   tempCohortData <- copy(newPCohortData)
   set(tempCohortData, NULL, "pixelIndex", NULL)
-  tempCohortData <- tempCohortData[!duplicated(tempCohortData)]
-
-  ## now remove dead cohorts, and keep only original columns
-  tempCohortData <- tempCohortData[B > 0, .SD, .SDcols = names(cohortData)]
+  cols <- names(cohortData)   ## need to follow cohortData as there may be other columns in tempCohortData (e.g. siteShade)
+  tempCohortData <- tempCohortData[!duplicated(tempCohortData[, .SD, .SDcols = cols])]
 
   return(list(cohortData = tempCohortData, pixelGroupMap = pixelGroupMap))
 }
