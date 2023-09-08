@@ -231,9 +231,6 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
       cohortData <- outs$cohortData
       pixelGroupMap <- outs$pixelGroupMap
       pixelGroupMap <- as.int(pixelGroupMap)
-      ##########################################################
-      # rm missing cohorts (i.e., those pixelGroups that are gone due to the fire/treedFirePixelTableSinceLastDisp)
-      ##########################################################
     }
   }
 
@@ -687,7 +684,7 @@ genPGsPostDisturbance <- function(cohortData, pixelGroupMap,
   if (doAssertion) {
     test <- setdiff(which(!is.na(pixelGroupMap[])), newPCohortData$pixelIndex)
     if (any(pixelGroupMap[test] != 0)) {
-      stop("Bug in Biomass_regenerationPM: pixels w/o information in burnt and unburnt pixelCohortData tables")
+      stop("Bug in Biomass_regenerationPM: not all pixels are in the joint burnt and unburnt pixelCohortData table")
     }
   }
 
