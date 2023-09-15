@@ -592,7 +592,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
                                         disturbedPixelTable = treedFirePixelTableSinceLastDisp,
                                         disturbedPixelCohortData = burnedPixelCohortData,
                                         colsForPixelGroups = colsForPixelGroups,
-                                        doAssertion = getOption("LandR.assertions", TRUE))
+                                        doAssertion = doAssertion)
 
       outs <- updateCohortData(newPixelCohortData = copy(postFirePixelCohortData),
                                cohortData = copy(tempObjs$cohortData),
@@ -606,7 +606,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
                          cohortDataNew = outs$cohortData, pixelGroupMapNew = outs$pixelGroupMap,
                          postFirePixelCohortData = postFirePixelCohortData,
                          burnedPixelCohortData = burnedPixelCohortData,
-                         doAssertion = getOption("LandR.assertions", TRUE))
+                         doAssertion = doAssertion)
 
       cohortData <- outs$cohortData
       pixelGroupMap <- outs$pixelGroupMap
