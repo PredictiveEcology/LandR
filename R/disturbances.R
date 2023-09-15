@@ -698,6 +698,8 @@ genPGsPostDisturbance <- function(cohortData, pixelGroupMap,
   newPCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = columnsForPixelGroups)]
   pixelGroupMap[newPCohortData$pixelIndex] <- newPCohortData$pixelGroup
 
+  ## recalculate sumB
+  newPCohortData[, sumB := sum(B, na.rm = TRUE), by = pixelGroup]
   ## collapse to PGs
   tempCohortData <- copy(newPCohortData)
   set(tempCohortData, NULL, "pixelIndex", NULL)
