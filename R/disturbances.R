@@ -73,7 +73,7 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
                             pixelGroupMap = sim$pixelGroupMap, currentTime = NULL, rasterToMatch = sim$rasterToMatch,
                             species = sim$species, sufficientLight = sim$sufficientLight,
                             speciesEcoregion = sim$speciesEcoregion, initialB = 10,
-                            successionTimestep = 10L, doAssertion = isTRUE(getOption("LandR.assertions", TRUE)),
+                            successionTimestep = 10L, doAssertion = getOption("LandR.assertions", TRUE),
                             verbose = getOption("LandR.verbose", TRUE)) {
   ## check
   if (is.null(currentTime)) {
@@ -302,7 +302,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
                               fireCFBRas = sim$fireCFBRas, species = sim$species, sufficientLight = sim$sufficientLight,
                               speciesEcoregion = sim$speciesEcoregion, initialB = 10,
                               minRelativeB = sim$minRelativeB, successionTimestep = 10L,
-                              doAssertion = isTRUE(getOption("LandR.assertions", TRUE)),
+                              doAssertion = getOption("LandR.assertions", TRUE),
                               verbose = getOption("LandR.verbose", TRUE)) {
   ## check
   if (is.null(currentTime)) {
