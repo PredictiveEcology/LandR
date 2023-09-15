@@ -603,7 +603,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
                                initialB = initialB,
                                successionTimestep = successionTimestep)
 
-      assertPostFireDist(cohortData = tempObjs$cohortData, pixelGroupMap = tempObjs$pixelGroupMap,
+      assertPostFireDist(cohortDataOrig = tempObjs$cohortData, pixelGroupMapOrig = tempObjs$pixelGroupMap,
                          cohortDataNew = outs$cohortData, pixelGroupMapNew = outs$pixelGroupMap,
                          postFirePixelCohortData = postFirePixelCohortData,
                          burnedPixelCohortData = burnedPixelCohortData,
