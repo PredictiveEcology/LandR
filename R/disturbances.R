@@ -73,7 +73,7 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
                             pixelGroupMap = sim$pixelGroupMap, currentTime = NULL, rasterToMatch = sim$rasterToMatch,
                             species = sim$species, sufficientLight = sim$sufficientLight,
                             speciesEcoregion = sim$speciesEcoregion, initialB = 10,
-                            successionTimestep = 10L,
+                            successionTimestep = 10L, doAssertion = isTRUE(getOption("LandR.assertions", TRUE)),
                             verbose = getOption("LandR.verbose", TRUE)) {
   ## check
   if (is.null(currentTime)) {
@@ -86,7 +86,7 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
   # 3. change of cohortdata and pixelgroup map
   # may be a supplementary function is needed to convert non-logical map
   # to a logical map
-  if (isTRUE(getOption("LandR.assertions", TRUE))) {
+  if (doAssertion) {
     if (!identical(NROW(cohortData), NROW(unique(cohortData, by = cohortDefinitionCols)))) {
       stop("cohortData has duplicated rows, i.e., multiple rows with the same pixelGroup, speciesCode and age")
     }
@@ -302,6 +302,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
                               fireCFBRas = sim$fireCFBRas, species = sim$species, sufficientLight = sim$sufficientLight,
                               speciesEcoregion = sim$speciesEcoregion, initialB = 10,
                               minRelativeB = sim$minRelativeB, successionTimestep = 10L,
+                              doAssertion = isTRUE(getOption("LandR.assertions", TRUE)),
                               verbose = getOption("LandR.verbose", TRUE)) {
   ## check
   if (is.null(currentTime)) {
@@ -334,7 +335,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
     fireCFBRas[] <- valsCFB
   }
 
-  if (isTRUE(getOption("LandR.assertions", TRUE))) {
+  if (doAssertion) {
     if (!identical(NROW(cohortData), NROW(unique(cohortData, by = c("pixelGroup", "speciesCode", "age", "B"))))) {
       stop("cohortData has duplicated rows, i.e., multiple rows with the same pixelGroup, speciesCode and age")
     }
@@ -419,11 +420,13 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
   severityData <- severityData[, .(pixelIndex, pixelGroup, severity)]
 
   ## add severity to survivor table.
-  if (isTRUE(getOption("LandR.assertions", TRUE)))
+  if (doAssertion) {
     if (!all(burnedPixelCohortData$pixelGroup %in% severityData$pixelGroup)) {
       warning("Some burnt pixels no fire behaviour indices or severity.\n",
               "Please debug Biomass_regenerationPM::fireDisturbance")
     }
+  }
+
   burnedPixelCohortData <- severityData[burnedPixelCohortData,
                                         on = .(pixelGroup, pixelIndex),
                                         allow.cartesian = TRUE]
@@ -448,12 +451,12 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
     ## find the % reduction in biomass:
     ## agesKilled w/ NAs come from observed severityToleranceDif having no matches in table,
     ## so they are beyond the range of values
-    ## if the observed severityToleranceDif is higher than table values, then  the fire damage is maximum
+    ## if the observed severityToleranceDif is higher than table values, then the fire damage is maximum
     ## if the observed severityToleranceDif is lower than table values, then there is no fire damage
     burnedPixelCohortData <- fireDamageTable[burnedPixelCohortData, on = "severityToleranceDif",
                                              nomatch = NA]
 
-    if (isTRUE(getOption("LandR.assertions", TRUE))) {
+    if (doAssertion) {
       if (!all(is.na(burnedPixelCohortData[(severityToleranceDif > max(fireDamageTable$severityToleranceDif) &
                                             severityToleranceDif < min(fireDamageTable$severityToleranceDif)),
                                            agesKilled])))
