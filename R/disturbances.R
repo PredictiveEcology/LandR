@@ -600,6 +600,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
                                currentTime = round(currentTime),
                                speciesEcoregion = copy(speciesEcoregion),
                                treedFirePixelTableSinceLastDisp = copy(treedFirePixelTableSinceLastDisp),
+                               initialB = initialB,
                                successionTimestep = successionTimestep)
 
       assertPostFireDist(cohortData = tempObjs$cohortData, pixelGroupMap = tempObjs$pixelGroupMap,
