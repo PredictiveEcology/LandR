@@ -5,6 +5,7 @@
 * fix bug in `calcSeverityB`: output table was missing the proportion of B killed.
 * new functions used to estimate maximum biomass (`maxB`) and species establishment probabilities (`SEP`)
 * new function to update the `speciesEcoregion` table (brought over from Biomass_speciesParameters module), using estimated `inflationFactor` and `mANPPproportion` to adjust `maxB` and `maxANPP`, respectively. 
+* new functions to simulate disturbances
 
 # LandR 1.1.0
 
