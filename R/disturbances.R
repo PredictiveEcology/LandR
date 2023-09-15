@@ -594,7 +594,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
                                         colsForPixelGroups = colsForPixelGroups,
                                         doAssertion = doAssertion)
 
-      outs <- updateCohortData(newPixelCohortData = copy(postFirePixelCohortData),
+      outs <- updateCohortData(newPixelCohortData = copy(postFirePixelCohortData[, -"pixelGroup", with = FALSE]),
                                cohortData = copy(tempObjs$cohortData),
                                pixelGroupMap = tempObjs$pixelGroupMap,
                                currentTime = round(currentTime),
