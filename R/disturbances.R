@@ -700,12 +700,25 @@ genPGsPostDisturbance <- function(cohortData, pixelGroupMap,
 
   ## recalculate sumB
   newPCohortData[, sumB := sum(B, na.rm = TRUE), by = pixelGroup]
+
+  ## check for duplicates at pixel-level
+  if (doAssertion) {
+    if (any(duplicated(newPCohortData[, .(speciesCode, age, pixelIndex)]))) {
+      stop("Duplicate cohorts in pixels were found after burning, serotiny and resprouting")
+    }
+  }
+
   ## collapse to PGs
   tempCohortData <- copy(newPCohortData)
   set(tempCohortData, NULL, "pixelIndex", NULL)
   cols <- c("pixelGroup", "speciesCode", "ecoregionGroup", "age")
   tempCohortData <- tempCohortData[!duplicated(tempCohortData[, ..cols])]
 
+  if (doAssertion) {
+    if (any(duplicated(tempCohortData[, .(speciesCode, age, pixelGroup)]))) {
+      stop("Duplicate cohorts in pixelGroups were found after burning, serotiny and resprouting")
+    }
+  }
   return(list(cohortData = tempCohortData, pixelGroupMap = pixelGroupMap))
 }
 
