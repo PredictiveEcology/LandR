@@ -1,5 +1,6 @@
 utils::globalVariables(c(
-  ".", ":=", "B", "pixelGroup", "postfireB", "prefireB", "severityB", "speciesCode"
+  ".", ":=", "B", "pixelGroup", "postfireB", "prefireB",
+  "severityB", "severityPropB", "speciesCode"
 ))
 
 #' Calculate fire severity

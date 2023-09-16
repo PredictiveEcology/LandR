@@ -23,6 +23,7 @@ utils::globalVariables(c(
 #' @template speciesEcoregion
 #' @template initialB
 #' @template successionTimestep
+#' @template doAssertion
 #' @template verbose
 #'
 #' @section Stand-replacing fire disturbances:
