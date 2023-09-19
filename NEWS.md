@@ -1,6 +1,7 @@
 # LandR (development version)
 
 * further adaptations to `terra` package
+* remove `gdalUtilities` dependency
 * fix bug in `prepInputLCC`: `orig` argument no longer accepted by `terra::compareGeom`
 * fix bug in `calcSeverityB`: output table was missing the proportion of B killed.
 * new functions used to estimate maximum biomass (`maxB`) and species establishment probabilities (`SEP`)
