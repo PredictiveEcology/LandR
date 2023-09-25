@@ -572,13 +572,6 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
       ## set ages to 1 here, because updateCohortData will only so so if there isn't an age column
       postFirePixelCohortData[is.na(age), age := 1L]
 
-      ## filter cohortData to only have unburnt pixels -- this is not sufficient!!!
-      ## in PGs where cohorts die in one but not other pixels, these cohorts from other pixels are added back where they were supposed to be removed.
-      # unburnedPCohortData <- addPixels2CohortData(copy(sim$cohortData), sim$pixelGroupMap)
-      # unburnedPCohortData <- unburnedPCohortData[!pixelIndex %in% treedFirePixelTableSinceLastDisp$pixelIndex]
-      # set(unburnedPCohortData, NULL, "pixelIndex", NULL)  ## collapse pixel groups again
-      # unburnedPCohortData <- unburnedPCohortData[!duplicated(unburnedPCohortData)]
-
       ## redo PGs in all burnt pixels
       ## 1) we need to create a table of unburt pixels and burnt pixels with dead and surviving cohorts,
       ## but not new cohorts (serotiny/resprout) -- these are added by updateCohortData
