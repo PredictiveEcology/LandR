@@ -676,9 +676,9 @@ genPGsPostDisturbance <- function(cohortData, pixelGroupMap,
     stop("There are duplicated dead/surviving/regenerating cohorts for a given species/pixel combination")
   }
 
-  unburnedPCohortData <- addPixels2CohortData(copy(cohortData), pixelGroupMap)
-  unburnedPCohortData <- unburnedPCohortData[!pixelIndex %in% disturbedPixelTable$pixelIndex]
-  newPCohortData <- rbind(unburnedPCohortData, disturbedPixelCohortData, fill = TRUE)
+  undisturbedPCohortData <- addPixels2CohortData(copy(cohortData), pixelGroupMap)
+  undisturbedPCohortData <- undisturbedPCohortData[!pixelIndex %in% disturbedPixelTable$pixelIndex]
+  newPCohortData <- rbind(undisturbedPCohortData, disturbedPixelCohortData, fill = TRUE)
 
   cd <- newPCohortData[, c("pixelIndex", colsForPixelGroups), with = FALSE]
   newPCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = colsForPixelGroups)]
