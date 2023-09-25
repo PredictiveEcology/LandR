@@ -20,12 +20,14 @@ FireDisturbance(
   speciesEcoregion = sim$speciesEcoregion,
   initialB = 10,
   successionTimestep = 10L,
+  doAssertion = getOption("LandR.assertions", TRUE),
   verbose = getOption("LandR.verbose", TRUE)
 )
 
 FireDisturbancePM(
   cohortData = sim$cohortData,
   cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+  colsForPixelGroups = LandR::columnsForPixelGroups,
   calibrate = FALSE,
   LANDISPM = TRUE,
   postFireRegenSummary = sim$postFireRegenSummary,
@@ -44,6 +46,7 @@ FireDisturbancePM(
   initialB = 10,
   minRelativeB = sim$minRelativeB,
   successionTimestep = 10L,
+  doAssertion = getOption("LandR.assertions", TRUE),
   verbose = getOption("LandR.verbose", TRUE)
 )
 }
@@ -135,7 +138,14 @@ excluding cohorts with ages less than \code{successionTimestep}.}
 \item{successionTimestep}{The time between successive seed dispersal events.
 In LANDIS-II, this is called "Succession Timestep".}
 
+\item{doAssertion}{A logical indicating whether some internal tests should be run to
+ensure the function is running correctly.
+Default: \code{getOption("LandR.assertions", TRUE)}.}
+
 \item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
+
+\item{colsForPixelGroups}{character. \code{cohortData} columns used to find identical pixels in terms of
+cohort composition, and group them into \code{pixelGroups}.}
 
 \item{LANDISPM}{logical. Should partial mortality be calculated as in LANDIS-II Dynamic Fire System v3.0.
 Must be \code{TRUE} for the time being.}

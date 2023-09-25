@@ -39,10 +39,16 @@ prepInputsStandAgeMap(
 
 \item{filename2}{passed to \code{prepInputs} of stand age map}
 
-\item{fireURL}{url to download fire polygons used to update age map. If NULL or NA age imputation is bypassed.}
+\item{firePerimeters}{fire raster layer fire year values.}
 
 \item{fireURL}{url to download fire polygons used to update age map. If NULL or NA age
 imputation is bypassed. Requires passing \code{rasterToMatch}. Only used if \code{firePerimeters}
+is missing.}
+
+\item{fireFun}{passed to \code{prepInputs} of fire data. Only used if \code{firePerimeters}
+is missing.}
+
+\item{fireField}{field used to rasterize fire polys. Only used if \code{firePerimeters}
 is missing.}
 
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent

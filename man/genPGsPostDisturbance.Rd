@@ -9,6 +9,7 @@ genPGsPostDisturbance(
   pixelGroupMap,
   disturbedPixelTable,
   disturbedPixelCohortData,
+  colsForPixelGroups = LandR::columnsForPixelGroups,
   doAssertion = getOption("LandR.assertions", TRUE)
 )
 }

@@ -5,8 +5,8 @@
 \title{Assert post-fire disturbance mortality and regeneration}
 \usage{
 assertPostFireDist(
-  cohortData,
-  pixelGroupMap,
+  cohortDataOrig,
+  pixelGroupMapOrig,
   cohortDataNew,
   pixelGroupMapNew,
   postFirePixelCohortData,
@@ -15,9 +15,9 @@ assertPostFireDist(
 )
 }
 \arguments{
-\item{cohortData}{object used in as \code{updateCohortData(cohortData = .)}}
+\item{cohortDataOrig}{object used in as \code{updateCohortData(cohortData = .)}}
 
-\item{pixelGroupMap}{object used in as \code{updateCohortData(pixelGroupMap = .)}}
+\item{pixelGroupMapOrig}{object used in as \code{updateCohortData(pixelGroupMap = .)}}
 
 \item{cohortDataNew}{\code{cohortData} output from \code{updateCohortData}}
 
