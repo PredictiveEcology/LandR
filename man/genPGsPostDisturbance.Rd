@@ -26,6 +26,9 @@ and surviving, but \emph{NOT} regenerating cohorts (cohorts for whom regeneratio
 or resprouting was succesfully activated), in \emph{disturbed pixels only}. Dead cohorts should
 age B == 0, surviving cohorts B > 0.}
 
+\item{colsForPixelGroups}{character. \code{cohortData} columns used to find identical pixels in terms of
+cohort composition, and group them into \code{pixelGroups}.}
+
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}

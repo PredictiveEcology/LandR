@@ -276,8 +276,7 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
 #'   - `resproutage_min`, `resproutage_max` -- minimum and maximum age at which species can repsrout
 #'   - `resproutprob` -- probability of resporuting success (before light/shade suitability is assessed)
 #'
-#' @param colsForPixelGroups character. `cohortData` columns used to find identical pixels in terms of
-#'   cohort composition, and group them into `pixelGroups`.
+#' @template colsForPixelGroups
 #' @param LANDISPM logical. Should partial mortality be calculated as in LANDIS-II Dynamic Fire System v3.0.
 #'   Must be `TRUE` for the time being.
 #' @param fireDamageTable `data.table` defining upper age limit of cohorts killed by fire.
@@ -658,6 +657,7 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
 #'  and surviving, but *NOT* regenerating cohorts (cohorts for whom regeneration via, e.g., serotiny
 #'  or resprouting was succesfully activated), in *disturbed pixels only*. Dead cohorts should
 #'  age B == 0, surviving cohorts B > 0.
+#' @template colsForPixelGroups
 #' @template doAssertion
 #'
 #' @return a named list with:
