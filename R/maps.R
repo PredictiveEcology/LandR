@@ -1003,7 +1003,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' @keywords internal
 .overlay <- function(SPP, HQ, LQ, hqLarger, highQualityStack, lowQualityStack, #nolint
                      outputFilenameSuffix = "overlay", destinationPath) {
-  if (requireNamespace("gdalUtilities", quietly = TRUE)) {
+  # if (requireNamespace("gdalUtilities", quietly = TRUE)) {
     ## if HQ & LQ have data, pool
     if (HQ & LQ) {
       ## check equality of raster attributes and correct if necessary
@@ -1142,9 +1142,9 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
         return(HQRast)
       }
     }
-  } else {
-    stop("Package 'gdalUtilities' is required but not installed.")
-  }
+  # } else {
+  #   stop("Package 'gdalUtilities' is required but not installed.")
+  # }
 }
 
 #' Merge species percent-cover rasters
