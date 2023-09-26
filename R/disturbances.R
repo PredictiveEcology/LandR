@@ -569,17 +569,10 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
                                        use.names = TRUE, fill = TRUE)
       postFirePixelCohortData[is.na(type), type := "survivor"]
 
-      ## set ages to 1 here, because updateCohortData will only so so if there isn't an age column
+      ## set ages to 1 here, because updateCohortData will only do so if there isn't an age column
       postFirePixelCohortData[is.na(age), age := 1L]
 
       ## redo PGs in all burnt pixels
-      ## 1) we need to create a table of unburt pixels and burnt pixels with dead and surviving cohorts,
-      ## but not new cohorts (serotiny/resprout) -- these are added by updateCohortData
-      ## 2) then remove dead cohorts for updateCohortData and redo PG
-      ## the PGs need to be done twice otherwise, once to account for cohorts that only died in some but not all pixels of a given
-      ## pixelGroup, and the second time to ensure that pixels that became similar after the death of some cohorts can
-      ## be grouped together.
-
       tempObjs <- genPGsPostDisturbance(cohortData = sim$cohortData,
                                         pixelGroupMap = sim$pixelGroupMap,
                                         disturbedPixelTable = treedFirePixelTableSinceLastDisp,
@@ -635,12 +628,20 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
 #' Re-generate new `pixelGroup`s in partially disturbed pixels.
 #'
 #' @details This function regenerates `pixelGroup`s in situations where
-#'  disturbances are not stand-replacing and create survivors/dead cohorts
-#'  in some, but potentially not all, pixels of a `pixelGroup`. This is
+#'  disturbances are not stand-replacing and create survivor and dead
+#'  cohorts in some, but potentially not all, pixels of a `pixelGroup`. This is
 #'  necessary to prevent reintroducing dead cohorts that were not affected
 #'  in the other pixels of the same, original, `pixelGroup`.
 #'  **ATTENTION** This function alone will not generate final `pixelGroups`,
 #'  and will likely need to be followed by an `updateCohortData` run.
+#'  The function:
+#'  1) creates a table of undisturbed pixels, and disturbed pixels with dead and surviving cohorts
+#'  but not new cohorts (e.g. from serotiny/resprouting) -- these are added by `updateCohortData`;
+#'  2) generates `pixelGroups` considering these dead and surviving cohorts -- this ensures that
+#'  we account for cohorts that died in some but not all pixels of a given `pixelGroup`;
+#'  3) then removes dead cohorts (as they should not be in tables for downstream
+#'  functions like `updateCohortData`) and recalculates `pixelGroups` -- this ensures that
+#'  pixels that became similar/dissimilar after the death of some cohorts can form new `pixelGroups`.
 #'
 #' @param cohortData `data.table`. The pre-disturbance `cohortData` table
 #' @param pixelGroupMap `SpatRaster`. The pre-disturbance `pixelGroupMap`.

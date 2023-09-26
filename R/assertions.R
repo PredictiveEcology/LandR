@@ -652,7 +652,7 @@ assertPostFireDist <- function(cohortDataOrig, pixelGroupMapOrig, cohortDataNew,
   if (doAssertion) {
     oldPCohortData <- addPixels2CohortData(cohortDataOrig, pixelGroupMapOrig, doAssertion = FALSE)
     newPCohortData <- addPixels2CohortData(cohortDataNew, pixelGroupMapNew)
-    ## PGs with many pixels
+
     testPGs <- oldPCohortData[pixelGroup %in% postFirePixelCohortData$pixelGroup, pixelGroup]
     testPIs <- postFirePixelCohortData[pixelGroup %in% testPGs, pixelIndex]
 
