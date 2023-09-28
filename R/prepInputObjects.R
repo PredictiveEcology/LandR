@@ -714,7 +714,7 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
         templateRas <- Cache(postProcessTerra,
                              templateRas,
                              studyArea = studyAreaLarge,
-                             useSAcrs = TRUE,
+                             useSAcrs = FALSE,
                              overwrite = TRUE,
                              userTags = c("postRTMtemplate"))
         templateRas <- fixErrors(templateRas)
