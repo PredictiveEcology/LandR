@@ -37,7 +37,7 @@ Imports:
     methods,
     MuMIn (>= 1.42.5),
     parallel,
-    pemisc (>= 0.0.4.9009),
+    pemisc (>= 0.0.4.9011),
     quickPlot,
     raster,
     RColorBrewer,
