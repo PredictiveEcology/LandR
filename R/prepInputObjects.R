@@ -716,8 +716,10 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
         ## note that extents/origin may never align if the resolution and projection do not allow for it
         templateRas <- Cache(postProcessTerra,
                              templateRas,
-                             studyArea = studyAreaLarge,
-                             useSAcrs = FALSE,
+                             cropTo = studyAreaLarge,
+                             maskTo = studyAreaLarge,
+                             # studyArea = studyAreaLarge,
+                             # useSAcrs = FALSE,
                              overwrite = TRUE,
                              userTags = c("postRTMtemplate"))
         templateRas <- fixErrors(templateRas)
