@@ -86,13 +86,27 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
-  speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv, "LANDIS_traits", multi = TRUE) &
-                                 Area %in% areas]
 
+  # some species don't have trait values in every "area", however, those species do exist, as rare species.
+  #  Now this selection is 2 stage -- first, the species, then the areas, but keep species in Areas not
+  #  in areas, e.g., Fraxinus americana is rare in prairies, but only has traits for Acadian
+  speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv, "LANDIS_traits", multi = TRUE)]
+  # Areas:
+  keepers <- speciesTable[, .(keep = if(any(Area %in% areas)) { .I[Area %in% areas] } else { .I[1]}), by = species]
+  speciesTable <- speciesTable[keepers$keep]
   speciesTable[, species := equivalentName(speciesTable$species, sppEquiv, sppEquivCol)]
   speciesTable <- speciesTable[, lapply(.SD, function(x) {
     if (is.numeric(x)) min(x, na.rm = TRUE) else x[1]
   }), by = "species"]
+
+
+  if (any(!speciesTable$Area %in% areas))  {
+    kept <- speciesTable[!Area %in% areas]
+    message(paste(kept$species, collapse = ", "), " was/were kept, even though there are no trait values in ",
+            "the parameter `areas`, namely: ", paste(areas, collapse = ", "),
+            ". Please confirm this is a suitable set of traits")
+    print(kept)
+  }
 
   ## use integers (instead of numerics) where possible; these are asserted in Biomass_core
   speciesTable[, `:=`(Area = as.factor(Area),
