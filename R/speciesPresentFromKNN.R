@@ -135,16 +135,19 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL) 
   if (is(speciesPresRas, "RasterLayer")) {
     rasLevs <- raster::levels(speciesPresRas)[[1]]
   } else {
-    rasLevs <- levels(speciesPresRas)[[1]]
+    rasLevs <- terra::cats(speciesPresRas)[[1]]
   }
 
-  rasLevs <- rasLevs[rasLevs$ID %in% na.omit(as.vector(bb[])), ]
+  idCol <- grep("id", ignore.case = TRUE, value = TRUE, colnames(rasLevs)) # in Raster it was ID
+  if (length(idCol) == 0) {
+    idCol <- grep("value", ignore.case = TRUE, value = TRUE, colnames(rasLevs)) # newer terra is it value
+  }
+
+  rasLevs <- rasLevs[rasLevs[[idCol]] %in% na.omit(as.vector(bb[])), ]
   levels(bb) <- rasLevs
 
   if (is(speciesPresRas, "RasterLayer")) {
     bb <- raster::deratify(bb)
-  } else {
-    bb <- as.numeric(bb)
   }
 
   speciesCommunities <- na.omit(factorValues2(bb, as.vector(bb[]), att = "category"))
