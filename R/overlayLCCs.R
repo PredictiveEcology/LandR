@@ -67,7 +67,7 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
   if (!identical(theOrder, seq_along(forestedList)))
     forestedList <- forestedList[theOrder]
 
-  fn <- rasterRead
+  fn <- eval(parse(text = getOption("reproducible.rasterRead"))) ## see LandR#99
   if (!is(LCCs, "RasterStack") && !identical(fn, terra::rast)) {
     if (!requireNamespace("raster", quietly = TRUE)) {
       stop("raster pkg is not installed; ",
