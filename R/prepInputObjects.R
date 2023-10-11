@@ -738,16 +738,11 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
     RTMvals <- as.vector(rasterToMatchLarge[])
     rasterToMatchLarge[!is.na(RTMvals)] <- 1 # converts to RAM object
 
-    # TRY TO DELETE IT IF IT EXISTS -- but doesn't help ... because sim$rtml still exists if there was a second module.
-    newFilename <- .suffix(file.path(destinationPath, "rasterToMatchLarge.tif"),
-                           paste0("_", studyAreaName))
-    if (file.exists(newFilename))
-      unlink(newFilename, force = TRUE)
-
+    ## use try -- overwrite can fail with terra + windows if raster was loaded
+    ## previously by another module; unlinking/deleting the file does not work in this case.
     rasterToMatchLargeTmp <- try(Cache(
       writeOutputs,
       rasterToMatchLarge,
-      # filename2 = newFilename,
       datatype = "INT2U",
       overwrite = TRUE,
       userTags = c(cacheTags, "rasterToMatchLarge"),
