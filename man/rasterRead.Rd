@@ -2,7 +2,7 @@
 % Please edit documentation in R/terra-raster-utils.R
 \name{rasterRead}
 \alias{rasterRead}
-\title{Determine the function with which to read a raster}
+\title{Wrapper to read a raster using a specific package function}
 \usage{
 rasterRead(...)
 }
@@ -10,8 +10,12 @@ rasterRead(...)
 \item{...}{passed to \code{\link[terra:rast]{terra::rast()}} or \code{\link[raster:raster]{raster::raster()}}}
 }
 \value{
-the function
+a raster of the type returned by the function
 }
 \description{
+Evaluates the function given by the option \code{reproducible.rasterRead}.
+E.g., \code{terra::rast} or \code{raster::raster}.
+}
+\details{
 TODO: Move to \code{reproducible}
 }

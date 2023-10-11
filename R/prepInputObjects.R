@@ -657,8 +657,11 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 #' attr(standAge, "imputedPixID")
 #' }
 replaceAgeInFires <- function(standAgeMap, firePerimeters, startTime) {
-  if (missing(startTime)) {
-    message("'startTime' is missing, the most recent fire year will be used.")
+  if (missing(startTime))
+    startTime <- 0
+  if (startTime < 1950 || startTime > 2023) {
+    message("'startTime' is missing or is not within a reasonable range of 1950 to 2023, ")
+    message("  --> The most recent fire year will be used.")
     startTime <- max(firePerimeters[], na.rm = TRUE)
   }
 
@@ -713,8 +716,10 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
         ## note that extents/origin may never align if the resolution and projection do not allow for it
         templateRas <- Cache(postProcessTerra,
                              templateRas,
-                             studyArea = studyAreaLarge,
-                             useSAcrs = TRUE,
+                             cropTo = studyAreaLarge,
+                             maskTo = studyAreaLarge,
+                             # studyArea = studyAreaLarge,
+                             # useSAcrs = FALSE,
                              overwrite = TRUE,
                              userTags = c("postRTMtemplate"))
         templateRas <- fixErrors(templateRas)
@@ -731,19 +736,28 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
     }
 
     RTMvals <- as.vector(rasterToMatchLarge[])
-    rasterToMatchLarge[!is.na(RTMvals)] <- 1
+    rasterToMatchLarge[!is.na(RTMvals)] <- 1 # converts to RAM object
 
-    rasterToMatchLarge <- Cache(
+    # TRY TO DELETE IT IF IT EXISTS -- but doesn't help ... because sim$rtml still exists if there was a second module.
+    newFilename <- .suffix(file.path(destinationPath, "rasterToMatchLarge.tif"),
+                           paste0("_", studyAreaName))
+    if (file.exists(newFilename))
+      unlink(newFilename, force = TRUE)
+
+    rasterToMatchLargeTmp <- try(Cache(
       writeOutputs,
       rasterToMatchLarge,
-      filename2 = .suffix(file.path(destinationPath, "rasterToMatchLarge.tif"),
-                          paste0("_", studyAreaName)),
+      # filename2 = newFilename,
       datatype = "INT2U",
       overwrite = TRUE,
       userTags = c(cacheTags, "rasterToMatchLarge"),
       omitArgs = c("userTags")
-    )
+    ))
+    if (!is(rasterToMatchLargeTmp, "try-error"))
+      rasterToMatchLarge <- rasterToMatchLargeTmp
     if (is.null(rasterToMatch)) {
+      rtmFilename <- .suffix(file.path(destinationPath, "rasterToMatch.tif"),
+              paste0("_", studyAreaName))
       rasterToMatch <- Cache(postProcessTerra,
                              from = rasterToMatchLarge,
                              studyArea = studyArea,
@@ -752,8 +766,7 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
                              # maskWithRTM = FALSE,   ## mask with SA
                              method = "bilinear",
                              datatype = "INT2U",
-                             filename2 = .suffix(file.path(destinationPath, "rasterToMatch.tif"),
-                                                 paste0("_", studyAreaName)),
+                             # filename2 = rtmFilename, # don't save -- can't with terra because same filename as sim$rtml
                              overwrite = TRUE,
                              # useCache = "overwrite",
                              userTags = c(cacheTags, "rasterToMatch"),
