@@ -69,12 +69,13 @@ utils::globalVariables(c(
 #'
 #' @export
 #' @rdname Disturbances
-FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
-                            calibrate = FALSE, postFireRegenSummary = sim$postFireRegenSummary,
+FireDisturbance <- function(cohortData = copy(sim$cohortData), cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+                            calibrate = FALSE, postFireRegenSummary = copy(sim$postFireRegenSummary),
+                            treedFirePixelTableSinceLastDisp = sim$treedFirePixelTableSinceLastDisp,
                             rstCurrentBurn = sim$rstCurrentBurn, inactivePixelIndex = sim$inactivePixelIndex,
                             pixelGroupMap = sim$pixelGroupMap, currentTime = NULL, rasterToMatch = sim$rasterToMatch,
-                            species = sim$species, sufficientLight = sim$sufficientLight,
-                            speciesEcoregion = sim$speciesEcoregion, initialB = 10,
+                            species = copy(sim$species), sufficientLight = copy(sim$sufficientLight),
+                            speciesEcoregion = copy(sim$speciesEcoregion), initialB = 10,
                             successionTimestep = 10L, doAssertion = getOption("LandR.assertions", TRUE),
                             verbose = getOption("LandR.verbose", TRUE)) {
   ## check
@@ -298,15 +299,16 @@ FireDisturbance <- function(cohortData = sim$cohortData, cohortDefinitionCols = 
 #'
 #' @export
 #' @rdname Disturbances
-FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
                               colsForPixelGroups = LandR::columnsForPixelGroups,
-                              calibrate = FALSE, LANDISPM = TRUE, postFireRegenSummary = sim$postFireRegenSummary,
+                              calibrate = FALSE, LANDISPM = TRUE, postFireRegenSummary = copy(sim$postFireRegenSummary),
+                              treedFirePixelTableSinceLastDisp = copy(sim$treedFirePixelTableSinceLastDisp),
                               rstCurrentBurn = sim$rstCurrentBurn, inactivePixelIndex = sim$inactivePixelIndex,
                               pixelGroupMap = sim$pixelGroupMap, currentTime = NULL, rasterToMatch = sim$rasterToMatch,
-                              fireDamageTable = sim$fireDamageTable, fireRSORas = sim$fireRSORas, fireROSRas = sim$fireROSRas,
-                              fireCFBRas = sim$fireCFBRas, species = sim$species, sufficientLight = sim$sufficientLight,
-                              speciesEcoregion = sim$speciesEcoregion, initialB = 10,
-                              minRelativeB = sim$minRelativeB, successionTimestep = 10L,
+                              fireDamageTable = copy(sim$fireDamageTable), fireRSORas = sim$fireRSORas, fireROSRas = sim$fireROSRas,
+                              fireCFBRas = sim$fireCFBRas, species = copy(sim$species), sufficientLight = copy(sim$sufficientLight),
+                              speciesEcoregion = copy(sim$speciesEcoregion), initialB = 10,
+                              minRelativeB = copy(sim$minRelativeB), successionTimestep = 10L,
                               doAssertion = getOption("LandR.assertions", TRUE),
                               verbose = getOption("LandR.verbose", TRUE)) {
   ## check
