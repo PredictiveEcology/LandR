@@ -623,8 +623,6 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
                   severityBMap = severityBMap, severityData = severityData)
   if (!is.null(postFireRegenSummary))
     outList <- c(outList, postFireRegenSummary = postFireRegenSummary)
-  if (!is.null(postFireRegenSummary))
-    outList <- c(outList, postFireRegenSummary = postFireRegenSummary)
 
   return(outList)
 }
