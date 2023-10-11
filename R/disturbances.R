@@ -66,6 +66,7 @@ utils::globalVariables(c(
 #' @references Scheller, R.M. & Mladenoff, D.J. (2004). A forest growth and biomass module for a landscape simulation model, LANDIS: design, validation, and application. Ecological Modelling, 180, 211–229.
 #'
 #' @importFrom terra ncell as.int
+#' @importFrom data.table copy data.table rbindlist
 #'
 #' @export
 #' @rdname Disturbances
