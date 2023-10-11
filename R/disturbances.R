@@ -580,10 +580,10 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
       postFirePixelCohortData[is.na(age), age := 1L]
 
       ## redo PGs in all burnt pixels
-      tempObjs <- genPGsPostDisturbance(cohortData = sim$cohortData,
+      tempObjs <- genPGsPostDisturbance(cohortData = copy(cohortData),
                                         pixelGroupMap = sim$pixelGroupMap,
-                                        disturbedPixelTable = treedFirePixelTableSinceLastDisp,
-                                        disturbedPixelCohortData = burnedPixelCohortData,
+                                        disturbedPixelTable = copy(treedFirePixelTableSinceLastDisp),
+                                        disturbedPixelCohortData = copy(burnedPixelCohortData),
                                         colsForPixelGroups = colsForPixelGroups,
                                         doAssertion = doAssertion)
 
