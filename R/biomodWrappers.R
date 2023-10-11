@@ -27,11 +27,11 @@ utils::globalVariables(c(
 #' @param responseVarData a data.table or list of data.tables with environmental data.
 #'   If a list, it should be named according to `sp`, for subsetting.#'
 #'
-#' @param dir.name passed to `biomod2::BIOMOD_FormatingData`
+#' @param dir.name passed to [biomod2::BIOMOD_FormatingData]
 #'
-#' @param BIOMOD_ModelingArgs a named list of arguments passed to `biomod2::BIOMOD_Modeling`
+#' @param BIOMOD_ModelingArgs a named list of arguments passed to [biomod2::BIOMOD_Modeling]
 #'
-#' @param ... further arguments passed to `reproducible::Cache`
+#' @param ... further arguments passed to [reproducible::Cache]
 #'
 #' @export
 biomodModelingWrapper <- function(sp, responseVar, responseVarData, predictorVars, predictorVarsData,
@@ -165,10 +165,10 @@ biomodModelingWrapper <- function(sp, responseVar, responseVarData, predictorVar
 }
 
 #' BIOMOD_EnsembleModeling wrapper
-#' @param bm.mod output of `biomod2::BIOMOD_Modeling`
-#' @param metric.select.thresh passed `biomod2::BIOMOD_EnsembleModeling`.
+#' @param bm.mod output of [biomod2::BIOMOD_Modeling]
+#' @param metric.select.thresh passed [biomod2::BIOMOD_EnsembleModeling].
 #'  By default no thresholding is applied.
-#' @param ... passed to Cache
+#' @param ... passed to [reproducible::Cache]
 #'
 #' @export
 biomodEnsembleWrapper <- function(bm.mod, metric.select.thresh = NULL, ...) {
@@ -202,13 +202,13 @@ biomodEnsembleWrapper <- function(bm.mod, metric.select.thresh = NULL, ...) {
 
 #' BIOMOD_Projection wrapper
 #'
-#' @param bm.mod output of `biomod2::BIOMOD_Modeling`
-#' @param bm.mod passed to `biomod2::BIOMOD_Projection`. If not supplied
+#' @param bm.mod output of [biomod2::BIOMOD_Modeling]
+#' @param bm.mod passed to [biomod2::BIOMOD_Projection]. If not supplied
 #'   the data used to fit the model will be used.
-#' @param proj.name passed to `biomod2::BIOMOD_Projection`
-#' @param new.env passed to `biomod2::BIOMOD_Projection`
-#' @param new.env.xy passed to `biomod2::BIOMOD_Projection`
-#' @param ... passed to Cache
+#' @param proj.name passed to [biomod2::BIOMOD_Projection]
+#' @param new.env passed to [biomod2::BIOMOD_Projection]
+#' @param new.env.xy passed to [biomod2::BIOMOD_Projection]
+#' @param ... passed to [reproducible::Cache]
 #'
 #' @export
 biomodProjWrapper <- function(bm.mod, proj.name = "testProj", new.env = NULL, new.env.xy = NULL, ...) {
@@ -248,21 +248,21 @@ biomodProjWrapper <- function(bm.mod, proj.name = "testProj", new.env = NULL, ne
 }
 
 
-#' Simple wrapper around `biomod2::BIOMOD_EnsembleForecasting()`
+#' Simple wrapper around [biomod2::BIOMOD_EnsembleForecasting()]
 #'
-#' @param bm.em output of `biomod2::BIOMOD_EnsembleModeling`
+#' @param bm.em output of [biomod2::BIOMOD_EnsembleModeling]
 #'
-#' @param bm.proj output of `biomod2::BIOMOD_Projection`
+#' @param bm.proj output of [biomod2::BIOMOD_Projection]
 #'
-#' @param proj.name passed to `biomod2::BIOMOD_Projection`
+#' @param proj.name passed to [biomod2::BIOMOD_Projection]
 #'
-#' @param new.env passed to `biomod2::BIOMOD_EnsembleForecasting`
+#' @param new.env passed to [biomod2::BIOMOD_EnsembleForecasting]
 #'
-#' @param new.env.xy passed to `biomod2::BIOMOD_EnsembleForecasting`
+#' @param new.env.xy passed to [biomod2::BIOMOD_EnsembleForecasting]
 #'
-#' @param keep.in.memory passed to `biomod2::BIOMOD_EnsembleForecasting`
+#' @param keep.in.memory passed to [biomod2::BIOMOD_EnsembleForecasting]
 #'
-#' @param ... passed to `reproducible::Cache`
+#' @param ... passed to [reproducible::Cache]
 #'
 #' @export
 biomodEnsembleFrcstWrapper <- function(bm.em, bm.proj = NULL, proj.name = NULL, new.env = NULL,

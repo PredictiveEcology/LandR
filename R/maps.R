@@ -86,9 +86,9 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #' @inheritParams reproducible::prepInputs
 #'
 #' @param year Numeric, either 2010 or 2015. See note re: backwards compatibility for 2005.
-#' @param method passed to `terra::intersect` or `raster::intersect`,
-#'   and `reproducible::prepInputs`
-#' @param filename2 passed to `reproducible::prepInputs`
+#' @param method passed to [terra::intersect] or [raster::intersect],
+#'   and [reproducible::prepInputs]
+#' @param filename2 passed to [reproducible::prepInputs]
 #'
 #' @export
 prepInputsLCC <- function(year = 2010,
@@ -162,8 +162,8 @@ prepInputsLCC <- function(year = 2010,
 #' @param speciesStack A `RasterStack` of species abundances.
 #'                     This must be one `RasterLayer` per species.
 #' @template vegLeadingProportion
-#' @param mixed Deprecated. See `mixedType` argument to `vegTypeMapGenerator`.
-#' @param ... Other arguments passed to `vegTypeMapGenerator`, i.e.,
+#' @param mixed Deprecated. See `mixedType` argument to [vegTypeMapGenerator].
+#' @param ... Other arguments passed to [vegTypeMapGenerator], i.e.,
 #'   `vegLeadingProportion`, `mixedType`, `sppEquiv`,
 #'   `sppEquivCol`, `colors`, `pixelGroupColName`, and `doAssertion`
 #'

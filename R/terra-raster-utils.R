@@ -79,7 +79,7 @@ utils::globalVariables(c(
 #' and benefit from its complexity.
 #'
 #' @param ... additional `Raster` or `SpatRaster` objects, and arguments
-#'            passed to `terra::compareGeom()`.
+#'            passed to [terra::compareGeom()].
 #'
 #' @return the projected extent
 #'
@@ -181,7 +181,7 @@ utils::globalVariables(c(
 #'
 #' TODO: Move to `reproducible`
 #'
-#' @param ... passed to `terra::rast` or `raster::raster`
+#' @param ... passed to [terra::rast()] or [raster::raster()]
 #'
 #' @return the function
 #'
@@ -256,7 +256,7 @@ reclass <- function(ras, tab) {
 #' @param field character. The field(s) to extract when x is a polygon.
 #' If `NULL`, all fields are extracted and returned. IDs of y are always returned (`ID` column).
 #'
-#' @param ... passed to `terra::extract`
+#' @param ... passed to [terra::extract()]
 #'
 #' @return a `data.table` with extracted values and an `ID` column of y point IDs
 #'

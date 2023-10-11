@@ -342,21 +342,21 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' Create `standAgeMap`
 #'
 #' Create the `standAgeMap` raster containing age estimates for `pixelCohortData`.
-#' A separate `prepInputs` call will source Canadian National Fire Data Base
+#' A separate [reproducible::prepInputs()] call will source Canadian National Fire Data Base
 #' data to update ages of recently burned pixels. To suppress this, pass NULL/NA `fireURL`
 #'
-#' @param ... additional arguments passed to `prepInputs`
+#' @param ... additional arguments passed to [reproducible::prepInputs()]
 #' @param ageURL url where age map is downloaded
-#' @param ageFun passed to 'fun' arg of `prepInputs` of stand age map
-#' @param maskWithRTM passed to `prepInputs` of stand age map
-#' @param method passed to `prepInputs` of stand age map
-#' @param datatype passed to `prepInputs` of stand age map
-#' @param filename2 passed to `prepInputs` of stand age map
+#' @param ageFun passed to 'fun' arg of [reproducible::prepInputs()] of stand age map
+#' @param maskWithRTM passed to [reproducible::prepInputs()] of stand age map
+#' @param method passed to [reproducible::prepInputs()] of stand age map
+#' @param datatype passed to [reproducible::prepInputs()] of stand age map
+#' @param filename2 passed to [reproducible::prepInputs()] of stand age map
 #' @param firePerimeters fire raster layer fire year values.
 #' @param fireURL url to download fire polygons used to update age map. If NULL or NA age
 #'   imputation is bypassed. Requires passing `rasterToMatch`. Only used if `firePerimeters`
 #'   is missing.
-#' @param fireFun passed to `prepInputs` of fire data. Only used if `firePerimeters`
+#' @param fireFun passed to [reproducible::prepInputs()] of fire data. Only used if `firePerimeters`
 #'   is missing.
 #' @param fireField field used to rasterize fire polys. Only used if `firePerimeters`
 #'   is missing.
@@ -479,13 +479,13 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'
 #' Create the `rawBiomassMap` raster containing biomass estimates for
 #' `pixelCohortData`.
-#' Wrapper on `prepInputs` that will rasterize fire polygons.
+#' Wrapper on [reproducible::prepInputs()] that will rasterize fire polygons.
 #'
 #' @template studyAreaName
 #'
 #' @template cacheTags
 #'
-#' @param ... arguments passed to `prepInputs` and `Cache`. If the following arguments
+#' @param ... arguments passed to [reproducible::prepInputs()] and [reproducible::Cache()]. If the following arguments
 #'   are not provided, the following values will be used:
 #'   \itemize{
 #'     \item{`url`: by default, the 2001 kNN stand biomass map is downloaded from
@@ -541,7 +541,7 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 
 #' Create a raster of fire perimeters
 #'
-#' @param ... Additional arguments passed to `prepInputs`
+#' @param ... Additional arguments passed to [reproducible::prepInputs()]
 #' @template rasterToMatch
 #' @param fireField field used to rasterize fire polys
 #' @param earliestYear the earliest fire date to allow
