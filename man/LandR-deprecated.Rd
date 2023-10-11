@@ -39,7 +39,7 @@ This must be one \code{RasterLayer} per species.}
 \item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
 threshold a species needs to pass to be considered "leading".}
 
-\item{mixed}{Deprecated. See \code{mixedType} argument to \code{vegTypeMapGenerator}.}
+\item{mixed}{Deprecated. See \code{mixedType} argument to \link{vegTypeMapGenerator}.}
 
 \item{...}{Additional arguments passed to \code{\link[reproducible:Cache]{reproducible::Cache()}}
 and \code{\link[=equivalentName]{equivalentName()}}.}

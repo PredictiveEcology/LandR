@@ -2,7 +2,7 @@
 % Please edit documentation in R/biomodWrappers.R
 \name{biomodEnsembleFrcstWrapper}
 \alias{biomodEnsembleFrcstWrapper}
-\title{Simple wrapper around \code{biomod2::BIOMOD_EnsembleForecasting()}}
+\title{Simple wrapper around \code{\link[biomod2:BIOMOD_EnsembleForecasting]{biomod2::BIOMOD_EnsembleForecasting()}}}
 \usage{
 biomodEnsembleFrcstWrapper(
   bm.em,
@@ -15,20 +15,20 @@ biomodEnsembleFrcstWrapper(
 )
 }
 \arguments{
-\item{bm.em}{output of \code{biomod2::BIOMOD_EnsembleModeling}}
+\item{bm.em}{output of \link[biomod2:BIOMOD_EnsembleModeling]{biomod2::BIOMOD_EnsembleModeling}}
 
-\item{bm.proj}{output of \code{biomod2::BIOMOD_Projection}}
+\item{bm.proj}{output of \link[biomod2:BIOMOD_Projection]{biomod2::BIOMOD_Projection}}
 
-\item{proj.name}{passed to \code{biomod2::BIOMOD_Projection}}
+\item{proj.name}{passed to \link[biomod2:BIOMOD_Projection]{biomod2::BIOMOD_Projection}}
 
-\item{new.env}{passed to \code{biomod2::BIOMOD_EnsembleForecasting}}
+\item{new.env}{passed to \link[biomod2:BIOMOD_EnsembleForecasting]{biomod2::BIOMOD_EnsembleForecasting}}
 
-\item{new.env.xy}{passed to \code{biomod2::BIOMOD_EnsembleForecasting}}
+\item{new.env.xy}{passed to \link[biomod2:BIOMOD_EnsembleForecasting]{biomod2::BIOMOD_EnsembleForecasting}}
 
-\item{keep.in.memory}{passed to \code{biomod2::BIOMOD_EnsembleForecasting}}
+\item{keep.in.memory}{passed to \link[biomod2:BIOMOD_EnsembleForecasting]{biomod2::BIOMOD_EnsembleForecasting}}
 
-\item{...}{passed to \code{reproducible::Cache}}
+\item{...}{passed to \link[reproducible:Cache]{reproducible::Cache}}
 }
 \description{
-Simple wrapper around \code{biomod2::BIOMOD_EnsembleForecasting()}
+Simple wrapper around \code{\link[biomod2:BIOMOD_EnsembleForecasting]{biomod2::BIOMOD_EnsembleForecasting()}}
 }

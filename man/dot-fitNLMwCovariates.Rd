@@ -22,7 +22,7 @@
 and the response variable. Note that incomplete lines are removed.}
 
 \item{nonLinModelQuoted}{The non-linear equation as a \code{call}
-(quoted expression) passed to \code{mle2(minuslog1)}. See \code{?mle}.
+(quoted expression) passed to \code{bbmle::mle2(minuslog1)}. See \code{?mle}.
 Accepts equations with three parameters 'A', 'p' and 'k'.}
 
 \item{linModelQuoted}{A list of linear equations/modes relating each
@@ -47,9 +47,9 @@ predictor is included (as it should). Passed to \code{extractMaxB}}
 \item{starts}{\code{data.table} or \code{data.frame} of parameter starting values. Will be coerced to named list
 with names being parameter names.}
 
-\item{lower}{passed to \code{mle2}}
+\item{lower}{passed to \link[bbmle:mle2]{bbmle::mle2}}
 
-\item{upper}{passed to \code{mle2}}
+\item{upper}{passed to \link[bbmle:mle2]{bbmle::mle2}}
 
 \item{nbWorkers}{integer. If > 1, the number of workers to use in \code{parallelly::makeClusterPSOCK(nbWorkers = .)},
 otherwise no parallellisation is done.}
@@ -61,4 +61,7 @@ coefficients) and \code{AICbest} (the AIC of the best models generating these co
 \description{
 Uses likelihood parameter estimation to fit non linear models
 while attempting several starting values.
+}
+\seealso{
+\code{\link[bbmle:mle2]{bbmle::mle2()}}
 }

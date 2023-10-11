@@ -47,10 +47,10 @@ where \code{0} is the non-forested pixels based on converting LCCs and
 2 LCC layers are provided, one has information in a pixel, but not the one
 which is \code{outputLayer}, so this needs a reclassify or remap.}
 
-\item{classesToReplace}{Passed to \code{convertUnwantedLCC}, for the pixels where
+\item{classesToReplace}{Passed to \code{\link[=convertUnwantedLCC]{convertUnwantedLCC()}}, for the pixels where
 \code{NNcondition} is \code{TRUE}}
 
-\item{availableERC_by_Sp}{Passed to \code{convertUnwantedLCC}, for the pixels where
+\item{availableERC_by_Sp}{Passed to \code{\link[=convertUnwantedLCC]{convertUnwantedLCC()}}, for the pixels where
 \code{NNcondition} is \code{TRUE}. If this is \code{NULL}, then it will be
 created internally with all pixels with:
 \code{data.table(initialEcoregionCode = LCCs[[outputLayer]][])}}

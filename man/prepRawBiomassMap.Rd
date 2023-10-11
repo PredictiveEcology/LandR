@@ -11,7 +11,7 @@ prepRawBiomassMap(studyAreaName, cacheTags, ...)
 
 \item{cacheTags}{a character vector of strings to pass to \code{Cache(userTags)}}
 
-\item{...}{arguments passed to \code{prepInputs} and \code{Cache}. If the following arguments
+\item{...}{arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} and \code{\link[reproducible:Cache]{reproducible::Cache()}}. If the following arguments
 are not provided, the following values will be used:
 \itemize{
 \item{\code{url}: by default, the 2001 kNN stand biomass map is downloaded from
@@ -31,5 +31,5 @@ a \code{rawBiomassMap} raster
 \description{
 Create the \code{rawBiomassMap} raster containing biomass estimates for
 \code{pixelCohortData}.
-Wrapper on \code{prepInputs} that will rasterize fire polygons.
+Wrapper on \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} that will rasterize fire polygons.
 }

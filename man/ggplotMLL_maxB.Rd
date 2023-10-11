@@ -31,10 +31,10 @@ data is assumed to be the same for the two models.}
 
 \item{xCovar}{the variable shown in the x axis. Defaults to \code{age}.}
 
-\item{plotTitle}{character. Passed to \code{ggplot2::labs(title)}.}
+\item{plotTitle}{character. Passed to \code{title} in \code{\link[ggplot2:labs]{ggplot2::labs()}}.}
 
 \item{nonLinModelQuoted}{a named list of non-linear equations as a \code{call}
-(quoted expression) passed to \code{mle2(minuslog1)}. See \code{?mle}.
+(quoted expression) passed to \code{mle2(minuslog1)}. See \code{\link[bbmle:mle2]{bbmle::mle2()}}.
 Accepts equations with three parameters 'A', 'p' and 'k'. List names and
 length must the same as in \code{mll}.}
 

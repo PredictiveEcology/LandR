@@ -46,10 +46,20 @@ Re-generate new \code{pixelGroup}s in partially disturbed pixels.
 }
 \details{
 This function regenerates \code{pixelGroup}s in situations where
-disturbances are not stand-replacing and create survivors/dead cohorts
-in some, but potentially not all, pixels of a \code{pixelGroup}. This is
+disturbances are not stand-replacing and create survivor and dead
+cohorts in some, but potentially not all, pixels of a \code{pixelGroup}. This is
 necessary to prevent reintroducing dead cohorts that were not affected
 in the other pixels of the same, original, \code{pixelGroup}.
 \strong{ATTENTION} This function alone will not generate final \code{pixelGroups},
 and will likely need to be followed by an \code{updateCohortData} run.
+The function:
+\enumerate{
+\item creates a table of undisturbed pixels, and disturbed pixels with dead and surviving cohorts
+but not new cohorts (e.g. from serotiny/resprouting) -- these are added by \code{updateCohortData};
+\item generates \code{pixelGroups} considering these dead and surviving cohorts -- this ensures that
+we account for cohorts that died in some but not all pixels of a given \code{pixelGroup};
+\item then removes dead cohorts (as they should not be in tables for downstream
+functions like \code{updateCohortData}) and recalculates \code{pixelGroups} -- this ensures that
+pixels that became similar/dissimilar after the death of some cohorts can form new \code{pixelGroups}.
+}
 }

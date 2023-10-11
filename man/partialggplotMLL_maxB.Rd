@@ -50,7 +50,7 @@ at maximum age) as dashed lines. If "maximum" the 100\% quantile will be plotted
 If "none", only the 50\% quantile line (average prediction) is plotted. Quantiles
 are always calculated at \code{max(age)}.}
 
-\item{plotTitle}{character. Passed to ggplot2::labs(title)}
+\item{plotTitle}{character. Passed to \code{title} in \code{\link[ggplot2:labs]{ggplot2::labs()}}}
 
 \item{nonLinModelQuoted}{a named list of non-linear equations as a \code{call}
 (quoted expression) passed to \code{mle2(minuslog1)}. See \code{?mle}.
@@ -74,4 +74,7 @@ of another target covariate, with all others held at average values.
 }
 \details{
 Note that the original data, not the predicted values is shown.
+}
+\seealso{
+\code{\link[bbmle:mle2]{bbmle::mle2()}}
 }

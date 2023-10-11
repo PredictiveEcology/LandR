@@ -7,7 +7,7 @@
 rasterRead(...)
 }
 \arguments{
-\item{...}{passed to \code{terra::rast} or \code{raster::raster}}
+\item{...}{passed to \code{\link[terra:rast]{terra::rast()}} or \code{\link[raster:raster]{raster::raster()}}}
 }
 \value{
 the function

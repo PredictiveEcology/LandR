@@ -32,11 +32,11 @@ be named according to \code{sp}, for subsetting.}
 
 \item{predictorVarsData}{environmental data.}
 
-\item{dir.name}{passed to \code{biomod2::BIOMOD_FormatingData}}
+\item{dir.name}{passed to \link[biomod2:BIOMOD_FormatingData]{biomod2::BIOMOD_FormatingData}}
 
-\item{BIOMOD_ModelingArgs}{a named list of arguments passed to \code{biomod2::BIOMOD_Modeling}}
+\item{BIOMOD_ModelingArgs}{a named list of arguments passed to \link[biomod2:BIOMOD_Modeling]{biomod2::BIOMOD_Modeling}}
 
-\item{...}{further arguments passed to \code{reproducible::Cache}}
+\item{...}{further arguments passed to \link[reproducible:Cache]{reproducible::Cache}}
 }
 \description{
 BIOMOD_Modeling wrapper

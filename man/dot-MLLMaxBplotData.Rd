@@ -52,3 +52,6 @@ changed to \code{maxCover}.}
 \description{
 Prepare data for model plotting
 }
+\seealso{
+\code{\link[bbmle:mle2]{bbmle::mle2()}}
+}

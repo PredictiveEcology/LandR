@@ -54,3 +54,6 @@ the all other variables except age are  averaged (\code{"mean"}). Other options 
 \description{
 Prepare data for model plotting
 }
+\seealso{
+\code{\link[bbmle:mle2]{bbmle::mle2()}}
+}

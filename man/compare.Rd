@@ -13,7 +13,7 @@
 \item{x, y}{a \code{Raster}, \code{SpatRaster}, \code{sf}, \code{SpatVector}, or \code{Spatial} object}
 
 \item{...}{additional \code{Raster} or \code{SpatRaster} objects, and arguments
-passed to \code{terra::compareGeom()}.}
+passed to \code{\link[terra:compareGeom]{terra::compareGeom()}}.}
 }
 \value{
 the projected extent
