@@ -1,6 +1,6 @@
 utils::globalVariables(c(
-  ":=", "..cols", "CFB", "ROS", "RSO",
-  "agesKilled", "severity", "severityToleranceDif", "sim"
+  ":=", "..cols", "CFB", "ROS", "RSO", "agesKilled", "severity", "severityToleranceDif", "sim",
+  "thermokarsttol"
 ))
 
 #' Disturbance functions
@@ -629,7 +629,157 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
 }
 
 
-# PeatlandThermokarst <- function()
+#' @section Peatland permafrost degradataion (thermokarst) disturbances:
+#'  `PeatlandThermokarst()` simulates tree cohort survival/mortality after
+#'  peatland permafrost thermokarst. The level of mortality depends on species
+#'  tolerance to thermokarst, determined by the `thermokarsttol` trait column
+#'  in the `species` traits table. At the moment, this level of tolerance is used
+#'  as the proportion of a cohort biomass that survives (is kept) when a pixel undergoes
+#'  thermokarst. This is similar to the partial disturbance effects used in LANDIS-II Biomass
+#'  Harvest v4.0. Requires the following objects in `sim` (and passed as `sim$*`):\
+#'   - `thawedPixIDs`
+#'   - `treedThawedPixelTableSinceLastDisp`
+#'   - `wetlands`
+#'   - `cohortData`
+#'   - `pixelGroupMap`
+#'   - `rasterToMatch`
+#'   - `species`
+#'   - `speciesEcoregion`
+#'   - `inactivePixelIndex`
+#'  The `species` table must contain the columns:
+#'   - `thermokarsttol` -- proportion of cohort biomass (B) that survives thermokarst
+#'
+#' @param thawedPixIDs integer. Vector of pixel IDs than underwent thermokarst
+#'  (and were converted to wetlands) in the current year (not the last thermokarst event).
+#' @param treedThawedPixelTableSinceLastDisp data.table with 3 columns: `pixelIndex`,
+#'  `pixelGroup`, and `burnTime`. Each row represents a forested pixel that was
+#'  burned up to and including this year, since last dispersal event, with its
+#'  corresponding `pixelGroup` and time it occurred Pixel group IDs correspond to
+#'  the last year's `pixelGroupMap` and not necessarily the pixelGroupMap of
+#'  the `burnTime` year.
+#' @param wetlands binary SpatRaster with current wetland pixels.
+#'
+#' @importFrom terra ncell as.int
+#' @importFrom data.table copy data.table rbindlist
+#'
+#' @references Scheller, R.M. & Domingo, J.B. (2021). LANDIS-II Biomass Harvest v4.4 Extension – User Guide
+#'
+#' @export
+#' @rdname Disturbances
+
+PeatlandThermokarst <- function(thawedPixIDs = copy(sim$thawedPixIDs),
+                                treedThawedPixelTableSinceLastDisp = copy(sim$treedThawedPixelTableSinceLastDisp),
+                                wetlands = sim$wetlands, cohortData = copy(sim$cohortData),
+                                pixelGroupMap = sim$pixelGroupMap, rasterToMatch = sim$rasterToMatch,
+                                species = copy(sim$species),  speciesEcoregion = copy(sim$speciesEcoregion),
+                                cohortDefinitionCols = c("pixelGroup", "speciesCode", "age"),
+                                initialB = 10L, inactivePixelIndex = sim$inactivePixelIndex, currentTime = NULL,
+                                successionTimestep = 10L) {
+  ## check
+  if (is.null(currentTime)) {
+    stop("Provide 'currentTime' as, e.g., time(sim).")
+  }
+
+  ## save for later
+  treedThawedPixelTableSinceLastDispOrig <- copy(treedThawedPixelTableSinceLastDisp)
+
+  if (!is.null(thawedPixIDs)) {
+    ## checks
+    if (is.null(species$thermokarsttol)) {
+      stop("'species' table is missing column 'thermokarsttol'")
+    } else {
+      tolRange <- range(species$thermokarsttol)
+      if (any(tolRange > 1) || any(tolRange < 0)) {
+        stop("'thermokarsttol' in 'species'table must be in the [0,1] range")
+      }
+    }
+
+    if (any(!thawedPixIDs %in% 1:ncell(rasterToMatch))) {
+      stop("Not all IDs in 'thawedPixIDs' are in 'rasterToMatch' pixel IDs")
+    }
+
+    .compareRas(wetlands, rasterToMatch)
+
+    ## which pixels thawed and are now wetlands?
+    newWetlands <- which(as.vector(wetlands[]) > 0)
+    newWetlands <- intersect(newWetlands, thawedPixIDs)
+
+    treedThawedLoci <- if (length(inactivePixelIndex) > 0) {
+      # These can burn other vegetation (grassland, wetland)
+      newWetlands[!(newWetlands %in% inactivePixelIndex)] # this is to prevent evaluating the pixels that are inactive
+    } else {
+      newWetlands
+    }
+
+    treedThawedPixelTableSinceLastDisp <- suppressWarnings({   ## treedThawedLoci may have length
+      data.table(pixelIndex = as.integer(treedThawedLoci),
+                 pixelGroup = as.integer(as.vector(pixelGroupMap[])[treedThawedLoci]),
+                 thawTime = currentTime)
+    })
+
+    ## make table spp/ecoregionGroup/age in thawed pixels
+    thawedPixelCohortData <- cohortData[pixelGroup %in% unique(treedThawedPixelTableSinceLastDisp$pixelGroup)]
+
+    ## select the pixels that have burned survivors and assess them
+    thawedPixelTable <- treedThawedPixelTableSinceLastDisp[pixelGroup %in% unique(thawedPixelCohortData$pixelGroup)]
+    ## expand table to pixels
+    thawedPixelCohortData <- thawedPixelTable[thawedPixelCohortData, allow.cartesian = TRUE,
+                                              nomatch = 0, on = "pixelGroup"]
+
+    ## add thermokarst tolerance
+    thawedPixelCohortData <- species[, .(speciesCode, thermokarsttol)][thawedPixelCohortData, on = .(speciesCode)]
+    thawedPixelCohortData[, B := B * thermokarsttol]
+
+    ## remove dead cohorts
+    postThawPixelCohortData <- thawedPixelCohortData[B > 0]
+
+    ## add type column
+    postThawPixelCohortData[, type := "survivor"]
+
+    ## redo PGs in all burnt pixels
+    tempObjs <- genPGsPostDisturbance(cohortData = copy(cohortData),
+                                      pixelGroupMap = pixelGroupMap,
+                                      disturbedPixelTable = copy(treedThawedPixelTableSinceLastDisp),
+                                      disturbedPixelCohortData = thawedPixelCohortData,
+                                      doAssertion = getOption("LandR.assertions", TRUE))
+
+    outs <- updateCohortData(newPixelCohortData = copy(postThawPixelCohortData[, -"pixelGroup", with = FALSE]),
+                             cohortData = copy(tempObjs$cohortData),
+                             pixelGroupMap = tempObjs$pixelGroupMap,
+                             currentTime = round(currentTime),
+                             speciesEcoregion = copy(speciesEcoregion),
+                             cohortDefinitionCols = cohortDefinitionCols,
+                             treedFirePixelTableSinceLastDisp = copy(treedThawedPixelTableSinceLastDisp),
+                             initialB = initialB,
+                             successionTimestep = successionTimestep)
+
+    ## can use the same assertion.
+    assertPostPartialDist(cohortData = copy(tempObjs$cohortData),
+                          pixelGroupMap = tempObjs$pixelGroupMap,
+                          cohortDataNew = copy(outs$cohortData),
+                          pixelGroupMapNew = outs$pixelGroupMap,
+                          postDistPixelCohortData = copy(postThawPixelCohortData),
+                          distrbdPixelCohortData = copy(thawedPixelCohortData),
+                          doAssertion = getOption("LandR.assertions", TRUE))
+
+    cohortData <- outs$cohortData[, .SD, .SDcols = names(cohortData)]  ## discard unnecessary columns
+    pixelGroupMap <- outs$pixelGroupMap
+    pixelGroupMap <- as.int(pixelGroupMap)
+
+    ## update past PGs to match current ones
+    treedThawedPixelTableSinceLastDispOrig[, pixelGroup := as.integer(as.vector(pixelGroupMap[]))[pixelIndex]]
+    # append previous year's
+    treedThawedPixelTableSinceLastDisp <- rbindlist(list(treedThawedPixelTableSinceLastDispOrig,
+                                                         treedThawedPixelTableSinceLastDisp))
+  } else {
+    message(cyan("'thawedPixIDs' is NULL. Assuming no pixels have thawed",
+                 "and no thermokarst mortality"))
+  }
+
+  outList <- list(cohortData = cohortData, pixelGroupMap = pixelGroupMap,
+                  treedThawedPixelTableSinceLastDisp = treedThawedPixelTableSinceLastDisp)
+  return(outList)
+}
 
 #' Re-generate new `pixelGroup`s in partially disturbed pixels.
 #'
