@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "variable", "value"
+  "value", "variable"
 ))
 
 ## TODO: Ceres: these functions can be improved by using options(reproducible...),
