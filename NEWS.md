@@ -9,6 +9,7 @@
 * new functions to simulate disturbances - `FireDisturbance` and `FireDisturbancePM` pulled from
 `Biomass_regeneration` and `Biomass_regenerationPM` modules, respectively.
 * `overlayLCCs()` now works correctly with terra (#99)
+* fixed partial argument match warnings (#100)
 
 # LandR 1.1.0
 
