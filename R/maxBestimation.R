@@ -103,6 +103,8 @@ utils::globalVariables(c(
 #' @param nbWorkers integer. If > 1, the number of workers to use in `future.apply::future_apply`, otherwise
 #'   no parallelisation is done.
 #'
+#' @seealso [bbmle::mle2()]
+#' @export
 fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
                          predictorVarsCombos = NULL, maxNoCoefs = 4, doFwdSelection = FALSE,
                          sampleSize = 3000, Ntries = 2000, maxCover = 1L, models = c("CR", "Logistic"),
@@ -492,7 +494,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 #' @param data a `data.table` or `data.frame` with all covariates
 #'   and the response variable. Note that incomplete lines are removed.
 #' @param nonLinModelQuoted The non-linear equation as a `call`
-#'   (quoted expression) passed to `mle2(minuslog1)`. See `?mle`.
+#'   (quoted expression) passed to `bbmle::mle2(minuslog1)`. See `?mle`.
 #'   Accepts equations with three parameters 'A', 'p' and 'k'.
 #' @param linModelQuoted A list of linear equations/modes relating each
 #'   parameter ('A', 'p' and 'k') with a set of covariates. A `call`
@@ -511,14 +513,15 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 #' @param maxCover numeric. Value indicating maximum cover/dominance.
 #' @param starts `data.table` or `data.frame` of parameter starting values. Will be coerced to named list
 #'   with names being parameter names.
-#' @param lower passed to `mle2`
-#' @param upper passed to `mle2`
+#' @param lower passed to [bbmle::mle2]
+#' @param upper passed to [bbmle::mle2]
 #' @param nbWorkers integer. If > 1, the number of workers to use in `parallelly::makeClusterPSOCK(nbWorkers = .)`,
 #'  otherwise no parallellisation is done.
 #'
 #' @return a `list` with entries `mll` (the maximum likelihood-estimated
 #' coefficients) and `AICbest` (the AIC of the best models generating these coefficients)
 #'
+#' @seealso [bbmle::mle2()]
 .fitNLMwCovariates <- function(data, nonLinModelQuoted, linModelQuoted, mllsOuterPrev,
                                model = c("CR", "Logistic"), maxCover = 1L,
                                starts = NULL, lower = NULL, upper = NULL, nbWorkers = 1L) {
@@ -842,10 +845,10 @@ extractMaxB <- function(mll, newdata, average = FALSE, model = c("CR", "Logistic
 #'
 #' @param xCovar the variable shown in the x axis. Defaults to `age`.
 #'
-#' @param plotTitle character. Passed to `ggplot2::labs(title)`.
+#' @param plotTitle character. Passed to `title` in [ggplot2::labs()].
 #'
 #' @param nonLinModelQuoted a named list of non-linear equations as a `call`
-#'   (quoted expression) passed to `mle2(minuslog1)`. See `?mle`.
+#'   (quoted expression) passed to `mle2(minuslog1)`. See [bbmle::mle2()].
 #'   Accepts equations with three parameters 'A', 'p' and 'k'. List names and
 #'   length must the same as in `mll`.
 #'
@@ -1016,6 +1019,7 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
 #'
 #' @param plotCIs should confidence intervals be calculated and plotted?
 #'
+#' @seealso [bbmle::mle2()]
 .MLLMaxBplotData <- function(mll, nonLinModelQuoted, linModelQuoted, maxCover, data,
                              averageCovariates = TRUE, observedAge = FALSE, plotCIs = TRUE) {
   if (requireNamespace("bbmle", quietly = TRUE)) {
@@ -1201,7 +1205,7 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
 #'
 #' @param maxCover numeric. Value indicating maximum cover/dominance.
 #'
-#' @param plotTitle character. Passed to ggplot2::labs(title)
+#' @param plotTitle character. Passed to `title` in [ggplot2::labs()]
 #'
 #' @param nonLinModelQuoted a named list of non-linear equations as a `call`
 #' (quoted expression) passed to `mle2(minuslog1)`. See `?mle`.
@@ -1219,6 +1223,8 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
 #'
 #' @param plotCIs should confidence intervals be calculated and plotted?
 #'
+#' @seealso [bbmle::mle2()]
+#' @export
 partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1, fixMaxCover = TRUE,
                                   xCovar = "age", showQuantiles = "allQuantiles", plotTitle = NULL,
                                   nonLinModelQuoted, linModelQuoted, fun = "mean", plotCIs = TRUE) {
@@ -1375,6 +1381,7 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
 #'
 #' @param plotCIs should confidence intervals be calculated and plotted?
 #'
+#' @seealso [bbmle::mle2()]
 .MLLMaxBPartialPlotData <- function(mll, nonLinModelQuoted, linModelQuoted,
                                     targetCovar = "cover", fixMaxCover = TRUE,
                                     maxCover = 1, data, fun = "mean", plotCIs = TRUE) {

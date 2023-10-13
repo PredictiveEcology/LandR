@@ -34,10 +34,10 @@ utils::globalVariables(c(
 #'   2 LCC layers are provided, one has information in a pixel, but not the one
 #'   which is `outputLayer`, so this needs a reclassify or remap.
 #'
-#' @param classesToReplace Passed to `convertUnwantedLCC`, for the pixels where
+#' @param classesToReplace Passed to [convertUnwantedLCC()], for the pixels where
 #'   `NNcondition` is `TRUE`
 #'
-#' @param availableERC_by_Sp Passed to `convertUnwantedLCC`, for the pixels where
+#' @param availableERC_by_Sp Passed to [convertUnwantedLCC()], for the pixels where
 #'   `NNcondition` is `TRUE`. If this is `NULL`, then it will be
 #'   created internally with all pixels with:
 #'   `data.table(initialEcoregionCode = LCCs[[outputLayer]][])`

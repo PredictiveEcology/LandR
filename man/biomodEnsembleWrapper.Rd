@@ -7,12 +7,12 @@
 biomodEnsembleWrapper(bm.mod, metric.select.thresh = NULL, ...)
 }
 \arguments{
-\item{bm.mod}{output of \code{biomod2::BIOMOD_Modeling}}
+\item{bm.mod}{output of \link[biomod2:BIOMOD_Modeling]{biomod2::BIOMOD_Modeling}}
 
-\item{metric.select.thresh}{passed \code{biomod2::BIOMOD_EnsembleModeling}.
+\item{metric.select.thresh}{passed \link[biomod2:BIOMOD_EnsembleModeling]{biomod2::BIOMOD_EnsembleModeling}.
 By default no thresholding is applied.}
 
-\item{...}{passed to Cache}
+\item{...}{passed to \link[reproducible:Cache]{reproducible::Cache}}
 }
 \description{
 BIOMOD_EnsembleModeling wrapper

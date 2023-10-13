@@ -14,7 +14,7 @@ genericExtract(x, y, field = NULL, ...)
 \item{field}{character. The field(s) to extract when x is a polygon.
 If \code{NULL}, all fields are extracted and returned. IDs of y are always returned (\code{ID} column).}
 
-\item{...}{passed to \code{terra::extract}}
+\item{...}{passed to \code{\link[terra:extract]{terra::extract()}}}
 }
 \value{
 a \code{data.table} with extracted values and an \code{ID} column of y point IDs

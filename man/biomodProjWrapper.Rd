@@ -13,16 +13,16 @@ biomodProjWrapper(
 )
 }
 \arguments{
-\item{bm.mod}{passed to \code{biomod2::BIOMOD_Projection}. If not supplied
+\item{bm.mod}{passed to \link[biomod2:BIOMOD_Projection]{biomod2::BIOMOD_Projection}. If not supplied
 the data used to fit the model will be used.}
 
-\item{proj.name}{passed to \code{biomod2::BIOMOD_Projection}}
+\item{proj.name}{passed to \link[biomod2:BIOMOD_Projection]{biomod2::BIOMOD_Projection}}
 
-\item{new.env}{passed to \code{biomod2::BIOMOD_Projection}}
+\item{new.env}{passed to \link[biomod2:BIOMOD_Projection]{biomod2::BIOMOD_Projection}}
 
-\item{new.env.xy}{passed to \code{biomod2::BIOMOD_Projection}}
+\item{new.env.xy}{passed to \link[biomod2:BIOMOD_Projection]{biomod2::BIOMOD_Projection}}
 
-\item{...}{passed to Cache}
+\item{...}{passed to \link[reproducible:Cache]{reproducible::Cache}}
 }
 \description{
 BIOMOD_Projection wrapper

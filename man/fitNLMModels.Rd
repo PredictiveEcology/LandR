@@ -121,3 +121,6 @@ forward step-AIC procedure to add covariates to the linear component of the
 model (on the A parameter -- the asymptote). The maximum number of covariates
 to add is determined by \code{maxNoCoefs}.
 }
+\seealso{
+\code{\link[bbmle:mle2]{bbmle::mle2()}}
+}
