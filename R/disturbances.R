@@ -758,8 +758,8 @@ PeatlandThermokarst <- function(thawedPixIDs = copy(sim$thawedPixIDs),
                              successionTimestep = successionTimestep)
 
     ## can use the same assertion.
-    assertPostPartialDist(cohortData = copy(tempObjs$cohortData),
-                          pixelGroupMap = tempObjs$pixelGroupMap,
+    assertPostPartialDist(cohortDataOrig = copy(tempObjs$cohortData),
+                          pixelGroupMapOrig = tempObjs$pixelGroupMap,
                           cohortDataNew = copy(outs$cohortData),
                           pixelGroupMapNew = outs$pixelGroupMap,
                           postDistPixelCohortData = copy(postThawPixelCohortData),
