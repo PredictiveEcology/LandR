@@ -15,7 +15,7 @@ assertPostPartialDist(
 )
 }
 \arguments{
-\item{cohortDataOrig}{original \code{cohertData} (prior to any modification)}
+\item{cohortDataOrig}{original \code{cohortData} (prior to any modification)}
 
 \item{pixelGroupMapOrig}{original \code{pixelGroupMap} (prior to any modification)}
 
@@ -23,14 +23,14 @@ assertPostPartialDist(
 
 \item{pixelGroupMapNew}{modified \code{pixelGroupMap} output from \code{updateCohortData()}}
 
+\item{postDistPixelCohortData}{modified \code{cohortData} output from \code{updateCohortData()}}
+
+\item{distrbdPixelCohortData}{\code{cohortData}-like object containing all dead, surviving and new cohorts
+(i.e. activated by serotiny/resprouting)}
+
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
-
-\item{postFirePixelCohortData}{modified \code{cohortData} output from \code{updateCohortData()}}
-
-\item{burnedPixelCohortData}{\code{cohortData}-like object containing all dead, surviving and new cohorts
-(i.e. activated by serotiny/resprouting)}
 }
 \description{
 Assert post-fire disturbance mortality and regeneration

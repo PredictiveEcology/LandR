@@ -634,7 +634,7 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
 
 #' Assert post-fire disturbance mortality and regeneration
 #'
-#' @param cohortDataOrig original `cohertData` (prior to any modification)
+#' @param cohortDataOrig original `cohortData` (prior to any modification)
 #'
 #' @param pixelGroupMapOrig original `pixelGroupMap` (prior to any modification)
 #'
@@ -642,17 +642,19 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
 #'
 #' @param pixelGroupMapNew modified `pixelGroupMap` output from `updateCohortData()`
 #'
-#' @param postFirePixelCohortData modified `cohortData` output from `updateCohortData()`
+#' @param postDistPixelCohortData modified `cohortData` output from `updateCohortData()`
 #'
-#' @param burnedPixelCohortData `cohortData`-like object containing all dead, surviving and new cohorts
+#' @param distrbdPixelCohortData `cohortData`-like object containing all dead, surviving and new cohorts
 #'   (i.e. activated by serotiny/resprouting)
 #'
 #' @template doAssertion
 #'
 #' @return NULL
 #' @export
-assertPostPartialDist <- function(cohortDataOrig, pixelGroupMapOrig, cohortDataNew, pixelGroupMapNew,
-                               postDistPixelCohortData, distrbdPixelCohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
+assertPostPartialDist <- function(cohortDataOrig, pixelGroupMapOrig,
+                                  cohortDataNew, pixelGroupMapNew,
+                                  postDistPixelCohortData, distrbdPixelCohortData,
+                                  doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     oldPCohortData <- addPixels2CohortData(cohortDataOrig, pixelGroupMapOrig, doAssertion = FALSE)
     newPCohortData <- addPixels2CohortData(cohortDataNew, pixelGroupMapNew)
