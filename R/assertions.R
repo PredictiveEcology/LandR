@@ -632,17 +632,21 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
   }
 }
 
-
-
 #' Assert post-fire disturbance mortality and regeneration
 #'
-#' @param cohortDataOrig object used in as `updateCohortData(cohortData = .)`
-#' @param pixelGroupMapOrig object used in as `updateCohortData(pixelGroupMap = .)`
-#' @param cohortDataNew `cohortData` output from `updateCohortData`
-#' @param pixelGroupMapNew `pixelGroupMap` output from `updateCohortData`
-#' @param postFirePixelCohortData object used in as `updateCohortData(newPixelCohortData = .)`
+#' @param cohortDataOrig original `cohertData` (prior to any modification)
+#'
+#' @param pixelGroupMapOrig original `pixelGroupMap` (prior to any modification)
+#'
+#' @param cohortDataNew modified `cohortData` output from `updateCohortData()`
+#'
+#' @param pixelGroupMapNew modified `pixelGroupMap` output from `updateCohortData()`
+#'
+#' @param postFirePixelCohortData modified `cohortData` output from `updateCohortData()`
+#'
 #' @param burnedPixelCohortData `cohortData`-like object containing all dead, surviving and new cohorts
 #'   (i.e. activated by serotiny/resprouting)
+#'
 #' @template doAssertion
 #'
 #' @return NULL

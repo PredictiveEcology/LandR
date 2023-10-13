@@ -580,17 +580,21 @@ FireDisturbancePM <- function(cohortData = sim$cohortData, cohortDefinitionCols 
                                         colsForPixelGroups = colsForPixelGroups,
                                         doAssertion = doAssertion)
 
-      outs <- updateCohortData(newPixelCohortData = copy(postFirePixelCohortData[, -"pixelGroup", with = FALSE]),
-                               cohortData = copy(tempObjs$cohortData),
-                               pixelGroupMap = tempObjs$pixelGroupMap,
-                               currentTime = round(currentTime),
-                               speciesEcoregion = copy(speciesEcoregion),
-                               treedFirePixelTableSinceLastDisp = copy(treedFirePixelTableSinceLastDisp),
-                               initialB = initialB,
-                               successionTimestep = successionTimestep)
+      outs <- updateCohortData(
+        newPixelCohortData = copy(postFirePixelCohortData[, -"pixelGroup", with = FALSE]),
+        cohortData = copy(tempObjs$cohortData),
+        pixelGroupMap = tempObjs$pixelGroupMap,
+        currentTime = round(currentTime),
+        speciesEcoregion = copy(speciesEcoregion),
+        treedFirePixelTableSinceLastDisp = copy(treedFirePixelTableSinceLastDisp),
+        initialB = initialB,
+        successionTimestep = successionTimestep
+      )
 
-      assertPostFireDist(cohortDataOrig = tempObjs$cohortData, pixelGroupMapOrig = tempObjs$pixelGroupMap,
-                         cohortDataNew = outs$cohortData, pixelGroupMapNew = outs$pixelGroupMap,
+      assertPostFireDist(cohortDataOrig = tempObjs$cohortData,
+                         pixelGroupMapOrig = tempObjs$pixelGroupMap,
+                         cohortDataNew = outs$cohortData,
+                         pixelGroupMapNew = outs$pixelGroupMap,
                          postFirePixelCohortData = postFirePixelCohortData,
                          burnedPixelCohortData = burnedPixelCohortData,
                          doAssertion = doAssertion)

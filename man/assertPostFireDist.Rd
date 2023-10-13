@@ -15,15 +15,15 @@ assertPostFireDist(
 )
 }
 \arguments{
-\item{cohortDataOrig}{object used in as \code{updateCohortData(cohortData = .)}}
+\item{cohortDataOrig}{original \code{cohertData} (prior to any modification)}
 
-\item{pixelGroupMapOrig}{object used in as \code{updateCohortData(pixelGroupMap = .)}}
+\item{pixelGroupMapOrig}{original \code{pixelGroupMap} (prior to any modification)}
 
-\item{cohortDataNew}{\code{cohortData} output from \code{updateCohortData}}
+\item{cohortDataNew}{modified \code{cohortData} output from \code{updateCohortData()}}
 
-\item{pixelGroupMapNew}{\code{pixelGroupMap} output from \code{updateCohortData}}
+\item{pixelGroupMapNew}{modified \code{pixelGroupMap} output from \code{updateCohortData()}}
 
-\item{postFirePixelCohortData}{object used in as \code{updateCohortData(newPixelCohortData = .)}}
+\item{postFirePixelCohortData}{modified \code{cohortData} output from \code{updateCohortData()}}
 
 \item{burnedPixelCohortData}{\code{cohortData}-like object containing all dead, surviving and new cohorts
 (i.e. activated by serotiny/resprouting)}
