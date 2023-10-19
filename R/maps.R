@@ -13,13 +13,15 @@ utils::globalVariables(c(
 #' @param nonFlammClasses numeric vector defining which classes in `LandCoverClassifiedMap`.
 #'
 #' @param mask A raster to use as a mask (see [raster::mask()]).
+#' @param to Passed to `postProcessTo(..., to = to)` and to the `mask` arg here, if
+#'   `mask` is not supplied.
 #'
 #' @param filename2 See [reproducible::postProcess()]. Default `NULL`.
 #'
 #' @export
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
                             nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
-                            mask = NULL, filename2 = NULL) {
+                            mask = NULL, to = NULL, filename2 = NULL) {
   if (!inherits(LandCoverClassifiedMap, c("RasterLayer", "SpatRaster"))) {
     stop("Need a classified land cover map that is a RasterLayer or SpatRaster")
   }
@@ -35,6 +37,15 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 
   if (!is.integer(nonFlammClasses)) {
     nonFlammClasses <- as.integer(nonFlammClasses)
+  }
+
+  if (!is.null(to)) {
+    same <- tryCatch(.compareRas(LandCoverClassifiedMap, to), error = function(e) FALSE)
+    if (!same) {
+      LandCoverClassifiedMap <- postProcessTo(LandCoverClassifiedMap, to)
+    }
+    if (is.null(mask))
+      mask <- to
   }
 
   if (!is.null(mask)) {
