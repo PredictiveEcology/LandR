@@ -114,6 +114,7 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 #' @param speciesPresentRas A factor raster where the character string is a string of
 #'   species names, separated by 2 underscores, sorted alphabetically. Can be produced
 #'   with `speciesPresentFromKNN`
+#' @param dPath Passed to `destinationPath` in `preProcess`.
 #'
 #' @return A named list of length 2: `speciesRas` is a factor `RasterLayer`
 #' and `speciesList` is a character string containing the unique, sorted
@@ -121,12 +122,13 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 #'
 #' @export
 #' @rdname speciesPresent
-speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL) {
+speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL,
+                               dPath = getOption("reproducible.destinationPath")) {
   if (is.null(speciesPresentRas)) {
     if (is.null(url)) {
       url <- "https://drive.google.com/file/d/1Oj78jJBeha5L6XDBBdWDAfimgNjYc9UD/"
     }
-    speciesPres <- preProcess(url = url)
+    speciesPres <- preProcess(url = url, destinationPath = dPath)
     speciesPresRas <- rasterRead(speciesPres$targetFilePath)
   }
 

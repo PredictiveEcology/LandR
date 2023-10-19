@@ -12,12 +12,17 @@ speciesPresentFromKNN(
   minPctCover = 10
 )
 
-speciesInStudyArea(studyArea, url = NULL, speciesPresentRas = NULL)
+speciesInStudyArea(
+  studyArea,
+  url = NULL,
+  speciesPresentRas = NULL,
+  dPath = getOption("reproducible.destinationPath")
+)
 }
 \arguments{
 \item{year}{Default (and only implemented) is 2011. This will download the 2011 KNN data layers}
 
-\item{dPath}{A character string indicating where to download all the KNN layers}
+\item{dPath}{Passed to \code{destinationPath} in the \code{preProcess}.}
 
 \item{res}{The resolution (one dimension, in m) for the resulting raster}
 
