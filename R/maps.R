@@ -19,6 +19,7 @@ utils::globalVariables(c(
 #' @param filename2 See [reproducible::postProcess()]. Default `NULL`.
 #'
 #' @export
+#' @importFrom reproducible postProcessTo
 defineFlammable <- function(LandCoverClassifiedMap = NULL,
                             nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
                             mask = NULL, to = NULL, filename2 = NULL) {
