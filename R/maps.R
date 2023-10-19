@@ -2,7 +2,7 @@ utils::globalVariables(c(
   ".", "..pgdAndScAndLeading", ":=", "B", "HQ", "leading", "LQ", "mixed", "N",
   "pixelGroup", "postfireB", "prefireB", "pure",
   "severityB", "speciesCode", "speciesGroupB", "speciesProportion", "SPP",
-  "totalB", "totalcover", "Type", "vals"
+  "totalB", "totalcover", "Type", "vals", "weightedAge"
 ))
 
 #' Define flammability map
@@ -152,12 +152,41 @@ prepInputsLCC <- function(year = 2010,
   out
 }
 
+#' Produce stand age map based on `cohortData`
+#'
+#' @template cohortData
+#' @template pixelGroupMap
+#' @param weight variable by which to weight `cohortData` ages. one of `"biomass"` or `NA`.
+#'               `NA` means use max unweighted age.
+#' @template doAssertion
+#'
+#' @return raster of the same type as `pixelGroupMap`.
+#'
+#' @export
+#' @importFrom SpaDES.tools rasterizeReduced
+standAgeMapGenerator <- function(cohortData, pixelGroupMap, weight = "biomass",
+                                 doAssertion = getOption("LandR.assertions", FALSE)) {
+  if (identical(tolower(weight), "biomass")) {
+    cohortData[, weightedAge := floor(sum(age * B) / sum(B) / 10) * 10, .(pixelGroup)]
+  } else {
+    ## unweighted max age
+    cohortData[, weightedAge := floor(max(age) / 10) * 10, .(pixelGroup)]
+  }
+  cohortDataReduced <- cohortData[, c("pixelGroup", "weightedAge")]
+  cohortDataReduced <- unique(cohortDataReduced)
+
+  names(pixelGroupMap) <- "pixelGroup"
+  standAgeMap <- rasterizeReduced(cohortDataReduced, pixelGroupMap, "weightedAge", mapCode = "pixelGroup")
+
+  return(standAgeMap)
+}
+
 #' Make a vegetation type map from a stack of species abundances
 #'
 #' @description
 #' `makeVegTypeMap` is a wrapper around `vegTypeMapGenerator`
-#' that works from a species stack of percent cover. These do not have
-#' to sum to 100%
+#' that works from a species stack of percent cover.
+#' These do not have to sum to 100%%
 #'
 #' @param speciesStack A `RasterStack` of species abundances.
 #'                     This must be one `RasterLayer` per species.
@@ -272,7 +301,6 @@ vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.a
     stop("x should be a Raster or SpatRaster")
   }
 }
-
 
 #' @examples
 #' library(data.table)

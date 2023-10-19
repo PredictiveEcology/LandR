@@ -10,6 +10,7 @@
 `Biomass_regeneration` and `Biomass_regenerationPM` modules, respectively.
 * `overlayLCCs()` now works correctly with terra (#99)
 * fixed partial argument match warnings (#100)
+* new function `standAgeMapGenerator()` to produce `standAgeMap` from `cohortData`
 
 # LandR 1.1.0
 
