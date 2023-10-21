@@ -580,19 +580,34 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 #' }
 prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950) {
   dots <- list(...)
-  a <- if (is.null(dots$fun)) {
-    Cache(prepInputs, rasterToMatch = rasterToMatch, fun = "terra::vect", ...) |>
-      st_as_sf()
+  if (is.null(dots$studyArea)) {
+    maskTo <- rasterToMatch
   } else {
-    if (grepl("st_read", dots$fun)) {
-      Cache(prepInputs, rasterToMatch = rasterToMatch, ...)  |>
-        st_as_sf() |>
-        st_zm() #NFDB data has incomplete z coordinates resulting in errors
-    } else {
-      Cache(prepInputs, rasterToMatch = rasterToMatch, ...) |>
-        st_as_sf()
-    }
+    maskTo <- dots$studyArea
+    dots$studyArea <- NULL
   }
+  fun <- if (is.null(dots$fun)) "terra::vect" else dots$fun
+  to <- rasterToMatch
+  a <- # if (is.null(dots$fun)) {
+    {
+    do.call(prepInputs, append(list(to = to, maskTo = maskTo, fun = fun),
+                               dots)) |>
+        st_as_sf() } |> Cache()
+    #Cache(prepInputs, to = to, maskTo = maskTo, fun = "terra::vect", ...) |>
+    #  st_as_sf()
+  # } else {
+  #   if (grepl("st_read", dots$fun)) {
+  #     Cache(prepInputs, to = to, maskTo = maskTo, ...)  |>
+  #       st_as_sf() |>
+  #       st_zm() #NFDB data has incomplete z coordinates resulting in errors
+  #   } else {
+  #     Cache(prepInputs, rasterToMatch = rasterToMatch, ...) |>
+  #       st_as_sf()
+  #   }
+  # }
+  if (isTRUE(grepl("st_read", dots$fun)))
+    a <- st_zm(a)
+
 
   if (nrow(a) > 0) {
     gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon
@@ -714,7 +729,7 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
       }
       if (!.compareRas(templateRas, studyAreaLarge, stopOnError = FALSE)) {
         ## note that extents/origin may never align if the resolution and projection do not allow for it
-        templateRas <- Cache(postProcessTerra,
+        templateRas <- Cache(postProcessTo,
                              templateRas,
                              cropTo = studyAreaLarge,
                              maskTo = studyAreaLarge,
