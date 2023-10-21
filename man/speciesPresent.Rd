@@ -22,7 +22,7 @@ speciesInStudyArea(
 \arguments{
 \item{year}{Default (and only implemented) is 2011. This will download the 2011 KNN data layers}
 
-\item{dPath}{Passed to \code{destinationPath} in the \code{preProcess}.}
+\item{dPath}{Passed to \code{destinationPath} in \code{preProcess}.}
 
 \item{res}{The resolution (one dimension, in m) for the resulting raster}
 

@@ -12,6 +12,7 @@
 #'   (see manual). If `NA`, the default, then this will try to determine which
 #'   column the `sppNameVector` used and use that. If `sppNameVector` is NULL, then
 #'   it will default to `"Boreal"`.
+#' @param dPath Passed to `speciesInStudyArea` (which then passes to `preProcess`)
 #'
 #' @template sppColorVect
 #'
@@ -30,11 +31,12 @@
 #' # P(sim)$sppEquivCol <- sppOuts$sppEquivCol
 #'
 sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
-                         vegLeadingProportion = 0, studyArea) {
+                         vegLeadingProportion = 0, studyArea,
+                         dPath = getOption("reproducible.destinationPath")) {
   if (is.null(sppEquiv) && is.null(sppNameVector)) {
     sppNameConvention <- "KNN"
     if (!missing(studyArea)) {
-      sppNameVector <-  Cache(LandR::speciesInStudyArea, studyArea)$speciesList
+      sppNameVector <-  Cache(LandR::speciesInStudyArea, studyArea, dPath = dPath)$speciesList
     } else {
       stop("Please pass studyArea polygon if not passing sppEquiv/sppNameVector")
     }

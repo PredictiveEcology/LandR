@@ -10,7 +10,8 @@ sppHarmonize(
   sppEquivCol,
   sppColorVect,
   vegLeadingProportion = 0,
-  studyArea
+  studyArea,
+  dPath = getOption("reproducible.destinationPath")
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ threshold a species needs to pass to be considered "leading".}
 
 \item{studyArea}{A \verb{SpatialPolygons*} object used as the principle study region,
 passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
+
+\item{dPath}{Passed to \code{speciesInStudyArea} (which then passes to \code{preProcess})}
 }
 \value{
 Returns a named list with the same names as the arguments. These should
