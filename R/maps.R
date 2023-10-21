@@ -856,6 +856,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
                                          overwrite = TRUE,
                                          userTags = dots$userTags
                          ),
+                         .functionName = "prepInputs",
                          prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
 
   correctOrder <- sapply(unique(kNNnames), function(x) grep(pattern = x, x = targetFiles, value = TRUE))
