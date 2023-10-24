@@ -599,13 +599,13 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
         successionTimestep = successionTimestep
       )
 
-      assertPostFireDist(cohortDataOrig = tempObjs$cohortData,
-                         pixelGroupMapOrig = tempObjs$pixelGroupMap,
-                         cohortDataNew = outs$cohortData,
-                         pixelGroupMapNew = outs$pixelGroupMap,
-                         postFirePixelCohortData = postFirePixelCohortData,
-                         burnedPixelCohortData = burnedPixelCohortData,
-                         doAssertion = doAssertion)
+      assertPostPartialDist(cohortDataOrig = tempObjs$cohortData,
+                            pixelGroupMapOrig = tempObjs$pixelGroupMap,
+                            cohortDataNew = outs$cohortData,
+                            pixelGroupMapNew = outs$pixelGroupMap,
+                            postDistPixelCohortData = postFirePixelCohortData,
+                            distrbdPixelCohortData = burnedPixelCohortData,
+                            doAssertion = doAssertion)
 
       cohortData <- outs$cohortData
       pixelGroupMap <- outs$pixelGroupMap
