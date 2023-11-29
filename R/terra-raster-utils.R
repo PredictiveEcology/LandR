@@ -34,6 +34,7 @@ utils::globalVariables(c(
 #'
 #' @return a stacked raster
 #'
+#' @export
 #' @rdname rasterTerraHelpers
 .stack <- function(rasList) {
   isRaster <- sapply(rasList, function(ras) is(ras, "Raster"))
