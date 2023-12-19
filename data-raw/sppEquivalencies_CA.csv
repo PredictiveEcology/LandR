@@ -27,8 +27,9 @@ acersacc,ACER.SAH,Acer_sah,Acer_Sah,Acer sach,Acer saccharum,Sg maple,Sugar mapl
 ,,Alnu_inc,Alnu_Inc_Ten,Alnu inca,,,,,,,TRUE,Deciduous,gray alder,Dm,class2,,
 ,,Alnu_inc,Alnu_Inc,Alnu inca,,,,,,,TRUE,Deciduous,gray alder,Dm,class2,,
 alnurubr,ALNU.RUB,Alnu_rub,Alnu_Rub,Alnu rubr,Alnus rubra,,,,,,TRUE,Deciduous,red alder,Dr,class2,,
-,,Alnu_sp,Alnu_Spp,Alnu spp,Alnus spp,Alder,Alder,Alder leading,,Alnu_Spp,TRUE,Deciduous,alder,D,class2,,
+,,Alnu_sp,Alnu_Spp,Alnu spp,Alnus spp.,Alder,Alder,Alder leading,,Alnu_Spp,TRUE,Deciduous,alder,D,class2,,
 ,,Alnu_vir,,Alnu viri,Alnus viridis,,,,,,TRUE,Deciduous,sitka alder,Dg,class2,,
+,,,,,Amelanchier spp.,,Shadbush,,"a.k.a. sugarplu, serviceberry, saskatoon",,TRUE,Deciduous,shadbush,,,,
 ,,Arbu_men,Arbu_Men,Arbu menz,Arbutus menziesii,,,,,,TRUE,Deciduous,,Ra,,,
 ,,Asim_tri,Asim_Tri,Asim tril,Asimina triloba,,,,,,TRUE,Deciduous,,,,,
 ,BETU.ALL,Betu_sp,Betu_All,Betu alle,Betula alleghaniensis,Sw birch,Swamp birch,Swamp birch leading,,Betu_All,TRUE,Deciduous,swamp birch,E,class2,,
@@ -86,7 +87,8 @@ lariocci,LARI.OCC,Lari_occ,Lari_Occ,Lari occi,Larix occidentalis,We larch,Wester
 ,,Magn_acu,,Magn acum,Magnolia acuminata,,,,,,TRUE,Deciduous,,,,,
 ,,Malu_fus,Malu_Fus,Malu fusc,Malus fusca,,,,,,TRUE,Deciduous,,,,,
 ,,Malu_pum,,Malu pumi,Malus pumila,,,,,,TRUE,Deciduous,,,,,
-,,Malu_sp,Malu_Spp,,,,,,,,TRUE,Deciduous,,,,,
+,,Malu_syl,Malu_Spp,,Malus sylvestris,crabapple,European crab apple,,,,,,,,,,
+,,Malu_sp,Malu_Spp,,Malus spp.,apple,,,,,TRUE,Deciduous,,,,,
 ,,Moru_rub,,Moru rubr,Morus rubra,,,,,,TRUE,Deciduous,,,,,
 ,,Nyss_syl,,Nyss sylv,Nyssa sylvatica,,,,,,TRUE,Deciduous,,,,,
 ,,Ostr_vir,Ostr_Vir,Ostr virg,Ostrya virginiana,,,,also known as ironwood,,TRUE,Deciduous,hop-hornbeam,,,,
@@ -122,6 +124,7 @@ pinustro,PINU.STR,Pinu_str,Pinu_Str,Pinu stro,Pinus strobus,Pine,Pine,Pine leadi
 ,,Pinu_syl,Pinu_Syl,Pinu sylv,Pinus sylvestris,Pine,Pine,Pine leading,,,FALSE,Conifer,,,class3,,SP
 ,,Plan_occ,Plat_Occ,Plan occi,Platanus occidentalis,,,,,,TRUE,Deciduous,,,,,
 ,,Popu_ang,,Popu angu,Populus angustifolia,,,,,,TRUE,Deciduous,,,,,
+popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamea,Ba poplar,Balsam poplar,Balsam poplar leading,,Popu_Bal,TRUE,Deciduous,balsam poplar,Acb,class2,Pb,BA
 popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamifera,Ba poplar,Balsam poplar,Balsam poplar leading,,Popu_Bal,TRUE,Deciduous,balsam poplar,Acb,class2,Pb,BA
 popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamifera v. balsamifera,Ba poplar,Balsam poplar,Balsam poplar leading,,Popu_Bal,TRUE,Deciduous,balsam poplar,Acb,class2,Pb,BA
 ,,Popu_bal,Popu_Tri,Popu balt,Populus trichocarpa,Bl cottonwood,Black cottonwood,Black cottonwood leading,Populus balsamifera trichocarpa is a synonym of Populus trichocarpa,Popu_Tri,TRUE,Deciduous,balsam poplar,Act,class2,,
@@ -171,6 +174,7 @@ querrubr,QUER.RUB,Quer_rub,Quer_Rub,Quer rubr,Quercus rubra,,,,,,TRUE,Deciduous,
 ,,Sass_alb,Sass_Alb,Sass albi,Sassafras albidum,,,,,,TRUE,Deciduous,,,,,
 ,,Sequ_gig,,Sequ giga,Sequoadendron giganteum,,,,,,FALSE,Conifer,,,,,
 ,,Sequ_sem,,Sequ semp,Sequoia sempervirens,,,,,,FALSE,Conifer,,,,,
+,,Sorb_auc,Sorb_Ame,Sorb aucu,Sorbus americana,,,,Sorbus americana is a synonym of Sorbus aucuparia,,TRUE,Deciduous,,,,,
 ,,Sorb_auc,Sorb_Ame,Sorb aucu,Sorbus aucuparia,,,,Sorbus aucuparia is a synonym of Sorbus americana,,TRUE,Deciduous,,,,,
 ,,Sorb_dec,Sorb_Dec,,,,,,,,TRUE,Deciduous,,,,,
 ,,Sorb_sp,Sorb_Spp,,,,,,,,TRUE,Deciduous,,,,,
