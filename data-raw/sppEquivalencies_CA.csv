@@ -101,7 +101,7 @@ piceglau,PICE.GLA,Pice_gla,Pice_Gla,Pice glau,Picea glauca,Wh Spruce,White.Spruc
 ,,Pice_lut,,Pice lutx,Picea x lutzii,,,,,,FALSE,Conifer,,,,,
 picemari,PICE.MAR,Pice_mar,Pice_Mar,Pice mari,Picea mariana,Bl Spruce,Black.Spruce,Black spruce leading,,Pice_Mar,FALSE,Conifer,black spruce,Sb,class3,Sb,BS
 ,,Pice_pun,,Pice pung,Picea pungens,,,,,,FALSE,Conifer,,,,,
-picerube,PICE.RUB,Pice_rub,Pice_Rub,Pice rube,Picea rubens,,,,,,FALSE,Conifer,,,,,
+picerube,PICE.RUB,Pice_rub,Pice_Rub,Pice rube,Picea rubens,,,,,,FALSE,Conifer,red spruce,,,,
 picesitc,PICE.SIT,Pice_sit,Pice_Sit,Pice sitc,Picea sitchensis,,,,,,FALSE,Conifer,sitka spruce,Ss,class3,,
 ,,Pice_sit,,Pice sitx,Picea sitchensis x ?,,,,,,FALSE,Conifer,sitka spruce,Ss,class3,,
 ,,Pice_sp,Pice_Spp,Pice spp,Picea spp.,Spruce,Spruce,Spruce leading,,Pice_Spp,FALSE,Conifer,spruce,S,class3,,
