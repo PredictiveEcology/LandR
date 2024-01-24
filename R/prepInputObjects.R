@@ -589,26 +589,15 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
   fun <- if (is.null(dots$fun)) "terra::vect" else dots$fun
   dots$fun <- NULL # need to do this or else it will pass double to the prepInputs
   to <- rasterToMatch
-  a <- # if (is.null(dots$fun)) {
-    {
-    do.call(prepInputs, append(list(to = to, maskTo = maskTo, fun = fun),
-                               dots)) |>
-        st_as_sf() } |> Cache()
-    #Cache(prepInputs, to = to, maskTo = maskTo, fun = "terra::vect", ...) |>
-    #  st_as_sf()
-  # } else {
-  #   if (grepl("st_read", dots$fun)) {
-  #     Cache(prepInputs, to = to, maskTo = maskTo, ...)  |>
-  #       st_as_sf() |>
-  #       st_zm() #NFDB data has incomplete z coordinates resulting in errors
-  #   } else {
-  #     Cache(prepInputs, rasterToMatch = rasterToMatch, ...) |>
-  #       st_as_sf()
-  #   }
-  # }
-  if (isTRUE(grepl("st_read", dots$fun)))
-    a <- st_zm(a)
+  a <- {
+      do.call(prepInputs, append(list(to = to, maskTo = maskTo, fun = fun), dots)) |>
+        st_as_sf()
+    } |>
+      Cache()
 
+  if (isTRUE(grepl("st_read", dots$fun))) {
+    a <- st_zm(a)
+  }
 
   if (nrow(a) > 0) {
     gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon
@@ -745,9 +734,10 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
 
     if (!anyNA(as.vector(rasterToMatchLarge[]))) {
       whZeros <- as.vector(rasterToMatchLarge[]) == 0
-      if (sum(whZeros) > 0) {# means there are zeros instead of NAs for RTML --> change
+      if (sum(whZeros) > 0) { ## means there are zeros instead of NAs for RTML --> change
         rasterToMatchLarge[whZeros] <- NA
-        message("There were no NAs on the rasterToMatchLarge, but there were zeros; converting these zeros to NA")
+        message("There were no NAs on the rasterToMatchLarge, but there were zeros;",
+                " converting these zeros to NA.")
       }
     }
 
@@ -781,15 +771,15 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
                              overwrite = TRUE,
                              # useCache = "overwrite",
                              userTags = c(cacheTags, "rasterToMatch"),
-                             omitArgs = c("destinationPath", "targetFile", "userTags", "stable", "filename2",
-                                          "overwrite"))
+                             omitArgs = c("destinationPath", "targetFile", "userTags", "stable",
+                                          "filename2", "overwrite"))
     }
     ## covert to 'mask'
     if (!anyNA(rasterToMatch[])) {
       whZeros <- as.vector(rasterToMatch[]) == 0
       if (sum(whZeros) > 0) {# means there are zeros instead of NAs for RTML --> change
         rasterToMatch[whZeros] <- NA
-        message("There were no NAs on the RTM, but there were zeros; converting these zeros to NA")
+        message("There were no NAs on the RTM, but there were zeros; converting these zeros to NA.")
       }
     }
 
@@ -799,4 +789,3 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
 
   return(list(rasterToMatch = rasterToMatch, rasterToMatchLarge = rasterToMatchLarge))
 }
-
