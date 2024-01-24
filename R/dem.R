@@ -19,7 +19,7 @@ prepInputsCanDEM <- function(studyArea, rasterToMatch, destinationPath) {
     targetFile = "Canada_3ArcMinuteDEM.asc",
     url = dem_url,
     destinationPath = destinationPath,
-    fun = "raster::raster", method = "bilinear"
+    fun = "terra::rast", method = "bilinear"
   )
   crs(dem) <- lonlat
   dem <- postProcess(dem, studyArea = studyArea_lonlat, rasterToMatch = rasterToMatch)
