@@ -587,6 +587,7 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
     dots$studyArea <- NULL
   }
   fun <- if (is.null(dots$fun)) "terra::vect" else dots$fun
+  dots$fun <- NULL # need to do this or else it will pass double to the prepInputs
   to <- rasterToMatch
   a <- {
       do.call(prepInputs, append(list(to = to, maskTo = maskTo, fun = fun), dots)) |>
