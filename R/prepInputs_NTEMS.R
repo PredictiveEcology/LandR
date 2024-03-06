@@ -1,14 +1,12 @@
-# utils::globalVariables(c(
-#  "foo"
-# ))
+utils::globalVariables(c(
+ "currentLCC"
+))
 
 #' Obtain an LCC layer for a given year from NTEMS, with forest matching the FAO definition
 #'
-#' @inheritParams reproducible::postProcessTo
 #' @param year stack of species layers rasters
-#' @param rasterToMatch template raster to crop to
-#' @param destinationPath destination folder for FAO and LCC data
 #' @param disturbedCode value assigned to pixels that are forest per FAO definition but not in LCC year
+#' @param ... passed to `prepInputs`
 #'
 #' @return
 #' A \code{SpatRaster} with corrected forest pixels
@@ -16,7 +14,7 @@
 #' @export
 #' @importFrom reproducible prepInputs
 #'
-prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 0, rasterToMatch, ...) {
+prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, ...) {
   if (year > 2019 | year < 1984) {
     stop("LCC for this year is unavailable")
   }
@@ -50,11 +48,13 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 0, rasterToMat
 #' @param endYear NTEMS LCC year to use for correcting transition from bare to non-forest
 #' @param lccToAdjust lcc values of the bare class
 #' @param nonforestLCC allowable lcc values for bare to become
+#' @param ... non-spatial arguments passed to `prepInputs` e.g. destinationPath
 #' @return
 #' A \code{SpatRaster} with non-flammable pixels corrected if they become flammable non-forest
 #'
 #' @export
 #' @importFrom data.table data.table setnames
+#' @importFrom terra ncell
 prepInputs_NTEMS_Nonforest <- function(rstLCC, endYear = 2019, lccToAdjust = 33,
                                        nonforestLCC = c(50, 100), ...) {
 

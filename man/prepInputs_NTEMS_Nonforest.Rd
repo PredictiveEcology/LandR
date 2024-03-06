@@ -4,12 +4,24 @@
 \alias{prepInputs_NTEMS_Nonforest}
 \title{reclassify non-flammable pixels that become flammable - herbaceous or shrubby - vegetation}
 \usage{
-prepInputs_NTEMS_Nonforest(rstLCC, endYear = 2018, lccToFix = 33)
+prepInputs_NTEMS_Nonforest(
+  rstLCC,
+  endYear = 2019,
+  lccToAdjust = 33,
+  nonforestLCC = c(50, 100),
+  ...
+)
 }
 \arguments{
+\item{rstLCC}{input lcc layer with bare soil class that may become vegetated}
+
 \item{endYear}{NTEMS LCC year to use for correcting transition from bare to non-forest}
 
-\item{...}{passed to prepInputs}
+\item{lccToAdjust}{lcc values of the bare class}
+
+\item{nonforestLCC}{allowable lcc values for bare to become}
+
+\item{...}{non-spatial arguments passed to \code{prepInputs} e.g. destinationPath}
 }
 \value{
 A \code{SpatRaster} with non-flammable pixels corrected if they become flammable non-forest

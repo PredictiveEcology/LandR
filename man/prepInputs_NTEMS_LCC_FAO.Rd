@@ -4,20 +4,14 @@
 \alias{prepInputs_NTEMS_LCC_FAO}
 \title{Obtain an LCC layer for a given year from NTEMS, with forest matching the FAO definition}
 \usage{
-prepInputs_NTEMS_LCC_FAO(year = 2011, disturbedCode = 0, ...)
+prepInputs_NTEMS_LCC_FAO(year = 2010, disturbedCode = 1, ...)
 }
 \arguments{
 \item{year}{stack of species layers rasters}
 
 \item{disturbedCode}{value assigned to pixels that are forest per FAO definition but not in LCC year}
 
-\item{...}{Arguments passed to \code{terra::mask} (for \code{maskTo}), \code{terra::project} (for \code{projectTo})
-or \code{terra::writeRaster} (for \code{writeTo}) and not used for \code{cropTo}, as well \code{postProcess}'s
-\code{rasterToMatch} and \code{studyArea} arguments (see below). Commonly used arguments might be
-\code{method}, \code{touches}, and \code{datatype}. If \code{filename} is passed, it will be ignored; use
-\verb{writeTo = }.}
-
-\item{destinationPath}{destination folder for FAO and LCC data}
+\item{...}{passed to \code{prepInputs}}
 }
 \value{
 A \code{SpatRaster} with corrected forest pixels
