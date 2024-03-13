@@ -76,6 +76,11 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, ...) {
 prepInputs_NTEMS_Nonforest <- function(rstLCC, endYear = 2019, lccToAdjust = 33,
                                        nonforestLCC = c(50, 100), ...) {
 
+  if (is.null(rstLCC)) {
+    #allow a more graceful fail than imploding upon reading the NTEMS dataset
+    stop("rstLCC should not be NULL")
+  }
+
   resetGDAL <- FALSE
   if (isTRUE(getOption("reproducible.gdalwarp"))) {
     message("temporarily setting reproducible.usegdalwarp to FALSE to avoid error")
@@ -85,14 +90,15 @@ prepInputs_NTEMS_Nonforest <- function(rstLCC, endYear = 2019, lccToAdjust = 33,
 
   lccURL <- paste0("https://opendata.nfis.org/downloads/forest_change/CA_forest_VLCE2_", endYear, ".zip")
   lccTF <- paste0("CA_forest_VLCE2_", endYear, ".tif")
-  endLCC <- prepInputs(url = lccURL, targetFile = lccTF, method = "near",
+  finalLCC <- prepInputs(url = lccURL, targetFile = lccTF, method = "near",
                        cropTo = rstLCC, projectTo = rstLCC, maskTo = rstLCC, ...)
 
-  toFix <- data.table(currentLCC = values(rstLCC, mat = FALSE), pixelID = 1:ncell(endLCC))
-  toFix <- toFix[!is.na(currentLCC) & currentLCC %in% lccToAdjust]
 
-  toFix[, endLCC := values(endLCC, mat = FALSE)[pixelID]]
-  toFix <- toFix[!is.na(endLCC) & endLCC %in% nonforestLCC, newLCC := endLCC]
+  toFix <- data.table(currentLCC = values(rstLCC, mat = FALSE), pixelID = 1:ncell(finalLCC))
+  toFix <- toFix[currentLCC %in% lccToAdjust]
+
+  toFix[, endLCC := values(finalLCC, mat = FALSE)[pixelID]]
+  toFix <- toFix[endLCC %in% nonforestLCC, newLCC := endLCC]
   toFix <- toFix[!is.na(newLCC)]
 
   #adjust pixels
