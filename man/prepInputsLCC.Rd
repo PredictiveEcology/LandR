@@ -32,7 +32,8 @@ and \link[reproducible:prepInputs]{reproducible::prepInputs}}
 or \code{terra::writeRaster} (for \code{writeTo}) and not used for \code{cropTo}, as well \code{postProcess}'s
 \code{rasterToMatch} and \code{studyArea} arguments (see below). Commonly used arguments might be
 \code{method}, \code{touches}, and \code{datatype}. If \code{filename} is passed, it will be ignored; use
-\verb{writeTo = }.}
+\verb{writeTo = }. If \code{reproducible.gdalwarp = TRUE}, then these will be passed to the
+\verb{gdal*} functions. See them for details.}
 }
 \description{
 A wrapper around \code{prepInputs} for the Canadian Land Cover Classification product(s).

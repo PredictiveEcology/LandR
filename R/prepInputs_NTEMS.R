@@ -13,6 +13,8 @@ utils::globalVariables(c(
 #'
 #' @export
 #' @importFrom reproducible prepInputs
+#' @importFrom terra values
+#' @importFrom data.table data.table
 #'
 prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, ...) {
   if (year > 2019 | year < 1984) {
@@ -20,7 +22,7 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, ...) {
   }
 
   resetGDAL <- FALSE
-  if (isTRUE(options("reproducible.gdalwarp"))) {
+  if (isTRUE(getOption("reproducible.gdalwarp"))) {
     message("temporarily setting reproducible.usegdalwarp to FALSE to avoid error")
     resetGDAL <- TRUE
     options("reproducible.gdalwarp" = FALSE)
@@ -36,11 +38,18 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, ...) {
   #1 is forest, #2 is disturbed forest
   fao <- prepInputs(url = "https://opendata.nfis.org/downloads/forest_change/CA_FAO_forest_2019.zip",
                     method = "near", cropTo = lcc, maskTo = lcc, projectTo = lcc)
+
   #10 is not a class in use - make it disturbed forest
   #pixels may not be disturbed yet if year is prior to 2019 (FAO year)
   #adjust non-forest LCC that are disturbed forest to 10
+  lccDat <- data.table(pixelID = 1:ncell(lcc), lcc = values(lcc, mat = FALSE))
+  lccDat <- lccDat[!is.na(lcc) & lcc %in% c(210, 81, 220, 230)]
+  lccDat[, fao := values(fao, mat = FALSE)[pixelID]]
+  lccDat <- lccDat[!is.na(fa) & fao == 2]
 
-  lcc[!lcc[] %in% c(210, 81, 220, 230) & fao[] == 2] <- disturbedCode
+  lcc[lccDat$pixelID] <- disturbedCode
+  rm(lccDat)
+  gc()
 
   if (resetGDAL) {
     options("reproducible.gdalwarp" = TRUE)
@@ -61,32 +70,33 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, ...) {
 #' A \code{SpatRaster} with non-flammable pixels corrected if they become flammable non-forest
 #'
 #' @export
-#' @importFrom data.table data.table setnames
-#' @importFrom terra ncell
+#' @importFrom data.table data.table
+#' @importFrom reproducible prepInputs
+#' @importFrom terra ncell values
 prepInputs_NTEMS_Nonforest <- function(rstLCC, endYear = 2019, lccToAdjust = 33,
                                        nonforestLCC = c(50, 100), ...) {
 
   resetGDAL <- FALSE
-  if (isTRUE(options("reproducible.gdalwarp"))) {
+  if (isTRUE(getOption("reproducible.gdalwarp"))) {
     message("temporarily setting reproducible.usegdalwarp to FALSE to avoid error")
     resetGDAL <- TRUE
     options("reproducible.gdalwarp" = FALSE)
   }
-
-
 
   lccURL <- paste0("https://opendata.nfis.org/downloads/forest_change/CA_forest_VLCE2_", endYear, ".zip")
   lccTF <- paste0("CA_forest_VLCE2_", endYear, ".tif")
   endLCC <- prepInputs(url = lccURL, targetFile = lccTF, method = "near",
                        cropTo = rstLCC, projectTo = rstLCC, maskTo = rstLCC, ...)
 
-  toFix <- data.table(currentLCC = rstLCC[], endLCC = endLCC[], id = 1:ncell(endLCC))
-  setnames(toFix, new = c("currentLCC", "endLCC", "id"))
-  toFix[currentLCC == lccToAdjust & endLCC %in% nonforestLCC, newLCC := endLCC]
-  toFix <- toFix[!is.na(newLCC), .(id, newLCC)]
+  toFix <- data.table(currentLCC = values(rstLCC, mat = FALSE), pixelID = 1:ncell(endLCC))
+  toFix <- toFix[!is.na(currentLCC) & currentLCC %in% lccToAdjust]
+
+  toFix[, endLCC := values(endLCC, mat = FALSE)[pixelID]]
+  toFix <- toFix[!is.na(endLCC) & endLCC %in% nonforestLCC, newLCC := endLCC]
+  toFix <- toFix[!is.na(newLCC)]
 
   #adjust pixels
-  rstLCC[toFix$id] <- toFix$newLCC
+  rstLCC[toFix$pixelID] <- toFix$newLCC
 
   if (resetGDAL) {
     options("reproducible.gdalwarp" = TRUE)
@@ -94,7 +104,3 @@ prepInputs_NTEMS_Nonforest <- function(rstLCC, endYear = 2019, lccToAdjust = 33,
 
   return(rstLCC)
 }
-
-
-
-
