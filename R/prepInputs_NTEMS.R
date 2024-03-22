@@ -21,6 +21,12 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, ...) {
     stop("LCC for this year is unavailable")
   }
 
+  dots <- list(...)
+
+  if (is.null(dots$rasterToMatch) & is.null(dots$cropTo)) {
+    stop("the NTEMS raster file is too large to process without cropping via `rasterToMatch` or `cropTo`")
+  }
+
   resetGDAL <- FALSE
   if (isTRUE(getOption("reproducible.gdalwarp"))) {
     message("temporarily setting reproducible.usegdalwarp to FALSE to avoid error")
@@ -37,7 +43,7 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, ...) {
 
   #1 is forest, #2 is disturbed forest
   fao <- prepInputs(url = "https://opendata.nfis.org/downloads/forest_change/CA_FAO_forest_2019.zip",
-                    method = "near", cropTo = lcc, maskTo = lcc, projectTo = lcc)
+                    method = "near", ...) #needs dots
 
   #10 is not a class in use - make it disturbed forest
   #pixels may not be disturbed yet if year is prior to 2019 (FAO year)
