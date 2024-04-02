@@ -51,7 +51,7 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, ...) {
   lccDat <- data.table(pixelID = 1:ncell(lcc), lcc = values(lcc, mat = FALSE))
   lccDat <- lccDat[!is.na(lcc) & lcc %in% c(210, 81, 220, 230)]
   lccDat[, fao := values(fao, mat = FALSE)[pixelID]]
-  lccDat <- lccDat[!is.na(fa) & fao == 2]
+  lccDat <- lccDat[!is.na(fao) & fao == 2]
 
   lcc[lccDat$pixelID] <- disturbedCode
   rm(lccDat)
