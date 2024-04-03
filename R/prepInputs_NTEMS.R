@@ -42,8 +42,10 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, ...) {
   lcc <- prepInputs(url = lccURL, targetFile = lccTF, method = "near", ...)
 
   #1 is forest, #2 is disturbed forest
+  #Do not pass dots, or the filename is passed and is overwritten
   fao <- prepInputs(url = "https://opendata.nfis.org/downloads/forest_change/CA_FAO_forest_2019.zip",
-                    method = "near", ...) #needs dots
+                    method = "near", destinationPath = dots$destinationPath, cropTo = lcc,
+                    maskTo = lcc, projectTo = lcc)
 
   #10 is not a class in use - make it disturbed forest
   #pixels may not be disturbed yet if year is prior to 2019 (FAO year)
