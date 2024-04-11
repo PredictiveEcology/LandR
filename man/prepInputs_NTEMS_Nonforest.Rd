@@ -2,7 +2,7 @@
 % Please edit documentation in R/prepInputs_NTEMS.R
 \name{prepInputs_NTEMS_Nonforest}
 \alias{prepInputs_NTEMS_Nonforest}
-\title{reclassify non-flammable pixels that become flammable - herbaceous or shrubby - vegetation}
+\title{Reclassify non-flammable pixels that become flammable - herbaceous or shrubby - vegetation}
 \usage{
 prepInputs_NTEMS_Nonforest(
   rstLCC,
@@ -21,11 +21,11 @@ prepInputs_NTEMS_Nonforest(
 
 \item{nonforestLCC}{allowable lcc values for bare to become}
 
-\item{...}{non-spatial arguments passed to \code{prepInputs} e.g. destinationPath}
+\item{...}{non-spatial arguments passed to \code{prepInputs} e.g. \code{destinationPath}}
 }
 \value{
-A \code{SpatRaster} with non-flammable pixels corrected if they become flammable non-forest
+a \code{SpatRaster} with non-flammable pixels corrected if they become flammable non-forest
 }
 \description{
-reclassify non-flammable pixels that become flammable - herbaceous or shrubby - vegetation
+Reclassify non-flammable pixels that become flammable - herbaceous or shrubby - vegetation
 }

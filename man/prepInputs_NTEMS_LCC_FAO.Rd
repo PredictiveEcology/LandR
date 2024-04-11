@@ -14,7 +14,7 @@ prepInputs_NTEMS_LCC_FAO(year = 2010, disturbedCode = 1, ...)
 \item{...}{passed to \code{prepInputs}}
 }
 \value{
-A \code{SpatRaster} with corrected forest pixels
+a \code{SpatRaster} with corrected forest pixels
 }
 \description{
 Obtain an LCC layer for a given year from NTEMS, with forest matching the FAO definition
