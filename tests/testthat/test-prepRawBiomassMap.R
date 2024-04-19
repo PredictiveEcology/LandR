@@ -14,9 +14,7 @@ testthat::test_that("test prepRawBiomassMap", {
                   "reproducible.rasterRead" = "terra::rast",
                   "reproducible.destinationPath" = dPath)
 
-  on.exit({
-    options(opts)
-  }, add = TRUE)
+  on.exit(options(opts), add = TRUE)
 
   biomassURL <- paste0(
     "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",

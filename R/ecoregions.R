@@ -143,7 +143,7 @@ speciesEcoregionStack <- function(ecoregionMap, speciesEcoregion,
   # bm2011 <- biomassMaps2011
   # speciesEcoregion <- bm2011$speciesEcoregion
   orig <- data.table::setDTthreads(2)
-  on.exit(data.table::setDTthreads(orig))
+  on.exit(data.table::setDTthreads(orig), add = TRUE)
   whNonNAs <- which(!is.na(ecoregionMap[]))
   fv <- factorValues2(ecoregionMap,
                       ecoregionMap[][whNonNAs],
