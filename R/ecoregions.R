@@ -115,7 +115,7 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
 
   ecoregionMap <-  rasterRead(ecoregionFiles$ecoregionMap)
 
-  # suppress this message call no non-missing arguments to min; returning Inf min(x@data@values, na.rm = TRUE)
+  ## suppress this message call no non-missing arguments to min; returning Inf min(x@data@values, na.rm = TRUE)
   suppressWarnings(ecoregionMap[pixelData$pixelIndex] <- as.integer(pixelData$ecoregionGroup))
   levels(ecoregionMap) <- data.frame(
     ID = seq(levels(pixelData$ecoregionGroup)),
@@ -125,7 +125,6 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
   )
   return(ecoregionMap)
 }
-
 
 #' Create Stacks of the `speciesEcoregion` content
 #'
@@ -154,26 +153,24 @@ speciesEcoregionStack <- function(ecoregionMap, speciesEcoregion,
   rasTemplate <- rasterRead(ecoregionMap)
   names(columns) <- columns
   spp <- names(seList)
-  stks <- lapply(columns, dtList = seList, rasTemplate = rasTemplate,
-                 spp = spp,
+  stks <- lapply(columns, dtList = seList, rasTemplate = rasTemplate, spp = spp,
                  function(column, dtList, rasTemplate, spp = spp) {
-    createStack(dtList = dtList, rasTemplate = rasTemplate,
-          column = column, spp = spp)
+    createStack(dtList = dtList, rasTemplate = rasTemplate, column = column, spp = spp)
   })
 }
 
 createStack <- function(dtList, rasTemplate, column = "estblishprob", spp) {
   i <- 0
-    # mclapply(mc.cores = length(dtList),
-    outList <- lapply(
-      dtList, rasTemplate = rasTemplate, column = column, spp = spp,
-      function(dt, rasTemplate, column, spp) {
-        i <<- i + 1
-        print(paste(column, " ", spp[i]))
-        rasTemplate[dt$pixelID] <- dt[[column]]
-        print("... Done!")
-        rasTemplate
-      })
+  # mclapply(mc.cores = length(dtList),
+  outList <- lapply(
+    dtList, rasTemplate = rasTemplate, column = column, spp = spp,
+    function(dt, rasTemplate, column, spp) {
+      i <<- i + 1
+      print(paste(column, " ", spp[i]))
+      rasTemplate[dt$pixelID] <- dt[[column]]
+      print("... Done!")
+      rasTemplate
+    })
 
-    .stack(outList)
+  .stack(outList)
 }
