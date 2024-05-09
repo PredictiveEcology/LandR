@@ -1044,148 +1044,119 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' @keywords internal
 .overlay <- function(SPP, HQ, LQ, hqLarger, highQualityStack, lowQualityStack, #nolint
                      outputFilenameSuffix = "overlay", destinationPath) {
-  # if (requireNamespace("gdalUtilities", quietly = TRUE)) {
-    ## if HQ & LQ have data, pool
-    if (HQ & LQ) {
-      ## check equality of raster attributes and correct if necessary
-      if (!all(
-        isTRUE(all.equal(ext(lowQualityStack), ext(highQualityStack))),
-        isTRUE(all.equal(crs(lowQualityStack), crs(highQualityStack))),
-        isTRUE(all.equal(res(lowQualityStack), res(highQualityStack))))) {
-        message("  ", SPP, " extents, or resolution, or projection did not match; ",
-                "using gdalwarp to make them overlap")
-        if (!nzchar(Filenames(lowQualityStack[[SPP]]))) {
-          LQCurName <- basename(tempfile(fileext = ".tif"))
-          lowQualityStack[[SPP]][] <- as.integer(as.vector(lowQualityStack[[SPP]][]))
+  ## if HQ & LQ have data, pool
+  if (HQ & LQ) {
+    ## check equality of raster attributes and correct if necessary
+    if (!all(
+      isTRUE(all.equal(ext(lowQualityStack), ext(highQualityStack))),
+      isTRUE(all.equal(crs(lowQualityStack), crs(highQualityStack))),
+      isTRUE(all.equal(res(lowQualityStack), res(highQualityStack))))) {
+      message("  ", SPP, " extents, or resolution, or projection did not match; ",
+              "using gdalwarp to make them overlap")
+      if (!nzchar(Filenames(lowQualityStack[[SPP]]))) {
+        LQCurName <- basename(tempfile(fileext = ".tif"))
+        lowQualityStack[[SPP]][] <- as.integer(as.vector(lowQualityStack[[SPP]][]))
 
-          NAval <- 65535L
-          lowQualityStack[[SPP]] <- writeRaster(lowQualityStack[[SPP]],
-                                                filename = LQCurName,
-                                                datatype = "INT2U", NAflag = NAval)
-          ## NAvals need to be converted back to NAs
-          lowQualityStack[[SPP]] <- .NAvalueFlag(lowQualityStack[[SPP]], NAval)
-        }
+        NAval <- 65535L
+        lowQualityStack[[SPP]] <- writeRaster(lowQualityStack[[SPP]],
+                                              filename = LQCurName,
+                                              datatype = "INT2U", NAflag = NAval)
+        ## NAvals need to be converted back to NAs
+        lowQualityStack[[SPP]] <- .NAvalueFlag(lowQualityStack[[SPP]], NAval)
+      }
 
-        LQRastName <- basename(tempfile(fileext = ".tif"))
-        LQRastInHQcrs <- .projectExtent(lowQualityStack, crs = crs(highQualityStack))
+      LQRastName <- basename(tempfile(fileext = ".tif"))
+      LQRastInHQcrs <- .projectExtent(lowQualityStack, crs = crs(highQualityStack))
 
-        ## create a template raster to use as RTM
-        templateRas <- rast(ext = LQRastInHQcrs, crs = crs(highQualityStack),
-                            res = res(highQualityStack))
+      ## create a template raster to use as RTM
+      templateRas <- rast(ext = LQRastInHQcrs, crs = crs(highQualityStack),
+                          res = res(highQualityStack))
 
-        # project LQ raster into HQ dimensions
-        ## TODO: moving away from gdal and using postProcess --
-        ## gdal code is kept for now in case edge cases of non-alignment arise
-        # gdalUtilities::gdalwarp(overwrite = TRUE,
-        #                         dstalpha = TRUE,
-        #                         s_srs = crs(lowQualityStack[[SPP]], proj = TRUE),
-        #                         t_srs = crs(highQualityStack[[SPP]], proj = TRUE),
-        #                         multi = TRUE, of = "GTiff",
-        #                         tr = res(highQualityStack),
-        #                         te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
-        #                                xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
-        #                         .filename(lowQualityStack[[SPP]]), ot = "Byte",
-        #                         LQRastName)
+      # project LQ raster into HQ dimensions
+      ## TODO: moving away from gdal and using postProcess --
+      ## gdal code is kept for now in case edge cases of non-alignment arise
+      # gdalUtilities::gdalwarp(overwrite = TRUE,
+      #                         dstalpha = TRUE,
+      #                         s_srs = crs(lowQualityStack[[SPP]], proj = TRUE),
+      #                         t_srs = crs(highQualityStack[[SPP]], proj = TRUE),
+      #                         multi = TRUE, of = "GTiff",
+      #                         tr = res(highQualityStack),
+      #                         te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
+      #                                xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
+      #                         .filename(lowQualityStack[[SPP]]), ot = "Byte",
+      #                         LQRastName)
 
-        # LQRast <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(LQRastName)
-        # LQRast[] <- LQRast[]
-        # ## `terra` imports two layers (?). the second has 255 (NA) everywhere
-        # if (length(names(LQRast)) > 1) {
-        #   LQRast <- LQRast[[1]]
-        # }
-        # LQRast[LQRast[] == 255] <- NA_integer_
-        #
-        # unlink(LQRastName)
-        # try(unlink(LQCurName), silent = TRUE)
+      # LQRast <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(LQRastName)
+      # LQRast[] <- LQRast[]
+      # ## `terra` imports two layers (?). the second has 255 (NA) everywhere
+      # if (length(names(LQRast)) > 1) {
+      #   LQRast <- LQRast[[1]]
+      # }
+      # LQRast[LQRast[] == 255] <- NA_integer_
+      #
+      # unlink(LQRastName)
+      # try(unlink(LQCurName), silent = TRUE)
 
+      ## TODO: postProcess returns NaN values and always tries to mask despite maskWithRTM = FALSE
+      # LQRast <- postProcess(LQRast, rasterToMatch = templateRas,
+      #                         maskWithRTM = FALSE)  ## not working
+      LQRast <- cropInputs(lowQualityStack[[SPP]], rasterToMatch = templateRas)
+      LQRast <- projectInputs(LQRast, rasterToMatch = templateRas,
+                              maskWithRTM = FALSE)
+
+      if (hqLarger) {
         ## TODO: postProcess returns NaN values and always tries to mask despite maskWithRTM = FALSE
-        # LQRast <- postProcess(LQRast, rasterToMatch = templateRas,
-        #                         maskWithRTM = FALSE)  ## not working
-        LQRast <- cropInputs(lowQualityStack[[SPP]], rasterToMatch = templateRas)
-        LQRast <- projectInputs(LQRast, rasterToMatch = templateRas,
-                                maskWithRTM = FALSE)
-
-        if (hqLarger) {
-          ## TODO: moving away from gdal and using postProcess --
-          ## gdal code is kept for now in case edge cases of non-alignment arise
-          # tmpHQName <- basename(tempfile(fileext = ".tif"))
-          #
-          # gdalUtilities::gdalwarp(overwrite = TRUE,
-          #                         dstalpha = TRUE,
-          #                         s_srs = crs(highQualityStack[[SPP]], proj = TRUE),
-          #                         t_srs = crs(highQualityStack[[SPP]], proj = TRUE),
-          #                         multi = TRUE, of = "GTiff",
-          #                         tr = res(highQualityStack),
-          #                         te = c(xmin(LQRastInHQcrs), ymin(LQRastInHQcrs),
-          #                                xmax(LQRastInHQcrs), ymax(LQRastInHQcrs)),
-          #                         ot = "Byte",
-          #                         srcfile = .filename(highQualityStack[[SPP]]),
-          #                         dstfile = tmpHQName)
-          # HQRast <- eval(parse(text = getOption("reproducible.rasterRead", "terra::rast")))(tmpHQName)
-          # HQRast[] <- HQRast[]
-          # ## `terra` imports two layers (?). the second has 255 (NA) everywhere
-          # if (length(names(HQRast)) > 1) {
-          #   HQRast <- HQRast[[1]]
-          # }
-          # HQRast[HQRast[] == 255] <- NA_integer_
-          # unlink(tmpHQName)
-
-          ## TODO: postProcess returns NaN values and always tries to mask despite maskWithRTM = FALSE
-          # HQRast <- postProcess(HQRast, rasterToMatch = templateRas,
-          #                       maskWithRTM = FALSE)  ## not working
-          HQRast <- cropInputs(highQualityStack[[SPP]], rasterToMatch = templateRas)
-          HQRast <- projectInputs(HQRast, rasterToMatch = templateRas,
-                                  maskWithRTM = FALSE)
-        } else {
-          HQRast <- highQualityStack[[SPP]]
-        }
+        # HQRast <- postProcess(HQRast, rasterToMatch = templateRas,
+        #                       maskWithRTM = FALSE)  ## not working
+        HQRast <- cropInputs(highQualityStack[[SPP]], rasterToMatch = templateRas)
+        HQRast <- projectInputs(HQRast, rasterToMatch = templateRas, maskWithRTM = FALSE)
       } else {
-        LQRast <- lowQualityStack[[SPP]]
         HQRast <- highQualityStack[[SPP]]
       }
-
-      message("  Writing new, overlaid ", SPP, " raster to disk.")
-      ## TODO: .compareRas (compareGeom) is less tolerant than st_crs, but projecting
-      ## manually is a pain (we can't use postProcess because it also uses st_crs internally)
-      ## for now use st_crs to compare CRS, but this is unlikely to be the best
-      if (!.compareRas(LQRast, HQRast, stopOnError = FALSE))
-        stop("Stacks not identical, something is wrong with overlayStacks function.")
-
-      NAs <- is.na(as.vector(HQRast[]))
-
-      ## complete missing HQ data with LQ data
-      HQRast[NAs] <- LQRast[][NAs]
-      NAval <- 255L
-      HQRast <- writeRaster(HQRast, datatype = "INT1U",
-                            filename = file.path(destinationPath,
-                                                 paste0(SPP, "_", outputFilenameSuffix, ".tif")),
-                            overwrite = TRUE, NAflag = NAval)
-      names(HQRast) <- SPP
-
-      ## NAvals need to be converted back to NAs
-      HQRast <- .NAvalueFlag(HQRast, NAval)
-
-      return(HQRast)
     } else {
-      ## if only HQ/LQ exist return one of them
-      ## if none have data return one of the empty to keep all layers
-      if (HQ) {
-        HQRast <- highQualityStack[[SPP]]
-        names(HQRast) <- SPP
-        return(HQRast)
-      } else if (LQ) {
-        LQRast <- lowQualityStack[[SPP]]
-        names(LQRast) <- SPP
-        return(LQRast)
-      } else {
-        HQRast <- highQualityStack[[SPP]]
-        names(HQRast) <- SPP
-        return(HQRast)
-      }
+      LQRast <- lowQualityStack[[SPP]]
+      HQRast <- highQualityStack[[SPP]]
     }
-  # } else {
-  #   stop("Package 'gdalUtilities' is required but not installed.")
-  # }
+
+    message("  Writing new, overlaid ", SPP, " raster to disk.")
+    ## TODO: .compareRas (compareGeom) is less tolerant than st_crs, but projecting
+    ## manually is a pain (we can't use postProcess because it also uses st_crs internally)
+    ## for now use st_crs to compare CRS, but this is unlikely to be the best
+    if (!.compareRas(LQRast, HQRast, stopOnError = FALSE))
+      stop("Stacks not identical, something is wrong with overlayStacks function.")
+
+    NAs <- is.na(as.vector(HQRast[]))
+
+    ## complete missing HQ data with LQ data
+    HQRast[NAs] <- LQRast[][NAs]
+    NAval <- 255L
+    HQRast <- writeRaster(HQRast, datatype = "INT1U",
+                          filename = file.path(destinationPath,
+                                               paste0(SPP, "_", outputFilenameSuffix, ".tif")),
+                          overwrite = TRUE, NAflag = NAval)
+    names(HQRast) <- SPP
+
+    ## NAvals need to be converted back to NAs
+    HQRast <- .NAvalueFlag(HQRast, NAval)
+
+    return(HQRast)
+  } else {
+    ## if only HQ/LQ exist return one of them
+    ## if none have data return one of the empty to keep all layers
+    if (HQ) {
+      HQRast <- highQualityStack[[SPP]]
+      names(HQRast) <- SPP
+      return(HQRast)
+    } else if (LQ) {
+      LQRast <- lowQualityStack[[SPP]]
+      names(LQRast) <- SPP
+      return(LQRast)
+    } else {
+      HQRast <- highQualityStack[[SPP]]
+      names(HQRast) <- SPP
+      return(HQRast)
+    }
+  }
 }
 
 #' Merge species percent-cover rasters
