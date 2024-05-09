@@ -1,16 +1,17 @@
 # LandR (development version)
 
-* further adaptations to `terra` package
-* remove `gdalUtilities` dependency
-* fix bug in `prepInputLCC`: `orig` argument no longer accepted by `terra::compareGeom`
-* fix bug in `calcSeverityB`: output table was missing the proportion of B killed.
-* new functions used to estimate maximum biomass (`maxB`) and species establishment probabilities (`SEP`)
-* new function to update the `speciesEcoregion` table (brought over from Biomass_speciesParameters module), using estimated `inflationFactor` and `mANPPproportion` to adjust `maxB` and `maxANPP`, respectively. 
-* new functions to simulate disturbances - `FireDisturbance` and `FireDisturbancePM` pulled from
-`Biomass_regeneration` and `Biomass_regenerationPM` modules, respectively.
-* `overlayLCCs()` now works correctly with terra (#99)
-* fixed partial argument match warnings (#100)
-* new function `standAgeMapGenerator()` to produce `standAgeMap` from `cohortData`
+* more conversion from `raster` to `terra` throughout;
+* remove `gdalUtilities` dependency;
+* fix bug in `prepInputLCC`: `orig` argument no longer accepted by `terra::compareGeom`;
+* fix bug in `calcSeverityB`: output table was missing the proportion of B killed;
+* new functions used to estimate maximum biomass (`maxB`) and species establishment probabilities (`SEP`);
+* new function to update the `speciesEcoregion` table (brought over from `Biomass_speciesParameters` module), using estimated `inflationFactor` and `mANPPproportion` to adjust `maxB` and `maxANPP`, respectively; 
+* new functions to simulate disturbances - `FireDisturbance` and `FireDisturbancePM` pulled from;
+`Biomass_regeneration` and `Biomass_regenerationPM` modules, respectively;
+* `overlayLCCs()` now works correctly with terra (#99);
+* fixed partial argument match warnings (#100);
+* new function `standAgeMapGenerator()` to produce `standAgeMap` from `cohortData`;
+* new functions `prepInputs_NTEMS_Nonforest()` and `prepInputs_NTEMS_LCC_FAO()`;
 
 # LandR 1.1.0
 
