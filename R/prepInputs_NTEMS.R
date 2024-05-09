@@ -24,8 +24,8 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, ...) {
 
   if (isTRUE(getOption("reproducible.gdalwarp"))) {
     message("temporarily setting reproducible.usegdalwarp to FALSE to avoid error")
-    options("reproducible.gdalwarp" = FALSE)
-    on.exit(options("reproducible.gdalwarp" = TRUE), add = TRUE)
+    opts <- options(reproducible.gdalwarp = FALSE)
+    on.exit(options(opts), add = TRUE)
   }
 
   ## Data codes:
@@ -76,8 +76,8 @@ prepInputs_NTEMS_Nonforest <- function(rstLCC, endYear = 2019, lccToAdjust = 33,
 
   if (isTRUE(getOption("reproducible.gdalwarp"))) {
     message("temporarily setting reproducible.usegdalwarp to FALSE to avoid error")
-    options("reproducible.gdalwarp" = FALSE)
-    on.exit(options("reproducible.gdalwarp" = TRUE), add = FALSE)
+    opts <- options(reproducible.gdalwarp = FALSE)
+    on.exit(options(opts), add = TRUE)
   }
 
   lccURL <- paste0("https://opendata.nfis.org/downloads/forest_change/CA_forest_VLCE2_", endYear, ".zip")
