@@ -398,7 +398,7 @@ test_that("test Ward 4 immediate neighbours", {
   withr::local_package("data.table")
   withr::local_package("SpaDES.tools")
 
-  pixelGroupMap <- terra::rast(terra::ext(0, 1250, 0, 1750), res = 250, vals = 0)
+  pixelGroupMap <- terra::rast(terra::ext(0, 1250, 0, 1750), resolution = 250, vals = 0)
   mp <- SpaDES.tools::middlePixel(pixelGroupMap)
   rc <- terra::rowColFromCell(pixelGroupMap, mp)
 
@@ -471,7 +471,7 @@ test_that("test Ward random collection of neighbours", {
   withr::local_package("data.table")
   withr::local_package("SpaDES.tools")
 
-  pixelGroupMap <- terra::rast(terra::ext(0, 1250, 0, 1750), res = 250, vals = 0)
+  pixelGroupMap <- terra::rast(terra::ext(0, 1250, 0, 1750), resolution = 250, vals = 0)
   mp <- SpaDES.tools::middlePixel(pixelGroupMap)
   rc <- terra::rowColFromCell(pixelGroupMap, mp)
 

@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     https://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2023-11-23
-Version: 1.1.0.9079
+Date: 2024-05-08
+Version: 1.1.0.9084
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -120,6 +120,7 @@ Collate:
     'plotting.R'
     'prepEcoregions.R'
     'prepInputObjects.R'
+    'prepInputs_NTEMS.R'
     'prepSpeciesLayers.R'
     'seedDispersalLANDIS.R'
     'serotiny-resprouting.R'
@@ -131,5 +132,5 @@ Collate:
     'terra-raster-utils.R'
     'wildfire.R'
     'zzz.R'
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Roxygen: list(markdown = TRUE)
