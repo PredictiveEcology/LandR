@@ -5,7 +5,7 @@ utils::globalVariables(c(
 ## BIOMOD FUNCTION WRAPPERS USED TO ESTIMATE SEP
 ## for caching, looping and parallelizing
 
-#' BIOMOD_Modeling wrapper
+#' `BIOMOD_Modeling` wrapper
 #'
 #' @param sp character of species name to subset `responseVarData` table
 #'
@@ -25,7 +25,7 @@ utils::globalVariables(c(
 #' @param predictorVarsData environmental data.
 #'
 #' @param responseVarData a data.table or list of data.tables with environmental data.
-#'   If a list, it should be named according to `sp`, for subsetting.#'
+#'   If a list, it should be named according to `sp`, for subsetting.
 #'
 #' @param dir.name passed to [biomod2::BIOMOD_FormatingData]
 #'
@@ -44,8 +44,7 @@ biomodModelingWrapper <- function(sp, responseVar, responseVarData, predictorVar
                                   ...) {
   if (requireNamespace("biomod2", quietly = TRUE)) {
     if (is.null(bm.options)) {
-      bm.options <- biomod2::BIOMOD_ModelingOptions(GLM = list(type = "simple"),
-                                                    GAM = list(k = 2))
+      bm.options <- biomod2::bm_ModelingOptions(GLM = list(type = "simple"), GAM = list(k = 2))
     }
     ## Checks ------------------
     if (is(responseVar, "list") & is.null(names(responseVar))) {

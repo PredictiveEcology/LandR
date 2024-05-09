@@ -2,7 +2,7 @@
 % Please edit documentation in R/biomodWrappers.R
 \name{biomodModelingWrapper}
 \alias{biomodModelingWrapper}
-\title{BIOMOD_Modeling wrapper}
+\title{\code{BIOMOD_Modeling} wrapper}
 \usage{
 biomodModelingWrapper(
   sp,
@@ -24,7 +24,7 @@ variable (column) to subset \code{responseVarData} table. If a list, it should
 be named according to \code{sp}, for subsetting.}
 
 \item{responseVarData}{a data.table or list of data.tables with environmental data.
-If a list, it should be named according to \code{sp}, for subsetting.#'}
+If a list, it should be named according to \code{sp}, for subsetting.}
 
 \item{predictorVars}{character vector, or list of character vectors, of environmental
 variables (columns) to subset \code{predictorVarsData} table. If a list, it should
@@ -39,5 +39,5 @@ be named according to \code{sp}, for subsetting.}
 \item{...}{further arguments passed to \link[reproducible:Cache]{reproducible::Cache}}
 }
 \description{
-BIOMOD_Modeling wrapper
+\code{BIOMOD_Modeling} wrapper
 }
