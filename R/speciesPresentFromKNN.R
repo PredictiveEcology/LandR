@@ -63,7 +63,7 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
   bf <- Cache(prepInputs, url = borealForestURL, fun = "forestOutline")
 
   opts <- options("reproducible.useTerra" = TRUE)
-  on.exit(opts, add = TRUE)
+  on.exit(options(opts), add = TRUE)
   studyAreaER <- Cache(
     prepInputs,
     url =  "https://sis.agr.gc.ca/cansis/nsdb/ecostrat/region/ecodistrict_shp.zip",
