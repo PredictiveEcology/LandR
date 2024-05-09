@@ -44,10 +44,11 @@ test_that("test .compareRas, .compareCRS -- vectors only", {
   require(reproducible)
   require(raster)
   require(sf)
-  opts <- options("reproducible.inputPaths" = NULL,
-                  "reproducible.overwrite" = TRUE,
-                  "reproducible.useTerra" = TRUE,
-                  "reproducible.rasterRead" = "terra::rast")
+
+  opts <- options(reproducible.inputPaths = NULL,
+                  reproducible.overwrite = TRUE,
+                  reproducible.useTerra = TRUE,
+                  reproducible.rasterRead = "terra::rast")
 
   on.exit(options(opts), add = TRUE)
 
@@ -69,7 +70,7 @@ test_that("test .compareRas, .compareCRS -- vectors only", {
   expect_true(.compareRas(v, v3, ext = FALSE))
 
   ## with SPDF
-  v4 <- shapefile(f)
+  v4 <- raster::shapefile(f)
   v5 <- raster::buffer(v4, 10)
   expect_true(.compareRas(v, v4))
   expect_true(.compareRas(v, v3, v4, ext = FALSE))
@@ -97,17 +98,18 @@ test_that("test .compareRas, .compareCRS -- vectors and rasters", {
   require(reproducible)
   require(raster)
   require(sf)
-  opts <- options("reproducible.inputPaths" = NULL,
-                  "reproducible.overwrite" = TRUE,
-                  "reproducible.useTerra" = TRUE,
-                  "reproducible.rasterRead" = "terra::rast")
+
+  opts <- options(reproducible.inputPaths = NULL,
+                  reproducible.overwrite = TRUE,
+                  reproducible.useTerra = TRUE,
+                  reproducible.rasterRead = "terra::rast")
 
   on.exit(options(opts), add = TRUE)
 
   f <- system.file("ex/lux.shp", package = "terra")
   v <- vect(f)
 
-  ras <- rast(v, res = 0.1)
+  ras <- rast(v, resolution = 0.1)
 
   expect_true(.compareRas(v, ras, ext = FALSE))
   expect_error(.compareRas(v, ras))
