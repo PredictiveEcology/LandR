@@ -12,6 +12,7 @@
 * fixed partial argument match warnings (#100);
 * new function `standAgeMapGenerator()` to produce `standAgeMap` from `cohortData`;
 * new functions `prepInputs_NTEMS_Nonforest()` and `prepInputs_NTEMS_LCC_FAO()`;
+* add new assertions: `assertSpeciesTable()` and `assertSpeciesTableRaw()`;
 
 # LandR 1.1.0
 

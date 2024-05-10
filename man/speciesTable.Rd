@@ -55,11 +55,20 @@ These are short versions of the Canada Ecoprovinces.
 Currently defaults to \code{c("BSW", "BP", "MC")} for historical reasons.}
 }
 \value{
-A \code{data.table} with columns ... TODO
+\code{getSpeciesTable()} returns a \code{data.table} with columns LandisCode, Area, Longevity, Maturity, Shade, Fire, SeedEffDist, SeedMaxDist, VegProb, MinAgeVeg, MaxAgeVeg, PostFireRegen, LeafLongevity, WoodDecayRate, MortalityCurve, GrowthCurve, LeafLignin, HardSoft.
+See \code{\link[=assertSpeciesTableRaw]{assertSpeciesTableRaw()}} for expected column data types.
+
+\code{prepSpeciesTable()} returns a \code{data.table} with columns species, Area, longevity, sexualmature, shadetolerance, firetolerance, seeddistance_eff, seeddistance_max, resproutprob, resproutage_min, resproutage_max, postfireregen, leaflongevity, wooddecayrate, mortalityshape, growthcurve, leafLignin, hardsoft.
+See \code{\link[=assertSpeciesTable]{assertSpeciesTable()}} for expected column data types.
 }
 \description{
 \code{prepSpeciesTable}
 }
 \note{
-This one is tailored to Canadian forests (?)
+This one is tailored to Canadian forests
+}
+\seealso{
+\code{\link[=assertSpeciesTableRaw]{assertSpeciesTableRaw()}}
+
+\code{\link[=assertSpeciesTable]{assertSpeciesTable()}}
 }

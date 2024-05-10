@@ -19,6 +19,8 @@
 \alias{assertStandAgeMapAttr}
 \alias{assertCohortDataAttr}
 \alias{assertSppVectors}
+\alias{assertSpeciesTableRaw}
+\alias{assertSpeciesTable}
 \title{Assertions}
 \usage{
 assert1(
@@ -134,6 +136,16 @@ assertSppVectors(
   sppEquivCol = NULL,
   doAssertion = getOption("LandR.assertions", TRUE)
 )
+
+assertSpeciesTableRaw(
+  speciesTableRaw,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertSpeciesTable(
+  speciesTable,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 }
 \arguments{
 \item{cohortData34to36}{A \code{cohortData} \code{data.table} with only the
@@ -171,7 +183,7 @@ which group together pixels of similar biophysical characteristics.}
 
 \item{minRelativeB}{a \code{data.frame} with  the cut points to classify stand shadiness.}
 
-\item{obj}{A data.frame or data.table-like object}
+\item{obj}{A \code{data.frame}- or \code{data.table}-like object}
 
 \item{colClasses}{A named vector of column classes, where the names are the column names}
 
@@ -235,6 +247,10 @@ parameter in \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} for details on 
 forest types).}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.}
+
+\item{speciesTableRaw}{raw species traits \code{data.table} (see \code{\link[=getSpeciesTable]{getSpeciesTable()}})}
+
+\item{speciesTable}{species traits \code{data.table} (see \code{\link[=prepSpeciesTable]{prepSpeciesTable()}})}
 }
 \description{
 \itemize{

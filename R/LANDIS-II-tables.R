@@ -1,8 +1,24 @@
+#' Species Table Column Names
+#'
+#' @keywords internal
+#' @rdname dot-speciesTableColNames
+.speciesTableRawColNames <- c("LandisCode", "Area", "Longevity", "Maturity", "Shade", "Fire",
+                              "SeedEffDist", "SeedMaxDist", "VegProb", "MinAgeVeg", "MaxAgeVeg",
+                              "PostFireRegen", "LeafLongevity", "WoodDecayRate", "MortalityCurve",
+                              "GrowthCurve", "LeafLignin", "HardSoft")
+
+#' @keywords internal
+#' @rdname dot-speciesTableColNames
+.speciesTableColNames <- c("species", "Area", "longevity", "sexualmature", "shadetolerance",
+                           "firetolerance", "seeddistance_eff", "seeddistance_max", "resproutprob",
+                           "resproutage_min", "resproutage_max", "postfireregen", "leaflongevity",
+                           "wooddecayrate", "mortalityshape", "growthcurve", "leafLignin",
+                           "hardsoft")
+
+
 utils::globalVariables(c(
-  ":=", ".SD", "Area", "col1", "firetolerance", "growthcurve", "hardsoft",
-  "leafLignin", "leaflongevity", "mortalityshape",
-  "seeddistance_eff", "seeddistance_max", "species", "species1", "species2",
-  "wooddecayrate"
+  ":=", ".SD", "col1", "species1", "species2",
+  .speciesTableRawColNames, .speciesTableColNames
 ))
 
 #' Default LANDIS-II project repo url
@@ -16,7 +32,7 @@ landisIIrepo <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/"
 #'
 #' `prepSpeciesTable`
 #'
-#' @note This one is tailored to Canadian forests (?)
+#' @note This one is tailored to Canadian forests
 #'
 #' @param url If NULL (the default), uses one from D. Cyr's LANDIS-II files:
 #' <https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv>).
@@ -25,13 +41,18 @@ landisIIrepo <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/"
 #'
 #' @param cacheTags User tags to pass to `Cache`.
 #'
+#' @return `getSpeciesTable()` returns a `data.table` with columns `r .speciesTableRawColNames`.
+#'         See [assertSpeciesTableRaw()] for expected column data types.
+#'
 #' @export
 #' @rdname speciesTable
+#' @seealso [assertSpeciesTableRaw()]
 getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
-  if (is.null(url))
+  if (is.null(url)) {
     url <- paste0("https://raw.githubusercontent.com/",
                   "dcyr/LANDIS-II_IA_generalUseFiles/",
                   "master/speciesTraits.csv")
+  }
 
   speciesTable <- Cache(prepInputs, "speciesTraits.csv",
                         destinationPath = asPath(dPath),
@@ -40,21 +61,33 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
                         header = TRUE, stringsAsFactors = FALSE,
                         userTags = c(cacheTags, "speciesTable"))
 
+  ## use integers (instead of numerics) where possible
+  speciesTable[, `:=`(LandisCode = as.character(LandisCode),
+                      Area = as.factor(Area),
+                      Longevity = as.integer(Longevity),
+                      Maturity = as.integer(Maturity),
+                      Shade = as.numeric(Shade),
+                      Fire = as.integer(Fire),
+                      SeedEffDist = as.integer(SeedEffDist),
+                      SeedMaxDist = as.integer(SeedMaxDist),
+                      VegProb = as.numeric(VegProb),
+                      MinAgeVeg = as.integer(MinAgeVeg),
+                      MaxAgeVeg = as.integer(MaxAgeVeg),
+                      PostFireRegen = as.factor(PostFireRegen),
+                      LeafLongevity = as.integer(LeafLongevity),
+                      WoodDecayRate = as.numeric(WoodDecayRate),
+                      MortalityCurve = as.numeric(MortalityCurve),
+                      GrowthCurve = as.numeric(GrowthCurve),
+                      LeafLignin = as.numeric(LeafLignin),
+                      HardSoft = as.character(HardSoft))]
+
   return(speciesTable)
 }
-
-#' Species Table Column Names
-#'
-#' @keywords internal
-.speciesTableColNames <- c("species", "Area", "longevity", "sexualmature", "shadetolerance",
-                           "firetolerance", "seeddistance_eff", "seeddistance_max", "resproutprob",
-                           "resproutage_min", "resproutage_max", "postfireregen", "leaflongevity",
-                           "wooddecayrate", "mortalityshape", "growthcurve", "leafLignin",
-                           "hardsoft")
 
 #' @template speciesTable
 #'
 #' @param speciesLayers Deprecated.
+#'
 #' @param areas A character vector of areas to use. Can be one or more of
 #'   `c("Acadian", "AM", "NorthShore", "BP", "BSE", "BSW", "LSJ", "MC", "PM", "WestON")`.
 #'   If it is more than one, this function will take the minimum value, within a species.
@@ -65,10 +98,12 @@ getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
 #'
 #' @template sppEquivCol
 #'
-#' @return A `data.table` with columns ... TODO
+#' @return `prepSpeciesTable()` returns a `data.table` with columns `r .speciesTableColNames`.
+#'         See [assertSpeciesTable()] for expected column data types.
 #'
 #' @export
 #' @rdname speciesTable
+#' @seealso [assertSpeciesTable()]
 prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
                              sppEquiv = NULL, sppEquivCol = "LandR",
                              areas = c("BSW", "BP", "MC")) {
@@ -77,9 +112,7 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
   }
 
   if (is.null(sppEquiv)) {
-    objName <- "sppEquivalencies_CA"
-    utils::data(get(objName), package = "LandR", envir = environment())
-    sppEquiv <- get(objName)
+    sppEquiv <- get(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
   }
 
   names(speciesTable) <- .speciesTableColNames
@@ -92,13 +125,15 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
   #  in areas, e.g., Fraxinus americana is rare in prairies, but only has traits for Acadian
   speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv, "LANDIS_traits", multi = TRUE)]
   # Areas:
-  keepers <- speciesTable[, .(keep = if(any(Area %in% areas)) { .I[Area %in% areas] } else { .I[1]}), by = species]
+  keepers <- speciesTable[, .(keep = if (any(Area %in% areas)) { .I[Area %in% areas] } else { .I[1]}), by = species]
   speciesTable <- speciesTable[keepers$keep]
   speciesTable[, species := equivalentName(speciesTable$species, sppEquiv, sppEquivCol)]
-  speciesTable <- speciesTable[, lapply(.SD, function(x) {
-    if (is.numeric(x)) min(x, na.rm = TRUE) else x[1]
-  }), by = "species"]
 
+  suppressWarnings({
+    speciesTable <- speciesTable[, lapply(.SD, function(x) {
+      if (is.numeric(x)) min(x, na.rm = TRUE) else x[1]
+    }), by = "species"]
+  })
 
   if (any(!speciesTable$Area %in% areas))  {
     kept <- speciesTable[!Area %in% areas]

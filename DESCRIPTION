@@ -9,7 +9,7 @@ URL:
     https://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
 Date: 2024-05-09
-Version: 1.1.0.9086
+Version: 1.1.0.9087
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),

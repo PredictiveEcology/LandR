@@ -191,7 +191,7 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
 
 #' - `assertColumns`: assert that an object contains a particular set of columns
 #'
-#' @param obj A data.frame or data.table-like object
+#' @param obj A `data.frame`- or `data.table`-like object
 #' @param colClasses A named vector of column classes, where the names are the column names
 #'
 #' @export
@@ -199,13 +199,14 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
 assertColumns <- function(obj, colClasses,
                           doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    #put them in order of the object
+    ## put them in order of the object
     colNames <- names(colClasses)
     test1Indiv <- colNames %in% colnames(obj)
     test1 <- all(test1Indiv)
     mess1 <- character()
-    if (!test1)
+    if (!test1) {
       mess1 <- paste0("obj has missing column(s): ", paste(collapse = ", ", colNames[!test1Indiv]))
+    }
     colClasses2 <- colClasses[na.omit(match(names(obj), names(colClasses)))]
     colNames2 <- names(colClasses2)
     test2Indiv <- vapply(seq(NCOL(obj[, colNames2, with = FALSE])),
@@ -678,4 +679,52 @@ assertPostPartialDist <- function(cohortDataOrig, pixelGroupMapOrig,
       stop("Killed cohorts are still in cohortData table")
     }
   }
+}
+
+#' Assert raw species table column types
+#'
+#' @param speciesTableRaw raw species traits `data.table` (see [getSpeciesTable()])
+#'
+#' @export
+#' @rdname assertions
+assertSpeciesTableRaw <- function(speciesTableRaw,
+                                  doAssertion = getOption("LandR.assertions", TRUE)) {
+  assertColumns(speciesTableRaw,
+                c(LandisCode = "character",
+                  Area = "factor",
+                  Longevity = "integer",
+                  Maturity = "integer",
+                  Shade = "numeric",
+                  Fire = "integer",
+                  SeedEffDist = "integer",
+                  SeedMaxDist = "integer",
+                  VegProb = "numeric",
+                  MinAgeVeg = "integer",
+                  MaxAgeVeg = "integer",
+                  PostFireRegen = "factor",
+                  LeafLongevity = "integer",
+                  WoodDecayRate = "numeric",
+                  MortalityCurve = "numeric",
+                  GrowthCurve = "numeric",
+                  LeafLignin = "numeric",
+                  HardSoft = "character"))
+}
+
+#' Assert species table column types
+#'
+#' @param speciesTable species traits `data.table` (see [prepSpeciesTable()])
+#'
+#' @export
+#' @rdname assertions
+assertSpeciesTable <- function(speciesTable,
+                               doAssertion = getOption("LandR.assertions", TRUE)) {
+  assertColumns(speciesTable,
+                c(species = "character", Area = "factor", longevity = "integer",
+                  sexualmature = "integer", shadetolerance = "numeric",
+                  firetolerance = "integer", seeddistance_eff = "integer",
+                  seeddistance_max = "integer", resproutprob = "numeric",
+                  resproutage_min = "integer", resproutage_max = "integer",
+                  postfireregen = "factor", leaflongevity = "integer",
+                  wooddecayrate = "numeric", mortalityshape = "integer",
+                  growthcurve = "numeric", leafLignin = "numeric", hardsoft = "factor"))
 }
