@@ -1,4 +1,4 @@
-# LandR (development version)
+# LandR 1.1.1
 
 * more conversion from `raster` to `terra` throughout;
 * remove `gdalUtilities` dependency;
