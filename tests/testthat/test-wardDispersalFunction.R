@@ -45,7 +45,11 @@ test_that("test Ward dispersal seeding algorithm", {
 
   reducedPixelGroupMap <- SpaDES.tools::randomPolygons(reducedPixelGroupMap, numTypes = pgs)
   Sum_of_species <- rast(reducedPixelGroupMap)
-  td <- tempdir()
+  td <- file.path(tempdir(), "test_Ward_dispersal")
+  withr::defer({
+    reproducible::clearCache(ask = FALSE)
+    unlink(td, recursive = TRUE)
+  })
   speciesTable <- reproducible::Cache(getSpeciesTable, dPath = td)
   speciesTable <- speciesTable[Area == "BSW"]
   speciesTable[, speciesCode := as.factor(LandisCode)]
