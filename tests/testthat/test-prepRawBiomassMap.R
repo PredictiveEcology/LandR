@@ -22,7 +22,7 @@ testthat::test_that("test prepRawBiomassMap", {
     "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif"
   )
   studyArea <- randomStudyArea()
-  RTM <- rast(res = 1, crs = crs(studyArea), ext = ext(studyArea))
+  RTM <- rast(resolution = 1, crs = crs(studyArea), extent = ext(studyArea))
   RTM[] <- 1L
   RTM <- terra::mask(RTM, studyArea)
   RTM[sample(1:ncell(RTM), 50)] <- NA

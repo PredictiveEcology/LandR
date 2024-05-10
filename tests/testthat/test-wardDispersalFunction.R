@@ -37,7 +37,7 @@ test_that("test Ward dispersal seeding algorithm", {
     reducedPixelGroupMap <- rast(
       xmin = 50, xmax = 50 + 99 * 25,
       ymin = 50, ymax = 50 + 99 * 25,
-      res = c(100, 100), val = 2
+      resolution = c(100, 100), vals = 2
     )
     pgs <- 30
     proportionRcvCells <- 0.5
@@ -183,7 +183,7 @@ test_that("test Ward dispersal seeding algorithm", {
       testDists[[dis]] <- sapply(unique(output$speciesCode), function(spCode) {
         env$effDist <- unique(joined[speciesCode == spCode]$seeddistance_eff)
         env$maxDist <- unique(joined[speciesCode == spCode]$seeddistance_max)
-        env$dis <- dis * env$cellSize
+        env$dist <- dis * env$cellSize
         dispersalProb <- do.call(Ward, as.list(env))
         dispersalProb <- 1 - (1 - dispersalProb)^successionTimestep
         probOfThatNumber <- dbinom(x = NROW(output[speciesCode == spCode]), size = 100, prob = dispersalProb)

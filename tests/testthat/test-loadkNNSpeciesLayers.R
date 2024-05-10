@@ -4,7 +4,7 @@
                    "canada-forests-attributes_attributs-forests-canada/2001",
                    "-attributes_attributs-2001/")
   sslIssue <- isTRUE(tryCatch({
-    RCurl::getURL(tryURL)
+    suppressWarnings(RCurl::getURL(tryURL)) ## partial match warning in Rcurl
   }, error = function(e) {
     grepl("SSL certificate problem", paste(e))
   }))
