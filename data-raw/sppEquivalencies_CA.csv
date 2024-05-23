@@ -45,7 +45,7 @@ betupapy,BETU.PAP,Betu_pap,Betu_Pap,Betu papy,Betula papyrifera,Pa birch,Paper b
 ,,Betu_win,,Betu winx,Betula x winteri,,,,,,TRUE,Deciduous,,,,Exp,,,BETU_WIN,
 ,,Calc_dec,,Calc decu,Calocedrus decurrens,,,,,,FALSE,Conifer,,,,,,,CALC_DEC,
 ,,Carp_car,Carp_Car,Carp caro,Carpinus caroliniana,,,,,,TRUE,Deciduous,,,,,,,CARP_CAR,
-,,Cary_cor,Cary_Cor,Cary cord,Carya cordiformis,,,,,,TRUE,Deciduous,,,,,,,CARY_COR,
+,,Cary_cor,Cary_Cor,Cary cord,Carya cordiformis,,,,,,TRUE,Deciduous,,,,,,,CARY_COR,CAC
 ,,Cary_gla,,Cary glab,Carya glabra,,,,,,TRUE,Deciduous,,,,,,,CARY_GLA,
 ,,Cary_lac,,Cary laci,Carya laciniosa,,,,,,TRUE,Deciduous,,,,,,,CARY_LAC,
 ,,Cary_ova,,Cary ovat,Carya ovata,,Shagbark hickory,hickory leading,,,TRUE,Deciduous,hickory,,class2,,,,CARY_OVA,CAF
@@ -57,6 +57,7 @@ betupapy,BETU.PAP,Betu_pap,Betu_Pap,Betu papy,Betula papyrifera,Pa birch,Paper b
 ,,Cerc_can,,Cerci cana,Cercis canadensis,,,,,,TRUE,Deciduous,,,,,,,CERC_CAN,
 ,,Cham_law,,Cham laws,Chamaecyparis lawsoniana,,,,,,FALSE,Conifer,,,,,,,CHAM_LAW,
 chamnoot,CHAM.NOO,Cham_noo,Cham_Noo,Cham noot,Chamaecyparis nootkatensis,,,,,,FALSE,Conifer,yellow cedar,,,Yc,,,CHAM_NOO,
+,,,,,Cornus alternifolia,,Pagoda dogwood,,,,TRUE,Deciduous,pagoda dogwood,,,,,,CORN_ALT,COA
 ,,Corn_nut,,Corn nutt,Cornus nuttallii,,,,,,TRUE,Deciduous,,,,,,,CORN_NUT,
 ,,Crat_sp,Crat_Spp,Crat spp,Crataegus spp,,,,,,TRUE,Deciduous,,,,,,,CRAT_SP,
 fagugran,FAGU.GRA,Fagu_gra,Fagu_Gra,Fagu gran,Fagus grandifolia,Am beech,American beech,American beech leading,,Fagu_Gra,TRUE,Deciduous,beech,,,,,,FAGU_GRA,HEG
@@ -75,7 +76,7 @@ fraxamer,FRAX.AME,Frax_ame,Frax_Ame,Frax amer,Fraxinus americana,Am ash,American
 ,,Jugl_nig,Jugl_Nig,Jugl nigr,Juglans nigra,,,,,,TRUE,Deciduous,,,,,,,JUGL_NIG,NON
 ,,Thuj_jun,Juni_Vir,Thuj juni,Juniperus virginiana,,,,Not clear why CASFRI name doesn't match,,FALSE,Conifer,eastern redcedar,,,,,,THUJ_JUN,
 ,,Juni_sco,,Juni scop,Juniperus scopulorum,,,,,,FALSE,Conifer,,,,,,,JUNI_SCO,
-,,Lari_dec,,Lari deci,Larix decidua,,,,,,FALSE,Conifer,,,,,,,LARI_DEC,
+,,Lari_dec,,Lari deci,Larix decidua,,,,,,FALSE,Conifer,,,,,,,LARI_DEC,MEU
 ,,Lari_kae,Lari_Kae,Lari kaem,Larix kaempferi,,,,,,FALSE,Conifer,,,,,,,LARI_KAE,
 larilari,LARI.LAR,Lari_lar,Lari_Lar,Lari lari,Larix laricina,Tamarack,Tamarack,Tamarack leading,,Lari_Lar,FALSE,Conifer,tamarack larch,,class2,Lt,Lt,TL,LARI_LAR,MEL
 larilyal,,Lari_lya,Lari_Lya,Lari lyal,Larix lyallii,Alp larch,Alpine larch,Alpine larch leading,,Lari_Lya,FALSE,Conifer,alpine larch,,class2,La,La,,LARI_LYA,
@@ -92,7 +93,7 @@ lariocci,LARI.OCC,Lari_occ,Lari_Occ,Lari occi,Larix occidentalis,We larch,Wester
 ,,Moru_rub,,Moru rubr,Morus rubra,,,,,,TRUE,Deciduous,,,,,,,MORU_RUB,
 ,,Nyss_syl,,Nyss sylv,Nyssa sylvatica,,,,,,TRUE,Deciduous,,,,,,,NYSS_SYL,
 ,,Ostr_vir,Ostr_Vir,Ostr virg,Ostrya virginiana,,,,also known as ironwood,,TRUE,Deciduous,hop-hornbeam,,,,,,OSTR_VIR,OSV
-,,Pice_abi,Pice_Abi,Pice abie,Picea abies,,,,,,FALSE,Conifer,,,class3,,,,PICE_ABI,
+,,Pice_abi,Pice_Abi,Pice abie,Picea abies,,,,,,FALSE,Conifer,norway spruce,,class3,,,,PICE_ABI,EPO
 ,,Pice_sp,Pice_Eng_Gla,Pice hybr,Picea engelmannii x glauca,En Spruce,Engelmann's spruce,Engelmann's spruce leading,Pice hybr is not on the manual CASFRI list but appears in database,Pice_Eng_Gla,FALSE,Conifer,spruce,,class3,Sxw,,,PICE_SP,
 ,,Pice_sp,Pice_Eng_Gla,Pice engx,Picea engelmannii x glauca,En Spruce,Engelmann's spruce,Engelmann's spruce leading,,Pice_Eng_Gla,FALSE,Conifer,spruce,,class3,Sxw,,,PICE_SP,
 piceengl,PICE.ENG,Pice_eng,Pice_Eng,Pice enge,Picea engelmannii,En Spruce,Engelmann's spruce,Engelmann's spruce leading,,Pice_Eng,FALSE,Conifer,engelmann spruce,,class3,Sx,Se,,PICE_ENG,
@@ -121,7 +122,7 @@ pinuresi,PINU.RES,Pinu_res,Pinu_Res,Pinu resi,Pinus resinosa,Rd pine,Red pine,Re
 ,,Pinu_rig,Pinu_Rig,Pinu rigi,Pinus rigida,Pine,Pine,Pine leading,,,FALSE,Conifer,,,,,,,PINU_RIG,PID
 ,,Pinu_sp,Pinu_Spp,Pinu spp,Pinus spp.,Pine,Pine,Pine leading,,Pinu_Spp,FALSE,Conifer,,,class3,,,,PINU_SP,
 pinustro,PINU.STR,Pinu_str,Pinu_Str,Pinu stro,Pinus strobus,Pine,Pine,Pine leading,,,FALSE,Conifer,white pine,C5,class3,Pw,,,PINU_STR,PIB
-,,Pinu_syl,Pinu_Syl,Pinu sylv,Pinus sylvestris,Pine,Pine,Pine leading,,,FALSE,Conifer,,,class3,,,SP,PINU_SYL,
+,,Pinu_syl,Pinu_Syl,Pinu sylv,Pinus sylvestris,Pine,Pine,Pine leading,,,FALSE,Conifer,,,class3,,,SP,PINU_SYL,PIS
 ,,Plan_occ,Plat_Occ,Plan occi,Platanus occidentalis,,,,,,TRUE,Deciduous,,,,,,,PLAN_OCC,PLO
 ,,Popu_ang,,Popu angu,Populus angustifolia,,,,,,TRUE,Deciduous,,,,,,,POPU_ANG,
 popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamea,Ba poplar,Balsam poplar,Balsam poplar leading,,Popu_Bal,TRUE,Deciduous,balsam poplar,,class2,Acb,Pb,BA,POPU_BAL,PEB
@@ -134,8 +135,8 @@ popudelt,,Popu_del,Popu_Del,Popu delt,Populus deltoides,,,,,,TRUE,Deciduous,east
 ,,Popu_del,Popu_Del,Popu delx,Populus deltoides,,,,,,TRUE,Deciduous,eastern cotttonwood,,class2,,,,POPU_DEL,PED
 ,,Popu_gra,Popu_Gra,Popu gran,Populus grandidentata,Wh poplar,White poplar,White poplar leading,,Popu_Gra,TRUE,Deciduous,largetooth aspen,,,,,,POPU_GRA,PEG
 ,,Popu_nig,,Popu nigr,Populus nigra,,,,,,TRUE,Deciduous,,,,,,,POPU_NIG,
-,,Popu_sp,Popu_Spp,Popu spp,Populus spp.,Poplar,Poplar,Poplar leading,,Popu_Spp,TRUE,Deciduous,trembling aspen,,class2,Ac,,,POPU_SP,TIL
-poputrem,POPU.TRE,Popu_tre,Popu_Tre,Popu trem,Populus tremuloides,Tr aspen,Trembling poplar,Trembling aspen leading,,Popu_Tre,TRUE,Deciduous,trembling aspen,,class2,At,Aw,TA,POPU_TRE,
+,,Popu_sp,Popu_Spp,Popu spp,Populus spp.,Poplar,Poplar,Poplar leading,,Popu_Spp,TRUE,Deciduous,trembling aspen,,class2,Ac,,,POPU_SP,
+poputrem,POPU.TRE,Popu_tre,Popu_Tre,Popu trem,Populus tremuloides,Tr aspen,Trembling poplar,Trembling aspen leading,,Popu_Tre,TRUE,Deciduous,trembling aspen,,class2,At,Aw,TA,POPU_TRE,PET
 ,,Prun_avi,,Prun aviu,Prunus avium,,,,,,TRUE,Deciduous,,,,,,,PRUN_AVI,
 ,,Prun_cer,,Prun cera,Prunus cerasus,,,,,,TRUE,Deciduous,,,,,,,PRUN_CER,
 ,,Prun_ema,,Prun emar,Prunus emarginata,,,,,,TRUE,Deciduous,,,,,,,PRUN_EMA,
@@ -194,7 +195,7 @@ tsugmert,TSUG.MER,Tsug_mer,Tsug_Mer,Tsug mert,Tsuga mertensiana x heterophylla,,
 ,,Ulmu_pum,Ulmu_Rub,Ulmu pumi,Ulmus pumila,,,,,,TRUE,Deciduous,,,,,,,ULMU_PUM,
 ,,Ulmu_rub,Ulmu_Spp,Ulmu rubr,Ulmus rubra,,Slippery elm,,,,TRUE,Deciduous,,,,,,,ULMU_RUB,ORR
 ,,Ulmu_sp,Ulmu_Tho,Ulmu spp,Ulmus spp.,,,,,,TRUE,Deciduous,,,,,,,ULMU_SPP.,
-,,,,Ulmu thom,Ulmus thomasii,,,,,,TRUE,Deciduous,,,,,,,,
+,,,,Ulmu thom,Ulmus thomasii,,Rock elm,,,,TRUE,Deciduous,,,class2,,,,ULMU_THO,ORT
 ,,,Broadleaf_Spp,Hard unkn,,Decid,Deciduous,Deciduous leading,,,TRUE,Deciduous,,,,,,,,
 ,,,Needleleaf_Spp,Soft unkn,,Conif,Coniferous,Coniferous leading,,,FALSE,Conifer,,,,,,,,
 ,,,,Nonc hard,,Decid,Deciduous,Deciduous leading,,,TRUE,Deciduous,,,,,,,,
