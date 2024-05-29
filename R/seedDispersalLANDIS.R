@@ -157,7 +157,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                        verbose = getOption("LandR.verbose", TRUE),
                        ...) {
 
-  if ((NROW(dtSrc) > 0) & (NROW(dtRcv) > 0)) {
+  if ((NROW(dtSrc) > 0) && (NROW(dtRcv) > 0)) {
     ####### Assertions #############
     if (!( (is.numeric(dtSrc$speciesCode) && is.numeric(dtRcv$speciesCode) && is.numeric(speciesTable$speciesCode)) ||
            (is.factor(dtSrc$speciesCode) && is.factor(dtRcv$speciesCode) && is.factor(speciesTable$speciesCode))))
@@ -551,7 +551,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   startTime <- Sys.time()
   cumSuccesses <- 0
 
-  for (i in 1:NROW(spiral)) {
+  for (i in seq_len(NROW(spiral))) {
     curDist <- curDists[i]
 
     if (i > 1) {
@@ -562,11 +562,13 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
         spTooLong <- curDist > activeSpecies$seeddistance_maxMinCellSize
         if (any(spTooLong)) {
           activeSpecies <- activeSpecies[!spTooLong]
-          tooLong <- curDist > ( pmax(cellSize, rcvFull[["seeddistance_max"]][activeFullIndex]) ) # * sqrt(2)) don't need this because spiral is sorted by distance
+          ## NOTE: don't need to multipl below by sqrt(2) because spiral is sorted by distance
+          tooLong <- curDist > (pmax(cellSize, rcvFull[["seeddistance_max"]][activeFullIndex]))
           if (any(tooLong, na.rm = TRUE)) {
             if (verbose >= 1) {
               tooLongFull <- curDist > rcvFull[["seeddistance_max"]]
-              set(rcvFull, which(tooLongFull & is.na(rcvFull$ReasonForStop)), "ReasonForStop", "NoneRecdBeforeMaxDistReached")
+              set(rcvFull, which(tooLongFull & is.na(rcvFull$ReasonForStop)), "ReasonForStop",
+                  "NoneRecdBeforeMaxDistReached")
             }
             activeFullIndex <- activeFullIndex[!tooLong]
             rowOrig <- rowOrig[!tooLong]
@@ -620,7 +622,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
       # The calculations for dispersal kernal are annual --
       #   so exponentiate for any other time step
       if (successionTimestep > 1) {
-        wardProbActual = 1 - (1 - wardProbActual) ^ successionTimestep
+        wardProbActual <- 1 - (1 - wardProbActual) ^ successionTimestep
       }
     }
 
@@ -642,7 +644,7 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
         }
         numSuccesses <- length(oo)
         if (verbose >= 2) {
-          print(paste0(i, "; curDist: ",round(curDist,0),"; NumSuccesses: ",
+          print(paste0(i, "; curDist: ", round(curDist, 0), "; NumSuccesses: ",
                        numSuccesses, "; NumRows: ", NROW(na.omit(activeFullIndex)),
                        "; NumSp: ", length(unique(speciesCode[activeFullIndex]))))
         }
@@ -735,8 +737,8 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
 
 spiralDistances <- function(pixelGroupMap, maxDis, cellSize) {
   spiral <- which(focalMat(pixelGroupMap, maxDis, type = "circle") > 0, arr.ind = TRUE) -
-    ceiling(maxDis/cellSize) - 1
-  spiral <- cbind(spiral, dists = sqrt( (0 - spiral[,1]) ^ 2 + (0 - spiral[, 2]) ^ 2))
+    ceiling(maxDis / cellSize) - 1
+  spiral <- cbind(spiral, dists = sqrt((0 - spiral[, 1]) ^ 2 + (0 - spiral[, 2]) ^ 2))
   spiral <- spiral[order(spiral[, "dists"], apply(abs(spiral), 1, sum),
-                         abs(spiral[, 1]), abs(spiral[, 2])),, drop = FALSE]
+                         abs(spiral[, 1]), abs(spiral[, 2])), , drop = FALSE]
 }

@@ -81,9 +81,11 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
     # pixels --> the entirely newly regenerated pixels do not require a
     # re-pixelGroupMaping  -- can just add to existing pixelGroup values
     if (verbose > 0) {
-      message(crayon::green("  Regenerating only burnt pixels with no survivors (i.e. resprouting & serotiny)"))
+      message(crayon::green(
+        "  Regenerating only burnt pixels with no survivors (i.e. resprouting & serotiny)"
+      ))
     }
-    columnsForPG <- c("ecoregionGroup", "speciesCode", "age") # no Biomass because they all have zero
+    columnsForPG <- c("ecoregionGroup", "speciesCode", "age") ## no Biomass b/c they all have zero
     cd <- newPixelCohortData[, c("pixelIndex", columnsForPG), with = FALSE]
     newPixelCohortData[, pixelGroup := generatePixelGroups(cd,
                                                            maxPixelGroup = maxPixelGroup,
@@ -137,7 +139,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 
     # newer way that will potentially conflict with LandR.CS due to differing aNPP
     colsToSubset <- setdiff(colnames(cohortData), c("pixelIndex"))
-    allCohortData <- cohorts[!duplicated(cohorts[, .(pixelGroup, speciesCode, ecoregionGroup, age)]), ..colsToSubset]
+    allCohortData <- cohorts[!duplicated(cohorts[, .(pixelGroup, speciesCode, ecoregionGroup, age)]),
+                             ..colsToSubset]
 
     theNewOnes <- is.na(allCohortData$B)
     cohortData <- allCohortData[!theNewOnes]
@@ -266,10 +269,12 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
 
   ## Note that after the following join, some cohorts will be lost due to lack of
   ##  parameters in speciesEcoregion. These need to be modified in pixelGroupMap.
-  # missingNewPixelCohortData <- newPixelCohortData[!specieseco_current, on = uniqueSpeciesEcoregionDefinition]
+  # missingNewPixelCohortData <- newPixelCohortData[!specieseco_current,
+  #                                                 on = uniqueSpeciesEcoregionDefinition]
   specieseco_current <- specieseco_current[!is.na(maxB)]
   specieseco_current[, maxB_eco := max(maxB), by = ecoregionGroup]
-  newPixelCohortData <- specieseco_current[newPixelCohortData, on = uniqueSpeciesEcoregionDefinition]
+  newPixelCohortData <- specieseco_current[newPixelCohortData,
+                                           on = uniqueSpeciesEcoregionDefinition]
   newPixelCohortData <- newPixelCohortData[!is.na(maxB)]
 
   if (any(newPixelCohortData$age > 1)) {
@@ -287,7 +292,8 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
   newPixelCohortData <- unique(cohortData[, .(pixelGroup, oldSumB)],
                                by = "pixelGroup"
   )[newPixelCohortData, on = "pixelGroup"]
-  set(newPixelCohortData, which(is.na(newPixelCohortData$oldSumB)), "oldSumB", 0) ## faster than [:=]
+  ## using set() is faster than [:=]
+  set(newPixelCohortData, which(is.na(newPixelCohortData$oldSumB)), "oldSumB", 0)
   setnames(newPixelCohortData, "oldSumB", "sumB")
   set(cohortData, NULL, "oldSumB", NULL)
 
@@ -301,17 +307,20 @@ updateCohortData <- function(newPixelCohortData, cohortData, pixelGroupMap, curr
       asInteger(pmax(1, newPixelCohortData$maxANPP *
                        exp(-1.6 * newPixelCohortData$sumB / newPixelCohortData$maxB_eco)))
     )
-    set(newPixelCohortData, NULL, "B", asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
+    set(newPixelCohortData, NULL, "B",
+        asInteger(pmin(newPixelCohortData$maxANPP, newPixelCohortData$B)))
   } else {
-    set(newPixelCohortData, NULL, "B", asInteger(initialB)) #Feb2022 change to 10 - maxANPP is unrealistic, particularly with
-    # high maxANPP needed to produce realistic growth curves
+    ## 2022-02: change to 10 - maxANPP is unrealistic, particularly with
+    ##          high maxANPP needed to produce realistic growth curves
+    set(newPixelCohortData, NULL, "B", asInteger(initialB))
   }
 
   newPixelCohortData <- newPixelCohortData[, .(pixelGroup, ecoregionGroup, speciesCode, age, B,
                                                mortality = 0L, aNPPAct = 0L)]
 
   if (getOption("LandR.assertions")) {
-    if (isTRUE(NROW(unique(newPixelCohortData, by = cohortDefinitionCols)) != NROW(newPixelCohortData))) {
+    if (isTRUE(NROW(unique(newPixelCohortData,
+                           by = cohortDefinitionCols)) != NROW(newPixelCohortData))) {
       stop("Duplicated new cohorts in a pixelGroup. Please debug LandR:::.initiateNewCohorts")
     }
   }
@@ -350,8 +359,7 @@ rmMissingCohorts <- function(cohortData, pixelGroupMap,
   pgmVals <- na.omit(pgmValues)
   pgmVals <- pgmVals[pixelGroup > 0]
   whPgsStillInCDGoneFromPGM <- !cohortData$pixelGroup %in% pgmVals$pixelGroup
-  pgsStillInCDGoneFromPGM <- cohortData[whPgsStillInCDGoneFromPGM, ] # setdiff(unique(cohortData$pixelGroup), unique(pgmVals$pixelGroup))
-  # pgsStillInPGMGoneFromCD <- setdiff(unique(pgmVals$pixelGroup), unique(cohortData$pixelGroup))
+  pgsStillInCDGoneFromPGM <- cohortData[whPgsStillInCDGoneFromPGM, ]
   whPgsStillInPGMGoneFromCD <- !pgmVals$pixelGroup %in% cohortData$pixelGroup
   pgsStillInPGMGoneFromCD <- pgmVals[whPgsStillInPGMGoneFromCD, ]
 
@@ -409,20 +417,23 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
   if (getOption("LandR.assertions")) {
     pcdOrig <- data.table::copy(pcd)
   }
-  # concatenate within rows -- e.g., ecoregionCode_speciesCode_age_biomass or 647_11_Abie_sp_100_2000
+  ## concatenate within rows:
+  ## e.g., ecoregionCode_speciesCode_age_biomass or 647_11_Abie_sp_100_2000
   pcd[, uniqueComboByRow := do.call(paste, as.list(.SD)), .SDcols = columns]
 
-  # concatenate within pixelIndex
+  ## concatenate within pixelIndex
   pcd[, c("uniqueComboByPixelIndex") := paste(uniqueComboByRow, collapse = "__"), by = "pixelIndex"]
   pcd[, c("pixelGroup") := as.integer(maxPixelGroup) + as.integer(factor(uniqueComboByPixelIndex))]
 
-  if (getOption("LandR.assertions")) { # old algorithm
-    # prepare object 1 (pcd) for checking below
-    pcd[, ord := 1:.N]
+  ## old algorithm:
+  if (isTRUE(getOption("LandR.assertions"))) {
+    ## prepare object 1 (pcd) for checking below
+    pcd[, ord := seq_len(.N)]
     setorderv(pcd, c("pixelIndex"))
     uniqPG <- unique(pcd$pixelGroup)
     pcd[, pixelGroup2 := mapvalues2(pixelGroup, from = uniqPG, to = as.character(seq_along(uniqPG)))]
-    # pcd[, pixelGroup2 := mapvalues(pixelGroup, from = unique(pixelGroup), to = as.character(seq_along(unique(pixelGroup))))]
+    # pcd[, pixelGroup2 := mapvalues(pixelGroup, from = unique(pixelGroup),
+    #                                to = as.character(seq_along(unique(pixelGroup))))]
     setorderv(pcd, "ord")
 
     pcdOld <- data.table::copy(pcdOrig)
@@ -432,27 +443,29 @@ generatePixelGroups <- function(pixelDataTable, maxPixelGroup,
       a <- as.integer(factor(x))
     }), .SDcols = columns]
 
-    # concatenate within rows -- e.g., ecoregionCode_speciesCode_age_biomass or 647_11_Abie_sp_100_2000
+    ## concatenate within rows:
+    ## e.g., ecoregionCode_speciesCode_age_biomass or 647_11_Abie_sp_100_2000
     pcdOld[, uniqueComboByRow := as.integer(factor(do.call(paste, as.list(.SD)))),
            .SDcols = columns2
     ]
 
-    # concatenate within pixelIndex
+    ## concatenate within pixelIndex
     pcdOld[, c("uniqueComboByPixelIndex") := paste(uniqueComboByRow, collapse = "__"),
-           by = "pixelIndex"
-    ]
+           by = "pixelIndex"]
     pcdOld[, c("pixelGroup") := as.integer(maxPixelGroup) +
              as.integer(factor(uniqueComboByPixelIndex))]
-    # prepare object 2 (pcdOld) for checking below
-    pcdOld[, ord := 1:.N]
+    ## prepare object 2 (pcdOld) for checking below
+    pcdOld[, ord := seq_len(.N)]
     setorderv(pcdOld, c("pixelIndex"))
 
     uniqPG <- unique(pcdOld$pixelGroup)
-    pcdOld[, pixelGroup2 := mapvalues2(pixelGroup, from = uniqPG, to = as.character(seq_along(uniqPG)))]
+    pcdOld[, pixelGroup2 := mapvalues2(pixelGroup,
+                                       from = uniqPG,
+                                       to = as.character(seq_along(uniqPG)))]
 
     setorderv(pcdOld, "ord")
 
-    # The check
+    ## the check
     if (!identical(pcdOld$pixelGroup2, pcd$pixelGroup2)) {
       stop("new generatePixelGroups algorithm failing")
     }
@@ -1198,12 +1211,12 @@ subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
       }
     } else {
       if (isTRUE(indices)) {
-        DT <- 1:nrow(DT)
+        DT <- seq_len(nrow(DT))
       }
     }
   } else {
     if (isTRUE(indices)) {
-      DT <- 1:nrow(DT)
+      DT <- seq_len(nrow(DT))
     }
   }
   return(DT)
@@ -1420,7 +1433,7 @@ addNoPixel2CohortData <- function(cohortData, pixelGroupMap,
     test2 <- sum(unique(pixelCohortData[, .(pixelGroup, noPixels)])$noPixels) !=
       sum(!is.na(pixelGroupMap[]) & pixelGroupMap[] != 0) ## 0's have no cohorts.
 
-    if (test1 | test2) {
+    if (test1 || test2) {
       stop("pixelGroups differ between pixelCohortData/pixelGroupMap and cohortData")
     }
   }

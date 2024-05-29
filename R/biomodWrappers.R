@@ -34,21 +34,22 @@ utils::globalVariables(c(
 #' @param ... further arguments passed to [reproducible::Cache]
 #'
 #' @export
-biomodModelingWrapper <- function(sp, responseVar, responseVarData, predictorVars, predictorVarsData,
+biomodModelingWrapper <- function(sp, responseVar, responseVarData,
+                                  predictorVars, predictorVarsData,
                                   dir.name, BIOMOD_ModelingArgs = list(
                                     models = c("GLM", "MARS"),
                                     bm.options = NULL,
                                     CV.k = 5, CV.perc = 100,
                                     metric.eval = c("TSS", "ROC"),
-                                    modeling.id = "test"),
-                                  ...) {
+                                    modeling.id = "test"
+                                  ), ...) {
   if (requireNamespace("biomod2", quietly = TRUE)) {
     if (is.null(bm.options)) {
       bm.options <- biomod2::BIOMOD_ModelingOptions(GLM = list(type = "simple"),
                                                     GAM = list(k = 2))
     }
     ## Checks ------------------
-    if (is(responseVar, "list") & is.null(names(responseVar))) {
+    if (is(responseVar, "list") && is.null(names(responseVar))) {
       stop("'responseVar' must be a named list with 'sp' as names, or a character vector")
     }
 
@@ -59,7 +60,7 @@ biomodModelingWrapper <- function(sp, responseVar, responseVarData, predictorVar
       responseVar <- responseVar[[sp]]
     }
 
-    if (is(responseVarData, "list") & is.null(names(responseVarData))) {
+    if (is(responseVarData, "list") && is.null(names(responseVarData))) {
       stop("'responseVarData' must be a named list with 'sp' as names, or a single data.table")
     }
 
@@ -70,7 +71,7 @@ biomodModelingWrapper <- function(sp, responseVar, responseVarData, predictorVar
       responseVarData <- responseVarData[[sp]]
     }
 
-    if (is(predictorVars, "list") & is.null(names(predictorVars))) {
+    if (is(predictorVars, "list") && is.null(names(predictorVars))) {
       stop("'predictorVars' must be a named list with 'sp' as names, or a character vector")
     }
 
@@ -81,7 +82,7 @@ biomodModelingWrapper <- function(sp, responseVar, responseVarData, predictorVar
       predictorVars <- predictorVars[[sp]]
     }
 
-    if (is(predictorVarsData, "list") & is.null(names(predictorVarsData))) {
+    if (is(predictorVarsData, "list") && is.null(names(predictorVarsData))) {
       stop("'predictorVarsData' must be a named list with 'sp' as names, or a single data.table")
     }
 
@@ -99,7 +100,7 @@ biomodModelingWrapper <- function(sp, responseVar, responseVarData, predictorVar
     }
 
     ## create outputs dir
-    suppressWarnings({dir.create(dir.name, recursive = TRUE)})
+    suppressWarnings(dir.create(dir.name, recursive = TRUE))
 
     ## Merge response and predictor variables --------------------
     envCols <- c("pixelIndex", "x", "y", predictorVars)
@@ -153,7 +154,7 @@ biomodModelingWrapper <- function(sp, responseVar, responseVarData, predictorVar
       message(blue("Some SEP models failed, retrying... attempt", i))
     }
   }
-  if (i == 6 & !all(bm.mod@models.failed == "none")) {
+  if (i == 6 && !all(bm.mod@models.failed == "none")) {
     sp <- sub("SEP_model_", "", BIOMOD_ModelingArgs$modeling.id)
     warning(red("Some/all SEP models could not be computed for", sp,
                 "\nConsider rerunning '.BIOMOD_ModelingRetry', simplifying the models,",
@@ -221,7 +222,7 @@ biomodProjWrapper <- function(bm.mod, proj.name = "testProj", new.env = NULL, ne
       new.env <- as.data.frame(new.env)
     }
 
-    if (!is.null(new.env.xy) & inherits(new.env.xy, "data.table")) {
+    if (!is.null(new.env.xy) && inherits(new.env.xy, "data.table")) {
       new.env.xy <- as.data.frame(new.env.xy)
     }
 
@@ -268,11 +269,11 @@ biomodProjWrapper <- function(bm.mod, proj.name = "testProj", new.env = NULL, ne
 biomodEnsembleFrcstWrapper <- function(bm.em, bm.proj = NULL, proj.name = NULL, new.env = NULL,
                                        new.env.xy = NULL, keep.in.memory = TRUE, ...) {
   if (requireNamespace("biomod2", quietly = TRUE)) {
-    if (!is.null("new.env") & inherits(new.env, "data.table")) {
+    if (!is.null("new.env") && inherits(new.env, "data.table")) {
       new.env <- as.data.frame(new.env)
     }
 
-    if (!is.null("new.env.xy") & inherits(new.env.xy, "data.table")) {
+    if (!is.null("new.env.xy") && inherits(new.env.xy, "data.table")) {
       new.env.xy <- as.data.frame(new.env.xy)
     }
     bm.em.proj <- Cache(biomod2::BIOMOD_EnsembleForecasting,
@@ -299,8 +300,8 @@ biomodEnsembleFrcstWrapper <- function(bm.em, bm.proj = NULL, proj.name = NULL, 
 #'   Note that `x` and `y`coordinates extracted from `bm.em.proj@coord` must be in the same
 #'   projection as `rasTemplate`.
 #'
-#' @param predModel character. Which model predictions should be used. Chose one of
-#'   `bm.em.proj@models.projected`.
+#' @param predModel character. Which model predictions should be used.
+#'   Choose one of `bm.em.proj@models.projected`.
 #'
 #' @param rasTemplate a template `RasterLayer` or `SpatRaster` that can be used to map the projections
 #'
@@ -324,7 +325,8 @@ biomodEnsembleProjMaps <- function(bm.em.proj, predModel, rasTemplate, origCRS) 
     ## as the data is joined and potentially reduced by biomodModelingWrapper
     predDataCoords <- bm.em.proj@coord
     predDataCoords <- vect(predDataCoords, geom = c("x", "y"), crs = origCRS)
-    predDataCoords <- as.data.table(terra::extract(rasTemplate, predDataCoords, cells = TRUE))  ## needs pkg name here
+    predDataCoords <- terra::extract(rasTemplate, predDataCoords, cells = TRUE) |>
+      as.data.table()
     setnames(predDataCoords, "cell", "pixelIndex")
 
     predDT <- as.data.table(biomod2::get_predictions(bm.em.proj))

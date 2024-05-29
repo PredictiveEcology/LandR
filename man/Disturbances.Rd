@@ -275,7 +275,7 @@ The \code{species} table must contain the columns:
 }
 }
 
-\section{Peatland permafrost degradataion (thermokarst) disturbances}{
+\section{Peatland permafrost degradation (thermokarst) disturbances}{
 
 \code{PeatlandThermokarst()} simulates tree cohort survival/mortality after
 peatland permafrost thermokarst. The level of mortality depends on species
@@ -283,7 +283,7 @@ tolerance to thermokarst, determined by the \code{thermokarsttol} trait column
 in the \code{species} traits table. At the moment, this level of tolerance is used
 as the proportion of a cohort biomass that survives (is kept) when a pixel undergoes
 thermokarst. This is similar to the partial disturbance effects used in LANDIS-II Biomass
-Harvest v4.0. Requires the following objects in \code{sim} (and passed as \verb{sim$*}):\
+Harvest v4.0. Requires the following objects in \code{sim} (and passed as \verb{sim$*}):
 \itemize{
 \item \code{thawedPixIDs}
 \item \code{treedThawedPixelTableSinceLastDisp}

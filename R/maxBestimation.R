@@ -71,14 +71,15 @@ utils::globalVariables(c(
 #'     \item{range of `A` starting values (B0 parameter in Fekedulegn et al. 1999)
 #'     varies between \eqn{ObsMaxB \times 0.3} and \eqn{ObsMaxB \times 0.9}, where $$ObsMaxB$$ is
 #'     the maximum observed B across the full dataset (not the sampled data for fitting)}
-#'     \item{`k` (CR model) and `p` (Logistic model; both are B2 parameter in
+#'     \item{`k` (CR model) and `p` (Logistic model; both are `B2` parameter in
 #'     Fekedulegn et al. 1999) are estimated as a constant rate to get to $$ObsMaxB$$,
-#'     calculated as \eqn{\frac{\frac{Bobs2 - Bobs1}{age2 - age1}}{ObsMaxB}}, where *B1/2* and
-#'     *age1/2* are are observed values at two points in time. We draw 100 samples
-#'     of two *age* values, and corresponding *B*, to calculate a sample of rates.
+#'     calculated as \eqn{\frac{\frac{Bobs2 - Bobs1}{age2 - age1}}{ObsMaxB}},
+#'     where `B1`/`B2` and `age1`/`age2` are are observed values at two points in time.
+#'     We draw 100 samples of two `age` values, and corresponding `B`,
+#'     to calculate a sample of rates.
 #'     After excluding rates <= 0, we take the minimum and maximum values as
 #'     the range of `k` (CR model) or `p` (Logistic model) parameters of the growth model}
-#'     \item{the `p` parameter (CR model) (related to B3 parameter in Fekedulegn
+#'     \item{the `p` parameter (CR model) (related to `B3` parameter in Fekedulegn
 #'     et al. 1999) should be > 1. Here we use a range of values between 1.1 and
 #'     80 which provided suitable fitting using data from the Northwest Territories,
 #'     Canada}
@@ -89,19 +90,19 @@ utils::globalVariables(c(
 #'     where to draw starting values.}
 #'   }
 #'
-#' @param lowerBounds a named vector of lower parameter boundaries. If FALSE, no lower
-#'   boundaries are applied. If TRUE, coefficients of the linear model on the A
-#'   parameter (intercept, cover, k and p) are bound (`intercept = observed maximum B * 0.5`,
-#'   `cover = 0`, `k = 0.05` and `p = 1`).
+#' @param lowerBounds a named vector of lower parameter boundaries. If `FALSE`, no lower
+#'   boundaries are applied. If `TRUE`, coefficients of the linear model on the `A`
+#'   parameter (`intercept`, `cover`, `k` and `p`) are bound
+#'   (`intercept = observed maximum B * 0.5`, `cover = 0`, `k = 0.05` and `p = 1`).
 #'   Alternatively, pass a named vector of parameter boundaries.
 #'
-#' @param upperBounds a named vector of upper parameter boundaries. If FALSE, no lower
-#'   boundaries are applied. If TRUE, coefficient of the linear model on the A parameter
+#' @param upperBounds a named vector of upper parameter boundaries. If `FALSE`, no lower
+#'   boundaries are applied. If `TRUE`, coefficient of the linear model on the A parameter
 #'   (`intercept` and `k`) are bound (`intercept = observed maximum B * 1.5`, `k = 0.2`).
 #'   Alternatively, pass a named vector of parameter boundaries.
 #'
 #' @param nbWorkers integer. If > 1, the number of workers to use in `future.apply::future_apply`, otherwise
-#'   no parallelisation is done.
+#'   no parallellisation is done.
 #'
 #' @seealso [bbmle::mle2()]
 #' @export
@@ -149,7 +150,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
   }
 
   if (!is.null(modelOutputsPrev)) {
-    if (isFALSE(is(modelOutputsPrev, "list")) | is.null(names(modelOutputsPrev))) {
+    if (isFALSE(is(modelOutputsPrev, "list")) || is.null(names(modelOutputsPrev))) {
       stop("modelOutputsPrev must be a list names after 'models'")
     }
 
@@ -189,7 +190,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 
   ## (Re-)sample data -----------------------
   if (is.na(sampleSize) || sampleSize > nrow(specDat2)) {
-    sampleIDs <- 1:nrow(specDat2)
+    sampleIDs <- seq_len(nrow(specDat2))
   } else {
     ## this is no longer necessary as the stratification should be done elsewhere
     ## stratify sampling by B to ensure good coverage
@@ -199,7 +200,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
     # sampleIDs <- specDat2[, sample(.I, unique(Bsamples), replace = FALSE), by = Bbins]$V1
     # set(specDat2, NULL, c("Bbins", "Bsamples"), NULL)
 
-    sampleIDs <- sample(1:nrow(specDat2), size = sampleSize)
+    sampleIDs <- sample(seq_len(nrow(specDat2)), size = sampleSize)
   }
   trainData <- specDat2[sampleIDs]
 
@@ -210,7 +211,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
   ## Data at origin -----------------------
 
   ## Add a B(0) age(0) point at the origin as per Fekedulegn et al. (1999)
-  if (nrow(trainData[age == 0 & B == 0]) == 0) {
+  if (nrow(trainData[age == 0 && B == 0]) == 0) {
     cols <- names(which(sapply(trainData, is.numeric)))
     newRow <- trainData[, lapply(.SD, mean), .SDcols = cols]
     cols <- setdiff(names(trainData), cols)
@@ -249,8 +250,10 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 
   ## Fekedulegn et al. (1999) suggest the following:
   ## To estimate A starting values (=B0 parameter), use the maximum observed B
-  ## To estimate k (CR) and p (Log) (=B2 parameter) use the following to calculate a constant rate to get to maxB
-  ## ((Bobs2 - Bobs1) / (age2 - age1)) / maxB  -- where B and age are observed values at two points in time and maxB is the maximum biomass
+  ## To estimate k (CR) and p (Log) (=B2 parameter) use the following to calculate
+  ##  a constant rate to get to maxB.
+  ## ((Bobs2 - Bobs1) / (age2 - age1)) / maxB
+  ## where B and age are observed values at two points in time and maxB is the maximum biomass
   ## p (CR) (related to B3 parameter -- p = 1/(1-B3) and 0 < B3 < 1) should be p > 1
   ## To estimate k (Log) (B1 parameter) use the following:
   ## B(0) = maxB/(1 + k), using a small positive number for B(0), e.g. 2
@@ -261,11 +264,14 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
   ## maximum observed biomass across full dataset
   ObsMaxB <- max(specDat2$B, na.rm = TRUE)   ## maximum across whole data for the focal species
 
-  ## this is probably a bad way of estimating rates, because its a space-for-time across a potentially very large area
+  ## this is probably a bad way of estimating rates, because its a space-for-time across a
+  ## potentially very large area
   if (FALSE) {
     ## initial parameter ranges for k (CR model) and p (Logistic model) parameters:
     ## sample a wide range of ages
-    ageSamples <- lapply(1:100, function(x) sort(sample(specDat2[cover > maxCover * 0.8, age], size = 2, replace = FALSE)))
+    ageSamples <- lapply(1:100, function(x) {
+      sort(sample(specDat2[cover > maxCover * 0.8, age], size = 2, replace = FALSE))
+    })
     ageSamples <- lapply(ageSamples, function(x) if (length(unique(x)) > 1) x)
 
     rateEstimates <- sapply(ageSamples, function(ages) {
@@ -284,10 +290,9 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
     rateEstimates <- rateEstimates[rateEstimates > 0]
   }
 
-
   ## initial parameter ranges for k (Logistic model) parameter:
   B0s <- seq(1, 5, 0.1)
-  kLogEstimates <- (ObsMaxB - B0s)/B0s
+  kLogEstimates <- (ObsMaxB - B0s) / B0s
 
   ## Parameter boundaries ---------------------------
 
@@ -545,7 +550,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
         stop("Please provide a 'cover' variable as a linear predictor to, e.g., 'A'")
       }
 
-      if (max(data$cover, na.rm = TRUE) > maxCover |
+      if (max(data$cover, na.rm = TRUE) > maxCover ||
           min(data$cover, na.rm = TRUE) < 0) {
         stop("data$cover must be scaled between 0 and 'maxCover'")
       }
@@ -876,16 +881,15 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
                            plotTitle = NULL, nonLinModelQuoted, linModelQuoted,
                            averageCovariates = TRUE, observedAge = FALSE, plotCIs = TRUE) {
   ## checks
-  if (!(is.list(mll) | is.null(names(mll)))) {
+  if (!(is.list(mll) || is.null(names(mll)))) {
     stop("mll must be a named list")
   }
 
-  if (any(!vapply(mll, FUN = function(x) is(x, "mle2"),
-                  FUN.VALUE = logical(1)))) {
+  if (any(!vapply(mll, FUN = function(x) is(x, "mle2"), FUN.VALUE = logical(1)))) {
     stop("mll must be a list of mle2 outputs or an mle2 output")
   }
 
-  if (is.list(nonLinModelQuoted) & length(nonLinModelQuoted) == length(mll)) {
+  if (is.list(nonLinModelQuoted) && length(nonLinModelQuoted) == length(mll)) {
     if (any(sort(names(nonLinModelQuoted)) != sort(names(mll)))) {
       stop("nonLinModelQuoted names must be identical to mll names")
     }
@@ -893,7 +897,7 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
     stop("nonLinModelQuoted must be a list of the same length as mll")
   }
 
-  if (is.list(linModelQuoted) & length(linModelQuoted) == length(mll)) {
+  if (is.list(linModelQuoted) && length(linModelQuoted) == length(mll)) {
     if (any(sort(names(linModelQuoted)) != sort(names(mll)))) {
       stop("linModelQuoted names must be identical to mll names")
     }
@@ -938,7 +942,7 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
     theme_classic() +
     labs(title = plotTitle, subtitle = subtitle, x = xCovar)
 
-  if (nrow(allConfInts) & averageCovariates) {
+  if (nrow(allConfInts) && averageCovariates) {
     gg1 <- gg1 +
       geom_ribbon(data = allConfInts,
                   aes(x = get(xCovar), ymin = lower, ymax = upper),
@@ -1096,7 +1100,7 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
         stop("Convergence timed-out.")
       }, error = function(e) e) ## may not work if matrix isn't postive definite
 
-      if (is(newparams, "error") & any(grepl("not positive definite", newparams))) {
+      if (is(newparams, "error") && any(grepl("not positive definite", newparams))) {
         if (!requireNamespace("lqmm", quietly = TRUE)) {
           stop("Package lqmm not installed. Install using `install.packages('lqmm')`.")
         }
@@ -1200,8 +1204,8 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
 #' "allQuantiles", quantile values (5%, 25%, 50%, 75%, 95%) of B will be
 #' plotted as blue lines, with their respective asymptote values (quantile values
 #' at maximum age) as dashed lines. If "maximum" the 100% quantile will be plotted.
-#' If "none", only the 50% quantile line (average prediction) is plotted. Quantiles
-#' are always calculated at `max(age)`.
+#' If "none", only the 50% quantile line (average prediction) is plotted.
+#' Quantiles are always calculated at `max(age)`.
 #'
 #' @param maxCover numeric. Value indicating maximum cover/dominance.
 #'
@@ -1229,7 +1233,7 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
                                   xCovar = "age", showQuantiles = "allQuantiles", plotTitle = NULL,
                                   nonLinModelQuoted, linModelQuoted, fun = "mean", plotCIs = TRUE) {
   ## checks
-  if (!(is.list(mll) | is.null(names(mll)))) {
+  if (!(is.list(mll) || is.null(names(mll)))) {
     stop("mll must be a named list")
   }
 
@@ -1238,7 +1242,7 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
     stop("mll must be a list of mle2 outputs or an mle2 output")
   }
 
-  if (is.list(nonLinModelQuoted) & length(nonLinModelQuoted) == length(mll)) {
+  if (is.list(nonLinModelQuoted) && length(nonLinModelQuoted) == length(mll)) {
     if (any(sort(names(nonLinModelQuoted)) != sort(names(mll)))) {
       stop("nonLinModelQuoted names must be identical to mll names")
     }
@@ -1246,7 +1250,7 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
     stop("nonLinModelQuoted must be a list of the same length as mll")
   }
 
-  if (is.list(linModelQuoted) & length(linModelQuoted) == length(mll)) {
+  if (is.list(linModelQuoted) && length(linModelQuoted) == length(mll)) {
     if (any(sort(names(linModelQuoted)) != sort(names(mll)))) {
       stop("linModelQuoted names must be identical to mll names")
     }
@@ -1410,7 +1414,7 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
     df <- df[, lapply(.SD, fun), .SDcols = cols]
     df <- cbind(ageTargetCovar, df)
 
-    if (targetCovar != "cover" & fixMaxCover) {
+    if (targetCovar != "cover" && fixMaxCover) {
       df[, cover := maxCover]
     }
 
@@ -1448,7 +1452,7 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
         stop("Convergence timed-out.")
       }, error = function(e) e) ## may not work if matrix isn't postive definite
 
-      if (is(newparams, "error") & any(grepl("not positive definite", newparams))) {
+      if (is(newparams, "error") && any(grepl("not positive definite", newparams))) {
         if (!requireNamespace("lqmm", quietly = TRUE)) {
           stop("Package lqmm not installed. Install using `install.packages('lqmm')`.")
         }
@@ -1521,31 +1525,32 @@ modifySpeciesAndSpeciesEcoregionTable <- function(speciesEcoregion, speciesTable
   if (is.null(speciesTable[["mANPPproportion"]])) {
     message("'speciesTable' is missing the column mANPPproportion")
     message("maxANPP will be estimated as (adjusted) maxB / 30")
-    speciesTable[, mANPPproportion := 10/3]
+    speciesTable[, mANPPproportion := 10 / 3]
   }
 
   if (is.null(speciesEcoregion[["maxB"]])) {
     stop("please supply a 'speciesEcoregion' with maxB")
   }
 
-  speciesTable[, growthCurveSource := 'estimated']
-  if (nrow(speciesTable[is.na(inflationFactor),]) > 0) {
+  speciesTable[, growthCurveSource := "estimated"]
+  if (nrow(speciesTable[is.na(inflationFactor), ]) > 0) {
     missing <- speciesTable[is.na(inflationFactor)]$species
     message("averaging traits for these species: ", paste(missing, collapse = ", "))
-    #note that inflationFactor is dependent on longevity, which is not adjusted
+    ## note that inflationFactor is dependent on longevity, which is not adjusted
     averageOfEstimated <- speciesTable[!is.na(inflationFactor),
                                        .(growthcurve = round(mean(growthcurve), digits = 2),
                                          mortalityshape = asInteger(mean(mortalityshape)),
                                          mANPPproportion = round(mean(mANPPproportion), digits = 2),
-                                         inflationFactor = round(mean(inflationFactor), digits = 3)), .(hardsoft)]
+                                         inflationFactor = round(mean(inflationFactor), digits = 3)),
+                                       .(hardsoft)]
 
     hardAverage <- averageOfEstimated[hardsoft == "hard"]
     softAverage <- averageOfEstimated[hardsoft == "soft"]
 
-    if (nrow(hardAverage) == 0){
+    if (nrow(hardAverage) == 0) {
       hardAverage <- softAverage
     }
-    if (nrow(softAverage) == 0){
+    if (nrow(softAverage) == 0) {
       softAverage <- hardAverage
     }
 
@@ -1571,8 +1576,9 @@ modifySpeciesAndSpeciesEcoregionTable <- function(speciesEcoregion, speciesTable
   newSpeciesEcoregion <- speciesEcoregion[speciesTable, on = c("speciesCode" = "species")]
   newSpeciesEcoregion[!is.na(inflationFactor), maxB := asInteger(maxB * inflationFactor)]
 
-  newSpeciesEcoregion[, maxANPP := asInteger(maxB * mANPPproportion/100)]
-  cols <- unique(c(names(speciesEcoregion), "maxB", "maxANPP"))  ## original table could be lacking maxANPP
+  newSpeciesEcoregion[, maxANPP := asInteger(maxB * mANPPproportion / 100)]
+  ## original table could be lacking maxANPP:
+  cols <- unique(c(names(speciesEcoregion), "maxB", "maxANPP"))
   newSpeciesEcoregion <- newSpeciesEcoregion[, .SD, .SDcols = cols]
   newSpeciesEcoregion[, speciesCode := as.factor(speciesCode)]
   newSpeciesEcoregion[, maxB := asInteger(maxB)]
@@ -1580,7 +1586,6 @@ modifySpeciesAndSpeciesEcoregionTable <- function(speciesEcoregion, speciesTable
   return(list("newSpeciesEcoregion" = newSpeciesEcoregion,
               "newSpeciesTable" = speciesTable))
 }
-
 
 ## OLD CODE FROM ELIOT:
 # library(bbmle)

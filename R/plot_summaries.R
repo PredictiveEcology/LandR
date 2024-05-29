@@ -1,5 +1,5 @@
 .defineLeading <- function(x, leadingPercentage = 0.8, totalCol) {
-  colID <- which(x[-length(x)] > (leadingPercentage*x[[totalCol]]))
+  colID <- which(x[-length(x)] > (leadingPercentage * x[[totalCol]]))
   if (length(colID) == 0) {
     # If we don't have a leading, we need to id conifer leading, or deciduous leading
     colID1 <- which.max(x[-length(x)])
@@ -30,10 +30,12 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
   if (requireNamespace("qs", quietly = TRUE)) {
     if (is.null(treeType)) {
       treeType <- data.frame(
-        leading = as.integer(c(1:length(treeSpecies[["Species"]]),
-                               paste0(length(treeSpecies[["Species"]]) + 1, 1:length(treeSpecies[["Species"]])))),
+        leading = as.integer(c(seq_along(length(treeSpecies[["Species"]])),
+                               paste0(length(treeSpecies[["Species"]]) + 1,
+                                      seq_along(length(treeSpecies[["Species"]]))))),
         landcover = c(treeSpecies[["Species"]], paste0("Mixed_", treeSpecies[["Species"]])),
-        leadingType = c(tolower(treeSpecies[["Type"]]), rep("mixed", length(treeSpecies[["Species"]]))),
+        leadingType = c(tolower(treeSpecies[["Type"]]),
+                        rep("mixed", length(treeSpecies[["Species"]]))),
         stringsAsFactors = FALSE
       )
       treeType$newClass <- ifelse(treeType$leadingType == "deciduous", 1,
@@ -75,7 +77,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
                                      leadingPercentage = leadingPercentage,
                                      totalCol = "totalBiomass"),
                   .SDcols = names(biomassDT)[names(biomassDT) != "pixelID"]]
-        biomassDT <- merge(biomassDT, treeType[, c("leading","newClass")])
+        biomassDT <- merge(biomassDT, treeType[, c("leading", "newClass")])
         allPixels <- data.table(pixelID = 1:ncell(biomassStack))
         biomassDTfilled <- merge(allPixels, biomassDT, all.x = TRUE, by = "pixelID")
         leadingSpeciesRaster <- rasterRead(biomassStack)
@@ -94,7 +96,10 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
         leadingStackChange <- raster::calc(bothYearsStk, fun = sum, na.rm = TRUE)
       }
 
-      stopifnot(all(min(leadingStackChange[], na.rm = TRUE) >= -1, max(leadingStackChange[], na.rm = TRUE) <= 1))
+      stopifnot(
+        all(min(leadingStackChange[], na.rm = TRUE) >= -1,
+            max(leadingStackChange[], na.rm = TRUE) <= 1)
+      )
 
       leadingStackChange[is.na(rasterToMatch)] <- NA
       names(leadingStackChange) <- paste("leadingMapChange", studyAreaName, climateScenario, rep, sep = "_")

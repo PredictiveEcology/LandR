@@ -47,8 +47,8 @@ is \code{B} values across values of \code{targetCovar} for each value of age.}
 "allQuantiles", quantile values (5\%, 25\%, 50\%, 75\%, 95\%) of B will be
 plotted as blue lines, with their respective asymptote values (quantile values
 at maximum age) as dashed lines. If "maximum" the 100\% quantile will be plotted.
-If "none", only the 50\% quantile line (average prediction) is plotted. Quantiles
-are always calculated at \code{max(age)}.}
+If "none", only the 50\% quantile line (average prediction) is plotted.
+Quantiles are always calculated at \code{max(age)}.}
 
 \item{plotTitle}{character. Passed to \code{title} in \code{\link[ggplot2:labs]{ggplot2::labs()}}}
 

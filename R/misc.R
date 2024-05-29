@@ -24,7 +24,7 @@ assignLightProb <- function(sufficientLight, newCohortData, interpolate = TRUE,
                             doAssertion = getOption("LandR.assertions", TRUE)) {
 
   ## 2022-06-22 AMC removed the assertion and always coerce to data.frame as needed
-  if (!is(sufficientLight, "data.frame") | is(sufficientLight, "data.table")) {
+  if (!is(sufficientLight, "data.frame") || is(sufficientLight, "data.table")) {
     warning("Coercing object 'sufficientLight' from ", is(sufficientLight)[1], " to data.frame.")
     sufficientLight <- as.data.frame(sufficientLight)
     stopifnot(is(sufficientLight, "data.frame"))
@@ -81,10 +81,10 @@ assignLightProb <- function(sufficientLight, newCohortData, interpolate = TRUE,
 .interpolateLightProb <- function(x, x0, x1, y0, y1) {
   ## if floor and ceiling are the same and equal to x, shade tolerances (x) are integers
   ## and the probability does not need to be interpolated
-  if (all((x1 - x0) == 0) & all(x == x1)) {
+  if (all((x1 - x0) == 0) && all(x == x1)) {
     y <- y0
   } else {
-    y <- ((y1 - y0)/(x1 - x0)) * (x - x0) + y0
+    y <- ((y1 - y0) / (x1 - x0)) * (x - x0) + y0
     y[is.nan(y)] <- y0[is.nan(y)]  ## as before, when shade tol. is an integer
   }
   y
@@ -107,8 +107,9 @@ assignLightProb <- function(sufficientLight, newCohortData, interpolate = TRUE,
 #' @examples
 #' x <- seq(-2, 2, 0.25)
 #' data.frame(dbl = x, int = asInteger(x))
-asInteger <- function(x)
+asInteger <- function(x) {
   as.integer(floor(x + 0.5))
+}
 
 #' Resample
 #'

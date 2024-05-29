@@ -1,19 +1,23 @@
 #' Prepare ecoregions objects
 #'
-#' DESCRIPTION NEEDED
+#' @param ecoregionRst an optional raster object that could be passed to `sim`,
+#'        representing ecoregions
 #'
-#' @param ecoregionRst an optional raster object that could be passed to `sim`, representing ecoregions
 #' @param ecoregionLayer a spatial polygons object representing ecoregions
+#'
 #' @param ecoregionLayerField optional. The field in `ecoregionLayer` that represents ecoregions.
+#'
 #' @template rasterToMatchLarge
+#'
 #' @param rstLCCAdj `RasterLayer` representing land cover adjusted for non-forest classes
+#'
 #' @param cacheTags `UserTags` to pass to cache
+#'
 #' @param pixelsToRm a vector of pixels to remove
 #'
 #' @export
 prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerField = NULL,
                            rasterToMatchLarge, rstLCCAdj, pixelsToRm, cacheTags) {
-
   appendEcoregionFactor <- FALSE ## whether or not to add the ecoregionClasses to the data
 
   if (is.null(ecoregionRst)) {

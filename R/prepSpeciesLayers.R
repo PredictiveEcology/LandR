@@ -381,15 +381,19 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   if (!all(min(CCstack[], na.rm = TRUE) >= 0)) stop("problem with min. of CCstack (< 0)")
   if (!all(max(CCstack[], na.rm = TRUE) <= 10)) stop("problem with max. of CCstack (> 10)")
 
-  CCstack <- CCstack * 10 # convert back to percent
-  NA_ids <- which(is.na(rs$LandType[]) |  # outside of studyArea polygon
-                    rs$LandType[] == 1)   # 1 is cities -- NA it here -- will be filled in with another veg layer if available (e.g. Pickell)
+  CCstack <- CCstack * 10 ## convert back to percent
+  ## NA means outside of studyArea polygon; 1 is cities, Set to NA here:
+  ## will be filled in with another veg layer if available (e.g. Pickell)
+  NA_ids <- which(is.na(rs$LandType[]) | rs$LandType[] == 1)
   message("  Setting NA, 1 in LandType to NA in speciesLayers in ForestInventory data")
   aa <- try(CCstack[NA_ids] <- NA, silent = TRUE)
   ## unclear why line above sometimes fails: 'Error in value[j, ] : incorrect number of dimensions'
   if (is(aa, "try-error")) {
     l <- unstack(CCstack)
-    CCstack <- lapply(l, function(x) {x[NA_ids] <- NA; x})
+    CCstack <- lapply(l, function(x) {
+      x[NA_ids] <- NA
+      x
+    })
   }
   names(CCstack) <- equivalentName(CCstackNames, sppEquiv, sppEquivCol)
 
@@ -430,14 +434,18 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
   if (!all(max(CCstack[], na.rm = TRUE) <= 10)) stop("problem with max. of CCstack (> 10)")
 
   CCstack <- CCstack * 10 # convert back to percent
-  NA_ids <- which(is.na(rs$LandType[]) |  # outside of studyArea polygon
-                    rs$LandType[] == 1)   # 1 is cities -- NA it here -- will be filled in with another veg layer if available (e.g. Pickell)
+  ## NA means outside of studyArea polygon; 1 is cities, Set to NA here:
+  ## will be filled in with another veg layer if available (e.g. Pickell)
+  NA_ids <- which(is.na(rs$LandType[]) | rs$LandType[] == 1)
   message("  Setting NA, 1 in LandType to NA in speciesLayers in MB FRI data")
   aa <- try(CCstack[NA_ids] <- NA, silent = TRUE)
   ## unclear why line above sometimes fails: 'Error in value[j, ] : incorrect number of dimensions'
   if (is(aa, "try-error")) {
     l <- unstack(CCstack)
-    CCstack <- lapply(l, function(x) {x[NA_ids] <- NA; x})
+    CCstack <- lapply(l, function(x) {
+      x[NA_ids] <- NA
+      x
+    })
   }
   names(CCstack) <- equivalentName(CClayerNames2, sppEquiv, sppEquivCol)
 
@@ -503,8 +511,8 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   }))
   names(sppLayers) <- FRIlayerNames
 
-  if (!all(minmax(sppLayers)[1,] >= 0)) stop("problem with min. of species layers stack (< 0)")
-  if (!all(minmax(sppLayers)[2,] <= 100)) stop("problem with max. of species layers stack (> 100)")
+  if (!all(minmax(sppLayers)[1, ] >= 0)) stop("problem with min. of species layers stack (< 0)")
+  if (!all(minmax(sppLayers)[2, ] <= 100)) stop("problem with max. of species layers stack (> 100)")
 
   ## merge species layers (currently only Popu; TODO: pine?)
   idsPopu <- grep("Popu", FRIlayerNames)

@@ -83,7 +83,7 @@ Burton & Cumming (1995), while MC will correspond to both tables.
 Of the above species, shade tolerance values are changed for \emph{Abies spp}, \emph{Picea spp},
 and \emph{Tsuga spp.} to reflect western boreal shade tolerances better.
 
-When different longetivity/shade tolerance trait values exist for a given species, the minimum
+When different longevity/shade tolerance trait values exist for a given species, the minimum
 value across \code{Area}'s (BSW, BP, MC) is kept.
 
 ATTENTION: if none of species in \code{species} are from BSW, BP or MC area this function will not

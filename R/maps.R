@@ -138,7 +138,7 @@ prepInputsLCC <- function(year = 2010,
   } else {
     ## try to guess targetFile/archive if not passed
     urlFile <- basename(dots$url)
-    if (grepl("\\.zip$", urlFile) & is.null(dots$archive)) {
+    if (grepl("\\.zip$", urlFile) && is.null(dots$archive)) {
       dots$archive  <- urlFile
     } else {
       if (is.null(dots$targetFile)) {
@@ -889,10 +889,13 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   speciesLayers <- speciesLayers[layersWdata]
   if (!is.null(sppMerge)) {
     if (length(sppMerge) == 0) {
-      lapply(1:length(speciesLayers), function(i, rasters = speciesLayers,
-                                               filenames = postProcessedFilenamesWithStudyAreaName) {
-        writeRaster(rasters[[i]], file.path(oPath, paste0(filenames[i], '.tif')), overwrite = TRUE)
-      })
+      lapply(
+        seq_along(speciesLayers),
+        FUN = function(i, rasters = speciesLayers,
+                       filenames = postProcessedFilenamesWithStudyAreaName) {
+          writeRaster(rasters[[i]], file.path(oPath, paste0(filenames[i], '.tif')), overwrite = TRUE)
+        }
+      )
     } else {
       speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
                                       sppEquiv = sppEquiv, column = "KNN", suffix = suffix,
@@ -946,9 +949,11 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
 #' @rdname LandR-deprecated
 loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppEquiv,
                                            knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
-  .Deprecated("loadkNNSpeciesLayers",
-              msg = paste("loadkNNSpeciesLayersValidation is deprecated.",
-                          "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers."))
+  .Deprecated(
+    "loadkNNSpeciesLayers",
+    msg = paste("loadkNNSpeciesLayersValidation is deprecated.",
+                "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers.")
+  )
 
   loadkNNSpeciesLayers(dPath = dPath, rasterToMatch = rasterToMatch, studyArea = studyArea,
                        sppEquiv = sppEquiv, year = 2011, knnNamesCol = knnNamesCol,
@@ -996,7 +1001,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
                           destinationPath) {
   ## check if there are any layers/values in the lowQualityStack
   ## if not return the HQ one
-  if (!(is(lowQualityStack, "RasterStack") || is(lowQualityStack, "SpatRaster")) &
+  if (!(is(lowQualityStack, "RasterStack") || is(lowQualityStack, "SpatRaster")) &&
       all(is.na(lowQualityStack[]))) {
     highQualityStack
   } else {
@@ -1016,7 +1021,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
     #dtj[, LQ := any(!is.na(lowQualityStack[[SPP]][])), by = 1:nrow(dtj)] #nolint
 
     stackRas <- list()
-    for (x in seq(nrow(dtj))) {
+    for (x in seq_len(nrow(dtj))) {
       stackRas[[x]] <- dtj[x, .overlay(SPP, HQ, LQ, hqLarger = hqLarger,
                                        highQualityStack = highQualityStack,
                                        lowQualityStack = lowQualityStack,
@@ -1045,7 +1050,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 .overlay <- function(SPP, HQ, LQ, hqLarger, highQualityStack, lowQualityStack, #nolint
                      outputFilenameSuffix = "overlay", destinationPath) {
   ## if HQ & LQ have data, pool
-  if (HQ & LQ) {
+  if (HQ && LQ) {
     ## check equality of raster attributes and correct if necessary
     if (!all(
       isTRUE(all.equal(ext(lowQualityStack), ext(highQualityStack))),
@@ -1184,7 +1189,7 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
   ## keep species present in the data
   sppMerges <- lapply(sppMerges, FUN = function(x) x[x %in% names(speciesLayers)])
 
-  for (i in seq(length(sppMerges))) {
+  for (i in seq_along(sppMerges)) {
     sumSpecies <- sppMerges[[i]]
     if (length(sumSpecies) > 1) {
       newLayerName <- names(sppMerges)[i]
@@ -1219,16 +1224,18 @@ fasterizeFromSp <- function(sp, raster, fieldName) {
   .requireNamespace("fasterize", stopOnFALSE = TRUE)
 
   ## check if projections are the same
-  if (!identical(crs(sp), crs(raster)))
+  if (!identical(crs(sp), crs(raster))) {
     stop("fasterize will probably be wrong, as shp and raster projections do not match")
+  }
 
   tempSf <- sf::st_as_sf(sp)
 
   if (all(names(tempSf) == "geometry")) {
     ## if there are no fields, ignore fieldname
     fasterize::fasterize(tempSf, raster)
-  } else
+  } else {
     fasterize::fasterize(tempSf, raster, field = fieldName)
+  }
 }
 
 #' Aggregate a raster

@@ -28,7 +28,7 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
                        speciesEcoregion, currentTime, treedFirePixelTableSinceLastDisp,
                        calibrate = FALSE) {
   ## checks
-  if (calibrate & is.null(postFireRegenSummary)) {
+  if (calibrate && is.null(postFireRegenSummary)) {
     stop("missing postFireRegenSummary table for doSerotiny")
   }
 
@@ -43,9 +43,8 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
     ## as long as one cohort is sexually mature, serotiny is activated
     serotinyPixelCohortData <- serotinyPixelCohortData[species[, .(speciesCode, sexualmature)],
                                                        on = "speciesCode", nomatch = 0]
-    #serotinyPixelCohortData <- setkey(serotinyPixelCohortData, speciesCode)[species[,.(speciesCode, sexualmature)],
-    #                                                                          nomatch = 0]
-    serotinyPixelCohortData <- serotinyPixelCohortData[age >= sexualmature]  |> # NOTE should be in mortalityFromDisturbance module or event
+    ## NOTE: should be in mortalityFromDisturbance module or event
+    serotinyPixelCohortData <- serotinyPixelCohortData[age >= sexualmature]  |>
       unique(by = c("pixelGroup", "speciesCode"))
     set(serotinyPixelCohortData, NULL, "sexualmature", NULL)
 
@@ -62,9 +61,6 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
     ## the get survival probs and subset survivors with runif
     serotinyPixelCohortData <- serotinyPixelCohortData[species[, .(speciesCode, shadetolerance)],
                                                        nomatch = 0, on = "speciesCode"]
-    # serotinyPixelCohortData[, siteShade := 0]   ## this is no longer done here to accoutn for PM
-    # serotinyPixelCohortData <- setkey(serotinyPixelCohortData, speciesCode)[species[,.(speciesCode, shadetolerance)],
-    #                                                     nomatch = 0][, siteShade := 0]
     serotinyPixelCohortData <- assignLightProb(sufficientLight = sufficientLight,
                                                serotinyPixelCohortData)
     serotinyPixelCohortData <- serotinyPixelCohortData[lightProb %>>% runif(nrow(serotinyPixelCohortData), 0, 1)]  ## subset survivors
@@ -136,7 +132,7 @@ doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
                           treedFirePixelTableSinceLastDisp, currentTime,
                           species, sufficientLight, calibrate = FALSE) {
   ## checks
-  if (calibrate & is.null(postFireRegenSummary)) {
+  if (calibrate && is.null(postFireRegenSummary)) {
     stop("missing postFireRegenSummary table for doResprouting")
   }
 

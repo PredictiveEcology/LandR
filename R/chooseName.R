@@ -71,7 +71,6 @@ equivalentNameAsList <- function(value, df, multi) {
 sppEquivCheck <- function(sppEquiv, ensureColumns = NULL, sppEquivCol = NULL) {
   sppEquivalencies_CA <- get(data("sppEquivalencies_CA", package = "LandR",
                                   envir = environment()), inherits = FALSE)
-
   if (is.null(dim(sppEquiv))) {
     stopifnot(!is.null(sppEquivCol))
     sppEquiv <- equivalentName(sppEquiv, sppEquivalencies_CA, column = sppEquivCol, multi = TRUE)
@@ -80,13 +79,15 @@ sppEquivCheck <- function(sppEquiv, ensureColumns = NULL, sppEquivCol = NULL) {
   }
   if (is(sppEquiv, "data.frame")) {
     if (!is.data.table(sppEquiv)) setDT(sppEquiv)
-    if (!all(c(ensureColumns) %in% colnames(sppEquiv) )) {
+    if (!all(c(ensureColumns) %in% colnames(sppEquiv))) {
       if (all(colnames(sppEquiv) %in% colnames(sppEquivalencies_CA))) {
         sppEquiv <- sppEquivalencies_CA[
           sppEquiv, on = intersect(colnames(sppEquiv), colnames(sppEquivalencies_CA))]
       } else {
-        stop("Please provide sppEquiv as a data.table with at least one column of species names, ",
-             "that shares a column name and species naming convention as in LandR::sppEquivalencies_CA")
+        stop(
+          "Please provide 'sppEquiv' as a data.table with at least one column of species names ",
+          "that shares a column name and species naming convention as in LandR::sppEquivalencies_CA"
+        )
       }
     }
   } else {

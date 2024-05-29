@@ -28,7 +28,7 @@ BioSIM_extractPoints <- function(x) {
   sfxy <- sf::st_as_sf(spxy)
   sfxy <- sf::st_transform(sfxy, crs = 4326)
 
-  dt <- data.table(Name = paste0("ID", 1:NROW(sfxy)), st_coordinates(sfxy), Elev = x[nonNA])
+  dt <- data.table(Name = paste0("ID", seq_len(NROW(sfxy))), st_coordinates(sfxy), Elev = x[nonNA])
   setnames(dt, "X", "Long")
   setnames(dt, "Y", "Lat")
   dt
@@ -47,8 +47,9 @@ BioSIM_getWindAnnual <- function(dem, years, climModel = "GCM4", rcp = "RCP45") 
   if (requireNamespace("BioSIM", quietly = TRUE)) {
     locations <- BioSIM_extractPoints(dem)
 
-    # Do call to BioSIM using "ClimaticWind_Annual"
-    windModel <- Cache(BioSIM::getModelList)[16] ## TODO: until this gets fixed in J4R, need to init java server here
+    ## Do call to BioSIM using "ClimaticWind_Annual"
+    ## TODO: until this gets fixed upstream in J4R, need to init java server here
+    windModel <- Cache(BioSIM::getModelList)[16]
     st <- system.time({
       ## TODO: need to split, apply, and recombine when nrow(locations) > 5000
       wind <- Cache(
@@ -112,8 +113,9 @@ BioSIM_getWindMonthly <- function(dem, years, months, climModel = "GCM4", rcp = 
   if (requireNamespace("BioSIM", quietly = TRUE)) {
     locations <- BioSIM_extractPoints(dem)
 
-    # Do call to BioSIM using "ClimaticWind_Annual"
-    windModel <- Cache(BioSIM::getModelList)[16] ## TODO: until this gets fixed in J4R, need to init java server here
+    ## Do call to BioSIM using "ClimaticWind_Annual"
+    ## TODO: until this gets fixed upstream  in J4R, need to init java server here
+    windModel <- Cache(BioSIM::getModelList)[16]
     st <- system.time({
       ## TODO: need to split, apply, and recombine when nrow(locations) > 5000
       wind <- Cache(
@@ -169,8 +171,9 @@ BioSIM_getMPBSLR <- function(dem, years, SLR = "R", climModel = "GCM4", rcp = "R
 
     locations <- BioSIM_extractPoints(dem)
 
-    # Do call to BioSIM using "MPB_SLR"
-    mpbSLRmodel <- Cache(BioSIM::getModelList)[46] ## TODO: until this gets fixed in J4R, need to init java server here
+    ## Do call to BioSIM using "MPB_SLR"
+    ## TODO: until this gets fixed upstream in J4R, need to init java server here
+    mpbSLRmodel <- Cache(BioSIM::getModelList)[46]
     st <- system.time({
       ## TODO: need to split, apply, and recombine when nrow(locations) > 5000
       slr <- lapply(years, function(yr) { ## TODO: use future_lapply?

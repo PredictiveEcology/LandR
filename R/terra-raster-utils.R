@@ -91,7 +91,9 @@ utils::globalVariables(c(
   dots <- list(...) # need to pass the ...
 
   ## subset spatial and non-spatial arguments
-  spatialDots <- vapply(dots, inherits, c("Raster", "SpatRaster", "Spatial", "sf", "SpatVector"), FUN.VALUE = logical(1))
+  spatialDots <- vapply(dots, FUN = inherits,
+                        what = c("Raster", "SpatRaster", "Spatial", "sf", "SpatVector"),
+                        FUN.VALUE = logical(1))
 
   objs <- append(list(x), dots[spatialDots])
 
@@ -116,7 +118,9 @@ utils::globalVariables(c(
     objs <- Map(function(ras) {
       if (is(ras, "Raster")) {
         rast(ras)
-      } else ras
+      } else {
+        ras
+      }
     }, ras = objs)
   }
 
@@ -125,7 +129,9 @@ utils::globalVariables(c(
     objs <- Map(function(vec) {
       if (inherits(vec, c("Spatial", "sf"))) {
         vect(vec)
-      } else vec
+      } else {
+        vec
+      }
     }, vec = objs)
   }
 
@@ -152,12 +158,14 @@ utils::globalVariables(c(
           out <- ext(x) == ext(objs[[i]])
 
           if (isFALSE(out) && isTRUE(otherArgs$stopOnError)) {
-            stop(".compareRas fail: ", format(mc[[i + 1]]), " and ", format(mc[["x"]]), " have different extents.")
+            stop(".compareRas fail: ", format(mc[[i + 1]]), " and ",
+                 format(mc[["x"]]), " have different extents.")
           }
         }
       }
       if (!isTRUE(out)) {
-        message("compareGeom/.compareRas fail: ", format(mc[[i + 1]]), " is not same as ", format(mc[["x"]]))
+        message("compareGeom/.compareRas fail: ", format(mc[[i + 1]]),
+                " is not same as ", format(mc[["x"]]))
         return(out)
       }
     }
@@ -299,7 +307,7 @@ genericExtract <- function(x, y, field = NULL, ...) {
       ## misalignments that generate NAs (even after snapping)
       names(y) <- toupper(names(y))
       if (!"ID" %in% names(y)) {
-        y$ID <- 1:length(y)
+        y$ID <- seq_along(y)
       }
       out <- terra::intersect(x = x, y = y)
       out <- as.data.table(out)
@@ -362,7 +370,7 @@ plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
 
   if (inherits(x, "SpatVector")) {
     x <- st_as_sf(x)
-    if (is.null(limits) & !is.null(field)) {
+    if (is.null(limits) && !is.null(field)) {
       limits <- range(as.vector(x[, field]))
     }
   }
@@ -372,9 +380,10 @@ plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
       stop("Please install 'rasterVis'")
     }
     maxpixels <- ncell(x)
-    if (maxpixels > 1E6) {
-      message("Raster to plot has >1E6 pixels -- 'maxpixels' set to 1E6 to avoid overly long plotting times")
-      maxpixels <- 1E6
+    if (maxpixels > 1e6) {
+      message("Raster to plot has >1e6 pixels. ",
+              "'maxpixels' set to 1e6 to avoid overly long plotting times.")
+      maxpixels <- 1e6
     }
     plot1 <- rasterVis::gplot(x, maxpixels = maxpixels)
 
@@ -400,7 +409,8 @@ plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
     if (!requireNamespace("rlang", quietly = TRUE)) {
       stop("Please install 'rlang'")
     }
-    plot1 <- ggplot() + theme_classic()  ## theme needs to come before fill scale because it overrides it in geom_sf
+    ## theme needs to come before fill scale because it overrides it in geom_sf
+    plot1 <- ggplot() + theme_classic()
 
     if (is.null(field)) {
       plot1 <- plot1 +

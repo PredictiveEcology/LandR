@@ -12,7 +12,7 @@ utils::globalVariables(c(
 #'
 #' @export
 prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, ...) {
-  if (year > 2019 | year < 1984) {
+  if (year > 2019 || year < 1984) {
     stop("LCC for this year is unavailable")
   }
 

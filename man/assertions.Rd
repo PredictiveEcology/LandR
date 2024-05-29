@@ -254,7 +254,7 @@ forest types).}
 }
 \description{
 \itemize{
-\item \code{assert1}: Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
+\item \code{assert1}: Assert that \code{ecoregionCodes} that were replaced, were correctly identified;
 }
 
 This is the full \code{pixelCohortData}, not the collapsed one.

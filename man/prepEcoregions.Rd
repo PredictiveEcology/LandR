@@ -15,7 +15,8 @@ prepEcoregions(
 )
 }
 \arguments{
-\item{ecoregionRst}{an optional raster object that could be passed to \code{sim}, representing ecoregions}
+\item{ecoregionRst}{an optional raster object that could be passed to \code{sim},
+representing ecoregions}
 
 \item{ecoregionLayer}{a spatial polygons object representing ecoregions}
 
@@ -30,5 +31,5 @@ prepEcoregions(
 \item{cacheTags}{\code{UserTags} to pass to cache}
 }
 \description{
-DESCRIPTION NEEDED
+Prepare ecoregions objects
 }

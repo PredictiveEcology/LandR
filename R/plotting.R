@@ -59,9 +59,11 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
                    sppEquivCol = sppEquivCol,
                    colors = colors,
                    doAssertion = getOption("LandR.assertions", TRUE))
-    } else
-      stop("plotVTM requires either a speciesStack of percent cover or a",
-           " vegetation type map (vtm).")
+    } else {
+      stop(
+        "plotVTM requires either a speciesStack of percent cover or a vegetation type map (vtm)."
+      )
+    }
   }
 
   ## the ones we want
@@ -230,7 +232,7 @@ plotFunction <- function(ras, studyArea, limits = NULL) {
                            height = unit(1, "cm"), width = unit(1, "cm"),
                            location = "tr", which_north = "true") +
     theme_pubr(legend = "bottom") +
-    theme(plot.margin = unit(c(0,0,0,0), units = "mm")) +
+    theme(plot.margin = unit(c(0, 0, 0, 0), units = "mm")) +
     scale_fill_distiller(palette = "Greys", na.value = "transparent",
                          direction = 1,
                          breaks = seq(limits[1], limits[2], length.out = 6),

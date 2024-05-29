@@ -175,7 +175,7 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #' Of the above species, shade tolerance values are changed for *Abies spp*, *Picea spp*,
 #' and *Tsuga spp.* to reflect western boreal shade tolerances better.
 #'
-#' When different longetivity/shade tolerance trait values exist for a given species, the minimum
+#' When different longevity/shade tolerance trait values exist for a given species, the minimum
 #' value across `Area`'s (BSW, BP, MC) is kept.
 #'
 #' ATTENTION: if none of species in `species` are from BSW, BP or MC area this function will not

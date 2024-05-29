@@ -1,6 +1,7 @@
 library(data.table)
-sppEquivalencies_CA <- as.data.table(read.csv("data-raw/sppEquivalencies_CA.csv",
-                                              stringsAsFactors = FALSE, header = TRUE))
+
+sppEquivalencies_CA <- fread("data-raw/sppEquivalencies_CA.csv",
+                             stringsAsFactors = FALSE, header = TRUE)
 str(sppEquivalencies_CA)
 
 ## subset kNN species names to existing layers
@@ -9,13 +10,15 @@ if (FALSE) {   ## run this manually
   library(XML)
 
   fileURLs2001 <- getURL(paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                                "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/"),
+                                "canada-forests-attributes_attributs-forests-canada/",
+                                "2001-attributes_attributs-2001/"),
                          dirlistonly = TRUE,
                          .opts = list(followlocation = TRUE))
   fileNames2001 <- getHTMLLinks(fileURLs2001)
 
   fileURLs2011 <- getURL(paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                                "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/"),
+                                "canada-forests-attributes_attributs-forests-canada/",
+                                "2011-attributes_attributs-2011/"),
                          dirlistonly = TRUE,
                          .opts = list(followlocation = TRUE))
   fileNames2011 <- getHTMLLinks(fileURLs2011)
@@ -32,7 +35,8 @@ if (FALSE) {   ## run this manually
   sppEquivalencies_CA[!KNN %in% allSpp, KNN := ""]
   ## checks
   setdiff(sppEquivalencies_CA$KNN, allSpp)
-  setdiff(allSpp, sppEquivalencies_CA$KNN)   ## Ceres: not sure what these are: "Genc_Spp"    "Genh_Spp"
+  setdiff(allSpp, sppEquivalencies_CA$KNN)
+  ## Ceres: not sure what these are: "Genc_Spp", "Genh_Spp"
 }
 
 usethis::use_data(sppEquivalencies_CA, overwrite = TRUE)

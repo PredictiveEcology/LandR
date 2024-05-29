@@ -56,7 +56,8 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
   studyAreaED <- Cache(
     prepInputs,
     url =  "https://sis.agr.gc.ca/cansis/nsdb/ecostrat/district/ecodistrict_shp.zip",
-    destinationPath = dPath, #fun = quote(SA_ERIntersect(x = targetFilePath, studyArea)),
+    destinationPath = dPath,
+    # fun = quote(SA_ERIntersect(x = targetFilePath, studyArea)),
     overwrite = FALSE
   )
 
@@ -82,7 +83,7 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 
   mat <- terra::values(allForestedStk)
   dt <- as.data.table(mat)
-  dt[, pixel := 1:.N]
+  dt[, pixel := seq_len(.N)]
   dt2 <- melt(dt, measure.vars = setdiff(colnames(dt), "pixel"), na.rm = TRUE, id.vars = "pixel")
   dt2 <- dt2[value != 0]
   setorderv(dt2, c("pixel", "variable"))
@@ -140,9 +141,10 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL,
     rasLevs <- terra::cats(speciesPresRas)[[1]]
   }
 
-  idCol <- grep("id", ignore.case = TRUE, value = TRUE, colnames(rasLevs)) # in Raster it was ID
+  ## NOTE: 'idCol' was 'ID' with raster package; newer terra is it 'value'
+  idCol <- grep("id", ignore.case = TRUE, value = TRUE, colnames(rasLevs))
   if (length(idCol) == 0) {
-    idCol <- grep("value", ignore.case = TRUE, value = TRUE, colnames(rasLevs)) # newer terra is it value
+    idCol <- grep("value", ignore.case = TRUE, value = TRUE, colnames(rasLevs))
   }
 
   rasLevs <- rasLevs[rasLevs[[idCol]] %in% na.omit(as.vector(bb[])), ]
@@ -191,7 +193,7 @@ SA_ERIntersect <- function(x, studyArea) {
   sa_sf <- sf::st_as_sf(studyArea)
   ecoregions <- sf::st_transform(x, sf::st_crs(sa_sf))
   studyAreaER <- sf::st_intersects(ecoregions, sa_sf, sparse = FALSE)
-  terra::vect(sf::as_Spatial(ecoregions[studyAreaER,]))
+  terra::vect(sf::as_Spatial(ecoregions[studyAreaER, ]))
 }
 
 #' @keywords internal
@@ -203,6 +205,6 @@ loadAndAggregateKNN <- function(dPath, res, sa) {
   }
 
   ll <- terra::rast(loadkNNSpeciesLayers(dPath))
-  llCoarse <- terra::aggregate(ll, res/250)
+  llCoarse <- terra::aggregate(ll, res / 250)
   postProcessTerra(from = llCoarse, to = sa, method = "near")
 }

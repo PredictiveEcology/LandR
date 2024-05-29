@@ -23,7 +23,7 @@ of all disturbed pixels. Additional columns are ignored.}
 
 \item{disturbedPixelCohortData}{a \code{cohortData}-like table with information of dead,
 and surviving, but \emph{NOT} regenerating cohorts (cohorts for whom regeneration via, e.g., serotiny
-or resprouting was succesfully activated), in \emph{disturbed pixels only}. Dead cohorts should
+or resprouting was successfully activated), in \emph{disturbed pixels only}. Dead cohorts should
 age B == 0, surviving cohorts B > 0.}
 
 \item{colsForPixelGroups}{character. \code{cohortData} columns used to find identical pixels in terms of

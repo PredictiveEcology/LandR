@@ -11,8 +11,8 @@ biomodEnsembleProjMaps(bm.em.proj, predModel, rasTemplate, origCRS)
 Note that \code{x} and \code{y}coordinates extracted from \code{bm.em.proj@coord} must be in the same
 projection as \code{rasTemplate}.}
 
-\item{predModel}{character. Which model predictions should be used. Chose one of
-\code{bm.em.proj@models.projected}.}
+\item{predModel}{character. Which model predictions should be used.
+Choose one of \code{bm.em.proj@models.projected}.}
 
 \item{rasTemplate}{a template \code{RasterLayer} or \code{SpatRaster} that can be used to map the projections}
 

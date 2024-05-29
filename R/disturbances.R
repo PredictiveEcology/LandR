@@ -109,7 +109,7 @@ FireDisturbance <- function(cohortData = copy(sim$cohortData), cohortDefinitionC
     set(postFirePixelCohortData, NULL, "sumB", NULL)
   }
 
-  if (calibrate & is.null(postFireRegenSummary)) {  ## don't overwrite
+  if (calibrate && is.null(postFireRegenSummary)) {  ## don't overwrite
     postFireRegenSummary <- data.table(year = numeric(),
                                        regenMode = character(),
                                        species = character(),
@@ -358,12 +358,13 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
                                  age = NULL, B = NULL, mortality = NULL,
                                  aNPPAct = NULL)]
 
-  # In some cases sumB exists, but not always -- we want to remove it too here.
+  ## In some cases sumB exists, but not always -- we want to remove it too here.
   if (isTRUE("sumB" %in% colnames(postFirePixelCohortData))) {
     set(postFirePixelCohortData, NULL, "sumB", NULL)
   }
 
-  if (calibrate & is.null(postFireRegenSummary)) {   # don't overwrite
+  if (calibrate && is.null(postFireRegenSummary)) {
+    ## don't overwrite
     postFireRegenSummary <- data.table(year = numeric(),
                                        regenMode = character(),
                                        species = character(),
@@ -379,9 +380,11 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
     burnedLoci
   }
 
-  treedFirePixelTableSinceLastDisp <- data.table(pixelIndex = as.integer(treedBurnLoci),
-                                                 pixelGroup = as.integer(as.vector(pixelGroupMap[])[treedBurnLoci]),
-                                                 burnTime = currentTime)
+  treedFirePixelTableSinceLastDisp <- data.table(
+    pixelIndex = as.integer(treedBurnLoci),
+    pixelGroup = as.integer(as.vector(pixelGroupMap[])[treedBurnLoci]),
+    burnTime = currentTime
+  )
 
   ## TODO: Ceres: I don't think we should be bring in the previously burnt pixelGroups at this point
   ##  solution (?) code was copy-pasted to before the export to sim
@@ -632,15 +635,14 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
   return(outList)
 }
 
-
-#' @section Peatland permafrost degradataion (thermokarst) disturbances:
+#' @section Peatland permafrost degradation (thermokarst) disturbances:
 #'  `PeatlandThermokarst()` simulates tree cohort survival/mortality after
 #'  peatland permafrost thermokarst. The level of mortality depends on species
 #'  tolerance to thermokarst, determined by the `thermokarsttol` trait column
 #'  in the `species` traits table. At the moment, this level of tolerance is used
 #'  as the proportion of a cohort biomass that survives (is kept) when a pixel undergoes
 #'  thermokarst. This is similar to the partial disturbance effects used in LANDIS-II Biomass
-#'  Harvest v4.0. Requires the following objects in `sim` (and passed as `sim$*`):\
+#'  Harvest v4.0. Requires the following objects in `sim` (and passed as `sim$*`):
 #'   - `thawedPixIDs`
 #'   - `treedThawedPixelTableSinceLastDisp`
 #'   - `wetlands`
@@ -670,7 +672,6 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
 #'
 #' @export
 #' @rdname Disturbances
-
 PeatlandThermokarst <- function(thawedPixIDs = copy(sim$thawedPixIDs),
                                 treedThawedPixelTableSinceLastDisp = copy(sim$treedThawedPixelTableSinceLastDisp),
                                 wetlands = sim$wetlands, cohortData = copy(sim$cohortData),
@@ -809,7 +810,7 @@ PeatlandThermokarst <- function(thawedPixIDs = copy(sim$thawedPixIDs),
 #'  of all disturbed pixels. Additional columns are ignored.
 #' @param disturbedPixelCohortData a `cohortData`-like table with information of dead,
 #'  and surviving, but *NOT* regenerating cohorts (cohorts for whom regeneration via, e.g., serotiny
-#'  or resprouting was succesfully activated), in *disturbed pixels only*. Dead cohorts should
+#'  or resprouting was successfully activated), in *disturbed pixels only*. Dead cohorts should
 #'  age B == 0, surviving cohorts B > 0.
 #' @template colsForPixelGroups
 #' @template doAssertion
