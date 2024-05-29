@@ -35,7 +35,7 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, ...) {
   lccURL <- paste0("https://opendata.nfis.org/downloads/forest_change/CA_forest_VLCE2_", year, ".zip")
   lccTF <- paste0("CA_forest_VLCE2_", year, ".tif")
   lcc <- prepInputs(url = lccURL, targetFile = lccTF, method = "near", ...)
-  #unlink this file as it is 24 GB
+  ## unlink this file as it is 24 GB
   toUnlink <- ifelse(is.null(dots$destinationPath), lccTF,
                      file.path(dots$destinationPath, lccTF))
   unlink(toUnlink)
@@ -96,7 +96,7 @@ prepInputs_NTEMS_Nonforest <- function(rstLCC, endYear = 2019, lccToAdjust = 33,
   toFix <- toFix[endLCC %in% nonforestLCC, newLCC := endLCC]
   toFix <- toFix[!is.na(newLCC)]
 
-  #adjust pixels
+  ## adjust pixels
   rstLCC[toFix$pixelID] <- toFix$newLCC
 
   return(rstLCC)
