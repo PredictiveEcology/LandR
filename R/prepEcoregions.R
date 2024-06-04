@@ -3,7 +3,7 @@
 #' @param ecoregionRst an optional raster object that could be passed to `sim`,
 #'        representing ecoregions
 #'
-#' @param ecoregionLayer a spatial polygons object representing ecoregions
+#' @param ecoregionLayer an `sf` polygons object representing ecoregions
 #'
 #' @param ecoregionLayerField optional. The field in `ecoregionLayer` that represents ecoregions.
 #'

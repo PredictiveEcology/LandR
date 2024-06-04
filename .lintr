@@ -1,1 +1,6 @@
-linters: linters_with_defaults(line_length_linter(100), object_name_linter("camelCase"), defaults = default_linters[-which(names(default_linters) %in% c("object_usage_linter", "return_linter"))])
+linters: linters_with_defaults(
+    line_length_linter(100),
+    object_name_linter("camelCase"),
+    object_usage_linter = NULL,
+    return_linter = NULL
+  )
