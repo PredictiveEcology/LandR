@@ -14,6 +14,7 @@ updateCohortData(
   treedFirePixelTableSinceLastDisp = NULL,
   successionTimestep,
   cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+  initialB = 10,
   verbose = getOption("LandR.verbose", TRUE),
   doAssertion = getOption("LandR.assertions", TRUE)
 )
@@ -25,7 +26,8 @@ updateCohortData(
   currentTime,
   cohortDefinitionCols = c("pixelGroup", "speciesCode", "age"),
   speciesEcoregion,
-  successionTimestep
+  successionTimestep,
+  initialB = 10
 )
 }
 \arguments{
@@ -37,27 +39,44 @@ Must contain the columns: \code{pixelIndex}, \code{speciesCode}, \code{ecoregion
 The remaining 4 (see \code{cohortData}) will be created with \code{0}s.}
 
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
-\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
-and \code{sumB}.}
+\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
 number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
 \item{currentTime}{The current simulation time e.g., \code{time(sim)}.}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
+\item{speciesEcoregion}{A \code{data.table} with \code{species}-\code{ecoregion}-specific species trait values.
+Ecoregion refers to "ecolocation", a categorical variable grouping sites with similar biophysical
+characteristics. The table should have at least the following columns: \code{speciesCode} and
+\code{ecoregionGroup}, character representation of species and ecoregion groups respectively,
+\code{maxB} the maximum biomass for the species in a given 'ecoregion', \code{maxANPP} the maximum
+aboveground net primary productivity and \code{SEP} the species establishment probability.
+May contain columns \code{inflationFactor}  (used to adjust \code{maxB}) and \code{mANPPproportion}
+(used to calculate \code{maxANPP}).}
 
-\item{treedFirePixelTableSinceLastDisp}{A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
+\item{treedFirePixelTableSinceLastDisp}{A data.table with at least 2 columns, \code{pixelIndex}
+and \code{pixelGroup}.
 This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
 to ensure that everything matches correctly.}
 
 \item{successionTimestep}{The time between successive seed dispersal events.
-In LANDIS-II, this is called "Succession Timestep". This is used here}
+In LANDIS-II, this is called "Succession Timestep".}
 
 \item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
 
-\item{verbose}{Integer, where increasing number is increasing verbosity. Currently,
-only level 1 exists; but this may change.}
+\item{initialB}{the initial biomass of new cohorts. Defaults to 10.
+If \code{NULL} or \code{NA}, initial cohort biomass is calculated as in LANDIS-II Biomass Succession
+Extension v3.2.1 (Scheller & Miranda, 2015):
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{initialB = asInteger(pmin(maxANPP, asInteger(pmax(1, maxANPP \\* exp(-1.6 \\* sumB / maxB_eco)))))
+}\if{html}{\out{</div>}}
+
+where \code{maxANPP} and \code{maxB_eco} are the maximum ANPP and B parameters of the species
+in question within the pixel's \code{ecolocation}, and \code{sumB} is the total stand biomass
+excluding cohorts with ages less than \code{successionTimestep}.}
+
+\item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
 
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.
@@ -70,7 +89,7 @@ A list of length 2, \code{cohortData} and \code{pixelGroupMap}, with
 A \code{data.table} with a new \code{rbindlist}ed \code{cohortData}
 }
 \description{
-This is a wrapper for  \code{generatePixelGroups}, \code{initiateNewCohort} and updates to
+This is a wrapper for \code{generatePixelGroups}, \code{initiateNewCohort} and updates to
 \code{pixelGroupMap} via assignment to new \code{pixelIndex} values in \code{newPixelCohortData}.
 By running these all together, there is less chance that they will diverge.
 There are some checks internally for consistency.
@@ -81,9 +100,14 @@ with \code{cohortData}.
 \details{
 Does the following:
 \enumerate{
-  \item add new cohort data into \code{cohortData};
-  \item assign initial \code{B} and \code{age} for new cohort;
-  \item assign the new \code{pixelGroup} to the pixels that have new cohort;
-  \item update the \code{pixelGroup} map.
+\item add \emph{new cohort} (not survivor) data into \code{cohortData};
+\item assign initial \code{B} and \code{age} for new cohort;
+\item assign the new \code{pixelGroup} to the pixels that have new cohort;
+\item update the \code{pixelGroup} map.
 }
+Note that if \code{newPixelCohortData} is generated after a disturbance
+it must contain a \code{type} column indicating the origin of the cohorts
+(e.g. "survivor", "serotiny", "resprouting"). "Survivor" cohorts will
+not be added to the output objects, as they are assumed to be accounted
+for in the input \code{cohortData} and, correspondingly, \code{pixelGroupMap}.
 }

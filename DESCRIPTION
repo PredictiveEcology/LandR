@@ -6,67 +6,87 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
     incorporate fire and insect disturbance, as well as other important ecological
     processes. Models are implemented as 'SpaDES' modules.
 URL: 
-    http://landr.predictiveecology.org,
+    https://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2020-08-13
-Version: 0.0.8
+Date: 2024-05-29
+Version: 1.1.2
 Authors@R: c(
-    person("Eliot J B", "McIntire", email = "eliot.mcintire@canada.ca",
-    role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
-    person("Alex M", "Chubaty", email = "alex.chubaty@gmail.com",
-    role = c("aut"), comment = c(ORCID = "0000-0001-7146-8135")),
-    person("Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources Canada",
-    role = "cph")
+    person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
+           role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
+    person("Alex M", "Chubaty", email = "achubaty@for-cast.ca",
+           role = c("aut"), comment = c(ORCID = "0000-0001-7146-8135")),
+    person("Ceres", "Barros", email = "ceres.barros@ubc.ca",
+           role = c("aut"), comment = c(ORCID = "0000-0003-4036-977X")),
+    person("Ian M S", "Eddy", email = "ian.eddy@nrcan-rncan.gc.ca",
+           role = c("aut"), comment = c(ORCID = "0000-0001-7397-2116")),
+    person(paste("His Majesty the King in Right of Canada,",
+                 "as represented by the Minister of Natural Resources Canada"),
+           role = "cph")
     )
 Depends:
-    R (>= 3.6)
+    R (>= 4.2)
 Imports:
-    assertthat,
-    backports,
-    CircStats,
     crayon,
     data.table,
-    dplyr,
-    fastdigest,
-    fasterize,
     fpCompare,
-    gdalUtils,
     ggplot2,
-    googledrive,
+    ggpubr,
+    ggspatial,
     grDevices,
-    httr,
     lme4,
-    magrittr,
-    map,
     methods,
     MuMIn (>= 1.42.5),
     parallel,
-    pemisc,
-    plyr,
+    pemisc (>= 0.0.4.9011),
     quickPlot,
     raster,
     RColorBrewer,
-    RCurl,
-    reproducible,
-    scales,
+    reproducible (>= 2.0.8),
     sf,
     sp,
-    SpaDES.core,
-    SpaDES.tools (>= 0.3.1.9000),
+    SpaDES.tools (>= 2.0.4),
     stats,
+    terra,
+    tidyterra,
     tools,
     utils,
-    XML
+    viridis
 Suggests:
+    bbmle, 
+    biomod2 (>= 4.2-2),
+    BioSIM,
     covr,
+    curl,
+    fasterize,
+    future,
+    future.apply,
+    googledrive (>= 2.0.0),
+    httr,
     knitr,
-    roxygen2,
+    lqmm,
+    MASS,
+    parallelly,
+    qs,
+    rasterVis,
+    RCurl,
+    RhpcBLASctl,
+    rlang,
     rmarkdown,
+    roxygen2,
+    R.utils,
     spelling,
-    testthat
+    testthat,
+    withr,
+    XML
 Remotes:
+    CeresBarros/biomod2@dev_currentCeres,
+    RNCan/BioSimClient_R,
     PredictiveEcology/map@development,
-    PredictiveEcology/pemisc@development
+    PredictiveEcology/pemisc@development,
+    PredictiveEcology/quickPlot@development,
+    PredictiveEcology/reproducible@development,
+    PredictiveEcology/SpaDES.core@development,
+    PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
@@ -74,4 +94,43 @@ VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
-RoxygenNote: 7.1.1
+Collate: 
+    'LANDIS-II-tables.R'
+    'LandR-package.R'
+    'assertions.R'
+    'biomodWrappers.R'
+    'biosim.R'
+    'chooseName.R'
+    'cohorts.R'
+    'convertUnwantedLCC2.R'
+    'dem.R'
+    'disturbances.R'
+    'ecoregions.R'
+    'ecozones.R'
+    'fireSeverity.R'
+    'light-shade.R'
+    'makeDummyInputs.R'
+    'maps.R'
+    'maxBestimation.R'
+    'misc.R'
+    'nullClimate.R'
+    'overlayLCCs.R'
+    'partitionBiomass.R'
+    'plot_summaries.R'
+    'plotting.R'
+    'prepEcoregions.R'
+    'prepInputObjects.R'
+    'prepInputs_NTEMS.R'
+    'prepSpeciesLayers.R'
+    'seedDispersalLANDIS.R'
+    'serotiny-resprouting.R'
+    'speciesPresentFromKNN.R'
+    'speciesTable.R'
+    'sppEquivalencies_CA.R'
+    'sppHarmonize.R'
+    'studyArea.R'
+    'terra-raster-utils.R'
+    'wildfire.R'
+    'zzz.R'
+RoxygenNote: 7.3.1
+Roxygen: list(markdown = TRUE)

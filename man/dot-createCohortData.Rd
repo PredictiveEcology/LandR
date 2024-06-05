@@ -6,13 +6,20 @@
 \usage{
 .createCohortData(
   inputDataTable,
+  sppColumns,
+  minCoverThreshold = 5,
   doAssertion = getOption("LandR.assertions", TRUE),
-  rescale = TRUE,
-  minCoverThreshold = 5
+  rescale = TRUE
 )
 }
 \arguments{
 \item{inputDataTable}{A \code{data.table} with columns described above.}
+
+\item{sppColumns}{A vector of the names of the columns in \code{inputDataTable} that
+represent percent cover by species, rescaled to sum up to 100\%\%.}
+
+\item{minCoverThreshold}{minimum total cover percentage necessary to consider the pixel
+vegetated, or a cohort present in a pixel.}
 
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.
@@ -21,7 +28,10 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 \item{rescale}{Logical. If \code{TRUE}, the default, cover for each species will be rescaled
 so all cover in \code{pixelGroup} or pixel sums to 100.}
 }
+\value{
+\code{cohortData} (\code{data.table}) with attribute \code{"imputedPixID"}
+}
 \description{
-Internal function used by \code{\link{makeAndCleanInitialCohortData}}.
+Internal function used by \code{\link[=makeAndCleanInitialCohortData]{makeAndCleanInitialCohortData()}}.
 }
 \keyword{internal}

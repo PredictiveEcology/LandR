@@ -8,32 +8,27 @@ utils::globalVariables(c(
 #'
 #' @template burnedPixelCohortData
 #' @template postFirePixelCohortData
-#' @param postFireRegenSummary a \code{data.table} summarizing for which species
-#'     serotiny/resprouting were activated and in how many pixels, for each year.
-#'     Only necessary if \code{calibrate = TRUE}.
-#' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
+#' @template postFireRegenSummary
+#' @template species
 #' @template sufficientLight
 #' @template speciesEcoregion
-#' @param currentTime integer. The current simulation time obtained with \code{time(sim)}
+#' @param currentTime integer. The current simulation time obtained with `time(sim)`
 #' @param treedFirePixelTableSinceLastDisp a vector of pixels that burnt and were forested
 #'     in the previous time step.
-#' @param calibrate logical. Determines whether to output \code{postFirePixelCohortData}.
-#'     Defaults to \code{FALSE}.
+#' @template calibrate
 #'
 #' @return  A list of objects:
-#'     \code{postFirePixelCohortData}, a \code{data.table} with the cohorts that undergo serotiny;
-#'     \code{serotinyPixel}, a vector of pixels where serotiny was activated;
-#'     \code{postFireRegenSummary}, the updated \code{postFireRegenSummary}, if \code{calibrate = TRUE}.
+#'     `postFirePixelCohortData`, a `data.table` with the cohorts that undergo serotiny;
+#'     `serotinyPixel`, a vector of pixels where serotiny was activated;
+#'     `postFireRegenSummary`, the updated `postFireRegenSummary`, if `calibrate = TRUE`.
 #'
 #' @export
-#' @importFrom fpCompare %>>% %<<%
-#' @importFrom stats runif
 doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
                        postFireRegenSummary = NULL, species, sufficientLight,
                        speciesEcoregion, currentTime, treedFirePixelTableSinceLastDisp,
                        calibrate = FALSE) {
   ## checks
-  if (calibrate & is.null(postFireRegenSummary)) {
+  if (calibrate && is.null(postFireRegenSummary)) {
     stop("missing postFireRegenSummary table for doSerotiny")
   }
 
@@ -48,10 +43,9 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
     ## as long as one cohort is sexually mature, serotiny is activated
     serotinyPixelCohortData <- serotinyPixelCohortData[species[, .(speciesCode, sexualmature)],
                                                        on = "speciesCode", nomatch = 0]
-    #serotinyPixelCohortData <- setkey(serotinyPixelCohortData, speciesCode)[species[,.(speciesCode, sexualmature)],
-    #                                                                          nomatch = 0]
-    serotinyPixelCohortData <- serotinyPixelCohortData[age >= sexualmature] %>% # NOTE should be in mortalityFromDisturbance module or event
-      unique(., by = c("pixelGroup", "speciesCode"))
+    ## NOTE: should be in mortalityFromDisturbance module or event
+    serotinyPixelCohortData <- serotinyPixelCohortData[age >= sexualmature]  |>
+      unique(by = c("pixelGroup", "speciesCode"))
     set(serotinyPixelCohortData, NULL, "sexualmature", NULL)
 
     ## select the pixels that have potential serotiny regeneration and assess them
@@ -67,9 +61,6 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
     ## the get survival probs and subset survivors with runif
     serotinyPixelCohortData <- serotinyPixelCohortData[species[, .(speciesCode, shadetolerance)],
                                                        nomatch = 0, on = "speciesCode"]
-    # serotinyPixelCohortData[, siteShade := 0]   ## this is no longer done here to accoutn for PM
-    # serotinyPixelCohortData <- setkey(serotinyPixelCohortData, speciesCode)[species[,.(speciesCode, shadetolerance)],
-    #                                                     nomatch = 0][, siteShade := 0]
     serotinyPixelCohortData <- assignLightProb(sufficientLight = sufficientLight,
                                                serotinyPixelCohortData)
     serotinyPixelCohortData <- serotinyPixelCohortData[lightProb %>>% runif(nrow(serotinyPixelCohortData), 0, 1)]  ## subset survivors
@@ -122,19 +113,18 @@ doSerotiny <- function(burnedPixelCohortData, postFirePixelCohortData,
 #'
 #' @template burnedPixelCohortData
 #' @template postFirePixelCohortData
-#' @param postFireRegenSummary a data.table summarizing for which species serotiny/resprouting were
-#'    activated and in how many pixels, for each year. Only necessary if \code{calibrate = TRUE}.
+#' @template postFireRegenSummary
 #' @param serotinyPixel a vector of pixels where serotiny was activated;
-#' @param species a \code{data.table} with species traits such as longevity, shade tolerance, etc.
+#' @template species
 #' @template sufficientLight
-#' @param currentTime integer. The current simulation time obtained with \code{time(sim)}
+#' @param currentTime integer. The current simulation time obtained with `time(sim)`
 #' @param treedFirePixelTableSinceLastDisp a vector of pixels that burnt and were forested in the previous time step.
-#' @param calibrate logical. Determines whether to output \code{postFirePixelCohortData}. Defaults to FALSE
+#' @template calibrate
 #'
 #' @return  A list of objects:
-#'     \code{postFirePixelCohortData}, a \code{data.table} with the cohorts that undergo serotiny;
-#'     \code{serotinyPixel}, a vector of pixels where serotiny was activated;
-#'     \code{postFireRegenSummary}, the updated \code{postFireRegenSummary}, if \code{calibrate = TRUE}.
+#'     `postFirePixelCohortData`, a `data.table` with the cohorts that undergo serotiny;
+#'     `serotinyPixel`, a vector of pixels where serotiny was activated;
+#'     `postFireRegenSummary`, the updated `postFireRegenSummary`, if `calibrate = TRUE`.
 #'
 #' @export
 doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
@@ -142,7 +132,7 @@ doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
                           treedFirePixelTableSinceLastDisp, currentTime,
                           species, sufficientLight, calibrate = FALSE) {
   ## checks
-  if (calibrate & is.null(postFireRegenSummary)) {
+  if (calibrate && is.null(postFireRegenSummary)) {
     stop("missing postFireRegenSummary table for doResprouting")
   }
 
@@ -153,13 +143,16 @@ doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
     availableToResprout <- copy(burnedPixelCohortData)    ## Ceres - fix
 
   } else {
-    # Replacing here -- ELiot -- THis was removing entire pixels that had successful serotiny -- now only species-pixel combos are removed
-    ## should be done by pixel and species -- Eliot: it works ok now because there are no serotinous species that are resprouters
-    full <- treedFirePixelTableSinceLastDisp[unique(burnedPixelCohortData, by = c("pixelGroup", "speciesCode")),
+    ## Replacing here -- Eliot -- This was removing entire pixels that had successful serotiny
+    ## -- now only species-pixel combos are removed.
+    ## should be done by pixel and species -- Eliot: it works ok now because there are no serotinous
+    ## species that are resprouters.
+    full <- treedFirePixelTableSinceLastDisp[unique(burnedPixelCohortData,
+                                                    by = c("pixelGroup", "speciesCode")),
                                              on = "pixelGroup", allow.cartesian = TRUE] #
 
-    # anti join to remove species-pixels that had successful serotiny/survivors
-    # Ceres: i don't know if I agree with this...
+    ## anti join to remove species-pixels that had successful serotiny/survivors
+    ## Ceres: i don't know if I agree with this...
     availableToResprout <- full[!postFirePixelCohortData, on = c("pixelIndex", "speciesCode")]
   }
 

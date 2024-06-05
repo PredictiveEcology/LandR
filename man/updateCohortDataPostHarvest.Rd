@@ -13,6 +13,8 @@ updateCohortDataPostHarvest(
   treedHarvestPixelTable = NULL,
   successionTimestep,
   provenanceTable,
+  trackPlanting = FALSE,
+  initialB = 10,
   cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
   verbose = getOption("LandR.verbose", TRUE),
   doAssertion = getOption("LandR.assertions", TRUE)
@@ -27,31 +29,41 @@ Must contain the columns: \code{pixelIndex}, \code{speciesCode}, \code{ecoregion
 The remaining 4 (see \code{cohortData}) will be created with \code{0}s.}
 
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
-\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
-and \code{sumB}.}
+\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
 number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
 \item{currentTime}{The current simulation time e.g., \code{time(sim)}.}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
+\item{speciesEcoregion}{A \code{data.table} with \code{species}-\code{ecoregion}-specific species trait values.
+Ecoregion refers to "ecolocation", a categorical variable grouping sites with similar biophysical
+characteristics. The table should have at least the following columns: \code{speciesCode} and
+\code{ecoregionGroup}, character representation of species and ecoregion groups respectively,
+\code{maxB} the maximum biomass for the species in a given 'ecoregion', \code{maxANPP} the maximum
+aboveground net primary productivity and \code{SEP} the species establishment probability.
+May contain columns \code{inflationFactor}  (used to adjust \code{maxB}) and \code{mANPPproportion}
+(used to calculate \code{maxANPP}).}
 
 \item{treedHarvestPixelTable}{A data.table with at least 2 columns, \code{pixelIndex} and \code{pixelGroup}.
 This will be used in conjunction with \code{cohortData} and \code{pixelGroupMap}
 to ensure that everything matches correctly.}
 
 \item{successionTimestep}{The time between successive seed dispersal events.
-In LANDIS-II, this is called "Succession Timestep". This is used here}
+In LANDIS-II, this is called "Succession Timestep".}
 
 \item{provenanceTable}{A \code{data.table} with three columns:
 New cohorts are initiated at the \code{ecoregionGroup} \code{speciesEcoregion} from the
 corresponding \code{speciesEcoregion} listed in the \code{Provenance} column}
 
+\item{trackPlanting}{if true, planted cohorts in \code{cohortData} are tracked with \code{TRUE}
+in column 'planted'}
+
+\item{initialB}{the initial biomass of new cohorts. Defaults to ten, even if NA/NULL is passed.}
+
 \item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
 
-\item{verbose}{Integer, where increasing number is increasing verbosity. Currently,
-only level 1 exists; but this may change.}
+\item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
 
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.
@@ -70,9 +82,9 @@ There are some checks internally for consistency.
 \details{
 Does the following:
 \enumerate{
-  \item add new cohort data into \code{cohortData};
-  \item assign initial \code{B} and \code{age} for new cohort;
-  \item assign the new \code{pixelGroup} to the pixels that have new cohort;
-  \item update the \code{pixelGroup} map.
+\item add new cohort data into \code{cohortData};
+\item assign initial \code{B} and \code{age} for new cohort;
+\item assign the new \code{pixelGroup} to the pixels that have new cohort;
+\item update the \code{pixelGroup} map.
 }
 }

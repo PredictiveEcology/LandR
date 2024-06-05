@@ -1,11 +1,13 @@
-^_pkgdown\.yml$
+^\.github$
 ^\.httr-oauth$
 ^\.lintr$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^_pkgdown\.yml$
+^codecov\.yml$
 ^data-raw$
 ^docs$
+^J4RTmpFile$
 ^LICENSE$
 ^man-roxygen$
-^\.github$
-^codecov\.yml$
+^\.secret$

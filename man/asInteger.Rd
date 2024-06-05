@@ -11,7 +11,7 @@ asInteger(x)
 }
 \value{
 An integer vector of length \code{x}, rounded to zero decimal places
-  prior to \code{as.integer}
+prior to \code{as.integer}
 }
 \description{
 Essentially a wrapper around \code{round}, rather than \code{truncate}, which is what \code{as.integer}

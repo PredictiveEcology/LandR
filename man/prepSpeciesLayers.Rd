@@ -5,7 +5,8 @@
 \alias{prepSpeciesLayers_CASFRI}
 \alias{prepSpeciesLayers_Pickell}
 \alias{prepSpeciesLayers_ForestInventory}
-\alias{prepSpeciesLayers_KNN2011}
+\alias{prepSpeciesLayers_MBFRI}
+\alias{prepSpeciesLayers_ONFRI}
 \title{Prepare species layers}
 \usage{
 prepSpeciesLayers_KNN(
@@ -53,7 +54,7 @@ prepSpeciesLayers_ForestInventory(
   ...
 )
 
-prepSpeciesLayers_KNN2011(
+prepSpeciesLayers_MBFRI(
   destinationPath,
   outputPath,
   url = NULL,
@@ -61,33 +62,43 @@ prepSpeciesLayers_KNN2011(
   rasterToMatch,
   sppEquiv,
   sppEquivCol,
-  thresh = 10,
+  ...
+)
+
+prepSpeciesLayers_ONFRI(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
   ...
 )
 }
 \arguments{
-\item{destinationPath}{TODO: description needed}
+\item{destinationPath}{path to data directory where objects will be downloaded or saved to}
 
 \item{outputPath}{TODO: description needed}
 
-\item{url}{TODO: description needed; if \code{NULL}, the default, use the default source url}
+\item{url}{if \code{NULL}, the default, use the default source url}
 
-\item{studyArea}{TODO: description needed}
+\item{studyArea}{A \verb{SpatialPolygons*} object used as the principle study region,
+passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
-Only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use
-\code{data("sppEquivalencies_CA", "LandR")}.}
+For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.
-Only necessary if \code{mixedType == 2}.
+For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
-\item{thresh}{threshold \% cover used to defined the species as "present" in the study area.
+\item{thresh}{threshold \\% cover used to defined the species as "present" in the study area.
 If at least one pixel has \code{cover >= thresh} , the species is considered "present".
 Otherwise the raster is excluded from the output. Defaults to 10.}
 

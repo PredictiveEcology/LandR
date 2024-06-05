@@ -2,13 +2,13 @@
 % Please edit documentation in R/maps.R
 \name{vegTypeMapGenerator}
 \alias{vegTypeMapGenerator}
-\alias{vegTypeMapGenerator.RasterStack}
+\alias{vegTypeMapGenerator.default}
 \alias{vegTypeMapGenerator.data.table}
 \title{Generate vegetation type map}
 \usage{
 vegTypeMapGenerator(x, ...)
 
-\method{vegTypeMapGenerator}{RasterStack}(x, ..., doAssertion = getOption("LandR.doAssertion", TRUE))
+\method{vegTypeMapGenerator}{default}(x, ..., doAssertion = getOption("LandR.assertions", FALSE))
 
 \method{vegTypeMapGenerator}{data.table}(
   x,
@@ -24,7 +24,7 @@ vegTypeMapGenerator(x, ...)
 )
 }
 \arguments{
-\item{x}{Either a \code{cohortData} object or a \code{speciesCover} \code{RasterStack}}
+\item{x}{Either a \code{cohortData} object or a \code{speciesCover} \code{RasterStack}/\code{SpatRaster}}
 
 \item{...}{Additional arguments.}
 
@@ -44,12 +44,11 @@ Defaults to 2.}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
-Only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use
-\code{data("sppEquivalencies_CA", "LandR")}.}
+For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.
-Only necessary if \code{mixedType == 2}.
+For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
 \item{colors}{A named vector of colour codes. The names MUST match the names of species
@@ -59,6 +58,16 @@ in \code{cohortData$speciesCode}, plus an optional "Mixed" colour.}
 }
 \description{
 Generate vegetation type map
+}
+\examples{
+library(data.table)
+library(terra)
+x <- data.table(pixelGroup = rep(1:2, each = 2), B = c(100, 200, 20, 400),
+                speciesCode = rep(c("Pice_Gla", "Popu_Tre"), 2))
+pixelGroupMap <- rast(ext(0,3, 0, 3), res = 1)
+pixelGroupMap[] <- sample(1:2, size = 9, replace = TRUE)
+vtm <- vegTypeMapGenerator(x, pixelGroupMap = pixelGroupMap)
+
 }
 \author{
 Eliot McIntire, Ceres Barros, Alex Chubaty

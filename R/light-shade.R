@@ -5,15 +5,14 @@ utils::globalVariables(c(".", ":=", "X1", "X2", "X3", "X4", "X5", "maxMaxB", "pr
 #' @template currentTime
 #' @template cohortData
 #' @template speciesEcoregion
-#' @param minRelativeB a \code{data.frame} with  the cut points to classify stand shadiness.
+#' @template minRelativeB
 #'
-#' @seealso  \code{\link{makeMinRelativeB}}
+#' @seealso  [makeMinRelativeB()]
 #'
-#' @return \code{cohortData} table with a \code{siteShade} column
+#' @return `cohortData` table with a `siteShade` column
 #'
 #' @export
-#' @importFrom data.table data.table set setkey
-calcSiteShade <- compiler::cmpfun(function(currentTime, cohortData, speciesEcoregion, minRelativeB) {
+calcSiteShade <- function(currentTime, cohortData, speciesEcoregion, minRelativeB) {
   # the siteshade was calculated based on the code:
   # https://github.com/LANDIS-II-Foundation/Extensions-Succession/blob/master/biomass-succession/trunk/src/PlugIn.cs
   if (nrow(cohortData[age > 5,]) > 0) {
@@ -55,4 +54,4 @@ calcSiteShade <- compiler::cmpfun(function(currentTime, cohortData, speciesEcore
   #   stop("aaaaa")
   bAMterm1 <- bAMterm1[, .(pixelGroup, ecoregionGroup, siteShade)]
   return(bAMterm1)
-})
+}

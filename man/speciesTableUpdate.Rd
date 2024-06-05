@@ -7,29 +7,88 @@
 speciesTableUpdate(species, speciesTable, sppEquiv, sppEquivCol)
 }
 \arguments{
-\item{species}{a \code{data.table} that has species traits such as longevity, shade tolerance, etc.}
+\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.
+Must have column \code{speciesCode}, with species names/IDs. The following is a
+list of default trait columns:
+\itemize{
+\item "species" same as "speciesCode" -- species ID name
+\item "speciesCode"
+\item "Area" -- inherited from LANDIS-II default table, the Canadian ecoregion
+from which traits where derived. Not used during the simulation
+\item "firetolerance" -- module\emph{relative} (to other species) fire tolerance
+\item "growthcurve" and "mortalityshape" -- growth curve shape parameters.
+\item "longevity" -- maximum species age
+\item "postfireregen" -- post-fire regeneration strategy ("serotiny", "resprout" or "none")
+\item "resproutprob" -- probability of resprouting
+\item "resproutage_min" -- minimum age at which species is capable of resprouting
+\item "resproutage_max" -- maximum age at which species is capable of resprouting
+\item "seeddistance_eff" -- effective dispersal distance
+\item "seeddistance_max" -- maximum dispersal distance
+\item "shadetolerance" -- \emph{relative} (to other species) shade tolerance
+\item "sexualmature" -- age at sexual maturity
+Known optional parameters added/needed by some modules (the user may add others for their own modules):
+\item "inflationFactor" -- \code{Biomass_speciesParameters} module: inflation factor for \code{maxB}
+\item "growthCurveSource" -- \code{Biomass_speciesParameters} module: how "growthcurve" was estimated
+\item "mANPPproportion" -- \code{Biomass_speciesParameters} module: multiplication factor to calculate \code{maxANPP} from \code{maxB}
+\item "thermokarsttol" -- \code{Biomass_disturbances} module: proportion of biomass surviving after thermokarst (i.e. permafrost thaw). Applied equally across cohorts.
+Parameters inherited from LANDIS-II default table, but not used in LandR at the moment:
+\item "leaflongevity"
+\item "wooddecayrate"
+\item "leafLignin"
+\item "hardsoft"
+Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015)
+for further detail.
+}}
 
-\item{speciesTable}{TODO: DESCRIPTION NEEDED}
+\item{speciesTable}{A species traits table, with \strong{at least} the following columns:
+\itemize{
+\item \code{speciesCode} an character representation of species;
+\item \code{Area} a character of geographical area within a species range for which trait values are relevant;
+\item \code{longevity} species longevity in years, \code{sexualmature} age in years at sexual maturity;
+\item \code{shadetolerance} numeric value between 1-5 of relative shade tolerance (with respect to other species);
+\item \code{seeddistance_eff} the "effective" seed dispersal distance;
+\item \code{seeddistance_max} a numeric with the maximum seed dispersal distance;
+\item \code{mortalityshape} and \code{growthcurve}: growth curve shape parameters.
+Other columns (e.g. fire-related traits) can also be included depending on LandR modules in use.
+Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015)
+for further detail.
+}}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
-Only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use
-\code{data("sppEquivalencies_CA", "LandR")}.}
+For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
+If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.
-Only necessary if \code{mixedType == 2}.
+For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 }
 \value{
 An updated species \code{data.table}
 }
 \description{
-Changes longevity values in the species table according to Burton & Cumming (1995).
-Only the species and values present in Boreal Shield West (BSW), Boreal Plains (BP) and
-Montane Cordillera (MC) \code{speciesTable$Area} are being changed.
-All others follow Dominic Cyr and Yan Boulanger's trait values
-(\url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
+Changes longevity and shade tolerance values in the species table.
+Longevity values are changed to follow Burton & Cumming (1995) for the following species:
+\emph{Abies balsamea}, \emph{Abies lasiocarpa}, \emph{Betula papyrifera}, \emph{Larix laricina},
+\emph{Larix occidentalis}, \emph{Picea engelmannii}, \emph{Picea glauca}, \emph{Picea mariana},
+\emph{Pinus banksiana}, \emph{Pinus contorta}, \emph{Pinus resinosa}, \emph{Pinus strobus},
+\emph{Populus balsamifera v. balsamifera}, \emph{Populus tremuloides}, \emph{Pseudotsuga menziesii var. glauca},
+\emph{Pseudotsuga menziesii}, \emph{Thuja plicata}, \emph{Tsuga heterophylla},
+\emph{Tsuga mertensiana x heterophylla}, and only for the  Boreal Shield West (BSW), Boreal Plains (BP)
+and Montane Cordillera (MC) \code{speciesTable$Area}s.
 Note that BSW and BP areas correspond more closely to the region considered in Table 2 of
 Burton & Cumming (1995), while MC will correspond to both tables.
+}
+\details{
+Of the above species, shade tolerance values are changed for \emph{Abies spp}, \emph{Picea spp},
+and \emph{Tsuga spp.} to reflect western boreal shade tolerances better.
+
+When different longevity/shade tolerance trait values exist for a given species, the minimum
+value across \code{Area}'s (BSW, BP, MC) is kept.
+
+ATTENTION: if none of species in \code{species} are from BSW, BP or MC area this function will not
+change any values.
+
+All other species/Area trait values follow Dominic Cyr and Yan Boulanger's trait values available at:
+(\url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
 }

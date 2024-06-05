@@ -12,6 +12,8 @@ makeCohortDataFiles(
   pixelGroupBiomassClass,
   pixelGroupAgeClass,
   minAgeForGrouping = 0,
+  rmImputedPix = FALSE,
+  imputedPixID,
   pixelFateDT
 )
 }
@@ -20,7 +22,14 @@ makeCohortDataFiles(
 
 \item{columnsForPixelGroups}{Default columns that define pixel groups}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
+\item{speciesEcoregion}{A \code{data.table} with \code{species}-\code{ecoregion}-specific species trait values.
+Ecoregion refers to "ecolocation", a categorical variable grouping sites with similar biophysical
+characteristics. The table should have at least the following columns: \code{speciesCode} and
+\code{ecoregionGroup}, character representation of species and ecoregion groups respectively,
+\code{maxB} the maximum biomass for the species in a given 'ecoregion', \code{maxANPP} the maximum
+aboveground net primary productivity and \code{SEP} the species establishment probability.
+May contain columns \code{inflationFactor}  (used to adjust \code{maxB}) and \code{mANPPproportion}
+(used to calculate \code{maxANPP}).}
 
 \item{pixelGroupBiomassClass}{Integer. When assigning \code{pixelGroup} membership, this defines
 the resolution of biomass that will be considered 'the same \code{pixelGroup}', e.g., if it is
@@ -36,6 +45,10 @@ Ages below this will not be grouped together. Defaults to -1, meaning treat all 
 If this is related to known ages from a high quality database, then use age of the oldest
 trees in that database.}
 
+\item{rmImputedPix}{Should imputed pixels be removed}
+
+\item{imputedPixID}{a vector of IDs of pixels that suffered data imputation.}
+
 \item{pixelFateDT}{A \code{data.table} of \code{pixelFateDT}; if none provided, will make an empty one.}
 }
 \value{
@@ -44,19 +57,19 @@ A list with a modified \code{pixelCohortData}, \code{cohortData}, and \code{pixe
 }
 \description{
 Takes a \code{pixelCohortData} table (see \code{makeAndCleanInitialCohortData}),
-  the \code{speciesEcoregion} list and returns a modified \code{pixelCohortData} and
-  the \code{cohortData} tables to be used in the simulation.
-  This function mainly removes unnecessary columns from \code{pixelCohortData},
-  subsets pixels with \code{biomass > 0}, generates \code{pixelGroups},
-  and adds \code{ecoregionGroup} and \code{totalBiomass} columns to \code{pixelCohortData}.
-  \code{cohortData} is then created by subsetting unique combinations of \code{pixelGroup} and
-  whatever columns are listed in \code{columnsForPixelGroups}.
-  The resulting \code{cohortData} table has the following columns:
+the \code{speciesEcoregion} list and returns a modified \code{pixelCohortData} and
+the \code{cohortData} tables to be used in the simulation.
+This function mainly removes unnecessary columns from \code{pixelCohortData},
+subsets pixels with \code{biomass > 0}, generates \code{pixelGroups},
+and adds \code{ecoregionGroup} and \code{totalBiomass} columns to \code{pixelCohortData}.
+\code{cohortData} is then created by subsetting unique combinations of \code{pixelGroup} and
+whatever columns are listed in \code{columnsForPixelGroups}.
+The resulting \code{cohortData} table has the following columns:
 \itemize{
-  \item \code{speciesCode} (factor)
-  \item \code{ecoregionGroup} (factor)
-  \item \code{pixelGroup} (integer)
-  \item \code{age} (integer)
-  \item \code{B} (integer)
+\item \code{speciesCode} (factor)
+\item \code{ecoregionGroup} (factor)
+\item \code{pixelGroup} (integer)
+\item \code{age} (integer)
+\item \code{B} (integer)
 }
 }

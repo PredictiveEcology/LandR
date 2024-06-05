@@ -29,7 +29,7 @@ in \code{LCCs}. This will be the classification system returned.}
 \item{NAcondition}{The condition when a pixel is deemed to be \code{NA}.
 Given as a character string of a vectorized logical statement that will be
 within the \code{forestEquivalencies} table.
-It should be a set of conditions with \code{== 0}, i.e., non-forested.
+It should be a set of conditions with \verb{== 0}, i.e., non-forested.
 Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
 where \code{0} is the non-forested pixels based on converting LCCs and
 \code{forestedList} to \code{1} and \code{0}.}
@@ -38,7 +38,7 @@ where \code{0} is the non-forested pixels based on converting LCCs and
 a nearest-neighbour search is done to fill in the pixel with forested type.
 Given as a character string of a vectorized logical statement that will be
 parsed within the \code{forestEquivalencies} table.
-It should be a set of conditions with \code{== 0}, i.e., non-forested.
+It should be a set of conditions with \verb{== 0}, i.e., non-forested.
 Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
 where \code{0} is the non-forested pixels based on converting LCCs and
 \code{forestedList} to \code{1} and \code{0}.}
@@ -47,10 +47,10 @@ where \code{0} is the non-forested pixels based on converting LCCs and
 2 LCC layers are provided, one has information in a pixel, but not the one
 which is \code{outputLayer}, so this needs a reclassify or remap.}
 
-\item{classesToReplace}{Passed to \code{convertUnwantedLCC}, for the pixels where
+\item{classesToReplace}{Passed to \code{\link[=convertUnwantedLCC]{convertUnwantedLCC()}}, for the pixels where
 \code{NNcondition} is \code{TRUE}}
 
-\item{availableERC_by_Sp}{Passed to \code{convertUnwantedLCC}, for the pixels where
+\item{availableERC_by_Sp}{Passed to \code{\link[=convertUnwantedLCC]{convertUnwantedLCC()}}, for the pixels where
 \code{NNcondition} is \code{TRUE}. If this is \code{NULL}, then it will be
 created internally with all pixels with:
 \code{data.table(initialEcoregionCode = LCCs[[outputLayer]][])}}

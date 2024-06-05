@@ -1,10 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://landr.predictiveecology.org/404.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/LICENSE-text.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/authors.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/index.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/news/index.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/BioSIM_extractPoints.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/BioSIM_getMPBSLR.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/BioSIM_getWindAnnual.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/BioSIM_getWindMonthly.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/CASFRItoSpRasts.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/Colors.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/Disturbances.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/LANDISDisp.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/LandR-deprecated.html</loc>
@@ -13,13 +46,31 @@
     <loc>https://landr.predictiveecology.org/reference/LandR-package.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/NAcover2zero.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/WardKernel.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/addCohorts.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/addNoPixel2CohortData.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/addPixelGroup.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/addPixels2CohortData.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/aggregateRasByDT.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/asInteger.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/assertPostPartialDist.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/assertSpeciesEcoregionCohortDataMatch.html</loc>
@@ -29,6 +80,24 @@
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/assignLightProb.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/biomodEnsembleFrcstWrapper.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/biomodEnsembleProjMaps.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/biomodEnsembleWrapper.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/biomodModelingWrapper.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/biomodProjWrapper.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/calcSeverityB.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/calcSiteShade.html</loc>
@@ -43,7 +112,13 @@
     <loc>https://landr.predictiveecology.org/reference/columnsForPixelGroups.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/compare.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/convertUnwantedLCC.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/convertUnwantedLCC2.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/defineFlammable.html</loc>
@@ -58,10 +133,22 @@
     <loc>https://landr.predictiveecology.org/reference/doSerotiny.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/dot-MLLMaxBPartialPlotData.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/dot-MLLMaxBplotData.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/dot-cleanLandWebStudyArea.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/dot-createCohortData.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/dot-fitNLMwCovariates.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/dot-getMaxBCoefs.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/dot-interpolateLightProb.html</loc>
@@ -76,6 +163,9 @@
     <loc>https://landr.predictiveecology.org/reference/dot-speciesTableColNames.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/dropTerm.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/dummy-inputs.html</loc>
   </url>
   <url>
@@ -85,10 +175,34 @@
     <loc>https://landr.predictiveecology.org/reference/equivalentName.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/extractMaxB.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/fasterizeFromSp.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/fitNLMModels.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/genPGsPostDisturbance.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/generatePixelGroups.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/genericExtract.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/getWildfire_NFI.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/ggplotMLL_maxB.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/installBioSIM.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/landisIIrepo.html</loc>
@@ -127,6 +241,9 @@
     <loc>https://landr.predictiveecology.org/reference/makePixelGroupMap.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/makePixelGroups.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/makePixelTable.html</loc>
   </url>
   <url>
@@ -136,10 +253,25 @@
     <loc>https://landr.predictiveecology.org/reference/mergeSppRaster.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/minRelativeBDefaults.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/modifySpeciesAndSpeciesEcoregionTable.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/nonForestedPixels.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/overlayLCCs.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/overlayStacks.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/partialggplotMLL_maxB.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/partitionBiomass.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/pixelFate.html</loc>
@@ -151,6 +283,12 @@
     <loc>https://landr.predictiveecology.org/reference/plantNewCohorts.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/plotLeadingSpecies.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/plotSpatial.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/plotVTM.html</loc>
   </url>
   <url>
@@ -160,7 +298,16 @@
     <loc>https://landr.predictiveecology.org/reference/prepEcoregions.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/prepEcozonesRst.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/prepInputsCanDEM.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/prepInputsEcoregion.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/prepInputsFireYear.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/prepInputsLCC.html</loc>
@@ -172,13 +319,40 @@
     <loc>https://landr.predictiveecology.org/reference/prepInputsSpeciesEcoregion.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/prepInputsStandAgeMap.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/prepInputs_NTEMS_LCC_FAO.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/prepInputs_NTEMS_Nonforest.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/prepRasterToMatch.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/prepRawBiomassMap.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/prepSpeciesLayers.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/randomStudyArea.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/rasterRead.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/rasterTerraHelpers.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/replaceAgeInFires.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/resample.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/rescale.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/rmMissingCohorts.html</loc>
@@ -190,6 +364,12 @@
     <loc>https://landr.predictiveecology.org/reference/speciesEcoregionLatestYear.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/speciesEcoregionStack.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/speciesPresent.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/speciesTable.html</loc>
   </url>
   <url>
@@ -199,7 +379,16 @@
     <loc>https://landr.predictiveecology.org/reference/sppColors.html</loc>
   </url>
   <url>
+    <loc>https://landr.predictiveecology.org/reference/sppEquivCheck.html</loc>
+  </url>
+  <url>
     <loc>https://landr.predictiveecology.org/reference/sppEquivalencies_CA.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/sppHarmonize.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/standAgeMapGenerator.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/statsModel.html</loc>
@@ -209,6 +398,9 @@
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/sumRastersBySpecies.html</loc>
+  </url>
+  <url>
+    <loc>https://landr.predictiveecology.org/reference/testCohortData.html</loc>
   </url>
   <url>
     <loc>https://landr.predictiveecology.org/reference/uniqueDefinitions.html</loc>

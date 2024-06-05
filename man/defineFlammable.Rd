@@ -6,8 +6,9 @@
 \usage{
 defineFlammable(
   LandCoverClassifiedMap = NULL,
-  nonFlammClasses = c(36L, 37L, 38L, 39L),
+  nonFlammClasses = c(0L, 25L, 30L, 33L, 36L, 37L, 38L, 39L),
   mask = NULL,
+  to = NULL,
   filename2 = NULL
 )
 }
@@ -17,9 +18,12 @@ defineFlammable(
 
 \item{nonFlammClasses}{numeric vector defining which classes in \code{LandCoverClassifiedMap}.}
 
-\item{mask}{A raster to use as a mask (see \code{\link[raster]{mask}}).}
+\item{mask}{A raster to use as a mask (see \code{\link[raster:mask]{raster::mask()}}).}
 
-\item{filename2}{See \code{\link[reproducible]{postProcess}}. Default \code{NULL}.}
+\item{to}{Passed to \code{postProcessTo(..., to = to)} and to the \code{mask} arg here, if
+\code{mask} is not supplied.}
+
+\item{filename2}{See \code{\link[reproducible:postProcess]{reproducible::postProcess()}}. Default \code{NULL}.}
 }
 \description{
 Define flammability map

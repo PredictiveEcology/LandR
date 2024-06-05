@@ -8,23 +8,29 @@ plantNewCohorts(
   newPixelCohortData,
   cohortData,
   pixelGroupMap,
+  initialB = 10,
   currentTime,
-  successionTimestep
+  successionTimestep,
+  trackPlanting = FALSE
 )
 }
 \arguments{
 \item{newPixelCohortData}{the cohorts that were harvested}
 
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
-\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
-and \code{sumB}.}
+\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
 number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
+\item{initialB}{the initial biomass of new cohorts. Defaults to ten.}
+
 \item{currentTime}{The current simulation time e.g., \code{time(sim)}.}
 
-\item{successionTimestep}{succession timestep used in the simulation}
+\item{successionTimestep}{The time between successive seed dispersal events.
+In LANDIS-II, this is called "Succession Timestep".}
+
+\item{trackPlanting}{adds column that tracks planted cohorts if \code{TRUE}}
 }
 \value{
 A \code{data.table} with a new \code{cohortData}

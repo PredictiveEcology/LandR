@@ -1,47 +1,55 @@
-utils::globalVariables(c("ecoregionCode", "NAs", "newLCC"))
+utils::globalVariables(c(
+  "ecoregionCode", "NAs", "newLCC"
+))
 
 #' Overlay different LCC data sources
 #'
-#' @param LCCs A named list or named \code{RasterStack} of layers whose content
+#' @param LCCs A named list or named `RasterStack` of layers whose content
 #'   is Land Cover Class.
-#' @param forestedList A named list of same length and names as \code{LCCs} indicating
+#'
+#' @param forestedList A named list of same length and names as `LCCs` indicating
 #'   which classes in each LCC raster are 'forested', either permanent or transient
+#'
 #' @param outputLayer A character string that matches one of the named elements
-#'   in \code{LCCs}. This will be the classification system returned.
-#' @param NAcondition The condition when a pixel is deemed to be \code{NA}.
+#'   in `LCCs`. This will be the classification system returned.
+#'
+#' @param NAcondition The condition when a pixel is deemed to be `NA`.
 #'   Given as a character string of a vectorized logical statement that will be
-#'   within the \code{forestEquivalencies} table.
-#'   It should be a set of conditions with \code{== 0}, i.e., non-forested.
-#'   Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
-#'   where \code{0} is the non-forested pixels based on converting LCCs and
-#'   \code{forestedList} to \code{1} and \code{0}.
+#'   within the `forestEquivalencies` table.
+#'   It should be a set of conditions with `== 0`, i.e., non-forested.
+#'   Examples:, e.g., `"LCC2005 == 0"` or `"CC == 0 | LCC2005 == 0"`,
+#'   where `0` is the non-forested pixels based on converting LCCs and
+#'   `forestedList` to `1` and `0`.
+#'
 #' @param NNcondition The 'nearest-neighbour' condition; i.e., the condition when
 #'   a nearest-neighbour search is done to fill in the pixel with forested type.
 #'   Given as a character string of a vectorized logical statement that will be
-#'   parsed within the \code{forestEquivalencies} table.
-#'   It should be a set of conditions with \code{== 0}, i.e., non-forested.
-#'   Examples:, e.g., \code{"LCC2005 == 0"} or \code{"CC == 0 | LCC2005 == 0"},
-#'   where \code{0} is the non-forested pixels based on converting LCCs and
-#'   \code{forestedList} to \code{1} and \code{0}.
-#' @param remapTable \code{data.table}. This would be for a situation where
+#'   parsed within the `forestEquivalencies` table.
+#'   It should be a set of conditions with `== 0`, i.e., non-forested.
+#'   Examples:, e.g., `"LCC2005 == 0"` or `"CC == 0 | LCC2005 == 0"`,
+#'   where `0` is the non-forested pixels based on converting LCCs and
+#'   `forestedList` to `1` and `0`.
+#'
+#' @param remapTable `data.table`. This would be for a situation where
 #'   2 LCC layers are provided, one has information in a pixel, but not the one
-#'   which is \code{outputLayer}, so this needs a reclassify or remap.
-#' @param classesToReplace Passed to \code{convertUnwantedLCC}, for the pixels where
-#'   \code{NNcondition} is \code{TRUE}
-#' @param availableERC_by_Sp Passed to \code{convertUnwantedLCC}, for the pixels where
-#'   \code{NNcondition} is \code{TRUE}. If this is \code{NULL}, then it will be
+#'   which is `outputLayer`, so this needs a reclassify or remap.
+#'
+#' @param classesToReplace Passed to [convertUnwantedLCC()], for the pixels where
+#'   `NNcondition` is `TRUE`
+#'
+#' @param availableERC_by_Sp Passed to [convertUnwantedLCC()], for the pixels where
+#'   `NNcondition` is `TRUE`. If this is `NULL`, then it will be
 #'   created internally with all pixels with:
-#'   \code{data.table(initialEcoregionCode = LCCs[[outputLayer]][])}
-#' @param forestEquivalencies A \code{data.frame} or \code{NULL}.
-#'   If \code{NULL}, this function will derive this table automatically from the
-#'   other arguments. Otherwise, the user must provide a \code{data.frame} with
-#'   \code{length(LCCs) + 1} columns, and \code{2 ^ length(LCCs)} rows.
+#'   `data.table(initialEcoregionCode = LCCs[[outputLayer]][])`
+#'
+#' @param forestEquivalencies A `data.frame` or `NULL`.
+#'   If `NULL`, this function will derive this table automatically from the
+#'   other arguments. Otherwise, the user must provide a `data.frame` with
+#'   `length(LCCs) + 1` columns, and `2 ^ length(LCCs)` rows.
 #'   Currently not used.
 #'
 #' @author Eliot McIntire and Alex Chubaty
 #' @export
-#' @importFrom data.table as.data.table
-#' @importFrom raster nlayers stack
 overlayLCCs <- function(LCCs, forestedList, outputLayer,
                         NAcondition, NNcondition, remapTable = NULL,
                         classesToReplace, availableERC_by_Sp,
@@ -59,13 +67,22 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
   if (!identical(theOrder, seq_along(forestedList)))
     forestedList <- forestedList[theOrder]
 
-  if (!is(LCCs, "RasterStack"))
-    LCCs <- stack(LCCs)
+  fn <- eval(parse(text = getOption("reproducible.rasterRead"))) ## see LandR#99
+  if (!is(LCCs, "RasterStack") && !identical(fn, terra::rast)) {
+    if (!requireNamespace("raster", quietly = TRUE)) {
+      stop("raster pkg is not installed; ",
+           "either set options('reproducible.rasterRead' = 'terra::rast'), ",
+           "or install.packages('raster').")
+    }
+    fn <- raster::stack
+  }
+  LCCs <- fn(LCCs)
 
-  if (nlayers(LCCs) > 1) {
-    forestedStack <- stack(LCCs)
+
+  if (length(names(LCCs)) > 1) {
+    forestedStack <- fn(LCCs)
     forestedStack[] <- 0 ## will convert to a brick, so need to restack
-    forestedStack <- stack(forestedStack)
+    forestedStack <- fn(forestedStack)
     names(forestedStack) <- names(LCCs)
 
     for (x in names(LCCs)) {
@@ -76,12 +93,12 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
     names(namesForestedStack) <- namesForestedStack
 
     if (is.null(availableERC_by_Sp)) {
-      availableERC_by_Sp <- data.table(initialEcoregionCode = LCCs[[outputLayer]][])
+      availableERC_by_Sp <- data.table(initialEcoregionCode = as.vector(LCCs[[outputLayer]][]))
     }
 
     if (is.null(remapTable)) {
-      dt <- as.data.table(lapply(namesForestedStack, function(x) forestedStack[[x]][]))
-      dt[, ecoregionCode := LCCs[[outputLayer]][]]
+      dt <- as.data.table(lapply(namesForestedStack, function(x) as.vector(forestedStack[[x]][])))
+      dt[, ecoregionCode := as.vector(LCCs[[outputLayer]][])]
 
       # 1. Put in NAs
       if (!missing(NAcondition)) {
@@ -108,15 +125,15 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
       }
     } else {
       if (is.data.frame(remapTable))
-        as.data.table(remapTable)
+        remapTable <- as.data.table(remapTable)
 
       if (!all(names(LCCs) %in% colnames(remapTable)))
         stop("All LCC names must be columns in remapTable")
 
       namesLCCs <- names(LCCs)
       names(namesLCCs) <- namesLCCs
-      dt <- as.data.table(lapply(namesLCCs, function(x) LCCs[[x]][]))
-      dt[, ecoregionCode := LCCs[[outputLayer]][]]
+      dt <- as.data.table(lapply(namesLCCs, function(x) as.vector(LCCs[[x]][])))
+      dt[, ecoregionCode := as.vector(LCCs[[outputLayer]][])]
       dt <- cbind(dt, availableERC_by_Sp)
       dt[, pixelIndex := seq(ncell(LCCs[[outputLayer]]))]
 
@@ -145,5 +162,8 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
     # replace all values in the raster
     LCCs[[outputLayer]][] <- dt$ecoregionCode
   }
+  if (is(LCCs[[outputLayer]], "SpatRaster"))
+    LCCs[[outputLayer]] <- as.int(LCCs[[outputLayer]])
+
   return(LCCs[[outputLayer]])
 }

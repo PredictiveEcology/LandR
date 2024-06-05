@@ -2,19 +2,18 @@
 % Please edit documentation in R/maps.R
 \name{prepInputsLCC}
 \alias{prepInputsLCC}
-\title{Simple \code{prepInputs} for LCC2005 or LCC2010 data}
+\title{Simple \code{prepInputs} for Canadian LCC data}
 \usage{
 prepInputsLCC(
-  year = 2005,
+  year = 2010,
   destinationPath = asPath("."),
-  studyArea = NULL,
-  rasterToMatch = NULL,
+  method = c("ngb", "near"),
   filename2 = NULL,
   ...
 )
 }
 \arguments{
-\item{year}{Numeric, either 2005 or 2010}
+\item{year}{Numeric, either 2010 or 2015. See note re: backwards compatibility for 2005.}
 
 \item{destinationPath}{Character string of a directory in which to download
 and save the file that comes from \code{url} and is also where the function
@@ -24,27 +23,23 @@ To prevent repeated downloads in different locations, the user can also set
 search for the file before attempting to download. Default for that option is
 \code{NULL} meaning do not search locally.}
 
-\item{studyArea}{\code{SpatialPolygons*} object used for masking and possibly cropping
-if no \code{rasterToMatch} is provided.
-If not in same CRS, then it will be \code{spTransform}ed to
-CRS of \code{x} before masking. Currently, this function will not reproject the
-\code{x}. Optional in \code{postProcess}.}
+\item{method}{passed to \link[terra:intersect]{terra::intersect} or \link[raster:intersect]{raster::intersect},
+and \link[reproducible:prepInputs]{reproducible::prepInputs}}
 
-\item{rasterToMatch}{Template \code{Raster*} object used for cropping (so extent should be
-the extent of desired outcome) and reprojecting (including changing the
-resolution and projection).
-See details in \code{\link[reproducible]{postProcess}}.}
+\item{filename2}{passed to \link[reproducible:prepInputs]{reproducible::prepInputs}}
 
-\item{filename2}{\code{filename2} is optional, and is either
-NULL (no writing of outputs to disk), or several options
-for writing the object to disk. If
-\code{TRUE} (the default), it will give it a file name determined by
-\code{.prefix(basename(filename1), prefix)}. If
-a character string, it will use this as its file name. See
-\code{\link[reproducible]{determineFilename}}.}
-
-\item{...}{Passed to raster::crop}
+\item{...}{Arguments passed to \code{terra::mask} (for \code{maskTo}), \code{terra::project} (for \code{projectTo})
+or \code{terra::writeRaster} (for \code{writeTo}) and not used for \code{cropTo}, as well \code{postProcess}'s
+\code{rasterToMatch} and \code{studyArea} arguments (see below). Commonly used arguments might be
+\code{method}, \code{touches}, and \code{datatype}. If \code{filename} is passed, it will be ignored; use
+\verb{writeTo = }. If \code{reproducible.gdalwarp = TRUE}, then these will be passed to the
+\verb{gdal*} functions. See them for details.}
 }
 \description{
 A wrapper around \code{prepInputs} for the Canadian Land Cover Classification product(s).
+}
+\note{
+As of May 2021, NRCAN no longer provides/hosts the LCC2005 data.
+A privately hosted version of the data is available to maintain backwards compatibility,
+but new users/projects should use the 2010 (or newer) data.
 }

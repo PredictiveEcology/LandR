@@ -16,25 +16,57 @@ makeSpeciesEcoregion(
 )
 }
 \arguments{
-\item{cohortDataBiomass}{a subset of \code{cohortData}}
+\item{cohortDataBiomass}{a subset of \code{cohortData} object}
 
 \item{cohortDataShort}{a subset of \code{cohortData}}
 
 \item{cohortDataShortNoCover}{a subset of \code{cohortData}}
 
-\item{species}{a \code{data.table} of species traits, e.g., longevity, shade tolerance, etc.}
+\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.
+Must have column \code{speciesCode}, with species names/IDs. The following is a
+list of default trait columns:
+\itemize{
+\item "species" same as "speciesCode" -- species ID name
+\item "speciesCode"
+\item "Area" -- inherited from LANDIS-II default table, the Canadian ecoregion
+from which traits where derived. Not used during the simulation
+\item "firetolerance" -- module\emph{relative} (to other species) fire tolerance
+\item "growthcurve" and "mortalityshape" -- growth curve shape parameters.
+\item "longevity" -- maximum species age
+\item "postfireregen" -- post-fire regeneration strategy ("serotiny", "resprout" or "none")
+\item "resproutprob" -- probability of resprouting
+\item "resproutage_min" -- minimum age at which species is capable of resprouting
+\item "resproutage_max" -- maximum age at which species is capable of resprouting
+\item "seeddistance_eff" -- effective dispersal distance
+\item "seeddistance_max" -- maximum dispersal distance
+\item "shadetolerance" -- \emph{relative} (to other species) shade tolerance
+\item "sexualmature" -- age at sexual maturity
+Known optional parameters added/needed by some modules (the user may add others for their own modules):
+\item "inflationFactor" -- \code{Biomass_speciesParameters} module: inflation factor for \code{maxB}
+\item "growthCurveSource" -- \code{Biomass_speciesParameters} module: how "growthcurve" was estimated
+\item "mANPPproportion" -- \code{Biomass_speciesParameters} module: multiplication factor to calculate \code{maxANPP} from \code{maxB}
+\item "thermokarsttol" -- \code{Biomass_disturbances} module: proportion of biomass surviving after thermokarst (i.e. permafrost thaw). Applied equally across cohorts.
+Parameters inherited from LANDIS-II default table, but not used in LandR at the moment:
+\item "leaflongevity"
+\item "wooddecayrate"
+\item "leafLignin"
+\item "hardsoft"
+Please see the LANDIS-II Biomass Succession Extension v3.2.1 manual (Scheller and Miranda 2015)
+for further detail.
+}}
 
 \item{modelCover}{statistical model of species presence/absence}
 
 \item{modelBiomass}{statistical model of species biomass}
 
-\item{successionTimestep}{The time between successive seed dispersal events.}
+\item{successionTimestep}{The time between successive seed dispersal events.
+In LANDIS-II, this is called "Succession Timestep".}
 
 \item{currentYear}{\code{time(sim)}}
 }
 \description{
 Use statistically estimated \code{maxB}, \code{maxANPP} and establishment probabilities
-to generate \code{specieEcoregion} table.
+to generate \code{speciesEcoregion} table.
 }
 \details{
 See Details.
@@ -50,14 +82,14 @@ partitioning:
 \code{establishprob = f(establishprob + resproutprob + jointEstablishProbResproutProb)}
 If \code{jointEstablishProbResproutProb} is 0, then these are independent events
 and the total cover probability can be partitioned easily between seeds and
-resprout. This is unlikely ever to be the case. We are picking 50% overlap as
+resprout. This is unlikely ever to be the case. We are picking 50\% overlap as
 a number that is better than 0 (totally independent probabilities, meaning no
-pixel has both seeds and resprout potential) and  100% overlap (totally
+pixel has both seeds and resprout potential) and  100\% overlap (totally
 dependent probabilities, i.e., every pixel where there is seeds will also be
 a pixel with resprouting) This is expressed with the "* 0.5" in the code.
 
 #' @return
 A \code{speciesEcoregion} \code{data.table} with added columns for parameters
-  \code{maxB}, \code{maxANPP} and \code{establishprob}
+\code{maxB}, \code{maxANPP} and \code{establishprob}
 }
 

@@ -6,7 +6,6 @@
 \usage{
 makePixelTable(
   speciesLayers,
-  species,
   standAgeMap,
   ecoregionFiles,
   biomassMap,
@@ -17,21 +16,21 @@ makePixelTable(
 )
 }
 \arguments{
-\item{speciesLayers}{stack of species layers rasters}
+\item{speciesLayers}{A \code{RasterStack} or \code{RasterLayer} that
+should contain species cover data in the study area}
 
-\item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.}
-
-\item{standAgeMap}{raster of stand age}
+\item{standAgeMap}{A \code{rasterLayer} of stand ages with attribute \code{"imputedPixID"}}
 
 \item{ecoregionFiles}{A list with two objects: the \code{ecoregionMap} and a table summarizing
 its information per \code{pixelID.} See \code{ecoregionProducer}.}
 
-\item{biomassMap}{raster of total stand biomass}
+\item{biomassMap}{raster of total stand biomass in t/ha. Biomass units are
+converted to g/m^2.}
 
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
 
-\item{rstLCC}{raster of land-cover class}
+\item{rstLCC}{raster of land-cover class, e.g., LCC2005}
 
 \item{printSummary}{Logical. If \code{TRUE}, the default, a print out of the
 \code{summary(pixelTable)} will occur.}
@@ -42,7 +41,8 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 }
 \value{
 A \code{data.table} as many rows as non-NA pixels in \code{rasterToMath} and
- the columns containing pixel data from the input raster layers.
+the columns containing pixel data from the input raster layers, with
+biomass in g/m^2.
 }
 \description{
 Make \code{pixelTable} from biomass, age, land-cover and species cover data

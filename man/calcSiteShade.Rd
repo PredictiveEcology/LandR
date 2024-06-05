@@ -10,10 +10,16 @@ calcSiteShade(currentTime, cohortData, speciesEcoregion, minRelativeB)
 \item{currentTime}{The current simulation time e.g., \code{time(sim)}.}
 
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
-\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
-and \code{sumB}.}
+\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
+\item{speciesEcoregion}{A \code{data.table} with \code{species}-\code{ecoregion}-specific species trait values.
+Ecoregion refers to "ecolocation", a categorical variable grouping sites with similar biophysical
+characteristics. The table should have at least the following columns: \code{speciesCode} and
+\code{ecoregionGroup}, character representation of species and ecoregion groups respectively,
+\code{maxB} the maximum biomass for the species in a given 'ecoregion', \code{maxANPP} the maximum
+aboveground net primary productivity and \code{SEP} the species establishment probability.
+May contain columns \code{inflationFactor}  (used to adjust \code{maxB}) and \code{mANPPproportion}
+(used to calculate \code{maxANPP}).}
 
 \item{minRelativeB}{a \code{data.frame} with  the cut points to classify stand shadiness.}
 }
@@ -24,5 +30,5 @@ and \code{sumB}.}
 Calculate site shade
 }
 \seealso{
-\code{\link{makeMinRelativeB}}
+\code{\link[=makeMinRelativeB]{makeMinRelativeB()}}
 }

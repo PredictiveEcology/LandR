@@ -3,6 +3,7 @@
 \name{assert1}
 \alias{assert1}
 \alias{assert2}
+\alias{assertSppMaxBMaxANPP}
 \alias{assertUniqueCohortData}
 \alias{assertERGs}
 \alias{assertColumns}
@@ -12,6 +13,14 @@
 \alias{assertFireToleranceDif}
 \alias{assertSpeciesLayers}
 \alias{assertRstLCChange}
+\alias{assertSpeciesEcoregionCohortDataMatch}
+\alias{assertPixelCohortDataValid}
+\alias{assertRepsAllCohortData}
+\alias{assertStandAgeMapAttr}
+\alias{assertCohortDataAttr}
+\alias{assertSppVectors}
+\alias{assertSpeciesTableRaw}
+\alias{assertSpeciesTable}
 \title{Assertions}
 \usage{
 assert1(
@@ -25,6 +34,11 @@ assert1(
 assert2(
   cohortDataNo34to36,
   classesToReplace = 34:36,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertSppMaxBMaxANPP(
+  speciesEcoregion,
   doAssertion = getOption("LandR.assertions", TRUE)
 )
 
@@ -51,7 +65,6 @@ assertColumns(
 assertCohortData(
   cohortData,
   pixelGroupMap,
-  sim,
   maxExpectedNumDiverge = 1,
   message = "",
   doAssertion = getOption("LandR.assertions", TRUE),
@@ -87,14 +100,59 @@ assertRstLCChange(
   rasterToMatch,
   doAssertion = getOption("LandR.assertions", TRUE)
 )
+
+assertSpeciesEcoregionCohortDataMatch(
+  cohortData,
+  speciesEcoregion,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertPixelCohortDataValid(
+  standCohortData,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertRepsAllCohortData(
+  allCohortData,
+  reps,
+  years,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertStandAgeMapAttr(
+  standAgeMap,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertCohortDataAttr(
+  cohortData,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertSppVectors(
+  sppEquiv = NULL,
+  sppNameVector = NULL,
+  sppColorVect = NULL,
+  sppEquivCol = NULL,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertSpeciesTableRaw(
+  speciesTableRaw,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertSpeciesTable(
+  speciesTable,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
 }
 \arguments{
 \item{cohortData34to36}{A \code{cohortData} \code{data.table} with only the
 pixels what were LCC 34:36}
 
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
-\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct},
-and \code{sumB}.}
+\code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
 \item{rmZeroBiomassQuote}{An expression to evaluate, in the form of \code{quote(B>0)},
 used to select cohorts with biomass.}
@@ -109,22 +167,28 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 \item{cohortDataNo34to36}{A \code{cohortData} \code{data.table} with only the
 pixels what were LCC 34:36}
 
+\item{speciesEcoregion}{A \code{data.table} with \code{species}-\code{ecoregion}-specific species trait values.
+Ecoregion refers to "ecolocation", a categorical variable grouping sites with similar biophysical
+characteristics. The table should have at least the following columns: \code{speciesCode} and
+\code{ecoregionGroup}, character representation of species and ecoregion groups respectively,
+\code{maxB} the maximum biomass for the species in a given 'ecoregion', \code{maxANPP} the maximum
+aboveground net primary productivity and \code{SEP} the species establishment probability.
+May contain columns \code{inflationFactor}  (used to adjust \code{maxB}) and \code{mANPPproportion}
+(used to calculate \code{maxANPP}).}
+
 \item{columns}{Vector of column names on which to test for unique \code{cohortData}}
 
-\item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique groupings}
+\item{ecoregionMap}{The \code{ecoregionMap}, a raster of all the unique ecoregion groupings,
+which group together pixels of similar biophysical characteristics.}
 
-\item{speciesEcoregion}{A \code{data.table} with \code{speciesEcoregion} values.}
+\item{minRelativeB}{a \code{data.frame} with  the cut points to classify stand shadiness.}
 
-\item{minRelativeB}{TODO: add description}
-
-\item{obj}{A data.frame or data.table-like object}
+\item{obj}{A \code{data.frame}- or \code{data.table}-like object}
 
 \item{colClasses}{A named vector of column classes, where the names are the column names}
 
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
 number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
-
-\item{sim}{If the \code{simList} is included, then the \code{browser()} call will be more useful.}
 
 \item{maxExpectedNumDiverge}{A numeric, length 1, indicating by how many they
 can diverge. Default 1.}
@@ -140,14 +204,10 @@ was called.}
 
 \item{speciesNames}{A vector of species names for which the labels will be checked}
 
-\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
-See \code{data("sppEquivalencies_CA", "LandR")}.
-Only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use
-\code{data("sppEquivalencies_CA", "LandR")}.}
+\item{sppEquiv}{an table with a column containing species names}
 
 \item{burnedPixelCohortData}{An expanded \code{cohortData} \code{data.table} with pixel-level
-cohort information on burnt pixels and columns:
+cohort information on burnt pixels and the following (optional) columns:
 \code{severity} - fire severity in that pixel calculated based on fire behaviour properties;
 \code{firetolerance} - species-level fire tolerance;
 \code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}.}
@@ -163,14 +223,39 @@ Defaults to 1.}
 
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
+
+\item{standCohortData}{A \code{data.table} with simulated and observed stand data for validation}
+
+\item{allCohortData}{A \code{data.table} with all simulated \code{cohortData} to use for
+validation}
+
+\item{reps}{repetition ids}
+
+\item{years}{years}
+
+\item{standAgeMap}{A \code{rasterLayer} of stand ages with attribute \code{"imputedPixID"}}
+
+\item{sppNameVector}{A character vector of species to use. These species must all
+be from one naming convention, i.e., from one column in the \code{sppEquiv}.}
+
+\item{sppColorVect}{A named vector of colours to use for plotting.
+The names must conform with species name convention used
+(see \link{sppEquivalencies_CA} for possible naming
+conventions) and should also contain a colour for 'Mixed',
+when a mixed forest type is supported  (see \code{vegLeadingProportion}
+parameter in \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} for details on mixed
+forest types).}
+
+\item{sppEquivCol}{the column name to use from \code{sppEquiv}.}
+
+\item{speciesTableRaw}{raw species traits \code{data.table} (see \code{\link[=getSpeciesTable]{getSpeciesTable()}})}
+
+\item{speciesTable}{species traits \code{data.table} (see \code{\link[=prepSpeciesTable]{prepSpeciesTable()}})}
 }
 \description{
-Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
-
-Assert that \code{ecoregionCodes} that were replaced, were correctly identified.
+\itemize{
+\item \code{assert1}: Assert that \code{ecoregionCodes} that were replaced, were correctly identified;
+}
 
 This is the full \code{pixelCohortData}, not the collapsed one.
-}
-\note{
-TODO
 }
