@@ -57,9 +57,12 @@ Suggests:
     BioSIM,
     covr,
     curl,
+    dplyr,
     fasterize,
     future,
     future.apply,
+    ggalluvial,
+    ggrepel,
     googledrive (>= 2.0.0),
     httr,
     knitr,
@@ -116,6 +119,7 @@ Collate:
     'nullClimate.R'
     'overlayLCCs.R'
     'partitionBiomass.R'
+    'plot-transitions.R'
     'plot_summaries.R'
     'plotting.R'
     'prepEcoregions.R'
