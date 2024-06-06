@@ -1930,7 +1930,7 @@ vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
       message(paste0(
         "Using mixedType == 2, but no sppEquiv provided. ",
         "Attempting to use data('sppEquivalencies_CA', 'LandR') ",
-        "and sppEquivCol == '", sppEquivCol, "'"
+        "and sppEquivCol = '", sppEquivCol, "'"
       ))
     }
   }
@@ -2053,8 +2053,8 @@ vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
     ## 4. change column names and convert pure to mixed ==> mixed <- !pure
     pixelGroupData3 <- pixelGroupData[, list(
       pure = speciesProportion >= vegLeadingProportion,
-      speciesCode, pixelGroup, speciesProportion
-    )]
+      speciesCode, get(pixelGroupColName), speciesProportion)]
+    setnames(pixelGroupData3, "V3", pixelGroupColName)
     setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
     set(pixelGroupData3, NULL, "speciesProportion", NULL)
     pixelGroupData3 <- pixelGroupData3[, .SD[1], by = pixelGroupColName]

@@ -1,3 +1,7 @@
+# LandR 1.1.4
+
+* fix bug in `vegTypeMapGenerator()` when `mixedType = 1`;
+
 # LandR 1.1.2
 
 * unlink NTEMS file (24 GB) after use in `prepInputs_NTEMS_LCC_FAO()`;

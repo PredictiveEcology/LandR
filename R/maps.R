@@ -483,7 +483,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     ## 3. Keep only first row in each pixelGroup
     ## 4. change column names and convert pure to mixed ==> mixed <- !pure
     pixelGroupData3 <- pixelGroupData[, list(pure = speciesProportion >= vegLeadingProportion,
-                                             speciesCode, pixelGroup, speciesProportion)]
+                                             speciesCode, get(pixelGroupColName), speciesProportion)]
+    setnames(pixelGroupData3, "V3", pixelGroupColName)
     setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
     set(pixelGroupData3, NULL, "speciesProportion", NULL)
     pixelGroupData3 <- pixelGroupData3[, .SD[1], by = pixelGroupColName]
@@ -562,9 +563,9 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
                                      species = levels(pixelGroupData3[["leading"]]),
                                      stringsAsFactors = TRUE)
   } else {
-    if (is.factor(pixelGroupData3[["initialEcoregionCode"]])) {
-      f <- pixelGroupData3[["initialEcoregionCode"]]
-      pixelGroupData3[["initialEcoregionCode"]] <- as.numeric(levels(f))[f]
+    if (is.factor(pixelGroupData3[[pixelGroupColName]])) {
+      f <- pixelGroupData3[[pixelGroupColName]]
+      pixelGroupData3[[pixelGroupColName]] <- as.numeric(levels(f))[f]
     }
 
     vegTypeMap <- rasterizeReduced(pixelGroupData3, pixelGroupMap, "leading", pixelGroupColName)
@@ -577,8 +578,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       sppColors(sppEquiv, sppEquivCol, palette = "Accent")
   }
 
-  assertSppVectors(sppEquiv = sppEquiv, sppEquivCol = sppEquivCol,
-                   sppColorVect = colors)
+  assertSppVectors(sppEquiv = sppEquiv, sppEquivCol = sppEquivCol, sppColorVect = colors)
 
   rasLevels <- levels(vegTypeMap)[[1]]
   if (!is.null(dim(rasLevels))) {
