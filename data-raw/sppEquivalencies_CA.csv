@@ -191,7 +191,7 @@ tsughete,TSUG.HET,Tsug_het,Tsug_Het,Tsug hete,Tsuga heterophylla,,,,,,FALSE,Coni
 ,,Tsug_mer,Tsug_Mer_Het,Tsug merx,Tsuga mertensiana,,,,,,FALSE,Conifer,mountain hemlock,,class3,Hm,,,TSUG_MER,
 tsugmert,TSUG.MER,Tsug_mer,Tsug_Mer,Tsug mert,Tsuga mertensiana x heterophylla,,,,,,FALSE,Conifer,mountain hemlock,,class3,Hxm,,,TSUG_MER,
 ,,Tsug_sp,Tsug_Spp,Tsug spp,Tsuga spp.,Hemlock,Hemlock,Hemlock leading,,Tsug_Spp,FALSE,Conifer,,,class3,H,,,TSUG_SP,
-,,Ulmu_ame,Ulmu_Ame,Ulmu amer,Ulmus americana,,,,,,TRUE,Deciduous,white elm,,,,,EL,ULMU_AME,ORM
+,,Ulmu_ame,Ulmu_Ame,Ulmu amer,Ulmus americana,,,,,,TRUE,Deciduous,white elm,,,,,EL,ULMU_AME,ORA
 ,,Ulmu_pum,Ulmu_Rub,Ulmu pumi,Ulmus pumila,,,,,,TRUE,Deciduous,,,,,,,ULMU_PUM,
 ,,Ulmu_rub,Ulmu_Spp,Ulmu rubr,Ulmus rubra,,Slippery elm,,,,TRUE,Deciduous,,,,,,,ULMU_RUB,ORR
 ,,Ulmu_sp,Ulmu_Tho,Ulmu spp,Ulmus spp.,,,,,,TRUE,Deciduous,,,,,,,ULMU_SPP.,
