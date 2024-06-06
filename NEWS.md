@@ -1,6 +1,7 @@
 # LandR 1.1.4
 
 * fix bug in `vegTypeMapGenerator()` when `mixedType = 1`;
+* allow `mixedType = 0` in `vegTypeMapGenerator()`;
 
 # LandR 1.1.3
 

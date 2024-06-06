@@ -1881,9 +1881,9 @@ pixelFate <- function(pixelFateDT, fate = NA_character_, pixelsRemoved = 0,
 #'
 #' @template vegLeadingProportion
 #'
-#' @param mixedType An integer defining whether mixed stands are of any kind of species
-#'                  admixture (1), or only when deciduous mixed with conifer (2).
-#'                  Defaults to 2.
+#' @param mixedType An integer defining whether mixed stands are:
+#'                  not differentiated (0), any kind of species admixture (1),
+#'                  or deciduous mixed with conifer (2; default).
 #'
 #' @template sppEquiv
 #'
@@ -1913,6 +1913,11 @@ vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
                              mixedType = 2, sppEquiv = NULL, sppEquivCol,
                              pixelGroupColName = "pixelGroup",
                              doAssertion = getOption("LandR.assertions", TRUE), ...) {
+  stopifnot(
+    mixedType %in% 0:2,
+    length(mixedType) == 1
+  )
+
   nrowCohortData <- NROW(x)
 
   leadingBasedOn <- preambleVTG(x, vegLeadingProportion, doAssertion, nrowCohortData)
@@ -2045,7 +2050,16 @@ vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
   ########################################################
   #### Determine "mixed"
   ########################################################
-  if (mixedType == 1) {
+  if (mixedType == 0) {
+    ## 1. sort on pixelGroup and speciesProportion, reverse so 1st row of each pixelGroup is the largest
+    ## 2. Keep only first row in each pixelGroup
+    pixelGroupData3 <- pixelGroupData[, list(speciesCode, get(pixelGroupColName), speciesProportion)]
+    setnames(pixelGroupData3, "V2", pixelGroupColName)
+    setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
+    set(pixelGroupData3, NULL, "speciesProportion", NULL)
+    pixelGroupData3 <- pixelGroupData3[, .SD[1], by = pixelGroupColName]
+    setnames(pixelGroupData3, "speciesCode", "leading")
+  } else if (mixedType == 1) {
     ## create "mixed" class #    -- Eliot May 28, 2019 -- faster than previous below
     ## 1. anything with >= vegLeadingProportion is "pure"
     ## 2. sort on pixelGroup and speciesProportion, reverse so that 1st row of each pixelGroup is the largest
@@ -2118,7 +2132,7 @@ vegTypeGenerator <- function(x, vegLeadingProportion = 0.8,
     setnames(pixelGroupData3, "speciesCode", "leading")
     set(pixelGroupData3, NULL, "leading", factor(pixelGroupData3[["leading"]]))
   } else {
-    stop("invalid mixedType! Must be one of '1' or '2'.")
+    stop("invalid mixedType! Must be one of '0', '1' or '2'.")
   }
 
   cols <- c(pixelGroupColName, "leading")
