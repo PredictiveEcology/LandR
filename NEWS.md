@@ -1,3 +1,7 @@
+# LandR (development version)
+
+- use INT2U instead of INT1U when writing rasters in `.overlay()` to avoid warning with larger values;
+
 # LandR 1.1.4
 
 * fix bug in `vegTypeMapGenerator()` when `mixedType = 1`;
