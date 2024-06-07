@@ -1,6 +1,15 @@
+# LandR 1.1.4
+
+* fix bug in `vegTypeMapGenerator()` when `mixedType = 1`;
+* allow `mixedType = 0` in `vegTypeMapGenerator()`;
+
+# LandR 1.1.3
+
+* fixed an assertion;
+
 # LandR 1.1.2
 
-* unlink NTEMS file (24 GB) after use in `prepInputs_NTEMS_LCC_FAO()`;
+* delete NTEMS file (24 GB) after use in `prepInputs_NTEMS_LCC_FAO()`;
 * update Quebec PSP column in `speciesEquivalencies_CA`;
 
 # LandR 1.1.1
