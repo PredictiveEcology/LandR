@@ -1152,8 +1152,8 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 
     ## complete missing HQ data with LQ data
     HQRast[NAs] <- LQRast[][NAs]
-    NAval <- 255L
-    HQRast <- writeRaster(HQRast, datatype = "INT1U",
+    NAval <- 65535L
+    HQRast <- writeRaster(HQRast, datatype = "INT2U",
                           filename = file.path(destinationPath,
                                                paste0(SPP, "_", outputFilenameSuffix, ".tif")),
                           overwrite = TRUE, NAflag = NAval)
