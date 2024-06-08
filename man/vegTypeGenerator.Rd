@@ -21,9 +21,9 @@ vegTypeGenerator(
 \item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
 threshold a species needs to pass to be considered "leading".}
 
-\item{mixedType}{An integer defining whether mixed stands are of any kind of species
-admixture (1), or only when deciduous mixed with conifer (2).
-Defaults to 2.}
+\item{mixedType}{An integer defining whether mixed stands are:
+not differentiated (0), any kind of species admixture (1),
+or deciduous mixed with conifer (2; default).}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.

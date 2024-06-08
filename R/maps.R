@@ -229,9 +229,9 @@ makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
 #'
 #' @template vegLeadingProportion
 #'
-#' @param mixedType An integer defining whether mixed stands are of any kind of species
-#'                  admixture (1), or only when deciduous mixed with conifer (2).
-#'                  Defaults to 2.
+#' @param mixedType An integer defining whether mixed stands are:
+#'                  not differentiated (0), any kind of species admixture (1),
+#'                  or deciduous mixed with conifer (2; default).
 #'
 #' @template sppEquiv
 #'
@@ -331,6 +331,11 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
                                            mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,
                                            pixelGroupColName = "pixelGroup",
                                            doAssertion = getOption("LandR.assertions", TRUE), ...) {
+  stopifnot(
+    mixedType %in% 0:2,
+    length(mixedType) == 1
+  )
+
   nrowCohortData <- NROW(x)
   leadingBasedOn <- preambleVTG(x, vegLeadingProportion, doAssertion, nrowCohortData)
 
@@ -476,14 +481,24 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       , .(pixelGroup, speciesCode, totalB)])
   }
 
-  if (mixedType == 1) {
+  if (mixedType == 0) {
+    ## 1. sort on pixelGroup and speciesProportion, reverse so 1st row of each pixelGroup is the largest
+    ## 2. Keep only first row in each pixelGroup
+    pixelGroupData3 <- pixelGroupData[, list(speciesCode, get(pixelGroupColName), speciesProportion)]
+    setnames(pixelGroupData3, "V2", pixelGroupColName)
+    setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
+    set(pixelGroupData3, NULL, "speciesProportion", NULL)
+    pixelGroupData3 <- pixelGroupData3[, .SD[1], by = pixelGroupColName]
+    setnames(pixelGroupData3, "speciesCode", "leading")
+  } else if (mixedType == 1) {
     ## create "mixed" class #    -- Eliot May 28, 2019 -- faster than previous below
     ## 1. anything with >= vegLeadingProportion is "pure"
     ## 2. sort on pixelGroup and speciesProportion, reverse so that 1st row of each pixelGroup is the largest
     ## 3. Keep only first row in each pixelGroup
     ## 4. change column names and convert pure to mixed ==> mixed <- !pure
     pixelGroupData3 <- pixelGroupData[, list(pure = speciesProportion >= vegLeadingProportion,
-                                             speciesCode, pixelGroup, speciesProportion)]
+                                             speciesCode, get(pixelGroupColName), speciesProportion)]
+    setnames(pixelGroupData3, "V3", pixelGroupColName)
     setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
     set(pixelGroupData3, NULL, "speciesProportion", NULL)
     pixelGroupData3 <- pixelGroupData3[, .SD[1], by = pixelGroupColName]
@@ -545,8 +560,6 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     pixelGroupData3[mixed == TRUE, speciesCode := "Mixed"]
     setnames(pixelGroupData3, "speciesCode", "leading")
     set(pixelGroupData3, NULL, "leading", factor(pixelGroupData3[["leading"]]))
-  } else {
-    stop("invalid mixedType! Must be one of '1' or '2'.")
   }
 
   if ("pixelIndex" %in% colnames(pixelGroupData3)) { #(!any(duplicated(pixelGroupData3[[pixelGroupColName]]))) {
@@ -562,23 +575,22 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
                                      species = levels(pixelGroupData3[["leading"]]),
                                      stringsAsFactors = TRUE)
   } else {
-    if (is.factor(pixelGroupData3[["initialEcoregionCode"]])) {
-      f <- pixelGroupData3[["initialEcoregionCode"]]
-      pixelGroupData3[["initialEcoregionCode"]] <- as.numeric(levels(f))[f]
+    if (is.factor(pixelGroupData3[[pixelGroupColName]])) {
+      f <- pixelGroupData3[[pixelGroupColName]]
+      pixelGroupData3[[pixelGroupColName]] <- as.numeric(levels(f))[f]
     }
 
     vegTypeMap <- rasterizeReduced(pixelGroupData3, pixelGroupMap, "leading", pixelGroupColName)
   }
 
   if (missing(colors)) {
-    colors <- if (vegLeadingProportion > 0)
+    colors <- if (mixedType > 0 && vegLeadingProportion > 0)
       sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
     else
       sppColors(sppEquiv, sppEquivCol, palette = "Accent")
   }
 
-  assertSppVectors(sppEquiv = sppEquiv, sppEquivCol = sppEquivCol,
-                   sppColorVect = colors)
+  assertSppVectors(sppEquiv = sppEquiv, sppEquivCol = sppEquivCol, sppColorVect = colors)
 
   rasLevels <- levels(vegTypeMap)[[1]]
   if (!is.null(dim(rasLevels))) {
@@ -593,10 +605,11 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
   }
 
   if (isTRUE(doAssertion)) {
-    if (sum(!is.na(vegTypeMap[])) < 100)
+    if (sum(!is.na(vegTypeMap[])) < 100) {
       ids <- sample(which(!is.na(vegTypeMap[])), sum(!is.na(vegTypeMap[])), replace = FALSE)
-    else
+    } else {
       ids <- sample(which(!is.na(vegTypeMap[])), 100, replace = FALSE)
+    }
 
     pgs <- pixelGroupMap[][ids]
     dups <- duplicated(pgs)
@@ -613,7 +626,12 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     pgs <- pgs[!pgs %in% whNAPG]
     pgTest <- pgTest[!whNA]
     pgTest[, Type := equivalentName(speciesCode, sppEquiv, "Type")]
-    if (mixedType == 1) {
+
+    if (mixedType == 0) {
+      pgTest2 <- pgTest[, list(leading = speciesCode[which.max(speciesProportion)]),
+                        by = pixelGroupColName]
+      out <- pgTest2
+    } else if (mixedType == 1) {
       pgTest2 <- pgTest[, list(mixed = all(speciesProportion < vegLeadingProportion),
                                leading = speciesCode[which.max(speciesProportion)]),
                         by = pixelGroupColName]
@@ -626,7 +644,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       pgTest2[mixed == TRUE, leading := "Mixed"]
       pgTest2 <- pgTest2[!duplicated(pgTest2)]
       out <- pgTest2
-    } ## TODO: make sure mixedType = 0 works!! currently not implemented
+    }
 
     length(unique(out[[pixelGroupColName]]))
     length(pgs %in% unique(pgTest2[[pixelGroupColName]]))
@@ -1134,8 +1152,8 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 
     ## complete missing HQ data with LQ data
     HQRast[NAs] <- LQRast[][NAs]
-    NAval <- 255L
-    HQRast <- writeRaster(HQRast, datatype = "INT1U",
+    NAval <- 65535L
+    HQRast <- writeRaster(HQRast, datatype = "INT2U",
                           filename = file.path(destinationPath,
                                                paste0(SPP, "_", outputFilenameSuffix, ".tif")),
                           overwrite = TRUE, NAflag = NAval)
