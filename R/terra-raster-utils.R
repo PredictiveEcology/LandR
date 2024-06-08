@@ -41,12 +41,10 @@ utils::globalVariables(c(
   isSpatRas <- sapply(rasList, function(ras) is(ras, "SpatRaster"))
   if (all(isRaster)) {
     return(raster::stack(rasList))
+  } else if (all(isSpatRas)) {
+    return(rast(rasList))
   } else {
-    if (all(isSpatRas)) {
-      return(rast(rasList))
-    } else {
-      stop("List entries should all be RasterLayer or SpatRaster")
-    }
+    stop("List entries should all be RasterLayer or SpatRaster")
   }
 }
 

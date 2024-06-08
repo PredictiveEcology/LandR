@@ -708,6 +708,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   if ("shared_drive_url" %in% names(dots)) {
     shared_drive_url <- dots[["shared_drive_url"]]
   }
+
   if (missing(sppEquiv)) {
     message("sppEquiv argument is missing, using LandR::sppEquivalencies_CA, with ",
             sppEquivCol," column (taken from sppEquivCol arg value)")
@@ -836,11 +837,11 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   ## the grep may partially match several species, resulting on a list.
   targetFiles <- unique(unlist(targetFiles))
 
-  postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
+  postProcessedFilenames <- .suffix(targetFiles, suffix = suffix) |> gsub("^[.]/", "", x = _)
   postProcessedFilenamesWithStudyAreaName <- if (is.null(dots$studyAreaName)) {
     postProcessedFilenames
   } else {
-    .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
+    .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName)) |> gsub("^[.]/", "", x = _)
   }
 
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
@@ -911,7 +912,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
         seq_along(speciesLayers),
         FUN = function(i, rasters = speciesLayers,
                        filenames = postProcessedFilenamesWithStudyAreaName) {
-          writeRaster(rasters[[i]], file.path(oPath, paste0(filenames[i], '.tif')), overwrite = TRUE)
+          outFile <- file.path(oPath, paste0(filenames[i], ".tif"))
+          writeRaster(rasters[[i]], outFile, overwrite = TRUE)
         }
       )
     } else {
