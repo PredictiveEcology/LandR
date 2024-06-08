@@ -38,7 +38,7 @@ Imports:
     MuMIn (>= 1.42.5),
     parallel,
     pemisc (>= 0.0.4.9011),
-    quickPlot,
+    quickPlot (>= 1.0.2.9001),
     raster,
     RColorBrewer,
     reproducible (>= 2.0.8),
