@@ -5,7 +5,7 @@
 \alias{plotVegTransitions}
 \title{Create a vegetation transitions data frame}
 \usage{
-vegTransitions(fvtm, ecoregion, studyArea, times)
+vegTransitions(fvtm, ecoregion, field, studyArea, times, na.rm = FALSE)
 
 plotVegTransitions(transitions_df)
 }
@@ -14,10 +14,17 @@ plotVegTransitions(transitions_df)
 
 \item{ecoregion}{\code{SpatRaster} of ecoregion (or other) codes by which to group produce plots.}
 
+\item{field}{character string of the column name in \code{ecoregion} to use for grouping.}
+
 \item{studyArea}{\code{sf} polygons object delineating the area to use for cropping and masking
 of \code{ecoregion} (e.g., \code{studyAreaReporting}).}
 
 \item{times}{numeric vector of years corresponding to the \code{fvtm} files.}
+
+\item{na.rm}{logical. If \code{TRUE}, remove rows with \code{NA} values in \code{vegType}
+(they won't appear as a stratum in the alluvial diagram).
+If \code{FALSE}, these \code{NA} values will be replaced with \code{"_NA_"} so transitions
+between vegetated and non-vegetated pixels can be visualized.}
 
 \item{transition_df}{A data frame with columns \code{pixelID}, \code{ecoregion}, \code{vegType}, and \code{time}.
 (i.e., output of \code{vegTransitions()}).}

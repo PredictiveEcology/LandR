@@ -52,9 +52,9 @@
 #' @importFrom SpaDES.tools spread2
 #' @importFrom stats as.formula complete.cases fitted glm na.omit predict quantile runif terms update vcov
 #' @importFrom terra app as.int cellFromRowCol cellFromXY classify coltab<- compareGeom
-#' @importFrom terra crop crs crs<- ext extract focalMat
-#' @importFrom terra intersect is.factor is.int is.points levels mask minmax NAflag<- ncell nlyr
-#' @importFrom terra project rast rasterize res rowColFromCell terraOptions values vect
+#' @importFrom terra crop crs crs<- ext extract focalMat intersect is.factor is.int is.points
+#' @importFrom terra levels mask minmax NAflag<- ncell nlyr project
+#' @importFrom terra rast rasterize res rowColFromCell terraOptions values vect
 #' @importFrom terra writeRaster xmax xmin ymax ymin xyFromCell
 #' @importFrom tidyterra geom_spatraster
 #' @importFrom tools file_path_sans_ext
