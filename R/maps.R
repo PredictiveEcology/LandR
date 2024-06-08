@@ -1202,12 +1202,13 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
 
   ## make sure species names and list names are in the right formats
   names(sppMerge) <- sppMerge
-  sppMerges <- lapply(sppMerge, FUN = function(x) {
+  sppMerges <- sapply(sppMerge, FUN = function(x) {
     unique(equivalentName(x, sppEquiv,  column = column, multi = TRUE))
-  })
+  }, simplify = FALSE)
 
   ## keep species present in the data
-  sppMerges <- lapply(sppMerges, FUN = function(x) x[x %in% names(speciesLayers)])
+  sppMerges <- sapply(sppMerges, FUN = function(x) x[x %in% names(speciesLayers)],
+                      simplify = FALSE)
 
   for (i in seq_along(sppMerges)) {
     sumSpecies <- sppMerges[[i]]
