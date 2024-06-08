@@ -356,7 +356,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
   pgdAndScAndLeading <- c(pgdAndSc, leadingBasedOn)
   totalOfLeadingBasedOn <- paste0("total", leadingBasedOn)
   speciesOfLeadingBasedOn <- paste0("speciesGroup", leadingBasedOn)
-  if (algo == 1 || isTRUE(doAssertion)) {
+  if (algo == 1) {# || isTRUE(doAssertion)) {
     # slower -- older, but simpler Eliot June 5, 2019
     # 1. Find length of each pixelGroup -- don't include pixelGroups in "by" that have only 1 cohort: N = 1
     cohortData1 <- copy(x)
@@ -427,7 +427,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     systimePost2 <- Sys.time()
   }
 
-  if (isTRUE(doAssertion)) {
+  if (isTRUE(doAssertion) && algo == 1) {
     ## slower -- older, but simpler Eliot June 5, 2019
     ## TODO: these algorithm tests should be deleted after a while. See date on prev line.
     if (!exists("oldAlgoVTM", envir = .pkgEnv)) .pkgEnv$oldAlgoVTM <- 0
