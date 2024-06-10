@@ -361,7 +361,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
   pgdAndScAndLeading <- c(pgdAndSc, leadingBasedOn)
   totalOfLeadingBasedOn <- paste0("total", leadingBasedOn)
   speciesOfLeadingBasedOn <- paste0("speciesGroup", leadingBasedOn)
-  if (algo == 1 || isTRUE(doAssertion)) {
+  if (algo == 1) {# || isTRUE(doAssertion)) {
     # slower -- older, but simpler Eliot June 5, 2019
     # 1. Find length of each pixelGroup -- don't include pixelGroups in "by" that have only 1 cohort: N = 1
     cohortData1 <- copy(x)
@@ -432,7 +432,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     systimePost2 <- Sys.time()
   }
 
-  if (isTRUE(doAssertion)) {
+  if (isTRUE(doAssertion) && algo == 1) {
     ## slower -- older, but simpler Eliot June 5, 2019
     ## TODO: these algorithm tests should be deleted after a while. See date on prev line.
     if (!exists("oldAlgoVTM", envir = .pkgEnv)) .pkgEnv$oldAlgoVTM <- 0
@@ -708,6 +708,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   if ("shared_drive_url" %in% names(dots)) {
     shared_drive_url <- dots[["shared_drive_url"]]
   }
+
   if (missing(sppEquiv)) {
     message("sppEquiv argument is missing, using LandR::sppEquivalencies_CA, with ",
             sppEquivCol," column (taken from sppEquivCol arg value)")
@@ -836,11 +837,11 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   ## the grep may partially match several species, resulting on a list.
   targetFiles <- unique(unlist(targetFiles))
 
-  postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
+  postProcessedFilenames <- .suffix(targetFiles, suffix = suffix) |> gsub("^[.]/", "", x = _)
   postProcessedFilenamesWithStudyAreaName <- if (is.null(dots$studyAreaName)) {
     postProcessedFilenames
   } else {
-    .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
+    .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName)) |> gsub("^[.]/", "", x = _)
   }
 
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
@@ -911,7 +912,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
         seq_along(speciesLayers),
         FUN = function(i, rasters = speciesLayers,
                        filenames = postProcessedFilenamesWithStudyAreaName) {
-          writeRaster(rasters[[i]], file.path(oPath, paste0(filenames[i], '.tif')), overwrite = TRUE)
+          outFile <- file.path(oPath, paste0(filenames[i], ".tif"))
+          writeRaster(rasters[[i]], outFile, overwrite = TRUE)
         }
       )
     } else {
@@ -1200,12 +1202,13 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
 
   ## make sure species names and list names are in the right formats
   names(sppMerge) <- sppMerge
-  sppMerges <- lapply(sppMerge, FUN = function(x) {
+  sppMerges <- sapply(sppMerge, FUN = function(x) {
     unique(equivalentName(x, sppEquiv,  column = column, multi = TRUE))
-  })
+  }, simplify = FALSE)
 
   ## keep species present in the data
-  sppMerges <- lapply(sppMerges, FUN = function(x) x[x %in% names(speciesLayers)])
+  sppMerges <- sapply(sppMerges, FUN = function(x) x[x %in% names(speciesLayers)],
+                      simplify = FALSE)
 
   for (i in seq_along(sppMerges)) {
     sumSpecies <- sppMerges[[i]]
