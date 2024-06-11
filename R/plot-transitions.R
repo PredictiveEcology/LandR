@@ -38,7 +38,7 @@ vtm2conifdecid <- function(vtm, sppEquiv = NULL, sppEquivCol = "LandR", studyAre
       as.factor()
 
     fout <- .suffix(vtm[i], "_conifdecid")
-    terra::writeRaster(conifdecid, fout, overwrite = TRUE)
+    terra::writeRaster(terra::as.factor(conifdecid), fout, overwrite = TRUE)
 
     return(fout)
   }, character(1))
