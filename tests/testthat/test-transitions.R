@@ -88,7 +88,7 @@ test_that("leading species transitions plots look good", {
   )
 
   if (interactive()) {
-    transition_ggs2 <- plotVegTransitions(transitions_df2)
+    transition_ggs2 <- plotVegTransitions(transitions_df)
 
     lapply(seq_along(transition_ggs2), function(i) {
       ggsave(file.path(outputDir, "figures", paste0("transition_conifdecid_", er, ".png")), gg,
