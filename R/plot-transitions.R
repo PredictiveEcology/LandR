@@ -33,12 +33,12 @@ vtm2conifdecid <- function(vtm, sppEquiv = NULL, sppEquivCol = "LandR", studyAre
 
     vegType <- lvls_vt[["values"]][match(values(r, mat = FALSE), lvls_vt[["id"]])]
 
-    conifdecid <- terra::rast(r)
-    conifdecid[] <- sppEquiv[["Type"]][match(vegType, sppEquiv[[sppEquivCol]])] |>
-      as.factor()
+    conifdecid <- sppEquiv[["Type"]][match(vegType, sppEquiv[[sppEquivCol]])] |> as.factor()
 
     fout <- .suffix(vtm[i], "_conifdecid")
-    terra::writeRaster(terra::as.factor(conifdecid), fout, overwrite = TRUE)
+    rout <- terra::rast(r)
+    terra::values(rout) <- conifdecid
+    terra::writeRaster(rout, fout, overwrite = TRUE)
 
     return(fout)
   }, character(1))
@@ -68,15 +68,17 @@ vegTransitions <- function(vtm, ecoregion, field, studyArea, times, na.rm = FALS
       terra::mask(studyArea)
     lvls_vt <- terra::levels(r)[[1]]
     names(lvls_vt) <- tolower(names(lvls_vt))
+    idcol_vt <- grep("^(id|value)$", names(lvls_vt), ignore.case = TRUE, value = TRUE)
 
     lvls_er <- terra::levels(ecoregion)[[1]]
     names(lvls_er) <- tolower(names(lvls_er))
+    idcol_er <- grep("^(id|value)$", names(lvls_er), ignore.case = TRUE, value = TRUE)
     field <- tolower(field)
 
     tdf <- data.table(
       pixelID = seq_len(terra::ncell(r)),
-      ecoregion = lvls_er[[field]][match(values(ecoregion, mat = FALSE), lvls_er[["id"]])],
-      vegType = lvls_vt[["values"]][match(values(r, mat = FALSE), lvls_vt[["id"]])],
+      ecoregion = lvls_er[[field]][match(values(ecoregion, mat = FALSE), lvls_er[[idcol_er]])],
+      vegType = lvls_vt[["values"]][match(values(r, mat = FALSE), lvls_vt[[idcol_vt]])],
       time = times[yr]
     ) |>
       na.omit("ecoregion")
