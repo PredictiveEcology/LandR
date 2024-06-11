@@ -27,7 +27,7 @@ If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 \item{studyArea}{\code{sf} polygons object delineating the area to use for cropping and masking
 of \code{ecoregion} (e.g., \code{studyAreaReporting}).}
 
-\item{ecoregion}{\code{SpatRaster} of ecoregion (or other) codes by which to group produce plots.}
+\item{ecoregion}{\code{SpatRaster} of ecoregion (or other) codes by which to group.}
 
 \item{field}{character string of the column name in \code{ecoregion} to use for grouping.}
 

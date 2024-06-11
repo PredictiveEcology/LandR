@@ -44,7 +44,7 @@ vtm2conifdecid <- function(vtm, sppEquiv = NULL, sppEquivCol = "LandR", studyAre
   }, character(1))
 }
 
-#' @param ecoregion `SpatRaster` of ecoregion (or other) codes by which to group produce plots.
+#' @param ecoregion `SpatRaster` of ecoregion (or other) codes by which to group.
 #'
 #' @param field character string of the column name in `ecoregion` to use for grouping.
 #'
