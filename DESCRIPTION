@@ -68,6 +68,7 @@ Suggests:
     knitr,
     lqmm,
     MASS,
+    memuse,
     parallelly,
     qs,
     rasterVis,

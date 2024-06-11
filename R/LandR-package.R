@@ -24,10 +24,10 @@
 #' @importFrom fpCompare %==% %>>% %<<%
 #' @importFrom ggplot2 aes coord_equal coord_sf element_blank element_text facet_wrap
 #' @importFrom ggplot2 geom_bar geom_hline geom_line geom_point labs geom_raster geom_ribbon geom_sf
-#' @importFrom ggplot2 ggplot guide_legend guides labs
+#' @importFrom ggplot2 ggplot ggtitle guide_legend guides labs
 #' @importFrom ggplot2 scale_color_distiller
 #' @importFrom ggplot2 scale_fill_distiller scale_fill_manual scale_fill_viridis_c scale_fill_viridis_d
-#' @importFrom ggplot2 scale_x_discrete
+#' @importFrom ggplot2 scale_linetype_manual scale_x_discrete
 #' @importFrom ggplot2 stat stat_summary sym theme theme_classic unit
 #' @importFrom ggpubr theme_pubr
 #' @importFrom ggspatial annotation_north_arrow layer_spatial north_arrow_minimal
@@ -58,7 +58,7 @@
 #' @importFrom terra writeRaster xmax xmin ymax ymin xyFromCell
 #' @importFrom tidyterra geom_spatraster
 #' @importFrom tools file_path_sans_ext
-#' @importFrom utils capture.output combn count.fields data getFromNamespace install.packages
+#' @importFrom utils capture.output combn count.fields data getFromNamespace head install.packages
 #' @importFrom utils str tail untar
 ## usethis namespace: end
 NULL
