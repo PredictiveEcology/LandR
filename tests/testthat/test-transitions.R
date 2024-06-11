@@ -43,7 +43,7 @@ test_that("leading species transitions plots look good", {
 
   transitions_df <- vegTransitions(
     vtm = fvtm,
-    ecoregion = NDTBEC,
+    ecoregion = rstNDTBEC,
     field = "NDTBEC",
     studyArea = studyArea2,
     times = years
@@ -81,7 +81,7 @@ test_that("leading species transitions plots look good", {
 
   transitions_df <- vegTransitions(
     vtm = fvtm2,
-    ecoregion = NDTBEC,
+    ecoregion = rstNDTBEC,
     field = "NDTBEC",
     studyArea = studyArea2,
     times = years

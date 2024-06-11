@@ -69,7 +69,7 @@ vegTransitions <- function(vtm, ecoregion, field, studyArea, times, na.rm = FALS
     lvls_vt <- terra::levels(r)[[1]]
     names(lvls_vt) <- tolower(names(lvls_vt))
 
-    lvls_er <- levels(ecoregion)[[1]]
+    lvls_er <- terra::levels(ecoregion)[[1]]
     names(lvls_er) <- tolower(names(lvls_er))
     field <- tolower(field)
 
