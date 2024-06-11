@@ -35,9 +35,7 @@ test_that("leading species transitions plots look good", {
 
   years <- c(800, 850, 900, 950, 1000, 1050, 1100, 1150, 1200)
 
-  fvtm <- vapply(outputDir, function(d) {
-    file.path(d, sprintf("vegTypeMap_year%04d.tif", years))
-  }, character(length(years))) |> as.vector()
+  fvtm <- file.path(outputDir, sprintf("vegTypeMap_year%04d.tif", years))
 
   ## using VTM as-is ---------------------------------------------------------------------------------
 
