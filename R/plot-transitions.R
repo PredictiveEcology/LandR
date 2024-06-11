@@ -129,11 +129,11 @@ plotVegTransitions <- function(transitions_df) {
       scale_linetype_manual(values = c("blank", "solid")) +
       ggrepel::geom_text_repel(
         aes(label = ifelse(as.numeric(as.character(time)) == head(as.numeric(as.character(time)), 1), vegType, NA)),
-        stat = "stratum", size = 3, direction = "y", nudge_x = -0.5
+        stat = ggalluvial::StatStratum, size = 3, direction = "y", nudge_x = -0.5
       ) +
       ggrepel::geom_text_repel(
         aes(label = ifelse(as.numeric(as.character(time)) == tail(as.numeric(as.character(time)), 1), vegType, NA)),
-        stat = "stratum", size = 3, direction = "y", nudge_x = +0.5
+        stat = ggalluvial::StatStratum, size = 3, direction = "y", nudge_x = +0.5
       ) +
       theme(legend.position = "none") +
       ggtitle(paste("Vegetation type transitions in", er))
