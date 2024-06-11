@@ -41,7 +41,7 @@ vtm2conifdecid <- function(vtm, sppEquiv = NULL, sppEquivCol = "LandR", studyAre
     terra::writeRaster(conifdecid, fout, overwrite = TRUE)
 
     return(fout)
-  }, character(length(vtm)))
+  }, character(1))
 }
 
 #' @param ecoregion `SpatRaster` of ecoregion (or other) codes by which to group produce plots.
