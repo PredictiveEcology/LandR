@@ -42,7 +42,7 @@ test_that("leading species transitions plots look good", {
   ## using VTM as-is ---------------------------------------------------------------------------------
 
   transitions_df <- vegTransitions(
-    fvtm = fvtm,
+    vtm = fvtm,
     ecoregion = NDTBEC,
     field = "NDTBEC",
     studyArea = studyArea2,
@@ -73,7 +73,7 @@ test_that("leading species transitions plots look good", {
     rbind(data.table(BC_HRV = "Mixed", Type = "Mixed"))
 
   fvtm2 <- vtm2conifdecid(
-    fvtm = fvtm,
+    vtm = fvtm,
     sppEquiv = sppEquiv,
     sppEquivCol = "BC_HRV",
     studyArea = studyArea2
