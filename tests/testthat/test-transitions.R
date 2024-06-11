@@ -14,8 +14,8 @@ test_that("leading species transitions plots look good", {
   withr::local_package("memuse")
   withr::local_package("terra")
 
-  ## need ~20GB RAM to construct summary data.frames and plots
-  skip_if_not(isTRUE(Sys.meminfo()$freeram >= as.memuse(20 * 1024^3)))
+  ## need ~10GB RAM to construct summary data.frames and plots
+  skip_if_not(isTRUE(Sys.meminfo()$freeram >= as.memuse(10 * 1024^3)))
 
   run <- 1L
   outputDir <- file.path("~/GitHub/BC_HRV/outputs",
