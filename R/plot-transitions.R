@@ -90,7 +90,7 @@ vegTransitions <- function(vtm, ecoregion, field, studyArea, times, na.rm = FALS
     return(as.data.frame(tdf))
   }) |>
     dplyr::bind_rows() |>
-    dplyr::mutate(time = factor(times, levels = as.character(times)))
+    dplyr::mutate(time = factor(time, levels = as.character(times)))
 
   return(transitions_df)
 }
