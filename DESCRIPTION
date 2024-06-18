@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     https://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2024-05-29
-Version: 1.1.2
+Date: 2024-06-10
+Version: 1.1.5.9000
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -38,7 +38,7 @@ Imports:
     MuMIn (>= 1.42.5),
     parallel,
     pemisc (>= 0.0.4.9011),
-    quickPlot,
+    quickPlot (>= 1.0.2.9001),
     raster,
     RColorBrewer,
     reproducible (>= 2.0.8),

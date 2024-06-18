@@ -40,14 +40,16 @@ utils::globalVariables(c(
   isRaster <- sapply(rasList, function(ras) is(ras, "Raster"))
   isSpatRas <- sapply(rasList, function(ras) is(ras, "SpatRaster"))
   if (all(isRaster)) {
-    return(raster::stack(rasList))
+    out <- raster::stack(rasList)
+    names(out) <- names(rasList)
+  } else if (all(isSpatRas)) {
+    out <- rast(rasList)
+    names(out) <- names(rasList)
   } else {
-    if (all(isSpatRas)) {
-      return(rast(rasList))
-    } else {
-      stop("List entries should all be RasterLayer or SpatRaster")
-    }
+    stop("List entries should all be RasterLayer or SpatRaster")
   }
+
+  return(out)
 }
 
 #' Project raster extent

@@ -333,8 +333,8 @@ assertSpeciesPlotLabels <- function(speciesNames, sppEquiv,
   if (doAssertion) {
     sppLabelsENshort <- equivalentName(speciesNames,  sppEquiv, "EN_generic_short")
     sppLabelsLeading <- equivalentName(speciesNames,  sppEquiv, "Leading")
-    if (any(duplicated(sppLabelsENshort) ||
-            duplicated(sppLabelsLeading)))
+    if (any(duplicated(sppLabelsENshort)) ||
+            any(duplicated(sppLabelsLeading)))
       stop(paste(
       "Two or more species share the same label under the 'EN_generic_short' or",
       "'Leading' columns of 'sppEquiv'.\n",

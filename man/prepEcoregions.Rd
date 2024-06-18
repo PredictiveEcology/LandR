@@ -18,7 +18,7 @@ prepEcoregions(
 \item{ecoregionRst}{an optional raster object that could be passed to \code{sim},
 representing ecoregions}
 
-\item{ecoregionLayer}{a spatial polygons object representing ecoregions}
+\item{ecoregionLayer}{an \code{sf} polygons object representing ecoregions}
 
 \item{ecoregionLayerField}{optional. The field in \code{ecoregionLayer} that represents ecoregions.}
 
