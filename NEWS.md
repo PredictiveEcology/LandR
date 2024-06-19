@@ -1,3 +1,7 @@
+# LandR (development version)
+
+- add functions to visualize vegetation type transitions;
+
 # LandR 1.1.5
 
 - use INT2U instead of INT1U when writing rasters in `.overlay()` to avoid warning with larger values;

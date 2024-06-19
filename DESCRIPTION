@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     https://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2024-06-10
-Version: 1.1.5.9000
+Date: 2024-06-11
+Version: 1.1.5.9003
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -57,14 +57,18 @@ Suggests:
     BioSIM,
     covr,
     curl,
+    dplyr,
     fasterize,
     future,
     future.apply,
+    ggalluvial,
+    ggrepel,
     googledrive (>= 2.0.0),
     httr,
     knitr,
     lqmm,
     MASS,
+    memuse,
     parallelly,
     qs,
     rasterVis,
@@ -116,6 +120,7 @@ Collate:
     'nullClimate.R'
     'overlayLCCs.R'
     'partitionBiomass.R'
+    'plot-transitions.R'
     'plot_summaries.R'
     'plotting.R'
     'prepEcoregions.R'
