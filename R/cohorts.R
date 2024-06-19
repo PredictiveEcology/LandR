@@ -1048,8 +1048,8 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
       function(x) all(x >= 0 & x <= 100)
     )))) {
       stop(
-        "Species columns are not percent cover between 0 and 100. This may",
-        " be because they more NA values than the Land Cover raster"
+        "Species columns are not percent cover between 0 and 100. ",
+        "This may be because there are more NA values than the Land Cover raster."
       )
     }
   }
