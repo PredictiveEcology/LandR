@@ -811,8 +811,8 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
   ## remove non-forested if asked by user
   if (omitNonTreedPixels) {
     if (is.null(forestedLCCClasses))
-      stop("No P(sim)$forestedLCCClasses provided, but P(sim)$omitNonTreedPixels is TRUE.
-             \nPlease provide a vector of forested classes in P(sim)$forestedLCCClasses")
+      stop("No P(sim)$forestedLCCClasses provided, but P(sim)$omitNonTreedPixels is TRUE.\n",
+           "Please provide a vector of forested classes in P(sim)$forestedLCCClasses")
     lccPixelsRemoveTF <- !(as.vector(rstLCC[]) %in% forestedLCCClasses)
     pixelsToRm <- lccPixelsRemoveTF | pixelsToRm
   }
@@ -838,9 +838,7 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
 #' @return `cohortData` (`data.table`) with attribute `"imputedPixID"`
 #'
 #' @keywords internal
-.createCohortData <- function(inputDataTable, # pixelGroupBiomassClass,
-                              sppColumns,
-                              minCoverThreshold = 5,
+.createCohortData <- function(inputDataTable, sppColumns, minCoverThreshold = 5,
                               doAssertion = getOption("LandR.assertions", TRUE), rescale = TRUE) {
   newCoverColNames <- gsub("cover\\.", "", sppColumns)
   setnames(inputDataTable, old = sppColumns, new = newCoverColNames)
@@ -891,10 +889,9 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
   cohortData <- data.table::melt(inputDataTable,
                                  value.name = "cover",
                                  measure.vars = newCoverColNames,
-                                 variable.name = "speciesCode"
-  )
+                                 variable.name = "speciesCode")
 
-  # Remove all cover <= minCoverThreshold
+  ## Remove all cover <= minCoverThreshold
   whCoverGTMinCover <- which(cohortData$cover > minCoverThreshold)
   message(green(
     "  -- Removing all cohorts with cover <= minCoverThreshold (affects", NROW(cohortData) - length(whCoverGTMinCover),
@@ -955,7 +952,7 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
 
   if (FALSE) {
     if (any(c("B", "totalBiomass") %in% cncd)) {
-      # Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
+      ## Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
       # set(cohortData, NULL, "B", as.numeric(cohortData[["B"]]))
       set(cohortData, NULL, "B", cohortData[["totalBiomass"]] * cohortData[["cover"]] / 100)
       message(green("  -- Divide total B of each pixel by the relative cover of the cohorts"))
@@ -971,7 +968,7 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
     }
   }
 
-  # clean up
+  ## clean up
   set(cohortData, NULL, c("totalCover", "coverOrig"), NULL)
   setattr(cohortData, "imputedPixID", imputedPixID)
   return(cohortData)
@@ -1022,13 +1019,11 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
 #' @author Eliot McIntire
 #' @export
 makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
-                                          # pixelGroupBiomassClass,
-                                          # pixelGroupAgeClass = 1,
                                           imputeBadAgeModel = quote(lme4::lmer(age ~ B * speciesCode + cover * speciesCode + (1 | initialEcoregionCode))),
                                           minCoverThreshold,
                                           doAssertion = getOption("LandR.assertions", TRUE),
                                           doSubset = TRUE) {
-  ### Create groupings
+  ## Create groupings
   if (doAssertion) {
     expectedColNames <- c(
       "age", "logAge", "initialEcoregionCode", "totalBiomass",
@@ -1069,12 +1064,10 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
   assertCohortDataAttr(cohortData, doAssertion = doAssertion)
   imputedPixID <- attr(cohortData, "imputedPixID")
 
-  ######################################################
-  # Impute missing ages on poor age dataset
-  ######################################################
-  # Cases:
-  #  All species cover = 0 yet totalB > 0
-  # (see other age inconsistencies solved above)
+  ## Impute missing ages on poor age dataset ----------------------------------------
+  ## Cases:
+  ##  All species cover = 0 yet totalB > 0
+  ## (see other age inconsistencies solved above)
 
   cohortDataMissingAge <- cohortData[
     , hasBadAge :=
@@ -1156,15 +1149,13 @@ makeAndCleanInitialCohortData <- function(inputDataTable, sppColumns,
       cohortData <- cohortData[!cohortDataMissingAge[, .(pixelIndex, speciesCode)], on = c("pixelIndex", "speciesCode")]
     }
   }
-  # # Round ages to nearest pixelGroupAgeClass
+  ## Round ages to nearest pixelGroupAgeClass
   # set(cohortData, NULL, "age", asInteger(cohortData$age / pixelGroupAgeClass) *
   #       as.integer(pixelGroupAgeClass))
 
   cohortData[, `:=`(hasBadAge = NULL)]
 
-  # #######################################################
-  # # set B to zero if age is zero because B is lowest quality dataset
-  # #######################################################
+  ## set B to zero if age is zero because B is lowest quality dataset ---------------
   # message(blue("Set recalculate totalBiomass as sum(B);",
   #              "many biomasses will have been set to 0 in previous steps"))
   # cohortData[cover > 0 & age == 0, B := 0L]
@@ -1201,9 +1192,9 @@ subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
         "using maximum of ", sam, " samples per combination of ecoregionGroup and speciesCode. ",
         "Change 'doSubset' to a different number if this is not enough"
       )
-      # subset -- add line numbers of those that were sampled
+      ## subset -- add line numbers of those that were sampled
       a <- DT[, list(lineNum = .I[sample(.N, size = min(.N, sam))]), by = by]
-      # Select only those row numbers from whole dataset
+      ## select only those row numbers from whole dataset
       if (isFALSE(indices)) {
         DT <- DT[a$lineNum]
       } else {
