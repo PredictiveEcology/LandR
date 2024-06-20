@@ -835,6 +835,7 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
 #'
 #' @param rescale Logical. If `TRUE`, the default, cover for each species will be rescaled
 #'   so all cover in `pixelGroup` or pixel sums to 100.
+#'
 #' @return `cohortData` (`data.table`) with attribute `"imputedPixID"`
 #'
 #' @keywords internal
