@@ -62,7 +62,7 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
       ecoregionTable[, ID := as.factor(paddedFloatToChar(ID, max(nchar(ID))))]
     }
   } else {
-    if (!length(ecoregionRst@data@attributes) == 0) {
+    if (!is.null(levels(ecoregionRst))) {
       # Not sure this is what you intended. The is_empty was making the attribute table return empty
       appendEcoregionFactor <- TRUE
     }
