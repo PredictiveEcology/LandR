@@ -62,10 +62,19 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
       ecoregionTable[, ID := as.factor(paddedFloatToChar(ID, max(nchar(ID))))]
     }
   } else {
-    if (!is.null(levels(ecoregionRst))) {
-      appendEcoregionFactor <- TRUE
-      ecoregionTable <- as.data.table(levels(ecoregionRst))
-      setnames(ecoregionTable, c("ID", "ecoregionName"))
+    if(inherits(ecoregionRst, "RasterLayer")){
+      if (!length(ecoregionRst@data@attributes) == 0) {
+        # Not sure this is what you intended. The is_empty was making the attribute table return empty
+      }
+    } else if(inherits(ecoregionRst, "SpatRaster")) {
+      if (!is.null(levels(ecoregionRst))) {
+        appendEcoregionFactor <- TRUE
+        ecoregionTable <- as.data.table(levels(ecoregionRst))
+        setnames(ecoregionTable, c("ID", "ecoregionName"))
+        ecoregionTable[, ID := as.factor(ID)]
+      }
+    } else {
+      stop("problem with ecoregionRst -- it is not a RasterLayer or a SpatRaster")
     }
   }
 
