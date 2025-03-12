@@ -9,6 +9,7 @@
 - new function `cohortDefinitionCols()` to ensure consistent cohort definitions;
 - new function `lccMapGenerator()` to calculate landcover classes from `cohortData` and `pixelGroupMap`;
 - don't delete `CA_forest_VLCE2` raster in `prepInputs_NTEMS_LCC_FAO()` (#110);
+- `minRelativeB` defaults updated based on discussion surrounding overrepresentation of shade tolerant species establishing and generating unreasonably high levels of understory cohorts
 
 # LandR 1.1.5
 
