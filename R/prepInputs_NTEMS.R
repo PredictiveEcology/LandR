@@ -55,7 +55,7 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, resampleMet
   ## pixels may not be disturbed yet if year is prior to 2019 (FAO year)
   ## adjust non-forest LCC that are disturbed forest to 10
   lccDat <- data.table(pixelID = 1:ncell(lcc), lcc = values(lcc, mat = FALSE))
-  lccDat <- lccDat[!is.na(lcc) & lcc %in% c(210, 81, 220, 230)]
+  lccDat <- lccDat[!is.na(lcc) & lcc %in% c(81, 210, 220, 230)]
   lccDat[, fao := values(fao, mat = FALSE)[pixelID]]
   lccDat <- lccDat[!is.na(fao) & fao == 2]
 
