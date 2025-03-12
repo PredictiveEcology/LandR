@@ -45,7 +45,7 @@
 #' @importFrom raster raster rasterOptions ratify reclassify stack unstack
 #' @importFrom RColorBrewer brewer.pal brewer.pal.info
 #' @importFrom reproducible .prefix .requireNamespace .sortDotsUnderscoreFirst .suffix
-#' @importFrom reproducible asPath basename2 Cache cropInputs Filenames fixErrors
+#' @importFrom reproducible asPath basename2 Cache CacheDigest cropInputs Filenames fixErrors
 #' @importFrom reproducible maxFn messageDF minFn paddedFloatToChar
 #' @importFrom reproducible postProcess postProcessTo postProcessTerra
 #' @importFrom reproducible prepInputs preProcess projectInputs
@@ -65,7 +65,7 @@
 #' @importFrom terra rast rasterize res rowColFromCell set.names set.values terraOptions
 #' @importFrom terra values vect writeRaster xmax xmin ymax ymin xyFromCell
 #' @importFrom tidyterra geom_spatraster
-#' @importFrom tools file_path_sans_ext
+#' @importFrom tools file_ext file_path_sans_ext
 #' @importFrom utils capture.output combn count.fields data getFromNamespace head install.packages
 #' @importFrom utils str tail untar
 ## usethis namespace: end
