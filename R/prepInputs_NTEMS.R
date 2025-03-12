@@ -44,8 +44,9 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, resampleMet
 
   ## 1 is forest, 2 is disturbed forest
   ## do not pass dots, or the filename is passed and is overwritten
+  url <- "https://opendata.nfis.org/downloads/forest_change/CA_FAO_forest_2019.zip"
   fao <- prepInputs(
-    url = "https://opendata.nfis.org/downloads/forest_change/CA_FAO_forest_2019.zip",
+    url = url,
     method = resampleMethod, destinationPath = dots$destinationPath, cropTo = lcc,
     maskTo = lcc, projectTo = lcc
   )
@@ -61,7 +62,9 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, resampleMet
   fns <- Filenames(lcc)
   lcc[lccDat$pixelID] <- disturbedCode
   if (nzchar(fns)) {
-    lcc <- writeTo(lcc, writeTo = fns)
+    newFN <- file.path(dots$destinationPath, paste0(tools::file_path_sans_ext(basename(url)), ".", fileExt(fns)))
+    # shouldn't exist first time; second time it will exist so the only way to avoid "writing again" is with Cache
+    lcc <- writeTo(lcc, writeTo = newFN, overwrite = TRUE)
   }
   rm(lccDat)
   gc()
