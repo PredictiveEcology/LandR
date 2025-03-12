@@ -62,7 +62,9 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, resampleMet
   fns <- Filenames(lcc)
   lcc[lccDat$pixelID] <- disturbedCode
   if (nzchar(fns)) {
-    newFN <- file.path(dots$destinationPath, paste0(tools::file_path_sans_ext(basename(url)), ".", fileExt(fns)))
+    dig <- CacheDigest(dots[setdiff(names(dots), c("destinationPath", "userTags"))], quick = TRUE)$outputHash
+    newFN <- file.path(dots$destinationPath, paste0(tools::file_path_sans_ext(basename(url)),
+                                                    "_", dig, ".", fileExt(fns)))
     # shouldn't exist first time; second time it will exist so the only way to avoid "writing again" is with Cache
     lcc <- writeTo(lcc, writeTo = newFN, overwrite = TRUE)
   }
