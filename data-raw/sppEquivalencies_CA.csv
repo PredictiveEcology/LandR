@@ -1,4 +1,4 @@
-LANDIS_test,LANDIS_traits,LandR,KNN,CASFRI,Latin_full,EN_generic_short,EN_generic_full,Leading,Notes,Boreal,Broadleaf,Type,PSP,ApproxFBP,FuelClass,BC_Forestry,AB_forestry,MB_forestry,NFI,QCPSP,CanfiCode,CanfiNote,NTEMS Species Code
+LANDIS_test,LANDIS_traits,LandR,KNN,CASFRI,Latin_full,EN_generic_short,EN_generic_full,Leading,Notes,Boreal,Broadleaf,Type,PSP,ApproxFBP,FuelClass,BC_Forestry,AB_forestry,MB_forestry,NFI,QCPSP,CanfiCode,CanfiNote,NTEMS_Species_Code
 abieamab,ABIE.AMA,Abie_ama,Abie_Ama,Abie amab,Abies amabilis,Ama fir,Amabilis fir,Amabilis fir leading,,,FALSE,Conifer,pacific silver fir,,SprcFrLrch,Ba,,,ABIE_AMA,,301,,1
 abiebals,ABIE.BAL,Abie_bal,Abie_Bal,Abie bals,Abies balsamea,Bal fir,Balsam fir,Balsam fir leading,,Abie_Bal,FALSE,Conifer,balsam fir,,SprcFrLrch,Bb,Fb,BF,ABIE_BAL,SAB,302,,2
 ,,Abie_con,,Abie conc,Abies concolor,Whi fir,White fir,White fir leading,,,FALSE,Conifer,,,SprcFrLrch,,,,ABIE_CON,,300,generic abies code,
