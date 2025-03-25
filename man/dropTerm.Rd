@@ -4,12 +4,16 @@
 \alias{dropTerm}
 \title{Drop factor term including interactions from a model formula}
 \usage{
-dropTerm(form, term)
+dropTerm(form, term, dropRanEff = TRUE)
 }
 \arguments{
 \item{form}{A model formula.}
 
 \item{term}{Character vector giving the name of the term to drop.}
+
+\item{dropRanEff}{Logical. If \code{TRUE} (the default), then the \code{term} to drop
+will also be dropped from the random effects terms. If \code{FALSE}, it will only
+be dropped from the fixed terms}
 }
 \value{
 An updated model formula.
