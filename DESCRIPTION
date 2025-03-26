@@ -28,6 +28,7 @@ Depends:
 Imports:
     crayon,
     data.table,
+    Formula,
     fpCompare,
     ggplot2,
     ggpubr,
