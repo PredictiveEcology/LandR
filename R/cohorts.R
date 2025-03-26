@@ -1230,6 +1230,7 @@ subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
 #' @param dropRanEff Logical. If `TRUE` (the default), then the `term` to drop
 #'   will also be dropped from the random effects terms. If `FALSE`, it will only
 #'   be dropped from the fixed terms
+#' @importFrom Formula Formula
 #'
 #' @return An updated model formula.
 #'
