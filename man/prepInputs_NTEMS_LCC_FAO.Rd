@@ -6,7 +6,7 @@
 \usage{
 prepInputs_NTEMS_LCC_FAO(
   year = 2010,
-  disturbedCode = 1,
+  disturbedCode = 240,
   resampleMethod = "near",
   ...
 )

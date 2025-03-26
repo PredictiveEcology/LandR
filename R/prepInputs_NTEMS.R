@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "currentLCC", "endLCC", "pixelID"
+  "currentLCC", "destinationPath", "endLCC", "pixelID", "writeTo"
 ))
 
 #' Obtain an LCC layer for a given year from NTEMS, with forest matching the FAO definition
@@ -12,14 +12,23 @@ utils::globalVariables(c(
 #' @return a `SpatRaster` with corrected forest pixels
 #'
 #' @export
-prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, resampleMethod = "near", ...) {
+prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleMethod = "near", ...) {
   if (year > 2019 || year < 1984) {
     stop("LCC for this year is unavailable")
   }
-
+  newFilename <- NULL
+  writeToFN <- NULL
   dots <- list(...)
+  if (!is.null(dots$writeTo)) {
+    #must pass a different file name to prepInputs as the object that is Cached
+    #will inevitably be modified later in this function
+    writeToFN <- dots$writeTo
+    #assign a temporary filename for the raw LCC
+    newFilename <- paste0("raw_", dots$writeTo)
+    dots$writeTo <- NULL
+  }
 
-  if (is.null(dots$rasterToMatch) && is.null(dots$cropTo)) {
+  if (is.null(dots$rasterToMatch) && is.null(dots$cropTo) && is.null(dots$to)) {
     stop("the NTEMS raster file is too large to process without cropping via `rasterToMatch` or `cropTo`")
   }
 
@@ -28,50 +37,59 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, resampleMet
     opts <- options(reproducible.gdalwarp = FALSE)
     on.exit(options(opts), add = TRUE)
   }
-
   ## Data codes:
   ## 0 = no change; 20 = water; 31 = snow_ice; 32 = rock_rubble; 33 = exposed_barren_land;
   ## 40 = bryoids; 50 = shrubs; 80 = wetland; 81 = wetland-treed; 100 = herbs; 210 = coniferous;
   ## 220 = broadleaf; 230 = mixedwood
   lccURL <- paste0("https://opendata.nfis.org/downloads/forest_change/CA_forest_VLCE2_", year, ".zip")
   lccTF <- paste0("CA_forest_VLCE2_", year, ".tif")
-  lcc <- prepInputs(url = lccURL, targetFile = lccTF, method = resampleMethod, ...)
+
+  #fix dots
+  dots$url <- lccURL
+  dots$targetFile <- lccTF
+  dots$method <- resampleMethod
+  dots$writeTo <- newFilename
+  lcc <- do.call(prepInputs, dots)
+
+  dots$writeTo <- writeToFN
+
   ## 2024-12: see #110; don't delete CA_forest_VLCE2 raster even though it's 24GB
   ## deleting it results in redownload every time and breaks parallel sims (race condition)
   # toUnlink <- ifelse(is.null(dots$destinationPath), lccTF,
   #                    file.path(dots$destinationPath, lccTF))
   # unlink(toUnlink)
 
-  ## 1 is forest, 2 is disturbed forest
+  #restore dots$writeTo - it will be NULL if it wasn't passed
+
+  ## 1 is forest, 2 is land that can meet the FAO definition of forest
   ## do not pass dots, or the filename is passed and is overwritten
   url <- "https://opendata.nfis.org/downloads/forest_change/CA_FAO_forest_2019.zip"
+  #let terra options dictate whether fao is on disk or not
+
   fao <- prepInputs(
     url = url,
     method = resampleMethod, destinationPath = dots$destinationPath, cropTo = lcc,
     maskTo = lcc, projectTo = lcc
   )
-
-  ## 10 is not a class in use - make it disturbed forest
   ## pixels may not be disturbed yet if year is prior to 2019 (FAO year)
-  ## adjust non-forest LCC that are disturbed forest to 10
-  lccDat <- data.table(pixelID = 1:ncell(lcc), lcc = values(lcc, mat = FALSE))
-  lccDat <- lccDat[!is.na(lcc) & lcc %in% c(81, 210, 220, 230)]
-  lccDat[, fao := values(fao, mat = FALSE)[pixelID]]
-  lccDat <- lccDat[!is.na(fao) & fao == 2]
-
-  fns <- Filenames(lcc)
-  lcc[lccDat$pixelID] <- disturbedCode
-  if (nzchar(fns)) {
-    dig <- CacheDigest(dots[setdiff(names(dots), c("destinationPath", "userTags"))], quick = TRUE)$outputHash
-    newFN <- file.path(dots$destinationPath, paste0(tools::file_path_sans_ext(basename(url)),
-                                                    "_", dig, ".", tools::file_ext(fns)))
-    # shouldn't exist first time; second time it will exist so the only way to avoid "writing again" is with Cache
-    lcc <- writeTo(lcc, writeTo = newFN, overwrite = TRUE)
+  ## adjust non-forest LCC that are disturbed forest to disturbedCode
+  DisturbedAdjust <- function(LCC, FAO, newVal = disturbedCode) {
+    LCC[FAO == 2 & !LCC %in% c(210, 81, 220, 230)] <- newVal
+    return(LCC)
   }
-  rm(lccDat)
-  gc()
+  input <- c(lcc, fao)
+  out <- terra::lapp(input, fun = DisturbedAdjust, usenames = FALSE)
+  # lcc <- terra::init(lcc, as.vector(out))
 
-  return(lcc)
+  if (!is.null(dots$writeTo)) {
+    fp <- if (!is.null(dots$destinationPath)) {
+      file.path(dots$destinationPath, dots$writeTo)
+    } else { dots$writeTo }
+    #assign it to itself or it stays in memory
+    out <- writeRaster(out, filename = fp, overwrite = TRUE) #overwrite lcc
+  }
+  gc()
+  return(out)
 }
 
 #' Reclassify non-flammable pixels that become flammable - herbaceous or shrubby - vegetation
