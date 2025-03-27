@@ -63,8 +63,10 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 1, resampleMet
   lcc[lccDat$pixelID] <- disturbedCode
   if (nzchar(fns)) {
     dig <- CacheDigest(dots[setdiff(names(dots), c("destinationPath", "userTags"))], quick = TRUE)$outputHash
-    newFN <- file.path(dots$destinationPath, paste0(tools::file_path_sans_ext(basename(url)),
-                                                    "_", dig, ".", tools::file_ext(fns)))
+    newFN <- file.path(dots$destinationPath, paste0(
+      tools::file_path_sans_ext(basename(url)),
+      "_", dig, ".", tools::file_ext(fns)
+    ))
     # shouldn't exist first time; second time it will exist so the only way to avoid "writing again" is with Cache
     lcc <- writeTo(lcc, writeTo = newFN, overwrite = TRUE)
   }
@@ -115,4 +117,86 @@ prepInputs_NTEMS_Nonforest <- function(rstLCC, endYear = 2019, lccToAdjust = 33,
   rstLCC[toFix$pixelID] <- toFix$newLCC
 
   return(rstLCC)
+}
+
+#' Obtain an Dominant species layer for a given year from NTEMS
+#'
+#' @template destinationPath
+#' @param year stack of species layers rasters
+#' @param ... passed to `prepInputs`
+#' @template sppEquiv
+#' @template sppEquivCol
+#' @return a `SpatRaster` with dominant species
+#' @importFrom terra unique
+#'
+#' @export
+prepInputs_NTEMS_DominantSpecies <- function(year = 2011, destinationPath, sppEquiv = LandR::sppEquivalencies_CA,
+                                             sppEquivCol = "LandR", ...) {
+  if (year > 2022 || year < 1984) {
+    stop("Dominant species for this year is unavailable")
+  }
+
+  dots <- list(...)
+
+  if (is.null(dots$rasterToMatch) && is.null(dots$cropTo)) {
+    warning("the NTEMS raster file is large and will take significant time to prepare without `rasterToMatch` or `cropTo` defined")
+  }
+
+  if (!is.null(dots$cropTo)) {
+    cropTo <- dots$cropTo
+  } else {
+    cropTo <- dots$rasterToMatch
+  }
+
+  if (!is.null(dots$maskTo)) {
+    maskTo <- dots$maskTo
+  } else {
+    maskTo <- dots$rasterToMatch
+  }
+
+
+  if (isTRUE(getOption("reproducible.gdalwarp"))) {
+    message("temporarily setting reproducible.usegdalwarp to FALSE to avoid error")
+    opts <- options(reproducible.gdalwarp = FALSE)
+    on.exit(options(opts), add = TRUE)
+  }
+
+  domSppURL <- paste0("https://opendata.nfis.org/downloads/forest_change/CA_Tree_Species_Classification_", year, ".zip")
+  domSppTF <- paste0("Canada_Tree_Species_Classification_HMM_", year, ".tif")
+  domSpp <- prepInputs(
+    url = domSppURL, targetFile = domSppTF, # cropping and masking nation wide raster to study area but NOT reprojecting
+    destinationPath = destinationPath,
+    cropTo = cropTo, maskTo = maskTo
+  )
+
+  sppEquiv <- sppEquiv[, .SD, .SDcol = c("NTEMS_Species_Code", sppEquivCol)] # matching NTEMS spp code to sppEquivCol
+  uniqueVals <- as.data.table(terra::unique(domSpp))
+  setnames(uniqueVals, new = "NTEMS_Species_Code")
+  uniqueVals <- sppEquiv[uniqueVals, on = c("NTEMS_Species_Code")] # pulling all species from NTEMS layer
+  uniqueVals <- na.omit(uniqueVals) # removing non-treed areas
+
+  if (!is.null(dots$projectTo)) {
+    projectTo <- dots$projectTo
+  } else if (!is.null(dots$rasterToMatch)) {
+    projectTo <- dots$rasterToMatch
+  } else {
+    projectTo <- NULL
+  }
+
+  domSpp <- lapply(uniqueVals[["NTEMS_Species_Code"]], FUN = function(spp, ras = domSpp,
+                                                                      template = projectTo) { # converting each species to binary layers and reprojecting to save user computation time
+    newMap <- domSpp
+    newMap[!domSpp[] == spp] <- 0
+    newMap[domSpp[] == spp] <- 1
+
+    if (!is.null(template)) {
+      newMap <- postProcess(newMap, to = template, method = "average")
+    }
+    return(newMap)
+  })
+
+  domSpp <- rast(domSpp)
+  names(domSpp) <- uniqueVals[[sppEquivCol]]
+
+  return(domSpp)
 }
