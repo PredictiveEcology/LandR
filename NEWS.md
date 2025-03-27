@@ -1,5 +1,6 @@
 # LandR (development version)
 
+- `dropTerm` now can deal with random effects better; see issue #105
 - `prepRawBiomassMap` - needed `overwrite = TRUE` for cases where download was corrupt
 - `prepRawBiomassMap` needs `httr2` package as remote site is failing with `download.file`
 - add functions to visualize vegetation type transitions;
