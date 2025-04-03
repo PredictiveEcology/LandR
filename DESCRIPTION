@@ -108,6 +108,7 @@ Collate:
     'assertions.R'
     'biomodWrappers.R'
     'biosim.R'
+    'buildVRT.R'
     'chooseName.R'
     'cohorts.R'
     'convertUnwantedLCC2.R'

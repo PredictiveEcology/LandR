@@ -11,8 +11,10 @@ utils::globalVariables(c(
 #'
 #' @return a `SpatRaster` with corrected forest pixels
 #'
+#' @importFrom terra lapp ncell inMemory
 #' @export
 prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleMethod = "near", ...) {
+
   if (year > 2019 || year < 1984) {
     stop("LCC for this year is unavailable")
   }
@@ -24,12 +26,12 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
     #will inevitably be modified later in this function
     writeToFN <- dots$writeTo
     #assign a temporary filename for the raw LCC
-    newFilename <- paste0("raw_", dots$writeTo)
+    newFilename <- paste0("raw_", basename(dots$writeTo))
     dots$writeTo <- NULL
   }
 
   if (is.null(dots$rasterToMatch) && is.null(dots$cropTo) && is.null(dots$to)) {
-    stop("the NTEMS raster file is too large to process without cropping via `rasterToMatch` or `cropTo`")
+    warning("the NTEMS raster file is too large to process without cropping via `rasterToMatch` or `cropTo`")
   }
 
   if (isTRUE(getOption("reproducible.gdalwarp"))) {
@@ -48,10 +50,18 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
   dots$url <- lccURL
   dots$targetFile <- lccTF
   dots$method <- resampleMethod
-  dots$writeTo <- newFilename
+  # dots$writeTo <- newFilename
   lcc <- do.call(prepInputs, dots)
+  lcc <- transitionToVRT(lcc, writeTo = newFilename,
+                         destinationPath = dots$destinationPath)
 
-  dots$writeTo <- writeToFN
+  if (!inMemory(lcc)) {
+    faoFilename <- paste0("FAO_", dots$writeTo)
+  } else {
+    faoFilename <- NULL
+  }
+
+  # dots$writeTo <- writeToFN
 
   ## 2024-12: see #110; don't delete CA_forest_VLCE2 raster even though it's 24GB
   ## deleting it results in redownload every time and breaks parallel sims (race condition)
@@ -71,23 +81,24 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
     method = resampleMethod, destinationPath = dots$destinationPath, cropTo = lcc,
     maskTo = lcc, projectTo = lcc
   )
+  fao <- transitionToVRT(fao, writeTo = faoFilename, dots = dots$destinationPath)
+
   ## pixels may not be disturbed yet if year is prior to 2019 (FAO year)
   ## adjust non-forest LCC that are disturbed forest to disturbedCode
+
   DisturbedAdjust <- function(LCC, FAO, newVal = disturbedCode) {
     LCC[FAO == 2 & !LCC %in% c(210, 81, 220, 230)] <- newVal
     return(LCC)
   }
+
   input <- c(lcc, fao)
   out <- terra::lapp(input, fun = DisturbedAdjust, usenames = FALSE)
   # lcc <- terra::init(lcc, as.vector(out))
 
-  if (!is.null(dots$writeTo)) {
-    fp <- if (!is.null(dots$destinationPath)) {
-      file.path(dots$destinationPath, dots$writeTo)
-    } else { dots$writeTo }
-    #assign it to itself or it stays in memory
-    out <- writeRaster(out, filename = fp, overwrite = TRUE) #overwrite lcc
-  }
+  #assign it to itself or it stays in memory
+  out <- buildVRT(out, writeTo = writeToFN,
+                  destinationPath = dots$destinationPath) #overwrite lcc
+
   gc()
   return(out)
 }
