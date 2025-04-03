@@ -53,7 +53,8 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
   # dots$writeTo <- newFilename
   lcc <- do.call(prepInputs, dots)
   lcc <- buildVRT(lcc, writeTo = newFilename,
-                         destinationPath = dots$destinationPath)
+                  destinationPath = dots$destinationPath,
+                  overwrite = dots$overwrite)
 
   if (!inMemory(lcc)) {
     faoFilename <- paste0("FAO_", dots$writeTo)
@@ -79,9 +80,10 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
   fao <- prepInputs(
     url = url,
     method = resampleMethod, destinationPath = dots$destinationPath, cropTo = lcc,
-    maskTo = lcc, projectTo = lcc
-  )
-  fao <- buildVRT(fao, writeTo = faoFilename, destinationPath = dots$destinationPath)
+    maskTo = lcc, projectTo = lcc)
+
+  fao <- buildVRT(fao, writeTo = faoFilename, destinationPath = dots$destinationPath,
+                  overwrite = dots$overwrite)
 
   ## pixels may not be disturbed yet if year is prior to 2019 (FAO year)
   ## adjust non-forest LCC that are disturbed forest to disturbedCode
@@ -97,7 +99,8 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
 
   #assign it to itself or it stays in memory
   out <- buildVRT(out, writeTo = writeToFN,
-                  destinationPath = dots$destinationPath) #overwrite lcc
+                  destinationPath = dots$destinationPath,
+                  overwrite = dots$overwrite) #overwrite lcc
 
   gc()
   return(out)
