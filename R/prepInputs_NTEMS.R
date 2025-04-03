@@ -81,7 +81,7 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
     method = resampleMethod, destinationPath = dots$destinationPath, cropTo = lcc,
     maskTo = lcc, projectTo = lcc
   )
-  fao <- buildVRT(fao, writeTo = faoFilename, dots = dots$destinationPath)
+  fao <- buildVRT(fao, writeTo = faoFilename, destinationPath = dots$destinationPath)
 
   ## pixels may not be disturbed yet if year is prior to 2019 (FAO year)
   ## adjust non-forest LCC that are disturbed forest to disturbedCode
