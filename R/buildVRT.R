@@ -10,7 +10,7 @@
 #' @returns the raster as a VRT
 #' @importFrom tools file_path_sans_ext
 #' @importFrom terra makeTiles vrt ncell sources
-#' @importFrom reproducible checkPath
+#' @importFrom reproducible checkPath .suffix
 #'
 #' @export
 buildVRT <- function(ras, bitExponent = 30,
@@ -31,7 +31,9 @@ buildVRT <- function(ras, bitExponent = 30,
     ndiv <- ceiling(ncell(ras)/c(2^bitExponent)) #with equal columns, 4 tiles minimum
     nrows <- ceiling(nrow(ras)/ndiv)
     ncols <- ceiling(ncol(ras)/ndiv)
-    tileNames <- file.path(destinationPath, writeTo)
+
+
+    tileNames <- file.path(destinationPath, .suffix(writeTo, "_")) #tiles will be _1, _2, etc
     ras <- terra::makeTiles(ras, filename = tileNames,
                             y = c(nrows, nrows),
                             na.rm = TRUE, overwrite = overwrite)

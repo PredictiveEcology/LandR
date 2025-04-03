@@ -57,7 +57,7 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
                   overwrite = dots$overwrite)
 
   if (!inMemory(lcc)) {
-    faoFilename <- paste0("FAO_", dots$writeTo)
+    faoFilename <- paste0("FAO_", newFilename)
   } else {
     faoFilename <- NULL
   }
