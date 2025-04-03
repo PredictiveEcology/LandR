@@ -52,7 +52,7 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
   dots$method <- resampleMethod
   # dots$writeTo <- newFilename
   lcc <- do.call(prepInputs, dots)
-  lcc <- transitionToVRT(lcc, writeTo = newFilename,
+  lcc <- buildVRT(lcc, writeTo = newFilename,
                          destinationPath = dots$destinationPath)
 
   if (!inMemory(lcc)) {
@@ -81,7 +81,7 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
     method = resampleMethod, destinationPath = dots$destinationPath, cropTo = lcc,
     maskTo = lcc, projectTo = lcc
   )
-  fao <- transitionToVRT(fao, writeTo = faoFilename, dots = dots$destinationPath)
+  fao <- buildVRT(fao, writeTo = faoFilename, dots = dots$destinationPath)
 
   ## pixels may not be disturbed yet if year is prior to 2019 (FAO year)
   ## adjust non-forest LCC that are disturbed forest to disturbedCode
