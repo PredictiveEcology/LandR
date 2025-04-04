@@ -9,6 +9,7 @@ speciesInStudyArea(
   url = NULL,
   speciesPresentRas = NULL,
   sppEquivCol = NULL,
+  dataSource = "KNN",
   dPath = getOption("reproducible.destinationPath")
 )
 }
@@ -24,6 +25,10 @@ with \code{speciesPresentFromKNN}}
 
 \item{sppEquivCol}{An optional column from \code{LandR::sppEquivalencies_CA}.
 If passed the KNN species will be returned according to this naming convention.}
+
+\item{dataSource}{Character. Either KNN or NTEMS. Defaults to KNN to obtain species from layer
+created using species cover data from KNN. Also able to obtain species from NTEMS
+Dominant Species Layer (though less species will likely be included).}
 
 \item{dPath}{Passed to \code{destinationPath} in \code{preProcess}.}
 }
