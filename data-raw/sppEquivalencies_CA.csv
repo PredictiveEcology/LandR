@@ -195,9 +195,9 @@ tsugmert,TSUG.MER,Tsug_mer,Tsug_Mer,Tsug mert,Tsuga mertensiana x heterophylla,W
 ,,Ulmu_sp,Ulmu_Tho,Ulmu spp,Ulmus spp.,Elm,Elm,Elm leading,,,TRUE,Deciduous,,,CedrMplOther,,,,ULMU_SPP.,,2200,,,121
 ,,,,,Cornus alternifolia,Pag dgwood,Pagoda dogwood,Pagoda dogwood leading,,,TRUE,Deciduous,pagoda dogwood,,CedrMplOther,,,,CORN_ALT,COA,1500,other hardwood code,,
 ,,,,Ulmu thom,Ulmus thomasii,Rock elm,Rock elm,Rock elm leading,,,TRUE,Deciduous,,,CedrMplOther,,,,ULMU_THO,ORT,2203,,,124
-,,,Broadleaf_Spp,Hard unkn,,Decid,Deciduous,Deciduous leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,1500,,,
-,,,Needleleaf_Spp,Soft unkn,,Conif,Coniferous,Coniferous leading,,,FALSE,Conifer,,,CedrMplOther,,,,,,1100,,,
-,,,,Nonc hard,,Decid,Deciduous,Deciduous leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,,,,
+,,,Broadleaf_Spp,Hard unkn,,Decid,Deciduous,Deciduous leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,1500,,,195
+,,,Needleleaf_Spp,Soft unkn,,Conif,Coniferous,Coniferous leading,,,FALSE,Conifer,,,CedrMplOther,,,,,,1100,,,194
+,,,,Nonc hard,,Decid,Deciduous,Deciduous leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,,,,195
 ,,,,Hard tole,,,,,,,,,,,CedrMplOther,,,,,,,,,
 ,,,,Hard into,,,,,,,,,,,CedrMplOther,,,,,,,,,
 ,,,,Mois hard,,,,,,,,,,,CedrMplOther,,,,,,,,,
