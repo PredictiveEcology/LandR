@@ -27,7 +27,6 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
     writeToFN <- dots$writeTo
     #assign a temporary filename for the raw LCC
     newFilename <- paste0("raw_", basename(dots$writeTo))
-    dots$writeTo <- NULL
   }
 
   if (is.null(dots$rasterToMatch) && is.null(dots$cropTo) && is.null(dots$to)) {
@@ -50,18 +49,23 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
   dots$url <- lccURL
   dots$targetFile <- lccTF
   dots$method <- resampleMethod
-  # dots$writeTo <- newFilename
+
+  #assume a user does not want intermediate files to be in destinationPath
+  dPath <- dots$destinationPath
+  dots$destinationPath <- tempdir()
+
   lcc <- do.call(prepInputs, dots)
-  lcc <- buildVRT(lcc, writeTo = newFilename,
-                  destinationPath = dots$destinationPath,
-                  overwrite = dots$overwrite)
+
+
+  #TODO: does a user want this file to be temporary?
+  lcc <- buildVRT(lcc, overwrite = dots$overwrite)
 
   if (!inMemory(lcc)) {
     faoFilename <- paste0("FAO_", newFilename)
   } else {
     faoFilename <- NULL
   }
-
+  #I dont' know if this VRT needs to be built
   # dots$writeTo <- writeToFN
 
   ## 2024-12: see #110; don't delete CA_forest_VLCE2 raster even though it's 24GB
@@ -77,13 +81,17 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
   url <- "https://opendata.nfis.org/downloads/forest_change/CA_FAO_forest_2019.zip"
   #let terra options dictate whether fao is on disk or not
 
-  fao <- prepInputs(
-    url = url,
-    method = resampleMethod, destinationPath = dots$destinationPath, cropTo = lcc,
-    maskTo = lcc, projectTo = lcc)
+  #what should be writeTo here?
+  fao <- prepInputs(url = url, method = resampleMethod,
+                    destinationPath = dots$destinationPath,
+                    cropTo = lcc, maskTo = lcc, projectTo = lcc)
 
-  fao <- buildVRT(fao, writeTo = faoFilename, destinationPath = dots$destinationPath,
-                  overwrite = dots$overwrite)
+  #this will write
+  fao <- buildVRT(fao, overwrite = dots$overwrite)
+
+
+  #reassign everything to dots
+
 
   ## pixels may not be disturbed yet if year is prior to 2019 (FAO year)
   ## adjust non-forest LCC that are disturbed forest to disturbedCode
@@ -98,10 +106,10 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
   # lcc <- terra::init(lcc, as.vector(out))
 
   #assign it to itself or it stays in memory
-  out <- buildVRT(out, writeTo = writeToFN,
-                  destinationPath = dots$destinationPath,
+  out <- buildVRT(out, writeTo = writeToFN, #the original writeTo
+                  destinationPath = dPath, #the original destinationPath
                   overwrite = dots$overwrite) #overwrite lcc
-
+  rm(input, fao, lcc)
   gc()
   return(out)
 }
