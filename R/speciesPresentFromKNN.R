@@ -195,7 +195,7 @@ speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 1500, year = 2011
   sa <- vect(st_transform(st_as_sf(studyAreaED), crs = crs(templateCRS))) ################################### #stopgap solution to projectTo issues
 
   SppURL <- paste0("https://opendata.nfis.org/downloads/forest_change/CA_Tree_Species_Classification_", year, ".zip")
-  SppTF <- paste0("Canada_Tree_Species_Classification_HMM_", year, ".tif")
+  SppTF <- paste0("CA_Forest_Tree_Species_", year, ".tif")
   SppRast <- prepInputs(
     url = SppURL, targetFile = SppTF,
     destinationPath = dPath
