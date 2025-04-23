@@ -24,7 +24,7 @@ Authors@R: c(
            role = "cph")
     )
 Depends:
-    R (>= 4.2)
+    R (>= 4.3)
 Imports:
     crayon,
     data.table,
