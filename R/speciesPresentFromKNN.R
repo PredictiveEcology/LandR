@@ -146,7 +146,10 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL, 
   #   bb <- raster::deratify(bb)
   # }
 
-  speciesCommunities <- na.omit(rasLevs[ID %in% as.vector(bb[[1]])]$category)
+  if (any(grepl("ID", colnames(rasLevs))))
+    speciesCommunities <- na.omit(rasLevs[ID %in% as.vector(bb[[1]])]$category)
+  else
+    speciesCommunities <- na.omit(rasLevs[value %in% as.vector(bb[[1]])]$category)
   species <- as.character(speciesCommunities)
   species <- unique(unlist(strsplit(species, "__")))
 
