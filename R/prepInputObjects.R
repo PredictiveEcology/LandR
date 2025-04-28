@@ -604,8 +604,10 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
     Args2$quick <- c("writeTo")
   }
 
-  rawBiomassMap <- Cache(do.call(prepInputs, args = Args), quick = Args2$quick,
-                         omitArgs = Args2$omitArgs, userTags = Args2$userTags)
+  rawBiomassMap <- do.call(prepInputs, args = Args) |>
+    Cache(
+      quick = Args2$quick, .functionName = "prepInputsRawBiomassMap",
+      omitArgs = Args2$omitArgs, userTags = Args2$userTags)
 
   return(rawBiomassMap)
 }
