@@ -3,7 +3,7 @@
 \name{speciesPresentFromKNN}
 \alias{speciesPresentFromKNN}
 \alias{speciesPresentFromNTEMS}
-\title{Make a species factor raster}
+\title{Make a species factor raster from KNN}
 \usage{
 speciesPresentFromKNN(
   year = 2011,
@@ -14,7 +14,7 @@ speciesPresentFromKNN(
 
 speciesPresentFromNTEMS(
   dPath = asPath("."),
-  res = 1500,
+  res = 2400,
   year = 2011,
   rasterToMatch = NULL,
   studyArea = NULL,
