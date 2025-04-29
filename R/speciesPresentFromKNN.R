@@ -2,10 +2,12 @@ utils::globalVariables(c(
   "allPres", "allPresFac", "KNN", "pixel", "variable", "NTEMS_Species_Code"
 ))
 
+####kNN ####
+
 maskTo <- utils::getFromNamespace("maskTo", "reproducible")
 projectTo <- utils::getFromNamespace("projectTo", "reproducible")
 
-#' Make a species factor raster
+#' Make a species factor raster from KNN
 #'
 #' This will download all KNN layers in Forests of Canada, and make
 #' a factor raster at resolution provided by `res` (larger is faster).
@@ -105,6 +107,10 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
   return(c(speciesPres, numSp))
 }
 
+
+####NTEMS ####
+
+#
 #' Make a species factor raster based on NTEMS Data
 #'
 #' This will download NTEMS dominant species layer for 2011 for forests of Canada, and make
@@ -149,7 +155,7 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 #'
 #' @export
 #' @rdname speciesPresent
-speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 1500, year = 2011,
+speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 2400, year = 2011,
                                     rasterToMatch = NULL, studyArea = NULL, ...) {
   dots <- list(...)
 
@@ -175,50 +181,52 @@ speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 1500, year = 2011
 
   opts <- options("reproducible.useTerra" = TRUE)
   on.exit(options(opts), add = TRUE)
-  studyAreaED <- Cache(
-    prepInputs,
-    fun = "terra::vect",
-    url = "https://sis.agr.gc.ca/cansis/nsdb/ecostrat/district/ecodistrict_shp.zip",
-    destinationPath = dPath,
-    # fun = quote(SA_ERIntersect(x = targetFilePath, studyArea)),
-    overwrite = FALSE
-  )
-
-  templateCRS <- reproducible::prepInputs(
-    url = paste0(
-      "https://www12.statcan.gc.ca/census-recensement/2021/",
-      "geo/sip-pis/boundary-limites/files-fichiers/lpr_000a21a_e.zip"
-    ),
-    destinationPath = dPath
-  )
-  sa <- projectTo(studyAreaED, terra::crs(templateCRS))
-  sa <- vect(st_transform(st_as_sf(studyAreaED), crs = crs(templateCRS))) ################################### #stopgap solution to projectTo issues
 
   SppURL <- paste0("https://opendata.nfis.org/downloads/forest_change/CA_Tree_Species_Classification_", year, ".zip")
-  SppTF <- paste0("Canada_Tree_Species_Classification_HMM_", year, ".tif")
   SppRast <- prepInputs(
-    url = SppURL, targetFile = SppTF,
+    url = SppURL,
     destinationPath = dPath
   )
+  #For some reason the raster is not trimmed - this reduces the pixel count by 30%
+  SppRast <- terra::trim(SppRast)
+  NAflag(SppRast) <- 0 #so we don't make an NA raster when we use aggregate/segregate
 
-  SppRast <- Cache(postProcess(SppRast, cropTo = sa, maskTo = sa))
+  aggName <- file.path(dPath, paste0("CA_Tree_Species_NTEMS_", year, "_120m.tif"))
+
+  NAflag(SppRast) <- 0
+
+  SppRast <- terra::aggregate(SppRast, fact = 4, fun = "modal", na.rm = TRUE,
+                              filename = aggName, overwrite = TRUE)
+  uniqueVals <- as.data.table(terra::unique(SppRast)) #for later
+
+  segFile <- file.path(dPath, paste0("CA_Tree_Species", year, "_120m_seg.tif"))
+
+  SppRast <- terra::segregate(SppRast, classes = uniqueVals$NTEMS_Species_Code,
+                              keep = TRUE, other = 0, filename = segFile,
+                              overwrite = TRUE)
+
+  newAggName <- file.path(dPath, paste0("CA_Tree_Species", year, "_", res, ".tif"))
+
+  SppRast <- terra::aggregate(SppRast, ceiling(res/120), fun = "max", overwrite = TRUE, na.rm = TRUE,
+                              filename = newAggName)
 
   sppEquiv <- sppEquiv[, .SD, .SDcol = c("NTEMS_Species_Code", "LandR")] # matching NTEMS spp code to sppEquivCol
 
-  uniqueVals <- as.data.table(terra::unique(SppRast))
+
   setnames(uniqueVals, new = "NTEMS_Species_Code")
+
   uniqueVals <- sppEquiv[uniqueVals, on = c("NTEMS_Species_Code")] # pulling all species from NTEMS layer
-  uniqueVals <- na.omit(uniqueVals) # removing non-treed areas
-  uniqueVals <- uniqueVals[, .(.N), by = .(NTEMS_Species_Code, LandR)] # grouping by species to eliminate duplicates caused by multiple subspecies in sppEquivalencies_CA
-  uniqueVals <- uniqueVals[, .(NTEMS_Species_Code, LandR)]
+  uniqueVals <- unique(uniqueVals[, .(NTEMS_Species_Code, LandR)])
 
-  SppRast <- Cache(terra::segregate(SppRast, keep = TRUE))
-  SppRast <- Cache(terra::aggregate(SppRast, res / 30, fun = "modal"))
-  SppRast <- terra::subset(SppRast, "0", negate = TRUE)
-
+  #note that Pinu_alb and Pice_abi both dropped
+  ActualNTEMS <- as.integer(names(SppRast))
+  uniqueVals <- uniqueVals[NTEMS_Species_Code %in% ActualNTEMS,]
   names(SppRast) <- c(uniqueVals$LandR)
 
-  numSp <- sum(SppRast > 0)
+  #one last time because aggregate or segregate reintroduces zeroes
+  NAflag(SppRast) <- 0
+
+  numSp <- sum(SppRast > 0, na.rm = TRUE)
 
   mat <- terra::values(SppRast)
   dt <- as.data.table(mat)
