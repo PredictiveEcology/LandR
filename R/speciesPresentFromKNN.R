@@ -331,9 +331,12 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL, 
     #   bb <- raster::deratify(bb)
     # }
 
+  if (any(grepl("ID", colnames(rasLevs))))
+    speciesCommunities <- na.omit(rasLevs[ID %in% as.vector(bb[[1]])]$category)
+  else
     speciesCommunities <- na.omit(rasLevs[value %in% as.vector(bb[[1]])]$category)
-    species <- as.character(speciesCommunities)
-    species <- unique(unlist(strsplit(species, "__")))
+  species <- as.character(speciesCommunities)
+  species <- unique(unlist(strsplit(species, "__")))
 
     if (!is.null(sppEquivCol) & is.null(speciesPresentRas)) {
       sppEquiv <- LandR::sppEquivalencies_CA
