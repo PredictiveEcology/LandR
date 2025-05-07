@@ -41,7 +41,7 @@ betupapy,BETU.PAP,Betu_pap,Betu_Pap,Betu papy,Betula papyrifera,Pa birch,Paper b
 ,,Betu_pen,,Betu pend,Betula pendula,Slv bir,Silver birch,Silver birch leading,,,TRUE,Deciduous,,,PopBrch,,,,BETU_PEN,,1300,generic birch code,,
 ,,Betu_pop,Betu_Pop,Betu popu,Betula populifolia,Gr bir,Gray birch,Gray birch leading,,Betu_Pop,TRUE,Deciduous,grey birch,,PopBrch,,,,BETU_POP,BOG,1304,,,77
 ,,Betu_pub,,Betu pube,Betula pubescens,Eur whi bir,European white birch,European white birch leading,,,TRUE,Deciduous,,,PopBrch,,,,BETU_PUB,,1300,generic birch code,,
-,BETU.ALL,Betu_sp,Betu_Spp,Betu spp,Betula spp.,Birch,Birch,Birch leading,,Betu_Spp,TRUE,Deciduous,birch,,PopBrch,,,,BETU_SP,,1300,generic birch code,,73
+,,Betu_sp,Betu_Spp,Betu spp,Betula spp.,Birch,Birch,Birch leading,,Betu_Spp,TRUE,Deciduous,birch,,PopBrch,,,,BETU_SP,,1300,generic birch code,,73
 ,,Betu_win,,Betu winx,Betula x winteri,Ak x Pa bir,Alaska x paper birch,Alaska x paper birch leading,,,TRUE,Deciduous,,,PopBrch,Exp,,,BETU_WIN,,1300,generic birch code,,173
 ,,Calc_dec,,Calc decu,Calocedrus decurrens,Cal Inc ced,California incense cedar,California incense cedar leading,,,FALSE,Conifer,,,CedrMplOther,,,,CALC_DEC,,1100,other softwood code,,
 ,,Carp_car,Carp_Car,Carp caro,Carpinus caroliniana,Am hornb,American hornbeam,American hornbeam leading,,,TRUE,Deciduous,,,CedrMplOther,,,,CARP_CAR,CAR,1950,,,107
