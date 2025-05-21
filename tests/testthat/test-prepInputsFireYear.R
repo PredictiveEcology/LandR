@@ -25,4 +25,24 @@ testthat::test_that("prepInputs fire year works", {
       )
     })
   })
+
+  goodPoly <- randomStudyArea(size = 6e8, seed = 5)
+  goodRas <- terra::rast(goodPoly, vals = 1, res = c(250, 250))
+  goodRas <- terra::mask(goodRas, goodPoly)
+
+  goodFire <- suppressWarnings({
+    prepInputsFireYear(
+      rasterToMatch = goodRas,
+      earliestYear = 2000, #limit postProcessing
+      maskTo = goodPoly,
+      destinationPath = td,
+      url = furl,
+      fireField = "YEAR"
+    )
+  })
+  rasNAs <- as.vector(goodRas)
+  fireNAs <- as.vector(goodFire)
+  expect_true(all(is.na(fireNAs[is.na(rasNAs)]))) #ensures postProcess was correct
+  #previously was not masking correct
+
 })
