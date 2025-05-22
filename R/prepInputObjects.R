@@ -533,6 +533,9 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'
 #' @template cacheTags
 #'
+#' @param dataSource Character. Either KNN or NTEMS. Defaults to KNN to obtain 2001 biomass layer from KNN.
+#'   Also able to obtain 2015 biomass layer from NTEMS.
+#'
 #' @param ... arguments passed to [reproducible::prepInputs()] and [reproducible::Cache()]. If the following arguments
 #'   are not provided, the following values will be used:
 #'   \itemize{
@@ -550,17 +553,26 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @return a `rawBiomassMap` raster
 #'
 #' @export
-prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
+prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", ...) {
   Args <- list(...)
 
-  if (is.null(Args$url)) {
-    Args$url <- paste0(
-      "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-      "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
-      "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif"
-    )
+  if (!(dataSource %in% c("KNN", "NTEMS"))) {
+    stop("Data Source must be either KNN or NTEMS")
   }
-
+  if (is.null(Args$url)) {
+    if(dataSource == "KNN") {
+      Args$url <- paste0(
+        "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+        "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
+        "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif"
+      )
+    }
+    if(dataSource == "NTEMS") {
+      Args$url <- paste0(
+        "https://opendata.nfis.org/downloads/forest_change/CA_forest_total_biomass_2015_NN.zip"
+      )
+    }
+  }
   ## NOTE: only calling httr2::request here because listed in Imports, to satisfy R CMD check;
   ##       httr is actually needed for reproducible::prepInputs() but it's only a Suggests there;
   ##       see LandR#113 and discussion therein
