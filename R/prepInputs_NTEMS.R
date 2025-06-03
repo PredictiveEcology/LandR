@@ -49,7 +49,11 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
   dots$targetFile <- lccTF
   dots$method <- resampleMethod
   dots$writeTo <- newFilename
-  lcc <- do.call(prepInputs, dots)
+  # digs <- .robustDigest(dots)
+  lcc <- do.call(prepInputs, dots) # |>
+  #  Cache(.functionName = paste0("prepInputs_NTEMS_LCC_FAO_", year),
+  #        omitArgs = c("targetFile", "writeTo"),
+  #        .cacheExtra = digs)
 
   dots$writeTo <- writeToFN
 
@@ -68,15 +72,16 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
 
   fao <- prepInputs(
     url = url,
-    method = resampleMethod, destinationPath = dots$destinationPath, cropTo = lcc,
-    maskTo = lcc, projectTo = lcc
-  )
+    method = resampleMethod, destinationPath = dots$destinationPath, to = lcc
+    # cropTo = lcc, maskTo = lcc, projectTo = lcc
+  ) # |> Cache(omitArgs = "to", .cacheExtra = digs)
   ## pixels may not be disturbed yet if year is prior to 2019 (FAO year)
   ## adjust non-forest LCC that are disturbed forest to disturbedCode
   DisturbedAdjust <- function(LCC, FAO, newVal = disturbedCode) {
     LCC[FAO == 2 & !LCC %in% c(210, 81, 220, 230)] <- newVal
     return(LCC)
   }
+  message("Updating codes on LCC with FAO data...")
   input <- c(lcc, fao)
   out <- terra::lapp(input, fun = DisturbedAdjust, usenames = FALSE)
   # lcc <- terra::init(lcc, as.vector(out))
@@ -88,6 +93,8 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
     #assign it to itself or it stays in memory
     out <- writeRaster(out, filename = fp, overwrite = TRUE) #overwrite lcc
   }
+  message("... done ... cleaning up RAM")
+  rm(input, lcc, fao) # remove them before doing gc
   gc()
   return(out)
 }
