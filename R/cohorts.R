@@ -768,7 +768,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     out3 <- data.table(pixelIndex = NA, ecoregionGroup = NA)[!is.na(pixelIndex)]
   } else {
     # setnames(out3, c("initialPixels", "initialEcoregionCode"), c("pixelIndex", "ecoregionGroup"))
-    out3[, `:=`(newPossLCC = NULL)]
+    # out3[, `:=`(newPossLCC = NULL)]
     # out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
     out3 <- unique(out3)
   }
@@ -778,7 +778,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     if (any(out3$pixelIndex %in% pixelsToNA)) {
       out3 <- out3[!pixelIndex %in% pixelsToNA]
     }
-    out3 <- rbind(out3, data.table(pixelIndex = pixelsToNA, ecoregionGroup = NA))
+    out3 <- rbind(out3, data.table(pixelIndex = pixelsToNA, ecoregionGroup = NA),
+                  fill = TRUE)
   }
 
   if (doAssertion) {
