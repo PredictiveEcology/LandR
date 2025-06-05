@@ -42,7 +42,7 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
     ## terra::rasterize creates a factor raster from a factor field, but uses "0" as the first value
     ## we will instead create integer field starting at 1.
     ecoregionMapSF$ecoregionLayerFieldInt <- as.integer(ecoregionMapSF$ecoregionLayerField)
-    ecoregionRst <- rasterize(ecoregionMapSF, rasterToMatchLarge,
+    ecoregionRst <- rasterize(ecoregionMapSF, rasterToMatchLarge, touches = TRUE,
                               field = "ecoregionLayerFieldInt")
 
     rm(ecoregionLayer)

@@ -743,7 +743,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
         out2[, initialEcoregion := substr(out8[, initialEcoregionCode], 1, numCharEcoregion)]
         out2[, ecoregionGroup := paste0(
           initialEcoregion, "_",
-          paddedFloatToChar(as.integer(newPossLCC), padL = 2, padR = 0)
+          paddedFloatToChar(as.integer(newPossLCC), padL = numCharLCCCodes, padR = 0)
         )] #nolint
         out2[, initialEcoregion := NULL]
       } else {
