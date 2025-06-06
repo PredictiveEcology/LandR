@@ -115,18 +115,25 @@ makeEcoregionDT <- function(pixelCohortData, speciesEcoregion) {
 #'
 #' @export
 makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
-  pixelData <- unique(pixelCohortData, by = "pixelIndex")
-  pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] ## resorts them in order
+
+  truePixelData <- as.data.table(ecoregionFiles$ecoregionMap, cells = TRUE)
+  setnames(truePixelData, old = "cell", new = "pixelIndex")
+  truePixelData[, mapcode := as.integer(mapcode)] #for join
+  truePixelData <- truePixelData[ecoregionFiles$ecoregion, on = c("mapcode")]
+  #keep only ecoregions for which we have data
+  #but keep all observations of that ecoregion, regardless of whether it is currently filled
+  truePixelData <- truePixelData[ecoregionGroup %in% pixelCohortData$ecoregionGroup]
+  truePixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
 
   ecoregionMap <- rasterRead(ecoregionFiles$ecoregionMap)
 
   ## suppress this message call no non-missing arguments to min;
   ## returning Inf min(x@data@values, na.rm = TRUE)
-  suppressWarnings(ecoregionMap[pixelData$pixelIndex] <- as.integer(pixelData$ecoregionGroup))
+  suppressWarnings(ecoregionMap[truePixelData$pixelIndex] <- as.integer(truePixelData$ecoregionGroup))
   levels(ecoregionMap) <- data.frame(
-    ID = seq(levels(pixelData$ecoregionGroup)),
-    ecoregion = gsub("_.*", "", levels(pixelData$ecoregionGroup)),
-    ecoregionGroup = levels(pixelData$ecoregionGroup),
+    ID = seq(levels(truePixelData$ecoregionGroup)),
+    ecoregion = gsub("_.*", "", levels(truePixelData$ecoregionGroup)),
+    ecoregionGroup = levels(truePixelData$ecoregionGroup),
     stringsAsFactors = TRUE
   )
   return(ecoregionMap)
