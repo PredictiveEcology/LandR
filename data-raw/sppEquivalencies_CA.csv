@@ -1,6 +1,6 @@
 LANDIS_test,LANDIS_traits,LandR,KNN,CASFRI,Latin_full,EN_generic_short,EN_generic_full,Leading,Notes,Boreal,Broadleaf,Type,PSP,ApproxFBP,FuelClass,BC_Forestry,AB_forestry,MB_forestry,NFI,QCPSP,CanfiCode,CanfiNote,NTEMS_Species_Code,CBM_speciesID,colorHex
-abieamab,ABIE.AMA,Abie_ama,Abie_Ama,Abie amab,Abies amabilis,Ama fir,Amabilis fir,Amabilis fir leading,,,FALSE,Conifer,pacific silver fir,,SprcFrLrch,Ba,,,ABIE_AMA,,301,,1,28,#A10300
-abiebals,ABIE.BAL,Abie_bal,Abie_Bal,Abie bals,Abies balsamea,Bal fir,Balsam fir,Balsam fir leading,,Abie_Bal,FALSE,Conifer,balsam fir,,SprcFrLrch,Bb,Fb,BF,ABIE_BAL,SAB,302,,2,29,#F1085C
+abieamab,ABIE.AMA,Abie_ama,Abie_Ama,Abie amab,Abies amabilis,Ama fir,Amabilis fir,Amabilis fir leading,,,FALSE,Conifer,pacific silver fir,,SprcFrLrch,Ba,,,ABIE_AMA,,301,,1,28,#F1085C
+abiebals,ABIE.BAL,Abie_bal,Abie_Bal,Abie bals,Abies balsamea,Bal fir,Balsam fir,Balsam fir leading,,Abie_Bal,FALSE,Conifer,balsam fir,,SprcFrLrch,Bb,Fb,BF,ABIE_BAL,SAB,302,,2,29,#A10300
 ,,Abie_con,,Abie conc,Abies concolor,Whi fir,White fir,White fir leading,,,FALSE,Conifer,,,SprcFrLrch,,,,ABIE_CON,,300,generic abies code,,,
 abiegran,ABIE.GRA,Abie_gra,Abie_Gra,Abie gran,Abies grandis,Gra fir,Grand fir,Grand fir leading,,,FALSE,Conifer,grand fir,,SprcFrLrch,Bg,,,ABIE_GRA,,303,,,30,
 abielasi,ABIE.LAS,Abie_las,Abie_Las,Abie lasi,Abies lasiocarpa,Subalp fir,Subalpine fir,Subalpine fir leading,,Abie_Las,FALSE,Conifer,subalpine fir,,SprcFrLrch,Bl,Fa,,ABIE_LAS,,304,,3,31,#FF0000
@@ -94,14 +94,14 @@ lariocci,LARI.OCC,Lari_occ,Lari_Occ,Lari occi,Larix occidentalis,W larch,Western
 ,,Ostr_vir,Ostr_Vir,Ostr virg,Ostrya virginiana,Am hophorn,American hophornbeam,American hophornbeam leading,also known as ironwood,,TRUE,Deciduous,hop-hornbeam,,CedrMplOther,,,,OSTR_VIR,OSV,1900,,,106,
 ,,Pice_abi,Pice_Abi,Pice abie,Picea abies,Nor sp,Norway spruce,Norway spruce leading,,,FALSE,Conifer,norway spruce,,CedrMplOther,,,,PICE_ABI,EPO,103,,15,4,#0000FF
 piceengl,PICE.ENG,Pice_eng,Pice_Eng,Pice enge,Picea engelmannii,Eng spr,Engelmann's spruce,Engelmann's spruce leading,,Pice_Eng,FALSE,Conifer,engelmann spruce,,SprcFrLrch,Sx,Se,,PICE_ENG,,104,,16,5,#009FFF
-piceglau,PICE.GLA,Pice_gla,Pice_Gla,Pice glau,Picea glauca,Whi spr,White spruce,White spruce leading,,Pice_Gla,FALSE,Conifer,white spruce,,SprcFrLrch,Sx,Sw,WS,PICE_GLA,EPB,105,,17,6,#1F9698
+piceglau,PICE.GLA,Pice_gla,Pice_Gla,Pice glau,Picea glauca,Whi spr,White spruce,White spruce leading,,Pice_Gla,FALSE,Conifer,white spruce,,SprcFrLrch,Sx,Sw,WS,PICE_GLA,EPB,105,,17,6,#93D4FF
 ,,Pice_koy,,Pice koya,Picea koyamai,Koy spr,Koyama's spruce,Koyama's spruce leading,,,FALSE,Conifer,,,CedrMplOther,,,,PICE_KOY,,100,generic spruce code,,10,
 ,,Pice_lut,,Pice lutx,Picea x lutzii,Wh x Sk spr,White x Sitka spruce,White x Sitka spruce leading,,,FALSE,Conifer,,,CedrMplOther,,,,PICE_LUT,,111,,,10,
 picemari,PICE.MAR,Pice_mar,Pice_Mar,Pice mari,Picea mariana,Bl spr,Black spruce,Black spruce leading,,Pice_Mar,FALSE,Conifer,black spruce,C2,BlkSprc,Sb,Sb,BS,PICE_MAR,EPN,101,,18,2,#00479E
 ,,Pice_pun,,Pice pung,Picea pungens,Blue spr,Blue spruce,Blue spruce leading,,,FALSE,Conifer,,,CedrMplOther,,,,PICE_PUN,,100,generic spruce code,,10,
 picerube,PICE.RUB,Pice_rub,Pice_Rub,Pice rube,Picea rubens,Rd spr,Red spruce,Red spruce leading,,,FALSE,Conifer,red spruce,,CedrMplOther,,,,PICE_RUB,EPR,102,,19,3,#004CFF
-picesitc,PICE.SIT,Pice_sit,Pice_Sit,Pice sitc,Picea sitchensis,Sk spr,Sitka spruce,Sitka spruce leading,,,FALSE,Conifer,sitka spruce,,CedrMplOther,Ss,,,PICE_SIT,,106,,20,7,#93D4FF
-,,Pice_sit,,Pice sitx,Picea sitchensis x ?,Hyb Sk spr,Hybrid sitka spruce,Hybrid sitka spruce leading,,,FALSE,Conifer,sitka spruce,,CedrMplOther,Ss,,,PICE_SIT,,106,,,10,#93D4FF
+picesitc,PICE.SIT,Pice_sit,Pice_Sit,Pice sitc,Picea sitchensis,Sk spr,Sitka spruce,Sitka spruce leading,,,FALSE,Conifer,sitka spruce,,CedrMplOther,Ss,,,PICE_SIT,,106,,20,7,#1F9698
+,,Pice_sit,,Pice sitx,Picea sitchensis x ?,Hyb Sk spr,Hybrid sitka spruce,Hybrid sitka spruce leading,,,FALSE,Conifer,sitka spruce,,CedrMplOther,Ss,,,PICE_SIT,,106,,,10,#1F9698
 ,,Pice_sp,Pice_Eng_Gla,Pice hybr,Picea engelmannii x glauca,WxE spr,Hybrid white x Englemann Spruce,Hybrid white x Englemann Spruce leading,Pice hybr is not on the manual CASFRI list but appears in database,Pice_Eng_Gla,FALSE,Conifer,spruce,,SprcFrLrch,Sxw,,,PICE_SP,,100,generic spruce code,,10,
 ,,Pice_sp,Pice_Eng_Gla,Pice engx,Picea engelmannii x glauca,WxE spr,Hybrid white x Englemann Spruce,Hybrid white x Englemann Spruce leading,,Pice_Eng_Gla,FALSE,Conifer,spruce,,SprcFrLrch,Sxw,,,PICE_SP,,100,generic spruce code,,10,
 ,,Pice_spp,Pice_Spp,Pice spp,Picea spp.,Spruce,Spruce,Spruce leading,,Pice_Spp,FALSE,Conifer,spruce,,CedrMplOther,S,,,PICE_SP,,100,,,1,
