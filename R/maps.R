@@ -548,7 +548,12 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     if (is(vegTypeMap, "RasterLayer")) {
       setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
     } else {
-      ## TODO: setColors needs to be adapted to SpatRaster...
+      temp <- levels(vegTypeMap)[[1]]
+      rasColors <- data.table(col = colors, values = names(colors))
+      rasColors <- rasColors[temp, on = "values"]
+      setcolorder(rasColors, "id")
+      rasColors[, values := NULL]
+      coltab(vegTypeMap) <- rasColors
     }
   }
 

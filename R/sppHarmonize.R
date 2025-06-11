@@ -133,7 +133,7 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
   ## add default colors for species used in model
   if (is.null(sppColorVect)) {
     sppColorVect <- sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
-    message("No 'sppColorVect' provided; making one with colour palette: Accent")
+    message("No 'sppColorVect' provided; will make one with Glasbey or Accent palette")
   } else {
     if (any(grepl("Mixed", names(sppColorVect)))) {
       if (length(sppColorVect) != (length(unique(sppEquiv[[sppEquivCol]])) + 1) ||

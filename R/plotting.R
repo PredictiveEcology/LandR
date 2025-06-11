@@ -232,8 +232,12 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
     sppColors <- sppEquiv$colorHex
     names(sppColors) <- sppEquiv[[sppEquivCol]]
     if (length(newVals == 1)) {
-      sppColors <- c(sppColors, newVals = "#FEF9F3")
+      mediumGray = "#F3F2ED"
+      names(mediumGray) = newVals
+      sppColors <- c(sppColors, mediumGray)
     }
+    #unique strips names...so use duplicated
+    sppColors <- sppColors[!duplicated(sppColors)]
   } else {
   sppColorNames <- c(na.omit(unique(sppEquiv[[sppEquivCol]])), newVals)
 
