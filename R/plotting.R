@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "band1"
+  "band1", "colorHex"
 ))
 
 #' Summary plots of leading vegetation types
@@ -217,6 +217,24 @@ Colors <- function(ras, cols, n = NULL) {
 #'
 #' @export
 sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
+
+  standardizedColors <- FALSE
+  #test if standardized plotting is an option - if so, override palette
+  if (!is.null(sppEquiv$colorHex)) {
+    if (nrow(sppEquiv[colorHex == "",]) == 0 &
+        !any(is.na(sppEquiv$colorHex)) &
+        c(is.null(newVals) | length(newVals) < 2)) {
+      standardizedColors <- TRUE
+    }
+  }
+
+  if (standardizedColors) {
+    sppColors <- sppEquiv$colorHex
+    names(sppColors) <- sppEquiv[[sppEquivCol]]
+    if (length(newVals == 1)) {
+      sppColors <- c(sppColors, newVals = "#FEF9F3")
+    }
+  } else {
   sppColorNames <- c(na.omit(unique(sppEquiv[[sppEquivCol]])), newVals)
 
   sppColors <- NULL
@@ -232,6 +250,7 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
   }
 
   names(sppColors) <- sppColorNames
+  }
   sppColors
 }
 
