@@ -556,6 +556,8 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'
 #' @export
 prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", dataYear = "2011", ...) {
+  Args <- list(...)
+
   if (!(dataSource %in% c("KNN", "SCANFI"))) {
     stop("Data Source must be either KNN or SCANFI")
   }
