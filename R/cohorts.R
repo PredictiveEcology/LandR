@@ -799,7 +799,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @param omitNonTreedPixels logical. Should pixels with classes in `forestedLCCClasses` be
 #'                           included as non-forested?
 #'
-#' @param forestedLCCClasses vector of non-forested land-cover classes in `rstLCC`
+#' @param forestedLCCClasses vector of forested land-cover classes in `rstLCC`
 #'
 #' @template rstLCC
 #'
