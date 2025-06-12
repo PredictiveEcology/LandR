@@ -223,7 +223,8 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
   if (!is.null(sppEquiv$colorHex)) {
     if (nrow(sppEquiv[colorHex == "",]) == 0 &
         !any(is.na(sppEquiv$colorHex)) &
-        c(is.null(newVals) | length(newVals) < 2)) {
+        c(is.null(newVals) | length(newVals) < 2) &
+        length(unique(sppEquiv[[sppEquivCol]] <= length(unique(sppEquiv$colorHex))))) {
       standardizedColors <- TRUE
     }
   }
@@ -232,12 +233,13 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
     sppColors <- sppEquiv$colorHex
     names(sppColors) <- sppEquiv[[sppEquivCol]]
     if (length(newVals == 1)) {
-      mediumGray = "#F3F2ED"
-      names(mediumGray) = newVals
+      mediumGray <- "#F3F2ED"
+      names(mediumGray) <- newVals
       sppColors <- c(sppColors, mediumGray)
     }
     #unique strips names...so use duplicated
-    sppColors <- sppColors[!duplicated(sppColors)]
+    #strip out the duplicated names - either subspecies or genus-level spp (e.g. Popu_spp)
+    sppColors <- sppColors[!duplicated(names(sppColors))]
   } else {
   sppColorNames <- c(na.omit(unique(sppEquiv[[sppEquivCol]])), newVals)
 
