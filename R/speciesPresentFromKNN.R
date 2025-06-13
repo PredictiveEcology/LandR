@@ -301,7 +301,6 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL, 
     # if (is(speciesPresRas, "RasterLayer")) {
     #   bb <- raster::deratify(bb)
     # }
-
     IDcol <- names(rasLevs)[1]
     speciesCommunities <- na.omit(rasLevs[rasLevs[[IDcol]] %in% as.vector(bb[[1]])]$category)
     species <- as.character(speciesCommunities)
@@ -326,23 +325,17 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL, 
     }
 
     bb <- postProcess(x = speciesPresRas, studyArea = studyArea)
+    rasLevs <- as.data.table(levels(speciesPresRas[[1]]))
 
-    rasLevs <- as.data.table(levels(bb))
-    # if (is(speciesPresRas, "RasterLayer")) {
-    #   bb <- raster::deratify(bb)
-    # }
+    speciesCommunities <- na.omit(rasLevs[rasLevs[["value"]] %in% as.vector(bb[[1]])]$category)
 
-  # if (any(grepl("ID", colnames(rasLevs))))
-  speciesCommunities <- na.omit(rasLevs[rasLevs[[IDcol]] %in% as.vector(bb[[1]])]$category)
-  # else
-  #   speciesCommunities <- na.omit(rasLevs[value %in% as.vector(bb[[1]])]$category)
-  species <- as.character(speciesCommunities)
-  species <- unique(unlist(strsplit(species, "__")))
-
-    if (!is.null(sppEquivCol) & is.null(speciesPresentRas)) {
+    # else
+    if (!is.null(sppEquivCol)) {
       sppEquiv <- LandR::sppEquivalencies_CA
-      species <- unique(sppEquiv[KNN %in% species, .SD, ][[sppEquivCol]])
+      species <- unique(sppEquiv[LandR %in% speciesCommunities, ][[sppEquivCol]])
       species <- species[!species == ""]
+    } else {
+      species <- speciesCommunities
     }
   }
 
