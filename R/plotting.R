@@ -216,7 +216,7 @@ Colors <- function(ras, cols, n = NULL) {
 #' plus any extra names passed with `newVals`.
 #'
 #' @export
-sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
+sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette = "Accent") {
 
   standardizedColors <- FALSE
   #test if standardized plotting is an option - if so, override palette
@@ -233,7 +233,7 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
     sppColors <- sppEquiv$colorHex
     names(sppColors) <- sppEquiv[[sppEquivCol]]
     if (length(newVals == 1)) {
-      mediumGray <- "#F3F2ED"
+      mediumGray <- "#AAA7AD"
       names(mediumGray) <- newVals
       sppColors <- c(sppColors, mediumGray)
     }
