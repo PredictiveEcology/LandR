@@ -533,8 +533,8 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'
 #' @template cacheTags
 #'
-#' @param dataSource Character. Either KNN or SCANFI. Defaults to KNN to obtain 2001 biomass layer from KNN.
-#'   Also able to obtain 2020 biomass layer from SCANFI.
+#' @param dataSource Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain 2001 biomass layer from KNN.
+#'   Also able to obtain 2015 biomass layer from NTEMS or 2020 biomass layer from SCANFI.
 #'
 #' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020 for SCANFI.
 #'
@@ -558,8 +558,8 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", dataYear = "2011", ...) {
   Args <- list(...)
 
-  if (!(dataSource %in% c("KNN", "SCANFI"))) {
-    stop("Data Source must be either KNN or SCANFI")
+  if (!(dataSource %in% c("KNN", "NTEMS", "SCANFI"))) {
+    stop("Data Source must be either KNN, NTEMS, or SCANFI")
   }
   if (is.null(Args$url)) {
     if(dataSource == "KNN") {
@@ -577,6 +577,15 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", data
       }
       else{
         stop("KNN data is available for 2001 or 2011 only")
+      }
+    }
+    if(dataSource == "NTEMS") {
+      if(dataYear == "2015") {
+        Args$url <- paste0(
+          "https://drive.google.com/file/d/19R4IXxByGvG3V3oE6VjhYnwqTQjQGVC-/view?usp=drive_link")
+      }
+      else {
+        stop("NTEMS data is currently available for 2015 only")
       }
     }
     if(dataSource == "SCANFI") {
