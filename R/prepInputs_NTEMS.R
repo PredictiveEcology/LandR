@@ -185,7 +185,7 @@ prepInputs_NTEMS_DominantSpecies <- function(year = 2011, destinationPath, sppEq
   }
 
   domSppURL <- paste0("https://opendata.nfis.org/downloads/forest_change/CA_Tree_Species_Classification_", year, ".zip")
-  domSppTF <- paste0("Canada_Tree_Species_Classification_HMM_", year, ".tif")
+  domSppTF <- paste0("CA_Forest_Tree_Species_", year, ".tif")
   domSpp <- prepInputs(
     url = domSppURL, targetFile = domSppTF, # cropping and masking nation wide raster to study area but NOT reprojecting
     destinationPath = destinationPath,
@@ -207,7 +207,8 @@ prepInputs_NTEMS_DominantSpecies <- function(year = 2011, destinationPath, sppEq
   }
 
   domSpp <- lapply(uniqueVals[["NTEMS_Species_Code"]], FUN = function(spp, ras = domSpp,
-                                                                      template = projectTo) { # converting each species to binary layers and reprojecting to save user computation time
+                                                                      template = projectTo) {
+    # converting each species to binary layers and reprojecting to save user computation time
     newMap <- domSpp
     newMap[!domSpp[] == spp] <- 0
     newMap[domSpp[] == spp] <- 1

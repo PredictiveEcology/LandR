@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "band1"
+  "band1", "colorHex"
 ))
 
 #' Summary plots of leading vegetation types
@@ -216,7 +216,31 @@ Colors <- function(ras, cols, n = NULL) {
 #' plus any extra names passed with `newVals`.
 #'
 #' @export
-sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
+sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette = "Accent") {
+
+  standardizedColors <- FALSE
+  #test if standardized plotting is an option - if so, override palette
+  if (!is.null(sppEquiv$colorHex)) {
+    if (nrow(sppEquiv[colorHex == "",]) == 0 &
+        !any(is.na(sppEquiv$colorHex)) &
+        c(is.null(newVals) | length(newVals) < 2) &
+        length(unique(sppEquiv[[sppEquivCol]] <= length(unique(sppEquiv$colorHex))))) {
+      standardizedColors <- TRUE
+    }
+  }
+
+  if (standardizedColors) {
+    sppColors <- sppEquiv$colorHex
+    names(sppColors) <- sppEquiv[[sppEquivCol]]
+    if (length(newVals == 1)) {
+      mediumGray <- "#AAA7AD"
+      names(mediumGray) <- newVals
+      sppColors <- c(sppColors, mediumGray)
+    }
+    #unique strips names...so use duplicated
+    #strip out the duplicated names - either subspecies or genus-level spp (e.g. Popu_spp)
+    sppColors <- sppColors[!duplicated(names(sppColors))]
+  } else {
   sppColorNames <- c(na.omit(unique(sppEquiv[[sppEquivCol]])), newVals)
 
   sppColors <- NULL
@@ -232,6 +256,7 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
   }
 
   names(sppColors) <- sppColorNames
+  }
   sppColors
 }
 

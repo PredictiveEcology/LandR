@@ -702,13 +702,23 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 
   ## invalid NFDB polygons will cause Rstudio to crash during postProcess as of 8/21/2024
   ## removing invalid polygons is far faster than fixing the 0.1% of data
-  postProcessArgs <- dots[names(dots) %in% c("to", "maskTo", "projectTo", "cropTo")]
+  #projectTo must be rasterToMatch due to terra rasterize
+  #but don't project yet because of NFDB
+  postProcessArgs <- dots[names(dots) %in% c("to", "projectTo", "studyArea", "maskTo")]
   if (length(postProcessArgs) == 0) {
-    postProcessArgs$to <- rasterToMatch
+    postProcessArgs$cropTo <- rasterToMatch
+    postProcessArgs$projectTo <- rasterToMatch
+    postProcessArgs$maskTo = rasterToMatch
   }
+  postProcessArgs$projectTo <- rasterToMatch
 
   preProcessArgs <- dots[!names(dots) %in% names(postProcessArgs)]
+  #you can crop without worrying about geometry
+  preProcessArgs$cropTo <- rasterToMatch
+
   allFires <- do.call(prepInputs, append(list(fun = fun), preProcessArgs))
+
+  #the reason this isn't combined into one function is due to geometry issues in NFDB
   allFires <- allFires[terra::is.valid(allFires), ] ## drop invalid geometries
 
   ## This may potentially result in dots intended for postProcess being lost.
@@ -730,7 +740,9 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
       if (!is(d, "SpatVector")) {
         d <- vect(d)
       }
-      fireRas <- terra::rasterize(d, rasterToMatch, field = fireField)
+
+      #fun = max to take the most recent fire year
+      fireRas <- terra::rasterize(d, rasterToMatch, field = fireField, fun = max)
       fireRas[!is.na(terra::values(fireRas, mat = FALSE)) &
                 terra::values(fireRas, mat = FALSE) < earliestYear] <- NA
     } else {
