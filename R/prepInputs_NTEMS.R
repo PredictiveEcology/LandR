@@ -207,7 +207,8 @@ prepInputs_NTEMS_DominantSpecies <- function(year = 2011, destinationPath, sppEq
   }
 
   domSpp <- lapply(uniqueVals[["NTEMS_Species_Code"]], FUN = function(spp, ras = domSpp,
-                                                                      template = projectTo) { # converting each species to binary layers and reprojecting to save user computation time
+                                                                      template = projectTo) {
+    # converting each species to binary layers and reprojecting to save user computation time
     newMap <- domSpp
     newMap[!domSpp[] == spp] <- 0
     newMap[domSpp[] == spp] <- 1
