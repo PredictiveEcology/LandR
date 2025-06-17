@@ -211,14 +211,14 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
   establishprobBySuccessionTimestep <- 1 - (1 - predictedCoverVals)^successionTimestep
   cohortDataShort[, establishprob := establishprobBySuccessionTimestep]
   cohortDataShort <- species[, .(resproutprob, postfireregen, speciesCode)][cohortDataShort,
-    on = "speciesCode"
+                                                                            on = "speciesCode"
   ]
 
   ## partitioning between seed and resprout. See documentation about the "* 0.5"
   cohortDataShort[, establishprob := pmax(0, pmin(1, (establishprob * (1 - resproutprob * 0.5))))]
 
   cohortDataShort <- rbindlist(list(cohortDataShort, cohortDataShortNoCover),
-    use.names = TRUE, fill = TRUE
+                               use.names = TRUE, fill = TRUE
   )
   cohortDataShort[is.na(establishprob), establishprob := 0]
 
@@ -237,23 +237,23 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
     speciesEcoregion2 <- copy(speciesEcoregion)
     speciesEcoregion2[, `:=`(
       logAge = scale(logAge,
-        center = attr(modelBiomass$scaledVarsModelB$logAge, "scaled:center"),
-        scale = attr(modelBiomass$scaledVarsModelB$logAge, "scaled:scale")
+                     center = attr(modelBiomass$scaledVarsModelB$logAge, "scaled:center"),
+                     scale = attr(modelBiomass$scaledVarsModelB$logAge, "scaled:scale")
       ),
       cover = scale(cover,
-        center = attr(modelBiomass$scaledVarsModelB$cover, "scaled:center"),
-        scale = attr(modelBiomass$scaledVarsModelB$cover, "scaled:scale")
+                    center = attr(modelBiomass$scaledVarsModelB$cover, "scaled:center"),
+                    scale = attr(modelBiomass$scaledVarsModelB$cover, "scaled:scale")
       )
     )]
     speciesEcoregion2[, maxB := asInteger(predict(modelBiomass$mod,
-      newdata = speciesEcoregion2,
-      type = "response"
+                                                  newdata = speciesEcoregion2,
+                                                  type = "response"
     ))]
     speciesEcoregion[, maxB := speciesEcoregion2$maxB]
   } else {
     speciesEcoregion[, maxB := asInteger(predict(modelBiomass$mod,
-      newdata = speciesEcoregion,
-      type = "response"
+                                                 newdata = speciesEcoregion,
+                                                 type = "response"
     ))]
   }
 
@@ -470,7 +470,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
   }
 
   getFires <- if (is.null(firePerimeters) &&
-    (isFALSE(is.null(fireURL)) && isFALSE(is.na(fireURL)))) {
+                  (isFALSE(is.null(fireURL)) && isFALSE(is.na(fireURL)))) {
     TRUE
   } else {
     FALSE
@@ -502,11 +502,11 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
   if (getFires) {
     if (isFALSE(is.null(rasterToMatch))) {
       firePerimeters <- Cache(prepInputsFireYear, ...,
-        url = fireURL,
-        fun = fireFun,
-        fireField = fireField,
-        destinationPath = destinationPath,
-        rasterToMatch = rasterToMatch
+                              url = fireURL,
+                              fun = fireFun,
+                              fireField = fireField,
+                              destinationPath = destinationPath,
+                              rasterToMatch = rasterToMatch
       )
     } else {
       message("No 'rasterToMatch' or 'firePerimeters' supplied; ages will NOT be adjusted using fire data.")
@@ -533,6 +533,11 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'
 #' @template cacheTags
 #'
+#' @param dataSource Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain 2001 biomass layer from KNN.
+#'   Also able to obtain 2015 biomass layer from NTEMS or 2020 biomass layer from SCANFI.
+#'
+#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020 for SCANFI.
+#'
 #' @param ... arguments passed to [reproducible::prepInputs()] and [reproducible::Cache()]. If the following arguments
 #'   are not provided, the following values will be used:
 #'   \itemize{
@@ -550,17 +555,49 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @return a `rawBiomassMap` raster
 #'
 #' @export
-prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
+prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", dataYear = "2011", ...) {
   Args <- list(...)
 
-  if (is.null(Args$url)) {
-    Args$url <- paste0(
-      "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-      "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
-      "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif"
-    )
+  if (!(dataSource %in% c("KNN", "NTEMS", "SCANFI"))) {
+    stop("Data Source must be either KNN, NTEMS, or SCANFI")
   }
-
+  if (is.null(Args$url)) {
+    if(dataSource == "KNN") {
+      if(dataYear == "2011") {
+        Args$url <- paste0(
+          "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+          "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
+          "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
+        if(dataYear == "2001") {
+          Args$url <- paste0(
+            "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+            "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/",
+            "NFI_MODIS250m_2001_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
+        }
+      }
+      else{
+        stop("KNN data is available for 2001 or 2011 only")
+      }
+    }
+    if(dataSource == "NTEMS") {
+      if(dataYear == "2015") {
+        Args$url <- paste0(
+          "https://drive.google.com/file/d/19R4IXxByGvG3V3oE6VjhYnwqTQjQGVC-/view?usp=drive_link")
+      }
+      else {
+        stop("NTEMS data is currently available for 2015 only")
+      }
+    }
+    if(dataSource == "SCANFI") {
+      if(dataYear == "2020") {
+        Args$url <- paste0(
+          "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/SCANFI/v1/SCANFI_att_biomass_SW_2020_v1.2.tif")
+      }
+      else {
+        stop("SCANFI data is currently available for 2020 only")
+      }
+    }
+  }
   ## NOTE: only calling httr2::request here because listed in Imports, to satisfy R CMD check;
   ##       httr is actually needed for reproducible::prepInputs() but it's only a Suggests there;
   ##       see LandR#113 and discussion therein
@@ -611,6 +648,7 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, ...) {
 
   return(rawBiomassMap)
 }
+
 
 #' Create a raster of fire perimeters
 #'
@@ -706,7 +744,7 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
       #fun = max to take the most recent fire year
       fireRas <- terra::rasterize(d, rasterToMatch, field = fireField, fun = max)
       fireRas[!is.na(terra::values(fireRas, mat = FALSE)) &
-        terra::values(fireRas, mat = FALSE) < earliestYear] <- NA
+                terra::values(fireRas, mat = FALSE) < earliestYear] <- NA
     } else {
       .requireNamespace("fasterize", stopOnFALSE = TRUE)
       fireRas <- fasterize::fasterize(d, raster = rasterToMatch, field = fireField)
@@ -826,13 +864,13 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
       if (!.compareRas(templateRas, studyAreaLarge, stopOnError = FALSE)) {
         ## note that extents/origin may never align if the resolution and projection do not allow for it
         templateRas <- Cache(postProcessTo,
-          templateRas,
-          cropTo = studyAreaLarge,
-          maskTo = studyAreaLarge,
-          # studyArea = studyAreaLarge,
-          # useSAcrs = FALSE,
-          overwrite = TRUE,
-          userTags = c("postRTMtemplate")
+                             templateRas,
+                             cropTo = studyAreaLarge,
+                             maskTo = studyAreaLarge,
+                             # studyArea = studyAreaLarge,
+                             # useSAcrs = FALSE,
+                             overwrite = TRUE,
+                             userTags = c("postRTMtemplate")
         )
         templateRas <- fixErrors(templateRas)
       }
