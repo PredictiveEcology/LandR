@@ -332,10 +332,10 @@ makeMinRelativeB <- function(pixelCohortData) {
 #' @export
 minRelativeBDefaults <- function() {
   data.frame(
-    X1 = 0.15, ## 0.2
-    X2 = 0.25, ## 0.4
-    X3 = 0.35, ## 0.5
-    X4 = 0.45, ## 0.7
+    X1 = 0.15,
+    X2 = 0.25,
+    X3 = 0.35,
+    X4 = 0.45,
     X5 = 0.55
   )
 }
@@ -534,9 +534,9 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' @template cacheTags
 #'
 #' @param dataSource Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain 2001 biomass layer from KNN.
-#'   Also able to obtain 2015 biomass layer from NTEMS or 2020 biomass layer from SCANFI.
+#'   Also able to obtain 2015 biomass layer from NTEMS or 2000, 2010, or 2020 biomass layer from SCANFI.
 #'
-#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020 for SCANFI.
+#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2000, 2010, or 2020 for SCANFI.
 #'
 #' @param ... arguments passed to [reproducible::prepInputs()] and [reproducible::Cache()]. If the following arguments
 #'   are not provided, the following values will be used:
@@ -589,12 +589,18 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", data
       }
     }
     if(dataSource == "SCANFI") {
-      if(dataYear == "2020") {
+      if(dataYear == "2000") {
         Args$url <- paste0(
-          "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/SCANFI/v1/SCANFI_att_biomass_SW_2020_v1.2.tif")
-      }
+          "https://drive.google.com/file/d/1B8cm6_YOnha-g1AFSdR1sIqOJ9bCmk1G")
+      } else if(dataYear == "2010") {
+          Args$url <- paste0(
+            "https://drive.google.com/file/d/11v0ZaBzhcVQprhFuL-L8FJkYOtuAcwc3")
+        } else if(dataYear == "2020") {
+            Args$url <- paste0(
+              "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/SCANFI/v1/SCANFI_att_biomass_SW_2020_v1.2.tif")
+          }
       else {
-        stop("SCANFI data is currently available for 2020 only")
+        stop("SCANFI data is currently available for 2000, 2010, and 2020 only")
       }
     }
   }
