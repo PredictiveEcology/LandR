@@ -568,18 +568,16 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", data
           "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
           "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
           "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
-        if(dataYear == "2001") {
-          Args$url <- paste0(
-            "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-            "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/",
-            "NFI_MODIS250m_2001_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
-        }
+      } else if(dataYear == "2001") {
+        Args$url <- paste0(
+          "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+          "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/",
+          "NFI_MODIS250m_2001_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
       }
-      else{
+      else {
         stop("KNN data is available for 2001 or 2011 only")
       }
-    }
-    if(dataSource == "NTEMS") {
+    } else if(dataSource == "NTEMS") {
       if(dataYear == "2015") {
         Args$url <- paste0(
           "https://drive.google.com/file/d/19R4IXxByGvG3V3oE6VjhYnwqTQjQGVC-/view?usp=drive_link")
@@ -587,18 +585,17 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", data
       else {
         stop("NTEMS data is currently available for 2015 only")
       }
-    }
-    if(dataSource == "SCANFI") {
+    } else if(dataSource == "SCANFI") {
       if(dataYear == "2000") {
         Args$url <- paste0(
           "https://drive.google.com/file/d/1B8cm6_YOnha-g1AFSdR1sIqOJ9bCmk1G")
       } else if(dataYear == "2010") {
-          Args$url <- paste0(
-            "https://drive.google.com/file/d/11v0ZaBzhcVQprhFuL-L8FJkYOtuAcwc3")
-        } else if(dataYear == "2020") {
-            Args$url <- paste0(
-              "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/SCANFI/v1/SCANFI_att_biomass_SW_2020_v1.2.tif")
-          }
+        Args$url <- paste0(
+          "https://drive.google.com/file/d/11v0ZaBzhcVQprhFuL-L8FJkYOtuAcwc3")
+      } else if(dataYear == "2020") {
+        Args$url <- paste0(
+          "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/SCANFI/v1/SCANFI_att_biomass_SW_2020_v1.2.tif")
+      }
       else {
         stop("SCANFI data is currently available for 2000, 2010, and 2020 only")
       }
