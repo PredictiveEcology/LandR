@@ -41,7 +41,7 @@ landisIIrepo <- paste0(
 #' @note This one is tailored to Canadian forests
 #'
 #' @param url If NULL (the default), uses one from D. Cyr's LANDIS-II files:
-#' <https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv>).
+#' <https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/blob/master/speciesTraits.csv>).
 #'
 #' @param dPath The destination path.
 #'
@@ -346,7 +346,7 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv = NULL, sppEquivC
 #' @note This one is tailored to Canadian forests (?)
 #'
 #' @param url If NULL (the default), uses one from the LANDIS-II project:
-#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/biomass-succession_test.txt">).
+#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/blob/master/biomass-succession-archive/trunk/tests/v6.0-2.0/biomass-succession_test.txt">).
 #'
 #' @param dPath The destination path.
 #'
@@ -464,7 +464,7 @@ prepInputsMainInput <- function(url = NULL, dPath = tempdir(), cacheTags = NULL)
 #' Get the dummy ecoregion table from LANDIS-II examples.
 #'
 #' @param url If NULL (the default), uses one from the LANDIS-II project:
-#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/ecoregion.txt">).
+#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/blob/master/biomass-succession-archive/trunk/tests/v6.0-2.0/ecoregion.txt">).
 #'
 #' @param dPath The destination path.
 #'
@@ -509,7 +509,7 @@ prepInputsEcoregion <- function(url = NULL, dPath, cacheTags = NULL) {
 #' Get the dummy ecoregion table from LANDIS-II examples.
 #'
 #' @param url If NULL (the default), uses one from the LANDIS-II project:
-#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/biomass-succession-dynamic-inputs_test.txt">).
+#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/blob/master/biomass-succession-archive/trunk/tests/v6.0-2.0/biomass-succession-dynamic-inputs_test.txt">).
 #'
 #' @param dPath The destination path.
 #'
