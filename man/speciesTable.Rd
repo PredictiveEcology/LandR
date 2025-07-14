@@ -17,7 +17,7 @@ prepSpeciesTable(
 }
 \arguments{
 \item{url}{If NULL (the default), uses one from D. Cyr's LANDIS-II files:
-\url{https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).}
+\url{https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/blob/master/speciesTraits.csv}).}
 
 \item{dPath}{The destination path.}
 
