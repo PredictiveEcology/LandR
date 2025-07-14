@@ -530,13 +530,17 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #' Create the `rawBiomassMap` raster containing biomass estimates for `pixelCohortData`.
 #'
 #'
-#' @param dataSource Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain 2001 biomass layer from KNN.
-#'   Also able to obtain 2015 biomass layer from NTEMS or 2000, 2010, or 2020 biomass layer from SCANFI.
+#' @param dataSource Character. One of KNN, NTEMS, or SCANFI.
+#'   Defaults to KNN for `dataYear` 2001.
+#'   Also available:
+#'   - KNN for `dataYear` 2011;
+#'   - NTEMS for `dataYear` 2015;
+#'   - SCANFI for `dataYear` 2000, 2010, or 2020.
 #'
 #' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2000, 2010, or 2020 for SCANFI.
 #'
-#' @param ... arguments passed to [reproducible::prepInputs()] and [reproducible::Cache()]. If the following arguments
-#'   are not provided, the following values will be used:
+#' @param ... arguments passed to [reproducible::prepInputs()] and [reproducible::Cache()].
+#' If the following arguments are not provided, the following values will be used:
 #'   \itemize{
 #'     \item{`url`: by default, the 2001 kNN stand biomass map is downloaded from
 #'       the NRCan National Forest Inventory}
@@ -557,13 +561,13 @@ prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
     stop("Data Source must be either KNN, NTEMS, or SCANFI")
   }
   if (is.null(Args$url)) {
-    if(dataSource == "KNN") {
-      if(dataYear == "2011") {
+    if (dataSource == "KNN") {
+      if (dataYear == "2011") {
         Args$url <- paste0(
           "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
           "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
           "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
-      } else if(dataYear == "2001") {
+      } else if (dataYear == "2001") {
         Args$url <- paste0(
           "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
           "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/",
@@ -572,7 +576,7 @@ prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
       else {
         stop("KNN data is available for 2001 or 2011 only")
       }
-    } else if(dataSource == "NTEMS") {
+    } else if (dataSource == "NTEMS") {
       if(dataYear == "2015") {
         Args$url <- paste0(
           "https://drive.google.com/file/d/19R4IXxByGvG3V3oE6VjhYnwqTQjQGVC-/view?usp=drive_link")
@@ -580,14 +584,14 @@ prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
       else {
         stop("NTEMS data is currently available for 2015 only")
       }
-    } else if(dataSource == "SCANFI") {
-      if(dataYear == "2000") {
+    } else if (dataSource == "SCANFI") {
+      if (dataYear == "2000") {
         Args$url <- paste0(
           "https://drive.google.com/file/d/1B8cm6_YOnha-g1AFSdR1sIqOJ9bCmk1G")
-      } else if(dataYear == "2010") {
+      } else if (dataYear == "2010") {
         Args$url <- paste0(
           "https://drive.google.com/file/d/11v0ZaBzhcVQprhFuL-L8FJkYOtuAcwc3")
-      } else if(dataYear == "2020") {
+      } else if (dataYear == "2020") {
         Args$url <- paste0(
           "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/SCANFI/v1/SCANFI_att_biomass_SW_2020_v1.2.tif")
       }
@@ -644,7 +648,6 @@ prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
 
   return(rawBiomassMap)
 }
-
 
 #' Create a raster of fire perimeters
 #'
