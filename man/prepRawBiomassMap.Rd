@@ -18,9 +18,10 @@ prepRawBiomassMap(
 \item{cacheTags}{a character vector of strings to pass to \code{Cache(userTags)}}
 
 \item{dataSource}{Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain 2001 biomass layer from KNN.
-Also able to obtain 2015 biomass layer from NTEMS or 2020 biomass layer from SCANFI.}
+Also able to obtain 2015 biomass layer from NTEMS or 2000, 2010, or 2020 biomass layer from SCANFI.}
 
-\item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020 for SCANFI.}
+
+\item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2000, 2010, or 2020 for SCANFI.}
 
 \item{...}{arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} and \code{\link[reproducible:Cache]{reproducible::Cache()}}. If the following arguments
 are not provided, the following values will be used:

@@ -332,10 +332,10 @@ makeMinRelativeB <- function(pixelCohortData) {
 #' @export
 minRelativeBDefaults <- function() {
   data.frame(
-    X1 = 0.15, ## 0.2
-    X2 = 0.25, ## 0.4
-    X3 = 0.35, ## 0.5
-    X4 = 0.45, ## 0.7
+    X1 = 0.15,
+    X2 = 0.25,
+    X3 = 0.35,
+    X4 = 0.45,
     X5 = 0.55
   )
 }
@@ -529,14 +529,11 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'
 #' Create the `rawBiomassMap` raster containing biomass estimates for `pixelCohortData`.
 #'
-#' @template studyAreaName
-#'
-#' @template cacheTags
 #'
 #' @param dataSource Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain 2001 biomass layer from KNN.
-#'   Also able to obtain 2015 biomass layer from NTEMS or 2020 biomass layer from SCANFI.
+#'   Also able to obtain 2015 biomass layer from NTEMS or 2000, 2010, or 2020 biomass layer from SCANFI.
 #'
-#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020 for SCANFI.
+#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2000, 2010, or 2020 for SCANFI.
 #'
 #' @param ... arguments passed to [reproducible::prepInputs()] and [reproducible::Cache()]. If the following arguments
 #'   are not provided, the following values will be used:
@@ -546,16 +543,14 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'     \item{`useSAcrs` and `projectTo`: `FALSE` and `NA`}
 #'     \item{`method`: `"bilinear"`}
 #'     \item{`datatype`: `"INT2U"`}
-#'     \item{`writeTo`: `suffix("rawBiomassMap.tif", paste0("_", studyAreaName))`}
 #'     \item{`overwrite`: `TRUE`}
-#'     \item{`userTags`: `c(cacheTags, "rawBiomassMap")`}
 #'     \item{`omitArgs`: `c("destinationPath", "targetFile", "userTags", "stable")`}
 #'   }
 #'
 #' @return a `rawBiomassMap` raster
 #'
 #' @export
-prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", dataYear = "2011", ...) {
+prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
   Args <- list(...)
 
   if (!(dataSource %in% c("KNN", "NTEMS", "SCANFI"))) {
@@ -568,18 +563,16 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", data
           "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
           "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
           "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
-        if(dataYear == "2001") {
-          Args$url <- paste0(
-            "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-            "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/",
-            "NFI_MODIS250m_2001_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
-        }
+      } else if(dataYear == "2001") {
+        Args$url <- paste0(
+          "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+          "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/",
+          "NFI_MODIS250m_2001_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
       }
-      else{
+      else {
         stop("KNN data is available for 2001 or 2011 only")
       }
-    }
-    if(dataSource == "NTEMS") {
+    } else if(dataSource == "NTEMS") {
       if(dataYear == "2015") {
         Args$url <- paste0(
           "https://drive.google.com/file/d/19R4IXxByGvG3V3oE6VjhYnwqTQjQGVC-/view?usp=drive_link")
@@ -587,14 +580,19 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", data
       else {
         stop("NTEMS data is currently available for 2015 only")
       }
-    }
-    if(dataSource == "SCANFI") {
-      if(dataYear == "2020") {
+    } else if(dataSource == "SCANFI") {
+      if(dataYear == "2000") {
+        Args$url <- paste0(
+          "https://drive.google.com/file/d/1B8cm6_YOnha-g1AFSdR1sIqOJ9bCmk1G")
+      } else if(dataYear == "2010") {
+        Args$url <- paste0(
+          "https://drive.google.com/file/d/11v0ZaBzhcVQprhFuL-L8FJkYOtuAcwc3")
+      } else if(dataYear == "2020") {
         Args$url <- paste0(
           "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/SCANFI/v1/SCANFI_att_biomass_SW_2020_v1.2.tif")
       }
       else {
-        stop("SCANFI data is currently available for 2020 only")
+        stop("SCANFI data is currently available for 2000, 2010, and 2020 only")
       }
     }
   }
@@ -617,8 +615,6 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", data
     if (!is.null(Args$filename2)) {
       Args$writeTo <- Args$filename2
       Args$filename2 <- NULL
-    } else {
-      Args$writeTo <- .suffix("rawBiomassMap.tif", paste0("_", studyAreaName))
     }
   }
 
@@ -631,7 +627,7 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", data
 
   Args2 <- list()
   if (is.null(Args$userTags)) {
-    Args2$userTags <- c(cacheTags, "rawBiomassMap")
+    Args2$userTags <- c("rawBiomassMap")
   }
   if (is.null(Args$omitArgs)) {
     Args2$omitArgs <- c("destinationPath", "targetFile", "userTags", "stable")
