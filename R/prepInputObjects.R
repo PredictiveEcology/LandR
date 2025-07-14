@@ -529,9 +529,6 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'
 #' Create the `rawBiomassMap` raster containing biomass estimates for `pixelCohortData`.
 #'
-#' @template studyAreaName
-#'
-#' @template cacheTags
 #'
 #' @param dataSource Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain 2001 biomass layer from KNN.
 #'   Also able to obtain 2015 biomass layer from NTEMS or 2000, 2010, or 2020 biomass layer from SCANFI.
@@ -546,16 +543,14 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'     \item{`useSAcrs` and `projectTo`: `FALSE` and `NA`}
 #'     \item{`method`: `"bilinear"`}
 #'     \item{`datatype`: `"INT2U"`}
-#'     \item{`writeTo`: `suffix("rawBiomassMap.tif", paste0("_", studyAreaName))`}
 #'     \item{`overwrite`: `TRUE`}
-#'     \item{`userTags`: `c(cacheTags, "rawBiomassMap")`}
 #'     \item{`omitArgs`: `c("destinationPath", "targetFile", "userTags", "stable")`}
 #'   }
 #'
 #' @return a `rawBiomassMap` raster
 #'
 #' @export
-prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", dataYear = "2011", ...) {
+prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
   Args <- list(...)
 
   if (!(dataSource %in% c("KNN", "NTEMS", "SCANFI"))) {
@@ -620,8 +615,6 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", data
     if (!is.null(Args$filename2)) {
       Args$writeTo <- Args$filename2
       Args$filename2 <- NULL
-    } else {
-      Args$writeTo <- .suffix("rawBiomassMap.tif", paste0("_", studyAreaName))
     }
   }
 
@@ -634,7 +627,7 @@ prepRawBiomassMap <- function(studyAreaName, cacheTags, dataSource = "KNN", data
 
   Args2 <- list()
   if (is.null(Args$userTags)) {
-    Args2$userTags <- c(cacheTags, "rawBiomassMap")
+    Args2$userTags <- c("rawBiomassMap")
   }
   if (is.null(Args$omitArgs)) {
     Args2$omitArgs <- c("destinationPath", "targetFile", "userTags", "stable")
