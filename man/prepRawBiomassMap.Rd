@@ -4,22 +4,11 @@
 \alias{prepRawBiomassMap}
 \title{Create \code{rawBiomassMap}}
 \usage{
-prepRawBiomassMap(
-  studyAreaName,
-  cacheTags,
-  dataSource = "KNN",
-  dataYear = "2011",
-  ...
-)
+prepRawBiomassMap(dataSource = "KNN", dataYear = "2011", ...)
 }
 \arguments{
-\item{studyAreaName}{character string giving the study area name.}
-
-\item{cacheTags}{a character vector of strings to pass to \code{Cache(userTags)}}
-
 \item{dataSource}{Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain 2001 biomass layer from KNN.
 Also able to obtain 2015 biomass layer from NTEMS or 2000, 2010, or 2020 biomass layer from SCANFI.}
-
 
 \item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2000, 2010, or 2020 for SCANFI.}
 
@@ -31,9 +20,7 @@ the NRCan National Forest Inventory}
 \item{\code{useSAcrs} and \code{projectTo}: \code{FALSE} and \code{NA}}
 \item{\code{method}: \code{"bilinear"}}
 \item{\code{datatype}: \code{"INT2U"}}
-\item{\code{writeTo}: \code{suffix("rawBiomassMap.tif", paste0("_", studyAreaName))}}
 \item{\code{overwrite}: \code{TRUE}}
-\item{\code{userTags}: \code{c(cacheTags, "rawBiomassMap")}}
 \item{\code{omitArgs}: \code{c("destinationPath", "targetFile", "userTags", "stable")}}
 }}
 }
