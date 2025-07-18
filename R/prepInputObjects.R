@@ -601,16 +601,6 @@ prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
   ##       see LandR#113 and discussion therein
   url <- httr2::request(Args$url)$url
 
-  if (is.null(Args$useSAcrs)) {
-    Args$useSAcrs <- FALSE
-  }
-
-  if (is.null(Args$method)) {
-    Args$method <- "bilinear"
-  }
-  if (is.null(Args$datatype)) {
-    Args$datatype <- "INT2U"
-  }
   if (is.null(Args$writeTo)) {
     if (!is.null(Args$filename2)) {
       Args$writeTo <- Args$filename2
@@ -626,11 +616,8 @@ prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
   }
 
   Args2 <- list()
-  if (is.null(Args$userTags)) {
-    Args2$userTags <- c("rawBiomassMap")
-  }
   if (is.null(Args$omitArgs)) {
-    Args2$omitArgs <- c("destinationPath", "targetFile", "userTags", "stable")
+    Args2$omitArgs <- c("destinationPath", "targetFile", "stable")
   }
 
   if (is.null(Args2$quick)) {
@@ -640,7 +627,7 @@ prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
   rawBiomassMap <- do.call(prepInputs, args = Args) |>
     Cache(
       quick = Args2$quick, .functionName = "prepInputsRawBiomassMap",
-      omitArgs = Args2$omitArgs, userTags = Args2$userTags)
+      omitArgs = Args2$omitArgs)
 
   return(rawBiomassMap)
 }
