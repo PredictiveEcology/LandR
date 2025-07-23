@@ -4,24 +4,29 @@
 \alias{prepRawBiomassMap}
 \title{Create \code{rawBiomassMap}}
 \usage{
-prepRawBiomassMap(studyAreaName, cacheTags, ...)
+prepRawBiomassMap(dataSource = "KNN", dataYear = "2011", ...)
 }
 \arguments{
-\item{studyAreaName}{character string giving the study area name.}
+\item{dataSource}{Character. One of KNN, NTEMS, or SCANFI.
+Defaults to KNN for \code{dataYear} 2001.
+Also available:
+\itemize{
+\item KNN for \code{dataYear} 2011;
+\item NTEMS for \code{dataYear} 2015;
+\item SCANFI for \code{dataYear} 2000, 2010, or 2020.
+}}
 
-\item{cacheTags}{a character vector of strings to pass to \code{Cache(userTags)}}
+\item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2000, 2010, or 2020 for SCANFI.}
 
-\item{...}{arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} and \code{\link[reproducible:Cache]{reproducible::Cache()}}. If the following arguments
-are not provided, the following values will be used:
+\item{...}{arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} and \code{\link[reproducible:Cache]{reproducible::Cache()}}.
+If the following arguments are not provided, the following values will be used:
 \itemize{
 \item{\code{url}: by default, the 2001 kNN stand biomass map is downloaded from
 the NRCan National Forest Inventory}
 \item{\code{useSAcrs} and \code{projectTo}: \code{FALSE} and \code{NA}}
 \item{\code{method}: \code{"bilinear"}}
 \item{\code{datatype}: \code{"INT2U"}}
-\item{\code{writeTo}: \code{suffix("rawBiomassMap.tif", paste0("_", studyAreaName))}}
 \item{\code{overwrite}: \code{TRUE}}
-\item{\code{userTags}: \code{c(cacheTags, "rawBiomassMap")}}
 \item{\code{omitArgs}: \code{c("destinationPath", "targetFile", "userTags", "stable")}}
 }}
 }

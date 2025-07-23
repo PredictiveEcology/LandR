@@ -2,7 +2,8 @@
 % Please edit documentation in R/speciesPresentFromKNN.R
 \name{speciesPresentFromKNN}
 \alias{speciesPresentFromKNN}
-\title{Make a species factor raster}
+\alias{speciesPresentFromNTEMS}
+\title{Make a species factor raster from KNN}
 \usage{
 speciesPresentFromKNN(
   year = 2011,
@@ -10,9 +11,18 @@ speciesPresentFromKNN(
   res = 2000,
   minPctCover = 10
 )
+
+speciesPresentFromNTEMS(
+  dPath = asPath("."),
+  res = 2400,
+  year = 2011,
+  rasterToMatch = NULL,
+  studyArea = NULL,
+  ...
+)
 }
 \arguments{
-\item{year}{Default (and only implemented) is 2011. This will download the 2011 KNN data layers}
+\item{year}{Default (and only implemented) is 2011. This will download the 2011 NTEMS species layer}
 
 \item{dPath}{A character string indicating where to download all the KNN layers}
 
@@ -20,14 +30,30 @@ speciesPresentFromKNN(
 
 \item{minPctCover}{An integer indicating what percent cover a species must have
 in a pixel to be considered present in that pixel.}
+
+\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).}
+
+\item{studyArea}{A \verb{SpatialPolygons*} object used as the principle study region,
+passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
+
+\item{...}{Additional arguments passed to \code{\link[reproducible:Cache]{reproducible::Cache()}}
+and \code{\link[=equivalentName]{equivalentName()}}. Also valid: \code{outputPath}, and \code{studyAreaName}.}
 }
 \value{
+A \code{SpatRaster} object with 2 layers: \code{"speciesPresent"} is a factor, with
+a legend (i.e., it is numbers on a map, that correspond to a legend) and
+\code{"numberSpecies"} which represents the number of species in each pixel.
+
 A \code{SpatRaster} object with 2 layers: \code{"speciesPresent"} is a factor, with
 a legend (i.e., it is numbers on a map, that correspond to a legend) and
 \code{"numberSpecies"} which represents the number of species in each pixel.
 }
 \description{
 This will download all KNN layers in Forests of Canada, and make
+a factor raster at resolution provided by \code{res} (larger is faster).
+
+This will download NTEMS dominant species layer for 2011 for forests of Canada, and make
 a factor raster at resolution provided by \code{res} (larger is faster).
 }
 \examples{
@@ -45,12 +71,31 @@ if (requireNamespace("googledrive", quietly = TRUE)) {
   out <- googledrive::drive_put(zipFn)
 
   ## Note: previous file (cropped to boreal forest)
-  ## available ot "1Oj78jJBeha5L6XDBBdWDAfimgNjYc9UD"
+  ## available at "1Oj78jJBeha5L6XDBBdWDAfimgNjYc9UD"
   driveID <- "1J8fN7clZeqjd7yhiDWi13uoCBL8OensF"
 
   ## Get species list
   sa <- LandR::randomStudyArea(size = 1e11)
   species <- LandR::speciesInStudyArea(sa)
+}
+}
+
+\dontrun{
+if (requireNamespace("googledrive", quietly = TRUE)) {
+  # Make the dataset
+  speciesPresent <- speciesPresentFromNTEMS(dPath = "~/data/NTEMS")
+
+  # To upload this:
+  speciesPresentRas <- terra::rast(speciesPresent)[[1]]
+  fn <- "SpeciesPresentInCanadianForests_NTEMS.tif"
+  writeRaster(speciesPresentRas, file = fn)
+  zipFn <- gsub(".tif", ".zip", fn)
+  zip(files = dir(pattern = fn), zipFn)
+  out <- googledrive::drive_put(zipFn)
+
+  ## Get species list
+  sa <- LandR::randomStudyArea(size = 1e11)
+  species <- LandR::speciesInStudyArea(sa, dataSource = "NTEMS")
 }
 }
 

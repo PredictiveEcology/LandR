@@ -8,7 +8,7 @@ prepInputsEcoregion(url = NULL, dPath, cacheTags = NULL)
 }
 \arguments{
 \item{url}{If NULL (the default), uses one from the LANDIS-II project:
-\url{https://github.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/ecoregion.txt"}).}
+\url{https://github.com/LANDIS-II-Foundation/Extensions-Succession/blob/master/biomass-succession-archive/trunk/tests/v6.0-2.0/ecoregion.txt"}).}
 
 \item{dPath}{The destination path.}
 

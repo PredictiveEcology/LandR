@@ -743,7 +743,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
         out2[, initialEcoregion := substr(out8[, initialEcoregionCode], 1, numCharEcoregion)]
         out2[, ecoregionGroup := paste0(
           initialEcoregion, "_",
-          paddedFloatToChar(as.integer(newPossLCC), padL = 2, padR = 0)
+          paddedFloatToChar(as.integer(newPossLCC), padL = numCharLCCCodes, padR = 0)
         )] #nolint
         out2[, initialEcoregion := NULL]
       } else {
@@ -768,7 +768,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     out3 <- data.table(pixelIndex = NA, ecoregionGroup = NA)[!is.na(pixelIndex)]
   } else {
     # setnames(out3, c("initialPixels", "initialEcoregionCode"), c("pixelIndex", "ecoregionGroup"))
-    out3[, `:=`(newPossLCC = NULL)]
+    # out3[, `:=`(newPossLCC = NULL)]
     # out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
     out3 <- unique(out3)
   }
@@ -778,7 +778,8 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
     if (any(out3$pixelIndex %in% pixelsToNA)) {
       out3 <- out3[!pixelIndex %in% pixelsToNA]
     }
-    out3 <- rbind(out3, data.table(pixelIndex = pixelsToNA, ecoregionGroup = NA))
+    out3 <- rbind(out3, data.table(pixelIndex = pixelsToNA, ecoregionGroup = NA),
+                  fill = TRUE)
   }
 
   if (doAssertion) {
@@ -798,7 +799,7 @@ convertUnwantedLCC <- function(classesToReplace = 34:36, rstLCC,
 #' @param omitNonTreedPixels logical. Should pixels with classes in `forestedLCCClasses` be
 #'                           included as non-forested?
 #'
-#' @param forestedLCCClasses vector of non-forested land-cover classes in `rstLCC`
+#' @param forestedLCCClasses vector of forested land-cover classes in `rstLCC`
 #'
 #' @template rstLCC
 #'
@@ -1227,11 +1228,15 @@ subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
 #'
 #' @param form A model formula.
 #' @param term Character vector giving the name of the term to drop.
+#' @param dropRanEff Logical. If `TRUE` (the default), then the `term` to drop
+#'   will also be dropped from the random effects terms. If `FALSE`, it will only
+#'   be dropped from the fixed terms
+#' @importFrom Formula Formula
 #'
 #' @return An updated model formula.
 #'
 #' @export
-dropTerm <- function(form, term) {
+dropTerm <- function(form, term, dropRanEff = TRUE) {
   if (!is(form, "formula")) {
     form <- as.formula(form)
   }
@@ -1240,19 +1245,48 @@ dropTerm <- function(form, term) {
   fac <- attr(fterms, "factors")
 
   new_form <- form
+  termsInner <- rownames(fac)
+
   for (tt in term) {
-    idr <- grepl(tt, rownames(fac))
-    idc <- which(as.logical(fac[idr, ]))
-    toDrop <- names(fac[idr, ][idc])
-    needsParenth <- vapply(paste0("(", toDrop, ")"),
-      FUN = grepl, FUN.VALUE = logical(1),
-      x = as.character(new_form)[3], fixed = TRUE
-    )
-    if (any(needsParenth)) {
-      toDrop[needsParenth] <- paste0("(", toDrop[needsParenth], ")")
+    idr <- grepl(tt, termsInner)
+    facPartial <- fac[idr, ]
+    toDrop <- list()
+    # Cycle through 1 row at a time of the matrix
+    for (rn in seq_len(NROW(facPartial))) {
+      ranEff <- grepl("\\|", termsInner[idr][rn])
+      if (any(ranEff)) {
+        if (isTRUE(dropRanEff)) {
+          for (whRE in which(ranEff)) {
+            old <- termsInner[idr][rn][whRE]
+            if (any(grepl("\\*", old)))
+              stop("This dropTerm function does not work for interaction terms inside the random effects; ",
+                   "Please rewrite formula or update this source code")
+            newRe <- deparse(update(Formula(as.formula(paste0("~", old))), as.formula(paste0("~ . -", tt))))
+            newRe <- gsub("~", "", newRe) # remove the ~ part to convert to string
+            termsInner[idr][rn][whRE] <- newRe
+            oldWithParenth <- paste0("(", old, ")") # random effects must have ( )
+            newWithParenth <- paste0("(", newRe, ")") # random effects must have ( )
+            new_form <- update(new_form, paste0(". ~ . - ", oldWithParenth)) # remove old
+            new_form <- update(new_form, paste0(". ~ . + ", newWithParenth)) # add new
+          }
+        }
+      } else {
+        # Fixed effect terms
+        idc <- which(as.logical(facPartial[rn, ]))
+        toDrop <- names(facPartial[rn, ][idc])
+        needsParenth <- vapply(paste0("(", toDrop, ")"),
+                               FUN = grepl, FUN.VALUE = logical(1),
+                               x = as.character(new_form)[3], fixed = TRUE
+        )
+        if (any(needsParenth)) {
+          toDrop[needsParenth] <- paste0("(", toDrop[needsParenth], ")")
+        }
+
+        new_form <- update(new_form, paste0(". ~ . -", paste(toDrop, collapse = " - ")))
+      }
     }
 
-    new_form <- update(new_form, paste0(". ~ . -", paste(toDrop, collapse = " - ")))
+
   }
 
   return(new_form)
