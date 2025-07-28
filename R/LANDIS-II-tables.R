@@ -19,7 +19,7 @@
   "hardsoft"
 )
 
-
+## NOTE: depends on species table col names above
 utils::globalVariables(c(
   ":=", ".SD", "col1", "species1", "species2",
   .speciesTableRawColNames, .speciesTableColNames
