@@ -56,7 +56,7 @@ betupapy,BETU.PAP,Betu_pap,Betu_Pap,Betu papy,Betula papyrifera,Pa birch,Paper b
 ,,Celt_occ,,Celt occi,Celtis occidentalis,Hackberry,Common hackberry,Common hackberry leading,,,TRUE,Deciduous,,,CedrMplOther,,,,CELT_OCC,,1500,other hardwood code,,160,,
 ,,Cerc_can,,Cerci cana,Cercis canadensis,E redbud,Eastern redbud,Eastern redbud leading,,,TRUE,Deciduous,,,CedrMplOther,,,,CERC_CAN,,1500,other hardwood code,,,,
 ,,Cham_law,,Cham laws,Chamaecyparis lawsoniana,PO cedar,Port Orford cedar,Port Orford cedar leading,,,FALSE,Conifer,,,CedrMplOther,,,,CHAM_LAW,,1000,generic cham code,,,,
-chamnoot,CHAM.NOO,Cham_noo,Cham_Noo,Cham noot,Chamaecyparis nootkatensis,Yl ced,Yellow cedar,Yellow cedar leading,Also known as yellow cypress,,FALSE,Conifer,yellow cedar,,CedrMplOther,Yc,,,CHAM_NOO,,1001,,11,,CHAM_NOO,#FFD300
+chamnoot,CHAM.NOO,Cham_noo,Cham_Noo,Cham noot,Chamaecyparis nootkatensis,Yl ced,Yellow cedar,Yellow cedar leading,Also known as yellow cypress,,FALSE,Conifer,yellow cedar,,CedrMplOther,Yc,,,CHAM_NOO,,1001,,11,57,CHAM_NOO,#FFD300
 ,,,,,Cornus alternifolia,Pag dgwood,Pagoda dogwood,Pagoda dogwood leading,,,TRUE,Deciduous,pagoda dogwood,,CedrMplOther,,,,CORN_ALT,COA,1500,other hardwood code,,,,
 ,,Corn_nut,,Corn nutt,Cornus nuttallii,Pa dogw,Pacific dogwood,Pacific dogwood leading,Also known as western dogwood,,TRUE,Deciduous,,,CedrMplOther,,,,CORN_NUT,,1500,other hardwood code,,140,,
 ,,Crat_spp,Crat_Spp,Crat spp,Crataegus spp,Hawthorn,Hawthorn,Hawthorn leading,,,TRUE,Deciduous,,,CedrMplOther,,,,CRAT_SP,CRA,3910,,,163,,
@@ -109,7 +109,7 @@ picesitc,PICE.SIT,Pice_sit,Pice_Sit,Pice sitc,Picea sitchensis,Sk spr,Sitka spru
 ,,Pice_spp,Pice_Spp,Pice spp,Picea spp.,Spruce,Spruce,Spruce leading,,Pice_Spp,FALSE,Conifer,spruce,,CedrMplOther,S,,,PICE_SP,,100,,,1,,
 pinualbi,,Pinu_alb,Pinu_Alb,Pinu albi,Pinus albicaulis,Whbk pine,Whitebark pine,Whitebark pine leading,,Pinu_Alb,FALSE,Conifer,,,CedrMplOther,Pa,Pa,,PINU_ALB,,206,,21,17,,
 pinubank,PINU.BAN,Pinu_ban,Pinu_Ban,Pinu bank,Pinus banksiana,Jk pine,Jack pine,Jack pine leading,,Pinu_Ban,FALSE,Conifer,jack pine,C3,LdgJkPine,Pj,Pj,JP,PINU_BAN,PIG,203,,22,14,PINU_BAN,#C8FF00
-,PINU.CON,Pinu_con,,Pinu cont,Pinus contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,,Pinu_Con,FALSE,Conifer,lodgepole pine,,LdgJkPine,Pl,Pl,,PINU_CON,,204,,23,,PINU_CON,
+,PINU.CON,Pinu_con,,Pinu cont,Pinus contorta,Lg pine,Lodgepole pine,Lodgepole pine leading,,Pinu_Con,FALSE,Conifer,lodgepole pine,,LdgJkPine,Pl,Pl,,PINU_CON,,204,,23,15,PINU_CON,
 pinuconcon,PINU.CON.CON,Pinu_con,,Pinu cont,Pinus contorta var. contorta,Sh pine,Shore pine,Shore pine leading,,Pinu_Con,FALSE,Conifer,lodgepole pine,,LdgJkPine,Plc,,,PINU_CON_CON,,204,,23,16,PINU_CON_CON,#02AD24
 ,PINU.CON.LAT,Pinu_con,Pinu_Con,Pinu cont,Pinus contorta var. latifolia,Lg pine,Lodgepole pine,Lodgepole pine leading,Pinus contortalatifolia is a synonym of var. latifolia,Pinu_Con,FALSE,Conifer,lodgepole pine,C3,LdgJkPine,Pli,Pl,,PINU_CON_LAT,,204,,23,15,PINU_CON_LAT,#02AD24
 pinuflex,,Pinu_fle,Pinu_Fle,Pinu flex,Pinus flexilis,Lim pine,Limber pine,Limber pine leading,,,FALSE,Conifer,,,CedrMplOther,Pf,Pf,,PINU_FLE,,213,,,24,,
