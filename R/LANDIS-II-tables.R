@@ -1,3 +1,8 @@
+utils::globalVariables(c(
+  ":=", ".SD", "col1", "species1", "species2",
+  .speciesTableRawColNames, .speciesTableColNames
+))
+
 #' Species Table Column Names
 #'
 #' @keywords internal
@@ -18,12 +23,6 @@
   "wooddecayrate", "mortalityshape", "growthcurve", "leafLignin",
   "hardsoft"
 )
-
-
-utils::globalVariables(c(
-  ":=", ".SD", "col1", "species1", "species2",
-  .speciesTableRawColNames, .speciesTableColNames
-))
 
 #' Default LANDIS-II project repo url
 #'
