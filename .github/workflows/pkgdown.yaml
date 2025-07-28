@@ -39,13 +39,7 @@ jobs:
             any::XML
             local::.
             BioSIM=?ignore
-            fastshp=?ignore
             NLMR=?ignore
-            PredictiveEcology/quickPlot@development
-            PredictiveEcology/reproducible@development
-            PredictiveEcology/Require@development
-            PredictiveEcology/SpaDES.core@development
-            PredictiveEcology/SpaDES.tools@development
           needs: website
 
       - name: Install additional package dependencies
@@ -53,7 +47,6 @@ jobs:
           pak::pkg_install("remotes")
           remotes::install_github("RNCan/BioSimClient_R")
           remotes::install_github("ropensci/NLMR")
-          remotes::install_github("s-u/fastshp")
         shell: Rscript {0}
 
       - name: Build site
