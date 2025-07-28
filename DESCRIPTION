@@ -67,7 +67,6 @@ Suggests:
     ggrepel,
     googledrive (>= 2.0.0),
     httr,
-    knitr,
     lqmm,
     map,
     MASS,
@@ -78,7 +77,6 @@ Suggests:
     RCurl,
     RhpcBLASctl,
     rlang,
-    rmarkdown,
     roxygen2,
     R.utils,
     SpaDES.core,
@@ -98,7 +96,6 @@ Remotes:
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3
-VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
