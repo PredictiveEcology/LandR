@@ -537,7 +537,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'   - NTEMS for `dataYear` 2015;
 #'   - SCANFI for `dataYear` 2000, 2010, or 2020.
 #'
-#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2000, 2010, or 2020 for SCANFI.
+#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN, 2015 for NTEMS, or 2000, 2010, or 2020 for SCANFI.
 #'
 #' @param ... arguments passed to [reproducible::prepInputs()] and [reproducible::Cache()].
 #' If the following arguments are not provided, the following values will be used:
