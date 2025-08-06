@@ -127,7 +127,7 @@ pinustro,PINU.STR,Pinu_str,Pinu_Str,Pinu stro,Pinus strobus,E wh pine,Eastern wh
 ,,Plan_occ,Plat_Occ,Plan occi,Platanus occidentalis,Sycamore,American sycamore,American sycamore leading,,,TRUE,Deciduous,,,CedrMplOther,,,,PLAN_OCC,PLO,2700,,,129,,
 ,,Popu_ang,,Popu angu,Populus angustifolia,Nar cottonwood,Narrowleaf cottonwood,Narrowleaf cottonwood leading,,,TRUE,Deciduous,,,PopBrch,,,,POPU_ANG,,1214,,,,,
 popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamifera,Ba poplar,Balsam poplar,Balsam poplar leading,,Popu_Bal,TRUE,Deciduous,balsam poplar,,PopBrch,Acb,Pb,BA,POPU_BAL,PEB,1203,,27,65,POPU_BAL,#FFACFD
-popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamifera v. balsamifera,Ba poplar,Balsam poplar,Balsam poplar leading,,Popu_Bal,TRUE,Deciduous,balsam poplar,,PopBrch,Acb,Pb,BA,POPU_BAL,,1203,,27,65,,#FFACFD
+popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamifera v. balsamifera,Ba poplar,Balsam poplar,Balsam poplar leading,,Popu_Bal,TRUE,Deciduous,balsam poplar,,PopBrch,Acb,Pb,BA,POPU_BAL,,1203,,27,65,POPU_BAL,#FFACFD
 ,,Popu_can,,Popu cana,Populus X canadensis,Can poplar,Canadian poplar,Canadian poplar leading,Polpulus nigra x deltoides,,TRUE,Deciduous,,,PopBrch,,,,POPU_CAN,,1200,generic aspen code,,69,,
 popudelt,,Popu_del,Popu_Del,Popu delt,Populus deltoides,E ctnwood,Eastern cottonwood,Eastern cottonwood leading,,,TRUE,Deciduous,eastern cotttonwood,,PopBrch,,,CO,POPU_DEL,PED,1205,,,67,,
 ,,Popu_del,Popu_Del,Popu delx,Populus deltoides,E ctnwood,Eastern cottonwood,Eastern cottonwood leading,,,TRUE,Deciduous,eastern cotttonwood,,PopBrch,,,,POPU_DEL,PED,1205,,,67,,
