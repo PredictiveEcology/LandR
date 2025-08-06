@@ -370,6 +370,12 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' data to update ages of recently burned pixels. To suppress this, pass NULL/NA `fireURL`
 #'
 #' @param ... additional arguments passed to [reproducible::prepInputs()]
+#' @param dataSource Character. One of KNN, NTEMS, or SCANFI.
+#'   Defaults to KNN for `dataYear` 2001.
+#'   Also available:
+#'   - KNN for `dataYear` 2011;
+#'   - SCANFI for `dataYear` 2020.
+#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020 for SCANFI.
 #' @param ageURL url where age map is downloaded
 #' @param ageFun passed to 'fun' arg of [reproducible::prepInputs()] of stand age map
 #' @param maskWithRTM passed to [reproducible::prepInputs()] of stand age map
@@ -439,7 +445,9 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' )
 #' attr(standAge, "imputedPixID")
 #' }
-prepInputsStandAgeMap <- function(..., ageURL = NULL,
+prepInputsStandAgeMap <- function(..., dataSource = "KNN",
+                                  dataYear = 2001,
+                                  ageURL = NULL,
                                   ageFun = "terra::rast",
                                   maskWithRTM = TRUE,
                                   method = "bilinear",
@@ -461,12 +469,30 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
   }
 
   if (is.null(ageURL)) {
-    ageURL <- paste0(
-      "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-      "canada-forests-attributes_attributs-forests-canada/",
-      "2001-attributes_attributs-2001/",
-      "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif"
-    )
+    if (dataSource == "KNN") {
+      if (dataYear == "2011") {
+        ageURL <- paste0(
+          "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+          "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
+          "NFI_MODIS250m_2011_kNN_Structure_Stand_Age_v1.tif")
+      } else if (dataYear == "2001") {
+        ageURL <- paste0(
+          "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+          "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/",
+          "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif")
+      }
+      else {
+        stop("KNN data is available for 2001 or 2011 only")
+      }
+    } else if (dataSource == "SCANFI") {
+      if (dataYear == "2020") {
+        ageURL <- paste0(
+          "https://drive.google.com/file/d/1OdZ7Tznk53KceEyt9dFOBOkxDHEX5X0U")
+      }
+      else {
+        stop("SCANFI data is currently available for 2020 only")
+      }
+    }
   }
 
   getFires <- if (is.null(firePerimeters) &&
