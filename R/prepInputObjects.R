@@ -587,13 +587,13 @@ prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
     } else if (dataSource == "SCANFI") {
       if (dataYear == "2000") {
         Args$url <- paste0(
-          "https://drive.google.com/file/d/1B8cm6_YOnha-g1AFSdR1sIqOJ9bCmk1G")
+          "https://drive.google.com/file/d/1lubpotPt-Tr_x1PHnLP6YL36fGg5Ic6h")
       } else if (dataYear == "2010") {
         Args$url <- paste0(
-          "https://drive.google.com/file/d/11v0ZaBzhcVQprhFuL-L8FJkYOtuAcwc3")
+          "https://drive.google.com/file/d/1J3izr9d0IaUs0H4GWJNbn6rCan-Or7Jf")
       } else if (dataYear == "2020") {
         Args$url <- paste0(
-          "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/SCANFI/v1/SCANFI_att_biomass_SW_2020_v1.2.tif")
+          "https://drive.google.com/file/d/1lexPzmm4zeY_5nljoNmsIlzrZYd1TpG_")
       }
       else {
         stop("SCANFI data is currently available for 2000, 2010, and 2020 only")
