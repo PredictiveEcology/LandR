@@ -728,48 +728,58 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
   #you can crop without worrying about geometry
   preProcessArgs$cropTo <- rasterToMatch
 
+  # Load polygons
   allFires <- do.call(prepInputs, append(list(fun = fun), preProcessArgs))
 
   #the reason this isn't combined into one function is due to geometry issues in NFDB
   allFires <- allFires[terra::is.valid(allFires), ] ## drop invalid geometries
 
-  ## This may potentially result in dots intended for postProcess being lost.
-  a <- do.call(postProcess, append(list(x = allFires), postProcessArgs)) |>
-    st_as_sf() ## Cache() takes vastly more time and RAM explodes, killing R rsession
-
-  if (isTRUE(grepl("st_read", dots$fun))) {
-    a <- st_zm(a)
-  }
-
-  if (nrow(a) > 0) {
-    gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon
-    d <- st_transform(gg, crs(rasterToMatch))
-    if (!is(d[[fireField]], "numeric")) {
-      warning("Chosen fireField will be coerced to numeric")
-      d[[fireField]] <- as.numeric(as.factor(d[[fireField]]))
-    }
-    if (is(rasterToMatch, "SpatRaster")) {
-      if (!is(d, "SpatVector")) {
-        d <- vect(d)
-      }
-
-      #fun = max to take the most recent fire year
-      fireRas <- terra::rasterize(d, rasterToMatch, field = fireField, fun = max)
-      fireRas[!is.na(terra::values(fireRas, mat = FALSE)) &
-                terra::values(fireRas, mat = FALSE) < earliestYear] <- NA
-    } else {
-      .requireNamespace("fasterize", stopOnFALSE = TRUE)
-      fireRas <- fasterize::fasterize(d, raster = rasterToMatch, field = fireField)
-      fireRas[!is.na(as.vector(fireRas[])) & as.vector(fireRas[]) < earliestYear] <- NA
-    }
-  } else {
-    if (is(rasterToMatch, "SpatRaster")) {
+  # If no valid polygons, return empty raster
+  if (nrow(allFires) == 0) {
+    if (inherits(rasterToMatch, "SpatRaster")) {
       fireRas <- rast(rasterToMatch, vals = NA)
     } else {
       fireRas <- raster::raster(rasterToMatch)
       fireRas[] <- NA
     }
+    return(fireRas)
   }
+
+  # Transform to raster CRS if needed
+  if (!identical(crs(allFires), crs(rasterToMatch))) {
+    allFires <- terra::project(allFires, crs(rasterToMatch))
+  }
+
+  if (isTRUE(grepl("vect", fun))) {
+    allFires <- st_as_sf(allFires)
+  }
+
+  allFires <- st_zm(allFires)
+
+
+  allFires <- st_cast(allFires, "MULTIPOLYGON") # collapse them into a single multipolygon
+  allFires <- st_transform(allFires, crs(rasterToMatch))
+  if (!is(allFires[[fireField]], "numeric")) {
+    warning("Chosen fireField will be coerced to numeric")
+    d[[fireField]] <- as.numeric(as.factor(d[[fireField]]))
+  }
+  if (is(rasterToMatch, "SpatRaster")) {
+    if (!is(allFires, "SpatVector")) {
+      allFires <- vect(allFires)
+    }
+
+    #fun = max to take the most recent fire year
+    fireRas <- terra::rasterize(allFires, rasterToMatch, field = fireField, fun = max)
+    fireRas[!is.na(terra::values(fireRas, mat = FALSE)) &
+              terra::values(fireRas, mat = FALSE) < earliestYear] <- NA
+  } else {
+    .requireNamespace("fasterize", stopOnFALSE = TRUE)
+    fireRas <- fasterize::fasterize(d, raster = rasterToMatch, field = fireField)
+    fireRas[!is.na(as.vector(fireRas[])) & as.vector(fireRas[]) < earliestYear] <- NA
+  }
+
+  ## This may potentially result in dots intended for postProcess being lost.
+  fireRas <- do.call(postProcess, append(list(x = fireRas), postProcessArgs))
 
   return(fireRas)
 }
