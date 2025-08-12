@@ -540,7 +540,7 @@ prepInputsStandAgeMap <- function(..., dataSource = "KNN",
   }
 
   if (isFALSE(is.null(firePerimeters))) {
-    standAgeMap <- replaceAgeInFires(standAgeMap, firePerimeters, startTime)
+    standAgeMap <- replaceAgeInFires(standAgeMap, firePerimeters, startTime = dataYear)
     imputedPixID <- attr(standAgeMap, "imputedPixID")
   }
 
