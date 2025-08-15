@@ -6,6 +6,8 @@
 \usage{
 prepInputsStandAgeMap(
   ...,
+  dataSource = "KNN",
+  dataYear = 2001,
   ageURL = NULL,
   ageFun = "terra::rast",
   maskWithRTM = TRUE,
@@ -24,6 +26,16 @@ prepInputsStandAgeMap(
 }
 \arguments{
 \item{...}{additional arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}}
+
+\item{dataSource}{Character. One of KNN, NTEMS, or SCANFI.
+Defaults to KNN for \code{dataYear} 2001.
+Also available:
+\itemize{
+\item KNN for \code{dataYear} 2011;
+\item SCANFI for \code{dataYear} 2020.
+}}
+
+\item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020 for SCANFI.}
 
 \item{ageURL}{url where age map is downloaded}
 

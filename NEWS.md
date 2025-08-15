@@ -17,6 +17,7 @@
 * added new `prepInputs_NTEMS_DominantSpecies` function for importing dominant species layers from NTEMS website
 * updated `speciesInStudyArea` function to create `dataSource` parameter to direct function to download KNN or NTEMS factor raster from google drive and create associated species list  
 * updated `prepRawBiomassMap` function to allow for incorporation of NTEMS or SCANFI biomass
+* updated `prepInputsStandAgeMap` function to allow for incorporation of SCANFI age map
 
 # LandR 1.1.5
 

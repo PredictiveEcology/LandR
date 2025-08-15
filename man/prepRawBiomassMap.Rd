@@ -16,7 +16,7 @@ Also available:
 \item SCANFI for \code{dataYear} 2000, 2010, or 2020.
 }}
 
-\item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2000, 2010, or 2020 for SCANFI.}
+\item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN, 2015 for NTEMS, or 2000, 2010, or 2020 for SCANFI.}
 
 \item{...}{arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} and \code{\link[reproducible:Cache]{reproducible::Cache()}}.
 If the following arguments are not provided, the following values will be used:
