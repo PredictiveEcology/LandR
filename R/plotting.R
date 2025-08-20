@@ -285,3 +285,31 @@ plotFunction <- function(ras, studyArea, limits = NULL) {
       title = sub("\\.|_", " ", names(ras))
     )
 }
+
+#' Plot function for generic SpatRaster objects with Plots
+#'
+#' @param x SpatRaster for current or cumulative harvest
+#' @param title character, the plot title
+#' @param subtitle character, the plot subtitle
+#'
+#' @returns ggplot object
+#' @export
+#' @importFrom ggplot2 ggplot ggtitle theme_bw labs
+#' @importFrom tidyterra geom_spatraster
+#' @importFrom viridis scale_fill_viridis
+plot_genericMap <- function(x, title = NULL, subtitle = NULL) {
+  if (!inherits(x, "SpatRaster")) {
+    stop("x must be a SpatRaster object.")
+  }
+
+  gg_gm <- ggplot() +
+    geom_spatraster(data = x) +
+    scale_fill_viridis(na.value = "transparent") +
+    theme_bw()
+
+  if (!is.null(title) || !is.null(subtitle)) {
+    gg_gm <- gg_gm + ggtitle(title) + labs(subtitle = subtitle)
+  }
+
+  gg_gm  # return ggplot object
+}
