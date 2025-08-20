@@ -288,7 +288,7 @@ plotFunction <- function(ras, studyArea, limits = NULL) {
 
 #' Plot function for generic raster objects with Plots
 #'
-#' @param x SpatRaster for current or cumulative harvest
+#' @param x A SpatRaster object
 #' @param title character, the plot title
 #' @param subtitle character, the plot subtitle
 #'
