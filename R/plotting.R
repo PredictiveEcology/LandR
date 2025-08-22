@@ -285,3 +285,36 @@ plotFunction <- function(ras, studyArea, limits = NULL) {
       title = sub("\\.|_", " ", names(ras))
     )
 }
+
+#' Plot function for generic raster objects with Plots
+#'
+#' @param x A SpatRaster object
+#' @param title character, the plot title
+#' @param subtitle character, the plot subtitle
+#'
+#' @returns ggplot object
+#' @export
+
+plot_raster <- function(x, title = NULL, subtitle = NULL) {
+
+  if (!inherits(x, "SpatRaster")) {
+    x <- rast(x)
+  }
+
+  gg_raster <- ggplot() +
+    geom_spatraster(data = x) +
+    scale_fill_viridis(na.value = "transparent") +
+    theme_bw()
+
+
+  if (!is.null(title)) {
+    gg_raster <- gg_raster + ggtitle(title)
+  }
+  if (!is.null(subtitle)) {
+    gg_raster <- gg_raster + labs(subtitle = subtitle)
+  }
+
+  gg_raster  # return ggplot object
+}
+
+
