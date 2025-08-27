@@ -24,7 +24,7 @@ speciesPresentFromNTEMS(
 \arguments{
 \item{year}{Default (and only implemented) is 2011. This will download the 2011 NTEMS species layer}
 
-\item{dPath}{A character string indicating where to download all the KNN layers}
+\item{dPath}{A character string indicating where to download all the NTEMS layers}
 
 \item{res}{The resolution (one dimension, in m) for the resulting raster}
 
