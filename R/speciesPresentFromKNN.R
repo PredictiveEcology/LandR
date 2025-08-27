@@ -9,7 +9,7 @@ projectTo <- utils::getFromNamespace("projectTo", "reproducible")
 
 #' Make a species factor raster from KNN
 #'
-#' This will download all KNN layers in Forests of Canada, and make
+#' speciesPresentFromKNN will download all KNN layers in Forests of Canada, and make
 #' a factor raster at resolution provided by `res` (larger is faster).
 #'
 #' @param year Default (and only implemented) is 2011. This will download the 2011 KNN data layers
@@ -109,7 +109,7 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 
 #' Make a species factor raster based on NTEMS Data
 #'
-#' This will download NTEMS dominant species layer for 2011 for forests of Canada, and make
+#' speciesPresentFromNTEMS will download NTEMS dominant species layer for 2011 for forests of Canada, and make
 #' a factor raster at resolution provided by `res` (larger is faster).
 #'
 #' @param dPath A character string indicating where to download all the NTEMS layers
@@ -171,8 +171,8 @@ speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 2400, year = 2011
   }
 
   sppEquiv <- get(data("sppEquivalencies_CA",
-    package = "LandR",
-    envir = environment()
+                       package = "LandR",
+                       envir = environment()
   ), inherits = FALSE)
 
   opts <- options("reproducible.useTerra" = TRUE)
@@ -263,7 +263,7 @@ speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 2400, year = 2011
 #' @param sppEquivCol An optional column from `LandR::sppEquivalencies_CA`.
 #'   If passed the KNN species will be returned according to this naming convention.
 #'
-#' @param dataSource Character. Either KNN or NTEMS. Defaults to KNN to obtain species from layer
+#' @param dataSource Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain species from layer
 #'   created using species cover data from KNN. Also able to obtain species from NTEMS
 #'   Dominant Species Layer (though less species will likely be included).
 #'
