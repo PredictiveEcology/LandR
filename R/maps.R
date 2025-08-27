@@ -969,6 +969,313 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
   )
 }
 
+#' Load SCANFI species layers from online data repository
+#'
+#' @param dPath path to the data directory
+#'
+#' @template rasterToMatch
+#'
+#' @template studyArea
+#'
+#' @template sppEquiv
+#'
+#' @param year which year's layers should be retrieved? One of 2000, 2010, or 2020 (default).
+#'
+#' @param SCANFINamesCol character string indicating the column in `sppEquiv`
+#'                    containing kNN species names.
+#'                    Default `"NFI"` for when `sppEquivalencies_CA` is used.
+#'
+#' @template sppEquivCol
+#'
+#' @param thresh the minimum percent cover a species must have (per pixel)
+#'               to be considered present in the study area.
+#'               Defaults to 10.
+#'
+#' @param url the source url for the data, default is KNN 2011 dataset
+#' (<https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/>)
+#'
+#' @param ... Additional arguments passed to [reproducible::Cache()]
+#'            and [equivalentName()]. Also valid: `outputPath`, and `studyAreaName`.
+#'
+#' @return A raster stack of percent cover layers by species.
+#'
+#' @export
+loadSCANFISpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, sppEquiv,
+                                    year = 2020, SCANFINamesCol = "SCANFI", sppEquivCol = "SCANFI",
+                                    thresh = 10, url = NULL, ...) {
+  rcurl <- requireNamespace("RCurl", quietly = TRUE)
+  xml <- requireNamespace("XML", quietly = TRUE)
+  if (!rcurl || !xml) {
+    stop(
+      "Suggested packages 'RCurl' and 'XML' required to download kNN species layers.\n",
+      "Install using `install.packages(c('RCurl', 'XML'))`."
+    )
+  }
+
+  dots <- list(...)
+  oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
+
+  sppEquivalencies_CA <- get(data("sppEquivalencies_CA",
+                                  package = "LandR",
+                                  envir = environment()
+  ), inherits = FALSE)
+
+  if (missing(sppEquiv)) {
+    message(
+      "sppEquiv argument is missing, using LandR::sppEquivalencies_CA, with ",
+      sppEquivCol, " column (taken from sppEquivCol arg value)"
+    )
+    sppEquiv <- sppEquivalencies_CA[get(sppEquivCol) != ""]
+  } else {
+    sppEquiv <- sppEquiv[get(sppEquivCol) != ""]
+  }
+
+  sppEquiv <- sppEquiv[, lapply(.SD, as.character)]
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
+  sppNameVector <- unique(sppEquiv[[sppEquivCol]])
+  ## remove empty names
+  sppNameVector <- sppNameVector[sppNameVector != ""]
+
+  sppMerge <- unique(sppEquiv[[sppEquivCol]][duplicated(sppEquiv[[sppEquivCol]])])
+  sppMerge <- sppMerge[nzchar(sppMerge)]
+  if ("cachePath" %in% names(dots)) {
+    cachePath <- dots$cachePath
+  } else {
+    cachePath <- getOption("reproducible.cachePath")
+  }
+
+  if (is.null(url)) {
+    if(year == 2000) {
+      url <- paste0(
+        "https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp")
+    } else if(year == 2010) {
+      url <- paste0(
+        "https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE")
+    } else if(year == 2020) {
+      url <- paste0(
+        "https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ")
+    }
+  }
+
+  driveFiles <- as.data.table(googledrive::with_drive_quiet(googledrive::drive_ls(url)))
+  driveFiles <- driveFiles[grepl("SCANFI_sps", name)] #selecing just species layers
+  driveFiles <- driveFiles[grep("tif.", name, invert = TRUE)] #removing .ovr and .aux files
+  fileURLs <- paste0("https://drive.google.com/file/d/",driveFiles$id)
+  fileNames <- c(driveFiles$name)
+  names(fileURLs) <- fileNames
+
+  ## get all SCANFI species - names only
+  allSpp <- fileNames |>
+    sub("SCANFI_sps_", "", x = _) |>
+    sub(paste0("_S_",year,"_v1_1.tif"), "", x = _)
+
+  stopifnot("Incomplete file list retrieved from server." = length(allSpp) > 1)
+
+  ## Make sure spp names are compatible with SCANFI names
+  SCANFInames <- if (SCANFINamesCol %in% colnames(sppEquiv)) {
+    equivalentName(sppNameVector, sppEquiv, column = SCANFINamesCol, multi = TRUE) |>
+      as.character()
+  } else {
+    equivalentName(sppNameVector, sppEquivalencies_CA, column = SCANFINamesCol, multi = TRUE,
+                   searchColumn = sppEquivCol) |>
+      as.character()
+  }
+  sppNameVector <- equivalentName(sppNameVector, sppEquiv, column = sppEquivCol, multi = TRUE) |>
+    as.character()
+
+  ## if there are NA's, that means some species can't be found in kNN database
+  if (any(is.na(SCANFInames))) {
+    warning(paste0("Can't find ", sppNameVector[is.na(SCANFInames)], " in `sppEquiv$",
+                   SCANFINamesCol, ".\n",
+                   "Will use remaining matching species, but check if this is correct."))
+    ## select only available species
+    sppNameVector <- sppNameVector[!is.na(SCANFInames)]
+    SCANFInames <- SCANFInames[!is.na(SCANFInames)]
+  }
+
+  emptySppNames <- SCANFInames == ""
+  if (any(emptySppNames)) {
+    ## select only available species
+    SCANFInames <- SCANFInames[!emptySppNames]
+    sppNameVector <- sppNameVector[!emptySppNames]
+  }
+
+  ## same as above
+  missingSCANFI <- setdiff(SCANFInames, allSpp)
+  if (length(missingSCANFI)) {
+    warning(paste0(
+      "Can't find ", paste(missingSCANFI, collapse = ", "), " in SCANFI database.\n",
+      "Will use remaining matching species, but check if this is correct."
+    ))
+    sppNameVector <- sppNameVector[SCANFInames %in% allSpp]
+    SCANFInames <- SCANFInames[SCANFInames %in% allSpp]
+  }
+
+  if (!length(SCANFInames)) {
+    stop("None of the selected species were found in the kNN database.")
+  }
+
+  ## define suffix to append to file names
+  suffix <- if (basename(cachePath) == "cache") {
+    if (is.null(rasterToMatch)) {
+      ""
+    } else {
+      paste0(as.character(ncell(rasterToMatch)), "px")
+    }
+  } else {
+    basename(cachePath)
+  }
+  suffix <- paste0("_", suffix)
+
+  ## select which targetFiles to extract
+  ## use sapply to preserve pattern order
+  targetFiles <- sapply(paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif"), USE.NAMES = FALSE, FUN = function(pat) {
+    grep(pat, fileNames, value = TRUE)
+  })
+  ## the grep may partially match several species, resulting on a list.
+  targetFiles <- unique(unlist(targetFiles))
+
+  postProcessedFilenames <- .suffix(targetFiles, suffix = suffix) |> gsub("^[.]/", "", x = _)
+  postProcessedFilenamesWithStudyAreaName <- if (is.null(dots$studyAreaName)) {
+    postProcessedFilenames
+  } else {
+    .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName)) |> gsub("^[.]/", "", x = _)
+  }
+
+  message("Running prepInputs for ", paste(SCANFInames, collapse = ", "))
+  if (length(SCANFInames) > 15) {
+    message(
+      "This looks like a lot of species;",
+      " did you mean to pass only a subset of this to sppEquiv?\n",
+      " You can use the list above to choose species, then select only those rows",
+      " in sppEquiv before passing here."
+    )
+  }
+
+  URLs <- fileURLs[targetFiles]
+
+  if (is.null(studyArea) && is.null(rasterToMatch)) {
+    # No masking/cropping/projecting, so no maskTo, to, or writeTo
+    moreArgs <- list(
+      destinationPath = dPath,
+      method = "bilinear",
+      datatype = "INT2U",
+      overwrite = TRUE,
+      userTags = dots$userTags
+    )
+    speciesLayers <- Map(
+      prepInputs,
+      targetFile = targetFiles,
+      url = URLs,
+      MoreArgs = moreArgs
+    ) |>
+      Cache(quick = c("targetFile", "destinationPath"))
+  } else {
+    # Masking/cropping/projecting required, include maskTo, to, and writeTo
+    moreArgs <- list(
+      destinationPath = dPath,
+      maskTo = studyArea,
+      to = rasterToMatch,
+      method = "bilinear",
+      datatype = "INT2U",
+      overwrite = TRUE,
+      userTags = dots$userTags
+    )
+    speciesLayers <- Map(
+      prepInputs,
+      targetFile = targetFiles,
+      writeTo = postProcessedFilenamesWithStudyAreaName,
+      url = URLs,
+      MoreArgs = moreArgs
+    ) |>
+      Cache(quick = c("targetFile", "writeTo", "destinationPath"))
+  }
+
+  SCANFInames2 <- paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif") #appending file name structure to eliminate double matches for subspecies
+  correctOrder <- sapply(unique(SCANFInames2), function(x) grep(pattern = x, x = targetFiles,
+                                                                value = TRUE))
+  names(speciesLayers) <- names(correctOrder)[match(correctOrder, targetFiles)]
+  names(speciesLayers) <- gsub(paste0("_?S_?",year,"_?v1_?1.tif"), "", names(speciesLayers))
+  names(speciesLayers) <- gsub("SCANFI_?sps_?", "", names(speciesLayers))
+
+  layerNames <- names(speciesLayers)
+  speciesLayers <- terra::rast(speciesLayers) #converting to a stack because global() is much faster than sapply over the list
+
+  maxs <- terra::global(speciesLayers, 'max', na.rm=TRUE)
+
+  speciesLayers <- as.list(speciesLayers)
+  names(speciesLayers) <- layerNames
+
+  # remove "no data" first
+  noData <- is.na(maxs)
+  if (any(noData)) {
+    message(paste(
+      paste(names(noData)[noData], collapse = " "),
+      " has no data in this study area; omitting it"
+    ))
+    speciesLayers <- speciesLayers[[!noData]]
+  }
+
+  # remove "little data" next
+  layersWdata <- ifelse(maxs > thresh, TRUE, FALSE)
+  if (sum(!layersWdata) > 0) {
+    sppKeep <- names(speciesLayers)[layersWdata]
+    if (length(sppKeep)) {
+      message(
+        "removing ", sum(!layersWdata), " species because they had <", thresh,
+        " % cover in the study area\n",
+        "  These species are retained (and could be further culled manually, if desired):\n",
+        paste(sppKeep, collapse = " ")
+      )
+    } else {
+      message(
+        "no pixels for ", paste(names(layersWdata), collapse = " "),
+        " were found with >=", thresh, " % cover in the study area.",
+        "\n  No species layers were retained. Try lowering the threshold",
+        " to retain species with low % cover"
+      )
+    }
+  }
+
+  speciesLayers <- speciesLayers[layersWdata]
+  if (!is.null(sppMerge)) {
+    if (length(sppMerge) == 0) {
+      lapply(
+        seq_along(speciesLayers),
+        FUN = function(i, rasters = speciesLayers,
+                       filenames = postProcessedFilenamesWithStudyAreaName) {
+          outFile <- file.path(oPath, paste0(filenames[i]))
+          if (!file.exists(outFile)) {
+            writeRaster(rasters[[i]], outFile, overwrite = TRUE)
+            message("Wrote file: ", outFile)
+          } else {
+            message("Skipped file: ", outFile, " (already exists)")
+          }
+        }
+      )
+    } else {
+      speciesLayers <- mergeSppRaster(
+        sppMerge = sppMerge, speciesLayers = speciesLayers,
+        sppEquiv = sppEquiv, column = "KNN", suffix = suffix,
+        dPath = oPath
+      )
+    }
+  }
+  ## Rename species layers - There will be 2 groups -- one
+  nameChanges <- equivalentName(names(speciesLayers), sppEquiv, column = sppEquivCol)
+  nameChangeNA <- is.na(nameChanges)
+  names(speciesLayers)[!nameChangeNA] <- nameChanges[!nameChangeNA]
+
+  nameChangesNonMerged <- equivalentName(names(speciesLayers)[nameChangeNA],
+                                         sppEquiv,
+                                         column = sppEquivCol
+  )
+  names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
+
+  ## return stack
+  .stack(speciesLayers)
+}
+
 #' Function to sum rasters of species layers
 #'
 #' @template speciesLayers

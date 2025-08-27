@@ -435,6 +435,94 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   stack(CCstack)
 }
 
+#' Prepare species layers from SCANFI data
+#'
+#' TODO: description needed
+#'
+#' @template destinationPath
+#' @param outputPath TODO: description needed
+#' @param url if `NULL`, the default, use the default source url
+#' @param dataYear. Year for the data obtained. 2000, 2010, or 2020 (default) possible.
+#' @template studyArea
+#' @template rasterToMatch
+#' @template sppEquiv
+#' @template sppEquivCol
+#' @param thresh threshold \% cover used to defined the species as "present" in the study area.
+#'    If at least one pixel has `cover >= thresh` , the species is considered "present".
+#'    Otherwise the raster is excluded from the output. Defaults to 10.
+#' @param ... other arguments, used for compatibility with other `prepSpeciesLayers` functions.
+#'
+#' @return TODO: description needed
+#'
+#' @export
+#' @rdname prepSpeciesLayers
+prepSpeciesLayers_SCANFI <- function(destinationPath, outputPath,
+                                     url = NULL, dataYear = 2020,
+                                     studyArea, rasterToMatch,
+                                     sppEquiv,
+                                     sppEquivCol,
+                                     thresh = 10, ...) {
+  stopifnot(requireNamespace("RCurl", quietly = TRUE))
+
+  dots <- list(...)
+
+  if ("year" %in% names(dots)) {
+    year <- dots[["year"]]
+  } else {
+    year <- dataYear
+  }
+
+  if (is.null(url)) {
+    if(dataYear == 2000) {
+      url <- paste0(
+        "https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp")
+    } else if(dataYear == 2010) {
+      url <- paste0(
+        "https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE")
+    } else if(dataYear == 2020) {
+      url <- paste0(
+        "https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ")
+    }
+  }
+
+  shared_drive_url <- NULL
+  if (!RCurl::url.exists(url)) { ## ping website and use gdrive if not available
+    if (requireNamespace("googledrive", quietly = TRUE)) {
+      driveFolder <- paste0("SCANFIForestAttributes_", year)
+      shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
+      # url <- googledrive::with_drive_quiet(
+      #   googledrive::drive_link(
+      #     googledrive::drive_ls(
+      #       driveFolder,
+      #       shared_drive = googledrive::as_id(shared_drive_url)
+      #     )
+      #   )
+      # )
+
+      driveDT <- as.data.table(googledrive::drive_ls(googledrive::as_id(shared_drive_url)))
+      url <- googledrive::with_drive_quiet(
+        googledrive::drive_link(driveDT[name == driveFolder, id])
+      )
+    }
+  }
+
+  loadSCANFISpeciesLayers(
+    dPath = destinationPath,
+    SCANFINamesCol = "SCANFI",
+    outputPath = outputPath,
+    rasterToMatch = rasterToMatch,
+    studyArea = studyArea,
+    studyAreaName = dots$studyAreaName,
+    sppEquiv = sppEquiv,
+    sppEquivCol = sppEquivCol,
+    thresh = thresh,
+    url = url,
+    year = year,
+    shared_drive_url = shared_drive_url,
+    userTags = c("speciesLayers", "KNN")
+  )
+}
+
 #' @export
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,

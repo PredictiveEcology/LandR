@@ -18,6 +18,7 @@
 * updated `speciesInStudyArea` function to create `dataSource` parameter to direct function to download KNN or NTEMS factor raster from google drive and create associated species list  
 * updated `prepRawBiomassMap` function to allow for incorporation of NTEMS or SCANFI biomass
 * updated `prepInputsStandAgeMap` function to allow for incorporation of SCANFI age map
+* added `loadSCANFISpeciesLayers` and `prepSpeciesLayers_SCANFI` functions for loading SCANFI species data from google drive
 
 # LandR 1.1.5
 
