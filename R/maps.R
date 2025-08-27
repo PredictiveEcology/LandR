@@ -409,7 +409,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
   setnames(pixelGroupData1, old = c("V1", "V2"), new = c(speciesOfLeadingBasedOn, totalOfLeadingBasedOn))
 
   set(pixelGroupData1, NULL, "speciesProportion", pixelGroupData1[[speciesOfLeadingBasedOn]] /
-    pixelGroupData1[[totalOfLeadingBasedOn]])
+        pixelGroupData1[[totalOfLeadingBasedOn]])
   systimePost1 <- Sys.time()
 
   setorderv(pixelGroupData1, pixelGroupColName)
@@ -490,8 +490,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 
     setkeyv(pixelGroupData3, pgdAndSc)
     mixedType2Condition <- quote(Type == "Deciduous" &
-      speciesProportion < vegLeadingProportion &
-      speciesProportion > 1 - vegLeadingProportion)
+                                   speciesProportion < vegLeadingProportion &
+                                   speciesProportion > 1 - vegLeadingProportion)
     pixelGroupData3[, mixed := FALSE]
 
     pixelGroupData3[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColName]
@@ -542,8 +542,8 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
   rasLevels <- levels(vegTypeMap)[[1]]
   if (!is.null(dim(rasLevels))) {
     levels(vegTypeMap) <- cbind(rasLevels,
-      colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
-      stringsAsFactors = FALSE
+                                colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
+                                stringsAsFactors = FALSE
     )
     if (is(vegTypeMap, "RasterLayer")) {
       setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
@@ -582,7 +582,7 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 
     if (mixedType == 0) {
       pgTest2 <- pgTest[, list(leading = speciesCode[which.max(speciesProportion)]),
-        by = pixelGroupColName
+                        by = pixelGroupColName
       ]
       out <- pgTest2
     } else if (mixedType == 1) {
@@ -666,8 +666,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
 
   sppEquivalencies_CA <- get(data("sppEquivalencies_CA",
-    package = "LandR",
-    envir = environment()
+                                  package = "LandR",
+                                  envir = environment()
   ), inherits = FALSE)
 
   if ("shared_drive_url" %in% names(dots)) {
@@ -836,21 +836,21 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   }
 
   speciesLayers <- Cache(Map,
-    targetFile = targetFiles,
-    writeTo = postProcessedFilenamesWithStudyAreaName,
-    url = URLs,
-    MoreArgs = list(
-      destinationPath = dPath,
-      # fun = "raster::raster",
-      maskTo = studyArea,
-      to = rasterToMatch,
-      method = "bilinear",
-      datatype = "INT2U",
-      overwrite = TRUE,
-      userTags = dots$userTags
-    ),
-    .functionName = "prepInputs",
-    prepInputs, quick = c("targetFile", "writeTo", "destinationPath")
+                         targetFile = targetFiles,
+                         writeTo = postProcessedFilenamesWithStudyAreaName,
+                         url = URLs,
+                         MoreArgs = list(
+                           destinationPath = dPath,
+                           # fun = "raster::raster",
+                           maskTo = studyArea,
+                           to = rasterToMatch,
+                           method = "bilinear",
+                           datatype = "INT2U",
+                           overwrite = TRUE,
+                           userTags = dots$userTags
+                         ),
+                         .functionName = "prepInputs",
+                         prepInputs, quick = c("targetFile", "writeTo", "destinationPath")
   )
 
   correctOrder <- sapply(unique(kNNnames), function(x) grep(pattern = x, x = targetFiles, value = TRUE))
@@ -911,8 +911,8 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   names(speciesLayers)[!nameChangeNA] <- nameChanges[!nameChangeNA]
 
   nameChangesNonMerged <- equivalentName(names(speciesLayers)[nameChangeNA],
-    sppEquiv,
-    column = sppEquivCol
+                                         sppEquiv,
+                                         column = sppEquivCol
   )
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
 
@@ -1011,7 +1011,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
   ## check if there are any layers/values in the lowQualityStack
   ## if not return the HQ one
   if (!(is(lowQualityStack, "RasterStack") || is(lowQualityStack, "SpatRaster")) &&
-    all(is.na(lowQualityStack[]))) {
+      all(is.na(lowQualityStack[]))) {
     highQualityStack
   } else {
     ## check if HQ resolution > LQ resolutions
@@ -1033,11 +1033,11 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
     stackRas <- list()
     for (x in seq_len(nrow(dtj))) {
       stackRas[[x]] <- dtj[x, .overlay(SPP, HQ, LQ,
-        hqLarger = hqLarger,
-        highQualityStack = highQualityStack,
-        lowQualityStack = lowQualityStack,
-        outputFilenameSuffix = outputFilenameSuffix,
-        destinationPath = destinationPath
+                                       hqLarger = hqLarger,
+                                       highQualityStack = highQualityStack,
+                                       lowQualityStack = lowQualityStack,
+                                       outputFilenameSuffix = outputFilenameSuffix,
+                                       destinationPath = destinationPath
       )]
     }
     names(stackRas) <- dtj$SPP
@@ -1079,8 +1079,8 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 
         NAval <- 65535L
         lowQualityStack[[SPP]] <- writeRaster(lowQualityStack[[SPP]],
-          filename = LQCurName,
-          datatype = "INT2U", NAflag = NAval
+                                              filename = LQCurName,
+                                              datatype = "INT2U", NAflag = NAval
         )
         ## NAvals need to be converted back to NAs
         lowQualityStack[[SPP]] <- .NAvalueFlag(lowQualityStack[[SPP]], NAval)
@@ -1125,8 +1125,8 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
       #                         maskWithRTM = FALSE)  ## not working
       LQRast <- cropInputs(lowQualityStack[[SPP]], rasterToMatch = templateRas)
       LQRast <- projectInputs(LQRast,
-        rasterToMatch = templateRas,
-        maskWithRTM = FALSE
+                              rasterToMatch = templateRas,
+                              maskWithRTM = FALSE
       )
 
       if (hqLarger) {
@@ -1157,12 +1157,12 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
     HQRast[NAs] <- LQRast[][NAs]
     NAval <- 65535L
     HQRast <- writeRaster(HQRast,
-      datatype = "INT2U",
-      filename = file.path(
-        destinationPath,
-        paste0(SPP, "_", outputFilenameSuffix, ".tif")
-      ),
-      overwrite = TRUE, NAflag = NAval
+                          datatype = "INT2U",
+                          filename = file.path(
+                            destinationPath,
+                            paste0(SPP, "_", outputFilenameSuffix, ".tif")
+                          ),
+                          overwrite = TRUE, NAflag = NAval
     )
     names(HQRast) <- SPP
 
@@ -1213,8 +1213,8 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
 
   ## keep species present in the data
   sppMerges <- sapply(sppMerges,
-    FUN = function(x) x[x %in% names(speciesLayers)],
-    simplify = FALSE
+                      FUN = function(x) x[x %in% names(speciesLayers)],
+                      simplify = FALSE
   )
 
   for (i in seq_along(sppMerges)) {
