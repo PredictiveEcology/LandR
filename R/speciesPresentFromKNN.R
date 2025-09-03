@@ -9,7 +9,7 @@ projectTo <- utils::getFromNamespace("projectTo", "reproducible")
 
 #' Make a species factor raster from KNN
 #'
-#' speciesPresentFromKNN will download all KNN layers in Forests of Canada, and make
+#' This will download all KNN layers in Forests of Canada, and make
 #' a factor raster at resolution provided by `res` (larger is faster).
 #'
 #' @param year Default (and only implemented) is 2011. This will download the 2011 KNN data layers
@@ -50,7 +50,7 @@ projectTo <- utils::getFromNamespace("projectTo", "reproducible")
 #' }
 #'
 #' @export
-#' @rdname speciesPresent
+#' @rdname speciesPresentFromKNN
 speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, minPctCover = 10) {
   studyAreaED <- Cache(
     prepInputs,
@@ -109,7 +109,7 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 
 #' Make a species factor raster based on NTEMS Data
 #'
-#' speciesPresentFromNTEMS will download NTEMS dominant species layer for 2011 for forests of Canada, and make
+#' This will download NTEMS dominant species layer for 2011 for forests of Canada, and make
 #' a factor raster at resolution provided by `res` (larger is faster).
 #'
 #' @param dPath A character string indicating where to download all the NTEMS layers
@@ -150,7 +150,7 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 #' }
 #'
 #' @export
-#' @rdname speciesPresent
+#' @rdname speciesPresentFromNTEMS
 speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 2400, year = 2011,
                                     rasterToMatch = NULL, studyArea = NULL, ...) {
   dots <- list(...)
