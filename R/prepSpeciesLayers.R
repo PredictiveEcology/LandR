@@ -489,7 +489,7 @@ prepSpeciesLayers_SCANFI <- function(destinationPath, outputPath,
   if (!RCurl::url.exists(url)) { ## ping website and use gdrive if not available
     if (requireNamespace("googledrive", quietly = TRUE)) {
       driveFolder <- paste0("SCANFIForestAttributes_", year)
-      shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
+      shared_drive_url <- "https://drive.google.com/drive/folders/1zLYV-wcDjJfSflH1VkXG6sosqZZF4SYc"
       # url <- googledrive::with_drive_quiet(
       #   googledrive::drive_link(
       #     googledrive::drive_ls(
