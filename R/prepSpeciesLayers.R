@@ -44,12 +44,16 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
   if (type[1] == "cover") {
     for (i in seq(numSpeciesColumns)) {
       set(
-        CASFRIattr, which(CASFRIattr[[paste0("SPECIES_", i)]] %in% NAVals),
-        paste0("SPECIES_", i), NA_character_
+        CASFRIattr,
+        which(CASFRIattr[[paste0("SPECIES_", i)]] %in% NAVals),
+        paste0("SPECIES_", i),
+        NA_character_
       )
       set(
-        CASFRIattr, which(CASFRIattr[[paste0("SPECIES_PER_", i)]] %in% NAVals),
-        paste0("SPECIES_", i), NA_character_
+        CASFRIattr,
+        which(CASFRIattr[[paste0("SPECIES_PER_", i)]] %in% NAVals),
+        paste0("SPECIES_", i),
+        NA_character_
       )
     }
     for (i in 1:1) {
@@ -62,8 +66,10 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
     message("set CASFRI entries with <15 cover in 2nd-5th dominance class to NA")
     for (i in 2:5) {
       set(
-        CASFRIattr, which(CASFRIattr[[paste0("SPECIES_PER_", i)]] <= 15),
-        paste0("SPECIES_", i), NA_character_
+        CASFRIattr,
+        which(CASFRIattr[[paste0("SPECIES_PER_", i)]] <= 15),
+        paste0("SPECIES_", i),
+        NA_character_
       )
     }
 
@@ -112,11 +118,10 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
   # The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
-  # Take this from the sppEquiv table; user cannot supply manually
+  ## Take this from the sppEquiv table; user cannot supply manually
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   names(sppNameVector) <- sppNameVector
 
-  # This
   sppListMergesCASFRI <- lapply(sppNameVector, function(x) {
     equivalentName(x, sppEquiv, column = "CASFRI", multi = TRUE)
   })
