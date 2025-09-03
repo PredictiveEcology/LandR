@@ -442,7 +442,7 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
 #' @template destinationPath
 #' @param outputPath TODO: description needed
 #' @param url if `NULL`, the default, use the default source url
-#' @param dataYear. Year for the data obtained. 2000, 2010, or 2020 (default) possible.
+#' @param dataYear Year for the data obtained. 2000, 2010, or 2020 (default) possible.
 #' @template studyArea
 #' @template rasterToMatch
 #' @template sppEquiv
@@ -473,20 +473,24 @@ prepSpeciesLayers_SCANFI <- function(destinationPath, outputPath,
   }
 
   if (is.null(url)) {
-    if(dataYear == 2000) {
+    if (dataYear == 2000) {
       url <- paste0(
-        "https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp")
-    } else if(dataYear == 2010) {
+        "https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp"
+      )
+    } else if (dataYear == 2010) {
       url <- paste0(
-        "https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE")
-    } else if(dataYear == 2020) {
+        "https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE"
+      )
+    } else if (dataYear == 2020) {
       url <- paste0(
-        "https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ")
+        "https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ"
+      )
     }
   }
 
   shared_drive_url <- NULL
-  if (!RCurl::url.exists(url)) { ## ping website and use gdrive if not available
+  if (!RCurl::url.exists(url)) {
+    ## ping website and use gdrive if not available
     if (requireNamespace("googledrive", quietly = TRUE)) {
       driveFolder <- paste0("SCANFIForestAttributes_", year)
       shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
