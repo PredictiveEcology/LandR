@@ -2,6 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{Colors}
 \alias{Colors}
+\alias{Colours}
 \title{Helper for setting Raster or \code{SpatRaster} colors}
 \usage{
 Colors(ras, cols, n = NULL)

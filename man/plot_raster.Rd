@@ -2,12 +2,12 @@
 % Please edit documentation in R/plotting.R
 \name{plot_raster}
 \alias{plot_raster}
-\title{Plot function for generic raster objects with Plots}
+\title{Plot raster objects using ggplot}
 \usage{
 plot_raster(x, title = NULL, subtitle = NULL)
 }
 \arguments{
-\item{x}{SpatRaster for current or cumulative harvest}
+\item{x}{A \code{SpatRaster} object}
 
 \item{title}{character, the plot title}
 
@@ -17,5 +17,5 @@ plot_raster(x, title = NULL, subtitle = NULL)
 ggplot object
 }
 \description{
-Plot function for generic raster objects with Plots
+Plot raster objects using ggplot
 }
