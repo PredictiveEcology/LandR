@@ -159,7 +159,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
       axis.text = element_text(size = 6)
     )
 
-  Plot(vtmPlot, title = title)
+  Plot(vtmPlot, title = title) ## TODO: use Plots (#87)
 }
 
 #' Helper for setting Raster or `SpatRaster` colors
