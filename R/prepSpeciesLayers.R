@@ -73,14 +73,8 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
       )
     }
 
-    CASFRIattrLong <- melt(CASFRIattr,
-                           id.vars = c("GID"),
-                           measure.vars = paste0("SPECIES_", 1:5)
-    )
-    CA2 <- melt(CASFRIattr,
-                id.vars = c("GID"),
-                measure.vars = c(paste0("SPECIES_PER_", 1:5))
-    )
+    CASFRIattrLong <- melt(CASFRIattr, id.vars = c("GID"), measure.vars = paste0("SPECIES_", 1:5))
+    CA2 <- melt(CASFRIattr, id.vars = c("GID"), measure.vars = c(paste0("SPECIES_PER_", 1:5)))
     CASFRIattrLong[, pct := CA2$value]
     rm(CA2)
     CASFRIattrLong <- na.omit(CASFRIattrLong)
@@ -104,8 +98,8 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 #' Extract CASFRI data.table values and create species layer rasters
 #'
 #' @param CASFRIRas `RasterLayer` object
-#' @param attrFile character string specifying a CASFRI attribute filename
-#' @param headerFile character string specifying a CASFRI header filename
+#' @param CASFRIattrLong data.table of CASFRI attributes (long format) (i.e., from [loadCASFRI])
+#' @param CASFRIdt data.table of CASFRI raster values (i.e., from [loadCASFRI])
 #' @template sppEquiv
 #' @template sppEquivCol
 #' @template destinationPath
@@ -148,12 +142,16 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     message("  running ", sp, ". Assigning NA, because absent from CASFRI")
     spRasts[[sp]] <- spRas
     NAval <- 65535L
-    spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
-                           filename = asPath(file.path(
-                             destinationPath,
-                             paste0("CASFRI_", sp, ".tif")
-                           )),
-                           overwrite = TRUE, datatype = "INT2U", NAflag = NAval
+    spRasts[[sp]] <- Cache(
+      writeRaster,
+      spRasts[[sp]],
+      filename = asPath(file.path(
+        destinationPath,
+        paste0("CASFRI_", sp, ".tif")
+      )),
+      overwrite = TRUE,
+      datatype = "INT2U",
+      NAflag = NAval
     )
     ## NAvals need to be converted back to NAs
     spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
@@ -178,12 +176,15 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 
     startCRS <- crs(spRasts[[sp]])
     NAval <- 255L
-    spRasts[[sp]] <- writeRaster(spRasts[[sp]],
-                                 filename = asPath(file.path(
-                                   destinationPath,
-                                   paste0("CASFRI_", sp, ".tif")
-                                 )),
-                                 datatype = "INT1U", overwrite = TRUE, NAflag = NAval
+    spRasts[[sp]] <- writeRaster(
+      spRasts[[sp]],
+      filename = asPath(file.path(
+        destinationPath,
+        paste0("CASFRI_", sp, ".tif")
+      )),
+      datatype = "INT1U",
+      overwrite = TRUE,
+      NAflag = NAval
     )
     ## NAvals need to be converted back to NAs
     spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
@@ -306,34 +307,36 @@ prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
   CASFRIheaderFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs_README.txt"))
 
   message("  Loading CASFRI layers...")
-  CASFRIRas <- Cache(prepInputs,
-                     # targetFile = asPath("Landweb_CASFRI_GIDs.tif"),
-                     targetFile = basename(CASFRItiffFile),
-                     archive = asPath("CASFRI for Landweb.zip"),
-                     url = url,
-                     alsoExtract = c(CASFRItiffFile, CASFRIattrFile, CASFRIheaderFile),
-                     destinationPath = destinationPath,
-                     studyArea = studyArea,
-                     rasterToMatch = rasterToMatch,
-                     method = "bilinear", ## ignore warning re: ngb (#5)
-                     datatype = "INT4U",
-                     writeTo = NULL,
-                     overwrite = TRUE,
-                     userTags = c("CASFRIRas", "stable")
+  CASFRIRas <- Cache(
+    prepInputs,
+    # targetFile = asPath("Landweb_CASFRI_GIDs.tif"),
+    targetFile = basename(CASFRItiffFile),
+    archive = asPath("CASFRI for Landweb.zip"),
+    url = url,
+    alsoExtract = c(CASFRItiffFile, CASFRIattrFile, CASFRIheaderFile),
+    destinationPath = destinationPath,
+    studyArea = studyArea,
+    rasterToMatch = rasterToMatch,
+    method = "bilinear", ## ignore warning re: ngb (#5)
+    datatype = "INT4U",
+    writeTo = NULL,
+    overwrite = TRUE,
+    userTags = c("CASFRIRas", "stable")
   )
 
   message("Load CASFRI data and headers, and convert to long format, and define species groups")
 
   # Cache
-  loadedCASFRI <- Cache(loadCASFRI,
-                        CASFRIRas = CASFRIRas,
-                        attrFile = CASFRIattrFile,
-                        headerFile = CASFRIheaderFile, ## TODO: this isn't used internally
-                        sppEquiv = sppEquiv,
-                        sppEquivCol = sppEquivCol,
-                        type = "cover" # ,
-                        # userTags = c("function:loadCASFRI", "BigDataTable",
-                        # "speciesLayers", "KNN")
+  loadedCASFRI <- Cache(
+    loadCASFRI,
+    CASFRIRas = CASFRIRas,
+    attrFile = CASFRIattrFile,
+    headerFile = CASFRIheaderFile, ## TODO: this isn't used internally
+    sppEquiv = sppEquiv,
+    sppEquivCol = sppEquivCol,
+    type = "cover" # ,
+    # userTags = c("function:loadCASFRI", "BigDataTable",
+    # "speciesLayers", "KNN")
   )
 
   message("Make stack from CASFRI data and headers")
@@ -360,19 +363,20 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
     url <- "https://drive.google.com/file/d/1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
   }
 
-  speciesLayers <- Cache(prepInputs,
-                         targetFile = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.dat"),
-                         url = url,
-                         archive = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.zip"),
-                         alsoExtract = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.hdr"),
-                         destinationPath = destinationPath,
-                         studyArea = studyArea,
-                         rasterToMatch = rasterToMatch,
-                         method = "bilinear", ## ignore warning re: ngb (#5)
-                         datatype = "INT2U",
-                         writeTo = NULL,
-                         overwrite = TRUE,
-                         userTags = c("speciesLayers", "KNN", "Pickell", "stable")
+  speciesLayers <- Cache(
+    prepInputs,
+    targetFile = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.dat"),
+    url = url,
+    archive = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.zip"),
+    alsoExtract = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.hdr"),
+    destinationPath = destinationPath,
+    studyArea = studyArea,
+    rasterToMatch = rasterToMatch,
+    method = "bilinear", ## ignore warning re: ngb (#5)
+    datatype = "INT2U",
+    writeTo = NULL,
+    overwrite = TRUE,
+    userTags = c("speciesLayers", "KNN", "Pickell", "stable")
   )
 
   makePickellStack(
@@ -408,10 +412,16 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   CClayerNames <- c("Pine", "Black Spruce", "Deciduous", "Fir", "White Spruce", "LandType")
   CClayerNamesFiles <- paste0(gsub(" ", "", CClayerNames), "1.tif")
 
-  lr <- lapply(CClayerNamesFiles, prepInputs,
-               studyArea = studyArea, rasterToMatch = rasterToMatch,
-               url = url, alsoExtract = "similar", method = "ngb",
-               destinationPath = destinationPath, writeTo = NULL
+  lr <- lapply(
+    CClayerNamesFiles,
+    prepInputs,
+    studyArea = studyArea,
+    rasterToMatch = rasterToMatch,
+    url = url,
+    alsoExtract = "similar",
+    method = "ngb",
+    destinationPath = destinationPath,
+    writeTo = NULL
   )
   rs <- raster::stack(lr)
   names(rs) <- CClayerNames
@@ -560,10 +570,16 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
   CClayerNames2 <- c("Pine", "Black Spruce", "Deciduous", "Fir", "White Spruce", "LandType") ## needs 'LandType'
   CClayerNamesFiles <- paste0("MB_", gsub(" ", "", CClayerNames), "2016_NRV.tif")
 
-  lr <- lapply(CClayerNamesFiles, prepInputs,
-               studyArea = studyArea, rasterToMatch = rasterToMatch,
-               url = url, alsoExtract = "similar", method = "ngb",
-               destinationPath = destinationPath, writeTo = NULL
+  lr <- lapply(
+    CClayerNamesFiles,
+    prepInputs,
+    studyArea = studyArea,
+    rasterToMatch = rasterToMatch,
+    url = url,
+    alsoExtract = "similar",
+    method = "ngb",
+    destinationPath = destinationPath,
+    writeTo = NULL
   )
   rs <- stack(lr)
   names(rs) <- CClayerNames2
@@ -774,12 +790,16 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(44)] <- 80
         spRasts[[sp]][PickellRaster[] %in% c(14, 34)] <- 40
         NAval <- 255L
-        spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
-                               filename = asPath(file.path(
-                                 destinationPath,
-                                 paste0("Pickell_", sp, ".tif")
-                               )),
-                               overwrite = TRUE, datatype = "INT1U", NAflag = NAval
+        spRasts[[sp]] <- Cache(
+          writeRaster,
+          spRasts[[sp]],
+          filename = asPath(file.path(
+            destinationPath,
+            paste0("Pickell_", sp, ".tif")
+          )),
+          overwrite = TRUE,
+          datatype = "INT1U",
+          NAflag = NAval
         )
         ## NAvals need to be converted back to NAs
         spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
@@ -794,12 +814,16 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(32, 42)] <- 40
 
         NAval <- 255L
-        spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
-                               filename = asPath(file.path(
-                                 destinationPath,
-                                 paste0("Pickell_", sp, ".tif")
-                               )),
-                               overwrite = TRUE, datatype = "INT1U", NAflag = NAval
+        spRasts[[sp]] <- Cache(
+          writeRaster,
+          spRasts[[sp]],
+          filename = asPath(file.path(
+            destinationPath,
+            paste0("Pickell_", sp, ".tif")
+          )),
+          overwrite = TRUE,
+          datatype = "INT1U",
+          NAflag = NAval
         )
         ## NAvals need to be converted back to NAs
         spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
@@ -827,12 +851,16 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(23, 43)] <- 40
 
         NAval <- 255L
-        spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
-                               filename = asPath(file.path(
-                                 destinationPath,
-                                 paste0("Pickell_", sp, ".tif")
-                               )),
-                               overwrite = TRUE, datatype = "INT1U", NAflag = NAval
+        spRasts[[sp]] <- Cache(
+          writeRaster,
+          spRasts[[sp]],
+          filename = asPath(file.path(
+            destinationPath,
+            paste0("Pickell_", sp, ".tif")
+          )),
+          overwrite = TRUE,
+          datatype = "INT1U",
+          NAflag = NAval
         )
         ## NAvals need to be converted back to NAs
         spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
@@ -847,12 +875,16 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(31, 41)] <- 40
 
         NAval <- 65535L
-        spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
-                               filename = asPath(file.path(
-                                 destinationPath,
-                                 paste0("Pickell_", sp, ".tif")
-                               )),
-                               overwrite = TRUE, datatype = "INT2U", NAflag = NAval
+        spRasts[[sp]] <- Cache(
+          writeRaster,
+          spRasts[[sp]],
+          filename = asPath(file.path(
+            destinationPath,
+            paste0("Pickell_", sp, ".tif")
+          )),
+          overwrite = TRUE,
+          datatype = "INT2U",
+          NAflag = NAval
         )
         ## NAvals need to be converted back to NAs
         spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)

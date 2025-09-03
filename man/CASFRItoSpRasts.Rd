@@ -16,6 +16,10 @@ CASFRItoSpRasts(
 \arguments{
 \item{CASFRIRas}{\code{RasterLayer} object}
 
+\item{CASFRIattrLong}{data.table of CASFRI attributes (long format) (i.e., from \link{loadCASFRI})}
+
+\item{CASFRIdt}{data.table of CASFRI raster values (i.e., from \link{loadCASFRI})}
+
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
 For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
@@ -26,10 +30,6 @@ For functions that have \code{mixedType}, only necessary if \code{mixedType == 2
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
 \item{destinationPath}{path to data directory where objects will be downloaded or saved to}
-
-\item{attrFile}{character string specifying a CASFRI attribute filename}
-
-\item{headerFile}{character string specifying a CASFRI header filename}
 }
 \value{
 \code{RasterStack} (or equivalent)
