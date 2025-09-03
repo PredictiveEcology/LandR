@@ -5,6 +5,7 @@
 \alias{prepSpeciesLayers_CASFRI}
 \alias{prepSpeciesLayers_Pickell}
 \alias{prepSpeciesLayers_ForestInventory}
+\alias{prepSpeciesLayers_SCANFI}
 \alias{prepSpeciesLayers_MBFRI}
 \alias{prepSpeciesLayers_ONFRI}
 \title{Prepare species layers}
@@ -51,6 +52,19 @@ prepSpeciesLayers_ForestInventory(
   rasterToMatch,
   sppEquiv,
   sppEquivCol,
+  ...
+)
+
+prepSpeciesLayers_SCANFI(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  dataYear = 2020,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  thresh = 10,
   ...
 )
 
@@ -103,10 +117,16 @@ If at least one pixel has \code{cover >= thresh} , the species is considered "pr
 Otherwise the raster is excluded from the output. Defaults to 10.}
 
 \item{...}{other arguments, used for compatibility with other \code{prepSpeciesLayers} functions.}
+
+\item{dataYear.}{Year for the data obtained. 2000, 2010, or 2020 (default) possible.}
 }
 \value{
 TODO: description needed
+
+TODO: description needed
 }
 \description{
+TODO: description needed
+
 TODO: description needed
 }

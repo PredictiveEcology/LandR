@@ -3,6 +3,7 @@
 \name{speciesPresentFromKNN}
 \alias{speciesPresentFromKNN}
 \alias{speciesPresentFromNTEMS}
+\alias{speciesPresentFromSCANFI}
 \title{Make a species factor raster from KNN}
 \usage{
 speciesPresentFromKNN(
@@ -20,11 +21,18 @@ speciesPresentFromNTEMS(
   studyArea = NULL,
   ...
 )
+
+speciesPresentFromSCANFI(
+  year = 2020,
+  dPath = asPath("."),
+  res = 2400,
+  minPctCover = 10
+)
 }
 \arguments{
-\item{year}{Default (and only implemented) is 2011. This will download the 2011 NTEMS species layer}
+\item{year}{One of 2000, 2010, or 2020. Default is 2020.}
 
-\item{dPath}{A character string indicating where to download all the NTEMS layers}
+\item{dPath}{A character string indicating where to download all the SCANFI layers}
 
 \item{res}{The resolution (one dimension, in m) for the resulting raster}
 
@@ -48,12 +56,19 @@ a legend (i.e., it is numbers on a map, that correspond to a legend) and
 A \code{SpatRaster} object with 2 layers: \code{"speciesPresent"} is a factor, with
 a legend (i.e., it is numbers on a map, that correspond to a legend) and
 \code{"numberSpecies"} which represents the number of species in each pixel.
+
+A \code{SpatRaster} object with 2 layers: \code{"speciesPresent"} is a factor, with
+a legend (i.e., it is numbers on a map, that correspond to a legend) and
+\code{"numberSpecies"} which represents the number of species in each pixel.
 }
 \description{
-This will download all KNN layers in Forests of Canada, and make
+speciesPresentFromKNN will download all KNN layers in Forests of Canada, and make
 a factor raster at resolution provided by \code{res} (larger is faster).
 
-This will download NTEMS dominant species layer for 2011 for forests of Canada, and make
+speciesPresentFromNTEMS will download NTEMS dominant species layer for 2011 for forests of Canada, and make
+a factor raster at resolution provided by \code{res} (larger is faster).
+
+speciesPresentFromSCANFI will download SCANFI species layer for forests of Canada, and make
 a factor raster at resolution provided by \code{res} (larger is faster).
 }
 \examples{
@@ -96,6 +111,25 @@ if (requireNamespace("googledrive", quietly = TRUE)) {
   ## Get species list
   sa <- LandR::randomStudyArea(size = 1e11)
   species <- LandR::speciesInStudyArea(sa, dataSource = "NTEMS")
+}
+}
+
+\dontrun{
+if (requireNamespace("googledrive", quietly = TRUE)) {
+  # Make the dataset
+  speciesPresent <- speciesPresentFromSCANFI(dPath = "~/data/SCANFI")
+
+  # To upload this:
+  speciesPresentRas <- terra::rast(speciesPresent)[[1]]
+  fn <- "SpeciesPresentInCanadianForests_NTEMS.tif"
+  writeRaster(speciesPresentRas, file = fn)
+  zipFn <- gsub(".tif", ".zip", fn)
+  zip(files = dir(pattern = fn), zipFn)
+  out <- googledrive::drive_put(zipFn)
+
+  ## Get species list
+  sa <- LandR::randomStudyArea(size = 1e11)
+  species <- LandR::speciesInStudyArea(sa, dataSource = "SCANFI")
 }
 }
 
