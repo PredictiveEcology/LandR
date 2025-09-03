@@ -26,7 +26,7 @@ with \code{speciesPresentFromKNN}}
 \item{sppEquivCol}{An optional column from \code{LandR::sppEquivalencies_CA}.
 If passed the KNN species will be returned according to this naming convention.}
 
-\item{dataSource}{Character. Either KNN or NTEMS. Defaults to KNN to obtain species from layer
+\item{dataSource}{Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain species from layer
 created using species cover data from KNN. Also able to obtain species from NTEMS
 Dominant Species Layer (though less species will likely be included).}
 

@@ -118,7 +118,7 @@ Otherwise the raster is excluded from the output. Defaults to 10.}
 
 \item{...}{other arguments, used for compatibility with other \code{prepSpeciesLayers} functions.}
 
-\item{dataYear.}{Year for the data obtained. 2000, 2010, or 2020 (default) possible.}
+\item{dataYear}{Year for the data obtained. 2000, 2010, or 2020 (default) possible.}
 }
 \value{
 TODO: description needed
