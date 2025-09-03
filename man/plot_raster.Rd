@@ -7,7 +7,7 @@
 plot_raster(x, title = NULL, subtitle = NULL)
 }
 \arguments{
-\item{x}{SpatRaster for current or cumulative harvest}
+\item{x}{A SpatRaster object}
 
 \item{title}{character, the plot title}
 
