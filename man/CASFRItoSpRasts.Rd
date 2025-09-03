@@ -14,11 +14,7 @@ CASFRItoSpRasts(
 )
 }
 \arguments{
-\item{CASFRIRas}{TODO: description needed}
-
-\item{CASFRIattrLong}{TODO: description needed}
-
-\item{CASFRIdt}{TODO: description needed}
+\item{CASFRIRas}{\code{RasterLayer} object}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.
@@ -30,10 +26,14 @@ For functions that have \code{mixedType}, only necessary if \code{mixedType == 2
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
 \item{destinationPath}{path to data directory where objects will be downloaded or saved to}
+
+\item{attrFile}{character string specifying a CASFRI attribute filename}
+
+\item{headerFile}{character string specifying a CASFRI header filename}
 }
 \value{
-TODO: description needed
+\code{RasterStack} (or equivalent)
 }
 \description{
-TODO: description and title needed
+Extract CASFRI data.table values and create species layer rasters
 }

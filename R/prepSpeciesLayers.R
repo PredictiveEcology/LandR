@@ -4,16 +4,16 @@ utils::globalVariables(c(
 
 #' Load CASFRI data
 #'
-#' TODO: description needed
+#' Loads CASFRIv4 data specifically supplied for the LandWeb project
 #'
-#' @param CASFRIRas TODO: description needed
-#' @param attrFile TODO: description needed
-#' @param headerFile TODO: description needed
+#' @param CASFRIRas `RasterLayer` object
+#' @param attrFile character string specifying a CASFRI attribute filename
+#' @param headerFile character string specifying a CASFRI header filename
 #' @template sppEquiv
 #' @template sppEquivCol
 #' @param type Character string. Either `"cover"` or `"age"`.
 #'
-#' @return TODO: description needed
+#' @return list with named elements: `CASFRIattrLong` and `CASFRIdt` (both data.tables)
 #'
 #' @export
 loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
@@ -21,13 +21,13 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
   # The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
-  # Take this from the sppEquiv table; user cannot supply manually
+  ## Take this from the sppEquiv table; user cannot supply manually
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   names(sppNameVector) <- sppNameVector
 
   sppNameVectorCASFRI <- equivalentName(sppNameVector, sppEquiv, column = "CASFRI", multi = TRUE)
 
-  # CASFRI stuff
+  ## CASFRI stuff
   CASFRIheader <- fread(headerFile, skip = 14, nrows = 49, header = FALSE, sep = "", fill = TRUE)
   header <- apply(CASFRIheader, 1, function(x) sub(pattern = "(\t+| ).*$", "", x))
   CASFRIheader <- header[nchar(header) != 0]
@@ -95,16 +95,16 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 
 #' `CASFRItoSpRasts`
 #'
-#' TODO: description and title needed
+#' Extract CASFRI data.table values and create species layer rasters
 #'
-#' @param CASFRIRas TODO: description needed
-#' @param CASFRIattrLong TODO: description needed
-#' @param CASFRIdt TODO: description needed
+#' @param CASFRIRas `RasterLayer` object
+#' @param attrFile character string specifying a CASFRI attribute filename
+#' @param headerFile character string specifying a CASFRI header filename
 #' @template sppEquiv
 #' @template sppEquivCol
 #' @template destinationPath
 #'
-#' @return TODO: description needed
+#' @return `RasterStack` (or equivalent)
 #'
 #' @export
 CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
@@ -247,7 +247,8 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
   }
 
   shared_drive_url <- NULL
-  if (!RCurl::url.exists(url)) { ## ping website and use gdrive if not available
+  if (!RCurl::url.exists(url)) {
+    ## ping website and use gdrive if not available
     if (requireNamespace("googledrive", quietly = TRUE)) {
       driveFolder <- paste0("kNNForestAttributes_", year)
       shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
@@ -413,8 +414,12 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
   CCstack <- dropLayer(rs, which(grepl("LandType", CClayerNames)))
   CCstackNames <- names(CCstack)
 
-  if (!all(min(CCstack[], na.rm = TRUE) >= 0)) stop("problem with min. of CCstack (< 0)")
-  if (!all(max(CCstack[], na.rm = TRUE) <= 10)) stop("problem with max. of CCstack (> 10)")
+  if (!all(min(CCstack[], na.rm = TRUE) >= 0)) {
+    stop("problem with min. of CCstack (< 0)")
+  }
+  if (!all(max(CCstack[], na.rm = TRUE) <= 10)) {
+    stop("problem with max. of CCstack (> 10)")
+  }
 
   CCstack <- CCstack * 10 ## convert back to percent
   ## NA means outside of studyArea polygon; 1 is cities, Set to NA here:
@@ -468,8 +473,12 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
 
   CCstack <- dropLayer(rs, which(grepl("LandType", CClayerNames2)))
 
-  if (!all(min(CCstack[], na.rm = TRUE) >= 0)) stop("problem with min. of CCstack (< 0)")
-  if (!all(max(CCstack[], na.rm = TRUE) <= 10)) stop("problem with max. of CCstack (> 10)")
+  if (!all(min(CCstack[], na.rm = TRUE) >= 0)) {
+    stop("problem with min. of CCstack (< 0)")
+  }
+  if (!all(max(CCstack[], na.rm = TRUE) <= 10)) {
+    stop("problem with max. of CCstack (> 10)")
+  }
 
   CCstack <- CCstack * 10 # convert back to percent
   ## NA means outside of studyArea polygon; 1 is cities, Set to NA here:
@@ -544,15 +553,24 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
 
   sppLayers <- rast(lapply(FRIlayerNamesFiles, function(f) {
     prepInputs(
-      url = url, studyArea = studyArea, rasterToMatch = rasterToMatch,
-      destinationPath = destinationPath, targetFile = f, writeTo = NULL,
-      alsoExtract = NA, method = "near"
+      url = url,
+      studyArea = studyArea,
+      rasterToMatch = rasterToMatch,
+      destinationPath = destinationPath,
+      targetFile = f,
+      writeTo = NULL,
+      alsoExtract = NA,
+      method = "near"
     )
   }))
   names(sppLayers) <- FRIlayerNames
 
-  if (!all(minmax(sppLayers)[1, ] >= 0)) stop("problem with min. of species layers stack (< 0)")
-  if (!all(minmax(sppLayers)[2, ] <= 100)) stop("problem with max. of species layers stack (> 100)")
+  if (!all(minmax(sppLayers)[1, ] >= 0)) {
+    stop("problem with min. of species layers stack (< 0)")
+  }
+  if (!all(minmax(sppLayers)[2, ] <= 100)) {
+    stop("problem with max. of species layers stack (> 100)")
+  }
 
   ## merge species layers (currently only Popu; TODO: pine?)
   idsPopu <- grep("Popu", FRIlayerNames)
@@ -625,9 +643,13 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
   })
 
   # Check that each of the layers that Pickell did are actually desired in speciesEquivalency
-  needPickell <- vapply(sppInPickell, function(sp) {
-    any(sp %in% sppOfInterest)
-  }, logical(1))
+  needPickell <- vapply(
+    sppInPickell,
+    function(sp) {
+      any(sp %in% sppOfInterest)
+    },
+    logical(1)
+  )
 
   # These are the ones in Pickell data set that we want according to speciesEquivalency
   PickellSpp <- equivalentName(PickellSpp[needPickell], sppEquiv, sppEquivCol)
@@ -687,16 +709,21 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
       }
     }
 
-    if (any(
-      !is.na(equivalentName("Pinu_ban", sppEquiv, sppEquivCol)),
-      !is.na(equivalentName("Pinu_con", sppEquiv, sppEquivCol)),
-      !is.na(equivalentName("Pinu_spp", sppEquiv, sppEquivCol))
-    )) {
-      if (sp %in% c(
-        equivalentName("Pinu_ban", sppEquiv, sppEquivCol),
-        equivalentName("Pinu_con", sppEquiv, sppEquivCol),
-        equivalentName("Pinu_sp", sppEquiv, sppEquivCol)
-      )) {
+    if (
+      any(
+        !is.na(equivalentName("Pinu_ban", sppEquiv, sppEquivCol)),
+        !is.na(equivalentName("Pinu_con", sppEquiv, sppEquivCol)),
+        !is.na(equivalentName("Pinu_spp", sppEquiv, sppEquivCol))
+      )
+    ) {
+      if (
+        sp %in%
+          c(
+            equivalentName("Pinu_ban", sppEquiv, sppEquivCol),
+            equivalentName("Pinu_con", sppEquiv, sppEquivCol),
+            equivalentName("Pinu_sp", sppEquiv, sppEquivCol)
+          )
+      ) {
         spRasts[[sp]] <- spRas
         spRasts[[sp]][PickellRaster[] %in% c(31, 32, 34)] <- 60
         spRasts[[sp]][PickellRaster[] %in% c(33)] <- 80
