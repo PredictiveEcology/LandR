@@ -68,5 +68,6 @@
 #' @importFrom tools file_ext file_path_sans_ext
 #' @importFrom utils capture.output combn count.fields data getFromNamespace head install.packages
 #' @importFrom utils str tail untar
+#' @importFrom viridis scale_fill_viridis
 ## usethis namespace: end
 NULL
