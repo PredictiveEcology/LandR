@@ -197,7 +197,7 @@ tsugmert,TSUG.MER,Tsug_mer,Tsug_Mer,Tsug mert,Tsuga mertensiana x heterophylla,W
 ,,Ulmu_spp,Ulmu_Tho,Ulmu spp,Ulmus spp.,Elm,Elm,Elm leading,,,TRUE,Deciduous,,,CedrMplOther,,,,ULMU_SPP.,,2200,,,121,,
 ,,,,Ulmu thom,Ulmus thomasii,Rock elm,Rock elm,Rock elm leading,,,TRUE,Deciduous,,,CedrMplOther,,,,ULMU_THO,ORT,2203,,,124,,
 ,,,Needleleaf_Spp,Soft unkn,,Conif,Coniferous,Coniferous leading,,,FALSE,Conifer,,,CedrMplOther,,,,,,1100,,,194,,
-,,,Broadleaf_Spp,Hard unkn,,Decid,Deciduous,Deciduous leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,1500,,,195,OtherBroadleaf,
+,,,Broadleaf_Spp,Hard unkn,,Decid,Deciduous,Deciduous leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,1500,,,195,,
 ,,,,Nonc hard,,Decid,Deciduous,Deciduous leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,,,,195,,
 ,,,,Hard into,,,,,,,,,,,CedrMplOther,,,,,,,,,,,
 ,,,,Hard tole,,,,,,,,,,,CedrMplOther,,,,,,,,,,,
