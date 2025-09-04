@@ -411,7 +411,7 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL, 
         if(dataSource == "KNN") {
           url <- "https://drive.google.com/file/d/1J8fN7clZeqjd7yhiDWi13uoCBL8OensF"
         } else if(dataSource == "SCANFI") {
-          url <- "https://drive.google.com/file/d/10JmsP_vAdXY7G4yXO_XzGk9PahHWMg7u/view?usp=drive_link"
+          url <- "https://drive.google.com/file/d/1l7PCWOYaqBwY6dOFIwhe5SnPADU5a0RA"
         }
         speciesPres <- preProcess(url = url, destinationPath = dPath)
         speciesPresRas <- rasterRead(speciesPres$targetFilePath)
