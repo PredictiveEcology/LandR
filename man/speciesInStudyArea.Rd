@@ -27,8 +27,8 @@ with \code{speciesPresentFromKNN}}
 If passed the KNN species will be returned according to this naming convention.}
 
 \item{dataSource}{Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain species from layer
-created using species cover data from KNN. Also able to obtain species from NTEMS
-Dominant Species Layer (though less species will likely be included).}
+created using species cover data from KNN. Also able to obtain species from SCANFI species cover layers
+and NTEMS Dominant Species Layer (though less species will be included from the latter).}
 
 \item{dPath}{Passed to \code{destinationPath} in \code{preProcess}.}
 }

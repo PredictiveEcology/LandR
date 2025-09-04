@@ -364,8 +364,8 @@ speciesPresentFromSCANFI <- function(year = 2020, dPath = asPath("."), res = 240
 #'   If passed the KNN species will be returned according to this naming convention.
 #'
 #' @param dataSource Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain species from layer
-#'   created using species cover data from KNN. Also able to obtain species from NTEMS
-#'   Dominant Species Layer (though less species will likely be included).
+#'   created using species cover data from KNN. Also able to obtain species from SCANFI species cover layers
+#'   and NTEMS Dominant Species Layer (though less species will be included from the latter).
 #'
 #' @param dPath Passed to `destinationPath` in `preProcess`.
 #'
@@ -377,36 +377,8 @@ speciesPresentFromSCANFI <- function(year = 2020, dPath = asPath("."), res = 240
 speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL, sppEquivCol = NULL,
                                dataSource = "KNN",
                                dPath = getOption("reproducible.destinationPath")) {
-  if (!(dataSource %in% c("KNN", "NTEMS"))) {
-    stop("Data Source must be either KNN or NTEMS")
-  }
-  if (dataSource == "KNN") {
-    if (is.null(speciesPresentRas)) {
-      if (is.null(url)) {
-        url <- "https://drive.google.com/file/d/1J8fN7clZeqjd7yhiDWi13uoCBL8OensF"
-      }
-      speciesPres <- preProcess(url = url, destinationPath = dPath)
-      speciesPresRas <- rasterRead(speciesPres$targetFilePath)
-    } else {
-      speciesPresRas <- speciesPresentRas
-    }
-
-    bb <- postProcess(x = speciesPresRas, studyArea = studyArea)
-
-    rasLevs <- as.data.table(levels(bb))
-    # if (is(speciesPresRas, "RasterLayer")) {
-    #   bb <- raster::deratify(bb)
-    # }
-    IDcol <- names(rasLevs)[1]
-    speciesCommunities <- na.omit(rasLevs[rasLevs[[IDcol]] %in% as.vector(bb[[1]])]$category)
-    species <- as.character(speciesCommunities)
-    species <- unique(unlist(strsplit(species, "__")))
-
-    if (!is.null(sppEquivCol) & is.null(speciesPresentRas)) {
-      sppEquiv <- LandR::sppEquivalencies_CA
-      species <- unique(sppEquiv[KNN %in% species, .SD, ][[sppEquivCol]])
-      species <- species[!species == ""]
-    }
+  if (!(dataSource %in% c("KNN", "NTEMS", "SCANFI"))) {
+    stop("Data Source must be either KNN, NTEMS, or SCANFI")
   }
   if (dataSource == "NTEMS") {
     warning("the NTEMS data includes only dominant species and thus using this dataset will likely result in fewer species returned")
@@ -432,6 +404,37 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL, 
       species <- species[!species == ""]
     } else {
       species <- speciesCommunities
+    }
+  } else if (dataSource == "KNN" | dataSource == "SCANFI") {
+    if (is.null(speciesPresentRas)) {
+      if (is.null(url)) {
+        if(dataSource == "KNN") {
+          url <- "https://drive.google.com/file/d/1J8fN7clZeqjd7yhiDWi13uoCBL8OensF"
+        } else if(dataSource == "SCANFI") {
+          url <- "https://drive.google.com/file/d/10JmsP_vAdXY7G4yXO_XzGk9PahHWMg7u/view?usp=drive_link"
+        }
+        speciesPres <- preProcess(url = url, destinationPath = dPath)
+        speciesPresRas <- rasterRead(speciesPres$targetFilePath)
+      } else {
+        speciesPresRas <- speciesPresentRas
+      }
+
+      bb <- postProcess(x = speciesPresRas, studyArea = studyArea)
+
+      rasLevs <- as.data.table(levels(bb))
+      # if (is(speciesPresRas, "RasterLayer")) {
+      #   bb <- raster::deratify(bb)
+      # }
+      IDcol <- names(rasLevs)[1]
+      speciesCommunities <- na.omit(rasLevs[rasLevs[[IDcol]] %in% as.vector(bb[[1]])]$category)
+      species <- as.character(speciesCommunities)
+      species <- unique(unlist(strsplit(species, "__")))
+
+      if (!is.null(sppEquivCol) & is.null(speciesPresentRas)) {
+        sppEquiv <- LandR::sppEquivalencies_CA
+        species <- unique(sppEquiv[KNN %in% species, .SD, ][[sppEquivCol]])
+        species <- species[!species == ""]
+      }
     }
   }
 
