@@ -246,6 +246,106 @@ speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 2400, year = 2011
   return(c(speciesPres, numSp))
 }
 
+#' Make a species factor raster based on SCANFI Data
+#'
+#' This will download SCANFI species layer for forests of Canada, and make
+#' a factor raster at resolution provided by `res` (larger is faster).
+#'
+#' @param dPath A character string indicating where to download all the SCANFI layers
+#'
+#' @param res The resolution (one dimension, in m) for the resulting raster
+#'
+#' @param year One of 2000, 2010, or 2020. Default is 2020.
+#'
+#' @template rasterToMatch
+#'
+#' @template studyArea
+#'
+#' @param ... Additional arguments passed to [reproducible::Cache()]
+#'            and [equivalentName()]. Also valid: `outputPath`, and `studyAreaName`.
+#'
+#' @return A `SpatRaster` object with 2 layers: `"speciesPresent"` is a factor, with
+#' a legend (i.e., it is numbers on a map, that correspond to a legend) and
+#' `"numberSpecies"` which represents the number of species in each pixel.
+#'
+#' @examples
+#' \dontrun{
+#' if (requireNamespace("googledrive", quietly = TRUE)) {
+#'   # Make the dataset
+#'   speciesPresent <- speciesPresentFromSCANFI(dPath = "~/data/SCANFI")
+#'
+#'   # To upload this:
+#'   speciesPresentRas <- terra::rast(speciesPresent)[[1]]
+#'   fn <- "SpeciesPresentInCanadianForests_SCANFI.tif"
+#'   writeRaster(speciesPresentRas, file = fn)
+#'   zipFn <- gsub(".tif", ".zip", fn)
+#'   zip(files = dir(pattern = fn), zipFn)
+#'   out <- googledrive::drive_put(zipFn)
+#'
+#'   ## Get species list
+#'   sa <- LandR::randomStudyArea(size = 1e11)
+#'   species <- LandR::speciesInStudyArea(sa, dataSource = "SCANFI")
+#' }
+#' }
+#'
+#' @export
+#' @rdname speciesPresentFromSCANFI
+speciesPresentFromSCANFI <- function(year = 2020, dPath = asPath("."), res = 2400, minPctCover = 10) {
+  studyAreaED <- Cache(
+    prepInputs,
+    url = "https://sis.agr.gc.ca/cansis/nsdb/ecostrat/district/ecodistrict_shp.zip",
+    destinationPath = dPath,
+    # fun = quote(SA_ERIntersect(x = targetFilePath, studyArea)),
+    overwrite = FALSE
+  )
+
+  opts <- options("reproducible.useTerra" = TRUE)
+  on.exit(options(opts), add = TRUE)
+  studyAreaER <- Cache(
+    prepInputs,
+    url = "https://sis.agr.gc.ca/cansis/nsdb/ecostrat/region/ecodistrict_shp.zip",
+    destinationPath = dPath,
+    fun = "terra::vect",
+    overwrite = TRUE
+  )
+
+  templateCRS <- reproducible::prepInputs(
+    url = paste0(
+      "https://www12.statcan.gc.ca/census-recensement/2021/",
+      "geo/sip-pis/boundary-limites/files-fichiers/lpr_000a21a_e.zip"
+    ),
+    destinationPath = dPath
+  )
+  sa <- vect(st_transform(st_as_sf(studyAreaER, crs = 7019), crs = crs(templateCRS))) #postProcess ruins this file so this is the only way to get a valid layer
+
+  allForestedStk <- loadAndAggregateSCANFI(year = year, dPath, res, sa) |> Cache()
+  allForestedStk <- round(allForestedStk, 0)
+  allForestedStk[allForestedStk <= minPctCover] <- 0
+
+  numSp <- sum(allForestedStk > 0)
+
+  mat <- terra::values(allForestedStk)
+  dt <- as.data.table(mat)
+  dt[, pixel := seq_len(.N)]
+  dt2 <- melt(dt, measure.vars = setdiff(colnames(dt), "pixel"), na.rm = TRUE, id.vars = "pixel")
+  dt2 <- dt2[value != 0]
+  setorderv(dt2, c("pixel", "variable"))
+  dt3 <- dt2[, list(allPres = paste(variable, collapse = "__")), by = "pixel"]
+  dt3[, allPresFac := factor(allPres)]
+
+  # Create a new empty rast
+  speciesPres <- terra::rast(allForestedStk[[1]])
+  # fill it with the integer values
+  speciesPres[dt3$pixel] <- as.integer(dt3$allPresFac)
+  names <- unique(dt3$allPresFac)
+  numerics <- as.integer(names)
+  # assign the levels
+  levels(speciesPres) <- data.frame(ID = numerics, category = names)
+
+
+  return(c(speciesPres, numSp))
+}
+
 #' Get species list in a given study area for a forest in Canada
 #'
 #' `speciesInStudyArea` defaults to use a url of a dataset uploaded to Google Drive that is
@@ -367,5 +467,12 @@ SA_ERIntersect <- function(x, studyArea) {
 loadAndAggregateKNN <- function(dPath, res, sa) {
   ll <- loadkNNSpeciesLayers(dPath, sppEquiv = LandR::sppEquivalencies_CA, sppEquivCol = "KNN")
   llCoarse <- terra::aggregate(ll, res / 250)
+  postProcess(llCoarse, cropTo = sa, maskTo = sa, method = "near")
+}
+
+#' @keywords internal
+loadAndAggregateSCANFI <- function(year, dPath, res, sa) {
+  ll <- loadSCANFISpeciesLayers(year = year, dPath, sppEquiv = LandR::sppEquivalencies_CA, sppEquivCol = "SCANFI")
+  llCoarse <- terra::aggregate(ll, res / 30)
   postProcess(llCoarse, cropTo = sa, maskTo = sa, method = "near")
 }

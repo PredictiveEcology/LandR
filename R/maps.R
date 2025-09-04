@@ -991,8 +991,7 @@ loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppE
 #'               to be considered present in the study area.
 #'               Defaults to 10.
 #'
-#' @param url the source url for the data, default is KNN 2011 dataset
-#' (<https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/>)
+#' @param url a source url for the data
 #'
 #' @param ... Additional arguments passed to [reproducible::Cache()]
 #'            and [equivalentName()]. Also valid: `outputPath`, and `studyAreaName`.

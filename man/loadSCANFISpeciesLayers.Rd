@@ -45,8 +45,7 @@ If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 to be considered present in the study area.
 Defaults to 10.}
 
-\item{url}{the source url for the data, default is KNN 2011 dataset
-(\url{https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/})}
+\item{url}{a source url for the data}
 
 \item{...}{Additional arguments passed to \code{\link[reproducible:Cache]{reproducible::Cache()}}
 and \code{\link[=equivalentName]{equivalentName()}}. Also valid: \code{outputPath}, and \code{studyAreaName}.}
