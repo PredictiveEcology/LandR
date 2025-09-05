@@ -36,4 +36,11 @@ testthat::test_that("speciesInStudyArea works", {
   testthat::expect_true("Pinu_con" %in% speciesInStudyNTEMS$speciesList)
   testthat::expect_true("Abie_las" %in% speciesInStudyNTEMS$speciesList)
   testthat::expect_false("Abie_ama" %in% speciesInStudyNTEMS$speciesList)
+
+  speciesInStudySCANFI <- speciesInStudyArea(ecod, dPath = td, dataSource = "SCANFI")
+
+  testthat::expect_true("PINU_CON_LAT" %in% speciesInStudySCANFI$speciesList)
+  testthat::expect_false("ABIE_AMA" %in% speciesInStudySCANFI$speciesList)
+  testthat::expect_true("PSEU_MEN" %in% speciesInStudySCANFI$speciesList)
+  testthat::expect_false("PINU_STR" %in% speciesInStudySCANFI$speciesList)
 })
