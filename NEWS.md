@@ -47,7 +47,7 @@
 * new function to update the `speciesEcoregion` table (brought over from `Biomass_speciesParameters` module), using estimated `inflationFactor` and `mANPPproportion` to adjust `maxB` and `maxANPP`, respectively; 
 * new functions to simulate disturbances - `FireDisturbance` and `FireDisturbancePM` pulled from;
 `Biomass_regeneration` and `Biomass_regenerationPM` modules, respectively;
-* `overlayLCCs()` now works correctly with terra (#99);
+* `overlayLCCs()` now works correctly with `terra` (#99);
 * fixed partial argument match warnings (#100);
 * new function `standAgeMapGenerator()` to produce `standAgeMap` from `cohortData`;
 * new functions `prepInputs_NTEMS_Nonforest()` and `prepInputs_NTEMS_LCC_FAO()`;
