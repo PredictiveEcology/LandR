@@ -12,7 +12,7 @@ prepInputs_NTEMS_LCC_FAO(
 )
 }
 \arguments{
-\item{year}{stack of species layers rasters}
+\item{year}{stack of species layers rasters. 1984 to 2023 possible.}
 
 \item{disturbedCode}{value assigned to pixels that are forest per FAO definition but not in LCC year}
 
