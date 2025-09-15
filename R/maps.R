@@ -190,6 +190,155 @@ prepInputsLCC <- function(year = 2010,
   out
 }
 
+#` Convert SCANFI Landcover layers from 1-8 codes to typical Canada LCC codes (0-230)
+#`
+#' @param year data year for SCANFI landcover data. 2000, 2010, and 2020 possible.
+#'
+#' @return a `SpatRaster` with corrected classification codes
+#'
+#' @export
+ convert_SCANFI_LCC_codes <- function(year = 2000, ...) {
+   if (!(year %in% c(2000,2010,2020))) {
+     stop("SCANFI Landcover does not exist for this year")
+   }
+   dots <- list(...)
+
+   if(year == 2000) {
+     lccURL <- paste0(
+       "https://drive.google.com/file/d/15AlzqODmeVs0Aev7o7PIzZti2XLPG78z")
+     lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
+   } else if(year == 2010) {
+     lccURL <- paste0(
+       "https://drive.google.com/file/d/1JOg9f7N4hZSCky_GhrPDZMYkp39XfS2h")
+     lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
+   } else if(year == 2020) {
+     lccURL <- paste0(
+       "https://drive.google.com/file/d/11sQu1mdPtVsWjFUBNx3TrzpksZ6ri1pJ")
+     lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
+   }
+
+   dots$url <- lccURL
+   dots$targetFile <- lccTF
+
+   scanfi_lcc <- do.call(prepInputs, dots)
+
+   oldVals <- 1:8 #Bryoids, herbs, rock/exposed, shrubs, broadleaf, conifer, mixedwood, water
+   newVals <- c(40, 100, 30, 50, 220, 210, 230, 20) #Bryoids, herbs, rock/exposed, shrubs, broadleaf, conifer, mixedwood, water
+
+   scanfi_lcc_corrected <- terra::subst(scanfi_lcc, from = oldVals, to = newVals)
+   rm(scanfi_lcc)
+
+   return(scanfi_lcc_corrected)
+ }
+
+
+#' Obtain an LCC layer for a given year from SCANFI, with forest matching the FAO definition
+#'
+#' @param year data year for LCC data. 2000, 2010, and 2020 possible.
+#' @param disturbedCode value assigned to pixels that are forest per FAO definition but not in LCC year
+#' @param resampleMethod method used when resampling LCC layers to match `rasterToMatch`
+#' @param ... passed to `prepInputs`
+#'
+#' @return a `SpatRaster` with corrected forest pixels
+#'
+#' @export
+prepInputs_SCANFI_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleMethod = "near", ...) {
+  if (!(year %in% c(2000,2010,2020))) {
+    stop("LCC for this year is unavailable")
+  }
+  newFilename <- NULL
+  writeToFN <- NULL
+  dots <- list(...)
+  if (!is.null(dots$writeTo)) {
+    #must pass a different file name to prepInputs as the object that is Cached
+    #will inevitably be modified later in this function
+    writeToFN <- dots$writeTo
+    #assign a temporary filename for the raw LCC
+    newFilename <- paste0("raw_", dots$writeTo)
+    dots$writeTo <- NULL
+  }
+
+  # if (is.null(dots$rasterToMatch) && is.null(dots$cropTo) && is.null(dots$to)) {
+  #   stop("the NTEMS raster file is too large to process without cropping via `rasterToMatch` or `cropTo`")
+  # }
+
+  if (isTRUE(getOption("reproducible.gdalwarp"))) {
+    message("temporarily setting reproducible.usegdalwarp to FALSE to avoid error")
+    opts <- options(reproducible.gdalwarp = FALSE)
+    on.exit(options(opts), add = TRUE)
+  }
+  ## Data codes:
+  ## 0 = no change; 20 = water; 31 = snow_ice; 32 = rock_rubble; 33 = exposed_barren_land;
+  ## 40 = bryoids; 50 = shrubs; 80 = wetland; 81 = wetland-treed; 100 = herbs; 210 = coniferous;
+  ## 220 = broadleaf; 230 = mixedwood
+  if(year == 2000) {
+    lccURL <- paste0(
+      "https://drive.google.com/file/d/1zqzTSDk9mtyRhcQuMsRMK2WDwkuk24kt")
+    lccTF <- paste0("SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_", year, "_v1_1.tif")
+  } else if(year == 2010) {
+    lccURL <- paste0(
+      "https://drive.google.com/file/d/1q1LOewgbanVUAySCyJqjc8VcSl4958TP")
+    lccTF <- paste0("SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_", year, "_v1_1.tif")
+  } else if(year == 2020) {
+    lccURL <- paste0(
+      "https://drive.google.com/file/d/1zqzTSDk9mtyRhcQuMsRMK2WDwkuk24kt")
+    lccTF <- paste0("SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_", year, "_v1_1.tif")
+  }
+
+  #fix dots
+  dots$url <- lccURL
+  dots$targetFile <- lccTF
+  dots$method <- resampleMethod
+  dots$writeTo <- newFilename
+  # digs <- .robustDigest(dots)
+  lcc <- do.call(prepInputs, dots) # |>
+  #  Cache(.functionName = paste0("prepInputs_NTEMS_LCC_FAO_", year),
+  #        omitArgs = c("targetFile", "writeTo"),
+  #        .cacheExtra = digs)
+
+  dots$writeTo <- writeToFN
+
+  ## 2024-12: see #110; don't delete CA_forest_VLCE2 raster even though it's 24GB
+  ## deleting it results in redownload every time and breaks parallel sims (race condition)
+  # toUnlink <- ifelse(is.null(dots$destinationPath), lccTF,
+  #                    file.path(dots$destinationPath, lccTF))
+  # unlink(toUnlink)
+
+  #restore dots$writeTo - it will be NULL if it wasn't passed
+
+  ## 1 is forest, 2 is land that can meet the FAO definition of forest
+  ## do not pass dots, or the filename is passed and is overwritten
+  url <- "https://opendata.nfis.org/downloads/forest_change/CA_FAO_forest_2019.zip"
+  #let terra options dictate whether fao is on disk or not
+
+  fao <- prepInputs(
+    url = url,
+    method = resampleMethod, destinationPath = dots$destinationPath, to = lcc
+  ) # |> Cache(omitArgs = "to", .cacheExtra = digs)
+  ## pixels may not be disturbed yet if year is prior to 2019 (FAO year)
+  ## adjust non-forest LCC that are disturbed forest to disturbedCode
+  DisturbedAdjust <- function(LCC, FAO, newVal = disturbedCode) {
+    LCC[FAO == 2 & !LCC %in% c(210, 220, 230)] <- newVal
+    return(LCC)
+  }
+  message("Updating codes on LCC with FAO data...")
+  input <- c(lcc, fao)
+  out <- terra::lapp(input, fun = DisturbedAdjust, usenames = FALSE)
+  # lcc <- terra::init(lcc, as.vector(out))
+
+  if (!is.null(dots$writeTo)) {
+    fp <- if (!is.null(dots$destinationPath)) {
+      file.path(dots$destinationPath, dots$writeTo)
+    } else { dots$writeTo }
+    #assign it to itself or it stays in memory
+    out <- writeRaster(out, filename = fp, overwrite = TRUE) #overwrite lcc
+  }
+  message("... done ... cleaning up RAM")
+  rm(input, lcc, fao) # remove them before doing gc
+  gc()
+  return(out)
+}
+
 #' Produce stand age map based on `cohortData`
 #'
 #' @template cohortData
