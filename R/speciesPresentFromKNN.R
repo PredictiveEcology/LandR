@@ -260,13 +260,6 @@ speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 2400, year = 2011
 #' @param minPctCover An integer indicating what percent cover a species must have
 #' in a pixel to be considered present in that pixel.
 #'
-#' @template rasterToMatch
-#'
-#' @template studyArea
-#'
-#' @param ... Additional arguments passed to [reproducible::Cache()]
-#'            and [equivalentName()]. Also valid: `outputPath`, and `studyAreaName`.
-#'
 #' @return A `SpatRaster` object with 2 layers: `"speciesPresent"` is a factor, with
 #' a legend (i.e., it is numbers on a map, that correspond to a legend) and
 #' `"numberSpecies"` which represents the number of species in each pixel.

@@ -20,15 +20,6 @@ speciesPresentFromSCANFI(
 
 \item{minPctCover}{An integer indicating what percent cover a species must have
 in a pixel to be considered present in that pixel.}
-
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
-
-\item{studyArea}{A \verb{SpatialPolygons*} object used as the principle study region,
-passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
-
-\item{...}{Additional arguments passed to \code{\link[reproducible:Cache]{reproducible::Cache()}}
-and \code{\link[=equivalentName]{equivalentName()}}. Also valid: \code{outputPath}, and \code{studyAreaName}.}
 }
 \value{
 A \code{SpatRaster} object with 2 layers: \code{"speciesPresent"} is a factor, with
