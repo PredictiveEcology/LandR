@@ -18,6 +18,9 @@ speciesPresentFromSCANFI(
 
 \item{res}{The resolution (one dimension, in m) for the resulting raster}
 
+\item{minPctCover}{An integer indicating what percent cover a species must have
+in a pixel to be considered present in that pixel.}
+
 \item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).}
 

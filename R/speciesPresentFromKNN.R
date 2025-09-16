@@ -257,6 +257,9 @@ speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 2400, year = 2011
 #'
 #' @param year One of 2000, 2010, or 2020. Default is 2020.
 #'
+#' @param minPctCover An integer indicating what percent cover a species must have
+#' in a pixel to be considered present in that pixel.
+#'
 #' @template rasterToMatch
 #'
 #' @template studyArea

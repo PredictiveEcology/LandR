@@ -8,6 +8,8 @@ convert_SCANFI_LCC_codes(year = 2000, ...)
 }
 \arguments{
 \item{year}{data year for SCANFI landcover data. 2000, 2010, and 2020 possible.}
+
+\item{...}{additional args (not used)}
 }
 \value{
 a \code{SpatRaster} with corrected classification codes

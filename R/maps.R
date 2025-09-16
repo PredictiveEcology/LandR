@@ -196,6 +196,8 @@ prepInputsLCC <- function(year = 2010,
 #'
 #' @return a `SpatRaster` with corrected classification codes
 #'
+#' @param ... additional args (not used)
+#'
 #' @export
  convert_SCANFI_LCC_codes <- function(year = 2000, ...) {
    if (!(year %in% c(2000,2010,2020))) {
