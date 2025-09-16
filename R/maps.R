@@ -190,8 +190,8 @@ prepInputsLCC <- function(year = 2010,
   out
 }
 
-#` Convert SCANFI Landcover layers from 1-8 codes to typical Canada LCC codes (0-230)
-#`
+#' Convert SCANFI Landcover layers from 1-8 codes to typical Canada LCC codes (0-230)
+#'
 #' @param year data year for SCANFI landcover data. 2000, 2010, and 2020 possible.
 #'
 #' @return a `SpatRaster` with corrected classification codes
