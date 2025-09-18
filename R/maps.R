@@ -313,7 +313,7 @@ prepInputs_SCANFI_LCC_FAO <- function(
   } else if (year == 2010) {
     lccURL <- "https://drive.google.com/file/d/1q1LOewgbanVUAySCyJqjc8VcSl4958TP"
   } else if (year == 2020) {
-    lccURL <- "https://drive.google.com/file/d/1zqzTSDk9mtyRhcQuMsRMK2WDwkuk24kt"
+    lccURL <- "https://drive.google.com/file/d/1ZwEspwpcpZwIYvYEnYmd7Ux44goNvDB2"
   }
   lccTF <- paste0("SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_", year, "_v1_1.tif")
 
