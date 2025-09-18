@@ -15,5 +15,9 @@ convert_SCANFI_LCC_codes(year = 2000, ...)
 a \code{SpatRaster} with corrected classification codes
 }
 \description{
-Convert SCANFI Landcover layers from 1-8 codes to typical Canada LCC codes (0-230)
+This function has been run previously to create layers with the correct codes which
+are available on Google Drive. These corrected layers are available here:
+https://drive.google.com/drive/folders/1zLYV-wcDjJfSflH1VkXG6sosqZZF4SYc?usp=drive_link
+In the respective folder for each year, under the file name
+SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_YEAR_v1_1.tif
 }
