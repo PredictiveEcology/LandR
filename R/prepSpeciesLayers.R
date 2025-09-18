@@ -486,6 +486,13 @@ prepSpeciesLayers_SCANFI <- function(destinationPath, outputPath,
 
   dots <- list(...)
 
+  if (is.null(sppEquiv)) {
+    message(
+      "No species list provided, this will download all available species",
+      "layers. Did you mean to download all layers?",
+      "Provide a list of species via sppEquiv to filter layers."
+    )
+  }
   if ("year" %in% names(dots)) {
     year <- dots[["year"]]
   } else {
