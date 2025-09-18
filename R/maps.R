@@ -1498,43 +1498,93 @@ loadSCANFISpeciesLayers <- function(
   }
 
   URLs <- fileURLs[targetFiles]
+  # if (is.null(studyArea) && is.null(rasterToMatch)) {
+  #   # No masking/cropping/projecting, so no maskTo, to, or writeTo
+  #   moreArgs <- list(
+  #     destinationPath = dPath,
+  #     method = "bilinear",
+  #     datatype = "INT2U",
+  #     overwrite = TRUE,
+  #     userTags = dots$userTags
+  #   )
+  #   speciesLayers <- Map(
+  #     prepInputs,
+  #     targetFile = targetFiles,
+  #     url = URLs,
+  #     MoreArgs = moreArgs
+  #   ) |>
+  #     Cache(quick = c("targetFile", "destinationPath"))
+  # } else {
+  #   ## Masking/cropping/projecting required, include maskTo, to, and writeTo
+  #   moreArgs <- list(
+  #     destinationPath = dPath,
+  #     maskTo = studyArea,
+  #     to = rasterToMatch,
+  #     method = "bilinear",
+  #     datatype = "INT2U",
+  #     overwrite = TRUE,
+  #     userTags = dots$userTags
+  #   )
+  #   speciesLayers <- Map(
+  #     prepInputs,
+  #     targetFile = targetFiles,
+  #     writeTo = postProcessedFilenamesWithStudyAreaName,
+  #     url = URLs,
+  #     MoreArgs = moreArgs
+  #   ) |>
+  #     Cache(quick = c("targetFile", "writeTo", "destinationPath"))
+  # }
 
   if (is.null(studyArea) && is.null(rasterToMatch)) {
-    # No masking/cropping/projecting, so no maskTo, to, or writeTo
-    moreArgs <- list(
-      destinationPath = dPath,
-      method = "bilinear",
-      datatype = "INT2U",
-      overwrite = TRUE,
-      userTags = dots$userTags
-    )
     speciesLayers <- Map(
-      prepInputs,
-      targetFile = targetFiles,
-      url = URLs,
-      MoreArgs = moreArgs
+      function(tf, url, outFile) {
+        if (!file.exists(tf)) {
+          id <- sub(".*?/d/([a-zA-Z0-9_-]+).*", "\\1", url)
+          googledrive::drive_download(
+            googledrive::as_id(id),
+            path = tf,
+            overwrite = TRUE
+          )
+        }
+        r <- terra::rast(tf)
+        terra::writeRaster(r, outFile, overwrite = TRUE)
+        return(rast(outFile))
+      },
+      targetFiles,
+      URLs,
+      file.path(dPath, postProcessedFilenamesWithStudyAreaName)
     ) |>
       Cache(quick = c("targetFile", "destinationPath"))
   } else {
-    ## Masking/cropping/projecting required, include maskTo, to, and writeTo
-    moreArgs <- list(
-      destinationPath = dPath,
-      maskTo = studyArea,
-      to = rasterToMatch,
-      method = "bilinear",
-      datatype = "INT2U",
-      overwrite = TRUE,
-      userTags = dots$userTags
-    )
     speciesLayers <- Map(
-      prepInputs,
-      targetFile = targetFiles,
-      writeTo = postProcessedFilenamesWithStudyAreaName,
-      url = URLs,
-      MoreArgs = moreArgs
+      function(tf, url, outFile) {
+        if (!file.exists(tf)) {
+          id <- sub(".*?/d/([a-zA-Z0-9_-]+).*", "\\1", url)
+          googledrive::drive_download(
+            googledrive::as_id(id),
+            path = tf,
+            overwrite = TRUE
+          )
+        }
+        r <- terra::rast(tf)
+        if (!compareCRS(r, maskTo)) {
+          maskTo_proj <- terra::project(maskTo, crs(r))
+        } else {
+          maskTo_proj <- maskTo
+        }
+        r_crop <- terra::crop(r, maskTo_proj)
+        r_mask <- terra::mask(r_crop, maskTo_proj)
+        r_resampled <- terra::resample(r_mask, to, method = method)
+        terra::writeRaster(r_resampled, outFile, overwrite = TRUE)
+        return(rast(outFile))
+      },
+      targetFiles,
+      URLs,
+      file.path(dPath, postProcessedFilenamesWithStudyAreaName)
     ) |>
       Cache(quick = c("targetFile", "writeTo", "destinationPath"))
   }
+
 
   SCANFInames2 <- paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif") ## appending file name structure to eliminate double matches for subspecies
   correctOrder <- sapply(unique(SCANFInames2), function(x) {
