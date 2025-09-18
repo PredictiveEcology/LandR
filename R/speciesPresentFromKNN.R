@@ -1,5 +1,10 @@
 utils::globalVariables(c(
-  "allPres", "allPresFac", "KNN", "pixel", "variable", "NTEMS_Species_Code"
+  "allPres",
+  "allPresFac",
+  "KNN",
+  "pixel",
+  "variable",
+  "NTEMS_Species_Code"
 ))
 
 ####kNN ####
@@ -50,7 +55,6 @@ projectTo <- utils::getFromNamespace("projectTo", "reproducible")
 #' }
 #'
 #' @export
-#' @rdname speciesPresentFromKNN
 speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, minPctCover = 10) {
   studyAreaED <- Cache(
     prepInputs,
@@ -94,15 +98,14 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
   dt3 <- dt2[, list(allPres = paste(variable, collapse = "__")), by = "pixel"]
   dt3[, allPresFac := factor(allPres)]
 
-  # Create a new empty rast
+  ## Create a new empty rast
   speciesPres <- terra::rast(allForestedStk[[1]])
-  # fill it with the integer values
+  ## fill it with the integer values
   speciesPres[dt3$pixel] <- as.integer(dt3$allPresFac)
   names <- unique(dt3$allPresFac)
   numerics <- as.integer(names)
-  # assign the levels
+  ## assign the levels
   levels(speciesPres) <- data.frame(ID = numerics, category = names)
-
 
   return(c(speciesPres, numSp))
 }
@@ -150,9 +153,14 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
 #' }
 #'
 #' @export
-#' @rdname speciesPresentFromNTEMS
-speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 2400, year = 2011,
-                                    rasterToMatch = NULL, studyArea = NULL, ...) {
+speciesPresentFromNTEMS <- function(
+  dPath = asPath("."),
+  res = 2400,
+  year = 2011,
+  rasterToMatch = NULL,
+  studyArea = NULL,
+  ...
+) {
   dots <- list(...)
 
   if (!requireNamespace("terra", quietly = TRUE)) {
@@ -170,20 +178,24 @@ speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 2400, year = 2011
     cachePath <- getOption("reproducible.cachePath")
   }
 
-  sppEquiv <- get(data("sppEquivalencies_CA",
-                       package = "LandR",
-                       envir = environment()
-  ), inherits = FALSE)
+  sppEquiv <- get(
+    data("sppEquivalencies_CA", package = "LandR", envir = environment()),
+    inherits = FALSE
+  )
 
   opts <- options("reproducible.useTerra" = TRUE)
   on.exit(options(opts), add = TRUE)
 
-  SppURL <- paste0("https://opendata.nfis.org/downloads/forest_change/CA_Tree_Species_Classification_", year, ".zip")
+  SppURL <- paste0(
+    "https://opendata.nfis.org/downloads/forest_change/CA_Tree_Species_Classification_",
+    year,
+    ".zip"
+  )
   SppRast <- prepInputs(
     url = SppURL,
     destinationPath = dPath
   )
-  #For some reason the raster is not trimmed - this reduces the pixel count by 30%
+  ## For some reason the raster is not trimmed - this reduces the pixel count by 30%
   SppRast <- terra::trim(SppRast)
   NAflag(SppRast) <- 0 #so we don't make an NA raster when we use aggregate/segregate
 
@@ -191,35 +203,51 @@ speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 2400, year = 2011
 
   NAflag(SppRast) <- 0
 
-  SppRast <- terra::aggregate(SppRast, fact = 4, fun = "modal", na.rm = TRUE,
-                              filename = aggName, overwrite = TRUE)
+  SppRast <- terra::aggregate(
+    SppRast,
+    fact = 4,
+    fun = "modal",
+    na.rm = TRUE,
+    filename = aggName,
+    overwrite = TRUE
+  )
   uniqueVals <- as.data.table(terra::unique(SppRast)) #for later
 
   segFile <- file.path(dPath, paste0("CA_Tree_Species", year, "_120m_seg.tif"))
 
-  SppRast <- terra::segregate(SppRast, classes = uniqueVals$NTEMS_Species_Code,
-                              keep = TRUE, other = 0, filename = segFile,
-                              overwrite = TRUE)
+  SppRast <- terra::segregate(
+    SppRast,
+    classes = uniqueVals$NTEMS_Species_Code,
+    keep = TRUE,
+    other = 0,
+    filename = segFile,
+    overwrite = TRUE
+  )
 
   newAggName <- file.path(dPath, paste0("CA_Tree_Species", year, "_", res, ".tif"))
 
-  SppRast <- terra::aggregate(SppRast, ceiling(res/120), fun = "max", overwrite = TRUE, na.rm = TRUE,
-                              filename = newAggName)
+  SppRast <- terra::aggregate(
+    SppRast,
+    ceiling(res / 120),
+    fun = "max",
+    overwrite = TRUE,
+    na.rm = TRUE,
+    filename = newAggName
+  )
 
-  sppEquiv <- sppEquiv[, .SD, .SDcol = c("NTEMS_Species_Code", "LandR")] # matching NTEMS spp code to sppEquivCol
-
+  sppEquiv <- sppEquiv[, .SD, .SDcol = c("NTEMS_Species_Code", "LandR")] ## matching NTEMS spp code to sppEquivCol
 
   setnames(uniqueVals, new = "NTEMS_Species_Code")
 
-  uniqueVals <- sppEquiv[uniqueVals, on = c("NTEMS_Species_Code")] # pulling all species from NTEMS layer
+  uniqueVals <- sppEquiv[uniqueVals, on = c("NTEMS_Species_Code")] ## pulling all species from NTEMS layer
   uniqueVals <- unique(uniqueVals[, .(NTEMS_Species_Code, LandR)])
 
-  #note that Pinu_alb and Pice_abi both dropped
+  ## note that Pinu_alb and Pice_abi both dropped
   ActualNTEMS <- as.integer(names(SppRast))
-  uniqueVals <- uniqueVals[NTEMS_Species_Code %in% ActualNTEMS,]
+  uniqueVals <- uniqueVals[NTEMS_Species_Code %in% ActualNTEMS, ]
   names(SppRast) <- c(uniqueVals$LandR)
 
-  #one last time because aggregate or segregate reintroduces zeroes
+  ## one last time because aggregate or segregate reintroduces zeroes
   NAflag(SppRast) <- 0
 
   numSp <- sum(SppRast > 0, na.rm = TRUE)
@@ -233,15 +261,14 @@ speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 2400, year = 2011
   dt3 <- dt2[, list(allPres = paste(variable, collapse = "__")), by = "pixel"]
   dt3[, allPresFac := factor(allPres)]
 
-  # Create a new empty rast
+  ## Create a new empty raster
   speciesPres <- terra::rast(SppRast[[1]])
-  # fill it with the integer values
+  ## fill it with the integer values
   speciesPres[dt3$pixel] <- as.integer(dt3$allPresFac)
   names <- unique(dt3$allPresFac)
   numerics <- as.integer(names)
-  # assign the levels
+  ## assign the levels
   levels(speciesPres) <- data.frame(ID = numerics, category = names)
-
 
   return(c(speciesPres, numSp))
 }
@@ -285,8 +312,12 @@ speciesPresentFromNTEMS <- function(dPath = asPath("."), res = 2400, year = 2011
 #' }
 #'
 #' @export
-#' @rdname speciesPresentFromSCANFI
-speciesPresentFromSCANFI <- function(year = 2020, dPath = asPath("."), res = 2400, minPctCover = 10) {
+speciesPresentFromSCANFI <- function(
+  year = 2020,
+  dPath = asPath("."),
+  res = 2400,
+  minPctCover = 10
+) {
   studyAreaED <- Cache(
     prepInputs,
     url = "https://sis.agr.gc.ca/cansis/nsdb/ecostrat/district/ecodistrict_shp.zip",
@@ -329,15 +360,14 @@ speciesPresentFromSCANFI <- function(year = 2020, dPath = asPath("."), res = 240
   dt3 <- dt2[, list(allPres = paste(variable, collapse = "__")), by = "pixel"]
   dt3[, allPresFac := factor(allPres)]
 
-  # Create a new empty rast
+  ## Create a new empty rast
   speciesPres <- terra::rast(allForestedStk[[1]])
-  # fill it with the integer values
+  ## fill it with the integer values
   speciesPres[dt3$pixel] <- as.integer(dt3$allPresFac)
   names <- unique(dt3$allPresFac)
   numerics <- as.integer(names)
-  # assign the levels
+  ## assign the levels
   levels(speciesPres) <- data.frame(ID = numerics, category = names)
-
 
   return(c(speciesPres, numSp))
 }
@@ -370,14 +400,21 @@ speciesPresentFromSCANFI <- function(year = 2020, dPath = asPath("."), res = 240
 #' species on the `speciesRas`, for convenience.
 #'
 #' @export
-speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL, sppEquivCol = NULL,
-                               dataSource = "KNN",
-                               dPath = getOption("reproducible.destinationPath")) {
+speciesInStudyArea <- function(
+  studyArea,
+  url = NULL,
+  speciesPresentRas = NULL,
+  sppEquivCol = NULL,
+  dataSource = "KNN",
+  dPath = getOption("reproducible.destinationPath")
+) {
   if (!(dataSource %in% c("KNN", "NTEMS", "SCANFI"))) {
     stop("Data Source must be either KNN, NTEMS, or SCANFI")
   }
   if (dataSource == "NTEMS") {
-    warning("the NTEMS data includes only dominant species and thus using this dataset will likely result in fewer species returned")
+    warning(
+      "the NTEMS data includes only dominant species and thus using this dataset will likely result in fewer species returned"
+    )
     if (is.null(speciesPresentRas)) {
       if (is.null(url)) {
         url <- "https://drive.google.com/file/d/1AytH5-4FZ3XpOFOiVFqUCLrMtavNmHuj"
@@ -404,9 +441,9 @@ speciesInStudyArea <- function(studyArea, url = NULL, speciesPresentRas = NULL, 
   } else if (dataSource == "KNN" | dataSource == "SCANFI") {
     if (is.null(speciesPresentRas)) {
       if (is.null(url)) {
-        if(dataSource == "KNN") {
+        if (dataSource == "KNN") {
           url <- "https://drive.google.com/file/d/1J8fN7clZeqjd7yhiDWi13uoCBL8OensF"
-        } else if(dataSource == "SCANFI") {
+        } else if (dataSource == "SCANFI") {
           url <- "https://drive.google.com/file/d/17_8RjJeSdqf2RevA0FrmE1_pi_b_PEX1"
         }
         speciesPres <- preProcess(url = url, destinationPath = dPath)
@@ -471,7 +508,12 @@ loadAndAggregateKNN <- function(dPath, res, sa) {
 
 #' @keywords internal
 loadAndAggregateSCANFI <- function(year, dPath, res, sa) {
-  ll <- loadSCANFISpeciesLayers(year = year, dPath, sppEquiv = LandR::sppEquivalencies_CA, sppEquivCol = "SCANFI")
+  ll <- loadSCANFISpeciesLayers(
+    year = year,
+    dPath,
+    sppEquiv = LandR::sppEquivalencies_CA,
+    sppEquivCol = "SCANFI"
+  )
   llCoarse <- terra::aggregate(ll, res / 30)
   postProcess(llCoarse, cropTo = sa, maskTo = sa, method = "near")
 }

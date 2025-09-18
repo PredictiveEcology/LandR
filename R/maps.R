@@ -1337,15 +1337,6 @@ loadSCANFISpeciesLayers <- function(
   url = NULL,
   ...
 ) {
-  rcurl <- requireNamespace("RCurl", quietly = TRUE)
-  xml <- requireNamespace("XML", quietly = TRUE)
-  if (!rcurl || !xml) {
-    stop(
-      "Suggested packages 'RCurl' and 'XML' required to download kNN species layers.\n",
-      "Install using `install.packages(c('RCurl', 'XML'))`."
-    )
-  }
-
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
 
@@ -1381,23 +1372,17 @@ loadSCANFISpeciesLayers <- function(
 
   if (is.null(url)) {
     if (year == 2000) {
-      url <- paste0(
-        "https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp"
-      )
+      url <- "https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp"
     } else if (year == 2010) {
-      url <- paste0(
-        "https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE"
-      )
+      url <- "https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE"
     } else if (year == 2020) {
-      url <- paste0(
-        "https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ"
-      )
+      url <- "https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ"
     }
   }
 
   driveFiles <- as.data.table(googledrive::with_drive_quiet(googledrive::drive_ls(url)))
-  driveFiles <- driveFiles[grepl("SCANFI_sps", name)] #selecing just species layers
-  driveFiles <- driveFiles[grep("tif.", name, invert = TRUE)] #removing .ovr and .aux files
+  driveFiles <- driveFiles[grepl("SCANFI_sps", name)] ## selecing just species layers
+  driveFiles <- driveFiles[grep("tif.", name, invert = TRUE)] ## removing .ovr and .aux files
   fileURLs <- paste0("https://drive.google.com/file/d/", driveFiles$id)
   fileNames <- c(driveFiles$name)
   names(fileURLs) <- fileNames
@@ -1525,7 +1510,7 @@ loadSCANFISpeciesLayers <- function(
     ) |>
       Cache(quick = c("targetFile", "destinationPath"))
   } else {
-    # Masking/cropping/projecting required, include maskTo, to, and writeTo
+    ## Masking/cropping/projecting required, include maskTo, to, and writeTo
     moreArgs <- list(
       destinationPath = dPath,
       maskTo = studyArea,
@@ -1545,7 +1530,7 @@ loadSCANFISpeciesLayers <- function(
       Cache(quick = c("targetFile", "writeTo", "destinationPath"))
   }
 
-  SCANFInames2 <- paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif") #appending file name structure to eliminate double matches for subspecies
+  SCANFInames2 <- paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif") ## appending file name structure to eliminate double matches for subspecies
   correctOrder <- sapply(unique(SCANFInames2), function(x) {
     grep(pattern = x, x = targetFiles, value = TRUE)
   })
@@ -1556,12 +1541,12 @@ loadSCANFISpeciesLayers <- function(
   layerNames <- names(speciesLayers)
   speciesLayers <- terra::rast(speciesLayers) #converting to a stack because global() is much faster than sapply over the list
 
-  maxs <- terra::global(speciesLayers, 'max', na.rm = TRUE)
+  maxs <- terra::global(speciesLayers, "max", na.rm = TRUE)
 
   speciesLayers <- as.list(speciesLayers)
   names(speciesLayers) <- layerNames
 
-  # remove "no data" first
+  ## remove "no data" first
   noData <- is.na(maxs)
   if (any(noData)) {
     message(paste(
@@ -1571,7 +1556,7 @@ loadSCANFISpeciesLayers <- function(
     speciesLayers <- speciesLayers[[!noData]]
   }
 
-  # remove "little data" next
+  ## remove "little data" next
   layersWdata <- ifelse(maxs > thresh, TRUE, FALSE)
   if (sum(!layersWdata) > 0) {
     sppKeep <- names(speciesLayers)[layersWdata]
