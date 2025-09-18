@@ -1539,7 +1539,7 @@ loadSCANFISpeciesLayers <- function(
   names(speciesLayers) <- gsub("SCANFI_?sps_?", "", names(speciesLayers))
 
   layerNames <- names(speciesLayers)
-  speciesLayers <- terra::rast(speciesLayers) #converting to a stack because global() is much faster than sapply over the list
+  speciesLayers <- terra::rast(speciesLayers) ## converting to a stack because global() is much faster than sapply over the list
 
   maxs <- terra::global(speciesLayers, "max", na.rm = TRUE)
 
@@ -1613,6 +1613,7 @@ loadSCANFISpeciesLayers <- function(
       )
     }
   }
+
   ## Rename species layers - There will be 2 groups -- one
   nameChanges <- equivalentName(names(speciesLayers), sppEquiv, column = sppEquivCol)
   nameChangeNA <- is.na(nameChanges)
