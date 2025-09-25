@@ -7,7 +7,8 @@ utils::globalVariables(c(
   "pixelGroup2", "pixelIndex", "pixels", "planted", "Provenance", "possERC",
   "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
   "temppixelGroup", "toDelete", "totalBiomass", "totalBiomass2", "totalCover",
-  "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
+  "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year",
+  "maxAge"
 ))
 
 #' Add cohorts to `cohortData` and `pixelGroupMap`
@@ -2147,10 +2148,10 @@ adjustAgeToLongevity <- function(pixelCohortData, longevity, adjustmentFactor){
   }
 
   # Calculate the maximum age accepted for each species
-  maxAges <- longevity[,.(speciesCode, maxAge := longevity * adjustmentFactor)]
+  maxAges <- longevity[,.(speciesCode, maxAge = round(longevity * adjustmentFactor))]
   # Correct the age for cohorts that exceed that limit
   correctedPixelCohortData <- pixelCohortData[maxAges, on = .(speciesCode)]
-  correctedPixelCohortData[age > maxAges, age := maxAges]
-  correctedPixelCohortData[, maxAges := NULL]
+  correctedPixelCohortData[age > maxAge, age := maxAge]
+  correctedPixelCohortData[, maxAge := NULL]
   return(correctedPixelCohortData)
 }
