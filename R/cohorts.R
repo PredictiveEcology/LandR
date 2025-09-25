@@ -2128,19 +2128,18 @@ mapvalues2 <- function(x, from, to) { #
   x
 }
 
-#' Title
+#' Reduces the age of cohorts that exceed their longevity x adjustmentFactort
 #'
-#' @param pixelCohortData
-#' @param longevity
-#' @param adjustmentFactor
+#' @param pixelCohortData A `cohortData` object
+#' @param longevity A data.table with the longevity of each species.
+#' @param adjustmentFactor A numeric controlling the proportion of species longevity
+#' that cohort ages cannot exceed.
 #'
-#' @returns
+#' @returns A `cohortData` object with corrected ages.
 #' @export
-#'
-#' @examples
-adjustAgeToLongevity <- function(pixelCohortData, longevity, adjustmentFactor){R
+adjustAgeToLongevity <- function(pixelCohortData, longevity, adjustmentFactor){
   # Check inputs requirements
-  if(!all(c("longevity", "speciesCode") %in% colnames(longevity)){
+  if(!all(c("longevity", "speciesCode") %in% colnames(longevity))){
     stop("longevity data.frame needs the columns longevity and speciesCode")
   }
   if(!is.numeric(adjustmentFactor) | adjustmentFactor < 0.5 | adjustmentFactor > 1){
@@ -2152,5 +2151,6 @@ adjustAgeToLongevity <- function(pixelCohortData, longevity, adjustmentFactor){R
   # Correct the age for cohorts that exceed that limit
   correctedPixelCohortData <- pixelCohortData[maxAges, on = .(speciesCode)]
   correctedPixelCohortData[age > maxAges, age := maxAges]
+  correctedPixelCohortData[, maxAges := NULL]
   return(correctedPixelCohortData)
 }
