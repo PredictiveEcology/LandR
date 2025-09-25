@@ -2127,3 +2127,30 @@ mapvalues2 <- function(x, from, to) { #
   x[!mapidxNA] <- to[mapidx[!mapidxNA]]
   x
 }
+
+#' Title
+#'
+#' @param pixelCohortData
+#' @param longevity
+#' @param adjustmentFactor
+#'
+#' @returns
+#' @export
+#'
+#' @examples
+adjustAgeToLongevity <- function(pixelCohortData, longevity, adjustmentFactor){R
+  # Check inputs requirements
+  if(!all(c("longevity", "speciesCode") %in% colnames(longevity)){
+    stop("longevity data.frame needs the columns longevity and speciesCode")
+  }
+  if(!is.numeric(adjustmentFactor) | adjustmentFactor < 0.5 | adjustmentFactor > 1){
+    stop("adjustmentFactor needs to be a number between 0.5 and 1")
+  }
+
+  # Calculate the maximum age accepted for each species
+  maxAges <- longevity[,.(speciesCode, maxAge := longevity * adjustmentFactor)]
+  # Correct the age for cohorts that exceed that limit
+  correctedPixelCohortData <- pixelCohortData[maxAges, on = .(speciesCode)]
+  correctedPixelCohortData[age > maxAges, age := maxAges]
+  return(correctedPixelCohortData)
+}
