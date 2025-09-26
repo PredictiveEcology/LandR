@@ -1570,7 +1570,7 @@ loadSCANFISpeciesLayers <- function(
         if (!.compareCRS(r, rasterToMatch)) {
           maskTo_proj <- terra::project(rasterToMatch, crs(r))
         } else {
-          maskTo_proj <- maskTo
+          maskTo_proj <- rasterToMatch
         }
         r_resampled <- terra::crop(r, maskTo_proj, mask = TRUE) |>
           terra::resample(rasterToMatch, method = "bilinear")
