@@ -1464,9 +1464,13 @@ loadSCANFISpeciesLayers <- function(
       paste0(as.character(ncell(rasterToMatch)), "px")
     }
   } else {
-    basename(cachePath)
+    if (is.null(dots$studyAreaName) || basename(cachePath) != dots$studyAreaName) {
+      basename(cachePath)
+    } else {
+      NULL ## will add studyAreaName below, so don't also add it here
+    }
   }
-  suffix <- paste0("_", suffix)
+  suffix <- ifelse(is.null(suffix), "", paste0("_", suffix))
 
   ## select which targetFiles to extract
   ## use sapply to preserve pattern order
@@ -1587,9 +1591,9 @@ loadSCANFISpeciesLayers <- function(
         terra::writeRaster(r_resampled, outFile, overwrite = TRUE)
         return(rast(outFile))
       },
-      targetFiles,
+      file.path(dPath, targetFiles),
       URLs,
-      file.path(dPath, postProcessedFilenamesWithStudyAreaName)
+      file.path(oPath, postProcessedFilenamesWithStudyAreaName)
     ) |>
       Cache(quick = c("targetFile", "writeTo", "destinationPath"))
   }
