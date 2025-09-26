@@ -1387,7 +1387,7 @@ loadSCANFISpeciesLayers <- function(
   }
 
   driveFiles <- as.data.table(googledrive::with_drive_quiet(googledrive::drive_ls(url)))
-  driveFiles <- driveFiles[grepl("SCANFI_sps", name)] ## selecing just species layers
+  driveFiles <- driveFiles[grepl("SCANFI_sps", name)] ## selecting just species layers
   driveFiles <- driveFiles[grep("tif.", name, invert = TRUE)] ## removing .ovr and .aux files
   fileURLs <- paste0("https://drive.google.com/file/d/", driveFiles$id)
   fileNames <- c(driveFiles$name)
