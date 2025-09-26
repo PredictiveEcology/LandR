@@ -19,6 +19,7 @@
 * updated `prepRawBiomassMap` function to allow for incorporation of NTEMS or SCANFI biomass;
 * updated `prepInputsStandAgeMap` function to allow for incorporation of SCANFI age map;
 * added `loadSCANFISpeciesLayers` and `prepSpeciesLayers_SCANFI` functions for loading SCANFI species data from Google drive;
+* updated documentation and citations for `prepSpeciesLayers_*` functions;
 
 # LandR 1.1.5
 
