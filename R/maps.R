@@ -260,15 +260,15 @@ convert_SCANFI_LCC_codes <- function(year = 2000, ...) {
 
   scanfi_lcc <- do.call(prepInputs, dots)
 
-  oldVals <- 1:8 #Bryoids, herbs, rock/exposed, shrubs, broadleaf, conifer, mixedwood, water
-  newVals <- c(40, 100, 30, 50, 220, 210, 230, 20) #Bryoids, herbs, rock/exposed, shrubs, broadleaf, conifer, mixedwood, water
+  ## Bryoids, herbs, rock/exposed, shrubs, broadleaf, conifer, mixedwood, water
+  oldVals <- 1:8
+  newVals <- c(40, 100, 30, 50, 220, 210, 230, 20)
 
   scanfi_lcc_corrected <- terra::subst(scanfi_lcc, from = oldVals, to = newVals)
   rm(scanfi_lcc)
 
   return(scanfi_lcc_corrected)
 }
-
 
 #' Obtain an LCC layer for a given year from SCANFI, with forest matching the FAO definition
 #'
@@ -1598,7 +1598,8 @@ loadSCANFISpeciesLayers <- function(
       Cache(quick = c("targetFile", "writeTo", "destinationPath"))
   }
 
-  SCANFInames2 <- paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif") ## appending file name structure to eliminate double matches for subspecies
+  ## appending file name structure to eliminate double matches for subspecies:
+  SCANFInames2 <- paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif")
   correctOrder <- sapply(unique(SCANFInames2), function(x) {
     grep(pattern = x, x = targetFiles, value = TRUE)
   })
@@ -1607,8 +1608,9 @@ loadSCANFISpeciesLayers <- function(
   names(speciesLayers) <- gsub("SCANFI_?sps_?", "", names(speciesLayers))
 
   layerNames <- names(speciesLayers)
-  speciesLayers <- terra::rast(speciesLayers) ## converting to a stack because global() is much faster than sapply over the list
 
+  ## converting to a stack because global() is much faster than sapply over the list
+  speciesLayers <- terra::rast(speciesLayers)
   maxs <- terra::global(speciesLayers, "max", na.rm = TRUE)
 
   speciesLayers <- as.list(speciesLayers)
