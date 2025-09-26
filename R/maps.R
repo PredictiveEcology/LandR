@@ -1575,7 +1575,7 @@ loadSCANFISpeciesLayers <- function(
             ext = TRUE,
             res = TRUE,
             rowcol = TRUE,
-            stopOnFALSE
+            stopOnError = FALSE
           )
         ) {
           maskTo_proj <- terra::project(rasterToMatch, crs(r))
