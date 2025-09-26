@@ -1567,13 +1567,13 @@ loadSCANFISpeciesLayers <- function(
           )
         }
         r <- terra::rast(tf)
-        if (!.compareCRS(r, maskTo)) {
-          maskTo_proj <- terra::project(maskTo, crs(r))
+        if (!.compareCRS(r, studyArea)) {
+          maskTo_proj <- terra::project(studyArea, crs(r))
         } else {
           maskTo_proj <- maskTo
         }
         r_resampled <- terra::crop(r, maskTo_proj, mask = TRUE) |>
-          terra::resample(to = rasterToMatch, method = "bilinear")
+          terra::resample(rasterToMatch, method = "bilinear")
         terra::writeRaster(r_resampled, outFile, overwrite = TRUE)
         return(rast(outFile))
       },
