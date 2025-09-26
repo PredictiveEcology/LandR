@@ -38,7 +38,7 @@ and \code{speciesList} is a character string containing the unique, sorted
 species on the \code{speciesRas}, for convenience.
 }
 \description{
-\code{speciesInStudyArea} defaults to use a url of a dataset uploaded to Google Drive that is
-from Canadian Forests, but a different factor raster can be passed e.g.,
-from \code{speciesPresentFromKNN}.
+\code{speciesInStudyArea} defaults to use a URL of a dataset uploaded to Google Drive that is
+from Canadian Forests,
+but a different factor raster can be passed e.g., from \code{speciesPresentFromKNN}.
 }

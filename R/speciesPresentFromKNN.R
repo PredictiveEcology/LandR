@@ -374,9 +374,9 @@ speciesPresentFromSCANFI <- function(
 
 #' Get species list in a given study area for a forest in Canada
 #'
-#' `speciesInStudyArea` defaults to use a url of a dataset uploaded to Google Drive that is
-#' from Canadian Forests, but a different factor raster can be passed e.g.,
-#' from `speciesPresentFromKNN`.
+#' `speciesInStudyArea` defaults to use a URL of a dataset uploaded to Google Drive that is
+#' from Canadian Forests,
+#' but a different factor raster can be passed e.g., from `speciesPresentFromKNN`.
 #'
 #' @template studyArea
 #'

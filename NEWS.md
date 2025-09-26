@@ -13,12 +13,12 @@
 * don't delete `CA_forest_VLCE2` raster in `prepInputs_NTEMS_LCC_FAO()` (#110);
 * `minRelativeB` defaults updated based on discussion surrounding over-representation of shade tolerant species establishing and generating unreasonably high levels of understory cohorts;
 * added new `prepInputs_NTEMS_DominantSpecies` function for importing dominant species layers from NTEMS website;
-* added new `speciesPresentFromNTEMS` function to import dominant species layer from NTEMS and create factor raster to be hosted on google drive
-* added new `prepInputs_NTEMS_DominantSpecies` function for importing dominant species layers from NTEMS website
-* updated `speciesInStudyArea` function to create `dataSource` parameter to direct function to download KNN or NTEMS factor raster from google drive and create associated species list  
-* updated `prepRawBiomassMap` function to allow for incorporation of NTEMS or SCANFI biomass
-* updated `prepInputsStandAgeMap` function to allow for incorporation of SCANFI age map
-* added `loadSCANFISpeciesLayers` and `prepSpeciesLayers_SCANFI` functions for loading SCANFI species data from google drive
+* added new `speciesPresentFromNTEMS` function to import dominant species layer from NTEMS and create factor raster to be hosted on Google drive;
+* added new `prepInputs_NTEMS_DominantSpecies` function for importing dominant species layers from NTEMS website;
+* updated `speciesInStudyArea` function to create `dataSource` parameter to direct function to download KNN or NTEMS factor raster from google drive and create associated species list;
+* updated `prepRawBiomassMap` function to allow for incorporation of NTEMS or SCANFI biomass;
+* updated `prepInputsStandAgeMap` function to allow for incorporation of SCANFI age map;
+* added `loadSCANFISpeciesLayers` and `prepSpeciesLayers_SCANFI` functions for loading SCANFI species data from Google drive;
 
 # LandR 1.1.5
 
