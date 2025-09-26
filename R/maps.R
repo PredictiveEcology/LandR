@@ -1567,7 +1567,7 @@ loadSCANFISpeciesLayers <- function(
           )
         }
         r <- terra::rast(tf)
-        if (!.compareCRS(r, rasterToMatch)) {
+        if (!.compareCRS(r, rasterToMatch, crs = TRUE, ext = TRUE, res = TRUE, rowcol = TRUE)) {
           maskTo_proj <- terra::project(rasterToMatch, crs(r))
         } else {
           maskTo_proj <- rasterToMatch
