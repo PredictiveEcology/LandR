@@ -1453,7 +1453,7 @@ loadSCANFISpeciesLayers <- function(
   }
 
   if (!length(SCANFInames)) {
-    stop("None of the selected species were found in the kNN database.")
+    stop("None of the selected species were found in the SCANFI layers")
   }
 
   ## define suffix to append to file names
