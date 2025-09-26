@@ -1567,14 +1567,13 @@ loadSCANFISpeciesLayers <- function(
           )
         }
         r <- terra::rast(tf)
-        if (!compareCRS(r, maskTo)) {
+        if (!.compareCRS(r, maskTo)) {
           maskTo_proj <- terra::project(maskTo, crs(r))
         } else {
           maskTo_proj <- maskTo
         }
-        r_crop <- terra::crop(r, maskTo_proj)
-        r_mask <- terra::mask(r_crop, maskTo_proj)
-        r_resampled <- terra::resample(r_mask, to, method = method)
+        r_resampled <- terra::crop(r, maskTo_proj, mask = TRUE) |>
+          terra::resample(to = rasterToMatch, method = "bilinear")
         terra::writeRaster(r_resampled, outFile, overwrite = TRUE)
         return(rast(outFile))
       },
@@ -1584,7 +1583,6 @@ loadSCANFISpeciesLayers <- function(
     ) |>
       Cache(quick = c("targetFile", "writeTo", "destinationPath"))
   }
-
 
   SCANFInames2 <- paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif") ## appending file name structure to eliminate double matches for subspecies
   correctOrder <- sapply(unique(SCANFInames2), function(x) {
