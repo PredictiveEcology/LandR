@@ -1,6 +1,15 @@
 utils::globalVariables(c(
-  "cover", "ecoregionGroup", "establishprob", "lcc", "longevity", "maxB", "maxANPP",
-  "postfireregen", "resproutprob", "speciesCode", "logAge"
+  "cover",
+  "ecoregionGroup",
+  "establishprob",
+  "lcc",
+  "logAge",
+  "longevity",
+  "maxB",
+  "maxANPP",
+  "postfireregen",
+  "resproutprob",
+  "speciesCode"
 ))
 
 #' Check if all species in have trait values
@@ -16,14 +25,18 @@ utils::globalVariables(c(
 #' @export
 checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
   missTraits <- setdiff(names(speciesLayers), species$species)
-  missTraits <- c(missTraits, setdiff(
-    species$species,
-    species[complete.cases(species), species]
-  ))
+  missTraits <- c(
+    missTraits,
+    setdiff(
+      species$species,
+      species[complete.cases(species), species]
+    )
+  )
   if (length(missTraits)) {
     message(blue(
       "The following species in 'speciesLayers' have missing traits",
-      "and will be excluded:\n", paste(missTraits, collapse = " "),
+      "and will be excluded:\n",
+      paste(missTraits, collapse = " "),
       "\n If this is wrong check if species synonyms are included in 'sppEquiv'"
     ))
     speciesLayers <- speciesLayers[[which(!names(speciesLayers) %in% missTraits)]]
@@ -53,10 +66,17 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #'  biomass in g/m^2.
 #'
 #' @export
-makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
-                           biomassMap, rasterToMatch, rstLCC, # pixelGroupAgeClass = 1,
-                           printSummary = TRUE,
-                           doAssertion = getOption("LandR.assertions", TRUE)) {
+makePixelTable <- function(
+  speciesLayers,
+  standAgeMap,
+  ecoregionFiles,
+  biomassMap,
+  rasterToMatch,
+  rstLCC,
+  # pixelGroupAgeClass = 1,
+  printSummary = TRUE,
+  doAssertion = getOption("LandR.assertions", TRUE)
+) {
   if (missing(rasterToMatch)) {
     rasterToMatch <- rasterRead(speciesLayers[[1]])
     rasterToMatch[] <- 0
@@ -138,8 +158,12 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
   }
 
   message(blue("rm NAs, leaving", magenta(NROW(pixelTable)), "pixels with data"))
-  message(blue("This is the summary of the input data for age, ecoregionGroup, biomass, speciesLayers:"))
-  if (isTRUE(printSummary)) print(summary(pixelTable))
+  message(blue(
+    "This is the summary of the input data for age, ecoregionGroup, biomass, speciesLayers:"
+  ))
+  if (isTRUE(printSummary)) {
+    print(summary(pixelTable))
+  }
 
   return(pixelTable)
 }
@@ -181,8 +205,16 @@ makePixelTable <- function(speciesLayers, standAgeMap, ecoregionFiles,
 #'   `maxB`, `maxANPP` and `establishprob`
 #'
 #' @export
-makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataShortNoCover,
-                                 species, modelCover, modelBiomass, successionTimestep, currentYear) {
+makeSpeciesEcoregion <- function(
+  cohortDataBiomass,
+  cohortDataShort,
+  cohortDataShortNoCover,
+  species,
+  modelCover,
+  modelBiomass,
+  successionTimestep,
+  currentYear
+) {
   if (!is.null(modelBiomass$scaledVarsModelB)) {
     if (!is(modelBiomass$scaledVarsModelB, "list")) {
       stop("modelBiomass$scaledVarsModelB must be a list")
@@ -201,7 +233,6 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
   speciesEcoregion <- species[, .(speciesCode, longevity)][speciesEcoregion, on = "speciesCode"]
   speciesEcoregion[, ecoregionGroup := factor(as.character(ecoregionGroup))]
 
-
   ## establishProb ----------------------------------------------------------------------------
   predictedCoverVals <- if (is(modelCover, "numeric")) {
     modelCover
@@ -210,15 +241,18 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
   }
   establishprobBySuccessionTimestep <- 1 - (1 - predictedCoverVals)^successionTimestep
   cohortDataShort[, establishprob := establishprobBySuccessionTimestep]
-  cohortDataShort <- species[, .(resproutprob, postfireregen, speciesCode)][cohortDataShort,
-                                                                            on = "speciesCode"
+  cohortDataShort <- species[, .(resproutprob, postfireregen, speciesCode)][
+    cohortDataShort,
+    on = "speciesCode"
   ]
 
   ## partitioning between seed and resprout. See documentation about the "* 0.5"
   cohortDataShort[, establishprob := pmax(0, pmin(1, (establishprob * (1 - resproutprob * 0.5))))]
 
-  cohortDataShort <- rbindlist(list(cohortDataShort, cohortDataShortNoCover),
-                               use.names = TRUE, fill = TRUE
+  cohortDataShort <- rbindlist(
+    list(cohortDataShort, cohortDataShortNoCover),
+    use.names = TRUE,
+    fill = TRUE
   )
   cohortDataShort[is.na(establishprob), establishprob := 0]
 
@@ -236,25 +270,25 @@ makeSpeciesEcoregion <- function(cohortDataBiomass, cohortDataShort, cohortDataS
   if (!is.null(modelBiomass$scaledVarsModelB)) {
     speciesEcoregion2 <- copy(speciesEcoregion)
     speciesEcoregion2[, `:=`(
-      logAge = scale(logAge,
-                     center = attr(modelBiomass$scaledVarsModelB$logAge, "scaled:center"),
-                     scale = attr(modelBiomass$scaledVarsModelB$logAge, "scaled:scale")
+      logAge = scale(
+        logAge,
+        center = attr(modelBiomass$scaledVarsModelB$logAge, "scaled:center"),
+        scale = attr(modelBiomass$scaledVarsModelB$logAge, "scaled:scale")
       ),
-      cover = scale(cover,
-                    center = attr(modelBiomass$scaledVarsModelB$cover, "scaled:center"),
-                    scale = attr(modelBiomass$scaledVarsModelB$cover, "scaled:scale")
+      cover = scale(
+        cover,
+        center = attr(modelBiomass$scaledVarsModelB$cover, "scaled:center"),
+        scale = attr(modelBiomass$scaledVarsModelB$cover, "scaled:scale")
       )
     )]
-    speciesEcoregion2[, maxB := asInteger(predict(modelBiomass$mod,
-                                                  newdata = speciesEcoregion2,
-                                                  type = "response"
-    ))]
+    speciesEcoregion2[,
+      maxB := asInteger(predict(modelBiomass$mod, newdata = speciesEcoregion2, type = "response"))
+    ]
     speciesEcoregion[, maxB := speciesEcoregion2$maxB]
   } else {
-    speciesEcoregion[, maxB := asInteger(predict(modelBiomass$mod,
-                                                 newdata = speciesEcoregion,
-                                                 type = "response"
-    ))]
+    speciesEcoregion[,
+      maxB := asInteger(predict(modelBiomass$mod, newdata = speciesEcoregion, type = "response"))
+    ]
   }
 
   speciesEcoregion[maxB < 0L, maxB := 0L] # fix negative predictions
@@ -445,24 +479,27 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' )
 #' attr(standAge, "imputedPixID")
 #' }
-prepInputsStandAgeMap <- function(..., dataSource = "KNN",
-                                  dataYear = 2001,
-                                  ageURL = NULL,
-                                  ageFun = "terra::rast",
-                                  maskWithRTM = TRUE,
-                                  method = "bilinear",
-                                  datatype = "INT2U",
-                                  destinationPath = NULL,
-                                  writeTo = NULL,
-                                  firePerimeters = NULL,
-                                  fireURL = paste0(
-                                    "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/",
-                                    "fire_poly/current_version/NFDB_poly.zip"
-                                  ),
-                                  fireFun = "terra::vect",
-                                  fireField = "YEAR",
-                                  rasterToMatch = NULL,
-                                  startTime) {
+prepInputsStandAgeMap <- function(
+  ...,
+  dataSource = "KNN",
+  dataYear = 2001,
+  ageURL = NULL,
+  ageFun = "terra::rast",
+  maskWithRTM = TRUE,
+  method = "bilinear",
+  datatype = "INT2U",
+  destinationPath = NULL,
+  writeTo = NULL,
+  firePerimeters = NULL,
+  fireURL = paste0(
+    "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/",
+    "fire_poly/current_version/NFDB_poly.zip"
+  ),
+  fireFun = "terra::vect",
+  fireField = "YEAR",
+  rasterToMatch = NULL,
+  startTime
+) {
   dots <- list(...)
   if (is.null(writeTo) && !is.null(dots$filename2)) {
     writeTo <- dots$filename2
@@ -474,29 +511,32 @@ prepInputsStandAgeMap <- function(..., dataSource = "KNN",
         ageURL <- paste0(
           "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
           "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
-          "NFI_MODIS250m_2011_kNN_Structure_Stand_Age_v1.tif")
+          "NFI_MODIS250m_2011_kNN_Structure_Stand_Age_v1.tif"
+        )
       } else if (dataYear == "2001") {
         ageURL <- paste0(
           "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
           "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/",
-          "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif")
-      }
-      else {
+          "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif"
+        )
+      } else {
         stop("KNN data is available for 2001 or 2011 only")
       }
     } else if (dataSource == "SCANFI") {
       if (dataYear == "2020") {
         ageURL <- paste0(
-          "https://drive.google.com/file/d/1OdZ7Tznk53KceEyt9dFOBOkxDHEX5X0U")
-      }
-      else {
+          "https://drive.google.com/file/d/1OdZ7Tznk53KceEyt9dFOBOkxDHEX5X0U"
+        )
+      } else {
         stop("SCANFI data is currently available for 2020 only")
       }
     }
   }
 
-  getFires <- if (is.null(firePerimeters) &&
-                  (isFALSE(is.null(fireURL)) && isFALSE(is.na(fireURL)))) {
+  getFires <- if (
+    is.null(firePerimeters) &&
+      (isFALSE(is.null(fireURL)) && isFALSE(is.na(fireURL)))
+  ) {
     TRUE
   } else {
     FALSE
@@ -507,7 +547,8 @@ prepInputsStandAgeMap <- function(..., dataSource = "KNN",
   }
 
   standAgeMap <- Cache(
-    prepInputs, ...,
+    prepInputs,
+    ...,
     maskWithRTM = maskWithRTM,
     method = method,
     datatype = datatype,
@@ -527,15 +568,19 @@ prepInputsStandAgeMap <- function(..., dataSource = "KNN",
   imputedPixID <- integer(0)
   if (getFires) {
     if (isFALSE(is.null(rasterToMatch))) {
-      firePerimeters <- Cache(prepInputsFireYear, ...,
-                              url = fireURL,
-                              fun = fireFun,
-                              fireField = fireField,
-                              destinationPath = destinationPath,
-                              rasterToMatch = rasterToMatch
+      firePerimeters <- Cache(
+        prepInputsFireYear,
+        ...,
+        url = fireURL,
+        fun = fireFun,
+        fireField = fireField,
+        destinationPath = destinationPath,
+        rasterToMatch = rasterToMatch
       )
     } else {
-      message("No 'rasterToMatch' or 'firePerimeters' supplied; ages will NOT be adjusted using fire data.")
+      message(
+        "No 'rasterToMatch' or 'firePerimeters' supplied; ages will NOT be adjusted using fire data."
+      )
     }
   }
 
@@ -592,36 +637,39 @@ prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
         Args$url <- paste0(
           "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
           "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
-          "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
+          "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif"
+        )
       } else if (dataYear == "2001") {
         Args$url <- paste0(
           "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
           "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/",
-          "NFI_MODIS250m_2001_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif")
-      }
-      else {
+          "NFI_MODIS250m_2001_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif"
+        )
+      } else {
         stop("KNN data is available for 2001 or 2011 only")
       }
     } else if (dataSource == "NTEMS") {
-      if(dataYear == "2015") {
+      if (dataYear == "2015") {
         Args$url <- paste0(
-          "https://drive.google.com/file/d/19R4IXxByGvG3V3oE6VjhYnwqTQjQGVC-/view?usp=drive_link")
-      }
-      else {
+          "https://drive.google.com/file/d/19R4IXxByGvG3V3oE6VjhYnwqTQjQGVC-/view?usp=drive_link"
+        )
+      } else {
         stop("NTEMS data is currently available for 2015 only")
       }
     } else if (dataSource == "SCANFI") {
       if (dataYear == "2000") {
         Args$url <- paste0(
-          "https://drive.google.com/file/d/1lubpotPt-Tr_x1PHnLP6YL36fGg5Ic6h")
+          "https://drive.google.com/file/d/1lubpotPt-Tr_x1PHnLP6YL36fGg5Ic6h"
+        )
       } else if (dataYear == "2010") {
         Args$url <- paste0(
-          "https://drive.google.com/file/d/1J3izr9d0IaUs0H4GWJNbn6rCan-Or7Jf")
+          "https://drive.google.com/file/d/1J3izr9d0IaUs0H4GWJNbn6rCan-Or7Jf"
+        )
       } else if (dataYear == "2020") {
         Args$url <- paste0(
-          "https://drive.google.com/file/d/1lexPzmm4zeY_5nljoNmsIlzrZYd1TpG_")
-      }
-      else {
+          "https://drive.google.com/file/d/1lexPzmm4zeY_5nljoNmsIlzrZYd1TpG_"
+        )
+      } else {
         stop("SCANFI data is currently available for 2000, 2010, and 2020 only")
       }
     }
@@ -656,8 +704,10 @@ prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
 
   rawBiomassMap <- do.call(prepInputs, args = Args) |>
     Cache(
-      quick = Args2$quick, .functionName = "prepInputsRawBiomassMap",
-      omitArgs = Args2$omitArgs)
+      quick = Args2$quick,
+      .functionName = "prepInputsRawBiomassMap",
+      omitArgs = Args2$omitArgs
+    )
 
   return(rawBiomassMap)
 }
@@ -756,7 +806,6 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 
   allFires <- st_zm(allFires)
 
-
   allFires <- st_cast(allFires, "MULTIPOLYGON") # collapse them into a single multipolygon
   allFires <- st_transform(allFires, crs(rasterToMatch))
   if (!is(allFires[[fireField]], "numeric")) {
@@ -770,8 +819,10 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 
     #fun = max to take the most recent fire year
     fireRas <- terra::rasterize(allFires, rasterToMatch, field = fireField, fun = max)
-    fireRas[!is.na(terra::values(fireRas, mat = FALSE)) &
-              terra::values(fireRas, mat = FALSE) < earliestYear] <- NA
+    fireRas[
+      !is.na(terra::values(fireRas, mat = FALSE)) &
+        terra::values(fireRas, mat = FALSE) < earliestYear
+    ] <- NA
   } else {
     .requireNamespace("fasterize", stopOnFALSE = TRUE)
     fireRas <- fasterize::fasterize(d, raster = rasterToMatch, field = fireField)
@@ -833,7 +884,8 @@ replaceAgeInFires <- function(standAgeMap, firePerimeters, startTime) {
     startTime <- max(firePerimeters[], na.rm = TRUE)
   }
 
-  toChange <- !is.na(as.vector(firePerimeters[])) & as.vector(firePerimeters[]) <= asInteger(startTime)
+  toChange <- !is.na(as.vector(firePerimeters[])) &
+    as.vector(firePerimeters[]) <= asInteger(startTime)
   standAgeMap[] <- asInteger(as.vector(standAgeMap[]))
   standAgeMap[toChange] <- asInteger(startTime) - asInteger(firePerimeters[][toChange])
   imputedPixID <- which(toChange)
@@ -860,10 +912,16 @@ replaceAgeInFires <- function(standAgeMap, firePerimeters, startTime) {
 #' @template cacheTags
 #'
 #' @export
-prepRasterToMatch <- function(studyArea, studyAreaLarge,
-                              rasterToMatch, rasterToMatchLarge,
-                              destinationPath,
-                              templateRas, studyAreaName, cacheTags = NULL) {
+prepRasterToMatch <- function(
+  studyArea,
+  studyAreaLarge,
+  rasterToMatch,
+  rasterToMatchLarge,
+  destinationPath,
+  templateRas,
+  studyAreaName,
+  cacheTags = NULL
+) {
   if (is.null(rasterToMatch) || is.null(rasterToMatchLarge)) {
     ## if we need rasterToMatch/rasterToMatchLarge, that means a) we don't have it,
     ## but b) we will have templateRas
@@ -885,14 +943,15 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
       }
       if (!.compareRas(templateRas, studyAreaLarge, stopOnError = FALSE)) {
         ## note that extents/origin may never align if the resolution and projection do not allow for it
-        templateRas <- Cache(postProcessTo,
-                             templateRas,
-                             cropTo = studyAreaLarge,
-                             maskTo = studyAreaLarge,
-                             # studyArea = studyAreaLarge,
-                             # useSAcrs = FALSE,
-                             overwrite = TRUE,
-                             userTags = c("postRTMtemplate")
+        templateRas <- Cache(
+          postProcessTo,
+          templateRas,
+          cropTo = studyAreaLarge,
+          maskTo = studyAreaLarge,
+          # studyArea = studyAreaLarge,
+          # useSAcrs = FALSE,
+          overwrite = TRUE,
+          userTags = c("postRTMtemplate")
         )
         templateRas <- fixErrors(templateRas)
       }
@@ -901,7 +960,8 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
 
     if (!anyNA(as.vector(rasterToMatchLarge[]))) {
       whZeros <- as.vector(rasterToMatchLarge[]) == 0
-      if (sum(whZeros) > 0) { ## means there are zeros instead of NAs for RTML --> change
+      if (sum(whZeros) > 0) {
+        ## means there are zeros instead of NAs for RTML --> change
         rasterToMatchLarge[whZeros] <- NA
         message(
           "There were no NAs on the rasterToMatchLarge, but there were zeros;",
@@ -943,15 +1003,20 @@ prepRasterToMatch <- function(studyArea, studyAreaLarge,
         ),
         userTags = c(cacheTags, "rasterToMatch"),
         omitArgs = c(
-          "destinationPath", "targetFile", "userTags", "stable",
-          "writeTo", "overwrite"
+          "destinationPath",
+          "targetFile",
+          "userTags",
+          "stable",
+          "writeTo",
+          "overwrite"
         )
       )
     }
     ## covert to 'mask'
     if (!anyNA(rasterToMatch[])) {
       whZeros <- as.vector(rasterToMatch[]) == 0
-      if (sum(whZeros) > 0) { # means there are zeros instead of NAs for RTML --> change
+      if (sum(whZeros) > 0) {
+        # means there are zeros instead of NAs for RTML --> change
         rasterToMatch[whZeros] <- NA
         message("There were no NAs on the RTM, but there were zeros; converting these zeros to NA.")
       }
