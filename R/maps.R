@@ -1677,7 +1677,7 @@ loadSCANFISpeciesLayers <- function(
         sppMerge = sppMerge,
         speciesLayers = speciesLayers,
         sppEquiv = sppEquiv,
-        column = "KNN",
+        column = "SCANFI",
         suffix = suffix,
         dPath = oPath
       )
