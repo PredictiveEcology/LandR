@@ -4,7 +4,7 @@ utils::globalVariables(c(
 
 #' Obtain an LCC layer for a given year from NTEMS, with forest matching the FAO definition
 #'
-#' @param year stack of species layers rasters
+#' @param year stack of species layers rasters. 1984 to 2023 possible.
 #' @param disturbedCode value assigned to pixels that are forest per FAO definition but not in LCC year
 #' @param resampleMethod method used when resampling LCC layers to match `rasterToMatch`
 #' @param ... passed to `prepInputs`

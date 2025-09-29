@@ -26,9 +26,9 @@ with \code{speciesPresentFromKNN}}
 \item{sppEquivCol}{An optional column from \code{LandR::sppEquivalencies_CA}.
 If passed the KNN species will be returned according to this naming convention.}
 
-\item{dataSource}{Character. Either KNN or NTEMS. Defaults to KNN to obtain species from layer
-created using species cover data from KNN. Also able to obtain species from NTEMS
-Dominant Species Layer (though less species will likely be included).}
+\item{dataSource}{Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain species from layer
+created using species cover data from KNN. Also able to obtain species from SCANFI species cover layers
+and NTEMS Dominant Species Layer (though less species will be included from the latter).}
 
 \item{dPath}{Passed to \code{destinationPath} in \code{preProcess}.}
 }
@@ -38,7 +38,7 @@ and \code{speciesList} is a character string containing the unique, sorted
 species on the \code{speciesRas}, for convenience.
 }
 \description{
-\code{speciesInStudyArea} defaults to use a url of a dataset uploaded to Google Drive that is
-from Canadian Forests, but a different factor raster can be passed e.g.,
-from \code{speciesPresentFromKNN}.
+\code{speciesInStudyArea} defaults to use a URL of a dataset uploaded to Google Drive that is
+from Canadian Forests,
+but a different factor raster can be passed e.g., from \code{speciesPresentFromKNN}.
 }
