@@ -2,12 +2,12 @@
 % Please edit documentation in R/cohorts.R
 \name{adjustAgeToLongevity}
 \alias{adjustAgeToLongevity}
-\title{Reduces the age of cohorts that exceed their longevity x adjustmentFactort}
+\title{Reduces the age of cohorts that exceed their \verb{longevity x adjustmentFactor}}
 \usage{
 adjustAgeToLongevity(pixelCohortData, longevity, adjustmentFactor)
 }
 \arguments{
-\item{pixelCohortData}{A \code{cohortData} object}
+\item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
 
 \item{longevity}{A data.table with the longevity of each species.}
 
@@ -18,5 +18,5 @@ that cohort ages cannot exceed.}
 A \code{cohortData} object with corrected ages.
 }
 \description{
-Reduces the age of cohorts that exceed their longevity x adjustmentFactort
+Reduces the age of cohorts that exceed their \verb{longevity x adjustmentFactor}
 }
