@@ -2484,20 +2484,55 @@ mapvalues2 <- function(x, from, to) {
 #' @returns A `cohortData` object with corrected ages.
 #'
 #' @export
-adjustAgeToLongevity <- function(pixelCohortData, longevity, adjustmentFactor) {
-  ## Check inputs requirements
-  if (!all(c("longevity", "speciesCode") %in% colnames(longevity))) {
-    stop("longevity data.frame needs the columns longevity and speciesCode")
-  }
-  if (!is.numeric(adjustmentFactor) | adjustmentFactor < 0.5 | adjustmentFactor > 1) {
-    stop("adjustmentFactor needs to be a number between 0.5 and 1")
-  }
-
-  ## Calculate the maximum age accepted for each species
-  maxAges <- longevity[, .(speciesCode, maxAge = round(longevity * adjustmentFactor))]
-  ## Correct the age for cohorts that exceed that limit
+adjustAgeToLongevity <- function(pixelCohortData, longevity, adjustmentFactor){
+  # calculate the maximum age accepted for each species
+  maxAges <- longevity[,.(speciesCode, maxAge = round(longevity * adjustmentFactor))]
+  # correct the age for cohorts that exceed that limit
   correctedPixelCohortData <- pixelCohortData[maxAges, on = .(speciesCode)]
-  correctedPixelCohortData[age > maxAge, age := maxAge]
+  # identify species for which some cohorts exceed longevity*adjustmentFactor
+  speciesToCorrect <- unique(as.character(correctedPixelCohortData[age > maxAge, speciesCode]))
+  for (sp in speciesToCorrect){
+    message("Adjusting ages of some ", sp, " cohorts that exceed `longevity*P(sim)$adjustmentFactor`.")
+    sp_row <- which(correctedPixelCohortData[,"speciesCode"] == sp)
+    sp_longevity <- longevity[speciesCode == sp, longevity]
+    correctedPixelCohortData[sp_row, "age"] <- ageAdjust(
+      age = correctedPixelCohortData[sp_row, age],
+      adjustmentFactor = adjustmentFactor,
+      longevity = sp_longevity
+    )
+  }
   correctedPixelCohortData[, maxAge := NULL]
   return(correctedPixelCohortData)
+}
+
+ageAdjust <- function(age, adjustmentFactor, longevity) {
+  ageOrig <- age
+  decayRange <- (1 - adjustmentFactor)*2 * longevity
+  maxUnaffectedAge <- longevity - decayRange - 1
+
+  # find the optimal values for the curvature of the decay
+  op <- optim(c(7,3.2), fn = fn, decayRange = decayRange)
+  a <- fn1(op$par, decayRange = decayRange)
+
+  ageFromMaxUnaffectedAge <- round(age - maxUnaffectedAge)
+  whNeedAdjusting <- which(ageFromMaxUnaffectedAge > 0)
+  ages2 <- ageFromMaxUnaffectedAge[whNeedAdjusting]
+  ind <- pmin(ages2, decayRange)
+
+  # update the values that need adjusting
+  ageOrig[whNeedAdjusting] <- maxUnaffectedAge + a[ind]
+  newAge <- ageOrig
+  return(round(newAge))
+}
+
+fn1 <- function(p = c(7, 2.8), decayRange) {
+  skipInitial <- p[1]
+  val <- (1 - exp((seq(0, -5, length.out = decayRange + skipInitial)))) ^ p[2]
+  val <- val[-(seq(skipInitial-1))]
+  trunc(val * decayRange/2)
+}
+
+fn <- function(p = c(7, 2.8), decayRange) {
+  se <- 1:15
+  abs(sum(fn1(p, decayRange)[se] - se))
 }
