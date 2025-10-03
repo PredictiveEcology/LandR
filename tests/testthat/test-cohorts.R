@@ -1,32 +1,32 @@
 testthat::test_that("adjustAgeToLongevity works", {
   # test that it returns expected results
   cd <- data.table(
-    speciesCode = c("A", "A", "B"),
-    age = c(10, 20, 20)
+    speciesCode = c("A", "A", "A", "B", "B"),
+    age = c(10, 200, 300, 200, 100)
   )
   traits <- data.table(
     speciesCode = c("A", "B"),
-    longevity = c(19, 30)
+    longevity = c(200, 250)
   )
   expect_equal(
-    adjustAgeToLongevity(cd, traits, 1),
+    suppressMessages(adjustAgeToLongevity(cd, traits, 0.9)),
     data.table(
-      speciesCode = c("A", "A", "B"),
-      age = c(10, 19, 20)
+      speciesCode = c("A", "A", "A", "B", "B"),
+      age = c(10, 180, 180, 200, 100)
     )
   )
   expect_equal(
-    adjustAgeToLongevity(cd, traits, 0.7),
+    suppressMessages(adjustAgeToLongevity(cd, traits, 0.7)),
     data.table(
-      speciesCode = c("A", "A", "B"),
-      age = c(10, round(19 * 0.7), 20)
+      speciesCode = c("A", "A", "A", "B", "B"),
+      age = c(10, 140, 140, 168, 101)
     )
   )
   expect_equal(
-    adjustAgeToLongevity(cd, traits, 0.5),
+    suppressMessages(adjustAgeToLongevity(cd, traits, 0.5)),
     data.table(
-      speciesCode = c("A", "A", "B"),
-      age = c(10, round(19 * 0.5), 15)
+      speciesCode = c("A", "A", "A", "B", "B"),
+      age = c(9, 100, 100, 120, 95)
     )
   )
 

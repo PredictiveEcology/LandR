@@ -2485,6 +2485,14 @@ mapvalues2 <- function(x, from, to) {
 #'
 #' @export
 adjustAgeToLongevity <- function(pixelCohortData, longevity, adjustmentFactor){
+  ## Check inputs requirements
+  if (!all(c("longevity", "speciesCode") %in% colnames(longevity))) {
+    stop("longevity data.frame needs the columns longevity and speciesCode")
+  }
+  if (!is.numeric(adjustmentFactor) | adjustmentFactor < 0.5 | adjustmentFactor > 1) {
+    stop("adjustmentFactor needs to be a number between 0.5 and 1")
+  }
+
   # calculate the maximum age accepted for each species
   maxAges <- longevity[,.(speciesCode, maxAge = round(longevity * adjustmentFactor))]
   # correct the age for cohorts that exceed that limit
@@ -2507,17 +2515,16 @@ adjustAgeToLongevity <- function(pixelCohortData, longevity, adjustmentFactor){
 
 ageAdjust <- function(age, adjustmentFactor, longevity) {
   ageOrig <- age
-  decayRange <- (1 - adjustmentFactor)*2 * longevity
+  decayRange <- round((1 - adjustmentFactor) * 2 * longevity)
   maxUnaffectedAge <- longevity - decayRange - 1
-
   # find the optimal values for the curvature of the decay
   op <- optim(c(7,3.2), fn = fn, decayRange = decayRange)
   a <- fn1(op$par, decayRange = decayRange)
-
-  ageFromMaxUnaffectedAge <- round(age - maxUnaffectedAge)
+  a <- c(a, decayRange/2 + 1)
+  ageFromMaxUnaffectedAge <- age - maxUnaffectedAge
   whNeedAdjusting <- which(ageFromMaxUnaffectedAge > 0)
   ages2 <- ageFromMaxUnaffectedAge[whNeedAdjusting]
-  ind <- pmin(ages2, decayRange)
+  ind <- pmin(ages2, decayRange+1)
 
   # update the values that need adjusting
   ageOrig[whNeedAdjusting] <- maxUnaffectedAge + a[ind]
@@ -2526,10 +2533,10 @@ ageAdjust <- function(age, adjustmentFactor, longevity) {
 }
 
 fn1 <- function(p = c(7, 2.8), decayRange) {
-  skipInitial <- p[1]
+  skipInitial <- round(p[1])
   val <- (1 - exp((seq(0, -5, length.out = decayRange + skipInitial)))) ^ p[2]
-  val <- val[-(seq(skipInitial-1))]
-  trunc(val * decayRange/2)
+  val <- val[-(seq(skipInitial))]
+  round(val * decayRange/2)
 }
 
 fn <- function(p = c(7, 2.8), decayRange) {
