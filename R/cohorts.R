@@ -2513,13 +2513,15 @@ adjustAgeToLongevity <- function(pixelCohortData, longevity, adjustmentFactor){
   return(correctedPixelCohortData)
 }
 
+# applies the smoothed age correction for a single species.
 ageAdjust <- function(age, adjustmentFactor, longevity) {
   ageOrig <- age
   decayRange <- round((1 - adjustmentFactor) * 2 * longevity)
   maxUnaffectedAge <- longevity - decayRange - 1
   # find the optimal values for the curvature of the decay
-  op <- optim(c(7,3.2), fn = fn, decayRange = decayRange)
-  a <- fn1(op$par, decayRange = decayRange)
+  op <- optim(c(7,3.2), fn = objectiveFunction, decayRange = decayRange)
+  a <- decayFunction(op$par, decayRange = decayRange)
+  # when age is > than longevity, we set age to `adjustmentFactor`xlongevity
   a <- c(a, decayRange/2 + 1)
   ageFromMaxUnaffectedAge <- age - maxUnaffectedAge
   whNeedAdjusting <- which(ageFromMaxUnaffectedAge > 0)
@@ -2532,14 +2534,16 @@ ageAdjust <- function(age, adjustmentFactor, longevity) {
   return(round(newAge))
 }
 
-fn1 <- function(p = c(7, 2.8), decayRange) {
+# determine the delta from maxUnaffectedAge to be apply for the decay range.
+decayFunction <- function(p = c(7, 2.8), decayRange) {
   skipInitial <- round(p[1])
   val <- (1 - exp((seq(0, -5, length.out = decayRange + skipInitial)))) ^ p[2]
   val <- val[-(seq(skipInitial))]
   round(val * decayRange/2)
 }
 
-fn <- function(p = c(7, 2.8), decayRange) {
+# function to optimise: insure that slope at left tail of the function is 1.
+objectiveFunction <- function(p = c(7, 2.8), decayRange) {
   se <- 1:15
-  abs(sum(fn1(p, decayRange)[se] - se))
+  abs(sum(decayFunction(p, decayRange)[se] - se))
 }
