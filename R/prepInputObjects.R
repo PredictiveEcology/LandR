@@ -1,15 +1,6 @@
 utils::globalVariables(c(
-  "cover",
-  "ecoregionGroup",
-  "establishprob",
-  "lcc",
-  "logAge",
-  "longevity",
-  "maxB",
-  "maxANPP",
-  "postfireregen",
-  "resproutprob",
-  "speciesCode"
+  "cover", "ecoregionGroup", "establishprob", "lcc", "logAge", "longevity",
+  "maxB", "maxANPP", "postfireregen", "resproutprob", "speciesCode"
 ))
 
 #' Check if all species in have trait values
@@ -25,13 +16,7 @@ utils::globalVariables(c(
 #' @export
 checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
   missTraits <- setdiff(names(speciesLayers), species$species)
-  missTraits <- c(
-    missTraits,
-    setdiff(
-      species$species,
-      species[complete.cases(species), species]
-    )
-  )
+  missTraits <- c(missTraits, setdiff(species$species, species[complete.cases(species), species]))
   if (length(missTraits)) {
     message(blue(
       "The following species in 'speciesLayers' have missing traits",
@@ -365,13 +350,7 @@ makeMinRelativeB <- function(pixelCohortData) {
 #'
 #' @export
 minRelativeBDefaults <- function() {
-  data.frame(
-    X1 = 0.15,
-    X2 = 0.25,
-    X3 = 0.35,
-    X4 = 0.45,
-    X5 = 0.55
-  )
+  data.frame(X1 = 0.15, X2 = 0.25, X3 = 0.35, X4 = 0.45, X5 = 0.55)
 }
 
 #' Create `makePixelGroupMap`
@@ -524,9 +503,7 @@ prepInputsStandAgeMap <- function(
       }
     } else if (dataSource == "SCANFI") {
       if (dataYear == "2020") {
-        ageURL <- paste0(
-          "https://drive.google.com/file/d/1OdZ7Tznk53KceEyt9dFOBOkxDHEX5X0U"
-        )
+        ageURL <- paste0("https://drive.google.com/file/d/1OdZ7Tznk53KceEyt9dFOBOkxDHEX5X0U")
       } else {
         stop("SCANFI data is currently available for 2020 only")
       }
@@ -534,8 +511,7 @@ prepInputsStandAgeMap <- function(
   }
 
   getFires <- if (
-    is.null(firePerimeters) &&
-      (isFALSE(is.null(fireURL)) && isFALSE(is.na(fireURL)))
+    is.null(firePerimeters) && (isFALSE(is.null(fireURL)) && isFALSE(is.na(fireURL)))
   ) {
     TRUE
   } else {
@@ -658,17 +634,11 @@ prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
       }
     } else if (dataSource == "SCANFI") {
       if (dataYear == "2000") {
-        Args$url <- paste0(
-          "https://drive.google.com/file/d/1lubpotPt-Tr_x1PHnLP6YL36fGg5Ic6h"
-        )
+        Args$url <- paste0("https://drive.google.com/file/d/1lubpotPt-Tr_x1PHnLP6YL36fGg5Ic6h")
       } else if (dataYear == "2010") {
-        Args$url <- paste0(
-          "https://drive.google.com/file/d/1J3izr9d0IaUs0H4GWJNbn6rCan-Or7Jf"
-        )
+        Args$url <- paste0("https://drive.google.com/file/d/1J3izr9d0IaUs0H4GWJNbn6rCan-Or7Jf")
       } else if (dataYear == "2020") {
-        Args$url <- paste0(
-          "https://drive.google.com/file/d/1lexPzmm4zeY_5nljoNmsIlzrZYd1TpG_"
-        )
+        Args$url <- paste0("https://drive.google.com/file/d/1lexPzmm4zeY_5nljoNmsIlzrZYd1TpG_")
       } else {
         stop("SCANFI data is currently available for 2000, 2010, and 2020 only")
       }
@@ -703,11 +673,7 @@ prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
   }
 
   rawBiomassMap <- do.call(prepInputs, args = Args) |>
-    Cache(
-      quick = Args2$quick,
-      .functionName = "prepInputsRawBiomassMap",
-      omitArgs = Args2$omitArgs
-    )
+    Cache(quick = Args2$quick, .functionName = "prepInputsRawBiomassMap", omitArgs = Args2$omitArgs)
 
   return(rawBiomassMap)
 }
@@ -1002,14 +968,7 @@ prepRasterToMatch <- function(
           overwrite = TRUE
         ),
         userTags = c(cacheTags, "rasterToMatch"),
-        omitArgs = c(
-          "destinationPath",
-          "targetFile",
-          "userTags",
-          "stable",
-          "writeTo",
-          "overwrite"
-        )
+        omitArgs = c("destinationPath", "targetFile", "userTags", "stable", "writeTo", "overwrite")
       )
     }
     ## covert to 'mask'

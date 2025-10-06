@@ -1,6 +1,7 @@
 utils::globalVariables(c(
   "possLCC"
 ))
+
 #' Convert Land Cover Classes (LCC) to another value in its neighbourhood
 #'
 #' This will search around the pixels on `rstLCC` that have
