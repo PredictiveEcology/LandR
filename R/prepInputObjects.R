@@ -687,9 +687,9 @@ prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
   }
 
   if (is.null(Args$overwrite)) {
-    # when prepInputs below fails for some reason, often the file gets downloaded, but it is corrupted
-    #   If it didn't fail, then the `Cache` will work and not trigger a new prepInputs, so it is safe
-    #   and won't redownload
+    ## when prepInputs below fails for some reason, often the file gets downloaded, but it is corrupted
+    ##   If it didn't fail, then the `Cache` will work and not trigger a new prepInputs, so it is safe
+    ##   and won't redownload
     Args$overwrite <- TRUE
   }
 
