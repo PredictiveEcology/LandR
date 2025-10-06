@@ -33,8 +33,8 @@ If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEq
 For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
-\item{colors}{Named vector of colour codes, named using species names. NOTE:
-plot order will follow this order.}
+\item{colors}{Named vector of colour codes, named using species names.
+NOTE: plot order will follow this order.}
 
 \item{title}{The title to use for the generated plots.}
 }

@@ -19,8 +19,8 @@ utils::globalVariables(c(
 #'
 #' @template sppEquivCol
 #'
-#' @param colors Named vector of colour codes, named using species names. NOTE:
-#'               plot order will follow this order.
+#' @param colors Named vector of colour codes, named using species names.
+#'               NOTE: plot order will follow this order.
 #'
 #' @param title The title to use for the generated plots.
 #'
@@ -84,7 +84,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   vtmTypes <- equivalentName(vtmTypes, sppEquiv, "EN_generic_short")
   vtmTypes[whMixed] <- "Mixed"
   names(vtmCols) <- vtmTypes
-  facLevels$Species <- vtmTypes #nolint
+  facLevels$Species <- vtmTypes
 
   ## plot initial types bar chart
   facVals <- factorValues2(vtm, as.vector(vtm[]), att = 2, na.rm = TRUE) ## 'species', 'Species', 'VALUE'
@@ -106,7 +106,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
     stop("Species names of 'colors' must match those in 'speciesStack'.")
   }
 
-  # Needs to be factor so ggplot2 knows that there may be missing levels
+  ## Needs to be factor so ggplot2 knows that there may be missing levels
   df$species <- factor(df$species, levels = unique(colDT$species), ordered = FALSE)
 
   cols2 <- colDT$cols
@@ -123,16 +123,11 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
       axis.text = element_text(size = 6)
     )
 
-  Plot(initialLeadingPlot, title = title)
+  Plot(initialLeadingPlot, title = title) ## TODO: use Plots (#87)
 
-  ## plot inital types raster
+  ## plot initial types raster
   levels(vtm) <- facLevels
-  if (is(vtm, "RasterLayer")) {
-    setColors(vtm, length(vtmTypes)) <- vtmCols ## setColors for factors must have an
-    ## entry for each row in raster::levels
-  } else {
-    ## TODO: setColors needs to be adapted to SpatRaster...
-  }
+  vtm <- Colors(vtm, vtmCols, n = length(vtmTypes))
 
   cols2 <- colDT$cols
   names(cols2) <- colDT$speciesOrig
@@ -141,18 +136,12 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   names(labs) <- colDT$speciesOrig
 
   vtmPlot <- if (is(vtm, "RasterLayer")) {
-    ggplot() +
-      geom_raster(data = vtm)
+    ggplot() + geom_raster(data = vtm)
   } else {
-    ggplot() +
-      geom_spatraster(data = vtm)
+    ggplot() + geom_spatraster(data = vtm)
   }
   vtmPlot <- vtmPlot +
-    scale_fill_manual(
-      values = cols2,
-      labels = labs,
-      na.value = "grey80"
-    ) +
+    scale_fill_manual(values = cols2, labels = labs, na.value = "grey80") +
     theme(
       legend.text = element_text(size = 6),
       legend.title = element_blank(),
@@ -169,11 +158,12 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 #'
 #' @param ras A `Raster*` or `SpatRaster` class object.
 #'
-#' @param cols a character vector of colours. See examples. Can also be a `data.frame`,
-#'   see `terra::coltab`
+#' @param cols a character vector of colours. See examples.
+#'   Can also be a `data.frame`, see [terra::coltab].
 #'
-#' @param n A numeric scalar giving the number of colours to create. Passed to
-#'   `quickPlot::setColors(ras, n = n) <- `. If missing, then `n` will be `length(cols)`
+#' @param n A numeric scalar giving the number of colours to create.
+#'   Passed to `quickPlot::setColors(ras, n = n) <- `.
+#'   If missing, then `n` will be `length(cols)`.
 #'
 #' @examples
 #' \donttest{
@@ -224,7 +214,6 @@ Colors <- function(ras, cols, n = NULL) {
 #' @aliases sppColours
 #' @export
 sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette = "Accent") {
-
   standardizedColors <- FALSE
   #test if standardized plotting is an option - if so, override palette
   if (!is.null(sppEquiv$colorHex)) {
@@ -253,17 +242,13 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette = "Accent")
     sppColors <- NULL
     sppColors <- if (is.character(palette)) {
       if (palette %in% rownames(RColorBrewer::brewer.pal.info)) {
-        colorPalette <- colorRampPalette(
-          colors = RColorBrewer::brewer.pal(n = 7, name = palette)
-        )
+        colorPalette <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 7, name = palette))
         colorPalette(length(sppColorNames))
       }
     }
 
     if (is.null(sppColors)) {
-      stop(
-        "Currently palette must be one of the RColorBrewer::brewer.pal names"
-      )
+      stop("Currently palette must be one of the RColorBrewer::brewer.pal names")
     }
 
     names(sppColors) <- sppColorNames
@@ -294,12 +279,7 @@ plotFunction <- function(ras, studyArea, limits = NULL) {
       breaks = seq(limits[1], limits[2], length.out = 6),
       limits = limits
     ) +
-    labs(
-      x = "longitude",
-      y = "latitude",
-      fill = "Cover",
-      title = sub("\\.|_", " ", names(ras))
-    )
+    labs(x = "longitude", y = "latitude", fill = "Cover", title = sub("\\.|_", " ", names(ras)))
 }
 
 #' Plot raster objects using ggplot
