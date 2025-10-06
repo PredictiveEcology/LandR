@@ -2493,11 +2493,11 @@ adjustAgeToLongevity <- function(pixelCohortData, longevity, adjustmentFactor){
     stop("adjustmentFactor needs to be a number between 0.5 and 1")
   }
 
-  # calculate the maximum age accepted for each species
+  # Calculate the maximum age accepted for each species
   maxAges <- longevity[,.(speciesCode, maxAge = round(longevity * adjustmentFactor))]
-  # correct the age for cohorts that exceed that limit
+  # Correct the age for cohorts that exceed that limit
   correctedPixelCohortData <- pixelCohortData[maxAges, on = .(speciesCode)]
-  # identify species for which some cohorts exceed longevity*adjustmentFactor
+  # Identify species for which some cohorts exceed longevity*adjustmentFactor
   speciesToCorrect <- unique(as.character(correctedPixelCohortData[age > maxAge, speciesCode]))
   for (sp in speciesToCorrect){
     message("Adjusting ages of some ", sp, " cohorts that exceed `longevity*P(sim)$adjustmentFactor`.")
@@ -2506,44 +2506,31 @@ adjustAgeToLongevity <- function(pixelCohortData, longevity, adjustmentFactor){
     correctedPixelCohortData[sp_row, "age"] <- ageAdjust(
       age = correctedPixelCohortData[sp_row, age],
       adjustmentFactor = adjustmentFactor,
-      longevity = sp_longevity
+      longevity = sp_longevity,
+      decayRange = 20
     )
   }
   correctedPixelCohortData[, maxAge := NULL]
   return(correctedPixelCohortData)
 }
 
-# applies the smoothed age correction for a single species.
-ageAdjust <- function(age, adjustmentFactor, longevity) {
+# Applies the smoothed age correction for a single species.
+ageAdjust <- function(age, adjustmentFactor, longevity, decayRange = 96) {
   ageOrig <- age
-  decayRange <- round((1 - adjustmentFactor) * 2 * longevity)
-  maxUnaffectedAge <- longevity - decayRange - 1
-  # find the optimal values for the curvature of the decay
-  op <- optim(c(7,3.2), fn = objectiveFunction, decayRange = decayRange)
-  a <- decayFunction(op$par, decayRange = decayRange)
-  # when age is > than longevity, we set age to `adjustmentFactor`xlongevity
-  a <- c(a, decayRange/2 + 1)
-  ageFromMaxUnaffectedAge <- age - maxUnaffectedAge
+  maxAge <- round(adjustmentFactor*longevity)
+  maxUnaffectedAge <- maxAge - decayRange - 1
+
+  ageFromMaxUnaffectedAge <- round(age - maxUnaffectedAge)
   whNeedAdjusting <- which(ageFromMaxUnaffectedAge > 0)
-  ages2 <- ageFromMaxUnaffectedAge[whNeedAdjusting]
-  ind <- pmin(ages2, decayRange+1)
 
-  # update the values that need adjusting
-  ageOrig[whNeedAdjusting] <- maxUnaffectedAge + a[ind]
-  newAge <- ageOrig
-  return(round(newAge))
+  age3 <- decayFunction(x = ageOrig[whNeedAdjusting], Ymax = maxAge, startAt = maxUnaffectedAge)
+  ageOrig[whNeedAdjusting] <- age3
+
+  newAge <- round(ageOrig)
+  return(newAge)
 }
 
-# determine the delta from maxUnaffectedAge to be apply for the decay range.
-decayFunction <- function(p = c(7, 2.8), decayRange) {
-  skipInitial <- round(p[1])
-  val <- (1 - exp((seq(0, -5, length.out = decayRange + skipInitial)))) ^ p[2]
-  val <- val[-(seq(skipInitial))]
-  round(val * decayRange/2)
-}
-
-# function to optimise: insure that slope at left tail of the function is 1.
-objectiveFunction <- function(p = c(7, 2.8), decayRange) {
-  se <- 1:15
-  abs(sum(decayFunction(p, decayRange)[se] - se))
+# Apply the decay function: exponential function starting at startAt and with an assymptote at Ymax
+decayFunction <- function(x, Ymax, startAt = 120) {
+  Ymax - (Ymax - startAt) * exp(-(x - startAt)/(Ymax - startAt))
 }
