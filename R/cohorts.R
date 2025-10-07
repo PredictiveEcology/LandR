@@ -2,7 +2,7 @@ utils::globalVariables(c(
   ".", "..cols", "..colsToSubset", ".I", ":=", "..groupVar",
   "age", "age2", "aNPPAct", "cover", "coverOrig", "ecoregion", "ecoregionGroup",
   "hasBadAge", "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
-  "lcc", "maxANPP", "maxB", "maxB_eco", "mortality", "new", "newPossLCC", "noPixels",
+  "lcc", "maxAge", "maxANPP", "maxB", "maxB_eco", "mortality", "new", "newPossLCC", "noPixels",
   "oldSumB", "ord", "outBiomass", "oldEcoregionGroup",
   "pixelGroup2", "pixelIndex", "pixels", "planted", "Provenance", "possERC",
   "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
@@ -2394,4 +2394,87 @@ mapvalues2 <- function(x, from, to) {
   from_found <- sort(unique(mapidx))
   x[!mapidxNA] <- to[mapidx[!mapidxNA]]
   x
+}
+
+#' Reduces the age of cohorts that exceed their `longevity x adjustmentFactor`
+#'
+#' @template pixelCohortData
+#'
+#' @param longevity A data.table with the longevity of each species.
+#'
+#' @param adjustmentFactor A numeric controlling the proportion of species longevity
+#' that cohort ages cannot exceed.
+#'
+#' @returns A `cohortData` data.table with corrected ages.
+#'
+#' @export
+adjustAgeToLongevity <- function(pixelCohortData, longevity, adjustmentFactor) {
+  ## Check inputs requirements
+  if (!all(c("longevity", "speciesCode") %in% colnames(longevity))) {
+    stop("longevity data.frame needs the columns longevity and speciesCode")
+  }
+  if (!is.numeric(adjustmentFactor) | adjustmentFactor < 0.5 | adjustmentFactor > 1) {
+    stop("adjustmentFactor needs to be a number between 0.5 and 1")
+  }
+
+  ## Calculate the maximum age accepted for each species
+  maxAges <- longevity[, .(speciesCode, maxAge = round(longevity * adjustmentFactor))]
+  ## Correct the age for cohorts that exceed that limit
+  correctedPixelCohortData <- pixelCohortData[maxAges, on = .(speciesCode)]
+  ## Identify species for which some cohorts exceed longevity*adjustmentFactor
+  speciesToCorrect <- unique(as.character(correctedPixelCohortData[age > maxAge, speciesCode]))
+  for (sp in speciesToCorrect) {
+    message(
+      "Adjusting ages of some ",
+      sp,
+      " cohorts that exceed `longevity*P(sim)$adjustmentFactor`."
+    )
+    sp_row <- which(correctedPixelCohortData[, "speciesCode"] == sp)
+    sp_longevity <- longevity[speciesCode == sp, longevity]
+    correctedPixelCohortData[sp_row, "age"] <- ageAdjust(
+      age = correctedPixelCohortData[sp_row, age],
+      adjustmentFactor = adjustmentFactor,
+      longevity = sp_longevity,
+      decayRange = 20
+    )
+  }
+  correctedPixelCohortData[, maxAge := NULL]
+  return(correctedPixelCohortData)
+}
+
+#' Applies the smoothed age correction for a single species.
+#'
+#' @inheritParams adjustAgeToLongevity
+#'
+#' @param age input age values
+#'
+#' @param decayRange range along the x-axis where [decayFunction] is applied
+#'
+#' @keywords internal
+ageAdjust <- function(age, adjustmentFactor, longevity, decayRange = 96) {
+  ageOrig <- age
+  maxAge <- round(adjustmentFactor * longevity)
+  maxUnaffectedAge <- maxAge - decayRange - 1
+
+  ageFromMaxUnaffectedAge <- round(age - maxUnaffectedAge)
+  whNeedAdjusting <- which(ageFromMaxUnaffectedAge > 0)
+
+  age3 <- decayFunction(x = ageOrig[whNeedAdjusting], Ymax = maxAge, startAt = maxUnaffectedAge)
+  ageOrig[whNeedAdjusting] <- age3
+
+  newAge <- round(ageOrig)
+  return(newAge)
+}
+
+#' Apply the decay function
+#'
+#' Exponential function starting at `startAt` and with an asymptote at `Ymax`
+#'
+#' @param x input value along the x-axis
+#' @param Ymax maximum value on the y-axis, defining the asymptote
+#' @param startAt value along the x-axis where the decay function is applied
+#'
+#' @keywords internal
+decayFunction <- function(x, Ymax, startAt = 120) {
+  Ymax - (Ymax - startAt) * exp(-(x - startAt) / (Ymax - startAt))
 }
