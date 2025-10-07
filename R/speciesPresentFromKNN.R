@@ -397,7 +397,7 @@ speciesInStudyArea <- function(
   url = NULL,
   speciesPresentRas = NULL,
   sppEquivCol = NULL,
-  dataSource = "KNN",
+  dataSource = "SCANFI",
   dPath = getOption("reproducible.destinationPath")
 ) {
   if (!(dataSource %in% c("KNN", "NTEMS", "SCANFI"))) {
@@ -457,7 +457,7 @@ speciesInStudyArea <- function(
 
       if (!is.null(sppEquivCol) & is.null(speciesPresentRas)) {
         sppEquiv <- LandR::sppEquivalencies_CA
-        species <- unique(sppEquiv[KNN %in% species, .SD, ][[sppEquivCol]])
+        species <- unique(sppEquiv[get(dataSource) %in% species, .SD, ][[sppEquivCol]])
         species <- species[!species == ""]
       }
     }
