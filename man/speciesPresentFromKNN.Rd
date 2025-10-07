@@ -30,3 +30,28 @@ a legend (i.e., it is numbers on a map, that correspond to a legend) and
 This will download all KNN layers in Forests of Canada, and make
 a factor raster at resolution provided by \code{res} (larger is faster).
 }
+\examples{
+\dontrun{
+if (requireNamespace("googledrive", quietly = TRUE)) {
+  ## Make the dataset
+  speciesPresent <- speciesPresentFromKNN(dPath = file.path(tempdir(), "data_KNN"))
+
+  ## To upload this:
+  speciesPresentRas <- terra::rast(speciesPresent)[[1]]
+  fn <- "SpeciesPresentInCanadianForests.tif"
+  writeRaster(speciesPresentRas, file = fn)
+  zipFn <- gsub(".tif", ".zip", fn)
+  zip(files = dir(pattern = fn), zipFn)
+  out <- googledrive::drive_put(zipFn)
+
+  ## Note: previous file (cropped to boreal forest)
+  ## available at "1Oj78jJBeha5L6XDBBdWDAfimgNjYc9UD"
+  driveID <- "1J8fN7clZeqjd7yhiDWi13uoCBL8OensF"
+
+  ## Get species list
+  sa <- LandR::randomStudyArea(size = 1e11)
+  species <- LandR::speciesInStudyArea(sa, dataSOurce = "KNN")
+}
+}
+
+}

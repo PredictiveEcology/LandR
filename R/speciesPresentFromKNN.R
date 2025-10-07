@@ -47,6 +47,7 @@ projectTo <- utils::getFromNamespace("projectTo", "reproducible")
 #'   sa <- LandR::randomStudyArea(size = 1e11)
 #'   species <- LandR::speciesInStudyArea(sa, dataSOurce = "KNN")
 #' }
+#' }
 #'
 #' @export
 speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, minPctCover = 10) {
