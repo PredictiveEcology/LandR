@@ -15,7 +15,7 @@ adjustAgeToLongevity(pixelCohortData, longevity, adjustmentFactor)
 that cohort ages cannot exceed.}
 }
 \value{
-A \code{cohortData} object with corrected ages.
+A \code{cohortData} data.table with corrected ages.
 }
 \description{
 Reduces the age of cohorts that exceed their \verb{longevity x adjustmentFactor}
