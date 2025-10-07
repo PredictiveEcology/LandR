@@ -1468,42 +1468,6 @@ loadSCANFISpeciesLayers <- function(
   }
 
   URLs <- fileURLs[targetFiles]
-  # if (is.null(studyArea) && is.null(rasterToMatch)) {
-  #   # No masking/cropping/projecting, so no maskTo, to, or writeTo
-  #   moreArgs <- list(
-  #     destinationPath = dPath,
-  #     method = "bilinear",
-  #     datatype = "INT2U",
-  #     overwrite = TRUE,
-  #     userTags = dots$userTags
-  #   )
-  #   speciesLayers <- Map(
-  #     prepInputs,
-  #     targetFile = targetFiles,
-  #     url = URLs,
-  #     MoreArgs = moreArgs
-  #   ) |>
-  #     Cache(quick = c("targetFile", "destinationPath"))
-  # } else {
-  #   ## Masking/cropping/projecting required, include maskTo, to, and writeTo
-  #   moreArgs <- list(
-  #     destinationPath = dPath,
-  #     maskTo = studyArea,
-  #     to = rasterToMatch,
-  #     method = "bilinear",
-  #     datatype = "INT2U",
-  #     overwrite = TRUE,
-  #     userTags = dots$userTags
-  #   )
-  #   speciesLayers <- Map(
-  #     prepInputs,
-  #     targetFile = targetFiles,
-  #     writeTo = postProcessedFilenamesWithStudyAreaName,
-  #     url = URLs,
-  #     MoreArgs = moreArgs
-  #   ) |>
-  #     Cache(quick = c("targetFile", "writeTo", "destinationPath"))
-  # }
 
   if (is.null(studyArea) && is.null(rasterToMatch)) {
     speciesLayers <- Map(
@@ -1531,7 +1495,7 @@ loadSCANFISpeciesLayers <- function(
         r <- terra::rast(tf)
         r_resampled <- postProcess(r, rasterToMatch, method = "bilinear", writeTo = outFile) |>
           suppressWarningsSpecific("method is bilinear")
-        # terra::writeRaster(r_resampled, outFile, overwrite = TRUE)
+
         return(r_resampled)
       },
       file.path(dPath, targetFiles),
