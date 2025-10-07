@@ -9,7 +9,7 @@ speciesInStudyArea(
   url = NULL,
   speciesPresentRas = NULL,
   sppEquivCol = NULL,
-  dataSource = "KNN",
+  dataSource = "SCANFI",
   dPath = getOption("reproducible.destinationPath")
 )
 }
