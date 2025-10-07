@@ -16,8 +16,14 @@ utils::globalVariables(c(
 #' @return list with named elements: `CASFRIattrLong` and `CASFRIdt` (both data.tables)
 #'
 #' @export
-loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
-                       type = c("cover", "age")) {
+loadCASFRI <- function(
+  CASFRIRas,
+  attrFile,
+  headerFile,
+  sppEquiv,
+  sppEquivCol,
+  type = c("cover", "age")
+) {
   # The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
@@ -107,8 +113,14 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 #' @return `RasterStack` (or equivalent)
 #'
 #' @export
-CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
-                            sppEquiv, sppEquivCol, destinationPath) {
+CASFRItoSpRasts <- function(
+  CASFRIRas,
+  CASFRIattrLong,
+  CASFRIdt,
+  sppEquiv,
+  sppEquivCol,
+  destinationPath
+) {
   # The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
@@ -145,10 +157,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     spRasts[[sp]] <- Cache(
       writeRaster,
       spRasts[[sp]],
-      filename = asPath(file.path(
-        destinationPath,
-        paste0("CASFRI_", sp, ".tif")
-      )),
+      filename = asPath(file.path(destinationPath, paste0("CASFRI_", sp, ".tif"))),
       overwrite = TRUE,
       datatype = "INT2U",
       NAflag = NAval
@@ -168,8 +177,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     }
     aa2 <- CASFRIattrLong[value %in% spCASFRI][, min(100L, sum(pct)), by = GID]
     setkey(aa2, GID)
-    cc <- aa2[CASFRIdt] |>
-      na.omit()
+    cc <- aa2[CASFRIdt] |> na.omit()
     rm(aa2)
     spRasts[[sp]][cc$rastInd] <- cc$V1
     message("  ", sp, " writing to disk")
@@ -178,10 +186,7 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     NAval <- 255L
     spRasts[[sp]] <- writeRaster(
       spRasts[[sp]],
-      filename = asPath(file.path(
-        destinationPath,
-        paste0("CASFRI_", sp, ".tif")
-      )),
+      filename = asPath(file.path(destinationPath, paste0("CASFRI_", sp, ".tif"))),
       datatype = "INT1U",
       overwrite = TRUE,
       NAflag = NAval
@@ -210,11 +215,53 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 
 #' Prepare species layers
 #'
-#' TODO: description needed
+#' Download and prepare species layers for a given study area, from one of several sources:
+#' - [prepSpeciesLayers_CASFRI()] uses CASFRIv4 described in Cosco (2011);
+#' - [prepSpeciesLayers_ForestInventory()] uses data prepared for Western Canada as part of the LandWeb project;
+#' - [prepSpeciesLayers_KNN()] uses the layers from Beaudoin *et al.* (2014, 2017);
+#' - [prepSpeciesLayers_MBFRI()] uses data derived from Manitoba Forest Resource Inventories;
+#' - [prepSpeciesLayers_NTEMS()] uses the National Terrestrial Ecosystem Monitoring System for
+#'   Canada (NTEMS) tree species data described in Hermosilla *et al.* (2024);
+#' - [prepSpeciesLayers_ONFRI()] uses data derived from Ontario Forest Resource Inventories;
+#' - [prepSpeciesLayers_Pickell()] uses data prepared for Western Canada by Pickell & Coops (2016)
+#'   as part of the LandWeb project;
+#' - [prepSpeciesLayers_SCANFI()] uses SCANFI data described in Guidon *et al.* (2023, 2024);
+#'
+#' @references
+#' Beaudoin, A., Bernier, P.Y., Guindon, L., Villemaire, P., Guo, X.J., Stinson, G., et al. (2014).
+#'   Mapping attributes of Canada’s forests at moderate resolution through kNN and MODIS imagery.
+#'   Canadian Journal of Forest Research, 44, 521–532.
+#'
+#' Beaudoin, A., Bernier, P.Y., Villemaire, P., Guindon, L. & Guo, X.J. (2017).
+#'   Species composition, forest properties and land cover types across Canada’s forests at 250m
+#'   resolution for 2001 and 2011. <https://doi.org/10.23687/EC9E2659-1C29-4DDB-87A2-6ACED147A990>
+#'
+#' Cosco, J.A. (2011). Common Attribute Schema (CAS) for Forest Inventories Across Canada.
+#'   Timberline Natural Resource Group for Boreal Avian Modelling Project and Canadian BEACONs Project.
+#'
+#' Guindon L., Villemaire P., Correia D.L.P., Manka F., Lacarte S., Smiley B. (2023).
+#'   SCANFI: Spatialized Canadian National Forest Inventory data product.
+#'   Natural Resources Canada, Canadian Forest Service, Laurentian Forestry Centre, Quebec, Canada.
+#'   <https://doi.org/10.23687/18e6a919-53fd-41ce-b4e2-44a9707c52dc>
+#'
+#' Guindon L., Manka F, Correia L.P. D., Villemaire P., Smiley B., Bernier P., Gauthier S.,
+#'   Beaudoin A., Boucher J., Boulanger Y. (2024). A new approach for Spatializing the Canadian National
+#'   Forest Inventory (SCANFI) using Landsat dense time series.
+#'   Canadian Journal of Forest Research. <https://doi.org/10.1139/cjfr-2023-0118>
+#'
+#' Hermosilla, T., Wulder, M.A., White, J.C., Coops, N.C., Bater, C.W., Hobart, G.W. (2024).
+#'   Characterizing long-term tree species dynamics in Canada's forested ecosystems using annual
+#'   time series remote sensing data. Forest Ecology and Management, 122313.
+#'   <https://doi.org/10.1016/j.foreco.2024.122313>
+#'
+#' Pickell, P.D. & Coops, N.C. (2016). Development of historical forest attribute layers using
+#'   Landsat time series and kNN imputation for the western Canadian boreal forest.
+#'   University of British Columbia.
 #'
 #' @template destinationPath
-#' @param outputPath TODO: description needed
+#' @param outputPath character, specifying the output directory to use
 #' @param url if `NULL`, the default, use the default source url
+#' @param dataYear Year for the data obtained. 2000, 2010, or 2020 (default) possible.
 #' @template studyArea
 #' @template rasterToMatch
 #' @template sppEquiv
@@ -224,16 +271,21 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 #'    Otherwise the raster is excluded from the output. Defaults to 10.
 #' @param ... other arguments, used for compatibility with other `prepSpeciesLayers` functions.
 #'
-#' @return TODO: description needed
+#' @return multilayer `SpatRaster` ("stack")
 #'
 #' @export
 #' @rdname prepSpeciesLayers
-prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
-                                  url = NULL,
-                                  studyArea, rasterToMatch,
-                                  sppEquiv,
-                                  sppEquivCol,
-                                  thresh = 10, ...) {
+prepSpeciesLayers_KNN <- function(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  thresh = 10,
+  ...
+) {
   stopifnot(requireNamespace("RCurl", quietly = TRUE))
 
   dots <- list(...)
@@ -247,8 +299,11 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
   if (is.null(url)) {
     url <- paste0(
       "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-      "canada-forests-attributes_attributs-forests-canada/", year,
-      "-attributes_attributs-", year, "/"
+      "canada-forests-attributes_attributs-forests-canada/",
+      year,
+      "-attributes_attributs-",
+      year,
+      "/"
     )
   }
 
@@ -258,14 +313,6 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
     if (requireNamespace("googledrive", quietly = TRUE)) {
       driveFolder <- paste0("kNNForestAttributes_", year)
       shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
-      # url <- googledrive::with_drive_quiet(
-      #   googledrive::drive_link(
-      #     googledrive::drive_ls(
-      #       driveFolder,
-      #       shared_drive = googledrive::as_id(shared_drive_url)
-      #     )
-      #   )
-      # )
 
       driveDT <- as.data.table(googledrive::drive_ls(googledrive::as_id(shared_drive_url)))
       url <- googledrive::with_drive_quiet(
@@ -293,11 +340,16 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
 
 #' @export
 #' @rdname prepSpeciesLayers
-prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
-                                     url = NULL,
-                                     studyArea, rasterToMatch,
-                                     sppEquiv,
-                                     sppEquivCol, ...) {
+prepSpeciesLayers_CASFRI <- function(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  ...
+) {
   if (is.null(url)) {
     url <- "https://drive.google.com/file/d/1y0ofr2H0c_IEMIpx19xf3_VTBheY0C9h"
   }
@@ -354,11 +406,16 @@ prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
 
 #' @export
 #' @rdname prepSpeciesLayers
-prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
-                                      url = NULL,
-                                      studyArea, rasterToMatch,
-                                      sppEquiv,
-                                      sppEquivCol, ...) {
+prepSpeciesLayers_Pickell <- function(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  ...
+) {
   if (is.null(url)) {
     url <- "https://drive.google.com/file/d/1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
   }
@@ -389,26 +446,30 @@ prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
 
 #' @export
 #' @rdname prepSpeciesLayers
-prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
-                                              url = NULL,
-                                              studyArea, rasterToMatch,
-                                              sppEquiv,
-                                              sppEquivCol, ...) {
+prepSpeciesLayers_ForestInventory <- function(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  ...
+) {
   if (is.null(url)) {
     url <- "https://drive.google.com/file/d/1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1"
   }
 
   ## TODO: add terra compatible methods.
 
-  # The ones we want
+  ## The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
-  # Take this from the sppEquiv table; user cannot supply manually
+  ## Take this from the sppEquiv table; user cannot supply manually
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   names(sppNameVector) <- sppNameVector
 
-  # This includes LandType because it will use that at the bottom of this function to
-  #  remove NAs
+  ## This includes LandType because it will use that at the bottom of this function to remove NAs
   CClayerNames <- c("Pine", "Black Spruce", "Deciduous", "Fir", "White Spruce", "LandType")
   CClayerNamesFiles <- paste0(gsub(" ", "", CClayerNames), "1.tif")
 
@@ -457,11 +518,105 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
 
 #' @export
 #' @rdname prepSpeciesLayers
-prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
-                                    url = NULL,
-                                    studyArea, rasterToMatch,
-                                    sppEquiv,
-                                    sppEquivCol, ...) {
+prepSpeciesLayers_NTEMS <- function(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  dataYear = 2020,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  thresh = 10,
+  ...
+) {
+  stop("not yet implemented") ## TODO
+}
+
+#' @export
+#' @rdname prepSpeciesLayers
+prepSpeciesLayers_SCANFI <- function(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  dataYear = 2020,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  thresh = 10,
+  ...
+) {
+  stopifnot(requireNamespace("RCurl", quietly = TRUE))
+
+  dots <- list(...)
+
+  if (is.null(sppEquiv)) {
+    message(
+      "No species list provided, this will download all available species layers.",
+      "\n  Did you mean to download all layers?",
+      "\n  Provide a list of species via 'sppEquiv' to filter layers."
+    )
+  }
+  if ("year" %in% names(dots)) {
+    year <- dots[["year"]]
+  } else {
+    year <- dataYear
+  }
+
+  if (is.null(url)) {
+    if (dataYear == 2000) {
+      url <- paste0("https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp")
+    } else if (dataYear == 2010) {
+      url <- paste0("https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE")
+    } else if (dataYear == 2020) {
+      url <- paste0("https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ")
+    }
+  }
+
+  shared_drive_url <- NULL
+  if (!RCurl::url.exists(url)) {
+    ## ping website and use gdrive if not available
+    if (requireNamespace("googledrive", quietly = TRUE)) {
+      driveFolder <- paste0("SCANFIForestAttributes_", year)
+      shared_drive_url <- "https://drive.google.com/drive/folders/1zLYV-wcDjJfSflH1VkXG6sosqZZF4SYc"
+
+      driveDT <- as.data.table(googledrive::drive_ls(googledrive::as_id(shared_drive_url)))
+      url <- googledrive::with_drive_quiet(
+        googledrive::drive_link(driveDT[name == driveFolder, id])
+      )
+    }
+  }
+
+  loadSCANFISpeciesLayers(
+    dPath = destinationPath,
+    SCANFINamesCol = "SCANFI",
+    outputPath = outputPath,
+    rasterToMatch = rasterToMatch,
+    studyArea = studyArea,
+    studyAreaName = dots$studyAreaName,
+    sppEquiv = sppEquiv,
+    sppEquivCol = sppEquivCol,
+    thresh = thresh,
+    url = url,
+    year = year,
+    shared_drive_url = shared_drive_url,
+    userTags = c("speciesLayers", "KNN")
+  )
+}
+
+#' @export
+#' @rdname prepSpeciesLayers
+prepSpeciesLayers_MBFRI <- function(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  ...
+) {
   if (is.null(url)) {
     url <- "https://drive.google.com/file/d/1KTqNBntNrEsDL6jk-5bchsBOcraDqNHe"
   }
@@ -522,11 +677,16 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
 
 #' @export
 #' @rdname prepSpeciesLayers
-prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
-                                    url = NULL,
-                                    studyArea, rasterToMatch,
-                                    sppEquiv,
-                                    sppEquivCol, ...) {
+prepSpeciesLayers_ONFRI <- function(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  ...
+) {
   ## TODO: this is sneaky and annoying (studyAreaName is part of outputPath)
   if (grepl("AOU", dirname(outputPath))) {
     sA <- "ceon"
@@ -609,9 +769,19 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
 #' @param outputPath path to output directory
 #' @export
 #' @rdname LandR-deprecated
-prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, studyArea,
-                                      rasterToMatch, sppEquiv, sppEquivCol, thresh = 10, ...) {
-  .Deprecated("loadkNNSpeciesLayers",
+prepSpeciesLayers_KNN2011 <- function(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  thresh = 10,
+  ...
+) {
+  .Deprecated(
+    "loadkNNSpeciesLayers",
     msg = paste(
       "prepSpeciesLayers_KNN2011 is deprecated.",
       "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers."
@@ -701,10 +871,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]] <- Cache(
           writeRaster,
           spRasts[[sp]],
-          filename = asPath(file.path(
-            destinationPath,
-            paste0("Pickell_", sp, ".tif")
-          )),
+          filename = asPath(file.path(destinationPath, paste0("Pickell_", sp, ".tif"))),
           overwrite = TRUE,
           datatype = "INT1U",
           NAflag = NAval
@@ -725,10 +892,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]] <- Cache(
           writeRaster,
           spRasts[[sp]],
-          filename = asPath(file.path(
-            destinationPath,
-            paste0("Pickell_", sp, ".tif")
-          )),
+          filename = asPath(file.path(destinationPath, paste0("Pickell_", sp, ".tif"))),
           overwrite = TRUE,
           datatype = "INT1U",
           NAflag = NAval
@@ -762,10 +926,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]] <- Cache(
           writeRaster,
           spRasts[[sp]],
-          filename = asPath(file.path(
-            destinationPath,
-            paste0("Pickell_", sp, ".tif")
-          )),
+          filename = asPath(file.path(destinationPath, paste0("Pickell_", sp, ".tif"))),
           overwrite = TRUE,
           datatype = "INT1U",
           NAflag = NAval
@@ -786,10 +947,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]] <- Cache(
           writeRaster,
           spRasts[[sp]],
-          filename = asPath(file.path(
-            destinationPath,
-            paste0("Pickell_", sp, ".tif")
-          )),
+          filename = asPath(file.path(destinationPath, paste0("Pickell_", sp, ".tif"))),
           overwrite = TRUE,
           datatype = "INT2U",
           NAflag = NAval

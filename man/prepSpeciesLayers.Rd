@@ -5,6 +5,8 @@
 \alias{prepSpeciesLayers_CASFRI}
 \alias{prepSpeciesLayers_Pickell}
 \alias{prepSpeciesLayers_ForestInventory}
+\alias{prepSpeciesLayers_NTEMS}
+\alias{prepSpeciesLayers_SCANFI}
 \alias{prepSpeciesLayers_MBFRI}
 \alias{prepSpeciesLayers_ONFRI}
 \title{Prepare species layers}
@@ -54,6 +56,32 @@ prepSpeciesLayers_ForestInventory(
   ...
 )
 
+prepSpeciesLayers_NTEMS(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  dataYear = 2020,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  thresh = 10,
+  ...
+)
+
+prepSpeciesLayers_SCANFI(
+  destinationPath,
+  outputPath,
+  url = NULL,
+  dataYear = 2020,
+  studyArea,
+  rasterToMatch,
+  sppEquiv,
+  sppEquivCol,
+  thresh = 10,
+  ...
+)
+
 prepSpeciesLayers_MBFRI(
   destinationPath,
   outputPath,
@@ -79,7 +107,7 @@ prepSpeciesLayers_ONFRI(
 \arguments{
 \item{destinationPath}{path to data directory where objects will be downloaded or saved to}
 
-\item{outputPath}{TODO: description needed}
+\item{outputPath}{character, specifying the output directory to use}
 
 \item{url}{if \code{NULL}, the default, use the default source url}
 
@@ -103,10 +131,55 @@ If at least one pixel has \code{cover >= thresh} , the species is considered "pr
 Otherwise the raster is excluded from the output. Defaults to 10.}
 
 \item{...}{other arguments, used for compatibility with other \code{prepSpeciesLayers} functions.}
+
+\item{dataYear}{Year for the data obtained. 2000, 2010, or 2020 (default) possible.}
 }
 \value{
-TODO: description needed
+multilayer \code{SpatRaster} ("stack")
 }
 \description{
-TODO: description needed
+Download and prepare species layers for a given study area, from one of several sources:
+\itemize{
+\item \code{\link[=prepSpeciesLayers_CASFRI]{prepSpeciesLayers_CASFRI()}} uses CASFRIv4 described in Cosco (2011);
+\item \code{\link[=prepSpeciesLayers_ForestInventory]{prepSpeciesLayers_ForestInventory()}} uses data prepared for Western Canada as part of the LandWeb project;
+\item \code{\link[=prepSpeciesLayers_KNN]{prepSpeciesLayers_KNN()}} uses the layers from Beaudoin \emph{et al.} (2014, 2017);
+\item \code{\link[=prepSpeciesLayers_MBFRI]{prepSpeciesLayers_MBFRI()}} uses data derived from Manitoba Forest Resource Inventories;
+\item \code{\link[=prepSpeciesLayers_NTEMS]{prepSpeciesLayers_NTEMS()}} uses the National Terrestrial Ecosystem Monitoring System for
+Canada (NTEMS) tree species data described in Hermosilla \emph{et al.} (2024);
+\item \code{\link[=prepSpeciesLayers_ONFRI]{prepSpeciesLayers_ONFRI()}} uses data derived from Ontario Forest Resource Inventories;
+\item \code{\link[=prepSpeciesLayers_Pickell]{prepSpeciesLayers_Pickell()}} uses data prepared for Western Canada by Pickell & Coops (2016)
+as part of the LandWeb project;
+\item \code{\link[=prepSpeciesLayers_SCANFI]{prepSpeciesLayers_SCANFI()}} uses SCANFI data described in Guidon \emph{et al.} (2023, 2024);
+}
+}
+\references{
+Beaudoin, A., Bernier, P.Y., Guindon, L., Villemaire, P., Guo, X.J., Stinson, G., et al. (2014).
+Mapping attributes of Canada’s forests at moderate resolution through kNN and MODIS imagery.
+Canadian Journal of Forest Research, 44, 521–532.
+
+Beaudoin, A., Bernier, P.Y., Villemaire, P., Guindon, L. & Guo, X.J. (2017).
+Species composition, forest properties and land cover types across Canada’s forests at 250m
+resolution for 2001 and 2011. \url{https://doi.org/10.23687/EC9E2659-1C29-4DDB-87A2-6ACED147A990}
+
+Cosco, J.A. (2011). Common Attribute Schema (CAS) for Forest Inventories Across Canada.
+Timberline Natural Resource Group for Boreal Avian Modelling Project and Canadian BEACONs Project.
+
+Guindon L., Villemaire P., Correia D.L.P., Manka F., Lacarte S., Smiley B. (2023).
+SCANFI: Spatialized Canadian National Forest Inventory data product.
+Natural Resources Canada, Canadian Forest Service, Laurentian Forestry Centre, Quebec, Canada.
+\url{https://doi.org/10.23687/18e6a919-53fd-41ce-b4e2-44a9707c52dc}
+
+Guindon L., Manka F, Correia L.P. D., Villemaire P., Smiley B., Bernier P., Gauthier S.,
+Beaudoin A., Boucher J., Boulanger Y. (2024). A new approach for Spatializing the Canadian National
+Forest Inventory (SCANFI) using Landsat dense time series.
+Canadian Journal of Forest Research. \url{https://doi.org/10.1139/cjfr-2023-0118}
+
+Hermosilla, T., Wulder, M.A., White, J.C., Coops, N.C., Bater, C.W., Hobart, G.W. (2024).
+Characterizing long-term tree species dynamics in Canada's forested ecosystems using annual
+time series remote sensing data. Forest Ecology and Management, 122313.
+\url{https://doi.org/10.1016/j.foreco.2024.122313}
+
+Pickell, P.D. & Coops, N.C. (2016). Development of historical forest attribute layers using
+Landsat time series and kNN imputation for the western Canadian boreal forest.
+University of British Columbia.
 }
