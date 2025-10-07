@@ -28,10 +28,10 @@ projectTo <- utils::getFromNamespace("projectTo", "reproducible")
 #' @examples
 #' \dontrun{
 #' if (requireNamespace("googledrive", quietly = TRUE)) {
-#'   # Make the dataset
-#'   speciesPresent <- speciesPresentFromKNN(dPath = "~/data/KNN")
+#'   ## Make the dataset
+#'   speciesPresent <- speciesPresentFromKNN(dPath = file.path(tempdir(), "data_KNN"))
 #'
-#'   # To upload this:
+#'   ## To upload this:
 #'   speciesPresentRas <- terra::rast(speciesPresent)[[1]]
 #'   fn <- "SpeciesPresentInCanadianForests.tif"
 #'   writeRaster(speciesPresentRas, file = fn)
@@ -45,8 +45,7 @@ projectTo <- utils::getFromNamespace("projectTo", "reproducible")
 #'
 #'   ## Get species list
 #'   sa <- LandR::randomStudyArea(size = 1e11)
-#'   species <- LandR::speciesInStudyArea(sa)
-#' }
+#'   species <- LandR::speciesInStudyArea(sa, dataSOurce = "KNN")
 #' }
 #'
 #' @export
