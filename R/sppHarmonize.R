@@ -34,7 +34,7 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
                          vegLeadingProportion = 0, studyArea,
                          dPath = getOption("reproducible.destinationPath")) {
   if (is.null(sppEquiv) && is.null(sppNameVector)) {
-    sppNameConvention <- "KNN"
+    sppNameConvention <- "SCANFI"
     if (!missing(studyArea)) {
       sppNameVector <- Cache(LandR::speciesInStudyArea, studyArea, dPath = dPath)$speciesList
     } else {
