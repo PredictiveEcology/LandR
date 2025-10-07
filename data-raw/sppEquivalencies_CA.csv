@@ -188,8 +188,8 @@ tiliamer,,Tili_ame,Tili_Ame,Tili amer,Tilia americana,Am linden,American basswoo
 ,,Tili_pla,,Tili plat,Tilia platyphyllos,Large lin,Largeleaf linden,Largeleaf linden leading,,,TRUE,Deciduous,,,CedrMplOther,,,,TILI_PLA,,3000,basswood code,,,,
 tsugcana,TSUG.CAN,Tsug_can,Tsug_Can,Tsug cana,Tsuga canadensis,E hemlock,Eastern hemlock,Eastern hemlock leading,,Tsug_Can,FALSE,Conifer,eastern hemlock,,CedrMplOther,,,,TSUG_CAN,PRU,401,,34,37,TSUG_CAN,#858567
 tsughete,TSUG.HET,Tsug_het,Tsug_Het,Tsug hete,Tsuga heterophylla,W hemlock,Western hemlock,Western hemlock leading,,,FALSE,Conifer,western hemlock,,CedrMplOther,Hw,,,TSUG_HET,,402,,35,38,TSUG_HET,#858567
-,,Tsug_mer,Tsug_Mer_Het,Tsug merx,Tsuga mertensiana,Mtn hemlock,Mountain hemlock,Mountain hemlock leading,,,FALSE,Conifer,mountain hemlock,,CedrMplOther,Hm,,,TSUG_MER,,403,,36,39,TSUG_MER,#886C00
-tsugmert,TSUG.MER,Tsug_mer,Tsug_Mer,Tsug mert,Tsuga mertensiana x heterophylla,WxMtn hemlock,Western x mountain hemlock,Western x mountain hemlock leading,,,FALSE,Conifer,mountain hemlock,,CedrMplOther,Hxm,,,TSUG_MER,,404,,36,40,,#886C00
+tsugmert,TSUG.MER,Tsug_mer,Tsug_Mer,Tsug merx,Tsuga mertensiana,Mtn hemlock,Mountain hemlock,Mountain hemlock leading,,,FALSE,Conifer,mountain hemlock,,CedrMplOther,Hm,,,TSUG_MER,,403,,36,39,TSUG_MER,#886C00
+,,Tsug_mer,Tsug_Mer_Het,Tsug mert,Tsuga mertensiana x heterophylla,WxMtn hemlock,Western x mountain hemlock,Western x mountain hemlock leading,,,FALSE,Conifer,mountain hemlock,,CedrMplOther,Hxm,,,TSUG_MER,,404,,36,40,,#886C00
 ,,Tsug_spp,Tsug_Spp,Tsug spp,Tsuga spp.,Hemlock,Hemlock,Hemlock leading,,Tsug_Spp,FALSE,Conifer,,,CedrMplOther,H,,,TSUG_SP,,400,,,36,,
 ,,Ulmu_ame,Ulmu_Ame,Ulmu amer,Ulmus americana,Am elm,American elm,American elm leading,,,TRUE,Deciduous,white elm,,CedrMplOther,,,EL,ULMU_AME,ORA,2201,,37,122,,#766C95
 ,,Ulmu_pum,Ulmu_Rub,Ulmu pumi,Ulmus pumila,Sib elm,Siberian elm,Siberian elm leading,,,TRUE,Deciduous,,,CedrMplOther,,,,ULMU_PUM,,2200,generic elm code,,,,
