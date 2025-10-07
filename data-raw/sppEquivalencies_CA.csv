@@ -95,7 +95,7 @@ lariocci,LARI.OCC,Lari_occ,Lari_Occ,Lari occi,Larix occidentalis,W larch,Western
 ,,Ostr_vir,Ostr_Vir,Ostr virg,Ostrya virginiana,Am hophorn,American hophornbeam,American hophornbeam leading,also known as ironwood,,TRUE,Deciduous,hop-hornbeam,,CedrMplOther,,,,OSTR_VIR,OSV,1900,,,106,,
 ,,Pice_abi,Pice_Abi,Pice abie,Picea abies,Nor sp,Norway spruce,Norway spruce leading,,,FALSE,Conifer,norway spruce,,CedrMplOther,,,,PICE_ABI,EPO,103,,15,4,,#0000FF
 piceengl,PICE.ENG,Pice_eng,Pice_Eng,Pice enge,Picea engelmannii,Eng spr,Engelmann's spruce,Engelmann's spruce leading,,Pice_Eng,FALSE,Conifer,engelmann spruce,,SprcFrLrch,Sx,Se,,PICE_ENG,,104,,16,5,PICE_ENG,#009FFF
-,,Pice_sp,Pice_Eng_Gla,Pice engx,Picea engelmannii x glauca,WxE spr,Hybrid white x Englemann Spruce,Hybrid white x Englemann Spruce leading,,Pice_Eng_Gla,FALSE,Conifer,spruce,,SprcFrLrch,Sxw,,,PICE_ENG_GLA,,100,generic spruce code,,10,PICE_ENG_GLA,
+,PICE.ENG,Pice_sp,Pice_Eng_Gla,Pice engx,Picea engelmannii x glauca,WxE spr,Hybrid white x Englemann Spruce,Hybrid white x Englemann Spruce leading,,Pice_Eng_Gla,FALSE,Conifer,spruce,,SprcFrLrch,Sxw,,,PICE_ENG_GLA,,100,generic spruce code,,10,PICE_ENG_GLA,
 piceglau,PICE.GLA,Pice_gla,Pice_Gla,Pice glau,Picea glauca,Whi spr,White spruce,White spruce leading,,Pice_Gla,FALSE,Conifer,white spruce,,SprcFrLrch,Sx,Sw,WS,PICE_GLA,EPB,105,,17,6,PICE_GLA,#93D4FF
 ,,Pice_koy,,Pice koya,Picea koyamai,Koy spr,Koyama's spruce,Koyama's spruce leading,,,FALSE,Conifer,,,CedrMplOther,,,,PICE_KOY,,100,generic spruce code,,10,,
 ,,Pice_lut,,Pice lutx,Picea x lutzii,Wh x Sk spr,White x Sitka spruce,White x Sitka spruce leading,,,FALSE,Conifer,,,CedrMplOther,,,,PICE_LUT,,111,,,10,,
@@ -132,7 +132,7 @@ popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamifera v. balsamifera
 popudelt,,Popu_del,Popu_Del,Popu delt,Populus deltoides,E ctnwood,Eastern cottonwood,Eastern cottonwood leading,,,TRUE,Deciduous,eastern cotttonwood,,PopBrch,,,CO,POPU_DEL,PED,1205,,,67,,
 ,,Popu_del,Popu_Del,Popu delx,Populus deltoides,E ctnwood,Eastern cottonwood,Eastern cottonwood leading,,,TRUE,Deciduous,eastern cotttonwood,,PopBrch,,,,POPU_DEL,PED,1205,,,67,,
 ,,Popu_del,Popu_Del,Popu delo,Populus deltoides v. occidentalis,Pla ctnwood,Plains cottonwood,Plains cottonwood leading,,,TRUE,Deciduous,eastern cotttonwood,,PopBrch,,,,POPU_DEL,PED,1205,,,67,,
-,,Popu_gra,Popu_Gra,Popu gran,Populus grandidentata,Bigto asp,Bigtooth aspen,Bigtooth aspen leading,,Popu_Gra,TRUE,Deciduous,largetooth aspen,,PopBrch,,,,POPU_GRA,PEG,1206,,28,68,POPU_GRA,
+,POPU.BAL,Popu_gra,Popu_Gra,Popu gran,Populus grandidentata,Bigto asp,Bigtooth aspen,Bigtooth aspen leading,,Popu_Gra,TRUE,Deciduous,largetooth aspen,,PopBrch,,,,POPU_GRA,PEG,1206,,28,68,POPU_GRA,
 ,,Popu_nig,,Popu nigr,Populus nigra,Bl pop,Black poplar,Black poplar leading,,,TRUE,Deciduous,,,PopBrch,,,,POPU_NIG,,1200,generic aspen code,,,,
 ,,Popu_spp,Popu_Spp,Popu spp,Populus spp.,Poplar,Poplar,Poplar leading,,Popu_Spp,TRUE,Deciduous,trembling aspen,,PopBrch,Ac,,,POPU_SP,,1200,,,62,,
 poputrem,POPU.TRE,Popu_tre,Popu_Tre,Popu trem,Populus tremuloides,Tr aspen,Trembling aspen,Trembling aspen leading,,Popu_Tre,TRUE,Deciduous,trembling aspen,,PopBrch,At,Aw,TA,POPU_TRE,PET,1201,,29,63,POPU_TRE,#FF00B6
