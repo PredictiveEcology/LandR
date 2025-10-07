@@ -1,13 +1,5 @@
 utils::globalVariables(c(
-  "AGE",
-  "CC",
-  "GID",
-  "id",
-  "keepSpecies",
-  "layerName",
-  "name",
-  "pct",
-  "value"
+  "AGE", "CC", "GID", "id", "keepSpecies", "layerName", "name", "pct", "value"
 ))
 
 #' Load CASFRI data
@@ -165,10 +157,7 @@ CASFRItoSpRasts <- function(
     spRasts[[sp]] <- Cache(
       writeRaster,
       spRasts[[sp]],
-      filename = asPath(file.path(
-        destinationPath,
-        paste0("CASFRI_", sp, ".tif")
-      )),
+      filename = asPath(file.path(destinationPath, paste0("CASFRI_", sp, ".tif"))),
       overwrite = TRUE,
       datatype = "INT2U",
       NAflag = NAval
@@ -188,8 +177,7 @@ CASFRItoSpRasts <- function(
     }
     aa2 <- CASFRIattrLong[value %in% spCASFRI][, min(100L, sum(pct)), by = GID]
     setkey(aa2, GID)
-    cc <- aa2[CASFRIdt] |>
-      na.omit()
+    cc <- aa2[CASFRIdt] |> na.omit()
     rm(aa2)
     spRasts[[sp]][cc$rastInd] <- cc$V1
     message("  ", sp, " writing to disk")
@@ -198,10 +186,7 @@ CASFRItoSpRasts <- function(
     NAval <- 255L
     spRasts[[sp]] <- writeRaster(
       spRasts[[sp]],
-      filename = asPath(file.path(
-        destinationPath,
-        paste0("CASFRI_", sp, ".tif")
-      )),
+      filename = asPath(file.path(destinationPath, paste0("CASFRI_", sp, ".tif"))),
       datatype = "INT1U",
       overwrite = TRUE,
       NAflag = NAval
@@ -581,17 +566,11 @@ prepSpeciesLayers_SCANFI <- function(
 
   if (is.null(url)) {
     if (dataYear == 2000) {
-      url <- paste0(
-        "https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp"
-      )
+      url <- paste0("https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp")
     } else if (dataYear == 2010) {
-      url <- paste0(
-        "https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE"
-      )
+      url <- paste0("https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE")
     } else if (dataYear == 2020) {
-      url <- paste0(
-        "https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ"
-      )
+      url <- paste0("https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ")
     }
   }
 
@@ -892,10 +871,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]] <- Cache(
           writeRaster,
           spRasts[[sp]],
-          filename = asPath(file.path(
-            destinationPath,
-            paste0("Pickell_", sp, ".tif")
-          )),
+          filename = asPath(file.path(destinationPath, paste0("Pickell_", sp, ".tif"))),
           overwrite = TRUE,
           datatype = "INT1U",
           NAflag = NAval
@@ -916,10 +892,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]] <- Cache(
           writeRaster,
           spRasts[[sp]],
-          filename = asPath(file.path(
-            destinationPath,
-            paste0("Pickell_", sp, ".tif")
-          )),
+          filename = asPath(file.path(destinationPath, paste0("Pickell_", sp, ".tif"))),
           overwrite = TRUE,
           datatype = "INT1U",
           NAflag = NAval
@@ -953,10 +926,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]] <- Cache(
           writeRaster,
           spRasts[[sp]],
-          filename = asPath(file.path(
-            destinationPath,
-            paste0("Pickell_", sp, ".tif")
-          )),
+          filename = asPath(file.path(destinationPath, paste0("Pickell_", sp, ".tif"))),
           overwrite = TRUE,
           datatype = "INT1U",
           NAflag = NAval
@@ -977,10 +947,7 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]] <- Cache(
           writeRaster,
           spRasts[[sp]],
-          filename = asPath(file.path(
-            destinationPath,
-            paste0("Pickell_", sp, ".tif")
-          )),
+          filename = asPath(file.path(destinationPath, paste0("Pickell_", sp, ".tif"))),
           overwrite = TRUE,
           datatype = "INT2U",
           NAflag = NAval

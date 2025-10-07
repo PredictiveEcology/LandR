@@ -1,10 +1,5 @@
 utils::globalVariables(c(
-  "allPres",
-  "allPresFac",
-  "KNN",
-  "pixel",
-  "variable",
-  "NTEMS_Species_Code"
+  "allPres", "allPresFac", "KNN", "NTEMS_Species_Code", "pixel", "variable"
 ))
 
 ####kNN ####
@@ -191,10 +186,7 @@ speciesPresentFromNTEMS <- function(
     year,
     ".zip"
   )
-  SppRast <- prepInputs(
-    url = SppURL,
-    destinationPath = dPath
-  )
+  SppRast <- prepInputs(url = SppURL, destinationPath = dPath)
   ## For some reason the raster is not trimmed - this reduces the pixel count by 30%
   SppRast <- terra::trim(SppRast)
   NAflag(SppRast) <- 0 #so we don't make an NA raster when we use aggregate/segregate

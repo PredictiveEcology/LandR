@@ -1,56 +1,13 @@
 utils::globalVariables(c(
-  ".",
-  "..cols",
-  "..colsToSubset",
-  ".I",
-  ":=",
-  "..groupVar",
-  "age",
-  "age2",
-  "aNPPAct",
-  "cover",
-  "coverOrig",
-  "ecoregion",
-  "ecoregionGroup",
-  "hasBadAge",
-  "imputedAge",
-  "initialEcoregion",
-  "initialEcoregionCode",
-  "initialPixels",
-  "lcc",
-  "maxAge",
-  "maxANPP",
-  "maxB",
-  "maxB_eco",
-  "mortality",
-  "new",
-  "newPossLCC",
-  "noPixels",
-  "oldSumB",
-  "ord",
-  "outBiomass",
-  "oldEcoregionGroup",
-  "pixelGroup2",
-  "pixelIndex",
-  "pixels",
-  "planted",
-  "Provenance",
-  "possERC",
-  "speciesposition",
-  "speciesGroup",
-  "speciesInt",
-  "state",
-  "sumB",
-  "temppixelGroup",
-  "toDelete",
-  "totalBiomass",
-  "totalBiomass2",
-  "totalCover",
-  "uniqueCombo",
-  "uniqueComboByRow",
-  "uniqueComboByPixelIndex",
-  "V1",
-  "year"
+  ".", "..cols", "..colsToSubset", ".I", ":=", "..groupVar",
+  "age", "age2", "aNPPAct", "cover", "coverOrig", "ecoregion", "ecoregionGroup",
+  "hasBadAge", "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
+  "lcc", "maxANPP", "maxB", "maxB_eco", "mortality", "new", "newPossLCC", "noPixels",
+  "oldSumB", "ord", "outBiomass", "oldEcoregionGroup",
+  "pixelGroup2", "pixelIndex", "pixels", "planted", "Provenance", "possERC",
+  "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
+  "temppixelGroup", "toDelete", "totalBiomass", "totalBiomass2", "totalCover",
+  "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "year"
 ))
 
 #' Add cohorts to `cohortData` and `pixelGroupMap`
@@ -269,10 +226,7 @@ updateCohortData <- function(
     ))
   }
 
-  return(list(
-    cohortData = outs$cohortData,
-    pixelGroupMap = outs$pixelGroupMap
-  ))
+  return(list(cohortData = outs$cohortData, pixelGroupMap = outs$pixelGroupMap))
 }
 
 #' Initiate new cohorts
@@ -470,10 +424,7 @@ rmMissingCohorts <- function(
 
   assertCohortDataERG(cohortData, doAssertion = doAssertion)
 
-  return(list(
-    cohortData = cohortData,
-    pixelGroupMap = pixelGroupMap
-  ))
+  return(list(cohortData = cohortData, pixelGroupMap = pixelGroupMap))
 }
 
 #' Add the correct `pixelGroups` to a `pixelDataTable` object
@@ -561,8 +512,7 @@ generatePixelGroups <- function(
       by = "pixelIndex"
     ]
     pcdOld[,
-      c("pixelGroup") := as.integer(maxPixelGroup) +
-        as.integer(factor(uniqueComboByPixelIndex))
+      c("pixelGroup") := as.integer(maxPixelGroup) + as.integer(factor(uniqueComboByPixelIndex))
     ]
     ## prepare object 2 (pcdOld) for checking below
     pcdOld[, ord := seq_len(.N)]
@@ -1209,19 +1159,15 @@ makeAndCleanInitialCohortData <- function(
       "pixelIndex"
     )
     if (!all(expectedColNames %in% colnames(inputDataTable))) {
-      stop(
-        "Column names for inputDataTable must include ",
-        paste(expectedColNames, collapse = " ")
-      )
+      stop("Column names for inputDataTable must include ", paste(expectedColNames, collapse = " "))
     }
     if (!all(sppColumns %in% colnames(inputDataTable))) {
       stop("Species names are incorrect")
     }
     if (
-      !all(unlist(lapply(
-        inputDataTable[, sppColumns, with = FALSE],
-        function(x) all(x >= 0 & x <= 100)
-      )))
+      !all(unlist(lapply(inputDataTable[, sppColumns, with = FALSE], function(x) {
+        all(x >= 0 & x <= 100)
+      })))
     ) {
       stop(
         "Species columns are not percent cover between 0 and 100. ",
@@ -1252,8 +1198,7 @@ makeAndCleanInitialCohortData <- function(
   ## (see other age inconsistencies solved above)
 
   cohortDataMissingAge <- cohortData[,
-    hasBadAge := (age > 0 & cover == 0) | # (age == 0 & cover > 0)#| # ok because cover can be >0 with biomass = 0
-      is.na(age) #|
+    hasBadAge := (age > 0 & cover == 0) | is.na(age) # (age == 0 & cover > 0)#| # ok because cover can be >0 with biomass = 0 #|
     # (B > 0 & age == 0) |
     # (B == 0 & age > 0)
   ][hasBadAge == TRUE] # , by = "pixelIndex"]
@@ -1263,9 +1208,7 @@ makeAndCleanInitialCohortData <- function(
       cohortDataMissingAgeUnique <- unique(
         cohortDataMissingAge,
         by = c("initialEcoregionCode", "speciesCode")
-      )[,
-        .(initialEcoregionCode, speciesCode)
-      ]
+      )[, .(initialEcoregionCode, speciesCode)]
       cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[
         cohortData,
         on = c("initialEcoregionCode", "speciesCode"),
@@ -1310,9 +1253,9 @@ makeAndCleanInitialCohortData <- function(
       outAge <- Cache(
         statsModel,
         modelFn = imputeBadAgeModel,
-        uniqueEcoregionGroups = .sortDotsUnderscoreFirst(
-          as.character(unique(cohortDataMissingAgeUnique$initialEcoregionCode))
-        ),
+        uniqueEcoregionGroups = .sortDotsUnderscoreFirst(as.character(unique(
+          cohortDataMissingAgeUnique$initialEcoregionCode
+        ))),
         .specialData = cohortDataMissingAgeUnique,
         omitArgs = ".specialData"
       )
@@ -1775,14 +1718,7 @@ makeCohortDataFiles <- function(
   ## refactor because the "_34" and "_35" ones are still levels
   pixelCohortData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
   cols <- intersect(
-    c(
-      "logAge",
-      "coverOrig",
-      "totalBiomass",
-      "initialEcoregionCode",
-      "cover",
-      "lcc"
-    ),
+    c("logAge", "coverOrig", "totalBiomass", "initialEcoregionCode", "cover", "lcc"),
     names(pixelCohortData)
   )
   set(pixelCohortData, j = cols, value = NULL)
@@ -1790,8 +1726,7 @@ makeCohortDataFiles <- function(
   ## Round ages to nearest pixelGroupAgeClass
   pixelCohortData[
     age > minAgeForGrouping,
-    age := asInteger(age / pixelGroupAgeClass) *
-      as.integer(pixelGroupAgeClass)
+    age := asInteger(age / pixelGroupAgeClass) * as.integer(pixelGroupAgeClass)
   ]
 
   ## Round Biomass to nearest pixelGroupBiomassClass
@@ -2171,10 +2106,7 @@ updateCohortDataPostHarvest <- function(
     ))
   }
 
-  return(list(
-    cohortData = outs$cohortData,
-    pixelGroupMap = outs$pixelGroupMap
-  ))
+  return(list(cohortData = outs$cohortData, pixelGroupMap = outs$pixelGroupMap))
 }
 
 #' Create or amend data to a `pixelFateDT` object
@@ -2208,11 +2140,7 @@ pixelFate <- function(
   }
   pixelFateDT <- rbindlist(list(
     pixelFateDT,
-    data.table(
-      fate = fate,
-      pixelsRemoved = pixelsRemoved,
-      runningPixelTotal = runningPixelTotal
-    )
+    data.table(fate = fate, pixelsRemoved = pixelsRemoved, runningPixelTotal = runningPixelTotal)
   ))
   pixelFateDT
 }
@@ -2264,10 +2192,7 @@ vegTypeGenerator <- function(
   doAssertion = getOption("LandR.assertions", TRUE),
   ...
 ) {
-  stopifnot(
-    mixedType %in% 0:2,
-    length(mixedType) == 1
-  )
+  stopifnot(mixedType %in% 0:2, length(mixedType) == 1)
 
   nrowCohortData <- NROW(x)
 
@@ -2337,8 +2262,7 @@ vegTypeGenerator <- function(
     pixelGroupData1,
     NULL,
     "speciesProportion",
-    pixelGroupData1[[speciesOfLeadingBasedOn]] /
-      pixelGroupData1[[totalOfLeadingBasedOn]]
+    pixelGroupData1[[speciesOfLeadingBasedOn]] / pixelGroupData1[[totalOfLeadingBasedOn]]
   )
   systimePost1 <- Sys.time()
 

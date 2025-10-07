@@ -1,27 +1,9 @@
 utils::globalVariables(c(
-  ".",
-  "..pgdAndScAndLeading",
-  ":=",
-  "B",
-  "HQ",
-  "leading",
-  "LQ",
-  "mixed",
-  "N",
-  "pixelGroup",
-  "postfireB",
-  "prefireB",
-  "pure",
-  "severityB",
-  "speciesCode",
-  "speciesGroupB",
-  "speciesProportion",
-  "SPP",
-  "totalB",
-  "totalcover",
-  "Type",
-  "vals",
-  "weightedAge"
+  ".", "..pgdAndScAndLeading", ":=",
+  "B", "HQ", "leading", "LQ", "mixed", "N",
+  "pixelGroup", "postfireB", "prefireB", "pure",
+  "severityB", "speciesCode", "speciesGroupB", "speciesProportion", "SPP",
+  "totalB", "totalcover", "Type", "vals", "weightedAge"
 ))
 
 #' Define flammability map
@@ -239,19 +221,13 @@ convert_SCANFI_LCC_codes <- function(year = 2000, ...) {
   dots <- list(...)
 
   if (year == 2000) {
-    lccURL <- paste0(
-      "https://drive.google.com/file/d/15AlzqODmeVs0Aev7o7PIzZti2XLPG78z"
-    )
+    lccURL <- paste0("https://drive.google.com/file/d/15AlzqODmeVs0Aev7o7PIzZti2XLPG78z")
     lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
   } else if (year == 2010) {
-    lccURL <- paste0(
-      "https://drive.google.com/file/d/1JOg9f7N4hZSCky_GhrPDZMYkp39XfS2h"
-    )
+    lccURL <- paste0("https://drive.google.com/file/d/1JOg9f7N4hZSCky_GhrPDZMYkp39XfS2h")
     lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
   } else if (year == 2020) {
-    lccURL <- paste0(
-      "https://drive.google.com/file/d/11sQu1mdPtVsWjFUBNx3TrzpksZ6ri1pJ"
-    )
+    lccURL <- paste0("https://drive.google.com/file/d/11sQu1mdPtVsWjFUBNx3TrzpksZ6ri1pJ")
     lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
   }
 
@@ -592,10 +568,7 @@ vegTypeMapGenerator.data.table <- function(
   doAssertion = getOption("LandR.assertions", TRUE),
   ...
 ) {
-  stopifnot(
-    mixedType %in% 0:2,
-    length(mixedType) == 1
-  )
+  stopifnot(mixedType %in% 0:2, length(mixedType) == 1)
 
   nrowCohortData <- NROW(x)
   leadingBasedOn <- preambleVTG(x, vegLeadingProportion, doAssertion, nrowCohortData)
@@ -660,8 +633,7 @@ vegTypeMapGenerator.data.table <- function(
     pixelGroupData1,
     NULL,
     "speciesProportion",
-    pixelGroupData1[[speciesOfLeadingBasedOn]] /
-      pixelGroupData1[[totalOfLeadingBasedOn]]
+    pixelGroupData1[[speciesOfLeadingBasedOn]] / pixelGroupData1[[totalOfLeadingBasedOn]]
   )
   systimePost1 <- Sys.time()
 
@@ -684,8 +656,7 @@ vegTypeMapGenerator.data.table <- function(
       pixelGroupData4,
       NULL,
       "speciesProportion",
-      pixelGroupData4$speciesGroupB /
-        pixelGroupData4$totalB
+      pixelGroupData4$speciesGroupB / pixelGroupData4$totalB
     )
     pixelGroupData4[, speciesProportion := speciesGroupB / totalB]
     b2 <- Sys.time()
@@ -993,11 +964,10 @@ loadkNNSpeciesLayers <- function(
     ## is it a google drive url?
     if (grepl("drive.google.com", url)) {
       if (requireNamespace("googledrive", quietly = TRUE)) {
-        fileURLs <- googledrive::with_drive_quiet(
-          googledrive::drive_link(
-            googledrive::drive_ls(url, shared_drive = googledrive::as_id(shared_drive_url))
-          )
-        )
+        fileURLs <- googledrive::with_drive_quiet(googledrive::drive_link(googledrive::drive_ls(
+          url,
+          shared_drive = googledrive::as_id(shared_drive_url)
+        )))
         fileNames <- googledrive::with_drive_quiet(googledrive::drive_ls(url)$name)
         names(fileURLs) <- fileNames
       } else {
@@ -1025,16 +995,13 @@ loadkNNSpeciesLayers <- function(
   }
 
   ## get all kNN species - names only
-  allSpp <- fileNames |>
-    sub("_v1\\.tif", "", x = _) |>
-    sub(".*(Species|SpeciesGroups)_", "", x = _)
+  allSpp <- fileNames |> sub("_v1\\.tif", "", x = _) |> sub(".*(Species|SpeciesGroups)_", "", x = _)
 
   stopifnot("Incomplete file list retrieved from server." = length(allSpp) > 1)
 
   ## Make sure spp names are compatible with kNN names
   kNNnames <- if (knnNamesCol %in% colnames(sppEquiv)) {
-    equivalentName(sppNameVector, sppEquiv, column = knnNamesCol, multi = TRUE) |>
-      as.character()
+    equivalentName(sppNameVector, sppEquiv, column = knnNamesCol, multi = TRUE) |> as.character()
   } else {
     equivalentName(
       sppNameVector,
@@ -1402,8 +1369,7 @@ loadSCANFISpeciesLayers <- function(
 
   ## Make sure spp names are compatible with SCANFI names
   SCANFInames <- if (SCANFINamesCol %in% colnames(sppEquiv)) {
-    equivalentName(sppNameVector, sppEquiv, column = SCANFINamesCol, multi = TRUE) |>
-      as.character()
+    equivalentName(sppNameVector, sppEquiv, column = SCANFINamesCol, multi = TRUE) |> as.character()
   } else {
     equivalentName(
       sppNameVector,
@@ -1544,11 +1510,7 @@ loadSCANFISpeciesLayers <- function(
       function(tf, url, outFile) {
         if (!file.exists(tf)) {
           id <- sub(".*?/d/([a-zA-Z0-9_-]+).*", "\\1", url)
-          googledrive::drive_download(
-            googledrive::as_id(id),
-            path = tf,
-            overwrite = TRUE
-          )
+          googledrive::drive_download(googledrive::as_id(id), path = tf, overwrite = TRUE)
         }
         r <- terra::rast(tf)
         terra::writeRaster(r, outFile, overwrite = TRUE)
@@ -1564,11 +1526,7 @@ loadSCANFISpeciesLayers <- function(
       function(tf, url, outFile) {
         if (!file.exists(tf)) {
           id <- sub(".*?/d/([a-zA-Z0-9_-]+).*", "\\1", url)
-          googledrive::drive_download(
-            googledrive::as_id(id),
-            path = tf,
-            overwrite = TRUE
-          )
+          googledrive::drive_download(googledrive::as_id(id), path = tf, overwrite = TRUE)
         }
         r <- terra::rast(tf)
         if (
@@ -1914,10 +1872,7 @@ overlayStacks <- function(
     HQRast <- writeRaster(
       HQRast,
       datatype = "INT2U",
-      filename = file.path(
-        destinationPath,
-        paste0(SPP, "_", outputFilenameSuffix, ".tif")
-      ),
+      filename = file.path(destinationPath, paste0(SPP, "_", outputFilenameSuffix, ".tif")),
       overwrite = TRUE,
       NAflag = NAval
     )

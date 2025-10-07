@@ -1,6 +1,5 @@
 utils::globalVariables(c(
-  ".N", "V1", "V2", "relativeAbundObsrvd", "relativeAbund",
-  "reps", "years"
+  ".N", "V1", "V2", "relativeAbundObsrvd", "relativeAbund", "reps", "years"
 ))
 
 #' Assertions
@@ -293,19 +292,15 @@ assertCohortData <- function(cohortData, pixelGroupMap, maxExpectedNumDiverge = 
     test2 <- sum(!b %in% a)
 
     if (test1 > maxExpectedNumDiverge || test2 > maxExpectedNumDiverge) {
-      if (nchar(message) > 0) message(message)
+      if (nchar(message) > 0) {
+        message(message)
+      }
       if (verbose) {
         if (test1 > maxExpectedNumDiverge) {
-          message(
-            "test1 is ", test1,
-            " -- too many pixelGroups on pixelGroupMap"
-          )
+          message("test1 is ", test1, " -- too many pixelGroups on pixelGroupMap")
         }
         if (test2 > maxExpectedNumDiverge) {
-          message(
-            "test2 is ", test2,
-            " -- too many pixelGroups in cohortData"
-          )
+          message("test2 is ", test2, " -- too many pixelGroups in cohortData")
         }
       }
       stop(
@@ -641,8 +636,7 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
 #'
 #' @export
 #' @rdname assertions
-assertStandAgeMapAttr <- function(standAgeMap,
-                                  doAssertion = getOption("LandR.assertions", TRUE)) {
+assertStandAgeMapAttr <- function(standAgeMap, doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     if (!inherits(standAgeMap, c("RasterLayer", "SpatRaster"))) {
       stop("standAgeMap should be a RasterLayer or SpatRaster")
@@ -668,8 +662,7 @@ assertStandAgeMapAttr <- function(standAgeMap,
 #'
 #' @export
 #' @rdname assertions
-assertCohortDataAttr <- function(cohortData,
-                                 doAssertion = getOption("LandR.assertions", TRUE)) {
+assertCohortDataAttr <- function(cohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     if (is.null(attr(cohortData, "imputedPixID"))) {
       stop("cohortData should have a 'imputedPixID' attribute")
@@ -828,19 +821,28 @@ assertSpeciesTableRaw <- function(speciesTableRaw,
 #'
 #' @export
 #' @rdname assertions
-assertSpeciesTable <- function(speciesTable,
-                               doAssertion = getOption("LandR.assertions", TRUE)) {
+assertSpeciesTable <- function(speciesTable, doAssertion = getOption("LandR.assertions", TRUE)) {
   assertColumns(
     speciesTable,
     c(
-      species = "character", Area = "factor", longevity = "integer",
-      sexualmature = "integer", shadetolerance = "numeric",
-      firetolerance = "integer", seeddistance_eff = "integer",
-      seeddistance_max = "integer", resproutprob = "numeric",
-      resproutage_min = "integer", resproutage_max = "integer",
-      postfireregen = "factor", leaflongevity = "integer",
-      wooddecayrate = "numeric", mortalityshape = "integer",
-      growthcurve = "numeric", leafLignin = "numeric", hardsoft = "factor"
+      species = "character",
+      Area = "factor",
+      longevity = "integer",
+      sexualmature = "integer",
+      shadetolerance = "numeric",
+      firetolerance = "integer",
+      seeddistance_eff = "integer",
+      seeddistance_max = "integer",
+      resproutprob = "numeric",
+      resproutage_min = "integer",
+      resproutage_max = "integer",
+      postfireregen = "factor",
+      leaflongevity = "integer",
+      wooddecayrate = "numeric",
+      mortalityshape = "integer",
+      growthcurve = "numeric",
+      leafLignin = "numeric",
+      hardsoft = "factor"
     )
   )
 }
