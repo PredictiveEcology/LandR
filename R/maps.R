@@ -1529,25 +1529,10 @@ loadSCANFISpeciesLayers <- function(
           googledrive::drive_download(googledrive::as_id(id), path = tf, overwrite = TRUE)
         }
         r <- terra::rast(tf)
-        if (
-          !terra::compareGeom(
-            r,
-            rasterToMatch,
-            crs = TRUE,
-            ext = TRUE,
-            res = TRUE,
-            rowcol = TRUE,
-            stopOnError = FALSE
-          )
-        ) {
-          maskTo_proj <- terra::project(rasterToMatch, crs(r))
-        } else {
-          maskTo_proj <- rasterToMatch
-        }
-        r_resampled <- terra::crop(r, maskTo_proj, mask = TRUE) |>
-          terra::resample(rasterToMatch, method = "bilinear")
-        terra::writeRaster(r_resampled, outFile, overwrite = TRUE)
-        return(rast(outFile))
+        r_resampled <- postProcess(r, rasterToMatch, method = "bilinear", writeTo = outFile) |>
+          suppressWarningsSpecific("method is bilinear")
+        # terra::writeRaster(r_resampled, outFile, overwrite = TRUE)
+        return(r_resampled)
       },
       file.path(dPath, targetFiles),
       URLs,
