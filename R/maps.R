@@ -494,12 +494,21 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       speciesProportion > 1 - vegLeadingProportion)
     pixelGroupData3[, mixed := FALSE]
 
-    pixelGroupData3[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColName]
-    pixelGroupData3[, mixed := any(mixed), by = pixelGroupColName]
+
+    pixelGroupColNameChar <- paste0(pixelGroupColName, "Char")
+    set(pixelGroupData3, NULL, pixelGroupColNameChar,
+        as.character(pixelGroupData3[[pixelGroupColName]]))
+    pixelGroupData3[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColNameChar]
+    pixelGroupData3[, mixed := any(mixed), by = pixelGroupColNameChar]
+    # pixelGroupData3[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColName]
+    # pixelGroupData3[, mixed := any(mixed), by = pixelGroupColName]
 
     setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
     set(pixelGroupData3, NULL, "speciesProportion", NULL)
     set(pixelGroupData3, NULL, "Type", NULL)
+    set(pixelGroupData3, NULL, pixelGroupColNameChar, NULL)
+
+
     pixelGroupData3 <- pixelGroupData3[, .SD[1], by = pixelGroupColName] ## sp. w/ highest prop. per pixelGroup
     pixelGroupData3[mixed == TRUE, speciesCode := "Mixed"]
     setnames(pixelGroupData3, "speciesCode", "leading")
@@ -594,15 +603,25 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
       ]
       out <- pgTest2[mixed == TRUE, leading := "Mixed"]
     } else if (mixedType == 2) {
+
+      # pixelGroupColNameChar <- paste0(pixelGroupColName, "Char")
+      set(pgTest, NULL, pixelGroupColNameChar,
+          as.character(pgTest[[pixelGroupColName]]))
+
       pgTest2 <- pgTest[, list(
         mixed = eval(mixedType2Condition),
-        leading = speciesCode[which.max(speciesProportion)]
+        leading = speciesCode[which.max(speciesProportion)],
+        "pixelGroupColNameCustom" = get(pixelGroupColName) # is renamed below
       ),
-      by = pixelGroupColName
+      by = pixelGroupColNameChar
       ]
-      pgTest2[, mixed := any(mixed), by = pixelGroupColName]
+
+      pgTest2[, mixed := any(mixed), by = pixelGroupColNameChar]
       pgTest2[mixed == TRUE, leading := "Mixed"]
       pgTest2 <- pgTest2[!duplicated(pgTest2)]
+
+      setnames(pgTest2, old = "pixelGroupColNameCustom", new = pixelGroupColName)
+      set(pgTest2, NULL, pixelGroupColNameChar, NULL)
       out <- pgTest2
     }
 
