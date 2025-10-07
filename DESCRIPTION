@@ -9,7 +9,7 @@ URL:
     https://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
 Date: 2025-10-07
-Version: 1.1.5.9062
+Version: 1.1.5.9063
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -113,6 +113,7 @@ Collate:
     'ecoregions.R'
     'ecozones.R'
     'fireSeverity.R'
+    'imports.R'
     'lccMapGenerator.R'
     'light-shade.R'
     'makeDummyInputs.R'
