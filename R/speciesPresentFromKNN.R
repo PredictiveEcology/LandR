@@ -462,6 +462,7 @@ speciesInStudyArea <- function(
       }
     }
   }
+  warning("Popu_gra layer is not reliable due to data error.")
 
   return(list(speciesRas = bb, speciesList = species))
 }
