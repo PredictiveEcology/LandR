@@ -20,6 +20,7 @@
 * update `prepInputsStandAgeMap` function to allow for incorporation of SCANFI age map;
 * add `loadSCANFISpeciesLayers` and `prepSpeciesLayers_SCANFI` functions for loading SCANFI species data from Google drive;
 * add `adjustAgeToLongevity` to adjust initial cohort ages based on `longevity` for each species;
+* add `studyAreaEco` function to extend `studyArea` to ecological boundaries;
 * update documentation and citations for `prepSpeciesLayers_*` functions;
 
 # LandR 1.1.5
