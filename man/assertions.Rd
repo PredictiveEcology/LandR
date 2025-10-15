@@ -228,8 +228,9 @@ Defaults to 1.}
 
 \item{rstLCChange}{a raster layer indicating pixels were land-use change occurred as 1s}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
 \item{standCohortData}{A \code{data.table} with simulated and observed stand data for validation}
 

@@ -7,11 +7,12 @@
 prepInputsCanDEM(studyArea, rasterToMatch, destinationPath)
 }
 \arguments{
-\item{studyArea}{A \verb{SpatialPolygons*} object used as the principle study region,
+\item{studyArea}{A \code{SpatVector} or \code{sf} polygons object used as the principle study region,
 passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
 \item{destinationPath}{path to data directory where objects will be downloaded or saved to}
 }

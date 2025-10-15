@@ -19,8 +19,9 @@ makeDummyRstLCC(rasterToMatch)
 makeDummyEcoregionFiles(ecoregionMap, rstLCC, rasterToMatch)
 }
 \arguments{
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
 \item{rawBiomassMap}{a \code{rawBiomassMap} (e.g. the one used
 throughout the simulation)}
