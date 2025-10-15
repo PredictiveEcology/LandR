@@ -9,8 +9,9 @@ makePixelGroupMap(pixelCohortData, rasterToMatch)
 \arguments{
 \item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 }
 \value{
 a raster with pixel groups

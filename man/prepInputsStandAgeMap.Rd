@@ -63,8 +63,9 @@ is missing.}
 \item{fireField}{field used to rasterize fire polys. Only used if \code{firePerimeters}
 is missing.}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
 \item{startTime}{date of the last fire year to be considered (e.g., start of fire
 period counting backwards). If missing, last fire year available will be used.}

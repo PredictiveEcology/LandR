@@ -13,8 +13,9 @@ and another with land cover (e.g. LCC).}
 \item{ecoregionName}{the name describing the type of ecoregions in first map
 (e.g. \code{"ecoDistrict"}) if passing a polygon file.}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 }
 \value{
 A list with two objects: the \code{ecoregionMap} and a table summarizing

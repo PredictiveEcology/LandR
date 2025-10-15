@@ -40,8 +40,9 @@ to take advantage of parallel processing.}
 
 \item{treeType}{TODO}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 }
 \value{
 list of file names corresponding to the figures and/or objects written to disk

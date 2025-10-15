@@ -39,7 +39,7 @@ forest types).}
 \item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
 threshold a species needs to pass to be considered "leading".}
 
-\item{studyArea}{A \verb{SpatialPolygons*} object used as the principle study region,
+\item{studyArea}{A \code{SpatVector} or \code{sf} polygons object used as the principle study region,
 passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
 \item{dPath}{Passed to \code{speciesInStudyArea} (which then passes to \code{preProcess})}

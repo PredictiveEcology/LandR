@@ -102,8 +102,9 @@ number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}
 
 \item{currentTime}{numeric. Current simulation time step (as in \code{time(sim)})}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
 \item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.
 Must have column \code{speciesCode}, with species names/IDs. The following is a
