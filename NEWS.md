@@ -1,7 +1,7 @@
 # LandR (development version)
 
 * drop support for R 4.2 due to changes in dependency packages;
-* remove deprecated package `crayon` and use `cli` instead;
+* remove deprecated package `crayon` in favour of `cli` instead;
 * `dropTerm` now can deal with random effects better (#105);
 * `prepRawBiomassMap` - needed `overwrite = TRUE` for cases where download was corrupt;
 * `prepRawBiomassMap` needs `httr2` package as remote site is failing with `download.file`;
