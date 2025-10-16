@@ -180,7 +180,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
   specDat2 <- predictorVarsData[, ..colsPred][sppVarsB[, ..colsResp], on = c("pixelIndex")]
 
   if (any(is.na(specDat2))) {
-    message(magenta(
+    message(cli::col_magenta(
       "Found NA's in species biomass or maxB model predictors.",
       "These lines will be removed"
     ))
@@ -353,7 +353,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
   ## linear equation for A, the asymptote (same for CR and Logistic models)
   # lnEqn <- paste("A ~", paste(predictorVars, collapse = " + "))
   if ("CR" %in% models) {
-    message(blue("Fitting CR model for", sp))
+    message(cli::col_blue("Fitting CR model for", sp))
     modelParams <- list(
       ## dpois represents the stochastic component generating B, for any set of conditions.
       nonLinEqn = quote(B ~ dpois(lambda = A * (1 - exp(-k * age))^p)),
@@ -383,7 +383,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
       )
     } else {
       ## instead of drawing randomly, explore parameter space
-      message(blue("Using starting values exploring parameter space. 'Ntries' will be ignored"))
+      message(cli::col_blue("Using starting values exploring parameter space. 'Ntries' will be ignored"))
       starts <- list(
         A = seq(paramRanges$Alim[["min"]], paramRanges$Alim[["max"]], length.out = 10),
         k = seq(paramRanges$klim[["min"]], paramRanges$klim[["max"]], length.out = 10),
@@ -400,7 +400,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
       # lnEqn <- paste("A ~ 1") ## testing
       modelParams$linEqn <- list(lnEqn) ## don't parse/eval: mem leak! keep as character - .fitNLMwCovariates converts to formula
 
-      message(blue("using ", lnEqn))
+      message(cli::col_blue("using ", lnEqn))
 
       ## tests with theoretical data
       ## generate B curves for changing age, k and p
@@ -446,7 +446,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
   }
 
   if ("Logistic" %in% models) {
-    message(blue("Fitting Logistic model for", sp))
+    message(cli::col_blue("Fitting Logistic model for", sp))
 
     modelParams <- list(
       ## dpois represents the stochastic component generating B, for any set of conditions.
@@ -469,7 +469,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
         p = runif(Ntries, paramRanges$plim[["min"]], paramRanges$plim[["max"]])
       )
     } else {
-      message(blue("Using starting values exploring parameter space. 'Ntries' will be ignored"))
+      message(cli::col_blue("Using starting values exploring parameter space. 'Ntries' will be ignored"))
       ## instead of drawing randomly, explore parameter space
       starts <- list(
         A = seq(paramRanges$Alim[["min"]], paramRanges$Alim[["max"]], length.out = 20),
@@ -491,7 +491,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
       # lnEqn <- paste("A ~ 1") ## testing
       modelParams$linEqn <- list(parse(text = lnEqn))
 
-      message(blue("using", lnEqn))
+      message(cli::col_blue("using", lnEqn))
 
       modelOutputsPrev$Logistic$mllsOuter <- .fitNLMwCovariates(
         data = trainData,
@@ -585,7 +585,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
       } else {
         maxBEst <- NA
       }
-      message(cyan("    best AIC so far:", round(aicPrev, 0), "; maxB est = ", maxBEst))
+      message(cli::col_cyan("    best AIC so far:", round(aicPrev, 0), "; maxB est = ", maxBEst))
     }
 
     if (!exists("aicPrev", inherits = FALSE)) {
@@ -674,7 +674,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
         newdata[, cover := maxCover]
 
         maxBEst <- extractMaxB(mll[[bestModel]], newdata = newdata, average = TRUE, model = model)
-        message(cyan("    best AIC so far:", round(aicTry, 0), "; maxB est = ", maxBEst))
+        message(cli::col_cyan("    best AIC so far:", round(aicTry, 0), "; maxB est = ", maxBEst))
         aicPrev <- aicTry
         mllKeep <- mll[[bestModel]]
       }
@@ -693,7 +693,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
     #   ## TODO: use plan sequential?
     #   for (ii in 1:Ntries) {
     #     if (ii %% (Ntries/10) == 0) {
-    #       message(cyan("    ... at attempt", ii, "of", Ntries))
+    #       message(cli::col_cyan("    ... at attempt", ii, "of", Ntries))
     #     }
     #
     #     mle2Args <- list("minuslogl" = nonLinModelQuoted
@@ -725,7 +725,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
     #     }, error = function(e) e)
     #     ## put new tryCatch outside of TimeoutException function for readability
     #     if (is.null(mll)) {
-    #       message(red("Timeout. Trying again without boundaries"))
+    #       message(cli::col_red("Timeout. Trying again without boundaries"))
     #
     #       mle2Args$lower <- NULL
     #       mle2Args$upper <- NULL
@@ -750,7 +750,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
     #       newdata[, cover := maxCover]
     #
     #       maxBEst <- extractMaxB(mll, newdata = newdata, average = TRUE, model = model)
-    #       message(cyan("    best AIC so far:", round(aicTry, 0), "; maxB est = ", maxBEst))
+    #       message(cli::col_cyan("    best AIC so far:", round(aicTry, 0), "; maxB est = ", maxBEst))
     #       aicPrev <- aicTry
     #       mllKeep <- mll
     #     }
@@ -794,7 +794,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 
   # put new tryCatch outside of TimeoutException function for readability
   # if (inherits(mll, c("error", "try-error"))) {
-  #   message(red("Timeout. Trying again without boundaries"))
+  #   message(cli::col_red("Timeout. Trying again without boundaries"))
   #
   #   mle2Args$lower <- NULL
   #   mle2Args$upper <- NULL
@@ -1546,7 +1546,7 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
 
     ## estimate 95% population prediction intervals
     if (all(is.na(vcov(mll)))) {
-      message(magenta("Cannot estimate confidence intervals"))
+      message(cli::col_magenta("Cannot estimate confidence intervals"))
       plotCIs <- FALSE
     }
     if (plotCIs) {
@@ -1620,10 +1620,10 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
       }
 
       if (is(newparams, "error")) {
-        message(magenta("Cannot estimate confidence intervals"))
+        message(cli::col_magenta("Cannot estimate confidence intervals"))
         confIntervals <- NULL
       } else {
-        message(blue("Estimating confidence intervals..."))
+        message(cli::col_blue("Estimating confidence intervals..."))
         preds <- apply(newparams, 1, function(x) bbmle::predict(mll, newdata = df, newparams = unlist(x))) ## predict biomass values for each age and new parameter combination
         confIntervals <- apply(preds, 1, function(x) quantile(x, c(0.025, 0.975))) ## estimate 95% quantiles for each iteration of age
         confIntervals <- as.data.table(t(confIntervals))

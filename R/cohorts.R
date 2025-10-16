@@ -86,7 +86,7 @@ updateCohortData <- function(
     ## pixels --> the entirely newly regenerated pixels do not require a
     ## re-pixelGroupMaping  -- can just add to existing pixelGroup values
     if (verbose > 0) {
-      message(crayon::green(
+      message(cli::col_green(
         "  Regenerating only burnt pixels with no survivors (i.e. resprouting & serotiny)"
       ))
     }
@@ -108,7 +108,7 @@ updateCohortData <- function(
     ## This is for situations where there are some empty pixels being filled,
     ## and some occupied pixels getting infilling. This requires a wholesale re-pixelGroup
     if (verbose > 0) {
-      message(crayon::green(
+      message(cli::col_green(
         "  Regenerating open and pixels with B (likely after seed dispersal, or partial mortality following disturbance)"
       ))
     }
@@ -208,19 +208,19 @@ updateCohortData <- function(
     nPixTreed <- sum(outs$pixelGroupMap[] != 0, na.rm = TRUE)
 
     nDigits <- max(nchar(c(nPixForest, nPixGrps, nPixNoPixGrp))) + 3
-    message(crayon::magenta(
+    message(cli::col_magenta(
       "NUMBER OF FORESTED PIXELS          :",
       paddedFloatToChar(nPixForest, padL = nDigits, pad = " ")
     ))
-    message(crayon::magenta(
+    message(cli::col_magenta(
       "NUMBER OF PIXELS WITH TREES        :",
       paddedFloatToChar(nPixTreed, padL = nDigits, pad = " ")
     ))
-    message(crayon::magenta(
+    message(cli::col_magenta(
       "NUMBER OF UNIQUE PIXELGROUPS       :",
       paddedFloatToChar(nPixGrps, padL = nDigits, pad = " ")
     ))
-    message(crayon::magenta(
+    message(cli::col_magenta(
       "NUMBER OF PIXELS WITH NO PIXELGROUP:",
       paddedFloatToChar(nPixNoPixGrp, padL = nDigits, pad = " ")
     ))
@@ -577,7 +577,7 @@ describeCohortData <- function(cohortData) {
   out <- lapply(vals, function(val) {
     .cohortMessages(cohortData, val)
   })
-  message(magenta(
+  message(cli::col_magenta(
     "Pixels with non-NA cover:, ",
     cohortData[!is.na(cover), length(unique(pixelIndex))]
   ))
@@ -588,13 +588,13 @@ describeCohortData <- function(cohortData) {
   out <- list()
   if (val %in% colnames(cohortData)) {
     pixelsNA <- NROW(cohortData[is.na(get(val)), unique("pixelIndex"), with = FALSE])
-    message(magenta("Pixels with missing", val, ":", format(pixelsNA, big.mark = ",")))
+    message(cli::col_magenta("Pixels with missing", val, ":", format(pixelsNA, big.mark = ",")))
     pixelsZero <- NROW(cohortData[, all(get(val) == 0), by = "pixelIndex"][get("V1") == TRUE])
-    message(magenta("Pixels with all(", val, " == 0): ", format(pixelsZero, big.mark = ",")))
+    message(cli::col_magenta("Pixels with all(", val, " == 0): ", format(pixelsZero, big.mark = ",")))
     pixelsBiomassNonZero <- NROW(cohortData[, any(get(val) > 0), by = "pixelIndex"][
       get("V1") == TRUE
     ])
-    message(magenta(
+    message(cli::col_magenta(
       "Pixels with all(",
       val,
       " > 0): ",
@@ -949,34 +949,34 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
 ) {
   newCoverColNames <- gsub("cover\\.", "", sppColumns)
   setnames(inputDataTable, old = sppColumns, new = newCoverColNames)
-  message(blue("Create initial cohortData object, with no pixelGroups yet"))
-  message(green("-- Begin reconciling data inconsistencies"))
+  message(cli::col_blue("Create initial cohortData object, with no pixelGroups yet"))
+  message(cli::col_green("-- Begin reconciling data inconsistencies"))
 
   imputedPixID <- integer(0)
 
   inputDataTable[, totalCover := rowSums(.SD), .SDcols = newCoverColNames]
   whEnoughCover <- inputDataTable$totalCover > minCoverThreshold
-  message(green(
+  message(cli::col_green(
     "  -- Removing all pixels with totalCover <= minCoverThreshold (affects",
     sum(!whEnoughCover),
     "of",
     NROW(inputDataTable),
     "pixels)"
   ))
-  message(green("     --> resulting in", sum(whEnoughCover), "pixels)"))
+  message(cli::col_green("     --> resulting in", sum(whEnoughCover), "pixels)"))
   inputDataTable <- inputDataTable[whEnoughCover]
 
   whAgeEqZero <- which(inputDataTable$age == 0)
 
   if (!is.null(inputDataTable[["totalBiomass"]])) {
-    message(green(
+    message(cli::col_green(
       "  -- Setting TotalBiomass in pixel to 0 where age == 0 (affects",
       length(whAgeEqZero),
       "of",
       NROW(inputDataTable),
       "pixels)"
     ))
-    message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
+    message(cli::col_green("     --> keeping ", NROW(inputDataTable), "pixels)"))
     ## correct B in a separate column to keep track of imputed pixels, then replace column
     inputDataTable[, `:=`(totalBiomass2 = totalBiomass)]
     inputDataTable[whAgeEqZero, `:=`(totalBiomass2 = 0)]
@@ -985,14 +985,14 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
     inputDataTable[, totalBiomass2 := NULL]
 
     whTotalBEqZero <- which(inputDataTable$totalBiomass == 0)
-    message(green(
+    message(cli::col_green(
       "  -- Setting age in pixel to 0 where totalBiomass == 0 (affects",
       length(whTotalBEqZero),
       "of",
       NROW(inputDataTable),
       "pixels)"
     ))
-    message(green("     --> keeping ", NROW(inputDataTable), "pixels)"))
+    message(cli::col_green("     --> keeping ", NROW(inputDataTable), "pixels)"))
     ## correct age in a separate column to keep track of imputed pixels, then replace column
     inputDataTable[, `:=`(age2 = age)]
     inputDataTable[whTotalBEqZero, `:=`(age2 = 0)]
@@ -1010,16 +1010,16 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
 
   ## Remove all cover <= minCoverThreshold
   whCoverGTMinCover <- which(cohortData$cover > minCoverThreshold)
-  message(green(
+  message(cli::col_green(
     "  -- Removing all cohorts with cover <= minCoverThreshold (affects",
     NROW(cohortData) - length(whCoverGTMinCover),
     "of",
     NROW(cohortData),
     "cohorts"
   ))
-  message(green("     --> resulting in", length(whCoverGTMinCover), "cohorts)"))
+  message(cli::col_green("     --> resulting in", length(whCoverGTMinCover), "cohorts)"))
   cohortData <- cohortData[whCoverGTMinCover]
-  message(green("     --> resulting in", length(unique(cohortData$pixelIndex)), "pixels)"))
+  message(cli::col_green("     --> resulting in", length(unique(cohortData$pixelIndex)), "pixels)"))
 
   cohortData[, coverOrig := cover]
   if (isTRUE(doAssertion)) {
@@ -1030,7 +1030,7 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
 
   # if (doAssertion)
   # describeCohortData(cohortData)
-  # message(green("  -- Assign B = 0 and age = 0 for pixels where cover = 0,\n",
+  # message(cli::col_green("  -- Assign B = 0 and age = 0 for pixels where cover = 0,\n",
   #             "because cover is most reliable dataset"))
 
   # hasCover0 <- which(cohortData[["cover"]] == 0)
@@ -1041,7 +1041,7 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
   # }
   if (any(c("B", "totalBiomass") %in% cncd)) {
     # set(cohortData, hasCover0, "B", 0)
-    # message(green("  -- Assign totalBiomass = 0 if sum(cover) = 0 in a pixel, ",
+    # message(cli::col_green("  -- Assign totalBiomass = 0 if sum(cover) = 0 in a pixel, ",
     #             "  because cover is most reliable dataset"))
     # cohortData <- cohortData[, sum(cover) == 0, by = "pixelIndex"][V1 == TRUE][
     #  cohortData, on = "pixelIndex"][V1 == TRUE, totalBiomass := 0L]
@@ -1049,7 +1049,7 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
   }
 
   ## CRAZY TODO: DIVIDE THE COVER BY 2 for DECIDUOUS -- will only affect mixed stands
-  # message(crayon::green(paste("POSSIBLE ALERT:",
+  # message(cli::col_cli::col_green(paste("POSSIBLE ALERT:",
   #                            "assume deciduous cover is 1/2 the conversion to B as conifer")))
   # cohortData[speciesCode == "Popu_sp", cover := asInteger(cover / 2)]
 
@@ -1075,13 +1075,13 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
       ## Biomass -- by cohort (NOTE: divide by 100 because cover is percent)
       # set(cohortData, NULL, "B", as.numeric(cohortData[["B"]]))
       set(cohortData, NULL, "B", cohortData[["totalBiomass"]] * cohortData[["cover"]] / 100)
-      message(green("  -- Divide total B of each pixel by the relative cover of the cohorts"))
+      message(cli::col_green("  -- Divide total B of each pixel by the relative cover of the cohorts"))
 
       # cohortData[ , B := mean(totalBiomass) * cover / 100, by = "pixelIndex"]
-      # message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
+      # message(cli::col_blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
       # cohortData[ , B := ceiling(B / pixelGroupBiomassClass) * pixelGroupBiomassClass]
 
-      message(green("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
+      message(cli::col_green("Set B to 0 where cover > 0 and age = 0, because B is least quality dataset"))
       cohortData[cover > 0 & age == 0, B := 0L]
       cohortData[, totalBiomass := asInteger(totalBiomass)]
       set(cohortData, NULL, "B", asInteger(cohortData[["B"]]))
@@ -1248,7 +1248,7 @@ makeAndCleanInitialCohortData <- function(
         by = c("initialEcoregionCode", "speciesCode"),
         doSubset = doSubset
       )
-      message(blue("Impute missing age values: started", Sys.time()))
+      message(cli::col_blue("Impute missing age values: started", Sys.time()))
 
       outAge <- Cache(
         statsModel,
@@ -1259,7 +1259,7 @@ makeAndCleanInitialCohortData <- function(
         .specialData = cohortDataMissingAgeUnique,
         omitArgs = ".specialData"
       )
-      message(blue("                           completed", Sys.time()))
+      message(cli::col_blue("                           completed", Sys.time()))
 
       # paste with capture.output keeps table structure intact
       messageDF(outAge$rsq, 3, "blue")
@@ -1294,7 +1294,7 @@ makeAndCleanInitialCohortData <- function(
   cohortData[, `:=`(hasBadAge = NULL)]
 
   ## set B to zero if age is zero because B is lowest quality dataset ---------------
-  # message(blue("Set recalculate totalBiomass as sum(B);",
+  # message(cli::col_blue("Set recalculate totalBiomass as sum(B);",
   #              "many biomasses will have been set to 0 in previous steps"))
   # cohortData[cover > 0 & age == 0, B := 0L]
   # cohortData[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
@@ -1490,11 +1490,11 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
       }
 
       message(
-        blue("Grouping variable "),
-        red("only has one level. "),
-        blue(
+        cli::col_blue("Grouping variable "),
+        cli::col_red("only has one level. "),
+        cli::col_blue(
           "Formula changed to\n",
-          magenta(paste0(format(modelFn2, appendLF = FALSE), collapse = ""))
+          cli::col_magenta(paste0(format(modelFn2, appendLF = FALSE), collapse = ""))
         )
       )
     }
@@ -1730,7 +1730,7 @@ makeCohortDataFiles <- function(
   ]
 
   ## Round Biomass to nearest pixelGroupBiomassClass
-  message(blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
+  message(cli::col_blue("Round B to nearest P(sim)$pixelGroupBiomassClass"))
   pixelCohortData[
     # age > minAgeForGrouping,
     ,
@@ -1738,7 +1738,7 @@ makeCohortDataFiles <- function(
   ]
 
   ## Remove B == 0 cohorts after young removals
-  message(green(
+  message(cli::col_green(
     "  -- Removing cohorts with B = 0 and age > 0 -- these were likely poor predictions from updateYoungBiomasses"
   ))
   whBEqZeroAgeGT0 <- which(pixelCohortData$B == 0 & pixelCohortData$age > 0)
@@ -1750,7 +1750,7 @@ makeCohortDataFiles <- function(
   }
 
   lostPixels <- setdiff(pixelCohortData$pixelIndex, pixelCohortData2$pixelIndex)
-  message(green(
+  message(cli::col_green(
     "     affected",
     length(whBEqZeroAgeGT0),
     "cohorts, in",
@@ -1758,7 +1758,7 @@ makeCohortDataFiles <- function(
     "pixels;"
   ))
   lenUniquePix <- length(unique(pixelCohortData2$pixelIndex))
-  message(green("     leaving", lenUniquePix, "pixels"))
+  message(cli::col_green("     leaving", lenUniquePix, "pixels"))
   pixelFateDT <- pixelFate(
     pixelFateDT,
     fate = "rm pixels with Biomass == 0, after updating young cohort B",
@@ -1770,7 +1770,7 @@ makeCohortDataFiles <- function(
   ## Set B to 0 if age is 0
   # whAgeZero <- which(pixelCohortData$age == 0)
   # if (length(whAgeZero)) {
-  #   message(green("    -- There were", length(whAgeZero), "pixels with age = 0; forcing B to zero"))
+  #   message(cli::col_green("    -- There were", length(whAgeZero), "pixels with age = 0; forcing B to zero"))
   #   pixelCohortData[whAgeZero, B := 0L]
   # }
 
@@ -1791,10 +1791,10 @@ makeCohortDataFiles <- function(
     )
   }
 
-  message(blue(
+  message(cli::col_blue(
     "Removing some pixels because their species * ecoregionGroup combination has no age or B data to estimate ecoregion traits:"
   ))
-  # message(blue(paste(sort(unique(pixelCohortData[!ecoregionGroup %in% ecoregionsWeHaveParametersFor][["ecoregionGroup]])), collapse = ", ")))
+  # message(cli::col_blue(paste(sort(unique(pixelCohortData[!ecoregionGroup %in% ecoregionsWeHaveParametersFor][["ecoregionGroup]])), collapse = ", ")))
   cols <- c("speciesCode", "ecoregionGroup")
   messageDF(
     colour = "blue",
@@ -2088,19 +2088,19 @@ updateCohortDataPostHarvest <- function(
     nPixTreed <- sum(outs$pixelGroupMap[] != 0, na.rm = TRUE)
 
     nDigits <- max(nchar(c(nPixForest, nPixGrps, nPixNoPixGrp))) + 3
-    message(crayon::magenta(
+    message(cli::col_magenta(
       "NUMBER OF FORESTED PIXELS          :",
       paddedFloatToChar(nPixForest, padL = nDigits, pad = " ")
     ))
-    message(crayon::magenta(
+    message(cli::col_magenta(
       "NUMBER OF PIXELS WITH TREES        :",
       paddedFloatToChar(nPixTreed, padL = nDigits, pad = " ")
     ))
-    message(crayon::magenta(
+    message(cli::col_magenta(
       "NUMBER OF UNIQUE PIXELGROUPS       :",
       paddedFloatToChar(nPixGrps, padL = nDigits, pad = " ")
     ))
-    message(crayon::magenta(
+    message(cli::col_magenta(
       "NUMBER OF PIXELS WITH NO PIXELGROUP:",
       paddedFloatToChar(nPixNoPixGrp, padL = nDigits, pad = " ")
     ))

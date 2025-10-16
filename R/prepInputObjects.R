@@ -18,7 +18,7 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
   missTraits <- setdiff(names(speciesLayers), species$species)
   missTraits <- c(missTraits, setdiff(species$species, species[complete.cases(species), species]))
   if (length(missTraits)) {
-    message(blue(
+    message(cli::col_blue(
       "The following species in 'speciesLayers' have missing traits",
       "and will be excluded:\n",
       paste(missTraits, collapse = " "),
@@ -82,11 +82,11 @@ makePixelTable <- function(
     )
   }
 
-  # message(blue("Round age to nearest pixelGroupAgeClass, which is", pixelGroupAgeClass))
+  # message(cli::col_blue("Round age to nearest pixelGroupAgeClass, which is", pixelGroupAgeClass))
   coverMatrix <- matrix(asInteger(speciesLayers[]), ncol = length(names(speciesLayers)))
   colnames(coverMatrix) <- names(speciesLayers)
 
-  # faster to use as.factor, which is fine for a numeric.
+  ## faster to use as.factor, which is fine for a numeric.
   iec <- if (is.numeric(initialEcoregionCodeVals)) {
     as.factor(initialEcoregionCodeVals)
   } else {
@@ -142,8 +142,8 @@ makePixelTable <- function(
     message("Setting pixels to NA where there is NA in 'ecoregionMap'")
   }
 
-  message(blue("rm NAs, leaving", magenta(NROW(pixelTable)), "pixels with data"))
-  message(blue(
+  message(cli::col_blue("rm NAs, leaving", cli::col_magenta(NROW(pixelTable)), "pixels with data"))
+  message(cli::col_blue(
     "This is the summary of the input data for age, ecoregionGroup, biomass, speciesLayers:"
   ))
   if (isTRUE(printSummary)) {
@@ -279,7 +279,7 @@ makeSpeciesEcoregion <- function(
   speciesEcoregion[maxB < 0L, maxB := 0L] # fix negative predictions
 
   ## maxANPP ----------------------------------------------------------------------------------
-  message(blue("Add maxANPP to speciesEcoregion -- currently --> maxB/30"))
+  message(cli::col_blue("Add maxANPP to speciesEcoregion -- currently --> maxB/30"))
   speciesEcoregion[, maxANPP := asInteger(maxB / 30)]
 
   ## clean up unneeded columns

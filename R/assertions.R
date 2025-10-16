@@ -332,7 +332,7 @@ assertCohortData <- function(cohortData, pixelGroupMap, maxExpectedNumDiverge = 
     }
 
     if (verbose > 1) {
-      message(crayon::green("  -- assertion passed using assertCohortData --"))
+      message(cli::col_green("  -- assertion passed using assertCohortData --"))
     }
   }
 }

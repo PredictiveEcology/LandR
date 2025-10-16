@@ -232,7 +232,7 @@ FireDisturbance <- function(cohortData = copy(sim$cohortData), cohortDefinitionC
       # Add new cohorts to BOTH the cohortData and pixelGroupMap
       ## reclassify pixel groups as burnt (0L)
       if (verbose > 0) {
-        message(blue("Post serotiny and resprouting"))
+        message(cli::col_blue("Post serotiny and resprouting"))
       }
 
       outs <- updateCohortData(
@@ -345,7 +345,7 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
     !is.null(fireROSRas),
     !is.null(fireCFBRas)
   )) {
-    message(red(paste0(
+    message(cli::col_red(paste0(
       "Biomass_regenerationPM is missing one/several of the following rasters:\n",
       "  fireRSORas, fireROSRas and fireCFBRas.\n",
       "  DUMMY RASTERS will be used - if this is not intended, please \n",
@@ -622,7 +622,7 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
       # Add new cohorts to BOTH the cohortData and pixelGroupMap
       ## reclassify pixel groups as burnt (0L)
       if (verbose > 0) {
-        message(blue("Post serotiny and resprouting"))
+        message(cli::col_blue("Post serotiny and resprouting"))
       }
 
       ## add the survivors cohorts to the serotiny/reprouting ones
@@ -847,7 +847,7 @@ PeatlandThermokarst <- function(thawedPixIDs = copy(sim$thawedPixIDs),
       treedThawedPixelTableSinceLastDisp
     ))
   } else {
-    message(cyan(
+    message(cli::col_cyan(
       "'thawedPixIDs' is NULL. Assuming no pixels have thawed",
       "and no thermokarst mortality"
     ))

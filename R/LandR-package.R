@@ -18,7 +18,7 @@
 "_PACKAGE"
 
 ## usethis namespace: start
-#' @importFrom crayon blue cyan green magenta red
+#' @importFrom cli col_blue col_cyan col_green col_magenta col_red
 #' @importFrom data.table as.data.table copy data.table dcast fifelse fread
 #' @importFrom data.table is.data.table last melt rbindlist
 #' @importFrom data.table set setattr setcolorder setDT setDTthreads

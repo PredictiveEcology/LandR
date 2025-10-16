@@ -242,7 +242,7 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv = NULL, sppEquivC
 
     test <- !any(unique(species$Area) %in% c("BSW", "BP", "MC"))
     if (test) {
-      message(red(
+      message(cli::col_red(
         "Areas in 'species$Area' do not match any of 'BSW', 'BP' or 'MC',",
         "\nno changes made to 'sim$species'."
       ))

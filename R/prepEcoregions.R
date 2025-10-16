@@ -72,7 +72,7 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
     ecoregionRst[pixelsToRm] <- NA
   }
 
-  message(blue("Make initial ecoregionGroups ", Sys.time()))
+  message(cli::col_blue("Make initial ecoregionGroups ", Sys.time()))
 
   if (!isTRUE(.compareRas(ecoregionRst, rstLCCAdj, res = TRUE, stopOnError = FALSE))) {
     stop("problem with rasters ecoregionRst and rstLCCAdj -- they don't have same metadata")
