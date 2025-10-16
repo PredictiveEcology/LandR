@@ -37,7 +37,7 @@ if (requireNamespace("googledrive", quietly = TRUE)) {
   speciesPresent <- speciesPresentFromSCANFI(dPath = "~/data/SCANFI")
 
   # To upload this:
-  speciesPresentRas <- terra::rast(speciesPresent)[[1]]
+  speciesPresentRas <- speciesPresent[[1]]
   fn <- "SpeciesPresentInCanadianForests_SCANFI.tif"
   writeRaster(speciesPresentRas, file = fn)
   zipFn <- gsub(".tif", ".zip", fn)
