@@ -14,7 +14,7 @@ speciesInStudyArea(
 )
 }
 \arguments{
-\item{studyArea}{A \verb{SpatialPolygons*} object used as the principle study region,
+\item{studyArea}{A \code{SpatVector} or \code{sf} polygons object used as the principle study region,
 passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
 \item{url}{A url to get a \code{speciesPresence} raster e.g., from \code{peciesPresentFromKNN}}
