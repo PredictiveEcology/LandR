@@ -290,7 +290,7 @@ speciesPresentFromNTEMS <- function(
 #'   speciesPresent <- speciesPresentFromSCANFI(dPath = "~/data/SCANFI")
 #'
 #'   # To upload this:
-#'   speciesPresentRas <- terra::rast(speciesPresent)[[1]]
+#'   speciesPresentRas <- speciesPresent[[1]]
 #'   fn <- "SpeciesPresentInCanadianForests_SCANFI.tif"
 #'   writeRaster(speciesPresentRas, file = fn)
 #'   zipFn <- gsub(".tif", ".zip", fn)
@@ -436,7 +436,7 @@ speciesInStudyArea <- function(
         if (dataSource == "KNN") {
           url <- "https://drive.google.com/file/d/1J8fN7clZeqjd7yhiDWi13uoCBL8OensF"
         } else if (dataSource == "SCANFI") {
-          url <- "https://drive.google.com/file/d/17_8RjJeSdqf2RevA0FrmE1_pi_b_PEX1"
+          url <- "https://drive.google.com/file/d/1CvasOBS2UbRUv1LocDn_gGTwcoAxIFkv"
         }
         speciesPres <- preProcess(url = url, destinationPath = dPath)
         speciesPresRas <- rasterRead(speciesPres$targetFilePath)
@@ -462,7 +462,6 @@ speciesInStudyArea <- function(
       }
     }
   }
-  warning("Popu_gra layer is not reliable due to data error.")
 
   return(list(speciesRas = bb, speciesList = species))
 }
