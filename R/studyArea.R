@@ -37,12 +37,12 @@ randomStudyArea <- utils::getFromNamespace("randomStudyArea", "SpaDES.tools")
 #'
 #' @export
 studyAreaEco <- function(studyArea = NULL, destinationPath = tempdir(),
-                         type = c("ECODISTRICT", "ECOREGION", "ECOPROVINCE", "ECOZONE")) {
-  stopifnot(inherits(studyArea, "sf") || inherits(studyArea, "SpatVector"))
+                         type = c("ECOZONE", "ECOPROVINCE", "ECOREGION", "ECODISTRICT")) {
+  stopifnot(is.null(studyArea) || inherits(studyArea, "sf") || inherits(studyArea, "SpatVector"))
 
   is_sf <- inherits(studyArea, "sf")
 
-  if (!is_sf) {
+  if (!is.null(studyArea) && !is_sf) {
     studyArea <- sf::st_as_sf(studyArea)
   }
 
@@ -60,10 +60,13 @@ studyAreaEco <- function(studyArea = NULL, destinationPath = tempdir(),
     fun = "sf::st_read",
     overwrite = TRUE
   )
-  eco <- eco[which(sapply(sf::st_intersects(eco, studyArea), length) > 0), ]
 
-  if (!is_sf) {
-    eco <- terra::vect(eco)
+  if (!is.null(studyArea)) {
+    eco <- eco[which(sapply(sf::st_intersects(eco, studyArea), length) > 0), ]
+
+    if (!is_sf) {
+      eco <- terra::vect(eco)
+    }
   }
 
   return(eco)

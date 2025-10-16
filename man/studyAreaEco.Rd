@@ -7,7 +7,7 @@
 studyAreaEco(
   studyArea = NULL,
   destinationPath = tempdir(),
-  type = c("ECODISTRICT", "ECOREGION", "ECOPROVINCE", "ECOZONE")
+  type = c("ECOZONE", "ECOPROVINCE", "ECOREGION", "ECODISTRICT")
 )
 }
 \arguments{

@@ -22,6 +22,7 @@
 * add `loadSCANFISpeciesLayers` and `prepSpeciesLayers_SCANFI` functions for loading SCANFI species data from Google drive;
 * add `adjustAgeToLongevity` to adjust initial cohort ages based on `longevity` for each species;
 * add `studyAreaEco` function to extend `studyArea` to ecological boundaries;
+  - `studyAreaEco` allows `studyArea = NULL`, uses `type = "ecozone"` by default;
 * update documentation and citations for `prepSpeciesLayers_*` functions;
 
 # LandR 1.1.5
