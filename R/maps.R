@@ -1498,11 +1498,11 @@ loadSCANFISpeciesLayers <- function(
         terra::writeRaster(r, outFile, overwrite = TRUE)
         return(rast(outFile))
       },
-      targetFiles,
-      URLs,
-      file.path(dPath, postProcessedFilenamesWithStudyAreaName)
+      tf = targetFiles,
+      url = URLs,
+      outFile = file.path(dPath, postProcessedFilenamesWithStudyAreaName)
     ) |>
-      Cache(quick = c("targetFile", "destinationPath"))
+      Cache()
   } else {
     speciesLayers <- Map(
       function(tf, url, outFile) {
@@ -1516,11 +1516,11 @@ loadSCANFISpeciesLayers <- function(
 
         return(r_resampled)
       },
-      file.path(dPath, targetFiles),
-      URLs,
-      file.path(oPath, postProcessedFilenamesWithStudyAreaName)
+      tf = file.path(dPath, targetFiles),
+      url = URLs,
+      outFile = file.path(oPath, postProcessedFilenamesWithStudyAreaName)
     ) |>
-      Cache(quick = c("targetFile", "writeTo", "destinationPath"))
+      Cache()
   }
 
   ## appending file name structure to eliminate double matches for subspecies:
