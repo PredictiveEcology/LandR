@@ -11,3 +11,5 @@
 ^LICENSE$
 ^man-roxygen$
 ^\.secret$
+^[.]?air[.]toml$
+^\.vscode$

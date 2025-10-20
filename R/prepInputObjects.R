@@ -370,6 +370,12 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' data to update ages of recently burned pixels. To suppress this, pass NULL/NA `fireURL`
 #'
 #' @param ... additional arguments passed to [reproducible::prepInputs()]
+#' @param dataSource Character. One of KNN, NTEMS, or SCANFI.
+#'   Defaults to KNN for `dataYear` 2001.
+#'   Also available:
+#'   - KNN for `dataYear` 2011;
+#'   - SCANFI for `dataYear` 2020.
+#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020 for SCANFI.
 #' @param ageURL url where age map is downloaded
 #' @param ageFun passed to 'fun' arg of [reproducible::prepInputs()] of stand age map
 #' @param maskWithRTM passed to [reproducible::prepInputs()] of stand age map
@@ -439,7 +445,9 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' )
 #' attr(standAge, "imputedPixID")
 #' }
-prepInputsStandAgeMap <- function(..., ageURL = NULL,
+prepInputsStandAgeMap <- function(..., dataSource = "KNN",
+                                  dataYear = 2001,
+                                  ageURL = NULL,
                                   ageFun = "terra::rast",
                                   maskWithRTM = TRUE,
                                   method = "bilinear",
@@ -461,12 +469,30 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
   }
 
   if (is.null(ageURL)) {
-    ageURL <- paste0(
-      "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-      "canada-forests-attributes_attributs-forests-canada/",
-      "2001-attributes_attributs-2001/",
-      "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif"
-    )
+    if (dataSource == "KNN") {
+      if (dataYear == "2011") {
+        ageURL <- paste0(
+          "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+          "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/",
+          "NFI_MODIS250m_2011_kNN_Structure_Stand_Age_v1.tif")
+      } else if (dataYear == "2001") {
+        ageURL <- paste0(
+          "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+          "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/",
+          "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif")
+      }
+      else {
+        stop("KNN data is available for 2001 or 2011 only")
+      }
+    } else if (dataSource == "SCANFI") {
+      if (dataYear == "2020") {
+        ageURL <- paste0(
+          "https://drive.google.com/file/d/1OdZ7Tznk53KceEyt9dFOBOkxDHEX5X0U")
+      }
+      else {
+        stop("SCANFI data is currently available for 2020 only")
+      }
+    }
   }
 
   getFires <- if (is.null(firePerimeters) &&
@@ -514,7 +540,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
   }
 
   if (isFALSE(is.null(firePerimeters))) {
-    standAgeMap <- replaceAgeInFires(standAgeMap, firePerimeters, startTime)
+    standAgeMap <- replaceAgeInFires(standAgeMap, firePerimeters, startTime = dataYear)
     imputedPixID <- attr(standAgeMap, "imputedPixID")
   }
 
@@ -537,7 +563,7 @@ prepInputsStandAgeMap <- function(..., ageURL = NULL,
 #'   - NTEMS for `dataYear` 2015;
 #'   - SCANFI for `dataYear` 2000, 2010, or 2020.
 #'
-#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2000, 2010, or 2020 for SCANFI.
+#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN, 2015 for NTEMS, or 2000, 2010, or 2020 for SCANFI.
 #'
 #' @param ... arguments passed to [reproducible::prepInputs()] and [reproducible::Cache()].
 #' If the following arguments are not provided, the following values will be used:
@@ -587,13 +613,13 @@ prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
     } else if (dataSource == "SCANFI") {
       if (dataYear == "2000") {
         Args$url <- paste0(
-          "https://drive.google.com/file/d/1B8cm6_YOnha-g1AFSdR1sIqOJ9bCmk1G")
+          "https://drive.google.com/file/d/1lubpotPt-Tr_x1PHnLP6YL36fGg5Ic6h")
       } else if (dataYear == "2010") {
         Args$url <- paste0(
-          "https://drive.google.com/file/d/11v0ZaBzhcVQprhFuL-L8FJkYOtuAcwc3")
+          "https://drive.google.com/file/d/1J3izr9d0IaUs0H4GWJNbn6rCan-Or7Jf")
       } else if (dataYear == "2020") {
         Args$url <- paste0(
-          "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/SCANFI/v1/SCANFI_att_biomass_SW_2020_v1.2.tif")
+          "https://drive.google.com/file/d/1lexPzmm4zeY_5nljoNmsIlzrZYd1TpG_")
       }
       else {
         stop("SCANFI data is currently available for 2000, 2010, and 2020 only")
@@ -702,48 +728,58 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
   #you can crop without worrying about geometry
   preProcessArgs$cropTo <- rasterToMatch
 
+  # Load polygons
   allFires <- do.call(prepInputs, append(list(fun = fun), preProcessArgs))
 
   #the reason this isn't combined into one function is due to geometry issues in NFDB
   allFires <- allFires[terra::is.valid(allFires), ] ## drop invalid geometries
 
-  ## This may potentially result in dots intended for postProcess being lost.
-  a <- do.call(postProcess, append(list(x = allFires), postProcessArgs)) |>
-    st_as_sf() ## Cache() takes vastly more time and RAM explodes, killing R rsession
-
-  if (isTRUE(grepl("st_read", dots$fun))) {
-    a <- st_zm(a)
-  }
-
-  if (nrow(a) > 0) {
-    gg <- st_cast(a, "MULTIPOLYGON") # collapse them into a single multipolygon
-    d <- st_transform(gg, crs(rasterToMatch))
-    if (!is(d[[fireField]], "numeric")) {
-      warning("Chosen fireField will be coerced to numeric")
-      d[[fireField]] <- as.numeric(as.factor(d[[fireField]]))
-    }
-    if (is(rasterToMatch, "SpatRaster")) {
-      if (!is(d, "SpatVector")) {
-        d <- vect(d)
-      }
-
-      #fun = max to take the most recent fire year
-      fireRas <- terra::rasterize(d, rasterToMatch, field = fireField, fun = max)
-      fireRas[!is.na(terra::values(fireRas, mat = FALSE)) &
-                terra::values(fireRas, mat = FALSE) < earliestYear] <- NA
-    } else {
-      .requireNamespace("fasterize", stopOnFALSE = TRUE)
-      fireRas <- fasterize::fasterize(d, raster = rasterToMatch, field = fireField)
-      fireRas[!is.na(as.vector(fireRas[])) & as.vector(fireRas[]) < earliestYear] <- NA
-    }
-  } else {
-    if (is(rasterToMatch, "SpatRaster")) {
+  # If no valid polygons, return empty raster
+  if (nrow(allFires) == 0) {
+    if (inherits(rasterToMatch, "SpatRaster")) {
       fireRas <- rast(rasterToMatch, vals = NA)
     } else {
       fireRas <- raster::raster(rasterToMatch)
       fireRas[] <- NA
     }
+    return(fireRas)
   }
+
+  # Transform to raster CRS if needed
+  if (!identical(crs(allFires), crs(rasterToMatch))) {
+    allFires <- terra::project(allFires, crs(rasterToMatch))
+  }
+
+  if (isTRUE(grepl("vect", fun))) {
+    allFires <- st_as_sf(allFires)
+  }
+
+  allFires <- st_zm(allFires)
+
+
+  allFires <- st_cast(allFires, "MULTIPOLYGON") # collapse them into a single multipolygon
+  allFires <- st_transform(allFires, crs(rasterToMatch))
+  if (!is(allFires[[fireField]], "numeric")) {
+    warning("Chosen fireField will be coerced to numeric")
+    d[[fireField]] <- as.numeric(as.factor(d[[fireField]]))
+  }
+  if (is(rasterToMatch, "SpatRaster")) {
+    if (!is(allFires, "SpatVector")) {
+      allFires <- vect(allFires)
+    }
+
+    #fun = max to take the most recent fire year
+    fireRas <- terra::rasterize(allFires, rasterToMatch, field = fireField, fun = max)
+    fireRas[!is.na(terra::values(fireRas, mat = FALSE)) &
+              terra::values(fireRas, mat = FALSE) < earliestYear] <- NA
+  } else {
+    .requireNamespace("fasterize", stopOnFALSE = TRUE)
+    fireRas <- fasterize::fasterize(d, raster = rasterToMatch, field = fireField)
+    fireRas[!is.na(as.vector(fireRas[])) & as.vector(fireRas[]) < earliestYear] <- NA
+  }
+
+  ## This may potentially result in dots intended for postProcess being lost.
+  fireRas <- do.call(postProcess, append(list(x = fireRas), postProcessArgs))
 
   return(fireRas)
 }

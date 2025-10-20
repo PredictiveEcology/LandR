@@ -866,7 +866,7 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
     speciesLayers <- speciesLayers[!noData]
   }
 
-  # remove "little data" first
+  # remove "little data" next
   layersWdata <- sapply(speciesLayers, function(xx) if (maxFn(xx) < thresh) FALSE else TRUE)
   if (sum(!layersWdata) > 0) {
     sppKeep <- names(speciesLayers)[layersWdata]

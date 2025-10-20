@@ -107,16 +107,12 @@ speciesPresentFromKNN <- function(year = 2011, dPath = asPath("."), res = 2000, 
   return(c(speciesPres, numSp))
 }
 
-
-####NTEMS ####
-
-#
 #' Make a species factor raster based on NTEMS Data
 #'
 #' This will download NTEMS dominant species layer for 2011 for forests of Canada, and make
 #' a factor raster at resolution provided by `res` (larger is faster).
 #'
-#' @param dPath A character string indicating where to download all the KNN layers
+#' @param dPath A character string indicating where to download all the NTEMS layers
 #'
 #' @param res The resolution (one dimension, in m) for the resulting raster
 #'

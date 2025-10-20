@@ -16,16 +16,16 @@ jobs:
     if: "!contains(github.event.commits[0].message, '[skip-ci]')"
     runs-on: ${{ matrix.config.os }}
 
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }}) (nosuggests ${{ matrix.config.nosuggests }})
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }}, nosuggests ${{ matrix.config.nosuggests }})
 
     strategy:
       fail-fast: false
       matrix:
         config:
-          - {os: macOS-latest,   nosuggests: false, r: 'release'}
-          - {os: windows-latest, nosuggests: false, r: 'devel'}
-          - {os: windows-latest, nosuggests: false, r: 'release'}
-          - {os: windows-latest, nosuggests: false, r: 'oldrel'}
+          - {os: macOS-latest,    nosuggests: false, r: 'release'}
+          - {os: windows-latest,  nosuggests: false, r: 'devel'}
+          - {os: windows-latest,  nosuggests: false, r: 'release'}
+          - {os: windows-latest,  nosuggests: false, r: 'oldrel'}
           - {os: ubuntu-latest,   nosuggests: false, r: 'devel'}
           - {os: ubuntu-latest,   nosuggests: false, r: 'release'}
           - {os: ubuntu-latest,   nosuggests: true,  r: 'release'}
@@ -57,26 +57,13 @@ jobs:
             any::sf
             any::XML
             BioSIM=?ignore
-            fastshp=?ignore
-            map=?ignore
             NLMR=?ignore
-            rgdal=?ignore
-            rgeos=?ignore
-            PredictiveEcology/quickPlot@development
-            PredictiveEcology/reproducible@development
-            PredictiveEcology/Require@development
-            PredictiveEcology/SpaDES.core@development
-            PredictiveEcology/SpaDES.tools@development
 
       - name: Install additional package dependencies
         run: |
           pak::pkg_install("remotes")
           remotes::install_github("RNCan/BioSimClient_R")
-          remotes::install_github("s-u/fastshp")
           remotes::install_github("ropensci/NLMR")
-          install.packages("rgdal", repos = "https://predictiveecology.r-universe.dev")
-          install.packages("rgeos", repos = "https://predictiveecology.r-universe.dev")
-          remotes::install_github("PredictiveEcology/map@development")
         shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2

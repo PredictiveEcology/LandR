@@ -17,6 +17,7 @@
 * added new `prepInputs_NTEMS_DominantSpecies` function for importing dominant species layers from NTEMS website
 * updated `speciesInStudyArea` function to create `dataSource` parameter to direct function to download KNN or NTEMS factor raster from google drive and create associated species list  
 * updated `prepRawBiomassMap` function to allow for incorporation of NTEMS or SCANFI biomass
+* updated `prepInputsStandAgeMap` function to allow for incorporation of SCANFI age map
 
 # LandR 1.1.5
 
@@ -46,7 +47,7 @@
 * new function to update the `speciesEcoregion` table (brought over from `Biomass_speciesParameters` module), using estimated `inflationFactor` and `mANPPproportion` to adjust `maxB` and `maxANPP`, respectively; 
 * new functions to simulate disturbances - `FireDisturbance` and `FireDisturbancePM` pulled from;
 `Biomass_regeneration` and `Biomass_regenerationPM` modules, respectively;
-* `overlayLCCs()` now works correctly with terra (#99);
+* `overlayLCCs()` now works correctly with `terra` (#99);
 * fixed partial argument match warnings (#100);
 * new function `standAgeMapGenerator()` to produce `standAgeMap` from `cohortData`;
 * new functions `prepInputs_NTEMS_Nonforest()` and `prepInputs_NTEMS_LCC_FAO()`;
