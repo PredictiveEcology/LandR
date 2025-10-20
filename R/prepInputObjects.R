@@ -485,7 +485,7 @@ prepInputsStandAgeMap <- function(
   }
 
   #track pixels that are imputed
-  allImputedPix <- integer(0)
+  allImputedPixels <- integer(0)
 
   if (dataSource == "SCANFI") {
     #SCANFI has only one dataYear so age is adjusted using NTEMS disturbance layers
@@ -497,7 +497,8 @@ prepInputsStandAgeMap <- function(
                               method = method,
                               fun = ageFun,
                               datatype = datatype,
-                              to = rasterToMatch
+                              to = rasterToMatch,
+                              ...
     )
 
     if (dataYear != "2020") {
@@ -553,7 +554,7 @@ prepInputsStandAgeMap <- function(
       #some zeroes remain -
       newStandAgeMap[newStandAgeMap < 0] <- 0
       standAgeMap <- newStandAgeMap
-      allImputedPix <- c(newVals$pixelID)
+      allImputedPixels <- c(newVals$pixelID)
       rm(newStandAgeMap, baseKNN, harvest_NTEMS, fire_NTEMS)
 
     }
@@ -642,7 +643,7 @@ prepInputsStandAgeMap <- function(
   }
 
   if (!is.null(writeTo)) {
-    standAgeMap <- writeTo(standAgeMap, writeTo)
+    standAgeMap <- writeTo(standAgeMap, writeTo, ...)
   }
 
   attr(standAgeMap, "imputedPixID") <- allImputedPixels
