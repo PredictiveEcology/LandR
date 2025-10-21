@@ -670,8 +670,8 @@ prepInputsStandAgeMap <- function(
 #' @param ... arguments passed to [reproducible::prepInputs()] and [reproducible::Cache()].
 #' If the following arguments are not provided, the following values will be used:
 #'   \itemize{
-#'     \item{`url`: by default, the 2001 kNN stand biomass map is downloaded from
-#'       the NRCan National Forest Inventory}
+#'     \item{`url`: by default, the 2020 SCANFI stand biomass map is downloaded from
+#'       a private google drive }
 #'     \item{`useSAcrs` and `projectTo`: `FALSE` and `NA`}
 #'     \item{`method`: `"bilinear"`}
 #'     \item{`datatype`: `"INT2U"`}
@@ -682,7 +682,7 @@ prepInputsStandAgeMap <- function(
 #' @return a `rawBiomassMap` raster
 #'
 #' @export
-prepRawBiomassMap <- function(dataSource = "KNN", dataYear = "2011", ...) {
+prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", ...) {
   Args <- list(...)
 
   if (!(dataSource %in% c("KNN", "NTEMS", "SCANFI"))) {

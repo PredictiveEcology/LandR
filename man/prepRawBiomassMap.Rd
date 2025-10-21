@@ -4,7 +4,7 @@
 \alias{prepRawBiomassMap}
 \title{Create \code{rawBiomassMap}}
 \usage{
-prepRawBiomassMap(dataSource = "KNN", dataYear = "2011", ...)
+prepRawBiomassMap(dataSource = "SCANFI", dataYear = "2020", ...)
 }
 \arguments{
 \item{dataSource}{Character. One of KNN, NTEMS, or SCANFI.
@@ -21,8 +21,8 @@ Also available:
 \item{...}{arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} and \code{\link[reproducible:Cache]{reproducible::Cache()}}.
 If the following arguments are not provided, the following values will be used:
 \itemize{
-\item{\code{url}: by default, the 2001 kNN stand biomass map is downloaded from
-the NRCan National Forest Inventory}
+\item{\code{url}: by default, the 2020 SCANFI stand biomass map is downloaded from
+a private google drive }
 \item{\code{useSAcrs} and \code{projectTo}: \code{FALSE} and \code{NA}}
 \item{\code{method}: \code{"bilinear"}}
 \item{\code{datatype}: \code{"INT2U"}}
