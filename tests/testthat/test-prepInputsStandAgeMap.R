@@ -29,5 +29,11 @@ testthat::test_that("prepInputsStandAgeMap work", {
                                 rasterToMatch = goodRas, destinationPath = td)
   expect_true(length(attr(out3, "imputedPix")) != length(attr(out2, "imputedPix")))
 
+  out4 <- prepInputsStandAgeMap(dataSource = "SCANFI",
+                                dataYear = 2020, studyArea = goodPoly,
+                                rasterToMatch = goodRas, destinationPath = td,
+                                overwrite = TRUE, fireURL = NULL)
+  expect_true(length(attr(out4, "imputedPix")) != length(attr(out, "imputedPix")))
+
 
 })
