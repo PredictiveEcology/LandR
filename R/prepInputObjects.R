@@ -1,6 +1,8 @@
 utils::globalVariables(c(
-  "cover", "ecoregionGroup", "establishprob", "lcc", "logAge", "longevity",
-  "maxB", "maxANPP", "postfireregen", "resproutprob", "speciesCode"
+  "cover", "distYear", "ecoregionGroup", "establishprob", "fireYear",
+  "harvestYear", "lcc", "logAge", "longevity", "newAge",
+  "maxB", "maxANPP", "postfireregen", "resproutprob", "SCANFIage", "speciesCode"
+
 ))
 
 #' Check if all species in have trait values
@@ -382,17 +384,28 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' A separate [reproducible::prepInputs()] call will source Canadian National Fire Data Base
 #' data to update ages of recently burned pixels. To suppress this, pass NULL/NA `fireURL`
 #'
-#' @param ... additional arguments passed to [reproducible::prepInputs()]
 #' @param dataSource Character. One of KNN, NTEMS, or SCANFI.
-#'   Defaults to KNN for `dataYear` 2001.
+#'   Defaults to SCANFI for `dataYear` 2020.
 #'   Also available:
-#'   - KNN for `dataYear` 2011;
-#'   - SCANFI for `dataYear` 2020.
-#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020 for SCANFI.
-#' @param ageURL url where age map is downloaded
+#'   - KNN for `dataYear` 2011; 2001
+#' When `dataSource = "SCANFI"`:
+#' - For `dataYear = 2020`, the SCANFI stand age map for 2020 is used directly.
+#' - For `dataYear != 2020`, the 2020 SCANFI map is **back-adjusted** to the requested
+#'   `dataYear` using NTEMS fire and harvest disturbance layers (1985–2020) and the
+#'   2001 kNN stand age map.
+#'   Disturbed pixels are assigned ages based on year of disturbance and kNN-based
+#'   estimates where applicable, while undisturbed areas are aged by subtracting
+#'   the difference between `dataYear` and 2020. Negative ages are set to zero.
+#'   This process fills missing or inconsistent SCANFI values and records pixel IDs
+#'   that were imputed or adjusted.
+#' A separate [reproducible::prepInputs()] call can be used to source Canadian
+#' National Fire Database (NFDB) fire polygons, allowing further stand age correction
+#' for burned areas. To suppress this, set `fireURL = NULL` or `fireURL = NA`.
+#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020/2000/2010 for SCANFI.
+#' @param ageURL URL for age map download. Will be supplied based on `dataSource` and `dataYear`
 #' @param ageFun passed to 'fun' arg of [reproducible::prepInputs()] of stand age map
 #' @param maskWithRTM passed to [reproducible::prepInputs()] of stand age map
-#' @param method passed to [reproducible::prepInputs()] of stand age map
+#' @param method passed to [reproducible::prepInputs()] for reprojecting the stand age map
 #' @param datatype passed to [reproducible::prepInputs()] of stand age map
 #' @param writeTo passed to [reproducible::prepInputs()] of stand age map
 #' @param firePerimeters fire raster layer fire year values.
@@ -405,7 +418,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #'   is missing.
 #' @template destinationPath
 #' @template rasterToMatch
-#' @template startTime
+#' @param ... additional arguments passed to [reproducible::prepInputs()]
 #'
 #' @return a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
 #'  for which ages were corrected. If no corrections were applied the attribute vector is `integer(0)`.
@@ -443,20 +456,14 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #'   rasterToMatch = ras2match
 #' )
 #'
-#' standAge <- prepInputsStandAgeMap(
-#'   destinationPath = tempDir,
-#'   firePerimeters = firePerimeters,
-#'   rasterToMatch = ras2match
+#' ## Example adjusting SCANFI to 2000 using NTEMS and kNN
+#' standAge2000 <- prepInputsStandAgeMap(
+#'   destinationPath = tempdir(),
+#'   dataSource = "SCANFI",
+#'   dataYear = 2000,
+#'   rasterToMatch = rast(res = 250, ext = ext(vect(randomStudyArea(size = 1e7))))
 #' )
-#' attr(standAge, "imputedPixID")
-#'
-#' ## not providing firePerimeters is still possible, but will be deprecated
-#' ## in this case 'rasterToMatch' MUST be provided
-#' standAge <- prepInputsStandAgeMap(
-#'   destinationPath = tempDir,
-#'   rasterToMatch = ras2match
-#' )
-#' attr(standAge, "imputedPixID")
+#' attr(standAge2000, "imputedPixID")
 #' }
 prepInputsStandAgeMap <- function(
   ...,
@@ -476,8 +483,7 @@ prepInputsStandAgeMap <- function(
   ),
   fireFun = "terra::vect",
   fireField = "YEAR",
-  rasterToMatch = NULL,
-  startTime
+  rasterToMatch = NULL
 ) {
   dots <- list(...)
   if (is.null(writeTo) && !is.null(dots$filename2)) {
@@ -530,9 +536,9 @@ prepInputsStandAgeMap <- function(
                             destinationPath = destinationPath,
                             to = standAgeMap,
                             method = "near")
-      newVals <- data.table(fireYear = as.vector(fire_NTEMS),
-                            harvestYear = as.vector(harvest_NTEMS),
-                            pixelID = 1:ncell(standAgeMap))
+      newVals <- data.table::data.table(fireYear = as.vector(fire_NTEMS),
+                                        harvestYear = as.vector(harvest_NTEMS),
+                                        pixelID = 1:ncell(standAgeMap))
       newVals <- newVals[!is.na(fireYear) | !is.na(harvestYear),
                          .(distYear = min(fireYear, harvestYear, na.rm = TRUE)),
                          .(pixelID)]
@@ -549,14 +555,11 @@ prepInputsStandAgeMap <- function(
       SCANFI_AgeAdj <- dataYear - 2020
       newStandAgeMap <- standAgeMap + SCANFI_AgeAdj
       newStandAgeMap[newVals$pixelID] <- newVals$newAge
-
-
       #some zeroes remain -
       newStandAgeMap[newStandAgeMap < 0] <- 0
       standAgeMap <- newStandAgeMap
       allImputedPixels <- c(newVals$pixelID)
       rm(newStandAgeMap, baseKNN, harvest_NTEMS, fire_NTEMS)
-
     }
     #if baseYear is 2020, proceed with 2020 standAgeMap
 

@@ -6,8 +6,8 @@
 \usage{
 prepInputsStandAgeMap(
   ...,
-  dataSource = "KNN",
-  dataYear = 2001,
+  dataSource = "SCANFI",
+  dataYear = 2020,
   ageURL = NULL,
   ageFun = "terra::rast",
   maskWithRTM = TRUE,
@@ -20,30 +20,41 @@ prepInputsStandAgeMap(
     "fire_poly/current_version/NFDB_poly.zip"),
   fireFun = "terra::vect",
   fireField = "YEAR",
-  rasterToMatch = NULL,
-  startTime
+  rasterToMatch = NULL
 )
 }
 \arguments{
 \item{...}{additional arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}}
 
 \item{dataSource}{Character. One of KNN, NTEMS, or SCANFI.
-Defaults to KNN for \code{dataYear} 2001.
+Defaults to SCANFI for \code{dataYear} 2020.
 Also available:
 \itemize{
-\item KNN for \code{dataYear} 2011;
-\item SCANFI for \code{dataYear} 2020.
+\item KNN for \code{dataYear} 2011; 2001
+When \code{dataSource = "SCANFI"}:
+\item For \code{dataYear = 2020}, the SCANFI stand age map for 2020 is used directly.
+\item For \code{dataYear != 2020}, the 2020 SCANFI map is \strong{back-adjusted} to the requested
+\code{dataYear} using NTEMS fire and harvest disturbance layers (1985–2020) and the
+2001 kNN stand age map.
+Disturbed pixels are assigned ages based on year of disturbance and kNN-based
+estimates where applicable, while undisturbed areas are aged by subtracting
+the difference between \code{dataYear} and 2020. Negative ages are set to zero.
+This process fills missing or inconsistent SCANFI values and records pixel IDs
+that were imputed or adjusted.
+A separate \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} call can be used to source Canadian
+National Fire Database (NFDB) fire polygons, allowing further stand age correction
+for burned areas. To suppress this, set \code{fireURL = NULL} or \code{fireURL = NA}.
 }}
 
-\item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020 for SCANFI.}
+\item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020/2000/2010 for SCANFI.}
 
-\item{ageURL}{url where age map is downloaded}
+\item{ageURL}{URL for age map download. Will be supplied based on \code{dataSource} and \code{dataYear}}
 
 \item{ageFun}{passed to 'fun' arg of \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} of stand age map}
 
 \item{maskWithRTM}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} of stand age map}
 
-\item{method}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} of stand age map}
+\item{method}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} for reprojecting the stand age map}
 
 \item{datatype}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} of stand age map}
 
@@ -66,9 +77,6 @@ is missing.}
 \item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).
 \code{rasterToMatch} should correspond to \code{studyArea} if used.}
-
-\item{startTime}{date of the last fire year to be considered (e.g., start of fire
-period counting backwards). If missing, last fire year available will be used.}
 }
 \value{
 a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
@@ -110,19 +118,13 @@ firePerimeters <- Cache(prepInputsFireYear,
   rasterToMatch = ras2match
 )
 
-standAge <- prepInputsStandAgeMap(
-  destinationPath = tempDir,
-  firePerimeters = firePerimeters,
-  rasterToMatch = ras2match
+## Example adjusting SCANFI to 2000 using NTEMS and kNN
+standAge2000 <- prepInputsStandAgeMap(
+  destinationPath = tempdir(),
+  dataSource = "SCANFI",
+  dataYear = 2000,
+  rasterToMatch = rast(res = 250, ext = ext(vect(randomStudyArea(size = 1e7))))
 )
-attr(standAge, "imputedPixID")
-
-## not providing firePerimeters is still possible, but will be deprecated
-## in this case 'rasterToMatch' MUST be provided
-standAge <- prepInputsStandAgeMap(
-  destinationPath = tempDir,
-  rasterToMatch = ras2match
-)
-attr(standAge, "imputedPixID")
+attr(standAge2000, "imputedPixID")
 }
 }
