@@ -30,6 +30,7 @@ Imports:
     data.table,
     Formula,
     fpCompare,
+    cowplot,
     ggplot2,
     ggpubr,
     ggspatial,
@@ -39,6 +40,7 @@ Imports:
     methods,
     MuMIn (>= 1.42.5),
     parallel,
+    patchwork,
     pemisc (>= 0.0.4.9011),
     quickPlot (>= 1.0.2.9001),
     raster,
@@ -48,6 +50,7 @@ Imports:
     sp,
     SpaDES.tools (>= 2.0.4),
     stats,
+    stringr,
     terra,
     tidyterra,
     tools,
@@ -102,6 +105,7 @@ LazyData: true
 Collate: 
     'LANDIS-II-tables.R'
     'LandR-package.R'
+    'SummarizeRasterFigures.R'
     'assertions.R'
     'biomodWrappers.R'
     'biosim.R'
