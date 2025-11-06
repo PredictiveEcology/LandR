@@ -33,7 +33,6 @@
 #' @importFrom ggplot2 scale_fill_viridis_c scale_fill_viridis_d
 #' @importFrom ggplot2 scale_linetype_manual scale_x_discrete
 #' @importFrom ggplot2 stat stat_summary sym theme theme_bw theme_classic unit
-#' @importFrom ggpubr theme_pubr
 #' @importFrom ggspatial annotation_north_arrow layer_spatial north_arrow_minimal
 #' @importFrom grDevices colorRampPalette dev.off png
 #' @importFrom httr2 request

@@ -2,6 +2,7 @@
 
 * drop support for R 4.2 due to changes in dependency packages;
 * remove deprecated package `crayon` in favour of `cli` instead;
+* move `ggpubr` to Suggests;
 * SCANFI and 2020 now default data source and year for stand age and biomass functions
 * `dropTerm` now can deal with random effects better (#105);
 * `prepRawBiomassMap` - needed `overwrite = TRUE` for cases where download was corrupt;
