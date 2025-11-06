@@ -36,7 +36,7 @@ testthat::test_that("test prepRawBiomassMap", {
   ## new args
   reproducible::clearCache(userTags = "test", ask = FALSE)
   testthat::expect_warning({
-  rawBiomassMap <- prepRawBiomassMap(
+    rawBiomassMap <- prepRawBiomassMap(
       url = biomassURL,
       cropTo = studyArea,
       maskTo = studyArea,
@@ -135,10 +135,10 @@ testthat::test_that("test prepRawBiomassMap", {
 
   ## SCANFI
   SCANFI2000 <- prepRawBiomassMap(to = studyTest,
-                               dataSource = "SCANFI", dataYear = 2000)
+                                  dataSource = "SCANFI", dataYear = 2000)
   SCANFI2000_mean <- terra::global(SCANFI2000, mean, na.rm = TRUE)
   SCANFI2020 <- prepRawBiomassMap(to = studyTest,
-                               dataSource = "SCANFI", dataYear = 2020)
+                                  dataSource = "SCANFI", dataYear = 2020)
   SCANFI2020_mean <- terra::global(SCANFI2020, mean, na.rm = TRUE)
   testthat::expect_true(compareGeom(SCANFI2000, SCANFI2000, rowcol = TRUE, res = TRUE, stopOnError = FALSE))
   testthat::expect_true(SCANFI2020_mean < SCANFI2000_mean)
@@ -146,7 +146,7 @@ testthat::test_that("test prepRawBiomassMap", {
 
   ## cache
   knn2001_c1 <- prepRawBiomassMap(to = studyTest, userTags = "cTest",
-                                 dataSource = "KNN", dataYear = 2001)
+                                  dataSource = "KNN", dataYear = 2001)
   mess1 <- capture_messages({
     knn2001_c2 <- prepRawBiomassMap(to = studyTest, userTags = "cTest",
                                     dataSource = "KNN", dataYear = 2001)
