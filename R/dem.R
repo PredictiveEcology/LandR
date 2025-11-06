@@ -6,7 +6,7 @@
 #' @template rasterToMatch
 #' @template destinationPath
 #'
-#' @return `RasterLayer`
+#' @return `SpatRaster`
 #'
 #' @export
 prepInputsCanDEM <- function(studyArea, rasterToMatch, destinationPath) {
