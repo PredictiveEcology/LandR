@@ -52,7 +52,7 @@
 #' @importFrom reproducible prepInputs preProcess projectInputs
 #' @importFrom reproducible rasterRead
 #' @importFrom reproducible writeOutputs writeTo
-#' @importFrom sf as_Spatial st_as_sf st_cast st_coordinates  st_intersects st_crs
+#' @importFrom sf as_Spatial st_as_sf st_cast st_coordinates st_intersects st_crs
 #' @importFrom sf st_read st_transform st_zm
 #' @importFrom sp CRS proj4string SpatialPoints
 #' @importFrom SpaDES.tools inRange neutralLandscapeMap randomPolygons rasterizeReduced runifC
