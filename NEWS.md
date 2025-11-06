@@ -1,8 +1,8 @@
 # LandR (development version)
 
-* SCANFI and 2020 now default data source and year for stand age and biomass functions
 * drop support for R 4.2 due to changes in dependency packages;
 * remove deprecated package `crayon` in favour of `cli` instead;
+* SCANFI and 2020 now default data source and year for stand age and biomass functions
 * `dropTerm` now can deal with random effects better (#105);
 * `prepRawBiomassMap` - needed `overwrite = TRUE` for cases where download was corrupt;
 * `prepRawBiomassMap` needs `httr2` package as remote site is failing with `download.file`;

@@ -23,6 +23,7 @@
 #' @importFrom data.table is.data.table last melt rbindlist
 #' @importFrom data.table set setattr setcolorder setDT setDTthreads
 #' @importFrom data.table setkey setkeyv setnames setorderv
+#' @importFrom Formula Formula
 #' @importFrom fpCompare %==% %>>% %<<% %<=%
 #' @importFrom ggplot2 aes coord_equal coord_sf element_blank element_text facet_wrap
 #' @importFrom ggplot2 geom_bar geom_hline geom_line geom_point labs geom_raster geom_ribbon geom_sf
