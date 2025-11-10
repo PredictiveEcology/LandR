@@ -257,6 +257,8 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette = "Accent")
 }
 
 plotFunction <- function(ras, studyArea, limits = NULL) {
+  .requireNamespace("ggpubr", stopOnFALSE = TRUE)
+
   if (is.null(limits)) {
     limits <- range(as.vector(ras[]), na.rm = TRUE)
   }
@@ -270,7 +272,7 @@ plotFunction <- function(ras, studyArea, limits = NULL) {
       location = "tr",
       which_north = "true"
     ) +
-    theme_pubr(legend = "bottom") +
+    ggpubr::theme_pubr(legend = "bottom") +
     theme(plot.margin = unit(c(0, 0, 0, 0), units = "mm")) +
     scale_fill_distiller(
       palette = "Greys",
