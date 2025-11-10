@@ -23,12 +23,12 @@ installBioSIM <- function(lib) {
 #' @seealso [prepInputsCanDEM()]
 BioSIM_extractPoints <- function(x) {
   nonNA <- which(!is.na(x[]))
-  xy <- xyFromCell(x, cell = nonNA)
-  spxy <- SpatialPoints(xy, proj4string = crs(x))
+  xy <- terra::xyFromCell(x, cell = nonNA)
+  spxy <- sp::SpatialPoints(xy, proj4string = crs(x))
   sfxy <- sf::st_as_sf(spxy)
   sfxy <- sf::st_transform(sfxy, crs = 4326)
 
-  dt <- data.table(Name = paste0("ID", seq_len(NROW(sfxy))), st_coordinates(sfxy), Elev = x[nonNA])
+  dt <- data.table(Name = paste0("ID", seq_len(NROW(sfxy))), sf::st_coordinates(sfxy), Elev = x[nonNA])
   setnames(dt, "X", "Long")
   setnames(dt, "Y", "Lat")
   dt
@@ -76,8 +76,8 @@ BioSIM_getWindAnnual <- function(dem, years, climModel = "GCM4", rcp = "RCP45") 
       windYr <- wind[Year == yr]
 
       # Convert BioSIM data to Vector dataset
-      sfWind <- SpatialPoints(wind[Year == yr, c("Longitude", "Latitude")],
-                              proj4string = CRS("+init=epsg:4326")) |>
+      sfWind <- sp::SpatialPoints(wind[Year == yr, c("Longitude", "Latitude")],
+                                  proj4string = sp::CRS("+init=epsg:4326")) |>
         sf::st_as_sf() |>
         sf::st_transform(crs = sf::st_crs(dem))
       cells <- cellFromXY(dem, sf::st_coordinates(sfWind))
@@ -177,8 +177,7 @@ BioSIM_getMPBSLR <- function(dem, years, SLR = "R", climModel = "GCM4", rcp = "R
     st <- system.time({
       ## TODO: need to split, apply, and recombine when nrow(locations) > 5000
       slr <- lapply(years, function(yr) { ## TODO: use future_lapply?
-        Cache(
-          BioSIM::getModelOutput,
+        BioSIM::getModelOutput(
           fromYr = yr - 1,
           toYr = yr,
           id = locations$Name,
@@ -189,7 +188,8 @@ BioSIM_getMPBSLR <- function(dem, years, SLR = "R", climModel = "GCM4", rcp = "R
           rep = 1, ## TODO: how many?
           rcp = rcp,
           climModel = climModel
-        )
+        ) |>
+          Cache()
         setDT(slr)
       }) |>
         rbindlist()
@@ -198,7 +198,7 @@ BioSIM_getMPBSLR <- function(dem, years, SLR = "R", climModel = "GCM4", rcp = "R
     message("Fetched ", NROW(slr), " locations in ", st[3], "s.")
 
     # Make RasterStack
-    slrStk <- stack(raster(dem))
+    slrStk <- raster::stack(raster::raster(dem))
     for (yr in unique(slr$Year)) {
       yrChar <- paste0("X", yr)
       slrYr <- slr[Year == yr]
@@ -206,14 +206,14 @@ BioSIM_getMPBSLR <- function(dem, years, SLR = "R", climModel = "GCM4", rcp = "R
       colID <- which(colnames(slrYr) == SLR2use)
 
       # Convert BioSIM data to Vector dataset
-      sfSLR <- SpatialPoints(slr[Year == yr, c("Longitude", "Latitude")],
-                             proj4string = CRS("+init=epsg:4326")) |>
+      sfSLR <- sp::SpatialPoints(slr[Year == yr, c("Longitude", "Latitude")],
+                                 proj4string = sp::CRS("+init=epsg:4326")) |>
         sf::st_as_sf() |>
         sf::st_transform(crs = sf::st_crs(dem))
-      cells <- cellFromXY(dem, sf::st_coordinates(sfSLR))
+      cells <- terra::cellFromXY(dem, sf::st_coordinates(sfSLR))
 
       # Convert to Raster
-      slrYrRas <- raster(dem)
+      slrYrRas <- raster::raster(dem)
       slrYrRas[cells] <- slrYr[[colID]]
       slrStk[[yrChar]] <- slrYrRas
     }

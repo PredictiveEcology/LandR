@@ -4,7 +4,12 @@
 \alias{prepEcozonesRst}
 \title{Prepare ecozones raster}
 \usage{
-prepEcozonesRst(url, destinationPath, studyArea = NULL, rasterToMatch = NULL)
+prepEcozonesRst(
+  url = NULL,
+  destinationPath,
+  studyArea = NULL,
+  rasterToMatch = NULL
+)
 }
 \arguments{
 \item{url}{character. ecozones shapefile url.
@@ -20,7 +25,7 @@ raster operations (i.e., the one used throughout the simulation).
 \code{rasterToMatch} should correspond to \code{studyArea} if used.}
 }
 \value{
-\code{RasterLayer}
+\code{SpatRaster}
 }
 \description{
 Download, rasterize, crop, mask, and reproject Canadian national ecozones shapefile.

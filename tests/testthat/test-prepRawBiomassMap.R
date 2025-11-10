@@ -36,7 +36,7 @@ testthat::test_that("test prepRawBiomassMap", {
   ## new args
   reproducible::clearCache(userTags = "test", ask = FALSE)
   testthat::expect_warning({
-  rawBiomassMap <- prepRawBiomassMap(
+    rawBiomassMap <- prepRawBiomassMap(
       url = biomassURL,
       cropTo = studyArea,
       maskTo = studyArea,
@@ -114,8 +114,7 @@ testthat::test_that("test prepRawBiomassMap", {
   testthat::expect_false(any(rawBiomassMap[] != rawBiomassMap2[], na.rm = TRUE))
   testthat::expect_true(all(is.na(rawBiomassMap2[]) == is.na(RTM[]))) ## see reproducible #330
 
-
-  ##testing w/o URL
+  ## testing w/o URL
   studyTest = {
     targetCRS <- paste("+proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0",
                        "+datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0")
@@ -123,7 +122,8 @@ testthat::test_that("test prepRawBiomassMap", {
     ecod <- ecod[ecod$ECODISTRIC == "332",]
     ecod <- sf::st_transform(ecod, targetCRS)
   }
-  #KNN
+
+  ## KNN
   knn2001 <- prepRawBiomassMap(to = studyTest,
                                dataSource = "KNN", dataYear = 2001)
   knn2001_mean <- terra::global(knn2001, mean, na.rm = TRUE)
@@ -132,42 +132,34 @@ testthat::test_that("test prepRawBiomassMap", {
   knn2011_mean <- terra::global(knn2011, mean, na.rm = TRUE)
   testthat::expect_true(compareGeom(knn2001, knn2011, rowcol = TRUE, res = TRUE, stopOnError = FALSE))
   testthat::expect_true(knn2011_mean < knn2001_mean)
-  #SCANFI
+
+  ## SCANFI
   SCANFI2000 <- prepRawBiomassMap(to = studyTest,
-                               dataSource = "SCANFI", dataYear = 2000)
+                                  dataSource = "SCANFI", dataYear = 2000)
   SCANFI2000_mean <- terra::global(SCANFI2000, mean, na.rm = TRUE)
   SCANFI2020 <- prepRawBiomassMap(to = studyTest,
-                               dataSource = "SCANFI", dataYear = 2020)
+                                  dataSource = "SCANFI", dataYear = 2020)
   SCANFI2020_mean <- terra::global(SCANFI2020, mean, na.rm = TRUE)
   testthat::expect_true(compareGeom(SCANFI2000, SCANFI2000, rowcol = TRUE, res = TRUE, stopOnError = FALSE))
   testthat::expect_true(SCANFI2020_mean < SCANFI2000_mean)
   testthat::expect_true(SCANFI2000_mean > knn2001_mean)
 
-  #cache
+  ## cache
   knn2001_c1 <- prepRawBiomassMap(to = studyTest, userTags = "cTest",
-                                 dataSource = "KNN", dataYear = 2001)
-  mess <- capture_messages({
-    # warn <- suppressWarningsSpecific(
-    #   falseWarnings = "attribute variables are assumed to be spatially constant",
-    #   {
-        knn2001_c2 <- prepRawBiomassMap(to = studyTest, userTags = "cTest",
-                                        dataSource = "KNN", dataYear = 2001)
-      # })
-        })
-  expect_true(any(grepl("Loaded! Cached result", mess)))
+                                  dataSource = "KNN", dataYear = 2001)
+  mess1 <- capture_messages({
+    knn2001_c2 <- prepRawBiomassMap(to = studyTest, userTags = "cTest",
+                                    dataSource = "KNN", dataYear = 2001)
+  })
+  expect_true(any(grepl("Loaded! Cached result", mess1)))
 
-  #file-backed cache
+  ## cache using file-backed raster
   knn2001_c1 <- prepRawBiomassMap(to = studyTest, userTags = "cTest",
                                   dataSource = "KNN", dataYear = 2001,
                                   writeTo = "testcacheRast.tif")
-  mess <- capture_messages({
-    # warn <- suppressWarningsSpecific(
-    #   falseWarnings = "attribute variables are assumed to be spatially constant",
-    #   {
-    knn2001_c2 <- prepRawBiomassMap(userTags = "cTest",
+  mess2 <- capture_messages({
+    knn2001_c2 <- prepRawBiomassMap(to = studyTest, userTags = "cTest",
                                     dataSource = "KNN", dataYear = 2001)
-    # })
   })
-  expect_true(any(grepl("Loaded! Cached result", mess)))
-
+  expect_true(any(grepl("Loaded! Cached result", mess2)))
 })

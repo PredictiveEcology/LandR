@@ -23,6 +23,7 @@
 #' @importFrom data.table is.data.table last melt rbindlist
 #' @importFrom data.table set setattr setcolorder setDT setDTthreads
 #' @importFrom data.table setkey setkeyv setnames setorderv
+#' @importFrom Formula Formula
 #' @importFrom fpCompare %==% %>>% %<<% %<=%
 #' @importFrom ggplot2 aes coord_equal coord_sf element_blank element_text facet_wrap
 #' @importFrom ggplot2 geom_bar geom_hline geom_line geom_point labs geom_raster geom_ribbon geom_sf
@@ -32,7 +33,6 @@
 #' @importFrom ggplot2 scale_fill_viridis_c scale_fill_viridis_d
 #' @importFrom ggplot2 scale_linetype_manual scale_x_discrete
 #' @importFrom ggplot2 stat stat_summary sym theme theme_bw theme_classic unit
-#' @importFrom ggpubr theme_pubr
 #' @importFrom ggspatial annotation_north_arrow layer_spatial north_arrow_minimal
 #' @importFrom grDevices colorRampPalette dev.off png
 #' @importFrom httr2 request
@@ -51,7 +51,7 @@
 #' @importFrom reproducible prepInputs preProcess projectInputs
 #' @importFrom reproducible rasterRead
 #' @importFrom reproducible writeOutputs writeTo
-#' @importFrom sf as_Spatial st_as_sf st_cast st_coordinates  st_intersects st_crs
+#' @importFrom sf as_Spatial st_as_sf st_cast st_coordinates st_intersects st_crs
 #' @importFrom sf st_read st_transform st_zm
 #' @importFrom sp CRS proj4string SpatialPoints
 #' @importFrom SpaDES.tools inRange neutralLandscapeMap randomPolygons rasterizeReduced runifC
