@@ -1,5 +1,6 @@
 test_that("test Ward dispersal seeding algorithm", {
-  skip_if_not_installed(c("googledrive", "withr"))
+  testthat::skip_if_not_installed("googledrive")
+  testthat::skip_if_not_installed("withr")
 
   verbose <- 0
 
@@ -104,7 +105,7 @@ test_that("test Ward dispersal seeding algorithm", {
     outputSum <- output[, list(speciesCode = sum(as.integer(speciesCode))), by = pixelName]
     Sum_of_species[outputSum[[pixelName]]] <- outputSum$speciesCode
 
-    # Plotting
+    ## Plotting
     a <- as.vector(reducedPixelGroupMap[]) %in% seedReceive$pixelGroup
     sum(a)
 
@@ -143,9 +144,11 @@ test_that("test Ward dispersal seeding algorithm", {
     # i <<- i + 1;
 
     expect_true(all(unique(output$speciesCode) %in% unique(seedReceiveFull$speciesCode)))
-    expect_true(all(is.na(Sum_of_species[as.vector(reducedPixelGroupMap[]) > 15]))) # nothing regenerates in the pgs that don't have receive available
 
-    # Test whether each pixelGroup has only the species that could have arrived there
+    ## nothing regenerates in the pgs that don't have receive available
+    expect_true(all(is.na(Sum_of_species[as.vector(reducedPixelGroupMap[]) > 15])))
+
+    ## Test whether each pixelGroup has only the species that could have arrived there
     output[, pixelGroup := reducedPixelGroupMap[pixelIndex]]
     joined <- seedReceiveFull[output, on = "pixelGroup", allow.cartesian = TRUE]
     joinedTest <- joined[, all(i.speciesCode %in% speciesCode), by = "pixelGroup"]
@@ -193,10 +196,10 @@ test_that("test Ward dispersal seeding algorithm", {
       })
     }
     tests <- unlist(testDists)
-    # Fairly conservative test -- the number of tests that fail at p < 0.01 should be about 5% ... really, it should be 1%
+    ## Fairly conservative test -- the number of tests that fail at p < 0.01 should be about 5% ... really, it should be 1%
     expect_true(sum(tests < 0.01) / length(tests) <= 0.1)
 
-    # Where rcv can receive a species, but it doesn't exist in Src
+    ## Where rcv can receive a species, but it doesn't exist in Src
     seedReceive <- data.table(pixelGroup = 3, speciesCode = species$speciesCode[1])
     seedSource <- data.table(pixelGroup = 1, speciesCode = species$speciesCode[2])
     output <- LANDISDisp(
@@ -212,7 +215,8 @@ test_that("test Ward dispersal seeding algorithm", {
 })
 
 test_that("test large files", {
-  skip_if_not_installed(c("googledrive", "withr"))
+  skip_if_not_installed("googledrive")
+  skip_if_not_installed("withr")
 
   dp <- withr::local_tempdir("dest_")
 
@@ -221,7 +225,7 @@ test_that("test large files", {
     dp <- switch(Sys.info()[["user"]], emcintir = "~/tmp", dp)
   } else {
     whichTest <- 2
-    googledrive::drive_deauth()
+    # googledrive::drive_deauth()
   }
 
   withr::local_package("reproducible")
@@ -232,7 +236,8 @@ test_that("test large files", {
     url = url1,
     targetFile = "dispersalMarch2021/dtSrc.rds",
     fun = "readRDS",
-    destinationPath = dp, overwrite = TRUE
+    destinationPath = dp,
+    overwrite = TRUE
   )
   dtRcv <- prepInputs(
     url = url1,
@@ -281,23 +286,23 @@ test_that("test large files", {
     pixGr <- pixelGroupMap[pix]
     pixGrs <- pixelGroupMap[pix + (-1:1)]
 
-    dtSrc1 <- dtSrc1[pixelGroup %in% pixGr] # Abie_bal
+    dtSrc1 <- dtSrc1[pixelGroup %in% pixGr] ## Abie_bal
     dtRcv2 <- dtRcv1[pixelGroup %in% (pixGrs)]
 
-    # verify
+    ## verify
     rcv <- which(as.vector(pixelGroupMap[]) %in% dtRcv2$pixelGroup)
     src <- which(as.vector(pixelGroupMap[]) %in% dtSrc1$pixelGroup)
-    expect_true(src %in% rcv) # src is one of the rcv
-    expect_true(sum(diff(rcv) == 1) > 1) # there are 3 adjacent cells
+    expect_true(src %in% rcv) ## src is one of the rcv
+    expect_true(sum(diff(rcv) == 1) > 1) ## there are 3 adjacent cells
   } else if (whichTest == 2) {
-    # subsetting -- but it doesn't seem to work for final test
+    ## subsetting -- but it doesn't seem to work for final test
     dtRcv2 <- dtRcv1[, .SD[sample(NROW(.SD), size = min(NROW(.SD), 300))], by = "speciesCode"]
   } else {
     dtRcv2 <- dtRcv1
   }
   suppressWarnings(rm(list = c("out")))
 
-  # Run this 2x -- once with verbose -- to get extra stuff
+  ## Run this 2x -- once with verbose -- to get extra stuff
   st <- system.time({
     out <- LANDISDisp(
       dtSrc = dtSrc1,
@@ -387,9 +392,11 @@ test_that("test large files", {
   if (rrDidntExist) rrOrig <- rr
   speciesTable[, c(1, 5)]
   if (!(whichTest %in% 1:2)) {
-    # This is a weak test -- that is often wrong with small samples -- seems to only
-    #   work with full dataset
-    corr <- cor(speciesTable[match(rownames(rr), species)][["shadetolerance"]], rr[, "propSrcRcved"],
+    ## This is a weak test -- that is often wrong with small samples;
+    ## seems to only work with full dataset
+    corr <- cor(
+      speciesTable[match(rownames(rr), species)][["shadetolerance"]],
+      rr[, "propSrcRcved"],
       method = "spearman"
     )
     expect_true(corr > 0.8)
@@ -411,7 +418,7 @@ test_that("test Ward 4 immediate neighbours", {
 
   pixelGroupMap[rc] <- 1
 
-  # 4 immediate neighbours
+  ## 4 immediate neighbours
   pixelGroupMap[rc + c(1, 0)] <- 2
   pixelGroupMap[rc + c(0, 1)] <- 2
   pixelGroupMap[rc + c(-1, 0)] <- 2
@@ -470,7 +477,9 @@ test_that("test Ward 4 immediate neighbours", {
     pixSelf <- which(as.vector(pixelGroupMap[]) == 1)
     expect_true(NROW(speciesTab) == sum(out$pixelIndex == pixSelf))
     oo <- out[, .N, by = c("speciesCode")]
-    expect_true(sum(oo$N) >= 34) # This will fail once in 1e6 times! It is OK if VERY VERY infrequently
+
+    ## This will fail once in 1e6 times! It is OK if VERY VERY infrequently
+    expect_true(sum(oo$N) >= 34)
   }
 })
 
@@ -486,7 +495,7 @@ test_that("test Ward random collection of neighbours", {
 
   pixelGroupMap[rc] <- 1
 
-  # 4 diagonal neighbours
+  ## 4 diagonal neighbours
   pixelGroupMap[rc + c(1, 1)] <- 2
   pixelGroupMap[rc + c(1, 0)] <- 2
   pixelGroupMap[rc + c(2, 1)] <- 2
