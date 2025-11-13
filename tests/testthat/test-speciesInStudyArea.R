@@ -4,7 +4,7 @@ testthat::test_that("speciesInStudyArea works", {
   testthat::skip_on_ci()
   testthat::skip_if_not_installed("googledrive")
 
-  googledrive::drive_deauth()
+  # googledrive::drive_deauth()
 
   td <- withr::local_tempdir("dest_")
 
