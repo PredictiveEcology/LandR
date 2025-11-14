@@ -26,6 +26,7 @@
 * add `studyAreaEco` function to extend `studyArea` to ecological boundaries;
   - `studyAreaEco` allows `studyArea = NULL`, uses `type = "ecozone"` by default;
 * update documentation and citations for `prepSpeciesLayers_*` functions;
+* add `plot_raster_statistics` and `calculate_raster_counts` for generating summaries of numeric rasters in Canada
 
 # LandR 1.1.5
 
