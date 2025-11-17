@@ -12,11 +12,11 @@ test_that("SummarizeCanadianForestRasters works", {
   ras <- terra::rast(terra::ext(c(-105, -104, 55, 56)), crs = crs,
                       resolution = c(.1, .1), vals = 1:100)
 
-  ## warn that rasterToMatchLarge and rasterToMatch are both missing
   testthat::expect_message(
     ras_stats <- plot_raster_statistics(
       ras,
-      output_dir = td
+      output_dir = td,
+      region_ids = c("88, 147")
     )
   )
 })
