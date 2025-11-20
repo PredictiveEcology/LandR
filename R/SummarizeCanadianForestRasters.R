@@ -13,6 +13,13 @@ prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL
   terra::vect(polygons)
 }
 
+freq_counts <- function(df, ...) {
+  stopifnot(requireNamespace("dplyr", quietly = TRUE))
+
+  na.omit(df) |>
+    dplyr::count(value)
+}
+
 #' Raster summary statistics and maps by polygon
 #'
 #' `calculate_raster_stats` iteratively calculates the frequency of raster values within each polygon.
@@ -114,61 +121,22 @@ calculate_raster_counts <- function(
   csv_file = NULL
 ) {
   stopifnot(
-    requireNamespace("dplyr", quietly = TRUE),
+    requireNamespace("zonal", quietly = TRUE),
     inherits(raster, "SpatRaster"),
     inherits(polygons, c("sf", "SpatVector"))
   )
 
-  polygons <- prep_polygons(raster, polygons, polygon_id, filter_ids)
+  polygons <- prep_polygons(raster, polygons, polygon_id, filter_ids) |> sf::st_as_sf()
 
-  out_dt <- data.table::data.table(ID = character(0), value = numeric(0), count = integer(0))
-
-  for (i in seq_along(polygons)) {
-    poly <- polygons[i]
-    region_val <- poly[["ID"]]
-
-    ## Check if polygon overlaps raster extent
-    check_intersect <- suppressWarningsSpecific(
-      terra::relate(poly, raster, relation = "intersects"),
-      "partial argument match of 'ext' to 'extent'"
-    )
-    if (is.null(check_intersect)) {
-      message("Skipping ", region_val, " (no spatial intersection)")
-      next
-    }
-
-    r_sub <- try(terra::crop(raster, poly), silent = TRUE)
-    if (inherits(r_sub, "try-error")) {
-      next
-    }
-    r_masked <- try(terra::mask(r_sub, poly), silent = TRUE)
-    if (inherits(r_masked, "try-error")) {
-      next
-    }
-
-    vals <- terra::values(r_masked)
-    vals <- vals[!is.na(vals)]
-
-    if (length(vals) == 0) {
-      next
-    }
-
-    val_counts <- data.table::as.data.table(table(vals))
-    data.table::setnames(val_counts, c("value", "count"))
-    val_counts[, value := as.numeric(value)]
-    val_counts[, count := as.numeric(count)]
-    val_counts[, ID := region_val]
-    data.table::setcolorder(val_counts, c("ID", "value", "count"))
-
-    out_dt <- data.table::rbindlist(list(out_dt, val_counts))
-    gc()
-  }
-
-  if (!is.null(csv_file)) {
-    data.table::fwrite(out_dt, csv_file)
-  }
-
-  return(as.data.frame(out_dt))
+  zonal::execute_zonal(
+    data = raster,
+    geom = polygons,
+    ID = "ID",
+    fun = freq_counts, ## pass function, not character
+    join = FALSE,
+    summarize_df = TRUE
+  )  |>
+    setNames(c("ID", "value", "count"))
 }
 
 prop_zero <- function(df, ...) {
