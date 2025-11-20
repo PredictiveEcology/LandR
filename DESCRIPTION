@@ -30,7 +30,6 @@ Imports:
     data.table,
     Formula,
     fpCompare,
-    cowplot,
     ggplot2,
     ggspatial,
     grDevices,
@@ -49,7 +48,6 @@ Imports:
     sp,
     SpaDES.tools (>= 2.0.4),
     stats,
-    stringr,
     terra,
     tidyterra,
     tools,
@@ -65,6 +63,7 @@ Suggests:
     fasterize,
     future,
     future.apply,
+    geodata,
     ggalluvial,
     ggpubr,
     ggrepel,
@@ -75,6 +74,7 @@ Suggests:
     MASS,
     memuse,
     parallelly,
+    purrr,
     qs,
     rasterVis,
     RCurl,
@@ -86,7 +86,8 @@ Suggests:
     spelling,
     testthat,
     withr,
-    XML
+    XML,
+    zonal
 Remotes:
     CeresBarros/biomod2@dev_currentCeres,
     RNCan/BioSimClient_R,
@@ -95,7 +96,8 @@ Remotes:
     PredictiveEcology/quickPlot@development,
     PredictiveEcology/reproducible@AI,
     PredictiveEcology/SpaDES.core@box,
-    PredictiveEcology/SpaDES.tools@development
+    PredictiveEcology/SpaDES.tools@development,
+    mikejohnson51/zonal
 Encoding: UTF-8
 Language: en-CA
 License: GPL-3

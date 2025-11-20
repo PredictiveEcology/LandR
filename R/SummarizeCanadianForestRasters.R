@@ -1,330 +1,426 @@
-utils::globalVariables(c("geometry", "id_col", "count", "RegionID", "bin", ".data"))
+utils::globalVariables(c(".data", "bin", "count", "geometry", "ID", "id_col"))
 
-#' Calculate Raster Value Counts by Polygon
-#'
-#' Iteratively calculates the frequency of raster values within each polygon.
-#' Supports user-provided polygons or automatic retrieval of ecoregions/ecozones.
-#'
-#' @param raster A `SpatRaster` object.
-#' @param polygons Optional. A `SpatVector` or `sf` object of polygons.
-#' @param polygon_id Optional. Name of the column in `polygons` to use as polygon ID.
-#' @param region_type Optional. `"ecoregion"` or `"ecozone"` if `polygons` is not provided.
-#' @param region_ids Optional. Vector of region IDs to filter.
-#' @param output_csv Path to save the output CSV file. Default is `"raster_counts.csv"`.
-#'
-#' @return A `data.frame` with columns: `RegionID`, `value`, `count`.
-#' @export
-calculate_raster_counts <- function(raster, polygons = NULL, polygon_id = NULL,
-                                    region_type = "ecoregion", region_ids = NULL,
-                                    output_csv = "raster_counts.csv") {
-  if (!inherits(raster, "SpatRaster")) stop("Input raster must be a terra::SpatRaster object.")
+prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL) {
+  polygons <- sf::st_transform(polygons, sf::st_crs(raster)) |>
+    dplyr::rename(ID = .data[[polygon_id]]) |>
+    dplyr::group_by(ID) |>
+    dplyr::summarise(geometry = sf::st_union(geometry), .groups = "drop")
 
-  # Load polygons if not provided
-  if (is.null(polygons)) {
-    if (is.null(region_type)) stop("Either 'polygons' or 'region_type' must be provided.")
-    if (!region_type %in% c("ecoregion", "ecozone")) stop("region_type must be 'ecoregion' or 'ecozone'.")
-
-    url <- if (region_type == "ecoregion") {
-      "https://sis.agr.gc.ca/cansis/nsdb/ecostrat/district/ecodistrict_shp.zip"
-    } else {
-      "https://sis.agr.gc.ca/cansis/nsdb/ecostrat/zone/ecozone_shp.zip"
-    }
-
-    shp <- reproducible::prepInputs(url = url, destinationPath = tempdir())
-    shp <- sf::st_make_valid(shp)
-
-    if(is.null(polygon_id)) {
-      polygon_id <- if (region_type == "ecoregion") "ECOREGION" else "ZONE_NAME"
-    }
-
-    shp <- shp |>
-      dplyr::group_by(.data[[polygon_id]]) |>
-      dplyr::summarise(geometry = sf::st_union(geometry), .groups = "drop")
-
-    if (!is.null(region_ids)) {
-      shp <- dplyr::filter(shp, .data[[polygon_id]] %in% region_ids)
-    }
-
-    shp <- sf::st_transform(shp, st_crs(raster))
-    polygons <- terra::vect(shp)
-    polygon_id <- id_col
+  if (!is.null(filter_ids)) {
+    polygons <- dplyr::filter(polygons, ID %in% filter_ids)
   }
 
-  out_dt <- data.table::data.table(RegionID = character(), value = numeric(), count = integer())
-
-  for (i in seq_along(polygons)) {
-    poly <- polygons[i]
-    region_val <- poly[[polygon_id]]
-    message("Calculating value counts for polygon: ", region_val)
-
-    # Check if polygon overlaps raster extent
-    if (is.null(terra::relate(poly, raster, relation = "intersects"))) {
-      message("Skipping ", region_val, " (no spatial intersection)")
-      next
-    }
-
-    r_sub <- try(terra::crop(raster, poly), silent = TRUE)
-    if (inherits(r_sub, "try-error")) next
-    r_masked <- try(terra::mask(r_sub, poly), silent = TRUE)
-    if (inherits(r_masked, "try-error")) next
-
-    vals <- terra::values(r_masked)
-    vals <- vals[!is.na(vals)]
-
-    if (length(vals) == 0) next
-
-    val_counts <- data.table::as.data.table(table(vals))
-    data.table::setnames(val_counts, c("value", "count"))
-    val_counts[, value := as.numeric(value)]
-    val_counts[, count := as.numeric(count)]
-    val_counts[, RegionID := region_val]
-    data.table::setcolorder(val_counts, c("RegionID", "value", "count"))
-
-    out_dt <- data.table::rbindlist(list(out_dt, val_counts))
-    gc()
-  }
-
-  data.table::fwrite(out_dt, output_csv)
-  return(out_dt)
+  terra::vect(polygons)
 }
 
-#' Plot Raster Statistics and Maps by Polygon
+#' Raster summary statistics and maps by polygon
 #'
-#' This function calculates and returns statistics (min, max, median, mean,
+#' `calculate_raster_stats` iteratively calculates the frequency of raster values within each polygon.
+#' Supports user-provided polygons or automatic retrieval of ecoregions/ecozones.
+#'
+#' `plot_raster_stats` calculates and returns statistics (min, max, median, mean,
 #' 25th percentile, 75th percentile, and proportion of zeroes) for a raster,
 #' and creates and saves figures for each polygon in a vector layer, including
 #' a histogram of raster values, a map of raster values within the polygon, and
 #' a summary of statistics . Optionally, zero values can be removed from the
 #' analysis, and the raster can be aggregated to a lower resolution to speed up plotting.
 #'
-#' @param raster A `SpatRaster` object. The raster containing values to be summarized.
-#' @param polygons Optional. A `SpatVector` or `sf` object of polygons to subset the raster. Defaults to Canadian Ecoregions.
+#' @param raster A `SpatRaster` object.
+#'
+#' @param polygons A `SpatVector` or `sf` object of polygons.
+#'
 #' @param polygon_id Name of the column in `polygons` to use as polygon ID.
-#' @param region_type Optional. `"ecoregion"` or `"ecozone"` if `polygons` is not provided.
-#' @param region_ids Optional. Vector of region IDs to filter.
-#' @param counts_df Optional. A `data.frame` with precomputed counts (`RegionID`, `value`, `count`),
-#' such as generated by `terra::extract()`. Polygon ID must match that from polygons.
-#' If provided, the function will use these values and skip calculating counts.
+#'
+#' @param filter_ids Optional. Polygon IDs to filter.
+#'
+#' @param csv_file Optional. Filename to save the output CSV file.
+#'
+#' @returns A `data.frame` with columns: `ID`, `value`, `count`.
+#'
+#' @examples
+#' if (interactive()) {
+#'   if (requireNamespace("dplyr", quietly = TRUE) &&
+#'       requireNamespace("geodata", quietly = TRUE) &&
+#'       requireNamespace("purrr", quietly = TRUE) &&
+#'       requireNamespace("withr", quietly = TRUE) &&
+#'       requireNamespace("zonal", quietly = TRUE)) {
+#'     tmp_pth <- withr::local_tempdir()
+#'
+#'     age <- prepInputsStandAgeMap(
+#'       dataSource = "KNN",
+#'       dataYear = 2011,
+#'       destinationPath = tmp_pth
+#'     )
+#'
+#'     ecozones <- reproducible::prepInputs(
+#'       url = "https://sis.agr.gc.ca/cansis/nsdb/ecostrat/zone/ecozone_shp.zip",
+#'       destinationPath = tmp_pth
+#'     ) |>
+#'      sf::st_make_valid()
+#'
+#'     id_col <- "ZONE_NAME"
+#'
+#'     ## WARNING: don't use Cache() below -- excessive RAM usage
+#'     withr::local_options(reproducible.useCache = FALSE) ## TODO
+#'
+#'     ecozone_counts <- calculate_raster_counts(
+#'       raster = age,
+#'       polygons = ecozones,
+#'       polygon_id = id_col
+#'     ) |>
+#'       reproducible::Cache()
+#'
+#'     ecozone_stats <- calculate_raster_stats(
+#'      raster = age,
+#'      polygons = ecozones,
+#'       polygon_id = id_col
+#'     ) |>
+#'       reproducible::Cache()
+#'
+#'     gc()
+#'
+#'     ## below, will call calc_raster_counts and calc_raster_stats internally,
+#'     ## but should get cached version run above if cache enabled
+#'     stats_ecozone <- plot_raster_stats(
+#'       raster = age,
+#'       polygons = ecozones,
+#'       polygon_id = id_col,
+#'       filter_ids = NULL,
+#'       aggregate_factor = 1,
+#'       remove_zeros = FALSE,
+#'       raster_label = "age",
+#'       inset_canada = TRUE,
+#'       bin_width = 10,
+#'       output_dir = tmp_pth,
+#'       csv_file = NULL
+#'     )
+#'
+#'     gc()
+#'
+#'     ## review the plots produced in tmp_pth
+#'     list.files(tmp_pth, pattern = "[.]png", full.names = TRUE)
+#'
+#'     identical(ecozone_stats, stats_ecozone) ## TRUE
+#'   }
+#' }
+#'
+#' @export
+#' @rdname raster_stats
+calculate_raster_counts <- function(
+  raster,
+  polygons = NULL,
+  polygon_id = NULL,
+  filter_ids = NULL,
+  csv_file = NULL
+) {
+  stopifnot(
+    requireNamespace("dplyr", quietly = TRUE),
+    inherits(raster, "SpatRaster"),
+    inherits(polygons, c("sf", "SpatVector"))
+  )
+
+  polygons <- prep_polygons(raster, polygons, polygon_id, filter_ids)
+
+  out_dt <- data.table::data.table(ID = character(0), value = numeric(0), count = integer(0))
+
+  for (i in seq_along(polygons)) {
+    poly <- polygons[i]
+    region_val <- poly[["ID"]]
+
+    ## Check if polygon overlaps raster extent
+    check_intersect <- suppressWarningsSpecific(
+      terra::relate(poly, raster, relation = "intersects"),
+      "partial argument match of 'ext' to 'extent'"
+    )
+    if (is.null(check_intersect)) {
+      message("Skipping ", region_val, " (no spatial intersection)")
+      next
+    }
+
+    r_sub <- try(terra::crop(raster, poly), silent = TRUE)
+    if (inherits(r_sub, "try-error")) {
+      next
+    }
+    r_masked <- try(terra::mask(r_sub, poly), silent = TRUE)
+    if (inherits(r_masked, "try-error")) {
+      next
+    }
+
+    vals <- terra::values(r_masked)
+    vals <- vals[!is.na(vals)]
+
+    if (length(vals) == 0) {
+      next
+    }
+
+    val_counts <- data.table::as.data.table(table(vals))
+    data.table::setnames(val_counts, c("value", "count"))
+    val_counts[, value := as.numeric(value)]
+    val_counts[, count := as.numeric(count)]
+    val_counts[, ID := region_val]
+    data.table::setcolorder(val_counts, c("ID", "value", "count"))
+
+    out_dt <- data.table::rbindlist(list(out_dt, val_counts))
+    gc()
+  }
+
+  if (!is.null(csv_file)) {
+    data.table::fwrite(out_dt, csv_file)
+  }
+
+  return(as.data.frame(out_dt))
+}
+
+prop_zero <- function(df, ...) {
+  stopifnot(requireNamespace("dplyr", quietly = TRUE))
+
+  na.omit(df) |> dplyr::summarise(prop_zero = sum(value == 0) / length(value))
+}
+
+#' @export
+#' @rdname raster_stats
+calculate_raster_stats <- function(raster, polygons = NULL, polygon_id = NULL, filter_ids = NULL) {
+  stopifnot(
+    requireNamespace("dplyr", quietly = TRUE),
+    requireNamespace("purrr", quietly = TRUE),
+    requireNamespace("zonal", quietly = TRUE),
+    !is.null(polygons),
+    !is.null(polygon_id)
+  )
+
+  polygons <- prep_polygons(raster, polygons, polygon_id, filter_ids) |> sf::st_as_sf()
+
+  ## functions known to exactextractr::extract_extract()
+  ee_funs <- list("min", "mean", "max", "quantile")
+
+  ## custom funs for use with
+  my_funs <- list("prop_zero")
+
+  all_funs <- append(ee_funs, my_funs)
+  ll <- lapply(all_funs, function(fun) {
+    gc()
+
+    if (fun == "quantile") {
+      zonal::execute_zonal(
+        data = raster,
+        geom = polygons,
+        ID = "ID",
+        fun = fun,
+        join = FALSE,
+        quantiles = c(0.25, 0.50, 0.75)
+      ) |>
+        setNames(c("ID", "q25", "q50", "q75")) ## q50 is the median
+    } else if (fun == "prop_zero") {
+      zonal::execute_zonal(
+        data = raster,
+        geom = polygons,
+        ID = "ID",
+        fun = prop_zero, ## pass function, not character
+        join = FALSE,
+        summarize_df = TRUE
+      ) |>
+        setNames(c("ID", "prop_zero"))
+    } else {
+      zonal::execute_zonal(data = raster, geom = polygons, ID = "ID", fun = fun, join = FALSE) |>
+        setNames(c("ID", fun))
+    }
+  }) |>
+    purrr::reduce(dplyr::inner_join, by = "ID")
+}
+
 #' @param aggregate_factor Optional. Integer factor to aggregate raster for plotting. Default is `1` (no aggregation).
+#'
 #' @param remove_zeros Logical. Removes zeroes from raster and counts for plotting.
 #' Useful to eliminate non-forested areas from forest rasters.
-#' @param raster_label Optional. Character label for raster used in plots. Defaults to raster layer name.
-#' @param inset.Canada Logical. Generates a small inset map of plotted polygons within Canada. Default to TRUE.
-#' @param bin_width Numeric. Bin size for histogram plots. Defaults to 10.
-#' @param output_dir Directory to save figures. Default is `"raster_figures"`.
-#' @param stats_csv Path to save the statistics CSV. Default is `"raster_stats.csv"`.
 #'
-#' @return A `data.frame` of computed statistics.
+#' @param raster_label Optional. Character label for raster used in plots.
+#' Defaults to raster layer name.
+#'
+#' @param inset_canada Logical. Generates a small inset map of plotted polygons within Canada.
+#'
+#' @param bin_width Numeric. Bin size for histogram plots.
+#'
+#' @param output_dir Directory to save figures and optional csv file.
+#'
+#' @return A `data.frame` of computed statistics (via `calc_raster_stats()`), with side effects
+#' of saving summary plots (and optionally a \file{.csv}) to disk.
+#'
 #' @export
-plot_raster_statistics <- function(raster, polygons = NULL, polygon_id = NULL,
-                                   region_type = "ecoregion", region_ids = NULL,
-                                   counts_df = NULL, aggregate_factor = 1,
-                                   remove_zeros = FALSE, raster_label = NULL,
-                                   inset.Canada = TRUE, bin_width = 10,
-                                   output_dir = "raster_figures",
-                                   stats_csv = "raster_stats.csv") {
-  if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
-
-  layer_name <- names(raster)[1]
-  if (is.null(raster_label)) raster_label <- layer_name
-
-  if(is.null(polygon_id)) {
-    if(is.null(polygons)) {
-      if(region_type == "ecoregion") {
-        polygon_id <- "ECOREGION"
-      } else if (region_type == "ecozone") {
-        polygon_id <- "ZONE_NAME"
-      }
-    } else(
-      stop("If supplying polygons, polygon_id must be be provided")
-    )
-  }
-
-  if(!is.null(polygons)) {
-    polygons <- polygons |>
-      dplyr::group_by(.data[[polygon_id]]) |>
-      dplyr::summarise(geometry = sf::st_union(geometry), .groups = "drop")
-
-    if (!is.null(region_ids)) polygons <- dplyr::filter(polygons, .data[[polygon_id]] %in% region_ids)
-  }
-
-  if (is.null(polygons)) {
-    if (!region_type %in% c("ecoregion", "ecozone")) stop("region_type must be 'ecoregion' or 'ecozone'.")
-
-    url <- if (region_type == "ecoregion") {
-      "https://sis.agr.gc.ca/cansis/nsdb/ecostrat/district/ecodistrict_shp.zip"
-    } else {
-      "https://sis.agr.gc.ca/cansis/nsdb/ecostrat/zone/ecozone_shp.zip"
-    }
-
-    polygons <- reproducible::prepInputs(url = url, destinationPath = tempdir())
-    polygons <- sf::st_make_valid(polygons)
-
-    polygons <- polygons |>
-      dplyr::group_by(.data[[polygon_id]]) |>
-      dplyr::summarise(geometry = sf::st_union(geometry), .groups = "drop")
-
-    if (!is.null(region_ids)) polygons <- dplyr::filter(polygons, .data[[polygon_id]] %in% region_ids)
-  }
-
-  if (inherits(polygons, "SpatVector")) {
-    polygons <- terra::project(polygons, crs(raster))
-  } else if (inherits(polygons, "sf")) {
-    polygons <- sf::st_transform(polygons, st_crs(raster))
-  } else (
-    stop("Object is neither a SpatVector nor an sf object.")
+#' @rdname raster_stats
+plot_raster_stats <- function(
+  raster,
+  polygons = NULL,
+  polygon_id = NULL,
+  filter_ids = NULL,
+  aggregate_factor = 1,
+  remove_zeros = FALSE,
+  raster_label = NULL,
+  inset_canada = TRUE,
+  bin_width = 10,
+  output_dir = ".",
+  csv_file = NULL
+) {
+  stopifnot(
+    requireNamespace("dplyr", quietly = TRUE),
+    requireNamespace("purrr", quietly = TRUE),
+    inherits(raster, "SpatRaster"),
+    inherits(polygons, c("sf", "SpatVector")),
+    is.logical(inset_canada) && !is.na(inset_canada)
   )
 
-  poly_sf <- polygons
-  polygons <- terra::vect(polygons)
-
-  # If counts_df is missing, generate it
-  if (is.null(counts_df)) {
-    message("Generating counts using calculate_raster_counts()...")
-    counts_df <- calculate_raster_counts(raster = raster,
-                                         polygons = polygons,
-                                         polygon_id = polygon_id,
-                                         region_type = region_type,
-                                         region_ids = region_ids) |>
-      Cache()
+  if (!dir.exists(output_dir)) {
+    dir.create(output_dir, recursive = TRUE)
   }
 
-  if (remove_zeros) {
-    counts_df <- counts_df[counts_df$value > 0, ]
+  if (is.null(raster_label)) {
+    raster_label <- terra::names(raster)[1]
   }
-  # Aggregate raster for plotting
-  raster_plot <- if (aggregate_factor > 1) terra::aggregate(raster, fact = aggregate_factor) else raster
 
-  # Remove zeros if requested
+  ## Aggregate raster for plotting
+  raster_plot <- if (aggregate_factor > 1) {
+    terra::aggregate(raster, fact = aggregate_factor)
+  } else {
+    terra::deepcopy(raster)
+  }
+
+  ## Remove zeros if requested
   if (remove_zeros) {
     raster_plot <- terra::clamp(raster_plot, lower = 1, value = FALSE)
-    raster <- terra::clamp(raster, lower = 1, value = FALSE)  # also clamp original raster for consistency
+    raster <- terra::clamp(raster, lower = 1, value = FALSE) # also clamp original raster for consistency
   }
 
-  # Canada outline for inset
-  canada <- reproducible::prepInputs(
-    url = "https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/boundary-limites/files-fichiers/lpr_000b21a_e.zip",
-    destinationPath = "inputs",
-    fun = "terra::vect"
-  )
-  canada <- terra::project(canada, raster)
-  canada_sf <- sf::st_as_sf(canada)
+  ## Calculated raster stats
+  counts_df <- calculate_raster_counts(raster, polygons, polygon_id, filter_ids, csv_file) |>
+    reproducible::Cache()
+  stats_df <- calculate_raster_stats(raster, polygons, polygon_id, filter_ids) |>
+    reproducible::Cache()
 
-  stats_list <- list()
+  polygons <- prep_polygons(raster, polygons, polygon_id, filter_ids) ## do after calculating stats
 
-  for (i in seq_len(nrow(poly_sf))) {
-    region_val <- poly_sf[[polygon_id]][i]
-    label_prefix <- if (!is.null(region_type)) {
-      if (region_type == "ecoregion") "Polygon "
-      else if (region_type == "ecozone") "Ecozone "
-      else paste0(polygon_id, ": ")
-    } else paste0(polygon_id, ": ")
-    region_label <- paste0(label_prefix, region_val)
+  if (!is.null(csv_file)) {
+    utils::write.csv(stats_df, file.path(output_dir, csv_file), row.names = FALSE)
+  }
 
-    message("Plotting polygon:", region_label)
+  ## Build plots for each polygon
+  for (i in seq_len(nrow(polygons))) {
+    region_val <- polygons[["ID"]][i, ]
 
-    poly <- poly_sf[i, ]
-    poly_spat <- terra::vect(poly)
+    message("Plotting polygon: ", region_val)
 
-    # Skip if polygon doesn't intersect raster extent
-    if (!terra::relate(poly_spat, raster, relation = "intersects")) {
-      message("Skipping ", region_label, " (no spatial intersection)")
+    poly <- polygons[i, ]
+
+    ## Skip if polygon doesn't intersect raster extent
+    check_intersect <- suppressWarningsSpecific(
+      terra::relate(poly, raster, relation = "intersects"),
+      "partial argument match of 'ext' to 'extent'"
+    )
+    if (!check_intersect) {
+      message("Skipping ", region_val, " (no spatial intersection)")
       next
     }
 
-    # Filter counts_df for this polygon
-    poly_counts <- counts_df[counts_df$RegionID == region_val, ]
-    poly_counts$value <- as.numeric(poly_counts$value)
-    poly_counts$count <- as.numeric(poly_counts$count)
+    poly_counts <- subset(counts_df, ID == region_val)
+    poly_stats <- subset(stats_df, ID == region_val)
 
-    # Skip if no valid data or only one unique value
-    if (nrow(poly_counts) == 0 || length(unique(poly_counts$value)) < 2) {
-      message("Insufficient data for ", region_label, "; skipping.")
-      next
-    }
+    ## Crop aggregated raster for plotting
+    r_mask <- terra::mask(terra::crop(raster_plot, poly), poly)
 
-
-    # Compute stats from counts_df
-    total <- sum(poly_counts$count)
-    weighted_quantile <- function(x, w, probs = c(0.25, 0.5, 0.75)) {
-      if (length(x) == 0 || length(w) == 0 || sum(w) == 0) return(rep(NA_real_, length(probs)))
-      ord <- order(x); x <- x[ord]; w <- w[ord]
-      cumw <- cumsum(w) / sum(w)
-      stats::approx(x = cumw, y = x, xout = probs)$y
-    }
-    q <- weighted_quantile(poly_counts$value, poly_counts$count)
-    stats <- data.frame(RegionID = region_val,
-                        min = min(poly_counts$value), mean = sum(poly_counts$value * poly_counts$count) / total,
-                        max = max(poly_counts$value), q25 = q[1], q50 = q[2], q75 = q[3],
-                        PercentPixelsZero = sum(poly_counts$count[poly_counts$value == 0]) / total)
-    stats_list[[i]] <- stats
-
-    # Crop aggregated raster for plotting
-    r_mask <- terra::mask(terra::crop(raster_plot, poly_spat), poly_spat)
-
-    # Skip if raster is empty (all NA)
+    ## Skip if raster is empty (all NA)
     if (all(is.na(terra::values(r_mask)))) {
-      message("Skipping ", region_label, " (raster empty after crop)")
+      message("Skipping ", region_val, " (raster empty after crop)")
       next
     }
 
-    map_df <- as.data.frame(r_mask, xy = TRUE, na.rm = TRUE)
-    value_col <- names(map_df)[3]
+    value_col <- terra::names(r_mask)
 
-    # Histogram from counts_df
+    ## Histogram from counts_df
     poly_counts_binned <- poly_counts |>
       dplyr::mutate(bin = floor(value / bin_width) * bin_width) |>
       dplyr::group_by(bin) |>
       dplyr::summarise(count = sum(count), .groups = "drop")
+
     hist_plot <- ggplot2::ggplot(poly_counts_binned, ggplot2::aes(x = bin, y = count)) +
       ggplot2::geom_col(fill = "steelblue") +
       ggplot2::theme_minimal() +
-      ggplot2::labs(title = paste("Histogram:", region_label), x = raster_label, y = "Count")
+      ggplot2::labs(title = paste("Histogram:", region_val), x = raster_label, y = "Count")
 
-    # Main map
+    ## Main map
     map_plot_base <- ggplot2::ggplot() +
-      ggplot2::geom_raster(data = map_df, ggplot2::aes(x = x, y = y, fill = .data[[value_col]])) +
-      ggplot2::geom_sf(data = poly, fill = NA, color = "black") +
-      ggplot2::scale_fill_viridis_c(name = raster_label) +
+      tidyterra::geom_spatraster(data = r_mask, aes(fill = .data[[value_col]])) +
+      ggplot2::geom_sf(data = poly, color = "black", fill = NA) +
+      ggplot2::scale_fill_viridis_c(name = raster_label, na.value = "transparent") +
       ggplot2::theme_minimal() +
-      ggplot2::labs(title = paste("Map:", region_label))
+      ggplot2::labs(title = paste("Map:", region_val), x = "Longitude", y = "Latitude")
 
-    if(inset.Canada == TRUE) {
-      # Inset map
+    if (inset_canada) {
+      ## Canada outline for inset
+      canada <- gadm_canada(src = "geodata", dst_path = tempdir()) |> terra::project(raster)
+      canada_sf <- sf::st_as_sf(canada)
+
+      ## Inset map
       inset_plot <- ggplot2::ggplot() +
-        ggplot2::geom_sf(data = canada_sf, fill = "grey85", color = NA) +
-        ggplot2::geom_sf(data = poly, fill = "red", color = NA) +
-        ggplot2::theme_void()
-      map_with_inset <- cowplot::ggdraw() +
-        cowplot::draw_plot(map_plot_base) +
-        cowplot::draw_plot(inset_plot, x = 0.75, y = 0.75, width = 0.2, height = 0.2)
+        ggplot2::geom_sf(data = canada, fill = "grey85", color = NA) +
+        ggplot2::geom_sf(data = poly, fill = "darkred", color = NA) +
+        ggplot2::theme_void() +
+        ggplot2::theme(
+          panel.border = ggplot2::element_rect(color = "black", fill = NA, linewidth = 1)
+        )
+
+      map_with_inset <- map_plot_base +
+        patchwork::inset_element(
+          inset_plot,
+          left = 0.75,
+          right = 0.95,
+          bottom = 0.75,
+          top = 0.95,
+          align_to = "plot"
+        )
     }
 
-    # Stats plot (centered text)
-    stats_text <- paste0("Min: ", round(stats$min, 2),
-                         " Mean: ", round(stats$mean, 2),
-                         " Max: ", round(stats$max, 2), "\n",
-                         "25%: ", round(stats$q25, 2),
-                         " Median: ", round(stats$q50, 2),
-                         " 75%: ", round(stats$q75, 2),
-                         " % Zero: ", round(stats$PercentPixelsZero * 100, 2), "%")
-    stats_plot <- ggplot2::ggplot() +
-      ggplot2::annotate("text", x = 0.5, y = 0.5, label = stats_text, hjust = 0.5, vjust = 0.5) +
+    ## Stats plot (centered text)
+    stats_text <- c(
+      paste0("Min    : ", round(poly_stats$min, 2)),
+      paste0("Mean   : ", round(poly_stats$mean, 2)),
+      paste0("Max    : ", round(poly_stats$max, 2)),
+      paste0("25%    : ", round(poly_stats$q25, 2)),
+      paste0("Median : ", round(poly_stats$q50, 2)),
+      paste0("75%    : ", round(poly_stats$q75, 2)),
+      paste0("% Zero : ", round(poly_stats$prop_zero * 100, 2), "%")
+    )
+    stats_plot <- ggplot2::ggplot(data.frame(x = 0:10, y = 0:10)) +
+      ggplot2::geom_point(aes(x = x, y = y), alpha = 0.0) +
+      ggplot2::annotate(
+        "text",
+        x = c(2.5, 5.0, 7.5, 2.5, 5.0, 7.5, 5.0),
+        y = c(6.5, 6.5, 6.5, 5.0, 5.0, 5.0, 3.5),
+        label = stats_text,
+        hjust = 0.5,
+        vjust = 0.5
+      ) +
       ggplot2::theme_void() +
-      ggplot2::labs(title = "Statistics")
+      ggplot2::labs(title = paste0("Statistics: ", region_val))
 
-    if(inset.Canada == TRUE) {
-      combined <- hist_plot | (map_with_inset / stats_plot + patchwork::plot_layout(heights = c(3, 1))) +
-        patchwork::plot_annotation(title = region_label)
+    if (inset_canada) {
+      final_plot <- hist_plot |
+        (map_with_inset / stats_plot + patchwork::plot_layout(heights = c(3, 1))) +
+          patchwork::plot_annotation(title = region_val)
     } else {
-      combined <- hist_plot | (map_plot_base / stats_plot + patchwork::plot_layout(heights = c(3, 1))) +
-        patchwork::plot_annotation(title = region_label)
+      final_plot <- hist_plot |
+        (map_plot_base / stats_plot + patchwork::plot_layout(heights = c(3, 1))) +
+          patchwork::plot_annotation(title = region_val)
     }
-    fig_name <- paste0("region_", stringr::str_replace_all(region_val, "[^A-Za-z0-9]", "_"), ".png")
-    ggplot2::ggsave(filename = file.path(output_dir, fig_name), plot = combined, width = 12, height = 7.5, dpi = 300)
+    fig_name <- paste0("region_", gsub("[^A-Za-z0-9]", "_", region_val), ".png")
+
+    ggplot2::ggsave(
+      filename = file.path(output_dir, fig_name),
+      plot = final_plot,
+      width = 12,
+      height = 7.5,
+      dpi = 300
+    )
+
+    gc()
   }
 
-  stats_df <- dplyr::bind_rows(stats_list)
-  utils::write.csv(stats_df, file.path(output_dir, stats_csv), row.names = FALSE)
   return(stats_df)
 }

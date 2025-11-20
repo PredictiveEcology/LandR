@@ -12,6 +12,8 @@
 #' - `LandR.assertions`: If `TRUE`, additional code checks are run during function calls.
 #'   Default `FALSE`.
 #'
+#' @import ggplot2
+#' @import patchwork
 #' @import methods
 #' @name LandR-package
 #' @rdname LandR-package
@@ -25,14 +27,6 @@
 #' @importFrom data.table setkey setkeyv setnames setorderv
 #' @importFrom Formula Formula
 #' @importFrom fpCompare %==% %>>% %<<% %<=%
-#' @importFrom ggplot2 aes coord_equal coord_sf element_blank element_text facet_wrap
-#' @importFrom ggplot2 geom_bar geom_hline geom_line geom_point labs geom_raster geom_ribbon geom_sf
-#' @importFrom ggplot2 ggplot ggtitle guide_legend guides labs
-#' @importFrom ggplot2 scale_color_distiller
-#' @importFrom ggplot2 scale_fill_distiller scale_fill_manual
-#' @importFrom ggplot2 scale_fill_viridis_c scale_fill_viridis_d
-#' @importFrom ggplot2 scale_linetype_manual scale_x_discrete
-#' @importFrom ggplot2 stat stat_summary sym theme theme_bw theme_classic unit
 #' @importFrom ggspatial annotation_north_arrow layer_spatial north_arrow_minimal
 #' @importFrom grDevices colorRampPalette dev.off png
 #' @importFrom httr2 request
@@ -52,14 +46,14 @@
 #' @importFrom reproducible rasterRead
 #' @importFrom reproducible writeOutputs writeTo
 #' @importFrom sf as_Spatial st_as_sf st_cast st_coordinates st_intersects st_crs
-#' @importFrom sf st_read st_transform st_zm
+#' @importFrom sf st_read st_transform st_union st_zm
 #' @importFrom sp CRS proj4string SpatialPoints
 #' @importFrom SpaDES.tools inRange neutralLandscapeMap randomPolygons rasterizeReduced runifC
 #' @importFrom SpaDES.tools spread2
-#' @importFrom stats as.formula complete.cases fitted glm na.omit
+#' @importFrom stats approx as.formula complete.cases fitted glm na.omit
 #' @importFrom stats predict quantile runif setNames terms update vcov
 #' @importFrom terra app as.factor as.int cellFromRowCol cellFromXY classify coltab<- compareGeom
-#' @importFrom terra crop crs crs<- ext extract focalMat
+#' @importFrom terra crop crs crs<- deepcopy ext extract focalMat
 #' @importFrom terra intersect is.factor is.int is.points is.valid
 #' @importFrom terra levels mask minmax NAflag<- ncell nlyr project
 #' @importFrom terra rast rasterize res rowColFromCell set.names set.values terraOptions

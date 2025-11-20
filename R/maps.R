@@ -6,6 +6,31 @@ utils::globalVariables(c(
   "totalB", "totalcover", "Type", "vals", "weightedAge"
 ))
 
+#' Canada administrative boundaries
+#'
+#' @param src Character. One of "stats_can" or (if `geodata` package is installed) "geodata".
+#'
+#' @param dst_path Character specifying the path to download to.
+#'
+#' @export
+gadm_canada <- function(src = "stats_can", dst_path = tempdir()) {
+  if (src == "geodata") {
+    stopifnot(requireNamespace("geodata", quietly = TRUE))
+
+    can <- geodata::gadm(country = "CA", level = 1, path = dst_path, version = "4.1")
+  } else if (src == "stats_can") {
+    can <- reproducible::prepInputs(
+      url = "https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/boundary-limites/files-fichiers/lpr_000b21a_e.zip",
+      destinationPath = dst_path,
+      fun = "terra::vect"
+    )
+  } else {
+    stop("src must be one of 'stats_can' or 'geodata'.")
+  }
+
+  return(can)
+}
+
 #' Define flammability map
 #'
 #' @param LandCoverClassifiedMap A `Raster` that represents land cover
