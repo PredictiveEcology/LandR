@@ -22,7 +22,7 @@ freq_counts <- function(df, ...) {
 
 #' Raster summary statistics and maps by polygon
 #'
-#' `calculate_raster_stats` iteratively calculates the frequency of raster values within each polygon.
+#' `calc_raster_stats` iteratively calculates the frequency of raster values within each polygon.
 #' Supports user-provided polygons or automatic retrieval of ecoregions/ecozones.
 #'
 #' `plot_raster_stats` calculates and returns statistics (min, max, median, mean,
@@ -70,14 +70,14 @@ freq_counts <- function(df, ...) {
 #'     ## WARNING: don't use Cache() below -- excessive RAM usage
 #'     withr::local_options(reproducible.useCache = FALSE) ## TODO
 #'
-#'     ecozone_counts <- calculate_raster_counts(
+#'     ecozone_counts <- calc_raster_counts(
 #'       raster = age,
 #'       polygons = ecozones,
 #'       polygon_id = id_col
 #'     ) |>
 #'       reproducible::Cache()
 #'
-#'     ecozone_stats <- calculate_raster_stats(
+#'     ecozone_stats <- calc_raster_stats(
 #'      raster = age,
 #'      polygons = ecozones,
 #'       polygon_id = id_col
@@ -113,7 +113,7 @@ freq_counts <- function(df, ...) {
 #'
 #' @export
 #' @rdname raster_stats
-calculate_raster_counts <- function(
+calc_raster_counts <- function(
   raster,
   polygons = NULL,
   polygon_id = NULL,
@@ -147,7 +147,7 @@ prop_zero <- function(df, ...) {
 
 #' @export
 #' @rdname raster_stats
-calculate_raster_stats <- function(raster, polygons = NULL, polygon_id = NULL, filter_ids = NULL) {
+calc_raster_stats <- function(raster, polygons = NULL, polygon_id = NULL, filter_ids = NULL) {
   stopifnot(
     requireNamespace("dplyr", quietly = TRUE),
     requireNamespace("purrr", quietly = TRUE),
