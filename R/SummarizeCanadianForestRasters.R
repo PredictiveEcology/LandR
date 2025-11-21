@@ -258,10 +258,8 @@ plot_raster_stats <- function(
   }
 
   ## Calculated raster stats
-  counts_df <- calculate_raster_counts(raster, polygons, polygon_id, filter_ids, csv_file) |>
-    reproducible::Cache()
-  stats_df <- calculate_raster_stats(raster, polygons, polygon_id, filter_ids) |>
-    reproducible::Cache()
+  counts_df <- calc_raster_counts(raster, polygons, polygon_id, filter_ids, csv_file)
+  stats_df <- calc_raster_stats(raster, polygons, polygon_id, filter_ids)
 
   polygons <- prep_polygons(raster, polygons, polygon_id, filter_ids) ## do after calculating stats
 
