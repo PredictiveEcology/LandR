@@ -13,12 +13,6 @@ prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL
   terra::vect(polygons)
 }
 
-freq_counts <- function(df, ...) {
-  stopifnot(requireNamespace("dplyr", quietly = TRUE))
-
-  na.omit(df) |>
-    dplyr::count(value)
-}
 
 #' Raster summary statistics and maps by polygon
 #'
@@ -114,28 +108,22 @@ freq_counts <- function(df, ...) {
 #' @export
 #' @rdname raster_stats
 calc_raster_counts <- function(
-  raster,
-  polygons = NULL,
-  polygon_id = NULL,
-  filter_ids = NULL,
-  csv_file = NULL
+    raster,
+    polygons = NULL,
+    polygon_id = NULL,
+    filter_ids = NULL,
+    csv_file = NULL
 ) {
   stopifnot(
-    requireNamespace("zonal", quietly = TRUE),
     inherits(raster, "SpatRaster"),
     inherits(polygons, c("sf", "SpatVector"))
   )
 
-  polygons <- prep_polygons(raster, polygons, polygon_id, filter_ids) |> sf::st_as_sf()
+  polygons <- prep_polygons(raster, polygons, polygon_id, filter_ids)
 
-  zonal::execute_zonal(
-    data = raster,
-    geom = polygons,
-    ID = "ID",
-    fun = freq_counts, ## pass function, not character
-    join = FALSE,
-    summarize_df = TRUE
-  )  |>
+  polyrast <- terra::rasterize(polygons, raster, "ID", wopt=list(names="ID"))
+  out <- terra::crosstab(c(polyrast, raster)) |>
+    as.data.frame() |>
     setNames(c("ID", "value", "count"))
 }
 
@@ -216,17 +204,17 @@ calc_raster_stats <- function(raster, polygons = NULL, polygon_id = NULL, filter
 #' @export
 #' @rdname raster_stats
 plot_raster_stats <- function(
-  raster,
-  polygons = NULL,
-  polygon_id = NULL,
-  filter_ids = NULL,
-  aggregate_factor = 1,
-  remove_zeros = FALSE,
-  raster_label = NULL,
-  inset_canada = TRUE,
-  bin_width = 10,
-  output_dir = ".",
-  csv_file = NULL
+    raster,
+    polygons = NULL,
+    polygon_id = NULL,
+    filter_ids = NULL,
+    aggregate_factor = 1,
+    remove_zeros = FALSE,
+    raster_label = NULL,
+    inset_canada = TRUE,
+    bin_width = 10,
+    output_dir = ".",
+    csv_file = NULL
 ) {
   stopifnot(
     requireNamespace("dplyr", quietly = TRUE),
@@ -369,11 +357,11 @@ plot_raster_stats <- function(
     if (inset_canada) {
       final_plot <- hist_plot |
         (map_with_inset / stats_plot + patchwork::plot_layout(heights = c(3, 1))) +
-          patchwork::plot_annotation(title = region_val)
+        patchwork::plot_annotation(title = region_val)
     } else {
       final_plot <- hist_plot |
         (map_plot_base / stats_plot + patchwork::plot_layout(heights = c(3, 1))) +
-          patchwork::plot_annotation(title = region_val)
+        patchwork::plot_annotation(title = region_val)
     }
     fig_name <- paste0("region_", gsub("[^A-Za-z0-9]", "_", region_val), ".png")
 
