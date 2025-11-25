@@ -75,7 +75,7 @@ fraxamer,FRAX.AME,Frax_ame,Frax_Ame,Frax amer,Fraxinus americana,Am ash,American
 ,,Jugl_cin,Jugl_Cin,Jugl cine,Juglans cinerea,Butnut,Butternut,Butternut leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Bn,NOC,Bu,JUGL_CIN,1701,,,101,,
 ,,Jugl_nig,Jugl_Nig,Jugl nigr,Juglans nigra,Bl walnut,Black walnut,Black walnut leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Wb,NON,,JUGL_NIG,1702,,,102,,
 ,,Juni_sco,,Juni scop,Juniperus scopulorum,RM jun,Rocky Mountain juniper,Rocky Mountain juniper leading,,,FALSE,Conifer,,,CedrMplOther,,,,,,,,JUNI_SCO,801,eastern redcedar code,,54,,
-,,Juni_vir,Juni_Vir,,Juniperus virginiana,E redced,Eastern redcedar,Eastern redcedar leading,,,FALSE,Conifer,Eastern redcedar,,CedrMplOther,,,,,Cr,,,JUNI_VIR,801,,,53,,
+,,Juni_vir,Juni_Vir,,Juniperus virginiana,E redced,Eastern redcedar,Eastern redcedar leading,,,FALSE,Conifer,eastern redcedar,,CedrMplOther,,,,,Cr,,,JUNI_VIR,801,,,53,,
 ,,Lari_dec,,Lari deci,Larix decidua,Eu larch,European larch,European larch leading,,,FALSE,Conifer,,,CedrMplOther,,,,,Le,MEU,,LARI_DEC,601,,,43,,
 ,,Lari_kae,Lari_Kae,Lari kaem,Larix kaempferi,Jp larch,Japanese larch,Japanese larch leading,,,FALSE,Conifer,,,CedrMplOther,,,,,,,,LARI_KAE,605,,,47,,
 larilari,LARI.LAR,Lari_lar,Lari_Lar,Lari lari,Larix laricina,Tamarack,Tamarack,Tamarack leading,,Lari_Lar,FALSE,Conifer,tamarack larch,,SprcFrLrch,Lt,Lt,,TL,La,MEL,tL,LARI_LAR,602,,13,44,LARI_LAR,#FFB79F
@@ -178,7 +178,7 @@ querrubr,QUER.RUB,Quer_rub,Quer_Rub,Quer rubr,Quercus rubra,N rd oak,Northern re
 ,,Sorb_dec,Sorb_Dec,,Sorbus decora,N mtn-ash,Northern mountain ash,Northern mountain ash leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,SOD,,SORB_DEC,3962,,,148,,
 ,,Sorb_spp,Sorb_Spp,,Sorbus spp.,Mtn-ash,Mountain ash,Mountain ash leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Am,,,SORB_SP,3960,,,168,,
 ,,Taxu_bre,,Taxu brev,Taxus brevifolia,Pa yew,Pacific yew,Pacific yew leading,,,FALSE,Conifer,,,CedrMplOther,Tw,,,,,,,TAXU_BRE,901,,,56,,
-,,Thuj_jun,Juni_Vir,Thuj juni,Juniperus virginiana,E redcedar,Eastern redcedar,Eastern redcedar leading,Not clear why CASFRI name doesn't match,,FALSE,Conifer,eastern redcedar,,CedrMplOther,,,,,,,,THUJ_JUN,801,eastern redcedar code,,53,,
+,,Thuj_jun,Juni_Vir,Thuj juni,Juniperus virginiana,E redcedar,Eastern redcedar,Eastern redcedar leading,Not clear why CASFRI name doesn't match,,FALSE,Conifer,eastern redcedar,,CedrMplOther,,,,,Cr,,,THUJ_JUN,801,eastern redcedar code,,53,,
 thujocci,,Thuj_occ,Thuj_Occ,Thuj occi,Thuja occidentalis,E whcedar,Eastern white-cedar,Eastern white-cedar leading,,,FALSE,Conifer,eastern white-cedar,,CedrMplOther,,,,EC,Cw,THO,Ce,THUJ_OCC,701,,32,49,THUJ_OCC,#F2F318
 thujplic,THUJ.PLI,Thuj_pli,Thuj_Pli,Thuj plic,Thuja plicata,W redced,Western redcedar,Western redcedar leading,,,FALSE,Conifer,western redcedar,,CedrMplOther,Cw,,,,,,,THUJ_PLI,702,,33,50,THUJ_PLI,#F2F318
 ,THUJ.SPP.ALL,Thuj_spp,Thuj_Spp,,Thuja spp.,Cedar,Cedar,Cedar leading,,,FALSE,Conifer,,,CedrMplOther,C,,,,,,,THUJ_SP,700,,,48,,
