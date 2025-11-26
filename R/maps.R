@@ -1433,7 +1433,9 @@ loadSCANFISpeciesLayers <- function(
   }
 
   ## same as above
-  missingSCANFI <- setdiff(SCANFInames, allSpp)
+  whInSCANFI <- sapply(SCANFInames, grep, x = allSpp)
+  missingSCANFI <- setdiff(SCANFInames, names(whInSCANFI))
+  # missingSCANFI <- setdiff(SCANFInames, allSpp)
   if (length(missingSCANFI)) {
     warning(paste0(
       "Can't find ",
