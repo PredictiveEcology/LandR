@@ -1,5 +1,5 @@
 # LandR (development version)
-
+* remove undifferentiated tree species variants from provincial forestry columns in sppEquivalencies_CA;
 * drop support for R 4.2 due to changes in dependency packages;
 * remove deprecated package `crayon` in favour of `cli` instead;
 * move `ggpubr` to Suggests;
