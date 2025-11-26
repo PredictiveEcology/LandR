@@ -605,7 +605,7 @@ prepSpeciesLayers_SCANFI <- function(
     sppEquivCol = sppEquivCol,
     thresh = thresh,
     url = url,
-    year = year,
+    year = dataYear,
     shared_drive_url = shared_drive_url,
     userTags = c("speciesLayers", "KNN")
   )
