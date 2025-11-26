@@ -1330,6 +1330,15 @@ loadSCANFISpeciesLayers <- function(
 ) {
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
+  if (!is.null(dots$to) && missing(studyArea))
+    studyArea <- dots$to
+
+  if (!is.null(dots$to) && missing(rasterToMatch) && reproducible:::isGridded(dots$to))
+    rasterToMatch <- dots$to
+
+  if (!is.null(dots$projectTo) && missing(rasterToMatch) && reproducible:::isGridded(dots$projectTo))
+    rasterToMatch <- dots$projectTo
+
 
   sppEquivalencies_CA <- get(
     data("sppEquivalencies_CA", package = "LandR", envir = environment()),
