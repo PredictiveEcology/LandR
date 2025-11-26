@@ -1358,11 +1358,12 @@ subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
 #' Based on <https://stackoverflow.com/a/23382097/1380598>.
 #'
 #' @param form A model formula.
+#'
 #' @param term Character vector giving the name of the term to drop.
+#'
 #' @param dropRanEff Logical. If `TRUE` (the default), then the `term` to drop
-#'   will also be dropped from the random effects terms. If `FALSE`, it will only
-#'   be dropped from the fixed terms
-#' @importFrom Formula Formula
+#'   will also be dropped from the random effects terms.
+#'   If `FALSE`, it will only be dropped from the fixed terms.
 #'
 #' @return An updated model formula.
 #'
@@ -1382,7 +1383,7 @@ dropTerm <- function(form, term, dropRanEff = TRUE) {
     idr <- grepl(tt, termsInner)
     facPartial <- fac[idr, ]
     toDrop <- list()
-    # Cycle through 1 row at a time of the matrix
+    ## Cycle through 1 row at a time of the matrix
     for (rn in seq_len(NROW(facPartial))) {
       ranEff <- grepl("\\|", termsInner[idr][rn])
       if (any(ranEff)) {
@@ -1399,16 +1400,16 @@ dropTerm <- function(form, term, dropRanEff = TRUE) {
               Formula(as.formula(paste0("~", old))),
               as.formula(paste0("~ . -", tt))
             ))
-            newRe <- gsub("~", "", newRe) # remove the ~ part to convert to string
+            newRe <- gsub("~", "", newRe) ## remove the ~ part to convert to string
             termsInner[idr][rn][whRE] <- newRe
-            oldWithParenth <- paste0("(", old, ")") # random effects must have ( )
-            newWithParenth <- paste0("(", newRe, ")") # random effects must have ( )
-            new_form <- update(new_form, paste0(". ~ . - ", oldWithParenth)) # remove old
-            new_form <- update(new_form, paste0(". ~ . + ", newWithParenth)) # add new
+            oldWithParenth <- paste0("(", old, ")") ## random effects must have ( )
+            newWithParenth <- paste0("(", newRe, ")") ## random effects must have ( )
+            new_form <- update(new_form, paste0(". ~ . - ", oldWithParenth)) ## remove old
+            new_form <- update(new_form, paste0(". ~ . + ", newWithParenth)) ## add new
           }
         }
       } else {
-        # Fixed effect terms
+        ## Fixed effect terms
         idc <- which(as.logical(facPartial[rn, ]))
         toDrop <- names(facPartial[rn, ][idc])
         needsParenth <- vapply(
@@ -1439,17 +1440,20 @@ dropTerm <- function(form, term, dropRanEff = TRUE) {
 #' `uniqueEcoregionGroups` should not be omitted.
 #'
 #' @param modelFn A quoted expression of type `package::model(Y ~ X, ...)`, omitting
-#'   the `data` argument. E.g. `lme4::glmer(Y ~ X + (X|G), family = poisson)`
+#'   the `data` argument. E.g., `lme4::glmer(Y ~ X + (X|G), family = poisson)`.
+#'
 #' @param uniqueEcoregionGroups Unique values of `ecoregionGroups`.
 #'   This is the basis for the statistics, and can be used to optimize caching,
-#'   e.g. ignore `.specialData` in `.omitArgs`.
-#' @param sumResponse a sum of all the response variable values
-#'   Also to be used to optimize caching, e.g. ignore `.specialData`
-#'   in `.omitArgs`.
+#'   e.g., ignore `.specialData` in `.omitArgs`.
+#'
+#' @param sumResponse a sum of all the response variable values.
+#'   Also to be used to optimize caching, e.g. ignore `.specialData` in `.omitArgs`.
 #' @param .specialData The custom dataset required for the model.
 #'
 #' @export
 statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData) {
+  .requireNamespace("MuMIn", stopOnFALSE = TRUE)
+
   ## convert model call to vector of arguments
   modelArgs <- as.character(modelFn)
   names(modelArgs) <- names(modelFn)
@@ -1491,7 +1495,8 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
 
       message(
         cli::col_blue("Grouping variable "),
-        cli::col_red("only has one level. "),
+        cli::col_red("only has one level"),
+        cli::col_blue(". "),
         cli::col_blue(
           "Formula changed to\n",
           cli::col_magenta(paste0(format(modelFn2, appendLF = FALSE), collapse = ""))

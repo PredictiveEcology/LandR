@@ -9,7 +9,7 @@ URL:
     https://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
 Date: 2025-11-26
-Version: 1.1.5.9072
+Version: 1.1.5.9074
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -31,7 +31,6 @@ Imports:
     Formula,
     fpCompare,
     ggplot2,
-    ggpubr,
     ggspatial,
     grDevices,
     httr2,
@@ -43,7 +42,7 @@ Imports:
     quickPlot (>= 1.0.2.9001),
     raster,
     RColorBrewer,
-    reproducible,
+    reproducible (>= 2.1.2.9070),
     sf,
     sp,
     SpaDES.tools (>= 2.0.4),
@@ -64,6 +63,7 @@ Suggests:
     future,
     future.apply,
     ggalluvial,
+    ggpubr,
     ggrepel,
     googledrive (>= 2.0.0),
     httr,
@@ -90,8 +90,8 @@ Remotes:
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
     PredictiveEcology/quickPlot@development,
-    PredictiveEcology/reproducible@development,
-    PredictiveEcology/SpaDES.core@development,
+    PredictiveEcology/reproducible@AI,
+    PredictiveEcology/SpaDES.core@box,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
 Language: en-CA

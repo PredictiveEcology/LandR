@@ -7,3 +7,5 @@ persistent-line-breaks = false
 exclude = []
 default-exclude = true
 skip = ["globalVariables"]
+table = []
+default-table = true

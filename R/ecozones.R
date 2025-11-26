@@ -11,10 +11,10 @@
 #'
 #' @template rasterToMatch
 #'
-#' @return `RasterLayer`
+#' @return `SpatRaster`
 #'
 #' @export
-prepEcozonesRst <- function(url, destinationPath, studyArea = NULL, rasterToMatch = NULL) {
+prepEcozonesRst <- function(url = NULL, destinationPath, studyArea = NULL, rasterToMatch = NULL) {
   if (is.null(url)) {
     url <- "http://sis.agr.gc.ca/cansis/nsdb/ecostrat/zone/ecozone_shp.zip"
   }
@@ -22,12 +22,12 @@ prepEcozonesRst <- function(url, destinationPath, studyArea = NULL, rasterToMatc
   targetCRS <- NULL
 
   if (!is.null(rasterToMatch)) {
-    targetCRS <- proj4string(rasterToMatch)
+    targetCRS <- sp::proj4string(rasterToMatch)
   }
 
   if (!is.null(studyArea)) {
-    studyArea <- as_Spatial(studyArea)
-    targetCRS <- proj4string(studyArea)
+    studyArea <- sf::as_Spatial(studyArea)
+    targetCRS <- sp::proj4string(studyArea)
   }
 
   ecozone_shp <- prepInputs(
@@ -41,9 +41,14 @@ prepEcozonesRst <- function(url, destinationPath, studyArea = NULL, rasterToMatc
   )
 
   ecozone_shp[["ZONE_NAME"]] <- as.factor(ecozone_shp[["ZONE_NAME"]])
-  ecozone <- rasterize(ecozone_shp, rast(rasterToMatch), field = "ZONE_NAME", fun = "sum")
-  ecozone <- rast(ecozone)
-  ecozone <- as.int(ecozone)
+  ecozone <- terra::rasterize(
+    ecozone_shp,
+    terra::rast(rasterToMatch),
+    field = "ZONE_NAME",
+    fun = "sum"
+  ) |>
+    terra::rast() |>
+    terra::as.int()
 
   if (is(rasterToMatch, "Raster")) {
     rasterToMatch <- terra::rast(rasterToMatch)
