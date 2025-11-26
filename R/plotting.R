@@ -53,8 +53,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 
   if (is.null(vtm)) {
     if (!is.null(speciesStack)) {
-      vtm <- Cache(
-        vegTypeMapGenerator,
+      vtm <- vegTypeMapGenerator(
         x = speciesStack,
         vegLeadingProportion = vegLeadingProportion,
         mixedType = 2,
@@ -62,7 +61,8 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
         sppEquivCol = sppEquivCol,
         colors = colors,
         doAssertion = getOption("LandR.assertions", TRUE)
-      )
+      ) |>
+        Cache()
     } else {
       stop(
         "plotVTM requires either a speciesStack of percent cover or a vegetation type map (vtm)."
@@ -121,9 +121,10 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
       legend.text = element_text(size = 6),
       legend.title = element_blank(),
       axis.text = element_text(size = 6)
-    )
+    ) +
+    ggtitle(title)
 
-  Plot(initialLeadingPlot, title = title) ## TODO: use Plots (#87)
+  # Plot(initialLeadingPlot, title = title) ## TODO: use Plots (#87)
 
   ## plot initial types raster
   levels(vtm) <- facLevels
@@ -146,9 +147,11 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
       legend.text = element_text(size = 6),
       legend.title = element_blank(),
       axis.text = element_text(size = 6)
-    )
+    ) +
+    ggtitle(title)
 
-  Plot(vtmPlot, title = title) ## TODO: use Plots (#87)
+  ggpubr::ggarrange(initialLeadingPlot, vtmPlot)
+  # Plot(vtmPlot, title = title) ## TODO: use Plots (#87)
 }
 
 #' Helper for setting Raster or `SpatRaster` colors
