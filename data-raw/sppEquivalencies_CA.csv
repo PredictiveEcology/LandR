@@ -178,7 +178,7 @@ querrubr,QUER.RUB,Quer_rub,Quer_Rub,Quer rubr,Quercus rubra,N rd oak,Northern re
 ,,Sorb_dec,Sorb_Dec,,Sorbus decora,N mtn-ash,Northern mountain ash,Northern mountain ash leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,SOD,,SORB_DEC,3962,,,148,,
 ,,Sorb_spp,Sorb_Spp,,Sorbus spp.,Mtn-ash,Mountain ash,Mountain ash leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Am,,,SORB_SP,3960,,,168,,
 ,,Taxu_bre,,Taxu brev,Taxus brevifolia,Pa yew,Pacific yew,Pacific yew leading,,,FALSE,Conifer,,,CedrMplOther,Tw,,,,,,,TAXU_BRE,901,,,56,,
-,,Thuj_jun,Juni_Vir,Thuj juni,Juniperus virginiana,E redcedar,Eastern redcedar,Eastern redcedar leading,Not clear why CASFRI name doesn't match,,FALSE,Conifer,eastern redcedar,,CedrMplOther,,,,,Cr,,,THUJ_JUN,801,eastern redcedar code,,53,,
+,,Thuj_jun,Juni_Vir,Thuj juni,Juniperus virginiana,E redcedar,Eastern redcedar,Eastern redcedar leading,Not clear why CASFRI name doesn't match,,FALSE,Conifer,,,CedrMplOther,,,,,,,,THUJ_JUN,801,eastern redcedar code,,53,,
 thujocci,,Thuj_occ,Thuj_Occ,Thuj occi,Thuja occidentalis,E whcedar,Eastern white-cedar,Eastern white-cedar leading,,,FALSE,Conifer,eastern white-cedar,,CedrMplOther,,,,EC,Cw,THO,Ce,THUJ_OCC,701,,32,49,THUJ_OCC,#F2F318
 thujplic,THUJ.PLI,Thuj_pli,Thuj_Pli,Thuj plic,Thuja plicata,W redced,Western redcedar,Western redcedar leading,,,FALSE,Conifer,western redcedar,,CedrMplOther,Cw,,,,,,,THUJ_PLI,702,,33,50,THUJ_PLI,#F2F318
 ,THUJ.SPP.ALL,Thuj_spp,Thuj_Spp,,Thuja spp.,Cedar,Cedar,Cedar leading,,,FALSE,Conifer,,,CedrMplOther,C,,,,,,,THUJ_SP,700,,,48,,
