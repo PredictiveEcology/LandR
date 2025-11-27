@@ -131,10 +131,12 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
 
+  LandisTraitColName <- grep("LANDIS.*trait", colnames(sppEquiv), value = TRUE)
+
   # some species don't have trait values in every "area", however, those species do exist, as rare species.
   #  Now this selection is 2 stage -- first, the species, then the areas, but keep species in Areas not
   #  in areas, e.g., Fraxinus americana is rare in prairies, but only has traits for Acadian
-  speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv, "LANDIS_traits", multi = TRUE)]
+  speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv, LandisTraitColName, multi = TRUE)]
   # Areas:
   keepers <- speciesTable[, .(keep = if (any(Area %in% areas)) {
     .I[Area %in% areas]
@@ -142,12 +144,35 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
     .I[1]
   }), by = species]
   speciesTable <- speciesTable[keepers$keep]
-  speciesTable[, species := equivalentName(speciesTable$species, sppEquiv, sppEquivCol)]
+  # Keep the LANDIS.traits column
+  set(speciesTable, NULL, LandisTraitColName, speciesTable[["species"]])
+  # many of the Areas are not unique ... e.g., BETU.PAP has the same traits in all western areas
+  speciesTable <- unique(speciesTable, by = setdiff(colnames(speciesTable), "Area"))
+
+  # This next line previously would eliminate examples like Pice_gla_eng hybrid; need the join approach to keep this
+  # stt <- copy(speciesTable)
+  speciesTable <- sppEquiv[speciesTable, on = LandisTraitColName]
+  # setorderv(speciesTable, "species", order = 1L)
+  # equivalentNameColumn(speciesTable[[LandisTraitColName]], sppEquiv, multi = TRUE)
+  # speciesTable <- speciesTable[sppEquiv, on = LandisTraitColName]
+  # speciesTable[, species := equivalentName(speciesTable$species, sppEquiv, sppEquivCol, multi = TRUE)]
+  set(speciesTable, NULL, setdiff(colnames(sppEquiv), c(LandisTraitColName, sppEquivCol)), NULL)
+  set(speciesTable, NULL, "species", speciesTable[[sppEquivCol]])
+  setcolorder(speciesTable, neworder = c(LandisTraitColName, sppEquivCol), after = tail(colnames(speciesTable), 1))
+
+  # The next block was wrong because it would remove species that had 2 rows in sppEquivCol, but one row in "species" col
+  #    We want all records, even if they map to 1 column in LandisTraitColName and "species"
+  #    Example, Pice_eng_gla is currently using Pice_eng traits, but this would remove that...
+  # suppressWarnings({
+  #   speciesTable <- speciesTable[, lapply(.SD, function(x) {
+  #     if (is.numeric(x)) min(x, na.rm = TRUE) else x[1]
+  #   }), by = "species"]
+  # })
 
   suppressWarnings({
     speciesTable <- speciesTable[, lapply(.SD, function(x) {
       if (is.numeric(x)) min(x, na.rm = TRUE) else x[1]
-    }), by = "species"]
+    }), by = sppEquivCol]
   })
 
   if (any(!speciesTable$Area %in% areas)) {
