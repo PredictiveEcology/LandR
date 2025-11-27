@@ -550,6 +550,11 @@ prepSpeciesLayers_SCANFI <- function(
   stopifnot(requireNamespace("RCurl", quietly = TRUE))
 
   dots <- list(...)
+  if (!is.null(dots$to) && missing(studyArea))
+    studyArea <- dots$to
+
+  if (!is.null(dots$projectTo) && missing(rasterToMatch))
+    rasterToMatch <- dots$projectTo
 
   if (is.null(sppEquiv)) {
     message(
@@ -558,11 +563,11 @@ prepSpeciesLayers_SCANFI <- function(
       "\n  Provide a list of species via 'sppEquiv' to filter layers."
     )
   }
-  if ("year" %in% names(dots)) {
-    year <- dots[["year"]]
-  } else {
-    year <- dataYear
-  }
+  # if ("year" %in% ...names()) {
+  #   year <- dots[["year"]]
+  # } else {
+  #   year <- dataYear
+  # }
 
   if (is.null(url)) {
     if (dataYear == 2000) {
@@ -592,14 +597,15 @@ prepSpeciesLayers_SCANFI <- function(
     dPath = destinationPath,
     SCANFINamesCol = "SCANFI",
     outputPath = outputPath,
-    rasterToMatch = rasterToMatch,
-    studyArea = studyArea,
+    projectTo = rasterToMatch,
+    to = studyArea,
+    projectTo = rasterToMatch,
     studyAreaName = dots$studyAreaName,
     sppEquiv = sppEquiv,
     sppEquivCol = sppEquivCol,
     thresh = thresh,
     url = url,
-    year = year,
+    year = dataYear,
     shared_drive_url = shared_drive_url,
     userTags = c("speciesLayers", "KNN")
   )
