@@ -53,7 +53,7 @@
 #' @importFrom stats approx as.formula complete.cases fitted glm na.omit
 #' @importFrom stats predict quantile runif setNames terms update vcov
 #' @importFrom terra app as.factor as.int cellFromRowCol cellFromXY classify coltab<- compareGeom
-#' @importFrom terra crop crs crs<- deepcopy ext extract focalMat
+#' @importFrom terra crop crosstab crs crs<- deepcopy ext extract focalMat
 #' @importFrom terra intersect is.factor is.int is.points is.valid
 #' @importFrom terra levels mask minmax NAflag<- ncell nlyr project
 #' @importFrom terra rast rasterize res rowColFromCell set.names set.values terraOptions
