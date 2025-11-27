@@ -1,5 +1,5 @@
 # LandR (development version)
-
+* remove undifferentiated tree species variants from provincial forestry columns in sppEquivalencies_CA;
 * plotVTM now does not use Plot internally
 * several minor updates to loadSCANFISpeciesLayers, prepSpeciesLayers_SCANFI to address more edge cases
 * prepSpeciesLayers_SCANFI updates to improve join sppEquiv so "multiple - to - one" can be used
