@@ -31,9 +31,10 @@ purpose of tree growth, the linear equation determining 'A' should include a
 'cover' predictor indicating the tree cover or dominance in the stand. Should be
 scaled between 0 and \code{maxCover}.}
 
-\item{targetCovar}{the covariate for which variation in maxB values will be shown.
-Defaults to showing how maxB values change with "cover". All other covariates except
-"age" are averaged. Age values are generated as \code{round(seq(min(age), max(age)*1.5, length.out = 100), 0)}.
+\item{targetCovar}{the covariate for which variation in \code{maxB} values will be shown.
+Defaults to showing how \code{maxB} values change with "cover".
+All other covariates except "age" are averaged.
+Age values are generated as \code{round(seq(min(age), max(age)*1.5, length.out = 100), 0)}.
 When \code{targetCovar != "cover"}, "cover" will be fixed at \code{maxCover}. See \code{fixMaxCover}.}
 
 \item{fixMaxCover}{logical. If \code{TRUE} and \code{targetCovar != "cover"}, cover is

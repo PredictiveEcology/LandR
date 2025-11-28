@@ -368,11 +368,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
       # klim = c(min = min(rateEstimates), max = max(rateEstimates))
     )
 
-    paramRanges <- modelParams[c(
-      "Alim",
-      "klim",
-      "plim"
-    )]
+    paramRanges <- modelParams[c("Alim", "klim", "plim")]
 
     ## starting values
     if (randomStarts) {
@@ -485,7 +481,6 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
     # lowerLims["p"] <- min(paramRanges$plim) * 0.1
     # upperLims["p"] <- min(paramRanges$plim) * 2
 
-
     for (pred in predictorVarsCombos) {
       lnEqn <- paste("A ~", paste(pred, collapse = " + "))
       # lnEqn <- paste("A ~ 1") ## testing
@@ -568,8 +563,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
         stop("Please provide a 'cover' variable as a linear predictor to, e.g., 'A'")
       }
 
-      if (max(data$cover, na.rm = TRUE) > maxCover ||
-        min(data$cover, na.rm = TRUE) < 0) {
+      if (max(data$cover, na.rm = TRUE) > maxCover || min(data$cover, na.rm = TRUE) < 0) {
         stop("data$cover must be scaled between 0 and 'maxCover'")
       }
     }
@@ -982,7 +976,8 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
       geom_ribbon(
         data = allConfInts,
         aes(x = get(xCovar), ymin = lower, ymax = upper),
-        fill = "grey", alpha = 0.5
+        fill = "grey",
+        alpha = 0.5
       )
   }
 
@@ -991,56 +986,79 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
     stat_summary(
       data = allPlotData,
       mapping = aes(x = get(xCovar), y = pred1, linetype = model),
-      fun = mean, geom = "line",
-      linewidth = 1, colour = lineCols[3]
+      fun = mean,
+      geom = "line",
+      linewidth = 1,
+      colour = lineCols[3]
     ) +
     stat_summary(
       data = allPlotData,
       mapping = aes(x = get(xCovar), y = pred1, linetype = model),
-      fun = quantile, fun.args = list(probs = 0.05),
-      geom = "line", linewidth = 1, colour = lineCols[1]
+      fun = quantile,
+      fun.args = list(probs = 0.05),
+      geom = "line",
+      linewidth = 1,
+      colour = lineCols[1]
     ) +
     stat_summary(
       data = allPlotData,
       mapping = aes(x = get(xCovar), y = pred1, linetype = model),
-      fun = quantile, fun.args = list(probs = 0.25),
-      geom = "line", linewidth = 1, colour = lineCols[2]
+      fun = quantile,
+      fun.args = list(probs = 0.25),
+      geom = "line",
+      linewidth = 1,
+      colour = lineCols[2]
     ) +
     stat_summary(
       data = allPlotData,
       mapping = aes(x = get(xCovar), y = pred1, linetype = model),
-      fun = quantile, fun.args = list(probs = 0.75),
-      geom = "line", linewidth = 1, colour = lineCols[4]
+      fun = quantile,
+      fun.args = list(probs = 0.75),
+      geom = "line",
+      linewidth = 1,
+      colour = lineCols[4]
     ) +
     stat_summary(
       data = allPlotData,
       mapping = aes(x = get(xCovar), y = pred1, linetype = model),
-      fun = quantile, fun.args = list(probs = 0.95),
-      geom = "line", linewidth = 1, colour = lineCols[5]
+      fun = quantile,
+      fun.args = list(probs = 0.95),
+      geom = "line",
+      linewidth = 1,
+      colour = lineCols[5]
     )
 
   gg1 <- gg1 +
     geom_hline(
-      yintercept = maxBfittedQuants[quant == "5%", value], colour = lineCols[1],
-      linetype = "dashed", linewidth = 1
+      yintercept = maxBfittedQuants[quant == "5%", value],
+      colour = lineCols[1],
+      linetype = "dashed",
+      linewidth = 1
     ) +
     geom_hline(
-      yintercept = maxBfittedQuants[quant == "25%", value], colour = lineCols[2],
-      linetype = "dashed", linewidth = 1
+      yintercept = maxBfittedQuants[quant == "25%", value],
+      colour = lineCols[2],
+      linetype = "dashed",
+      linewidth = 1
     ) +
     geom_hline(
-      yintercept = maxBfittedQuants[quant == "50%", value], colour = lineCols[3],
-      linetype = "dashed", linewidth = 1
+      yintercept = maxBfittedQuants[quant == "50%", value],
+      colour = lineCols[3],
+      linetype = "dashed",
+      linewidth = 1
     ) +
     geom_hline(
-      yintercept = maxBfittedQuants[quant == "75%", value], colour = lineCols[4],
-      linetype = "dashed", linewidth = 1
+      yintercept = maxBfittedQuants[quant == "75%", value],
+      colour = lineCols[4],
+      linetype = "dashed",
+      linewidth = 1
     ) +
     geom_hline(
-      yintercept = maxBfittedQuants[quant == "95%", value], colour = lineCols[5],
-      linetype = "dashed", linewidth = 1
+      yintercept = maxBfittedQuants[quant == "95%", value],
+      colour = lineCols[5],
+      linetype = "dashed",
+      linewidth = 1
     )
-
 
   gg1
 }
@@ -1090,10 +1108,7 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
     cols <- c("age", .getMaxBCoefs(mll)[[2]])
     missingCols <- setdiff(c("B", cols), names(data))
     if (length(missingCols)) {
-      stop(
-        "The following colums were not found in data: ",
-        paste(missingCols, collapse = ", ")
-      )
+      stop("The following colums were not found in data: ", paste(missingCols, collapse = ", "))
     }
 
     df <- data[, ..cols]
@@ -1119,10 +1134,7 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
         ## age/cover combination
         cols <- setdiff(cols, c("cover", "age"))
         df <- apply(ageCover, 1, function(x) {
-          cbind(
-            data.table(cover = x["cover"], age = x["age"]),
-            df[, ..cols]
-          )
+          cbind(data.table(cover = x["cover"], age = x["age"]), df[, ..cols])
         })
         df <- rbindlist(df)
         df <- df[, lapply(.SD, round, digits = 2)] ## round to reduce size
@@ -1177,7 +1189,10 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
         ## see https://stackoverflow.com/questions/69804459/multivariete-distribution-error-sigma-is-not-positive-definite
         ## note that this may be due to some variables being linear combinations of others, or bad model specification
         # https://stats.stackexchange.com/questions/30465/what-does-a-non-positive-definite-covariance-matrix-tell-me-about-my-data
-        SigmaMatrix <- tryCatch(lqmm::make.positive.definite(solve(mll@details$hessian)), error = function(e) e)
+        SigmaMatrix <- tryCatch(
+          lqmm::make.positive.definite(solve(mll@details$hessian)),
+          error = function(e) e
+        )
         if (isFALSE(is(SigmaMatrix, "error"))) {
           if (!requireNamespace("MASS", quietly = TRUE)) {
             stop("Package MASS not installed. Install using `install.packages('MASS')`.")
@@ -1202,7 +1217,9 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
       if (is(newparams, "error")) {
         confIntervals <- NULL
       } else {
-        preds <- apply(newparams, 1, function(x) bbmle::predict(mll, newdata = df, newparams = unlist(x))) ## predict biomass values for each age and new parameter combination
+        preds <- apply(newparams, 1, function(x) {
+          bbmle::predict(mll, newdata = df, newparams = unlist(x))
+        }) ## predict biomass values for each age and new parameter combination
         confIntervals <- apply(preds, 1, function(x) quantile(x, c(0.025, 0.975))) ## estimate 95% quantiles for each iteration of age
         confIntervals <- as.data.table(t(confIntervals))
         confIntervals[, age := df$age]
@@ -1312,10 +1329,7 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
     stop("mll must be a named list")
   }
 
-  if (any(!vapply(mll,
-    FUN = function(x) is(x, "mle2"),
-    FUN.VALUE = logical(1)
-  ))) {
+  if (any(!vapply(mll, FUN = function(x) is(x, "mle2"), FUN.VALUE = logical(1)))) {
     stop("mll must be a list of mle2 outputs or an mle2 output")
   }
 
@@ -1368,10 +1382,7 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
   }
 
   gg1 <- ggplot() +
-    geom_point(
-      data = data,
-      aes(x = get(xCovar), y = B, color = get(targetCovar))
-    ) +
+    geom_point(data = data, aes(x = get(xCovar), y = B, color = get(targetCovar))) +
     scale_color_distiller(palette = "Greens", direction = 1) +
     theme_classic() +
     labs(title = plotTitle, color = targetCovar, x = xCovar)
@@ -1381,7 +1392,8 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
       geom_ribbon(
         data = allConfInts,
         aes(x = get(xCovar), ymin = lower, ymax = upper),
-        fill = "grey", alpha = 0.5
+        fill = "grey",
+        alpha = 0.5
       )
   }
 
@@ -1392,8 +1404,10 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
       stat_summary(
         data = allPlotData,
         mapping = aes(x = get(xCovar), y = pred1, linetype = model),
-        fun = mean, geom = "line",
-        linewidth = 1, colour = lineCols[3]
+        fun = mean,
+        geom = "line",
+        linewidth = 1,
+        colour = lineCols[3]
       )
   }
   if (showQuantiles == "allQuantiles") {
@@ -1401,46 +1415,68 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
       stat_summary(
         data = allPlotData,
         mapping = aes(x = get(xCovar), y = pred1, linetype = model),
-        fun = quantile, fun.args = list(probs = 0.05),
-        geom = "line", linewidth = 1, colour = lineCols[1]
+        fun = quantile,
+        fun.args = list(probs = 0.05),
+        geom = "line",
+        linewidth = 1,
+        colour = lineCols[1]
       ) +
       stat_summary(
         data = allPlotData,
         mapping = aes(x = get(xCovar), y = pred1, linetype = model),
-        fun = quantile, fun.args = list(probs = 0.25),
-        geom = "line", linewidth = 1, colour = lineCols[2]
+        fun = quantile,
+        fun.args = list(probs = 0.25),
+        geom = "line",
+        linewidth = 1,
+        colour = lineCols[2]
       ) +
       stat_summary(
         data = allPlotData,
         mapping = aes(x = get(xCovar), y = pred1, linetype = model),
-        fun = quantile, fun.args = list(probs = 0.75),
-        geom = "line", linewidth = 1, colour = lineCols[4]
+        fun = quantile,
+        fun.args = list(probs = 0.75),
+        geom = "line",
+        linewidth = 1,
+        colour = lineCols[4]
       ) +
       stat_summary(
         data = allPlotData,
         mapping = aes(x = get(xCovar), y = pred1, linetype = model),
-        fun = quantile, fun.args = list(probs = 0.95),
-        geom = "line", linewidth = 1, colour = lineCols[5]
+        fun = quantile,
+        fun.args = list(probs = 0.95),
+        geom = "line",
+        linewidth = 1,
+        colour = lineCols[5]
       ) +
       geom_hline(
-        yintercept = maxBfittedQuants[quant == "5%", value], colour = lineCols[1],
-        linetype = "dashed", linewidth = 1
+        yintercept = maxBfittedQuants[quant == "5%", value],
+        colour = lineCols[1],
+        linetype = "dashed",
+        linewidth = 1
       ) +
       geom_hline(
-        yintercept = maxBfittedQuants[quant == "25%", value], colour = lineCols[2],
-        linetype = "dashed", linewidth = 1
+        yintercept = maxBfittedQuants[quant == "25%", value],
+        colour = lineCols[2],
+        linetype = "dashed",
+        linewidth = 1
       ) +
       geom_hline(
-        yintercept = maxBfittedQuants[quant == "50%", value], colour = lineCols[3],
-        linetype = "dashed", linewidth = 1
+        yintercept = maxBfittedQuants[quant == "50%", value],
+        colour = lineCols[3],
+        linetype = "dashed",
+        linewidth = 1
       ) +
       geom_hline(
-        yintercept = maxBfittedQuants[quant == "75%", value], colour = lineCols[4],
-        linetype = "dashed", linewidth = 1
+        yintercept = maxBfittedQuants[quant == "75%", value],
+        colour = lineCols[4],
+        linetype = "dashed",
+        linewidth = 1
       ) +
       geom_hline(
-        yintercept = maxBfittedQuants[quant == "95%", value], colour = lineCols[5],
-        linetype = "dashed", linewidth = 1
+        yintercept = maxBfittedQuants[quant == "95%", value],
+        colour = lineCols[5],
+        linetype = "dashed",
+        linewidth = 1
       )
   }
 
@@ -1449,12 +1485,17 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
       stat_summary(
         data = allPlotData,
         mapping = aes(x = get(xCovar), y = pred1, linetype = model),
-        fun = quantile, fun.args = list(probs = 1.0),
-        geom = "line", linewidth = 1, colour = lineCols[5]
+        fun = quantile,
+        fun.args = list(probs = 1.0),
+        geom = "line",
+        linewidth = 1,
+        colour = lineCols[5]
       ) +
       geom_hline(
-        yintercept = maxBfittedQuants[quant == "100%", value], colour = lineCols[5],
-        linetype = "dashed", linewidth = 1
+        yintercept = maxBfittedQuants[quant == "100%", value],
+        colour = lineCols[5],
+        linetype = "dashed",
+        linewidth = 1
       )
   }
 
@@ -1470,9 +1511,10 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
 #' an 'age' column. Note that other covariates will be averaged and 'cover' values
 #' will be replaced with the maximum cover value (`maxCover`).
 #'
-#' @param targetCovar the covariate for which variation in maxB values will be shown.
-#' Defaults to showing how maxB values change with "cover". All other covariates except
-#' "age" are averaged. Age values are generated as `round(seq(min(age), max(age)*1.5, length.out = 100), 0)`.
+#' @param targetCovar the covariate for which variation in `maxB` values will be shown.
+#' Defaults to showing how `maxB` values change with "cover".
+#' All other covariates except "age" are averaged.
+#' Age values are generated as `round(seq(min(age), max(age)*1.5, length.out = 100), 0)`.
 #' When `targetCovar != "cover"`, "cover" will be fixed at `maxCover`. See `fixMaxCover`.
 #'
 #' @param fixMaxCover logical. If `TRUE` and `targetCovar != "cover"`, cover is
@@ -1508,10 +1550,7 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
     cols <- unique(c("age", targetCovar, .getMaxBCoefs(mll)[[2]]))
     missingCols <- setdiff(c("B", cols), names(data))
     if (length(missingCols)) {
-      stop(
-        "The following colums were not found in data: ",
-        paste(missingCols, collapse = ", ")
-      )
+      stop("The following colums were not found in data: ", paste(missingCols, collapse = ", "))
     }
 
     df <- data[, ..cols]
@@ -1624,7 +1663,9 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
         confIntervals <- NULL
       } else {
         message(cli::col_blue("Estimating confidence intervals..."))
-        preds <- apply(newparams, 1, function(x) bbmle::predict(mll, newdata = df, newparams = unlist(x))) ## predict biomass values for each age and new parameter combination
+        preds <- apply(newparams, 1, function(x) {
+          bbmle::predict(mll, newdata = df, newparams = unlist(x))
+        }) ## predict biomass values for each age and new parameter combination
         confIntervals <- apply(preds, 1, function(x) quantile(x, c(0.025, 0.975))) ## estimate 95% quantiles for each iteration of age
         confIntervals <- as.data.table(t(confIntervals))
         confIntervals[, age := df$age]
@@ -1724,52 +1765,5 @@ modifySpeciesAndSpeciesEcoregionTable <- function(speciesEcoregion, speciesTable
   newSpeciesEcoregion[, speciesCode := as.factor(speciesCode)]
   newSpeciesEcoregion[, maxB := asInteger(maxB)]
 
-  return(list(
-    "newSpeciesEcoregion" = newSpeciesEcoregion,
-    "newSpeciesTable" = speciesTable
-  ))
+  return(list("newSpeciesEcoregion" = newSpeciesEcoregion, "newSpeciesTable" = speciesTable))
 }
-
-## OLD CODE FROM ELIOT:
-# library(bbmle)
-# specDat[, age := exp(logAge)]
-# ll <- split(specDat, by = c("speciesCode"))
-#
-# models <- list()
-# nlsoutInner <- list()
-#
-# # Chapman Richards
-# # https://www.srs.fs.usda.gov/pubs/gtr/gtr_srs092/gtr_srs092-068-coble.pdf
-# models <- list(
-#   nonLinEqn = quote(B ~ dpois(A * (1 - exp(-k * age))^p)),
-#   linEqn = quote(A ~ cover + MAT),  ## Ceres: A is the asymptote
-#   plim = c(min = 1, max = 80),
-#   Alim = c(max(specDat$B) * c(min = 0.3, max = 0.9)), ## (specDat in B_borealDP)
-#   klim = c(min = 0.0001, max = 0.13))
-#
-# # models <- list(
-# #   nonLinEqn = "B ~ dpois(A / (1 + k * exp(-p * age)))",
-# #   plim = c(min = 0.001, max = 1),
-# #   Alim = c(max(specDat$B) * c(min = 0.3, max = 0.9)) )
-# # models$klim <- c(min = 10, max = max(models$Alim))
-#
-#
-# # Two levels:
-# # 1. Model type -> e.g., logistic, chapman richards
-# # 2. Species
-# mllsOuter <- list() # this is here as a placeholder; this function can be run again and again
-# #  to keep trying new start values, i.e., "interate". To iterate,
-# #  don't reset this object
-#
-#
-# mllsOuter <- fitNLMwCovariates(ll = ll,
-#                                nonLinModelQuoted = models$nonLinEqn,
-#                                linModelQuoted = models$linEqn, paramRanges = models[3:5],
-#                                modelType = "CR", Ntries = 300, mllsOuterPrev = mllsOuter)
-#
-# maxBs <- extractMaxB(mllsOuter$mlls)
-# ggs <- ggplotMLLs(mllsOuter$mlls, ll, linModelQuoted = models$linEqn,
-#                   nonLinModelQuoted = models$nonLinEqn)
-#
-# library(ggpubr)
-# ggarrange(plotlist = ggs)

@@ -28,6 +28,8 @@ utils::globalVariables(c(
 #' @export
 plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
                     sppEquiv, sppEquivCol, colors, title = "Leading vegetation types") {
+  stopifnot(requireNamespace("ggpubr", quietly = TRUE))
+
   if (is(speciesStack, "RasterBrick")) {
     speciesStack <- raster::stack(speciesStack)
   }
@@ -101,7 +103,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
       df[whMixed, species := mixedString]
     }
 
-    df <- colDT[df, on = "species"] # merge color and species
+    df <- colDT[df, on = "species"] ## merge color and species
   } else {
     stop("Species names of 'colors' must match those in 'speciesStack'.")
   }
@@ -123,8 +125,6 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
       axis.text = element_text(size = 6)
     ) +
     ggtitle(title)
-
-  # Plot(initialLeadingPlot, title = title) ## TODO: use Plots (#87)
 
   ## plot initial types raster
   levels(vtm) <- facLevels
@@ -151,7 +151,6 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
     ggtitle(title)
 
   ggpubr::ggarrange(initialLeadingPlot, vtmPlot)
-  # Plot(vtmPlot, title = title) ## TODO: use Plots (#87)
 }
 
 #' Helper for setting Raster or `SpatRaster` colors
@@ -220,10 +219,12 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette = "Accent")
   standardizedColors <- FALSE
   #test if standardized plotting is an option - if so, override palette
   if (!is.null(sppEquiv$colorHex)) {
-    if (nrow(sppEquiv[colorHex == "",]) == 0 &
+    if (
+      nrow(sppEquiv[colorHex == "", ]) == 0 &
         !any(is.na(sppEquiv$colorHex)) &
         c(is.null(newVals) | length(newVals) < 2) &
-        length(unique(sppEquiv[[sppEquivCol]] <= length(unique(sppEquiv$colorHex))))) {
+        length(unique(sppEquiv[[sppEquivCol]] <= length(unique(sppEquiv$colorHex))))
+    ) {
       standardizedColors <- TRUE
     }
   }
