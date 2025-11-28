@@ -117,6 +117,7 @@ calc_raster_counts <- function(
     filter_ids = NULL
 ) {
   stopifnot(
+    requireNamespace("dplyr", quietly = TRUE),
     inherits(raster, "SpatRaster"),
     inherits(polygons, c("sf", "SpatVector"))
   )
