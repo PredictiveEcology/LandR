@@ -29,9 +29,9 @@ test_that("calc_raster_stats and plot_raster_stats work", {
     polygon_id = "ECOREGION",
     filter_ids = c("88", "147"), ## 88 intesects; 147 does not
     output_dir = td,
-    csv_file = "stats_by_ecoregion.csv"
+    csv_file = "ecoregion.csv"
   )
 
-  expected_files <- c("region_88.png", "stats_by_ecoregion.csv")
+  expected_files <- c("region_88.png", "ecoregion_counts.csv", "ecoregion_stats.csv")
   expect_true(all(file.exists(file.path(td, expected_files))))
 })
