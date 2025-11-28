@@ -10,8 +10,7 @@ calc_raster_counts(
   raster,
   polygons = NULL,
   polygon_id = NULL,
-  filter_ids = NULL,
-  csv_file = NULL
+  filter_ids = NULL
 )
 
 calc_raster_stats(
@@ -26,6 +25,8 @@ plot_raster_stats(
   polygons = NULL,
   polygon_id = NULL,
   filter_ids = NULL,
+  counts_df = NULL,
+  stats_df = NULL,
   aggregate_factor = 1,
   remove_zeros = FALSE,
   raster_label = NULL,
@@ -44,7 +45,11 @@ plot_raster_stats(
 
 \item{filter_ids}{Optional. Polygon IDs to filter.}
 
-\item{csv_file}{Optional. Filename to save the output CSV file.}
+\item{counts_df}{optional \code{data.frame} of frequency counts output by \code{calc_raster_counts}.
+If not provided, that function will be called internally.}
+
+\item{stats_df}{optional \code{data.frame} of raster statistics output by \code{calc_raster_stats}.
+If not provided, that function will be called internally.}
 
 \item{aggregate_factor}{Optional. Integer factor to aggregate raster for plotting. Default is \code{1} (no aggregation).}
 
@@ -59,6 +64,11 @@ Defaults to raster layer name.}
 \item{bin_width}{Numeric. Bin size for histogram plots.}
 
 \item{output_dir}{Directory to save figures and optional csv file.}
+
+\item{csv_file}{Optional. Base filename to save the output CSV file.
+If provided, a suffix will be added to this filename to denote the 'counts' and 'stats' tables
+(e.g., if \code{csv_file = "ecozones.csv"}, the output files saved to \code{output_dir} will be
+\code{ecozones_counts.csv} and \code{ecozones_stats.csv}).}
 }
 \value{
 A \code{data.frame} with columns: \code{ID}, \code{value}, \code{count}.
@@ -78,6 +88,10 @@ a histogram of raster values, a map of raster values within the polygon, and
 a summary of statistics . Optionally, zero values can be removed from the
 analysis, and the raster can be aggregated to a lower resolution to speed up plotting.
 }
+\note{
+Large rasters should be processed on disk, where possible, e.g. by setting
+\code{terraOptions(memfrac = 0.0)}.
+}
 \examples{
 if (interactive()) {
   if (requireNamespace("dplyr", quietly = TRUE) &&
@@ -86,6 +100,9 @@ if (interactive()) {
       requireNamespace("withr", quietly = TRUE) &&
       requireNamespace("zonal", quietly = TRUE)) {
     tmp_pth <- withr::local_tempdir()
+
+    ## work with raster on disk instead of in memory
+    terraOptions(memfrac = 0.0)
 
     age <- prepInputsStandAgeMap(
       dataSource = "KNN",
@@ -102,31 +119,30 @@ if (interactive()) {
     id_col <- "ZONE_NAME"
 
     ## WARNING: don't use Cache() below -- excessive RAM usage
-    withr::local_options(reproducible.useCache = FALSE) ## TODO
 
     ecozone_counts <- calc_raster_counts(
       raster = age,
       polygons = ecozones,
       polygon_id = id_col
-    ) |>
-      reproducible::Cache()
+    )
 
     ecozone_stats <- calc_raster_stats(
      raster = age,
      polygons = ecozones,
       polygon_id = id_col
-    ) |>
-      reproducible::Cache()
+    )
 
     gc()
 
-    ## below, will call calc_raster_counts and calc_raster_stats internally,
-    ## but should get cached version run above if cache enabled
+    ## below will call calc_raster_counts and calc_raster_stats internally,
+    ## so we shortcut this by passing the previously-calculated tables
     stats_ecozone <- plot_raster_stats(
       raster = age,
       polygons = ecozones,
       polygon_id = id_col,
       filter_ids = NULL,
+      counts_df = ecozone_counts,
+      stats_df = ecozone_stats,
       aggregate_factor = 1,
       remove_zeros = FALSE,
       raster_label = "age",

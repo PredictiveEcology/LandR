@@ -26,6 +26,9 @@ prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL
 #' a summary of statistics . Optionally, zero values can be removed from the
 #' analysis, and the raster can be aggregated to a lower resolution to speed up plotting.
 #'
+#' @note Large rasters should be processed on disk, where possible, e.g. by setting
+#' `terraOptions(memfrac = 0.0)`.
+#'
 #' @param raster A `SpatRaster` object.
 #'
 #' @param polygons A `SpatVector` or `sf` object of polygons.
@@ -33,8 +36,6 @@ prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL
 #' @param polygon_id Name of the column in `polygons` to use as polygon ID.
 #'
 #' @param filter_ids Optional. Polygon IDs to filter.
-#'
-#' @param csv_file Optional. Filename to save the output CSV file.
 #'
 #' @returns A `data.frame` with columns: `ID`, `value`, `count`.
 #'
@@ -46,6 +47,9 @@ prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL
 #'       requireNamespace("withr", quietly = TRUE) &&
 #'       requireNamespace("zonal", quietly = TRUE)) {
 #'     tmp_pth <- withr::local_tempdir()
+#'
+#'     ## work with raster on disk instead of in memory
+#'     terraOptions(memfrac = 0.0)
 #'
 #'     age <- prepInputsStandAgeMap(
 #'       dataSource = "KNN",
@@ -62,31 +66,30 @@ prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL
 #'     id_col <- "ZONE_NAME"
 #'
 #'     ## WARNING: don't use Cache() below -- excessive RAM usage
-#'     withr::local_options(reproducible.useCache = FALSE) ## TODO
 #'
 #'     ecozone_counts <- calc_raster_counts(
 #'       raster = age,
 #'       polygons = ecozones,
 #'       polygon_id = id_col
-#'     ) |>
-#'       reproducible::Cache()
+#'     )
 #'
 #'     ecozone_stats <- calc_raster_stats(
 #'      raster = age,
 #'      polygons = ecozones,
 #'       polygon_id = id_col
-#'     ) |>
-#'       reproducible::Cache()
+#'     )
 #'
 #'     gc()
 #'
-#'     ## below, will call calc_raster_counts and calc_raster_stats internally,
-#'     ## but should get cached version run above if cache enabled
+#'     ## below will call calc_raster_counts and calc_raster_stats internally,
+#'     ## so we shortcut this by passing the previously-calculated tables
 #'     stats_ecozone <- plot_raster_stats(
 #'       raster = age,
 #'       polygons = ecozones,
 #'       polygon_id = id_col,
 #'       filter_ids = NULL,
+#'       counts_df = ecozone_counts,
+#'       stats_df = ecozone_stats,
 #'       aggregate_factor = 1,
 #'       remove_zeros = FALSE,
 #'       raster_label = "age",
@@ -111,8 +114,7 @@ calc_raster_counts <- function(
     raster,
     polygons = NULL,
     polygon_id = NULL,
-    filter_ids = NULL,
-    csv_file = NULL
+    filter_ids = NULL
 ) {
   stopifnot(
     inherits(raster, "SpatRaster"),
@@ -120,11 +122,17 @@ calc_raster_counts <- function(
   )
 
   polygons <- prep_polygons(raster, polygons, polygon_id, filter_ids)
+  poly_names_df <- data.frame(zone = seq_along(polygons$ID), ID = polygons$ID)
 
-  polyrast <- terra::rasterize(polygons, raster, "ID", wopt=list(names="ID"))
-  out <- terra::crosstab(c(polyrast, raster)) |>
-    as.data.frame() |>
-    setNames(c("ID", "value", "count"))
+  ## terra::freq outputs data.frame with colnames: layer, value, count, zone (zone is numeric)
+  ## we need data.frame with colnames: ID, value, count (with ID being the poly name)
+  out <- terra::freq(raster, zones = polygons) |>
+    dplyr::left_join(poly_names_df, by = "zone") |>
+    dplyr::relocate(ID, .before = layer) |>
+    dplyr::mutate(layer = NULL, zone = NULL) |>
+    dplyr::arrange(ID, value)
+
+  return(out_df)
 }
 
 prop_zero <- function(df, ...) {
@@ -184,10 +192,21 @@ calc_raster_stats <- function(raster, polygons = NULL, polygon_id = NULL, filter
     purrr::reduce(dplyr::inner_join, by = "ID")
 }
 
+#' @param csv_file Optional. Base filename to save the output CSV file.
+#' If provided, a suffix will be added to this filename to denote the 'counts' and 'stats' tables
+#' (e.g., if `csv_file = "ecozones.csv"`, the output files saved to `output_dir` will be
+#' `ecozones_counts.csv` and `ecozones_stats.csv`).
+#'
 #' @param aggregate_factor Optional. Integer factor to aggregate raster for plotting. Default is `1` (no aggregation).
 #'
 #' @param remove_zeros Logical. Removes zeroes from raster and counts for plotting.
 #' Useful to eliminate non-forested areas from forest rasters.
+#'
+#' @param counts_df optional `data.frame` of frequency counts output by `calc_raster_counts`.
+#' If not provided, that function will be called internally.
+#'
+#' @param stats_df optional `data.frame` of raster statistics output by `calc_raster_stats`.
+#' If not provided, that function will be called internally.
 #'
 #' @param raster_label Optional. Character label for raster used in plots.
 #' Defaults to raster layer name.
@@ -208,6 +227,8 @@ plot_raster_stats <- function(
     polygons = NULL,
     polygon_id = NULL,
     filter_ids = NULL,
+    counts_df = NULL,
+    stats_df = NULL,
     aggregate_factor = 1,
     remove_zeros = FALSE,
     raster_label = NULL,
@@ -246,13 +267,14 @@ plot_raster_stats <- function(
   }
 
   ## Calculated raster stats
-  counts_df <- calc_raster_counts(raster, polygons, polygon_id, filter_ids, csv_file)
+  counts_df <- calc_raster_counts(raster, polygons, polygon_id, filter_ids)
   stats_df <- calc_raster_stats(raster, polygons, polygon_id, filter_ids)
 
   polygons <- prep_polygons(raster, polygons, polygon_id, filter_ids) ## do after calculating stats
 
   if (!is.null(csv_file)) {
-    utils::write.csv(stats_df, file.path(output_dir, csv_file), row.names = FALSE)
+    utils::write.csv(counts_df, file.path(output_dir, .suffix(csv_file, "_counts")), row.names = FALSE)
+    utils::write.csv(stats_df, file.path(output_dir, .suffix(csv_file, "_stats")), row.names = FALSE)
   }
 
   ## Build plots for each polygon
