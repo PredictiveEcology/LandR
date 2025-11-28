@@ -31,6 +31,7 @@
 * `plotVTM` now does not use `Plot` internally (with #140);
 * several minor updates to `loadSCANFISpeciesLayers`, `prepSpeciesLayers_SCANFI` to address more edge cases
 * `prepSpeciesLayers_SCANFI` updates to improve join `sppEquiv` so "multiple - to - one" can be used
+* add `plot_raster_stats` and `calc_raster_counts` for generating summaries of numeric rasters in Canada
 
 # LandR 1.1.5
 

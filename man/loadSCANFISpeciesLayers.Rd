@@ -34,9 +34,8 @@ If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEq
 
 \item{year}{which year's layers should be retrieved? One of 2000, 2010, or 2020 (default).}
 
-\item{SCANFINamesCol}{character string indicating the column in \code{sppEquiv}
-containing kNN species names.
-Default \code{"NFI"} for when \code{sppEquivalencies_CA} is used.}
+\item{SCANFINamesCol}{character string indicating the column in \code{sppEquiv} containing SCANFI
+species names. Default \code{"NFI"} for when \code{sppEquivalencies_CA} is used.}
 
 \item{sppEquivCol}{the column name to use from \code{sppEquiv}.
 For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
