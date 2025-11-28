@@ -1,10 +1,5 @@
 # LandR (development version)
-* corrected some BC forestry tree species entries
-* standardized sppEquivalencies_CA naming convention for provincial forestry columns with <province>_forestry 
-* remove undifferentiated tree species variants from provincial forestry columns in sppEquivalencies_CA;
-* plotVTM now does not use Plot internally
-* several minor updates to loadSCANFISpeciesLayers, prepSpeciesLayers_SCANFI to address more edge cases
-* prepSpeciesLayers_SCANFI updates to improve join sppEquiv so "multiple - to - one" can be used
+
 * drop support for R 4.2 due to changes in dependency packages;
 * remove deprecated package `crayon` in favour of `cli` instead;
 * move `ggpubr` to Suggests;
@@ -22,7 +17,6 @@
 * `minRelativeB` defaults updated based on discussion surrounding over-representation of shade tolerant species establishing and generating unreasonably high levels of understory cohorts;
 * add new `prepInputs_NTEMS_DominantSpecies` function for importing dominant species layers from NTEMS website;
 * add new `speciesPresentFromNTEMS` function to import dominant species layer from NTEMS and create factor raster to be hosted on Google drive;
-* add new `prepInputs_NTEMS_DominantSpecies` function for importing dominant species layers from NTEMS website;
 * update `speciesInStudyArea` function to create `dataSource` parameter to direct function to download KNN or NTEMS factor raster from google drive and create associated species list;
 * update `prepRawBiomassMap` function to allow for incorporation of NTEMS or SCANFI biomass;
 * update `prepInputsStandAgeMap` function to allow for incorporation of SCANFI age map;
@@ -31,6 +25,12 @@
 * add `studyAreaEco` function to extend `studyArea` to ecological boundaries;
   - `studyAreaEco` allows `studyArea = NULL`, uses `type = "ecozone"` by default;
 * update documentation and citations for `prepSpeciesLayers_*` functions;
+* corrected some BC forestry tree species entries;
+* standardized `sppEquivalencies_CA` naming convention for provincial forestry columns with `<province>_forestry` ;
+* remove undifferentiated tree species variants from provincial forestry columns in `sppEquivalencies_CA`;
+* `plotVTM` now does not use `Plot` internally (with #140);
+* several minor updates to `loadSCANFISpeciesLayers`, `prepSpeciesLayers_SCANFI` to address more edge cases
+* `prepSpeciesLayers_SCANFI` updates to improve join `sppEquiv` so "multiple - to - one" can be used
 
 # LandR 1.1.5
 
