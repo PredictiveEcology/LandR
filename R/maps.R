@@ -1294,9 +1294,8 @@ loadkNNSpeciesLayersValidation <- function(
 #'
 #' @param year which year's layers should be retrieved? One of 2000, 2010, or 2020 (default).
 #'
-#' @param SCANFINamesCol character string indicating the column in `sppEquiv`
-#'                    containing kNN species names.
-#'                    Default `"NFI"` for when `sppEquivalencies_CA` is used.
+#' @param SCANFINamesCol character string indicating the column in `sppEquiv` containing SCANFI
+#'                       species names. Default `"NFI"` for when `sppEquivalencies_CA` is used.
 #'
 #' @template sppEquivCol
 #'
@@ -1326,15 +1325,21 @@ loadSCANFISpeciesLayers <- function(
 ) {
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
-  if (!is.null(dots$to) && missing(studyArea))
+  if (!is.null(dots$to) && missing(studyArea)) {
     studyArea <- dots$to
+  }
 
-  if (!is.null(dots$to) && missing(rasterToMatch) && reproducible:::isGridded(dots$to))
+  ## TODO: fix use of unported fun isGridded (LandR#175; reproducible#448)
+  if (!is.null(dots$to) && missing(rasterToMatch) && reproducible:::isGridded(dots$to)) {
     rasterToMatch <- dots$to
+  }
 
-  if (!is.null(dots$projectTo) && missing(rasterToMatch) && reproducible:::isGridded(dots$projectTo))
+  if (
+    ## TODO: fix use of unported fun isGridded (LandR#175; reproducible#448)
+    !is.null(dots$projectTo) && missing(rasterToMatch) && reproducible:::isGridded(dots$projectTo)
+  ) {
     rasterToMatch <- dots$projectTo
-
+  }
 
   sppEquivalencies_CA <- get(
     data("sppEquivalencies_CA", package = "LandR", envir = environment()),
@@ -1496,16 +1501,20 @@ loadSCANFISpeciesLayers <- function(
 
   speciesLayers <- Map(
     function(tf, url, outFile) {
-      prepInputs(url = url, to = rasterToMatch, destinationPath = dPath,
-                 method = "bilinear", writeTo = outFile, overwrite = TRUE)
+      prepInputs(
+        url = url,
+        to = rasterToMatch,
+        destinationPath = dPath,
+        method = "bilinear",
+        writeTo = outFile,
+        overwrite = TRUE
+      )
     },
     tf = file.path(dPath, targetFiles),
     url = URLs,
     outFile = file.path(oPath, postProcessedFilenamesWithStudyAreaName)
   ) |>
     Cache(.functionName = "prepInputs_speciesLayers")
-
-
 
   # if (is.null(studyArea) && is.null(rasterToMatch)) {
   #   speciesLayers <- Map(
