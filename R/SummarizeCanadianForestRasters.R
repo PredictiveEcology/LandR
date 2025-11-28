@@ -126,13 +126,11 @@ calc_raster_counts <- function(
 
   ## terra::freq outputs data.frame with colnames: layer, value, count, zone (zone is numeric)
   ## we need data.frame with colnames: ID, value, count (with ID being the poly name)
-  out <- terra::freq(raster, zones = polygons) |>
+  terra::freq(raster, zones = polygons) |>
     dplyr::left_join(poly_names_df, by = "zone") |>
     dplyr::relocate(ID, .before = layer) |>
     dplyr::mutate(layer = NULL, zone = NULL) |>
     dplyr::arrange(ID, value)
-
-  return(out_df)
 }
 
 prop_zero <- function(df, ...) {
