@@ -20,30 +20,32 @@ utils::globalVariables(c(
 #' @rdname vegetation-transitions
 vtm2conifdecid <- function(vtm, sppEquiv = NULL, sppEquivCol = "LandR", studyArea) {
   if (is.null(sppEquiv)) {
-    sppEquiv <- get(data("sppEquivalencies_CA",
-      package = "LandR",
-      envir = environment()
-    ), inherits = FALSE)
+    sppEquiv <- get(
+      data("sppEquivalencies_CA", package = "LandR", envir = environment()),
+      inherits = FALSE
+    )
   }
 
-  vapply(seq_along(vtm), function(i) {
-    r <- terra::rast(vtm[i]) |>
-      terra::crop(studyArea) |>
-      terra::mask(studyArea)
-    lvls_vt <- levels(r)[[1]]
-    names(lvls_vt) <- tolower(names(lvls_vt))
+  vapply(
+    seq_along(vtm),
+    function(i) {
+      r <- terra::rast(vtm[i]) |> terra::crop(studyArea) |> terra::mask(studyArea)
+      lvls_vt <- levels(r)[[1]]
+      names(lvls_vt) <- tolower(names(lvls_vt))
 
-    vegType <- lvls_vt[["values"]][match(values(r, mat = FALSE), lvls_vt[["id"]])]
+      vegType <- lvls_vt[["values"]][match(values(r, mat = FALSE), lvls_vt[["id"]])]
 
-    conifdecid <- sppEquiv[["Type"]][match(vegType, sppEquiv[[sppEquivCol]])] |> as.factor()
+      conifdecid <- sppEquiv[["Type"]][match(vegType, sppEquiv[[sppEquivCol]])] |> as.factor()
 
-    fout <- .suffix(vtm[i], "_conifdecid")
-    rout <- terra::rast(r)
-    terra::values(rout) <- conifdecid
-    terra::writeRaster(rout, fout, overwrite = TRUE)
+      fout <- .suffix(vtm[i], "_conifdecid")
+      rout <- terra::rast(r)
+      terra::values(rout) <- conifdecid
+      terra::writeRaster(rout, fout, overwrite = TRUE)
 
-    return(fout)
-  }, character(1))
+      return(fout)
+    },
+    character(1)
+  )
 }
 
 #' @param ecoregion `SpatRaster` of ecoregion (or other) codes by which to group.
@@ -64,10 +66,10 @@ vtm2conifdecid <- function(vtm, sppEquiv = NULL, sppEquivCol = "LandR", studyAre
 #' @export
 #' @rdname vegetation-transitions
 vegTransitions <- function(vtm, ecoregion, field, studyArea, times, na.rm = FALSE) {
+  stopifnot(requireNamespace("dplyr", quietly = TRUE))
+
   transitions_df <- lapply(seq_along(times), function(yr) {
-    r <- terra::rast(vtm[yr]) |>
-      terra::crop(studyArea) |>
-      terra::mask(studyArea)
+    r <- terra::rast(vtm[yr]) |> terra::crop(studyArea) |> terra::mask(studyArea)
     lvls_vt <- terra::levels(r)[[1]]
     names(lvls_vt) <- tolower(names(lvls_vt))
     idcol_vt <- grep("^(id|value)$", names(lvls_vt), ignore.case = TRUE, value = TRUE)
@@ -123,18 +125,42 @@ plotVegTransitions <- function(transitions_df) {
   erNames <- unique(transitions_df$ecoregion)
   transition_ggs <- lapply(erNames, function(er) {
     gg <- dplyr::filter(transitions_df, ecoregion == er) |>
-      ggplot(aes(x = time, stratum = vegType, alluvium = pixelID, fill = vegType, label = vegType)) +
+      ggplot(aes(
+        x = time,
+        stratum = vegType,
+        alluvium = pixelID,
+        fill = vegType,
+        label = vegType
+      )) +
       scale_x_discrete(expand = c(0.1, 0)) +
       ggalluvial::geom_flow(color = "darkgray") +
       ggalluvial::geom_stratum(width = 1 / 8) +
       scale_linetype_manual(values = c("blank", "solid")) +
       ggrepel::geom_text_repel(
-        aes(label = ifelse(as.numeric(as.character(time)) == head(as.numeric(as.character(time)), 1), vegType, NA)),
-        stat = ggalluvial::StatStratum, size = 3, direction = "y", nudge_x = -0.5
+        aes(
+          label = ifelse(
+            as.numeric(as.character(time)) == head(as.numeric(as.character(time)), 1),
+            vegType,
+            NA
+          )
+        ),
+        stat = ggalluvial::StatStratum,
+        size = 3,
+        direction = "y",
+        nudge_x = -0.5
       ) +
       ggrepel::geom_text_repel(
-        aes(label = ifelse(as.numeric(as.character(time)) == tail(as.numeric(as.character(time)), 1), vegType, NA)),
-        stat = ggalluvial::StatStratum, size = 3, direction = "y", nudge_x = +0.5
+        aes(
+          label = ifelse(
+            as.numeric(as.character(time)) == tail(as.numeric(as.character(time)), 1),
+            vegType,
+            NA
+          )
+        ),
+        stat = ggalluvial::StatStratum,
+        size = 3,
+        direction = "y",
+        nudge_x = +0.5
       ) +
       theme(legend.position = "none") +
       ggtitle(paste("Vegetation type transitions in", er))

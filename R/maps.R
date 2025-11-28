@@ -733,7 +733,6 @@ vegTypeMapGenerator.data.table <- function(
     )
     pixelGroupData3[, mixed := FALSE]
 
-
     pixelGroupColNameChar <- paste0(pixelGroupColName, "Char")
     set(pixelGroupData3, NULL, pixelGroupColNameChar,
         as.character(pixelGroupData3[[pixelGroupColName]]))
@@ -746,7 +745,6 @@ vegTypeMapGenerator.data.table <- function(
     set(pixelGroupData3, NULL, "speciesProportion", NULL)
     set(pixelGroupData3, NULL, "Type", NULL)
     set(pixelGroupData3, NULL, pixelGroupColNameChar, NULL)
-
 
     pixelGroupData3 <- pixelGroupData3[, .SD[1], by = pixelGroupColName] ## sp. w/ highest prop. per pixelGroup
     pixelGroupData3[mixed == TRUE, speciesCode := "Mixed"]
@@ -846,10 +844,8 @@ vegTypeMapGenerator.data.table <- function(
       ]
       out <- pgTest2[mixed == TRUE, leading := "Mixed"]
     } else if (mixedType == 2) {
-
       # pixelGroupColNameChar <- paste0(pixelGroupColName, "Char")
-      set(pgTest, NULL, pixelGroupColNameChar,
-          as.character(pgTest[[pixelGroupColName]]))
+      set(pgTest, NULL, pixelGroupColNameChar, as.character(pgTest[[pixelGroupColName]]))
 
       pgTest2 <- pgTest[, list(
         mixed = eval(mixedType2Condition),
