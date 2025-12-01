@@ -759,8 +759,12 @@ vegTypeMapGenerator.data.table <- function(
     pixelGroupData3[, mixed := FALSE]
 
     pixelGroupColNameChar <- paste0(pixelGroupColName, "Char")
-    set(pixelGroupData3, NULL, pixelGroupColNameChar,
-        as.character(pixelGroupData3[[pixelGroupColName]]))
+    set(
+      pixelGroupData3,
+      NULL,
+      pixelGroupColNameChar,
+      as.character(pixelGroupData3[[pixelGroupColName]])
+    )
     pixelGroupData3[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColNameChar]
     pixelGroupData3[, mixed := any(mixed), by = pixelGroupColNameChar]
     # pixelGroupData3[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColName]
@@ -872,12 +876,13 @@ vegTypeMapGenerator.data.table <- function(
       # pixelGroupColNameChar <- paste0(pixelGroupColName, "Char")
       set(pgTest, NULL, pixelGroupColNameChar, as.character(pgTest[[pixelGroupColName]]))
 
-      pgTest2 <- pgTest[, list(
-        mixed = eval(mixedType2Condition),
-        leading = speciesCode[which.max(speciesProportion)],
-        "pixelGroupColNameCustom" = get(pixelGroupColName) # is renamed below
-      ),
-      by = pixelGroupColNameChar
+      pgTest2 <- pgTest[,
+        list(
+          mixed = eval(mixedType2Condition),
+          leading = speciesCode[which.max(speciesProportion)],
+          "pixelGroupColNameCustom" = get(pixelGroupColName) # is renamed below
+        ),
+        by = pixelGroupColNameChar
       ]
 
       pgTest2[, mixed := any(mixed), by = pixelGroupColNameChar]
@@ -1354,14 +1359,12 @@ loadSCANFISpeciesLayers <- function(
     studyArea <- dots$to
   }
 
-  ## TODO: fix use of unported fun isGridded (LandR#175; reproducible#448)
-  if (!is.null(dots$to) && missing(rasterToMatch) && reproducible:::isGridded(dots$to)) {
+  if (!is.null(dots$to) && missing(rasterToMatch) && reproducible::.isGridded(dots$to)) {
     rasterToMatch <- dots$to
   }
 
   if (
-    ## TODO: fix use of unported fun isGridded (LandR#175; reproducible#448)
-    !is.null(dots$projectTo) && missing(rasterToMatch) && reproducible:::isGridded(dots$projectTo)
+    !is.null(dots$projectTo) && missing(rasterToMatch) && reproducible::.isGridded(dots$projectTo)
   ) {
     rasterToMatch <- dots$projectTo
   }
