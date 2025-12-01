@@ -13,7 +13,6 @@ prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL
   terra::vect(polygons)
 }
 
-
 #' Raster summary statistics and maps by polygon
 #'
 #' `calc_raster_stats` iteratively calculates the frequency of raster values within each polygon.
@@ -110,12 +109,7 @@ prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL
 #'
 #' @export
 #' @rdname raster_stats
-calc_raster_counts <- function(
-    raster,
-    polygons = NULL,
-    polygon_id = NULL,
-    filter_ids = NULL
-) {
+calc_raster_counts <- function(raster, polygons = NULL, polygon_id = NULL, filter_ids = NULL) {
   stopifnot(
     requireNamespace("dplyr", quietly = TRUE),
     inherits(raster, "SpatRaster"),
@@ -222,19 +216,19 @@ calc_raster_stats <- function(raster, polygons = NULL, polygon_id = NULL, filter
 #' @export
 #' @rdname raster_stats
 plot_raster_stats <- function(
-    raster,
-    polygons = NULL,
-    polygon_id = NULL,
-    filter_ids = NULL,
-    counts_df = NULL,
-    stats_df = NULL,
-    aggregate_factor = 1,
-    remove_zeros = FALSE,
-    raster_label = NULL,
-    inset_canada = TRUE,
-    bin_width = 10,
-    output_dir = ".",
-    csv_file = NULL
+  raster,
+  polygons = NULL,
+  polygon_id = NULL,
+  filter_ids = NULL,
+  counts_df = NULL,
+  stats_df = NULL,
+  aggregate_factor = 1,
+  remove_zeros = FALSE,
+  raster_label = NULL,
+  inset_canada = TRUE,
+  bin_width = 10,
+  output_dir = ".",
+  csv_file = NULL
 ) {
   stopifnot(
     requireNamespace("dplyr", quietly = TRUE),
@@ -378,11 +372,11 @@ plot_raster_stats <- function(
     if (inset_canada) {
       final_plot <- hist_plot |
         (map_with_inset / stats_plot + patchwork::plot_layout(heights = c(3, 1))) +
-        patchwork::plot_annotation(title = region_val)
+          patchwork::plot_annotation(title = region_val)
     } else {
       final_plot <- hist_plot |
         (map_plot_base / stats_plot + patchwork::plot_layout(heights = c(3, 1))) +
-        patchwork::plot_annotation(title = region_val)
+          patchwork::plot_annotation(title = region_val)
     }
     fig_name <- paste0("region_", gsub("[^A-Za-z0-9]", "_", region_val), ".png")
 
