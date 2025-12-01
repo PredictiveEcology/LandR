@@ -2,7 +2,7 @@ utils::globalVariables(c(".data", "bin", "count", "geometry", "ID", "id_col"))
 
 prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL) {
   polygons <- sf::st_transform(polygons, sf::st_crs(raster)) |>
-    dplyr::rename(ID = dplyr::all_of(polygon_id)) |>
+    dplyr::rename(ID = .data[[polygon_id]]) |>
     dplyr::group_by(ID) |>
     dplyr::summarise(geometry = sf::st_union(geometry), .groups = "drop")
 
@@ -110,7 +110,12 @@ prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL
 #'
 #' @export
 #' @rdname raster_stats
-calc_raster_counts <- function(raster, polygons = NULL, polygon_id = NULL, filter_ids = NULL) {
+calc_raster_counts <- function(
+    raster,
+    polygons = NULL,
+    polygon_id = NULL,
+    filter_ids = NULL
+) {
   stopifnot(
     requireNamespace("dplyr", quietly = TRUE),
     inherits(raster, "SpatRaster"),
@@ -217,19 +222,19 @@ calc_raster_stats <- function(raster, polygons = NULL, polygon_id = NULL, filter
 #' @export
 #' @rdname raster_stats
 plot_raster_stats <- function(
-  raster,
-  polygons = NULL,
-  polygon_id = NULL,
-  filter_ids = NULL,
-  counts_df = NULL,
-  stats_df = NULL,
-  aggregate_factor = 1,
-  remove_zeros = FALSE,
-  raster_label = NULL,
-  inset_canada = TRUE,
-  bin_width = 10,
-  output_dir = ".",
-  csv_file = NULL
+    raster,
+    polygons = NULL,
+    polygon_id = NULL,
+    filter_ids = NULL,
+    counts_df = NULL,
+    stats_df = NULL,
+    aggregate_factor = 1,
+    remove_zeros = FALSE,
+    raster_label = NULL,
+    inset_canada = TRUE,
+    bin_width = 10,
+    output_dir = ".",
+    csv_file = NULL
 ) {
   stopifnot(
     requireNamespace("dplyr", quietly = TRUE),
@@ -267,16 +272,8 @@ plot_raster_stats <- function(
   polygons <- prep_polygons(raster, polygons, polygon_id, filter_ids) ## do after calculating stats
 
   if (!is.null(csv_file)) {
-    utils::write.csv(
-      counts_df,
-      file.path(output_dir, .suffix(csv_file, "_counts")),
-      row.names = FALSE
-    )
-    utils::write.csv(
-      stats_df,
-      file.path(output_dir, .suffix(csv_file, "_stats")),
-      row.names = FALSE
-    )
+    utils::write.csv(counts_df, file.path(output_dir, .suffix(csv_file, "_counts")), row.names = FALSE)
+    utils::write.csv(stats_df, file.path(output_dir, .suffix(csv_file, "_stats")), row.names = FALSE)
   }
 
   ## Build plots for each polygon
@@ -324,7 +321,7 @@ plot_raster_stats <- function(
 
     ## Main map
     map_plot_base <- ggplot2::ggplot() +
-      tidyterra::geom_spatraster(data = r_mask, aes(fill = dplyr::all_of(value_col))) +
+      tidyterra::geom_spatraster(data = r_mask, aes(fill = .data[[value_col]])) +
       ggplot2::geom_sf(data = poly, color = "black", fill = NA) +
       ggplot2::scale_fill_viridis_c(name = raster_label, na.value = "transparent") +
       ggplot2::theme_minimal() +
@@ -381,11 +378,11 @@ plot_raster_stats <- function(
     if (inset_canada) {
       final_plot <- hist_plot |
         (map_with_inset / stats_plot + patchwork::plot_layout(heights = c(3, 1))) +
-          patchwork::plot_annotation(title = region_val)
+        patchwork::plot_annotation(title = region_val)
     } else {
       final_plot <- hist_plot |
         (map_plot_base / stats_plot + patchwork::plot_layout(heights = c(3, 1))) +
-          patchwork::plot_annotation(title = region_val)
+        patchwork::plot_annotation(title = region_val)
     }
     fig_name <- paste0("region_", gsub("[^A-Za-z0-9]", "_", region_val), ".png")
 
