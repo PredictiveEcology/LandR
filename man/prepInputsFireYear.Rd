@@ -24,22 +24,24 @@ a \code{SpatRaster} layer of fire perimeters with fire year values.
 Create a raster of fire perimeters
 }
 \examples{
-library(terra)
-library(reproducible)
-
-opts <- options(
+withr::local_options(list(
   reproducible.useTerra = TRUE,
   reproducible.rasterRead = "terra::rast"
-)
+))
 
-targetCRS <- crs(SpaDES.tools::randomStudyArea())
+targetCRS <- terra::crs(SpaDES.tools::randomStudyArea())
 randomPoly <- SpaDES.tools::randomStudyArea(
-  center = vect(cbind(-115, 50), crs = targetCRS),
+  center = terra::vect(cbind(-115, 50), crs = targetCRS),
   size = 1e+7,
 )
-buffExt <- buffer(randomPoly, 1e+3) |> ext()
-ras2match <- rast(res = 10, ext = ext(randomPoly), crs = crs(randomPoly))
-ras2match <- rasterize(randomPoly, ras2match)
+
+buffExt <- terra::buffer(randomPoly, 1e+3) |> terra::ext()
+ras2match <- terra::rast(
+  resolution = 10,
+  extent = terra::ext(randomPoly),
+  crs = terra::crs(randomPoly)
+)
+ras2match <- terra::rasterize(randomPoly, ras2match)
 
 firePerimeters <- prepInputsFireYear(
   url = paste0(
@@ -56,5 +58,6 @@ if (interactive()) {
   plot(randomPoly, add = TRUE)
 }
 
-options(opts)
+withr::deferred_run()
+
 }
