@@ -826,7 +826,28 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
   preProcessArgs$cropTo <- rasterToMatch
 
   # Load polygons
-  allFires <- do.call(prepInputs, append(list(fun = fun), preProcessArgs))
+  files <- do.call(preProcess, append(list(fun = fun), preProcessArgs))
+  files2 <- files$checkSums[result %in% "OK"]$actualFile
+  shpFiles <- grep(files2, pattern = ".shp$", value = TRUE)
+
+  preProcessArgs2 <- preProcessArgs
+  preProcessArgs2$url <- NULL
+
+  # There are at least 2 .shp files now (as of Dec 2, 2025)
+  lots <- Map(shp = shpFiles, function(shp) {
+    preProcessArgs2$targetFile = file.path(preProcessArgs2$destinationPath, shp)
+    shp1 <- terra::vect(preProcessArgs2$targetFile)
+    preProcessArgs2$targetFile <- NULL
+    do.call(postProcess, append(list(x = shp1), preProcessArgs2))
+  })
+
+
+  allFires <- lots[[1]]
+  for (i in 2:length(lots)) {
+    allFires <- rbind(allFires, lots[[i]])
+  }
+
+  # allFires <- do.call(prepInputs, append(list(fun = fun), preProcessArgs))
 
   #the reason this isn't combined into one function is due to geometry issues in NFDB
   allFires <- allFires[terra::is.valid(allFires), ] ## drop invalid geometries
