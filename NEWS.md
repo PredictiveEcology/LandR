@@ -1,5 +1,5 @@
 # LandR (development version)
-
+* minor bug fixes to `prepInputsFireYear` pertaining to file structure of NFDB data
 * drop support for R 4.2 due to changes in dependency packages;
 * remove deprecated package `crayon` in favour of `cli` instead;
 * move `ggpubr` to Suggests;
