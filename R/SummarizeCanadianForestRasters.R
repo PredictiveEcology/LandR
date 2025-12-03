@@ -323,7 +323,7 @@ plot_raster_stats <- function(
 
     ## Main map
     map_plot_base <- ggplot2::ggplot() +
-      tidyterra::geom_spatraster(data = r_mask, aes(fill = dplyr::all_of(value_col))) +
+      tidyterra::geom_spatraster(data = r_mask, aes(fill = !!value_col)) +
       ggplot2::geom_sf(data = poly, color = "black", fill = NA) +
       ggplot2::scale_fill_viridis_c(name = raster_label, na.value = "transparent") +
       ggplot2::theme_minimal() +
