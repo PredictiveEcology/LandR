@@ -1,8 +1,8 @@
-utils::globalVariables(c(".data", "bin", "count", "geometry", "ID", "id_col"))
+utils::globalVariables(c("bin", "count", "geometry", "ID", "id_col"))
 
 prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL) {
   polygons <- sf::st_transform(polygons, sf::st_crs(raster)) |>
-    dplyr::rename(ID = .data[[polygon_id]]) |>
+    dplyr::rename(ID = !!polygon_id) |>
     dplyr::group_by(ID) |>
     dplyr::summarise(geometry = sf::st_union(geometry), .groups = "drop")
 
@@ -325,7 +325,7 @@ plot_raster_stats <- function(
     map_plot_base <- ggplot2::ggplot() +
       tidyterra::geom_spatraster(data = r_mask, aes(fill = !!value_col)) +
       ggplot2::geom_sf(data = poly, color = "black", fill = NA) +
-      ggplot2::scale_fill_viridis_c(name = raster_label, na.value = "transparent") +
+      ggplot2::scale_fill_viridis_d(name = raster_label, na.value = "transparent") +
       ggplot2::theme_minimal() +
       ggplot2::labs(title = paste("Map:", region_val), x = "Longitude", y = "Latitude")
 
