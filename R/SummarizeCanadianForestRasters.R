@@ -1,8 +1,8 @@
-utils::globalVariables(c(".data", "bin", "count", "geometry", "ID", "id_col"))
+utils::globalVariables(c("bin", "count", "geometry", "ID", "id_col"))
 
 prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL) {
   polygons <- sf::st_transform(polygons, sf::st_crs(raster)) |>
-    dplyr::rename(ID = .data[[polygon_id]]) |>
+    dplyr::rename(ID = !!polygon_id) |>
     dplyr::group_by(ID) |>
     dplyr::summarise(geometry = sf::st_union(geometry), .groups = "drop")
 
@@ -266,8 +266,16 @@ plot_raster_stats <- function(
   polygons <- prep_polygons(raster, polygons, polygon_id, filter_ids) ## do after calculating stats
 
   if (!is.null(csv_file)) {
-    utils::write.csv(counts_df, file.path(output_dir, .suffix(csv_file, "_counts")), row.names = FALSE)
-    utils::write.csv(stats_df, file.path(output_dir, .suffix(csv_file, "_stats")), row.names = FALSE)
+    utils::write.csv(
+      counts_df,
+      file.path(output_dir, .suffix(csv_file, "_counts")),
+      row.names = FALSE
+    )
+    utils::write.csv(
+      stats_df,
+      file.path(output_dir, .suffix(csv_file, "_stats")),
+      row.names = FALSE
+    )
   }
 
   ## Build plots for each polygon
@@ -315,9 +323,9 @@ plot_raster_stats <- function(
 
     ## Main map
     map_plot_base <- ggplot2::ggplot() +
-      tidyterra::geom_spatraster(data = r_mask, aes(fill = .data[[value_col]])) +
+      tidyterra::geom_spatraster(data = r_mask, aes(fill = !!value_col)) +
       ggplot2::geom_sf(data = poly, color = "black", fill = NA) +
-      ggplot2::scale_fill_viridis_c(name = raster_label, na.value = "transparent") +
+      ggplot2::scale_fill_viridis_d(name = raster_label, na.value = "transparent") +
       ggplot2::theme_minimal() +
       ggplot2::labs(title = paste("Map:", region_val), x = "Longitude", y = "Latitude")
 
