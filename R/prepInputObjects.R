@@ -1,8 +1,7 @@
 utils::globalVariables(c(
   "cover", "distYear", "ecoregionGroup", "establishprob", "fireYear",
-  "harvestYear", "lcc", "logAge", "longevity", "newAge",
-  "maxB", "maxANPP", "postfireregen", "resproutprob", "SCANFIage", "speciesCode"
-
+  "harvestYear", "lcc", "logAge", "longevity", "maxB", "maxANPP", "newAge",
+  "postfireregen", "resproutprob", "result", "SCANFIage", "speciesCode"
 ))
 
 #' Check if all species in have trait values
@@ -811,8 +810,7 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 
   ## invalid NFDB polygons will cause Rstudio to crash during postProcess as of 8/21/2024
   ## removing invalid polygons is far faster than fixing the 0.1% of data
-  #projectTo must be rasterToMatch due to terra rasterize
-  #but don't project yet because of NFDB
+  ## projectTo must be rasterToMatch due to terra rasterize, but don't project yet because of NFDB
   postProcessArgs <- dots[names(dots) %in% c("to", "projectTo", "studyArea", "maskTo")]
   if (length(postProcessArgs) == 0) {
     postProcessArgs$cropTo <- rasterToMatch
@@ -822,10 +820,10 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
   postProcessArgs$projectTo <- rasterToMatch
 
   preProcessArgs <- dots[!names(dots) %in% names(postProcessArgs)]
-  #you can crop without worrying about geometry
+  ## you can crop without worrying about geometry
   preProcessArgs$cropTo <- rasterToMatch
 
-  # Load polygons
+  ## Load polygons
   files <- do.call(preProcess, append(list(fun = fun), preProcessArgs))
   files2 <- files$checkSums[result %in% "OK"]$actualFile
   shpFiles <- grep(files2, pattern = ".shp$", value = TRUE)
@@ -833,14 +831,13 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
   preProcessArgs2 <- preProcessArgs
   preProcessArgs2$url <- NULL
 
-  # There are at least 2 .shp files now (as of Dec 2, 2025)
+  ## There are at least 2 .shp files now (as of Dec 2, 2025)
   lots <- Map(shp = shpFiles, function(shp) {
     preProcessArgs2$targetFile = file.path(preProcessArgs2$destinationPath, shp)
     shp1 <- terra::vect(preProcessArgs2$targetFile)
     preProcessArgs2$targetFile <- NULL
     do.call(postProcess, append(list(x = shp1), preProcessArgs2))
   })
-
 
   allFires <- lots[[1]]
   for (i in 2:length(lots)) {
@@ -849,10 +846,10 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 
   # allFires <- do.call(prepInputs, append(list(fun = fun), preProcessArgs))
 
-  #the reason this isn't combined into one function is due to geometry issues in NFDB
+  ## the reason this isn't combined into one function is due to geometry issues in NFDB
   allFires <- allFires[terra::is.valid(allFires), ] ## drop invalid geometries
 
-  # If no valid polygons, return empty raster
+  ## If no valid polygons, return empty raster
   if (nrow(allFires) == 0) {
     if (inherits(rasterToMatch, "SpatRaster")) {
       fireRas <- rast(rasterToMatch, vals = NA)
@@ -863,7 +860,7 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
     return(fireRas)
   }
 
-  # Transform to raster CRS if needed
+  ## Transform to raster CRS if needed
   if (!identical(crs(allFires), crs(rasterToMatch))) {
     allFires <- terra::project(allFires, crs(rasterToMatch))
   }
@@ -874,7 +871,7 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 
   allFires <- st_zm(allFires)
 
-  allFires <- st_cast(allFires, "MULTIPOLYGON") # collapse them into a single multipolygon
+  allFires <- st_cast(allFires, "MULTIPOLYGON") ## collapse them into a single multipolygon
   allFires <- st_transform(allFires, crs(rasterToMatch))
   if (!is(allFires[[fireField]], "numeric")) {
     warning("Chosen fireField will be coerced to numeric")
@@ -885,7 +882,7 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
       allFires <- vect(allFires)
     }
 
-    #fun = max to take the most recent fire year
+    ## fun = max to take the most recent fire year
     fireRas <- terra::rasterize(allFires, rasterToMatch, field = fireField, fun = max)
     fireRas[
       !is.na(terra::values(fireRas, mat = FALSE)) &
