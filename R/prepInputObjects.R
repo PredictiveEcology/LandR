@@ -496,18 +496,18 @@ prepInputsStandAgeMap <- function(
     #SCANFI has only one dataYear so age is adjusted using NTEMS disturbance layers
     ageURL <- paste0("https://drive.google.com/file/d/1OdZ7Tznk53KceEyt9dFOBOkxDHEX5X0U")
 
-    standAgeMap <- prepInputs(url = ageURL,
-                              destinationPath = destinationPath,
-                              datatype= datatype,
-                              method = method,
-                              fun = ageFun,
-                              datatype = datatype,
-                              to = rasterToMatch,
-                              ...
+    standAgeMap <- prepInputs(
+      url = ageURL,
+      destinationPath = destinationPath,
+      datatype = datatype,
+      method = method,
+      fun = ageFun,
+      datatype = datatype,
+      to = rasterToMatch,
+      ...
     )
 
     if (dataYear != "2020") {
-
       #use NTEMS to identify disturbances (harvest and fire) that occurred between dataYear and 2020
       #example pixel disturbed in 2002 with dataYear 2000 - use kNN 2001 estimate minus one - if negative, set to 0
       #example pixel disturbed in 1995 with dataYear 2000 -> set stand age to dataYear - YOD = 5
@@ -515,38 +515,53 @@ prepInputsStandAgeMap <- function(
       #example pixel disturbed in 2001 with dataYear 2000 - kNN will not have correct age, so set standAge to 16
       #As the largest observed disturbance occurred in 2001 and the time series begins in 1985,
       # the minimum age in 2000 would be 2000 - 1985 + 1
-      message("SCANFI data is currently available for 2020 only - age will be adjusted to ",
-              dataYear, " using various data sources")
+      message(
+        "SCANFI data is currently available for 2020 only - age will be adjusted to ",
+        dataYear,
+        " using various data sources"
+      )
       # Download and align NTEMS fire and harvest disturbance layers
-      fire_NTEMS <- prepInputs(url = "https://opendata.nfis.org/downloads/forest_change/CA_Forest_Fire_1985-2020.zip",
-                               destinationPath = destinationPath,
-                               to = standAgeMap,
-                               method = "near")
-      harvest_NTEMS <- prepInputs(url = "https://opendata.nfis.org/downloads/forest_change/CA_Forest_Harvest_1985-2020.zip",
-                                  destinationPath = destinationPath,
-                                  to = standAgeMap,
-                                  method = "near")
+      fire_NTEMS <- prepInputs(
+        url = "https://opendata.nfis.org/downloads/forest_change/CA_Forest_Fire_1985-2020.zip",
+        destinationPath = destinationPath,
+        to = standAgeMap,
+        method = "near"
+      )
+      harvest_NTEMS <- prepInputs(
+        url = "https://opendata.nfis.org/downloads/forest_change/CA_Forest_Harvest_1985-2020.zip",
+        destinationPath = destinationPath,
+        to = standAgeMap,
+        method = "near"
+      )
       NAflag(fire_NTEMS) <- 0
       NAflag(harvest_NTEMS) <- 0
 
-      baseKNN <- prepInputs(url = paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-",
-                                         "attributes_attributs-forests-canada/2001-attributes_attributs-2001/",
-                                         "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif"),
-                            destinationPath = destinationPath,
-                            to = standAgeMap,
-                            method = "near")
-      newVals <- data.table::data.table(fireYear = as.vector(fire_NTEMS),
-                                        harvestYear = as.vector(harvest_NTEMS),
-                                        pixelID = 1:ncell(standAgeMap))
-      newVals <- newVals[!is.na(fireYear) | !is.na(harvestYear),
-                         .(distYear = min(fireYear, harvestYear, na.rm = TRUE)),
-                         .(pixelID)]
+      baseKNN <- prepInputs(
+        url = paste0(
+          "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-",
+          "attributes_attributs-forests-canada/2001-attributes_attributs-2001/",
+          "NFI_MODIS250m_2001_kNN_Structure_Stand_Age_v1.tif"
+        ),
+        destinationPath = destinationPath,
+        to = standAgeMap,
+        method = "near"
+      )
+      newVals <- data.table::data.table(
+        fireYear = as.vector(fire_NTEMS),
+        harvestYear = as.vector(harvest_NTEMS),
+        pixelID = 1:ncell(standAgeMap)
+      )
+      newVals <- newVals[
+        !is.na(fireYear) | !is.na(harvestYear),
+        .(distYear = min(fireYear, harvestYear, na.rm = TRUE)),
+        .(pixelID)
+      ]
       kNN_AgeAdj <- dataYear - 2001 #if dataYear is 2000, subtract one - if 2010, add nine
 
       newVals[distYear >= dataYear, newAge := baseKNN[pixelID] + kNN_AgeAdj]
       newVals[distYear < dataYear, newAge := dataYear - distYear]
       newVals[, SCANFIage := standAgeMap[pixelID]]
-      if (dataYear == 2000){
+      if (dataYear == 2000) {
         newVals[distYear == 2001, newAge := 16] #assume these stands were at least 16 (1985 start date of TS)
       }
       #final safety catches - likely disagreement over what is forest
@@ -561,9 +576,7 @@ prepInputsStandAgeMap <- function(
       rm(newStandAgeMap, baseKNN, harvest_NTEMS, fire_NTEMS)
     }
     #if baseYear is 2020, proceed with 2020 standAgeMap
-
   } else {
-
     if (is.null(ageURL)) {
       if (dataSource == "KNN") {
         if (dataYear == "2011") {
@@ -617,7 +630,6 @@ prepInputsStandAgeMap <- function(
     vals <- standAgeMap[]
   }
   standAgeMap[] <- asInteger(vals)
-
 
   if (getFires) {
     if (isFALSE(is.null(rasterToMatch))) {
