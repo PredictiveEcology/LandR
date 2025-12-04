@@ -812,8 +812,8 @@ prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", ...) {
 #' )
 #'
 #' if (interactive()) {
-#'   plot(firePerimeters)
-#'   plot(randomPoly, add = TRUE)
+#'   terra::plot(firePerimeters)
+#'   terra::plot(randomPoly, add = TRUE)
 #' }
 #'
 #' withr::deferred_run()
