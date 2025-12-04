@@ -855,8 +855,11 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
   })
 
   allFires <- lots[[1]]
-  for (i in 2:length(lots)) {
-    allFires <- rbind(allFires, lots[[i]])
+
+  if (length(lots) > 1) {
+    for (i in 2:length(lots)) {
+      allFires <- rbind(allFires, lots[[i]])
+    }
   }
 
   # allFires <- do.call(prepInputs, append(list(fun = fun), preProcessArgs))
