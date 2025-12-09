@@ -787,19 +787,16 @@ prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", ...) {
 #'   reproducible.rasterRead = "terra::rast"
 #' ))
 #'
-#' targetCRS <- terra::crs(SpaDES.tools::randomStudyArea())
-#' randomPoly <- SpaDES.tools::randomStudyArea(
-#'   center = terra::vect(cbind(-115, 50), crs = targetCRS),
-#'   size = 1e+7,
+#' randomPoly <- LandR::randomStudyArea(
+#'   size = 1e+8, seed = 5
 #' )
 #'
-#' buffExt <- terra::buffer(randomPoly, 1e+3) |> terra::ext()
 #' ras2match <- terra::rast(
-#'   resolution = 10,
-#'   extent = terra::ext(randomPoly),
-#'   crs = terra::crs(randomPoly)
+#'   randomPoly,
+#'   vals = 1,
+#'   res = 100,
 #' )
-#' ras2match <- terra::rasterize(randomPoly, ras2match)
+#' ras2match <- terra::mask(ras2match, randomPoly)
 #'
 #' firePerimeters <- prepInputsFireYear(
 #'   url = paste0(
@@ -808,7 +805,7 @@ prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", ...) {
 #'   ),
 #'   destinationPath = file.path(tempdir(), "ex_prepInputsFireYear"),
 #'   rasterToMatch = ras2match,
-#'   earliestYear = 1930
+#'   earliestYear = 1950
 #' )
 #'
 #' if (interactive()) {
