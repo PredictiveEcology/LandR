@@ -113,15 +113,15 @@ pinuconcon,PINU.CON.CON,Pinu_con,,Pinu cont,Pinus contorta var. contorta,Sh pine
 ,PINU.CON.LAT,Pinu_con,Pinu_Con,Pinu cont,Pinus contorta var. latifolia,Lg pine,Lodgepole pine,Lodgepole pine leading,Pinus contortalatifolia is a synonym of var. latifolia,Pinu_Con,FALSE,Conifer,lodgepole pine,C3,LdgJkPine,Pli,,,,,,,PINU_CON_LAT,204,,23,15,PINU_CON_LAT,#02AD24
 pinuflex,,Pinu_fle,Pinu_Fle,Pinu flex,Pinus flexilis,Lim pine,Limber pine,Limber pine leading,,,FALSE,Conifer,,,CedrMplOther,Pf,Pf,,,,,,PINU_FLE,213,,,24,,
 ,,Pinu_lam,,Pinu lamb,Pinus lambertiana,Sug pine,Sugar pine,Sugar pine leading,,,FALSE,Conifer,,,CedrMplOther,,,,,,,,PINU_LAM,200,generic pine code,,,,
-,,Pinu_mon,Pinu_Mon,Pinu mont,Pinus monticola,W wh pine,Western white pine,Western white pine leading,,Pinu_Mon,FALSE,Conifer,,,CedrMplOther,Pxj,,,,,,,PINU_MON,201,,,12,,
-,,Pinu_mur,,Pinu murx,Pinus x murraybanksiana,LgXJk pine,Lodgepole x jack pine,Lodgepole x jack pine leading,Also known as Murraybanks Pine,,FALSE,Conifer,,,CedrMplOther,,,,,,,,PINU_MUR,216,,,174,,
+,,Pinu_mon,Pinu_Mon,Pinu mont,Pinus monticola,W wh pine,Western white pine,Western white pine leading,,Pinu_Mon,FALSE,Conifer,,,CedrMplOther,Pw,,,,,,,PINU_MON,201,,,12,,
+,,Pinu_mur,,Pinu murx,Pinus x murraybanksiana,LgXJk pine,Lodgepole x jack pine,Lodgepole x jack pine leading,Also known as Murraybanks Pine,,FALSE,Conifer,,,CedrMplOther,Pxj,,,,,,,PINU_MUR,216,,,174,,
 ,,Pinu_nig,,Pinu nigr,Pinus nigra,Pl pine,Black pine,Black pine leading,,,FALSE,Conifer,,,CedrMplOther,,,,,Pn,,,PINU_NIG,200,generic pine code,,18,,
 pinupon,PINU.PON,Pinu_pon,Pinu_Pon,Pinu pond,Pinus ponderosa,Pon pine,Ponderosa pine,Ponderosa pine leading,,,FALSE,Conifer,ponderosa pine,C7,DgFrPoPine,Py,,,,,,,PINU_PON,208,,24,19,PINU_PON,#005300
 ,,Pinu_rad,,Pinu radi,Pinus radiata,Mon pine,Monterey pine,Monterey pine leading,,,FALSE,Conifer,,,CedrMplOther,,,,,,,,PINU_RAD,200,generic pine code,,,,
 pinuresi,PINU.RES,Pinu_res,Pinu_Res,Pinu resi,Pinus resinosa,Rd pine,Red pine,Red pine leading,,Pinu_Res,FALSE,Conifer,red pine,C5,RdWhPine,,,RP,RP,Pr,PIR,rP,PINU_RES,209,,25,20,PINU_RES,#B1CC71
 ,,Pinu_rig,Pinu_Rig,Pinu rigi,Pinus rigida,Pitch pine,Pitch pine,Pitch pine leading,,,FALSE,Conifer,,,CedrMplOther,,,,,Pp,PID,,PINU_RIG,210,,,21,,
 ,,Pinu_spp,Pinu_Spp,Pinu spp,Pinus spp.,Pine,Pine,Pine leading,,Pinu_Spp,FALSE,Conifer,,,CedrMplOther,,,,,,,,PINU_SP,200,,,11,,
-pinustro,PINU.STR,Pinu_str,Pinu_Str,Pinu stro,Pinus strobus,E wh pine,Eastern white pine,Eastern white pine leading,,,FALSE,Conifer,eastern white pine,C5,RdWhPine,Pw,,,,Pw,PIB,wP,PINU_STR,202,,26,13,PINU_STR,#00FF00
+pinustro,PINU.STR,Pinu_str,Pinu_Str,Pinu stro,Pinus strobus,E wh pine,Eastern white pine,Eastern white pine leading,,,FALSE,Conifer,eastern white pine,C5,RdWhPine,,,,,Pw,PIB,wP,PINU_STR,202,,26,13,PINU_STR,#00FF00
 ,,Pinu_syl,Pinu_Syl,Pinu sylv,Pinus sylvestris,Scot pine,Scotch pine,Scotch pine leading,,,FALSE,Conifer,,,CedrMplOther,,,SP,SP,Ps,PIS,,PINU_SYL,211,,,22,,
 ,,Plan_occ,Plat_Occ,Plan occi,Platanus occidentalis,Sycamore,American sycamore,American sycamore leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Sy,PLO,,PLAN_OCC,2700,,,129,,
 ,,Popu_ang,,Popu angu,Populus angustifolia,Nar cottonwood,Narrowleaf cottonwood,Narrowleaf cottonwood leading,,,TRUE,Deciduous,,,PopBrch,,,,,,,,POPU_ANG,1214,,,,,
