@@ -90,15 +90,27 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
   if (!isTRUE(.compareRas(ecoregionRst, rstLCCAdj, res = TRUE, stopOnError = FALSE))) {
     stop("problem with rasters ecoregionRst and rstLCCAdj -- they don't have same metadata")
   }
-
-  ecoregionFiles <- Cache(ecoregionProducer,
+  ecoregionFiles <- ecoregionProducer(
     ecoregionMaps = list(ecoregionRst, rstLCCAdj),
     rasterToMatch = rasterToMatchLarge,
-    userTags = c(cacheTags, "ecoregionFiles", "stable"),
-    omitArgs = c("userTags")
-  )
+    ecoregionTable = ecoregionTable) |>
+    Cache(
+      # ecoregionTable = ecoregionTable,
+      userTags = c(cacheTags, "ecoregionFiles", "stable"),
+      omitArgs = c("userTags")
+    )
 
   if (appendEcoregionFactor) {
+    # These can be mismatched in the case where there are more factor levels in ecoregionTable than
+    #   ecoregionFiles$ecoregion, but only if they have more digits, e.g., paddedFloatToChar may
+    #   have created only 1:9 in ecoregionTable, but there may be 1:11 in ecoregionFiles
+    maxNcharERT <- max(nchar(as.character(ecoregionTable[["ID"]])))
+    erfEChar <- as.character(ecoregionFiles$ecoregion[["ecoregion"]])
+    if (maxNcharERT != max(nchar(erfEChar))) {
+      aa <- as.integer(erfEChar)
+      aa <- factor(paddedFloatToChar(aa, padL = maxNcharERT))
+      ecoregionFiles$ecoregion[["ecoregion"]] <- aa
+    }
     ecoregionFiles$ecoregion <- ecoregionFiles$ecoregion[ecoregionTable, on = c("ecoregion" = "ID")] |>
       na.omit()
     setnames(ecoregionFiles$ecoregion, old = "ecoregion_lcc", new = "ecoregionGroup")

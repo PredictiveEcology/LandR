@@ -36,7 +36,7 @@ randomPoly <- LandR::randomStudyArea(
 ras2match <- terra::rast(
   randomPoly,
   vals = 1,
-  resolution = 100,
+  res = 100,
 )
 ras2match <- terra::mask(ras2match, randomPoly)
 

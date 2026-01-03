@@ -13,6 +13,11 @@ utils::globalVariables(c(
 #'
 #' @param ecoregionName the name describing the type of ecoregions in first map
 #' (e.g. `"ecoDistrict"`) if passing a polygon file.
+#' @param ecoregionTable A data.table that has 2 columns, `ecoregionName` (a factor)
+#'   and `ID` a factor of `paddedFloatToChar(1:length(unique(ecoregionName)), 
+#'                         padL = max(nchar(length(unique(ecoregionName)))))`. This
+#'   represents all the possible values that are available; this will be joined
+#'   to `ecoregionMaps[[1]]` values
 #'
 #' @template rasterToMatch
 #'
@@ -21,7 +26,8 @@ utils::globalVariables(c(
 #' its information per `pixelID`
 #'
 #' @export
-ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch) {
+ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch,
+                              ecoregionTable) {
   .requireNamespace("fasterize", stopOnFALSE = TRUE)
 
   ## change the coordinate reference for all spatialpolygons
@@ -47,10 +53,22 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch
     is.na(as.vector(x[])) | as.vector(x[]) == 0
   }))
   NAs <- rtmNAs | rstEcoregionNAs
-  a <- lapply(rstEcoregion, function(x) as.vector(x[])[!NAs])
+  # The next line fails when there are missing levels of the first one, 
+  #   if they don't have all the digits of the whole, i.e.,
+  #   rstEcoregion[[1]] in one case has only levels 1:9
+  #   but the ecoregionTable has 1:11, so the join outside this function
+  #   fails
+  # a <- lapply(rstEcoregion, function(x) as.vector(x[])[!NAs])
+  # b[, (names(b)) := lapply(.SD, function(x) paddedFloatToChar(x, max(nchar(x), na.rm = TRUE)))]
+  # New Jan 2, 2026 by Eliot
+  a <- lapply(rstEcoregion, function(x) {
+    if (is.factor(x)) factorValues(x, values(x, mat = FALSE)[!NAs])
+    else as.vector(x[])[!NAs]
+    })
   b <- as.data.table(a)
-  b[, (names(b)) := lapply(.SD, function(x) paddedFloatToChar(x, max(nchar(x), na.rm = TRUE)))]
-
+  b <- ecoregionTable[b, on = "ecoregionName"] # join that gets all the correct values
+  set(b, NULL, "ecoregionName", NULL)
+  
   ## take the first 2 columns, whatever their names, in case they are given something
   ecoregionValues <- factor(paste(b[[1]], b[[2]], sep = "_"))
 
