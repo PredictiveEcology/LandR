@@ -148,12 +148,14 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
   ## suppress this message call no non-missing arguments to min;
   ## returning Inf min(x@data@values, na.rm = TRUE)
   suppressWarnings(ecoregionMap[truePixelData$pixelIndex] <- as.integer(truePixelData$ecoregionGroup))
-  levels(ecoregionMap) <- data.frame(
-    ID = seq(levels(truePixelData$ecoregionGroup)),
-    ecoregion = gsub("_.*", "", levels(truePixelData$ecoregionGroup)),
-    ecoregionGroup = levels(truePixelData$ecoregionGroup),
-    stringsAsFactors = TRUE
-  )
+  
+  factorDT <- unique(truePixelData[, .(ecoregionGroup, landcover, ecoregionName)])
+  factorDT[, ID := seq(levels(ecoregionGroup))]
+  factorDT[, ecoregion := gsub("_.*", "", ecoregionGroup)]
+  setcolorder(factorDT, c("ID", "ecoregionGroup", "ecoregionName", "ecoregion", "landcover"))
+  
+  levels(ecoregionMap) <- factorDT
+  
   return(ecoregionMap)
 }
 
