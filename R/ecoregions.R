@@ -1,5 +1,6 @@
 utils::globalVariables(c(
-  "active", "ecoregion", "ecoregion_lcc", "ecoregionGroup", "ID", "landcover", "mapcode"
+  "active", "ecoregion", "ecoregion_lcc", "ecoregionGroup",
+  "ecoregionName", "ID", "landcover", "mapcode"
 ))
 
 #' Make `ecoregionMap` and `ecoregion` table
