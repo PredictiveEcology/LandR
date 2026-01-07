@@ -23,7 +23,7 @@ raster operations (i.e., the one used throughout the simulation).
 \code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
 \item{ecoregionTable}{A data.table that has 2 columns, \code{ecoregionName} (a factor)
-and \code{ID} a factor of \code{paddedFloatToChar(1:length(unique(ecoregionName)),  padL = max(nchar(length(unique(ecoregionName)))))}. This
+and \code{ID} a factor of \code{paddedFloatToChar(1:length(unique(ecoregionName)), padL = max(nchar(length(unique(ecoregionName)))))}. This
 represents all the possible values that are available; this will be joined
 to \code{ecoregionMaps[[1]]} values}
 }

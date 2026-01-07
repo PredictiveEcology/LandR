@@ -14,7 +14,7 @@ utils::globalVariables(c(
 #' @param ecoregionName the name describing the type of ecoregions in first map
 #' (e.g. `"ecoDistrict"`) if passing a polygon file.
 #' @param ecoregionTable A data.table that has 2 columns, `ecoregionName` (a factor)
-#'   and `ID` a factor of `paddedFloatToChar(1:length(unique(ecoregionName)), 
+#'   and `ID` a factor of `paddedFloatToChar(1:length(unique(ecoregionName)),
 #'                         padL = max(nchar(length(unique(ecoregionName)))))`. This
 #'   represents all the possible values that are available; this will be joined
 #'   to `ecoregionMaps[[1]]` values
@@ -53,7 +53,7 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch
     is.na(as.vector(x[])) | as.vector(x[]) == 0
   }))
   NAs <- rtmNAs | rstEcoregionNAs
-  # The next line fails when there are missing levels of the first one, 
+  # The next line fails when there are missing levels of the first one,
   #   if they don't have all the digits of the whole, i.e.,
   #   rstEcoregion[[1]] in one case has only levels 1:9
   #   but the ecoregionTable has 1:11, so the join outside this function
@@ -62,13 +62,13 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch
   # b[, (names(b)) := lapply(.SD, function(x) paddedFloatToChar(x, max(nchar(x), na.rm = TRUE)))]
   # New Jan 2, 2026 by Eliot
   a <- lapply(rstEcoregion, function(x) {
-    if (is.factor(x)) factorValues(x, values(x, mat = FALSE)[!NAs])
+    if (is.factor(x)) raster::factorValues(x, values(x, mat = FALSE)[!NAs])
     else as.vector(x[])[!NAs]
     })
   b <- as.data.table(a)
   b <- ecoregionTable[b, on = "ecoregionName"] # join that gets all the correct values
   set(b, NULL, "ecoregionName", NULL)
-  
+
   ## take the first 2 columns, whatever their names, in case they are given something
   ecoregionValues <- factor(paste(b[[1]], b[[2]], sep = "_"))
 
@@ -148,14 +148,14 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
   ## suppress this message call no non-missing arguments to min;
   ## returning Inf min(x@data@values, na.rm = TRUE)
   suppressWarnings(ecoregionMap[truePixelData$pixelIndex] <- as.integer(truePixelData$ecoregionGroup))
-  
+
   factorDT <- unique(truePixelData[, .(ecoregionGroup, landcover, ecoregionName)])
   factorDT[, ID := seq(levels(ecoregionGroup))]
   factorDT[, ecoregion := gsub("_.*", "", ecoregionGroup)]
   setcolorder(factorDT, c("ID", "ecoregionGroup", "ecoregionName", "ecoregion", "landcover"))
-  
+
   levels(ecoregionMap) <- factorDT
-  
+
   return(ecoregionMap)
 }
 
