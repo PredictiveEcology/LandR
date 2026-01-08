@@ -429,7 +429,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' library(SpaDES.tools)
 #' library(terra)
 #' library(reproducible)
-#' randomPoly <- vect(randomStudyArea(size = 1e7))
+#' randomPoly <- randomStudyArea(size = 1e7)
 #' randomPoly
 #' ras2match <- rast(res = 250, ext = ext(randomPoly), crs = crs(randomPoly))
 #' ras2match <- rasterize(randomPoly, ras2match)
