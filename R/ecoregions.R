@@ -68,6 +68,12 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch
   b <- as.data.table(a)
   b <- ecoregionTable[b, on = "ecoregionName"] # join that gets all the correct values
   set(b, NULL, "ecoregionName", NULL)
+  set(b, NULL, "ID", as.character(b[["ID"]]))
+  for (cn in colnames(b)) {
+    if (data.table::uniqueN(nchar(b[[cn]])) != 1) {
+      set(b, NULL, cn, paddedFloatToChar(b[[cn]], max(nchar(b[[cn]]), na.rm = TRUE)))
+    }
+  }
   
   ## take the first 2 columns, whatever their names, in case they are given something
   ecoregionValues <- factor(paste(b[[1]], b[[2]], sep = "_"))
@@ -179,7 +185,8 @@ speciesEcoregionStack <- function(ecoregionMap, speciesEcoregion,
   # speciesEcoregion <- bm2011$speciesEcoregion
   orig <- data.table::setDTthreads(2)
   on.exit(data.table::setDTthreads(orig), add = TRUE)
-  whNonNAs <- which(!is.na(ecoregionMap[]))
+  # whNonNAs <- which(!is.na(ecoregionMap[]))
+  whNonNAs <- which(!is.na(values(mat = FALSE, ecoregionMap))) # faster than previous line
   fv <- factorValues2(ecoregionMap,
     ecoregionMap[][whNonNAs],
     att = "ecoregionGroup"
