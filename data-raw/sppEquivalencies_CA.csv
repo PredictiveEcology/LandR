@@ -134,7 +134,7 @@ popudelt,,Popu_del,Popu_Del,Popu delt,Populus deltoides,E ctnwood,Eastern cotton
 ,,Popu_gra,Popu_Gra,Popu gran,Populus grandidentata,Bigto asp,Bigtooth aspen,Bigtooth aspen leading,,Popu_Gra,TRUE,Deciduous,largetooth aspen,,PopBrch,,,,,Pl,PEG,ltA,POPU_GRA,1206,,28,68,,
 ,,Popu_nig,,Popu nigr,Populus nigra,Bl pop,Black poplar,Black poplar leading,,,TRUE,Deciduous,,,PopBrch,,,,,,,,POPU_NIG,1200,generic aspen code,,,,
 ,,Popu_spp,Popu_Spp,Popu spp,Populus spp.,Poplar,Poplar,Poplar leading,,Popu_Spp,TRUE,Deciduous,trembling aspen,,PopBrch,,,,,Po,,,POPU_SP,1200,,,62,,
-poputrem,POPU.TRE,Popu_tre,Popu_Tre,Popu trem,Populus tremuloides,Tr aspen,Trembling aspen,Trembling aspen leading,,Popu_Tre,TRUE,Deciduous,trembling aspen,,PopBrch,At,Aw,,TA,Pt,PET,tA,POPU_TRE,1201,,29,63,POPU_TRE,#FF00B6
+poputrem,POPU.TRE,Popu_tre,Popu_Tre,Popu trem,Populus tremuloides,Tr aspen,Trembling aspen,Trembling aspen leading,,Popu_Tre,TRUE,Deciduous,trembling aspen,,PopBrch,At,Aw,TA,TA,Pt,PET,tA,POPU_TRE,1201,,29,63,POPU_TRE,#FF00B6
 ,,Popu_bal,Popu_Tri,Popu balt,Populus trichocarpa,Bl ctnwood,Black cottonwood,Black cottonwood leading,Populus balsamifera trichocarpa is a synonym of Populus trichocarpa,Popu_Tri,TRUE,Deciduous,black cottonwood,,PopBrch,Act,,,,,,,POPU_TRI,1204,,,66,,#FFACFD
 ,,Prun_avi,,Prun aviu,Prunus avium,Wild cherry,Wild cherry,Wild cherry leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Cm,,,PRUN_AVI,2801,black cherry code,,,,
 ,,Prun_cer,,Prun cera,Prunus cerasus,Sour cherry,Sour cherry,Sour cherry leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Cs,,,PRUN_CER,2801,black cherry code,,,,
