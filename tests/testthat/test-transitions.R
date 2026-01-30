@@ -57,12 +57,14 @@ testthat::test_that("leading species transitions plots look good", {
     transition_ggs <- plotVegTransitions(transitions_df)
 
     plot_files <- purrr::map_chr(.x = names(transition_ggs), .f = function(i) {
-      ggsave(
-        file.path(outputDir, "figures", paste0("transition_vegTypeMap_", i, ".png")),
-        transition_ggs[[i]],
-        width = 12,
-        height = 6
-      )
+      suppressWarnings({
+        ggsave(
+          file.path(outputDir, "figures", paste0("transition_vegTypeMap_", i, ".png")),
+          transition_ggs[[i]],
+          width = 12,
+          height = 6
+        )
+      })
     })
 
     expect_all_true(file.exists(plot_files))
@@ -70,7 +72,7 @@ testthat::test_that("leading species transitions plots look good", {
     rm(transition_ggs)
   }
 
-  rm(transition_df)
+  rm(transitions_df)
 
   ## using VTM to get conifer/deciduous/mixed --------------------------------------------------------
 
