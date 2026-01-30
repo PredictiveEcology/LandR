@@ -1,9 +1,10 @@
 # LandR (development version)
-* minor bug fixes to `prepInputsFireYear` pertaining to file structure of NFDB data
+
 * drop support for R 4.2 due to changes in dependency packages;
 * remove deprecated package `crayon` in favour of `cli` instead;
 * move `ggpubr` to Suggests;
-* SCANFI and 2020 now default data source and year for stand age and biomass functions
+* add `arrow` to Suggests;
+* SCANFI and 2020 now default data source and year for stand age and biomass functions;
 * `dropTerm` now can deal with random effects better (#105);
 * `prepRawBiomassMap` - needed `overwrite = TRUE` for cases where download was corrupt;
 * `prepRawBiomassMap` needs `httr2` package as remote site is failing with `download.file`;
@@ -32,6 +33,8 @@
 * several minor updates to `loadSCANFISpeciesLayers`, `prepSpeciesLayers_SCANFI` to address more edge cases;
 * `prepSpeciesLayers_SCANFI` updates to improve join `sppEquiv` so "multiple - to - one" can be used;
 * add `plot_raster_stats` and `calc_raster_counts` for generating summaries of numeric rasters in Canada;
+* minor bug fixes to `prepInputsFireYear` pertaining to file structure of NFDB data;
+* improved transition plots, use `arrow` datasets to minimize memory use (important for large study areas);
 
 # LandR 1.1.5
 

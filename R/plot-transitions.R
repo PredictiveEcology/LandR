@@ -10,15 +10,14 @@ utils::globalVariables(c(
 #'
 #' @template sppEquivCol
 #'
-#' @param studyArea `sf` polygons object delineating the area to use for cropping and masking
-#'                  of `ecoregion` (e.g., `studyAreaReporting`).
+#' @param zones `sf` polygons object delineating the reporting area (`zone`) boundaries.
 #'
 #' @return
 #' - `vtm2conifdecid()` returns a character vector of file paths to the conifer-deciduous maps.
 #'
 #' @export
 #' @rdname vegetation-transitions
-vtm2conifdecid <- function(vtm, sppEquiv = NULL, sppEquivCol = "LandR", studyArea) {
+vtm2conifdecid <- function(vtm, sppEquiv = NULL, sppEquivCol = "LandR", zones) {
   if (is.null(sppEquiv)) {
     sppEquiv <- get(
       data("sppEquivalencies_CA", package = "LandR", envir = environment()),
@@ -29,7 +28,7 @@ vtm2conifdecid <- function(vtm, sppEquiv = NULL, sppEquivCol = "LandR", studyAre
   vapply(
     seq_along(vtm),
     function(i) {
-      r <- terra::rast(vtm[i]) |> terra::crop(studyArea) |> terra::mask(studyArea)
+      r <- terra::rast(vtm[i]) |> terra::crop(zones, mask = TRUE)
       lvls_vt <- levels(r)[[1]]
       names(lvls_vt) <- tolower(names(lvls_vt))
 
@@ -48,9 +47,7 @@ vtm2conifdecid <- function(vtm, sppEquiv = NULL, sppEquivCol = "LandR", studyAre
   )
 }
 
-#' @param ecoregion `SpatRaster` of ecoregion (or other) codes by which to group.
-#'
-#' @param field character string of the column name in `ecoregion` to use for grouping.
+#' @param field character string of the column name in `zones` to use for grouping.
 #'
 #' @param times numeric vector of years corresponding to `vtm`.
 #'
@@ -59,33 +56,42 @@ vtm2conifdecid <- function(vtm, sppEquiv = NULL, sppEquivCol = "LandR", studyAre
 #'        If `FALSE`, these `NA` values will be replaced with `"_NA_"` so transitions
 #'        between vegetated and non-vegetated pixels can be visualized.
 #'
+#' @param dest character, specifying a destination directory
+#'
 #' @return
-#' - `vegTransitions()` returns a `data.frame` with columns `pixelID`, `ecoregion`, `vegType`,
+#' - `vegTransitions()` returns a `arrow` dataset with columns `pixelID`, `zone`, `vegType`,
 #' and `time`.
 #'
 #' @export
 #' @rdname vegetation-transitions
-vegTransitions <- function(vtm, ecoregion, field, studyArea, times, na.rm = FALSE) {
-  stopifnot(requireNamespace("dplyr", quietly = TRUE))
+vegTransitions <- function(vtm, zones, field, times, na.rm = FALSE, dest = ".") {
+  stopifnot(requireNamespace("arrow", quietly = TRUE), requireNamespace("dplyr", quietly = TRUE))
 
-  transitions_df <- lapply(seq_along(times), function(yr) {
-    r <- terra::rast(vtm[yr]) |> terra::crop(studyArea) |> terra::mask(studyArea)
+  dest <- file.path(dest, "vegetation-transitions")
+
+  rtm <- terra::rast(vtm[1]) |> terra::rast() ## remove values
+  rstZones <- terra::rasterize(zones, rtm, field = field) |> terra::crop(zones, mask = TRUE)
+  levels(rstZones) <- data.frame(ID = seq_len(nrow(zones))) |>
+    dplyr::mutate({{ field }} := zones[[field]])
+
+  purrr::walk(.x = seq_along(times), .f = function(yr) {
+    r <- terra::rast(vtm[yr]) |> terra::crop(zones, mask = TRUE)
     lvls_vt <- terra::levels(r)[[1]]
     names(lvls_vt) <- tolower(names(lvls_vt))
     idcol_vt <- grep("^(id|value)$", names(lvls_vt), ignore.case = TRUE, value = TRUE)
 
-    lvls_er <- terra::levels(ecoregion)[[1]]
-    names(lvls_er) <- tolower(names(lvls_er))
-    idcol_er <- grep("^(id|value)$", names(lvls_er), ignore.case = TRUE, value = TRUE)
+    lvls_zn <- terra::levels(rstZones)[[1]]
+    names(lvls_zn) <- tolower(names(lvls_zn))
+    idcol_zn <- grep("^(id|value)$", names(lvls_zn), ignore.case = TRUE, value = TRUE)
     field <- tolower(field)
 
     tdf <- data.table(
       pixelID = seq_len(terra::ncell(r)),
-      ecoregion = lvls_er[[field]][match(values(ecoregion, mat = FALSE), lvls_er[[idcol_er]])],
-      vegType = lvls_vt[["values"]][match(values(r, mat = FALSE), lvls_vt[[idcol_vt]])],
+      zone = lvls_zn[[field]][match(terra::values(rstZones, mat = FALSE), lvls_zn[[idcol_zn]])],
+      vegType = lvls_vt[["values"]][match(terra::values(r, mat = FALSE), lvls_vt[[idcol_vt]])],
       time = times[yr]
     ) |>
-      na.omit("ecoregion")
+      na.omit("zone")
 
     if (isTRUE(na.rm)) {
       tdf <- na.omit(tdf, "vegType")
@@ -93,10 +99,13 @@ vegTransitions <- function(vtm, ecoregion, field, studyArea, times, na.rm = FALS
       tdf <- tdf[is.na(vegType), vegType := "_NA_"]
     }
 
-    return(as.data.frame(tdf))
-  }) |>
-    dplyr::bind_rows() |>
-    dplyr::mutate(time = factor(time, levels = as.character(times)))
+    as.data.frame(tdf) |>
+      dplyr::mutate(time = factor(time, levels = as.character(times))) |>
+      dplyr::group_by(zone, time) |>
+      arrow::write_dataset(dest, existing_data_behavior = "overwrite")
+  })
+
+  transitions_df <- arrow::open_dataset(dest)
 
   return(transitions_df)
 }
@@ -106,25 +115,34 @@ vegTransitions <- function(vtm, ecoregion, field, studyArea, times, na.rm = FALS
 #' @note creating these plots for large landscapes can be computationally intensive
 #' (time and memory use).
 #'
-#' @param transitions_df A data frame with columns `pixelID`, `ecoregion`, `vegType`, and `time`.
+#' @param transitions_df A data frame with columns `pixelID`, `zone`, `vegType`, and `time`.
 #'                       (i.e., output of `vegTransitions()`).
 #'
 #' @return
-#'  - `plotVegTransitions()` returns a list of `ggplot` objects, one for each ecoregion.
+#'  - `plotVegTransitions()` returns a list of `ggplot` objects, one for each zone.
 #'
 #' @export
 #' @rdname vegetation-transitions
 plotVegTransitions <- function(transitions_df) {
   stopifnot(
+    requireNamespace("arrow", quietly = TRUE),
     requireNamespace("dplyr", quietly = TRUE),
     requireNamespace("ggalluvial", quietly = TRUE),
     requireNamespace("ggrepel", quietly = TRUE),
-    all(c("pixelID", "ecoregion", "vegType", "time") %in% colnames(transitions_df))
+    all(c("pixelID", "zone", "vegType", "time") %in% colnames(transitions_df))
   )
 
-  erNames <- unique(transitions_df$ecoregion)
-  transition_ggs <- lapply(erNames, function(er) {
-    gg <- dplyr::filter(transitions_df, ecoregion == er) |>
+  zoneNames <- transitions_df |> dplyr::distinct(zone) |> dplyr::collect() |> dplyr::pull(zone)
+  times <- transitions_df |>
+    dplyr::distinct(time) |>
+    dplyr::collect() |>
+    dplyr::pull(time) |>
+    sort()
+
+  transition_ggs <- lapply(zoneNames, function(er) {
+    gg <- dplyr::filter(transitions_df, zone == er) |>
+      dplyr::collect() |>
+      dplyr::mutate(time = factor(time, levels = as.character(times))) |>
       ggplot(aes(
         x = time,
         stratum = vegType,
@@ -137,26 +155,14 @@ plotVegTransitions <- function(transitions_df) {
       ggalluvial::geom_stratum(width = 1 / 8) +
       scale_linetype_manual(values = c("blank", "solid")) +
       ggrepel::geom_text_repel(
-        aes(
-          label = ifelse(
-            as.numeric(as.character(time)) == head(as.numeric(as.character(time)), 1),
-            vegType,
-            NA
-          )
-        ),
+        aes(label = ifelse(as.numeric(as.character(time)) == min(times), vegType, NA)),
         stat = ggalluvial::StatStratum,
         size = 3,
         direction = "y",
         nudge_x = -0.5
       ) +
       ggrepel::geom_text_repel(
-        aes(
-          label = ifelse(
-            as.numeric(as.character(time)) == tail(as.numeric(as.character(time)), 1),
-            vegType,
-            NA
-          )
-        ),
+        aes(label = ifelse(as.numeric(as.character(time)) == max(times), vegType, NA)),
         stat = ggalluvial::StatStratum,
         size = 3,
         direction = "y",
@@ -165,7 +171,7 @@ plotVegTransitions <- function(transitions_df) {
       theme(legend.position = "none") +
       ggtitle(paste("Vegetation type transitions in", er))
   })
-  names(transition_ggs) <- erNames
+  names(transition_ggs) <- zoneNames
 
   transition_ggs
 }

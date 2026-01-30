@@ -9,7 +9,9 @@ testthat::test_that("leading species transitions plots look good", {
   testthat::skip_if_not_installed("SpaDES.core")
   testthat::skip_if_not_installed("withr")
 
+  withr::local_package("arrow")
   withr::local_package("data.table")
+  withr::local_package("dplyr")
   withr::local_package("ggplot2")
   withr::local_package("ggalluvial")
   withr::local_package("memuse")
@@ -21,43 +23,49 @@ testthat::test_that("leading species transitions plots look good", {
   run <- 1L
   outputDir <- file.path(
     "~/GitHub/BC_HRV/outputs",
-    "NRD_Quesnel_scfm_hrv_FRT_res125",
+    "NRD_Quesnel_scfm_LH_hrv_NDTBEC_FRT_res125",
     sprintf("rep%02d", run)
   )
 
   testthat::skip_if_not(dir.exists(outputDir))
 
-  ml <- readRDS(file.path(outputDir, "ml_preamble.rds"))
+  ml <- readRDS(file.path(dirname(outputDir), "ml_preamble.rds"))
   rTM <- terra::rast(file.path(outputDir, "pixelGroupMap_year0000.tif")) |> terra::rast()
   studyArea2 <- map::studyArea(ml, 2) ## studyAreaReporting
-  NDTBEC <- suppressWarnings({
-    sf::st_crop(ml$`ecoregionLayer (NDTxBEC)`, studyArea2)
-  })
-  rstNDTBEC <- terra::rasterize(NDTBEC, rTM, field = "NDTBEC") |>
-    terra::crop(studyArea2, mask = TRUE)
+  NDTBEC <- suppressWarnings(sf::st_crop(ml[["BEC zones"]], studyArea2)) |>
+    dplyr::mutate(NDTBEC = paste0(NATURAL_DISTURBANCE, "_", ZONE))
   rm(ml)
 
-  years <- c(800, 850, 900, 950, 1000, 1050, 1100, 1150, 1200)
+  years <- seq(800, 1200, 50)
 
   fvtm <- file.path(outputDir, sprintf("vegTypeMap_year%04d.tif", years))
+
+  stopifnot(all(file.exists(fvtm)))
 
   ## using VTM as-is ---------------------------------------------------------------------------------
 
   transitions_df <- vegTransitions(
     vtm = fvtm,
-    ecoregion = rstNDTBEC,
+    zones = NDTBEC,
     field = "NDTBEC",
-    studyArea = studyArea2,
-    times = years
+    times = years,
+    na.rm = TRUE,
+    dest = outputDir
   )
 
   if (interactive()) {
     transition_ggs <- plotVegTransitions(transitions_df)
 
-    lapply(names(transition_ggs), function(i) {
-      ggsave(file.path(outputDir, "figures", paste0("transition_vegTypeMap_", i, ".png")),
-             transition_ggs[[i]], width = 12, height = 6)
+    plot_files <- purrr::map_chr(.x = names(transition_ggs), .f = function(i) {
+      ggsave(
+        file.path(outputDir, "figures", paste0("transition_vegTypeMap_", i, ".png")),
+        transition_ggs[[i]],
+        width = 12,
+        height = 6
+      )
     })
+
+    expect_all_true(file.exists(plot_files))
 
     rm(transition_ggs)
   }
@@ -66,13 +74,17 @@ testthat::test_that("leading species transitions plots look good", {
 
   ## using VTM to get conifer/deciduous/mixed --------------------------------------------------------
 
-  # tmp <- SpaDES.core::loadSimList(file.path(outputDir, "simOutSpeciesLayers_NRD_Quesnel.rds"))
-  # fwrite(tmp$sppEquiv, file.path(dirname(outputDir), "sppEquiv.csv"))
+  sppEquiv_file <- file.path(dirname(outputDir), "sppEquiv.csv")
+
+  # tmp <- file.path(dirname(outputDir), "simOutDataPrep_NRD_Quesnel.rds") |>
+  #   SpaDES.core::loadSimList()
+  # fwrite(tmp$sppEquiv, sppEquiv_file)
   # rm(tmp)
 
-  sppEquiv <- fread(file.path(dirname(outputDir), "sppEquiv.csv"))
-  sppEquiv <- sppEquiv[, c("BC_HRV", "Type")] |>
-    rbind(data.table(BC_HRV = "Mixed", Type = "Mixed"))
+  skip_if_not(file.exists(sppEquiv_file))
+
+  sppEquiv <- fread(sppEquiv_file)
+  sppEquiv <- sppEquiv[, c("BC_HRV", "Type")] |> rbind(data.table(BC_HRV = "Mixed", Type = "Mixed"))
 
   fvtm2 <- vtm2conifdecid(
     vtm = fvtm,
@@ -93,8 +105,12 @@ testthat::test_that("leading species transitions plots look good", {
     transition_ggs2 <- plotVegTransitions(transitions_df)
 
     lapply(names(transition_ggs2), function(i) {
-      ggsave(file.path(outputDir, "figures", paste0("transition_conifdecid_", er, ".png")), gg,
-             width = 12, height = 6)
+      ggsave(
+        file.path(outputDir, "figures", paste0("transition_conifdecid_", er, ".png")),
+        gg,
+        width = 12,
+        height = 6
+      )
     })
 
     rm(transition_ggs2)

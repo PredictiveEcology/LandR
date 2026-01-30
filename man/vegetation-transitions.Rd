@@ -6,9 +6,9 @@
 \alias{plotVegTransitions}
 \title{Create a summaries of vegetation type transitions}
 \usage{
-vtm2conifdecid(vtm, sppEquiv = NULL, sppEquivCol = "LandR", studyArea)
+vtm2conifdecid(vtm, sppEquiv = NULL, sppEquivCol = "LandR", zones)
 
-vegTransitions(vtm, ecoregion, field, studyArea, times, na.rm = FALSE)
+vegTransitions(vtm, zones, field, times, na.rm = FALSE, dest = ".")
 
 plotVegTransitions(transitions_df)
 }
@@ -24,12 +24,9 @@ If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEq
 For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
 
-\item{studyArea}{\code{sf} polygons object delineating the area to use for cropping and masking
-of \code{ecoregion} (e.g., \code{studyAreaReporting}).}
+\item{zones}{\code{sf} polygons object delineating the reporting area (\code{zone}) boundaries.}
 
-\item{ecoregion}{\code{SpatRaster} of ecoregion (or other) codes by which to group.}
-
-\item{field}{character string of the column name in \code{ecoregion} to use for grouping.}
+\item{field}{character string of the column name in \code{zones} to use for grouping.}
 
 \item{times}{numeric vector of years corresponding to \code{vtm}.}
 
@@ -38,7 +35,9 @@ of \code{ecoregion} (e.g., \code{studyAreaReporting}).}
 If \code{FALSE}, these \code{NA} values will be replaced with \code{"_NA_"} so transitions
 between vegetated and non-vegetated pixels can be visualized.}
 
-\item{transitions_df}{A data frame with columns \code{pixelID}, \code{ecoregion}, \code{vegType}, and \code{time}.
+\item{dest}{character, specifying a destination directory}
+
+\item{transitions_df}{A data frame with columns \code{pixelID}, \code{zone}, \code{vegType}, and \code{time}.
 (i.e., output of \code{vegTransitions()}).}
 }
 \value{
@@ -47,12 +46,12 @@ between vegetated and non-vegetated pixels can be visualized.}
 }
 
 \itemize{
-\item \code{vegTransitions()} returns a \code{data.frame} with columns \code{pixelID}, \code{ecoregion}, \code{vegType},
+\item \code{vegTransitions()} returns a \code{arrow} dataset with columns \code{pixelID}, \code{zone}, \code{vegType},
 and \code{time}.
 }
 
 \itemize{
-\item \code{plotVegTransitions()} returns a list of \code{ggplot} objects, one for each ecoregion.
+\item \code{plotVegTransitions()} returns a list of \code{ggplot} objects, one for each zone.
 }
 }
 \description{
