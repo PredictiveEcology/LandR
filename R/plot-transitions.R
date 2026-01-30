@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "time", "vegType"
+  "time", "vegType", "zone"
 ))
 
 #' Create a summaries of vegetation type transitions
