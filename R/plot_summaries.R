@@ -59,7 +59,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
           qs2::qs_read()
         pixelGroupMap <- resultsDir |>
           file.path(paste0("pixelGroupMap_", year, "_year", year, ".tif")) |>
-          terra::rasterRead()
+          rasterRead()
 
         cohortDataReduced <- cohortData[, list(sumBio = sum(B, na.rm = TRUE)),
           by = c("speciesCode", "pixelGroup")
