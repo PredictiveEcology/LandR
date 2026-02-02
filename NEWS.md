@@ -2,6 +2,7 @@
 
 * drop support for R 4.2 due to changes in dependency packages;
 * remove deprecated package `crayon` in favour of `cli` instead;
+* remove deprecated package `qs` in favour of `qs2` instead;
 * move `ggpubr` to Suggests;
 * add `arrow` to Suggests;
 * SCANFI and 2020 now default data source and year for stand age and biomass functions;
