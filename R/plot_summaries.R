@@ -27,7 +27,7 @@
 plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, outputDir, treeSpecies,
                                defineLeading = .defineLeading, leadingPercentage = 0.8,
                                treeType = NULL, rasterToMatch) {
-  if (requireNamespace("qs", quietly = TRUE)) {
+  if (requireNamespace("qs2", quietly = TRUE)) {
     if (is.null(treeType)) {
       treeType <- data.frame(
         leading = as.integer(c(
@@ -55,7 +55,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
 
       bothYears <- lapply(years, function(year) {
         cohortData <- resultsDir |>
-          file.path(paste0("cohortData_", year, "_year", year, ".qs")) |>
+          file.path(paste0("cohortData_", year, "_year", year, ".qs2")) |>
           qs2::qs_read()
         pixelGroupMap <- resultsDir |>
           file.path(paste0("pixelGroupMap_", year, "_year", year, ".tif")) |>
