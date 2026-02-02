@@ -32,10 +32,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
       treeType <- data.frame(
         leading = as.integer(c(
           seq_along(length(treeSpecies[["Species"]])),
-          paste0(
-            length(treeSpecies[["Species"]]) + 1,
-            seq_along(length(treeSpecies[["Species"]]))
-          )
+          paste0(length(treeSpecies[["Species"]]) + 1, seq_along(length(treeSpecies[["Species"]])))
         )),
         landcover = c(treeSpecies[["Species"]], paste0("Mixed_", treeSpecies[["Species"]])),
         leadingType = c(
@@ -49,9 +46,9 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
       )
     }
 
-    # 1. for each rep within a scenario, calculate difference -->
-    #    if conifer to decid = 1, if decid to conifer = -1, otherwise 0
-    # 2. Create one single map of "proportion net conversion" sum of difference / Nreps
+    ## 1. for each rep within a scenario, calculate difference -->
+    ##    if conifer to decid = 1, if decid to conifer = -1, otherwise 0
+    ## 2. Create one single map of "proportion net conversion" sum of difference / Nreps
     allReps <- parallel::mclapply(1:Nreps, function(rep) {
       runName <- sprintf("%s_%s", studyAreaName, climateScenario)
       resultsDir <- file.path(outputDir, runName, sprintf("rep%02d", rep))
@@ -59,10 +56,10 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
       bothYears <- lapply(years, function(year) {
         cohortData <- resultsDir |>
           file.path(paste0("cohortData_", year, "_year", year, ".qs")) |>
-          qs::qread()
+          qs2::qs_read()
         pixelGroupMap <- resultsDir |>
           file.path(paste0("pixelGroupMap_", year, "_year", year, ".tif")) |>
-          rasterRead()
+          terra::rasterRead()
 
         cohortDataReduced <- cohortData[, list(sumBio = sum(B, na.rm = TRUE)),
           by = c("speciesCode", "pixelGroup")
@@ -112,12 +109,10 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
         leadingStackChange <- raster::calc(bothYearsStk, fun = sum, na.rm = TRUE)
       }
 
-      stopifnot(
-        all(
-          min(leadingStackChange[], na.rm = TRUE) >= -1,
-          max(leadingStackChange[], na.rm = TRUE) <= 1
-        )
-      )
+      stopifnot(all(
+        min(leadingStackChange[], na.rm = TRUE) >= -1,
+        max(leadingStackChange[], na.rm = TRUE) <= 1
+      ))
 
       leadingStackChange[is.na(rasterToMatch)] <- NA
       names(leadingStackChange) <- paste("leadingMapChange", studyAreaName, climateScenario, rep, sep = "_")
@@ -160,20 +155,13 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
       meanLeadingChange,
       main = paste("Proportional change in leading species under", climateScenario),
       sub = list(
-        paste0(
-          " Red: conversion to conifer\n",
-          " Blue: conversion to deciduous."
-        ),
+        paste0(" Red: conversion to conifer\n", " Blue: conversion to deciduous."),
         cex = 2
       ),
       margin = FALSE,
       maxpixels = 7e6,
       at = AT,
-      colorkey = list(
-        space = "bottom",
-        axis.line = list(col = "black"),
-        width = 0.75
-      ),
+      colorkey = list(space = "bottom", axis.line = list(col = "black"), width = 0.75),
       par.settings = list(
         strip.border = list(col = "transparent"),
         strip.background = list(col = "transparent"),
