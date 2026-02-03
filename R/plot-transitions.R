@@ -158,6 +158,7 @@ plotVegTransitions <- function(transitions_df) {
         aes(label = ifelse(as.numeric(as.character(time)) == min(times), vegType, NA)),
         stat = ggalluvial::StatStratum,
         size = 3,
+        linewidth = 3,
         direction = "y",
         nudge_x = -0.5
       ) +
@@ -165,6 +166,7 @@ plotVegTransitions <- function(transitions_df) {
         aes(label = ifelse(as.numeric(as.character(time)) == max(times), vegType, NA)),
         stat = ggalluvial::StatStratum,
         size = 3,
+        linewidth = 3,
         direction = "y",
         nudge_x = +0.5
       ) +
