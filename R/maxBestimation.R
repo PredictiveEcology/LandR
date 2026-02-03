@@ -410,12 +410,12 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
       # trainData2[, lambda := A * (1 - exp(-k * age))^p]
       # trainData2[, B := sapply(lambda, function(x) rpois(1, x))]
       # ggplot(trainData2, aes(y = B, x = age, colour = as.factor(k))) +
-      #   geom_line(size = 1) +
+      #   geom_line(linewidth = 1) +
       #   ggpubr::theme_pubr() +
       #   facet_grid(~ p)
       #
       # ggplot(trainData2, aes(y = B, x = age, colour = as.factor(k))) +
-      #   geom_line(size = 1) +
+      #   geom_line(linewidth = 1) +
       #   ggpubr::theme_pubr() +
       #   facet_grid(~ p)
 
