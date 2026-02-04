@@ -71,8 +71,10 @@ vegTransitions <- function(vtm, zones, field, times, na.rm = FALSE, dest = ".") 
 
   rtm <- terra::rast(vtm[1]) |> terra::rast() ## remove values
   rstZones <- terra::rasterize(zones, rtm, field = field) |> terra::crop(zones, mask = TRUE)
-  levels(rstZones) <- data.frame(ID = seq_len(nrow(zones))) |>
-    dplyr::mutate({{ field }} := zones[[field]])
+  if (is.null(levels(rstZones)[[1]])) {
+    levels(rstZones) <- data.frame(ID = seq_len(nrow(zones))) |>
+      dplyr::mutate({{ field }} := zones[[field]])
+  }
 
   purrr::walk(.x = seq_along(times), .f = function(yr) {
     r <- terra::rast(vtm[yr]) |> terra::crop(zones, mask = TRUE)
