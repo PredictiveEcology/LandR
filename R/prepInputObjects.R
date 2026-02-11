@@ -625,11 +625,13 @@ prepInputsStandAgeMap <- function(
   }
 
   if (is(standAgeMap, "SpatRaster")) {
-    vals <- as.vector(standAgeMap[])
+    standAgeMap <- as.int(standAgeMap + 0.5)
+    # vals <- as.vector(standAgeMap[])
   } else {
     vals <- standAgeMap[]
+    standAgeMap[] <- asInteger(vals)
   }
-  standAgeMap[] <- asInteger(vals)
+  
 
   if (getFires) {
     if (isFALSE(is.null(rasterToMatch))) {
