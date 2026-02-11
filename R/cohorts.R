@@ -1381,7 +1381,7 @@ dropTerm <- function(form, term, dropRanEff = TRUE) {
 
   for (tt in term) {
     idr <- grepl(tt, termsInner)
-    facPartial <- fac[idr, ]
+    facPartial <- fac[idr, , drop = FALSE]
     toDrop <- list()
     ## Cycle through 1 row at a time of the matrix
     for (rn in seq_len(NROW(facPartial))) {
