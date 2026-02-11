@@ -505,7 +505,7 @@ prepInputsStandAgeMap <- function(
       datatype = datatype,
       to = rasterToMatch,
       ...
-    )
+    ) |> Cache(.functionName = "prepInputs_ageMapFromSCANFI")
 
     if (dataYear != "2020") {
       #use NTEMS to identify disturbances (harvest and fire) that occurred between dataYear and 2020
@@ -526,13 +526,13 @@ prepInputsStandAgeMap <- function(
         destinationPath = destinationPath,
         to = standAgeMap,
         method = "near"
-      )
+      )  |> Cache(.functionName = "prepInputs_CA_ForestFire1985to2020")
       harvest_NTEMS <- prepInputs(
         url = "https://opendata.nfis.org/downloads/forest_change/CA_Forest_Harvest_1985-2020.zip",
         destinationPath = destinationPath,
         to = standAgeMap,
         method = "near"
-      )
+      ) |> Cache(.functionName = "prepInputs_CA_Harvest1985to2020")
       NAflag(fire_NTEMS) <- 0
       NAflag(harvest_NTEMS) <- 0
 
