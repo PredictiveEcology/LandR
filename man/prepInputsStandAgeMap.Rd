@@ -5,7 +5,7 @@
 \title{Create \code{standAgeMap}}
 \usage{
 prepInputsStandAgeMap(
-  ...,
+  rasterToMatch = NULL,
   dataSource = "SCANFI",
   dataYear = 2020,
   ageURL = NULL,
@@ -20,11 +20,13 @@ prepInputsStandAgeMap(
     "fire_poly/current_version/NFDB_poly.zip"),
   fireFun = "terra::vect",
   fireField = "YEAR",
-  rasterToMatch = NULL
+  ...
 )
 }
 \arguments{
-\item{...}{additional arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
 \item{dataSource}{Character. One of KNN, NTEMS, or SCANFI.
 Defaults to SCANFI for \code{dataYear} 2020.
@@ -74,9 +76,7 @@ is missing.}
 \item{fireField}{field used to rasterize fire polys. Only used if \code{firePerimeters}
 is missing.}
 
-\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).
-\code{rasterToMatch} should correspond to \code{studyArea} if used.}
+\item{...}{additional arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}}
 }
 \value{
 a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
