@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     https://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2026-01-31
-Version: 1.1.5.9097
+Date: 2026-03-23
+Version: 1.1.5.9098
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -130,8 +130,8 @@ Collate:
     'nullClimate.R'
     'overlayLCCs.R'
     'partitionBiomass.R'
+    'plot-summaries.R'
     'plot-transitions.R'
-    'plot_summaries.R'
     'plotting.R'
     'prepEcoregions.R'
     'prepInputObjects.R'
