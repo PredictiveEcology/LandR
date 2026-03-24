@@ -148,6 +148,6 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
 
     ggplot2::ggsave(filename = f_meanLeadingChange_gg, fig, width = 12, height = 12)
 
-    return(list(f_meanLeadingChange, f_meanLeadingChange_gg))
+    return(c(f_meanLeadingChange, f_meanLeadingChange_gg))
   }
 }
