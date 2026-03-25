@@ -1,4 +1,4 @@
-testthat::test_that("prepInputsStandAgeMap work", {
+testthat::test_that("prepInputsStandAgeMap works", {
   testthat::skip_if_offline()
   testthat::skip_on_cran()
   testthat::skip_on_ci()
@@ -6,7 +6,8 @@ testthat::test_that("prepInputsStandAgeMap work", {
   td <- withr::local_tempdir("dest_")
   testthat::skip_if_not(interactive())
 
-  goodPoly <- randomStudyArea(size = 3e8, seed = 5)
+  #this default randomStudyArea is not centred on a place with much fire...
+  goodPoly <- randomStudyArea(size = 5e10, seed = 7)
   goodRas <- terra::rast(goodPoly, vals = 1, res = c(250, 250))
   goodRas <- terra::mask(goodRas, goodPoly)
 
