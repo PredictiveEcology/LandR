@@ -74,66 +74,90 @@
   )
 }
 
+## Deterministic variable-size partition of `total` cells into `nBlocks` blocks.
+## Pure integer arithmetic, no RNG — output is identical across OSes (unlike
+## SpaDES.tools::randomPolygons, which is what this fixture used to call and
+## which was the source of cross-platform divergence in seed-locked tests).
+.varBlockSizes <- function(total, nBlocks, salt = 0L) {
+  if (nBlocks <= 1L) return(as.integer(total))
+  i <- seq_len(nBlocks) - 1L
+  ## weight pattern in 1..5; (* 7) %% 5 cycles through {0,2,4,1,3,...}
+  w <- as.integer(((i + as.integer(salt)) * 7L) %% 5L) + 1L
+  cumW <- cumsum(w); totW <- cumW[nBlocks]
+  bounds <- as.integer(round(cumW / totW * total))
+  sizes <- diff(c(0L, bounds))
+  ## guarantee no zero-size block (steal one cell from the largest)
+  while (any(sizes == 0L)) {
+    sizes[which.max(sizes)] <- sizes[which.max(sizes)] - 1L
+    sizes[which(sizes == 0L)[1]] <- 1L
+  }
+  sizes
+}
+
 #' Build a deterministic LANDISDisp fixture without any network access.
 #'
-#' Reproducibility note: this uses set.seed() *internally*; the surrounding
-#' RNG state is restored on exit so a caller can later set their own seed for
-#' the dispersal call itself. That way the fixture ordering is independent of
-#' the seed used to drive LANDISDisp.
+#' Reproducibility: pure integer arithmetic — no RNG, no SpaDES.tools, no
+#' platform-sensitive raster ops. Identical bytes on Linux/Windows/macOS for
+#' the same `(size, fixtureSeed, successionTimestep, nSpecies)`. `fixtureSeed`
+#' is used as a salt to perturb the layout (block sizes, pgID rotation, species
+#' cycle), so different seeds still produce visibly different fixtures.
 makeLANDISDispFixture <- function(size = "small", fixtureSeed = 11L,
                                   successionTimestep = 10L,
                                   nSpecies = 7L) {
-  spec <- .landisDispSizeSpec(size)
+  spec         <- .landisDispSizeSpec(size)
+  speciesTable <- .landisDispSpeciesTable(nSpecies = nSpecies)
+  spCodes      <- speciesTable$speciesCode
+  numSp        <- length(spCodes)
+  salt         <- as.integer(fixtureSeed)
 
-  ## isolate fixture RNG so callers can use their own seeds afterwards
-  oldSeed <- if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-    get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
-  } else NULL
-  on.exit({
-    if (is.null(oldSeed)) {
-      if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-        rm(".Random.seed", envir = .GlobalEnv)
-      }
-    } else {
-      assign(".Random.seed", oldSeed, envir = .GlobalEnv)
-    }
-  }, add = TRUE)
-
-  set.seed(fixtureSeed)
-
+  ## ---- deterministic block-tiled pixelGroupMap ----
+  ## Cells are tiled into rectangular blocks of varied (but deterministic) size.
+  ## Block index (row-major) is mapped to a pgID via modulo nPgs, so distant
+  ## blocks may share a pgID — giving multi-patch pixelGroups like a real
+  ## pixelGroupMap (the property `randomPolygons` used to provide).
+  nRowBlocks <- max(2L, as.integer(ceiling(sqrt(spec$pgs))))
+  nColBlocks <- max(2L, as.integer(ceiling(spec$pgs / nRowBlocks)))
+  rowSizes   <- .varBlockSizes(spec$ny, nRowBlocks, salt)
+  colSizes   <- .varBlockSizes(spec$nx, nColBlocks, salt + 1L)
+  rowBlock   <- rep(seq_along(rowSizes), times = rowSizes)
+  colBlock   <- rep(seq_along(colSizes), times = colSizes)
+  ## terra::rast fills `vals` row-major (upper-left → lower-right)
+  ri <- rep(rowBlock, each = spec$nx)
+  ci <- rep(colBlock, times = spec$ny)
+  blockIdx <- (ri - 1L) * nColBlocks + (ci - 1L)
+  vals <- as.integer(((blockIdx + salt) %% spec$pgs) + 1L)
   pgm <- terra::rast(
     xmin = 0, xmax = spec$nx * spec$res,
     ymin = 0, ymax = spec$ny * spec$res,
     resolution = c(spec$res, spec$res),
-    vals = 1L
+    vals = vals
   )
-  pgm <- SpaDES.tools::randomPolygons(pgm, numTypes = spec$pgs)
-  ## ensure integer storage to mimic real pixelGroupMaps
-  pgm[] <- as.integer(terra::values(pgm))
 
-  speciesTable <- .landisDispSpeciesTable(nSpecies = nSpecies)
-  spCodes <- speciesTable$speciesCode
-
+  ## ---- deterministic per-pg species assignment ----
   rcvPGs <- seq_len(round(spec$pgs * spec$propRcv))
   srcPGs <- setdiff(seq_len(spec$pgs), rcvPGs)
 
-  rcvList <- lapply(rcvPGs, function(pg) {
-    n <- sample.int(spec$maxRcvSpPerPG, 1L)
-    data.table::data.table(
-      pixelGroup  = pg,
-      speciesCode = sort(sample(spCodes, size = n))
-    )
-  })
-  srcList <- lapply(srcPGs, function(pg) {
-    n <- sample.int(spec$maxSrcSpPerPG, 1L)
-    data.table::data.table(
-      pixelGroup  = pg,
-      speciesCode = sort(sample(spCodes, size = n))
-    )
-  })
-
-  dtRcv <- data.table::rbindlist(rcvList)
-  dtSrc <- data.table::rbindlist(srcList)
+  ## For each pg: pick n in 1..min(maxSp, numSp) via (pg + salt) %% maxSp,
+  ## then take n consecutive species codes (mod numSp) starting at a
+  ## pg-and-salt-dependent offset. n distinct because n <= numSp.
+  pgEntries <- function(pgs, maxSp) {
+    if (length(pgs) == 0L) {
+      return(data.table::data.table(pixelGroup = integer(0),
+                                    speciesCode = integer(0)))
+    }
+    pgs   <- as.integer(pgs)
+    maxSp <- min(as.integer(maxSp), numSp)
+    nVec  <- ((pgs - 1L + salt) %% maxSp) + 1L
+    rows  <- data.table::rbindlist(lapply(seq_along(pgs), function(k) {
+      pg  <- pgs[k]; n <- nVec[k]
+      off <- as.integer((pg - 1L) * 3L + salt)
+      sps <- ((off + 0:(n - 1L)) %% numSp) + 1L
+      data.table::data.table(pixelGroup = pg, speciesCode = sort(sps))
+    }))
+    rows
+  }
+  dtRcv <- pgEntries(rcvPGs, spec$maxRcvSpPerPG)
+  dtSrc <- pgEntries(srcPGs, spec$maxSrcSpPerPG)
 
   ## dtRcv often arrives joined to speciesTable in real workflows
   dtRcvFull <- speciesTable[dtRcv, on = "speciesCode"]
