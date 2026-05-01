@@ -215,7 +215,6 @@ test_that("test Ward dispersal seeding algorithm", {
 })
 
 test_that("test large files", {
-  testthat::skip_on_ci()
   skip_if_not_installed("googledrive")
   skip_if_not_installed("withr")
 
