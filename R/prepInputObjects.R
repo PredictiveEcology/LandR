@@ -382,7 +382,8 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' Create the `standAgeMap` raster containing age estimates for `pixelCohortData`.
 #' A separate [reproducible::prepInputs()] call will source Canadian National Fire Data Base
 #' data to update ages of recently burned pixels. To suppress this, pass NULL/NA `fireURL`
-#'
+
+#' @template rasterToMatch
 #' @param dataSource Character. One of KNN, NTEMS, or SCANFI.
 #'   Defaults to SCANFI for `dataYear` 2020.
 #'   Also available:
@@ -416,7 +417,6 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @param fireField field used to rasterize fire polys. Only used if `firePerimeters`
 #'   is missing.
 #' @template destinationPath
-#' @template rasterToMatch
 #' @param ... additional arguments passed to [reproducible::prepInputs()]
 #'
 #' @return a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
@@ -465,25 +465,26 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' attr(standAge2000, "imputedPixID")
 #' }
 prepInputsStandAgeMap <- function(
-  ...,
-  dataSource = "SCANFI",
-  dataYear = 2020,
-  ageURL = NULL,
-  ageFun = "terra::rast",
-  maskWithRTM = TRUE,
-  method = "bilinear",
-  datatype = "INT2U",
-  destinationPath = NULL,
-  writeTo = NULL,
-  firePerimeters = NULL,
-  fireURL = paste0(
-    "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/",
-    "fire_poly/current_version/NFDB_poly.zip"
-  ),
-  fireFun = "terra::vect",
-  fireField = "YEAR",
-  rasterToMatch = NULL
+    rasterToMatch = NULL,
+    dataSource = "SCANFI",
+    dataYear = 2020,
+    ageURL = NULL,
+    ageFun = "terra::rast",
+    maskWithRTM = TRUE,
+    method = "bilinear",
+    datatype = "INT2U",
+    destinationPath = NULL,
+    writeTo = NULL,
+    firePerimeters = NULL,
+    fireURL = paste0(
+      "https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/",
+      "fire_poly/current_version/NFDB_poly.zip"
+    ),
+    fireFun = "terra::vect",
+    fireField = "YEAR",
+    ...
 ) {
+
   dots <- list(...)
   if (is.null(writeTo) && !is.null(dots$filename2)) {
     writeTo <- dots$filename2
@@ -505,7 +506,7 @@ prepInputsStandAgeMap <- function(
       datatype = datatype,
       to = rasterToMatch,
       ...
-    )
+    ) |> Cache(.functionName = "prepInputs_ageMapFromSCANFI")
 
     if (dataYear != "2020") {
       #use NTEMS to identify disturbances (harvest and fire) that occurred between dataYear and 2020
@@ -526,13 +527,13 @@ prepInputsStandAgeMap <- function(
         destinationPath = destinationPath,
         to = standAgeMap,
         method = "near"
-      )
+      )  |> Cache(.functionName = "prepInputs_CA_ForestFire1985to2020")
       harvest_NTEMS <- prepInputs(
         url = "https://opendata.nfis.org/downloads/forest_change/CA_Forest_Harvest_1985-2020.zip",
         destinationPath = destinationPath,
         to = standAgeMap,
         method = "near"
-      )
+      ) |> Cache(.functionName = "prepInputs_CA_Harvest1985to2020")
       NAflag(fire_NTEMS) <- 0
       NAflag(harvest_NTEMS) <- 0
 
@@ -625,11 +626,13 @@ prepInputsStandAgeMap <- function(
   }
 
   if (is(standAgeMap, "SpatRaster")) {
-    vals <- as.vector(standAgeMap[])
+    standAgeMap <- as.int(standAgeMap + 0.5)
+    # vals <- as.vector(standAgeMap[])
   } else {
     vals <- standAgeMap[]
+    standAgeMap[] <- asInteger(vals)
   }
-  standAgeMap[] <- asInteger(vals)
+
 
   if (getFires) {
     if (isFALSE(is.null(rasterToMatch))) {
