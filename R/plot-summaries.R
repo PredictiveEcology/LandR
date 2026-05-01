@@ -31,8 +31,8 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
     if (is.null(treeType)) {
       treeType <- data.frame(
         leading = as.integer(c(
-          seq_along(length(treeSpecies[["Species"]])),
-          paste0(length(treeSpecies[["Species"]]) + 1, seq_along(length(treeSpecies[["Species"]])))
+          seq_len(length(treeSpecies[["Species"]])),
+          paste0(length(treeSpecies[["Species"]]) + 1, seq_len(length(treeSpecies[["Species"]])))
         )),
         landcover = c(treeSpecies[["Species"]], paste0("Mixed_", treeSpecies[["Species"]])),
         leadingType = c(
@@ -50,15 +50,14 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
     ##    if conifer to decid = 1, if decid to conifer = -1, otherwise 0
     ## 2. Create one single map of "proportion net conversion" sum of difference / Nreps
     allReps <- parallel::mclapply(1:Nreps, function(rep) {
-      runName <- sprintf("%s_%s", studyAreaName, climateScenario)
-      resultsDir <- file.path(outputDir, runName, sprintf("rep%02d", rep))
+      resultsDir <- file.path(outputDir, sprintf("rep%02d", rep))
 
       bothYears <- lapply(years, function(year) {
         cohortData <- resultsDir |>
-          file.path(paste0("cohortData_", year, "_year", year, ".qs2")) |>
+          file.path(paste0("cohortData_year", year, ".qs2")) |>
           qs2::qs_read()
         pixelGroupMap <- resultsDir |>
-          file.path(paste0("pixelGroupMap_", year, "_year", year, ".tif")) |>
+          file.path(paste0("pixelGroupMap_year", year, ".tif")) |>
           rasterRead()
 
         cohortDataReduced <- cohortData[, list(sumBio = sum(B, na.rm = TRUE)),
@@ -95,88 +94,60 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
         biomassDTfilled <- merge(allPixels, biomassDT, all.x = TRUE, by = "pixelID")
         leadingSpeciesRaster <- rasterRead(biomassStack)
         leadingSpeciesRaster[] <- biomassDTfilled[["newClass"]]
-        names(leadingSpeciesRaster) <- paste("biomassMap", studyAreaName, climateScenario, sep = "_")
 
         leadingSpeciesRaster
       })
       names(bothYears) <- paste0("Year", years)
 
-      bothYearsStk <- .stack(c(bothYears[[2]], -bothYears[[1]]))
+      # bothYearsStk <- .stack(c(bothYears[[2]], -bothYears[[1]]))
+      bothYearsStk <- terra::sds(bothYears[[2]], -bothYears[[1]])
 
-      if (is(bothYearsStk, "SpatRaster")) {
-        leadingStackChange <- sum(bothYearsStk, na.rm = TRUE)
-      } else {
-        leadingStackChange <- raster::calc(bothYearsStk, fun = sum, na.rm = TRUE)
-      }
+      # leadingStackChange <- sum(bothYearsStk, na.rm = TRUE)
+      leadingStackChange <- terra::app(bothYearsStk, fun = "sum", na.rm = TRUE)
 
       stopifnot(all(
         min(leadingStackChange[], na.rm = TRUE) >= -1,
         max(leadingStackChange[], na.rm = TRUE) <= 1
       ))
-
       leadingStackChange[is.na(rasterToMatch)] <- NA
-      names(leadingStackChange) <- paste("leadingMapChange", studyAreaName, climateScenario, rep, sep = "_")
+
       leadingStackChange
     })
     names(allReps) <- paste0("rep", 1:Nreps)
 
-    fmeanLeadingChange <- file.path(
-      outputDir, studyAreaName,
-      paste0("leadingChange_", studyAreaName, "_", climateScenario, ".tif")
-    )
     if (length(allReps) > 1) {
       allRepsStk <- .stack(allReps)
-      if (is(allRepsStk, "SpatRaster")) {
-        meanLeadingChange <- mean(allRepsStk, na.rm = TRUE)
-      } else {
-        meanLeadingChange <- raster::calc(allRepsStk, mean, na.rm = TRUE)
-      }
+      meanLeadingChange <- mean(allRepsStk, na.rm = TRUE)
     } else {
       meanLeadingChange <- allReps[[1]]
     }
     meanLeadingChange <- mask(crop(meanLeadingChange, rasterToMatch), rasterToMatch)
-    writeRaster(meanLeadingChange, filename = fmeanLeadingChange, overwrite = TRUE)
 
-    maxV <- max(
-      abs(round(min(meanLeadingChange[], na.rm = TRUE), 1)),
-      abs(round(max(meanLeadingChange[], na.rm = TRUE), 1))
+    f_meanLeadingChange <- file.path(
+      outputDir, paste0("leadingChange_", studyAreaName, "_", climateScenario, ".tif")
     )
-    AT <- seq(-maxV, maxV, length.out = 12)
+    writeRaster(meanLeadingChange, filename = f_meanLeadingChange, overwrite = TRUE)
 
-    pal <- RColorBrewer::brewer.pal(11, "RdYlBu")
-    pal[6] <- "#f7f4f2"
+    f_meanLeadingChange_gg <- file.path(outputDir, "figures") |>
+      reproducible::checkPath(create = TRUE) |>
+      file.path(paste0("leadingChange_", studyAreaName, "_", climateScenario, ".png"))
 
-    fmeanLeadingChange_gg <- file.path(
-      outputDir, studyAreaName, "figures",
-      paste0("leadingChange_", studyAreaName, "_", climateScenario, ".png")
-    )
+    fig <- ggplot2::ggplot() +
+      tidyterra::geom_spatraster(data = meanLeadingChange, maxcell = 1e+06) +
+      tidyterra::scale_fill_whitebox_c("bl_yl_rd", direction = -1) +
+      ggplot2::facet_wrap(~lyr) +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(
+        legend.direction = "horizontal",
+        legend.position = "top"
+      ) +
+      ggplot2::labs(
+        title = paste("Proportional change in leading species under", climateScenario),
+        subtitle = "Red: conversion to conifer; Blue: conversion to deciduous."
+      )
 
-    fig <- rasterVis::levelplot(
-      meanLeadingChange,
-      main = paste("Proportional change in leading species under", climateScenario),
-      sub = list(
-        paste0(" Red: conversion to conifer\n", " Blue: conversion to deciduous."),
-        cex = 2
-      ),
-      margin = FALSE,
-      maxpixels = 7e6,
-      at = AT,
-      colorkey = list(space = "bottom", axis.line = list(col = "black"), width = 0.75),
-      par.settings = list(
-        strip.border = list(col = "transparent"),
-        strip.background = list(col = "transparent"),
-        axis.line = list(col = "transparent")
-      ),
-      scales = list(draw = FALSE),
-      col.regions = pal,
-      par.strip.text = list(cex = 0.8, lines = 1, col = "black")
-    )
+    ggplot2::ggsave(filename = f_meanLeadingChange_gg, fig, width = 12, height = 12)
 
-    ## levelplot (trellis graphics more generally) won't plot correctly inside loop w/o print()
-    png(filename = fmeanLeadingChange_gg, width = 1000, height = 1000)
-    print(fig)
-    dev.off()
-
-    return(list(fmeanLeadingChange, fmeanLeadingChange_gg))
+    return(c(f_meanLeadingChange, f_meanLeadingChange_gg))
   }
 }
