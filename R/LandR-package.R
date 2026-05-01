@@ -15,6 +15,8 @@
 #' @import ggplot2
 #' @import patchwork
 #' @import methods
+#' @importFrom Rcpp evalCpp
+#' @useDynLib LandR, .registration = TRUE
 #' @name LandR-package
 #' @rdname LandR-package
 "_PACKAGE"

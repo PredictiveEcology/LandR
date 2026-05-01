@@ -15,6 +15,7 @@ LANDISDisp(
   plot.it = FALSE,
   successionTimestep,
   verbose = getOption("LandR.verbose", TRUE),
+  useCpp = getOption("LandR.LANDISDisp.useCpp", TRUE),
   ...
 )
 }
@@ -56,6 +57,11 @@ In LANDIS-II, this is called "Succession Timestep".}
 
 \item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
 
+\item{useCpp}{Logical. If \code{TRUE} (the default), the spiral seed-dispersal
+inner loop runs in C++ via \pkg{Rcpp}. If \code{FALSE}, the R reference
+implementation is used instead. Output is bit-identical between the two
+under a fixed seed. Defaults to \code{getOption("LandR.LANDISDisp.useCpp", TRUE)}.}
+
 \item{...}{Additional parameters. Currently none.}
 }
 \value{
@@ -85,6 +91,14 @@ The expression that can take an argument named "dis" (without quotes) as this wi
 calculated internally and represents the distance from the initial (receiving) pixel
 and all active pixels within that cluster of active pixels.
 \pkg{LandR} includes the \code{\link[=Ward]{Ward()}} kernel as defined in the LANDIS-II documentation.
+
+The spiral inner loop is implemented in C++ (via \pkg{Rcpp}) and is on by
+default; it produces bit-identical output to the previous R implementation
+under a fixed seed, but is typically ~3x faster end-to-end on
+landscape-scale inputs (and uses dramatically less memory by replacing the
+per-cell-by-species source matrix with a per-\code{pixelGroup} species bitmask).
+To fall back to the R reference (e.g., for debugging), pass
+\code{useCpp = FALSE} or set \code{options(LandR.LANDISDisp.useCpp = FALSE)}.
 }
 \examples{
 if (require("googledrive")) {
