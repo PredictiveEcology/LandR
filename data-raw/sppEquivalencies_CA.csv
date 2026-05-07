@@ -131,7 +131,7 @@ popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamifera v. balsamifera
 popudelt,,Popu_del,Popu_Del,Popu delt,Populus deltoides,E ctnwood,Eastern cottonwood,Eastern cottonwood leading,,,TRUE,Deciduous,eastern cotttonwood,,PopBrch,,,,CO,Pd,PED,,POPU_DEL,1205,,,67,,
 ,,Popu_del,Popu_Del,Popu delx,Populus deltoides,E ctnwood,Eastern cottonwood,Eastern cottonwood leading,,,TRUE,Deciduous,eastern cotttonwood,,PopBrch,,,,,,PED,,,1205,,,67,,
 ,,Popu_del,Popu_Del,Popu delo,Populus deltoides v. occidentalis,Pla ctnwood,Plains cottonwood,Plains cottonwood leading,,,TRUE,Deciduous,eastern cotttonwood,,PopBrch,,,,,,,,,1205,,,67,,
-,,Popu_gra,Popu_Gra,Popu gran,Populus grandidentata,Bigto asp,Bigtooth aspen,Bigtooth aspen leading,,Popu_Gra,TRUE,Deciduous,largetooth aspen,,PopBrch,,,,,Pl,PEG,ltA,POPU_GRA,1206,,28,68,,
+,,Popu_gra,Popu_Gra,Popu gran,Populus grandidentata,Bigto asp,Bigtooth aspen,Bigtooth aspen leading,,Popu_Gra,TRUE,Deciduous,largetooth aspen,,PopBrch,,,,,Pl,PEG,ltA,POPU_GRA,1206,,28,68,POPU_GRA,
 ,,Popu_nig,,Popu nigr,Populus nigra,Bl pop,Black poplar,Black poplar leading,,,TRUE,Deciduous,,,PopBrch,,,,,,,,POPU_NIG,1200,generic aspen code,,,,
 ,,Popu_spp,Popu_Spp,Popu spp,Populus spp.,Poplar,Poplar,Poplar leading,,Popu_Spp,TRUE,Deciduous,trembling aspen,,PopBrch,,,,,Po,,,POPU_SP,1200,,,62,,
 poputrem,POPU.TRE,Popu_tre,Popu_Tre,Popu trem,Populus tremuloides,Tr aspen,Trembling aspen,Trembling aspen leading,,Popu_Tre,TRUE,Deciduous,trembling aspen,,PopBrch,At,Aw,TA,TA,Pt,PET,tA,POPU_TRE,1201,,29,63,POPU_TRE,#FF00B6
