@@ -262,6 +262,7 @@ CASFRItoSpRasts <- function(
 #' @param outputPath character, specifying the output directory to use
 #' @param url if `NULL`, the default, use the default source url
 #' @param dataYear Year for the data obtained. 2000, 2010, or 2020 (default) possible.
+#' @param dataVersion character. Data version for SCANFI. V2 is default.
 #' @template studyArea
 #' @template rasterToMatch
 #' @template sppEquiv
@@ -540,6 +541,7 @@ prepSpeciesLayers_SCANFI <- function(
   outputPath,
   url = NULL,
   dataYear = 2020,
+  dataVersion = "V2",
   studyArea,
   rasterToMatch,
   sppEquiv,
@@ -570,15 +572,40 @@ prepSpeciesLayers_SCANFI <- function(
   # }
 
   if (is.null(url)) {
-    if (dataYear == 2000) {
-      url <- paste0("https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp")
-    } else if (dataYear == 2010) {
-      url <- paste0("https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE")
-    } else if (dataYear == 2020) {
-      url <- paste0("https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ")
+    if (dataVersion == "V1") {
+      if (dataYear == 2000) {
+        url <- paste0("https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp")
+      } else if (dataYear == 2010) {
+        url <- paste0("https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE")
+      } else if (dataYear == 2020) {
+        url <- paste0("https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ")
+      } else {
+        stop("SCANFI V1 data is currently available for 2000, 2010, and 2020 only")
+      }
+    } else if (dataVersion == "V2") {
+      if (dataYear == "1985") {
+        Args$url <- paste0("https://drive.google.com/file/d/1zXkDkGIJaRB2Cwd7Ld2R7FFswRIDmAj4")
+      } else if (dataYear == "1990") {
+        Args$url <- paste0("https://drive.google.com/file/d/1GbKOGxxLG-pF-jjBjuJC6IuWIU3aVBo2")
+      } else if (dataYear == "1995") {
+        Args$url <- paste0("https://drive.google.com/file/d/1KfAxjccHE51pOmi0OMYqwyRkIhJH7knn")
+      } else if (dataYear == "2000") {
+        Args$url <- paste0("https://drive.google.com/file/d/19sddeWJCJq9uMkDjmtNtXKjOQEDeFKBl")
+      } else if (dataYear == "2005") {
+        Args$url <- paste0("https://drive.google.com/file/d/10Aw9PX_FEEhYHNTraKAb6l9DnaIom2qk")
+      } else if (dataYear == "2010") {
+        Args$url <- paste0("https://drive.google.com/file/d/1fjoiYf0lhkZF3SgDMGPuYB1J4sUmU_Vo")
+      } else if (dataYear == "2015") {
+        Args$url <- paste0("https://drive.google.com/file/d/1FcXFIfscxkO7o5WRTINDZfFnu102IMls")
+      } else if (dataYear == "2020") {
+        Args$url <- paste0("https://drive.google.com/file/d/15T4HIFeqzwp0TuOuxmYoexuXdLFnCZBi")
+      } else if (dataYear == "2025") {
+        Args$url <- paste0("https://drive.google.com/file/d/1jS2sscKe_tcw4qDC-9297_jrulFduyKg")
+      } else {
+        stop("SCANFI V2 data is currently available for 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, and 2025 only")
+      }
     }
-  }
-
+}
   shared_drive_url <- NULL
   if (!RCurl::url.exists(url)) {
     ## ping website and use gdrive if not available
