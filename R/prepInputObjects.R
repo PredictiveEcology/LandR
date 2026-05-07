@@ -401,7 +401,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' A separate [reproducible::prepInputs()] call can be used to source Canadian
 #' National Fire Database (NFDB) fire polygons, allowing further stand age correction
 #' for burned areas. To suppress this, set `fireURL = NULL` or `fireURL = NA`.
-#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020/2000/2010 for SCANFI.
+#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020 for SCANFI.
 #' @param ageURL URL for age map download. Will be supplied based on `dataSource` and `dataYear`
 #' @param ageFun passed to 'fun' arg of [reproducible::prepInputs()] of stand age map
 #' @param maskWithRTM passed to [reproducible::prepInputs()] of stand age map
