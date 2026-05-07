@@ -274,7 +274,10 @@ speciesPresentFromNTEMS <- function(
 #'
 #' @param res The resolution (one dimension, in m) for the resulting raster
 #'
-#' @param year One of 2000, 2010, or 2020. Default is 2020.
+#' @param year data year for SCANFI data. 2000, 2010, and 2020 possible for V1.
+#'    1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020 (default), 2025 possible for V2.
+#'
+#' @param dataVersion Character. SCANFI product version for data. Default is currently V2. V1 also available.
 #'
 #' @param minPctCover An integer indicating what percent cover a species must have
 #' in a pixel to be considered present in that pixel.
@@ -306,6 +309,7 @@ speciesPresentFromNTEMS <- function(
 #' @export
 speciesPresentFromSCANFI <- function(
   year = 2020,
+  dataVersion = "V2",
   dPath = asPath("."),
   res = 2400,
   minPctCover = 10
@@ -337,7 +341,7 @@ speciesPresentFromSCANFI <- function(
   )
   sa <- vect(st_transform(st_as_sf(studyAreaER, crs = 7019), crs = crs(templateCRS))) #postProcess ruins this file so this is the only way to get a valid layer
 
-  allForestedStk <- loadAndAggregateSCANFI(year = year, dPath, res, sa) |> Cache()
+  allForestedStk <- loadAndAggregateSCANFI(year = year, dataVersion, dPath, res, sa) |> Cache()
   allForestedStk <- round(allForestedStk, 0)
   allForestedStk[allForestedStk <= minPctCover] <- 0
 
@@ -502,6 +506,7 @@ loadAndAggregateKNN <- function(dPath, res, sa) {
 loadAndAggregateSCANFI <- function(year, dPath, res, sa) {
   ll <- loadSCANFISpeciesLayers(
     year = year,
+    dataVersion,
     dPath,
     sppEquiv = LandR::sppEquivalencies_CA,
     sppEquivCol = "SCANFI"
