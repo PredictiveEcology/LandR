@@ -339,7 +339,7 @@ speciesPresentFromSCANFI <- function(
     ),
     destinationPath = dPath
   )
-  sa <- vect(st_transform(st_as_sf(studyAreaER, crs = 7019), crs = crs(templateCRS))) #postProcess ruins this file so this is the only way to get a valid layer
+  sa <- terra::project(studyAreaER, templateCRS)
 
   allForestedStk <- loadAndAggregateSCANFI(year = year, dataVersion, dPath, res, sa) |> Cache()
   allForestedStk <- round(allForestedStk, 0)
