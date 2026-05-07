@@ -53,15 +53,15 @@ checkSpeciesTraits <- function(speciesLayers, species, sppColorVect) {
 #'
 #' @export
 makePixelTable <- function(
-  speciesLayers,
-  standAgeMap,
-  ecoregionFiles,
-  biomassMap,
-  rasterToMatch,
-  rstLCC,
-  # pixelGroupAgeClass = 1,
-  printSummary = TRUE,
-  doAssertion = getOption("LandR.assertions", TRUE)
+    speciesLayers,
+    standAgeMap,
+    ecoregionFiles,
+    biomassMap,
+    rasterToMatch,
+    rstLCC,
+    # pixelGroupAgeClass = 1,
+    printSummary = TRUE,
+    doAssertion = getOption("LandR.assertions", TRUE)
 ) {
   if (missing(rasterToMatch)) {
     rasterToMatch <- rasterRead(speciesLayers[[1]])
@@ -192,14 +192,14 @@ makePixelTable <- function(
 #'
 #' @export
 makeSpeciesEcoregion <- function(
-  cohortDataBiomass,
-  cohortDataShort,
-  cohortDataShortNoCover,
-  species,
-  modelCover,
-  modelBiomass,
-  successionTimestep,
-  currentYear
+    cohortDataBiomass,
+    cohortDataShort,
+    cohortDataShortNoCover,
+    species,
+    modelCover,
+    modelBiomass,
+    successionTimestep,
+    currentYear
 ) {
   if (!is.null(modelBiomass$scaledVarsModelB)) {
     if (!is(modelBiomass$scaledVarsModelB, "list")) {
@@ -268,12 +268,12 @@ makeSpeciesEcoregion <- function(
       )
     )]
     speciesEcoregion2[,
-      maxB := asInteger(predict(modelBiomass$mod, newdata = speciesEcoregion2, type = "response"))
+                      maxB := asInteger(predict(modelBiomass$mod, newdata = speciesEcoregion2, type = "response"))
     ]
     speciesEcoregion[, maxB := speciesEcoregion2$maxB]
   } else {
     speciesEcoregion[,
-      maxB := asInteger(predict(modelBiomass$mod, newdata = speciesEcoregion, type = "response"))
+                     maxB := asInteger(predict(modelBiomass$mod, newdata = speciesEcoregion, type = "response"))
     ]
   }
 
@@ -1023,14 +1023,14 @@ replaceAgeInFires <- function(standAgeMap, firePerimeters, startTime) {
 #'
 #' @export
 prepRasterToMatch <- function(
-  studyArea,
-  studyAreaLarge,
-  rasterToMatch,
-  rasterToMatchLarge,
-  destinationPath,
-  templateRas,
-  studyAreaName,
-  cacheTags = NULL
+    studyArea,
+    studyAreaLarge,
+    rasterToMatch,
+    rasterToMatchLarge,
+    destinationPath,
+    templateRas,
+    studyAreaName,
+    cacheTags = NULL
 ) {
   if (is.null(rasterToMatch) || is.null(rasterToMatchLarge)) {
     ## if we need rasterToMatch/rasterToMatchLarge, that means a) we don't have it,
