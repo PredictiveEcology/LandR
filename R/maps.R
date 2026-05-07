@@ -1362,7 +1362,10 @@ loadkNNSpeciesLayersValidation <- function(
 #'
 #' @template sppEquiv
 #'
-#' @param year which year's layers should be retrieved? One of 2000, 2010, or 2020 (default).
+#' @param year data year for SCANFI data. 2000, 2010, and 2020 possible for V1.
+#'    1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020 (default), 2025 possible for V2.
+#'
+#' @param dataVersion Character. SCANFI product version for data. Default is currently V2. V1 also available.
 #'
 #' @param SCANFINamesCol character string indicating the column in `sppEquiv` containing SCANFI
 #'                       species names. Default `"NFI"` for when `sppEquivalencies_CA` is used.
@@ -1387,6 +1390,7 @@ loadSCANFISpeciesLayers <- function(
   studyArea = NULL,
   sppEquiv,
   year = 2020,
+  dataVersion = "V2",
   SCANFINamesCol = "SCANFI",
   sppEquivCol = "SCANFI",
   thresh = 10,
@@ -1440,12 +1444,44 @@ loadSCANFISpeciesLayers <- function(
   }
 
   if (is.null(url)) {
-    if (year == 2000) {
-      url <- "https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp"
-    } else if (year == 2010) {
-      url <- "https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE"
-    } else if (year == 2020) {
-      url <- "https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ"
+    if (dataVersion == "V1") {
+      if (!(year %in% c(2000, 2010, 2020))) {
+        stop("SCANFI V1 species do not exist for this year")
+      }
+
+      if (year == 2000) {
+        url <- "https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp"
+      } else if (year == 2010) {
+        url <- "https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE"
+      } else if (year == 2020) {
+        url <- "https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ"
+      }
+
+    } else if (dataVersion == "V2") {
+
+      if (!(year %in% c(1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025))) {
+        stop("SCANFI V2 species does not exist for this year")
+      }
+
+      if (year == 1985) {
+        url <- paste0("https://drive.google.com/file/d/1zXkDkGIJaRB2Cwd7Ld2R7FFswRIDmAj4")
+      } else if (year == 1990) {
+        url <- paste0("https://drive.google.com/file/d/1GbKOGxxLG-pF-jjBjuJC6IuWIU3aVBo2")
+      } else if (year == 1995) {
+        url <- paste0("https://drive.google.com/file/d/1KfAxjccHE51pOmi0OMYqwyRkIhJH7knn")
+      } else if (year == 2000) {
+        url <- paste0("https://drive.google.com/file/d/19sddeWJCJq9uMkDjmtNtXKjOQEDeFKBl")
+      } else if (year == 2005) {
+        url <- paste0("https://drive.google.com/file/d/10Aw9PX_FEEhYHNTraKAb6l9DnaIom2qk")
+      } else if (year == 2010) {
+        url <- paste0("https://drive.google.com/file/d/1fjoiYf0lhkZF3SgDMGPuYB1J4sUmU_Vo")
+      } else if (year == 2015) {
+        url <- paste0("https://drive.google.com/file/d/1FcXFIfscxkO7o5WRTINDZfFnu102IMls")
+      } else if (year == 2020) {
+        url <- paste0("https://drive.google.com/file/d/15T4HIFeqzwp0TuOuxmYoexuXdLFnCZBi")
+      } else if (year == 2025) {
+        url <- paste0("https://drive.google.com/file/d/1jS2sscKe_tcw4qDC-9297_jrulFduyKg")
+      }
     }
   }
 
@@ -1583,42 +1619,6 @@ loadSCANFISpeciesLayers <- function(
     outFile = file.path(oPath, postProcessedFilenamesWithStudyAreaName)
   ) |>
     Cache(.functionName = "prepInputs_speciesLayers")
-
-  # if (is.null(studyArea) && is.null(rasterToMatch)) {
-  #   speciesLayers <- Map(
-  #     function(tf, url, outFile) {
-  #       if (!file.exists(tf)) {
-  #         id <- sub(".*?/d/([a-zA-Z0-9_-]+).*", "\\1", url)
-  #         googledrive::drive_download(googledrive::as_id(id), path = tf, overwrite = TRUE)
-  #       }
-  #       r <- terra::rast(tf)
-  #       terra::writeRaster(r, outFile, overwrite = TRUE)
-  #       return(rast(outFile))
-  #     },
-  #     tf = targetFiles,
-  #     url = URLs,
-  #     outFile = file.path(dPath, postProcessedFilenamesWithStudyAreaName)
-  #   ) |>
-  #     Cache()
-  # } else {
-  #   speciesLayers <- Map(
-  #     function(tf, url, outFile) {
-  #       if (!file.exists(tf)) {
-  #         id <- sub(".*?/d/([a-zA-Z0-9_-]+).*", "\\1", url)
-  #         googledrive::drive_download(googledrive::as_id(id), path = tf, overwrite = TRUE)
-  #       }
-  #       r <- terra::rast(tf)
-  #       r_resampled <- postProcess(r, rasterToMatch, method = "bilinear", writeTo = outFile) |>
-  #         suppressWarningsSpecific("method is bilinear")
-  #
-  #       return(r_resampled)
-  #     },
-  #     tf = file.path(dPath, targetFiles),
-  #     url = URLs,
-  #     outFile = file.path(oPath, postProcessedFilenamesWithStudyAreaName)
-  #   ) |>
-  #     Cache()
-  # }
 
   ## appending file name structure to eliminate double matches for subspecies:
   SCANFInames2 <- paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif")
