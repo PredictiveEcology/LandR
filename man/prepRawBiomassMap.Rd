@@ -4,7 +4,12 @@
 \alias{prepRawBiomassMap}
 \title{Create \code{rawBiomassMap}}
 \usage{
-prepRawBiomassMap(dataSource = "SCANFI", dataYear = "2020", ...)
+prepRawBiomassMap(
+  dataSource = "SCANFI",
+  dataYear = "2020",
+  dataVersion = "V2",
+  ...
+)
 }
 \arguments{
 \item{dataSource}{Character. One of KNN, NTEMS, or SCANFI.
@@ -16,7 +21,10 @@ Also available:
 \item SCANFI for \code{dataYear} 2000, 2010, or 2020.
 }}
 
-\item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN, 2015 for NTEMS, or 2000, 2010, or 2020 for SCANFI.}
+\item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN, 2015 for NTEMS,
+2000, 2010, or 2020 for SCANFI V1, or 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020 (default), 2025 possible for V2.}
+
+\item{dataVersion}{Character. SCANFI product version for data. Default is currently V2. V1 also available.}
 
 \item{...}{arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} and \code{\link[reproducible:Cache]{reproducible::Cache()}}.
 If the following arguments are not provided, the following values will be used:
