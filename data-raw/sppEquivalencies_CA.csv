@@ -61,7 +61,7 @@ chamnoot,CHAM.NOO,Cham_noo,Cham_Noo,Cham noot,Chamaecyparis nootkatensis,Yl ced,
 ,,Corn_nut,,Corn nutt,Cornus nuttallii,Pa dogw,Pacific dogwood,Pacific dogwood leading,Also known as western dogwood,,TRUE,Deciduous,,,CedrMplOther,Gp,,,,,,,CORN_NUT,1500,other hardwood code,,140,,
 ,,Crat_spp,Crat_Spp,Crat spp,Crataegus spp,Hawthorn,Hawthorn,Hawthorn leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Ht,CRA,,CRAT_SP,3910,,,163,,
 fagugran,FAGU.GRA,Fagu_gra,Fagu_Gra,Fagu gran,Fagus grandifolia,Am beech,American beech,American beech leading,,Fagu_Gra,TRUE,Deciduous,beech,,CedrMplOther,,,,,Be,HEG,Be,FAGU_GRA,2000,,,108,FAGU_GRA,
-fraxamer,FRAX.AME,Frax_ame,Frax_Ame,Frax amer,Fraxinus americana,Am ash,American ash,American ash leading,,Frax_Ame,TRUE,Deciduous,white ash,,CedrMplOther,,,,,Aw,FRA,wAs,FRAX_AME,3401,,,145,,#000033
+fraxamer,FRAX.AME,Frax_ame,Frax_Ame,Frax amer,Fraxinus americana,Am ash,American ash,American ash leading,,Frax_Ame,TRUE,Deciduous,white ash,,CedrMplOther,,,,,Aw,FRA,wAs,FRAX_AME,3401,,,145,FRAX_AME,#000033
 ,,Frax_lat,,Frax lati,Fraxinus latifolia,Or ash,Oregon ash,Oregon ash leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,,,FRAX_LAT,3400,generic ash code,,151,,
 ,,Frax_nig,Frax_Nig,Frax nigr,Fraxinus nigra,Bl ash,Black ash,Black ash leading,,Frax_Nig,TRUE,Deciduous,black ash,,CedrMplOther,,,,,Ab,FRN,bAs,FRAX_NIG,3402,,12,146,,#000033
 ,,Frax_pen,Frax_Pen_Sub,Frax penn,Fraxinus pennsylvanica var. subintegerrima,Gn ash,Green ash,Green ash leading,Fraxinus pennsylvanica subintegerrima is a synonym,,TRUE,Deciduous,red ash,,CedrMplOther,,,,,,FRP,,,3403,,,149,,
