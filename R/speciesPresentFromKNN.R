@@ -503,7 +503,7 @@ loadAndAggregateKNN <- function(dPath, res, sa) {
 }
 
 #' @keywords internal
-loadAndAggregateSCANFI <- function(year, dPath, res, sa) {
+loadAndAggregateSCANFI <- function(year, dataVersion, dPath, res, sa) {
   ll <- loadSCANFISpeciesLayers(
     year = year,
     dataVersion,
