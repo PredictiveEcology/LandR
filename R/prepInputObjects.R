@@ -679,7 +679,10 @@ prepInputsStandAgeMap <- function(
 #'   - NTEMS for `dataYear` 2015;
 #'   - SCANFI for `dataYear` 2000, 2010, or 2020.
 #'
-#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN, 2015 for NTEMS, or 2000, 2010, or 2020 for SCANFI.
+#' @param dataYear Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN, 2015 for NTEMS,
+#'    2000, 2010, or 2020 for SCANFI V1, or 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020 (default), 2025 possible for V2.
+#'
+#' @param dataVersion Character. SCANFI product version for data. Default is currently V2. V1 also available.
 #'
 #' @param ... arguments passed to [reproducible::prepInputs()] and [reproducible::Cache()].
 #' If the following arguments are not provided, the following values will be used:
@@ -696,7 +699,7 @@ prepInputsStandAgeMap <- function(
 #' @return a `rawBiomassMap` raster
 #'
 #' @export
-prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", ...) {
+prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", dataVersion = "V2", ...) {
   Args <- list(...)
 
   if (!(dataSource %in% c("KNN", "NTEMS", "SCANFI"))) {
@@ -728,14 +731,38 @@ prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", ...) {
         stop("NTEMS data is currently available for 2015 only")
       }
     } else if (dataSource == "SCANFI") {
-      if (dataYear == "2000") {
-        Args$url <- paste0("https://drive.google.com/file/d/1lubpotPt-Tr_x1PHnLP6YL36fGg5Ic6h")
-      } else if (dataYear == "2010") {
-        Args$url <- paste0("https://drive.google.com/file/d/1J3izr9d0IaUs0H4GWJNbn6rCan-Or7Jf")
-      } else if (dataYear == "2020") {
-        Args$url <- paste0("https://drive.google.com/file/d/1lexPzmm4zeY_5nljoNmsIlzrZYd1TpG_")
-      } else {
-        stop("SCANFI data is currently available for 2000, 2010, and 2020 only")
+      if (dataVersion == "V1") {
+        if (dataYear == "2000") {
+          Args$url <- paste0("https://drive.google.com/file/d/1lubpotPt-Tr_x1PHnLP6YL36fGg5Ic6h")
+        } else if (dataYear == "2010") {
+          Args$url <- paste0("https://drive.google.com/file/d/1J3izr9d0IaUs0H4GWJNbn6rCan-Or7Jf")
+        } else if (dataYear == "2020") {
+          Args$url <- paste0("https://drive.google.com/file/d/1lexPzmm4zeY_5nljoNmsIlzrZYd1TpG_")
+        } else {
+          stop("SCANFI V1 data is currently available for 2000, 2010, and 2020 only")
+        }
+      } else if (dataVersion == "V2") {
+        if (dataYear == "1985") {
+          Args$url <- paste0("https://drive.google.com/file/d/1rSbEs9PpjS5D5n4R2QL0UYVP1xGepRg5")
+        } else if (dataYear == "1990") {
+          Args$url <- paste0("https://drive.google.com/file/d/15psX9X_ElAxg3oZqfp9QOpy1b_i8OO-4")
+        } else if (dataYear == "1995") {
+          Args$url <- paste0("https://drive.google.com/file/d/1KdR4k9Bb95-Y2pFCTBCkuC9yIepE8bK6")
+        } else if (dataYear == "2000") {
+          Args$url <- paste0("https://drive.google.com/file/d/1GJMLSZweBW3dngDf3RRs4lTX-eMMr7_6")
+        } else if (dataYear == "2005") {
+          Args$url <- paste0("https://drive.google.com/file/d/1NxgZXKPiFTWRTHo7b40jCJqLvvvMp1tY")
+        } else if (dataYear == "2010") {
+          Args$url <- paste0("https://drive.google.com/file/d/1HFbXmH6o_2zXezEC6wQKRlPWcwjWl-VX")
+        } else if (dataYear == "2015") {
+          Args$url <- paste0("https://drive.google.com/file/d/1aYzXALVkOvW18CgRXBnmhqdvWtqOo-7Q")
+        } else if (dataYear == "2020") {
+          Args$url <- paste0("https://drive.google.com/file/d/13-atqi_7ogRPIFxOoJZoUDYdQCJ5-a_u")
+        } else if (dataYear == "2025") {
+          Args$url <- paste0("https://drive.google.com/file/d/12MFxY0F9go8zDXNpNsx8UvQUo4cnTdE0")
+        } else {
+          stop("SCANFI V2 data is currently available for 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, and 2025 only")
+        }
       }
     }
   }
