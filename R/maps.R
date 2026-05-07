@@ -233,7 +233,7 @@ prepInputsLCC <- function(
 #' `SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_<YEAR>_v1_1.tif`
 #'
 #' @param year data year for SCANFI landcover data. 2000, 2010, and 2020 possible for V1.
-#' 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025 possible for V2.
+#'    1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025 possible for V2.
 #'
 #' @param dataVersion Character. SCANFI product version for data. Default is currently V2. V1 also available.
 #'
@@ -245,7 +245,7 @@ prepInputsLCC <- function(
 convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", ...) {
   if (dataVersion == "V1") {
     if (!(year %in% c(2000, 2010, 2020))) {
-      stop("SCANFI Landcover does not exist for this year")
+      stop("SCANFI V1 Landcover does not exist for this year")
     }
 
     if (year == 2000) {
@@ -262,7 +262,7 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", ...) {
   } else if (dataVersion == "V2") {
 
     if (!(year %in% c(1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025))) {
-      stop("SCANFI Landcover does not exist for this year")
+      stop("SCANFI V2 Landcover does not exist for this year")
     }
 
     if (year == 1985) {
