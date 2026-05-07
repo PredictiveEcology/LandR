@@ -17,12 +17,12 @@ utils::globalVariables(c(
 #'
 #' @export
 loadCASFRI <- function(
-  CASFRIRas,
-  attrFile,
-  headerFile,
-  sppEquiv,
-  sppEquivCol,
-  type = c("cover", "age")
+    CASFRIRas,
+    attrFile,
+    headerFile,
+    sppEquiv,
+    sppEquivCol,
+    type = c("cover", "age")
 ) {
   # The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
@@ -114,12 +114,12 @@ loadCASFRI <- function(
 #'
 #' @export
 CASFRItoSpRasts <- function(
-  CASFRIRas,
-  CASFRIattrLong,
-  CASFRIdt,
-  sppEquiv,
-  sppEquivCol,
-  destinationPath
+    CASFRIRas,
+    CASFRIattrLong,
+    CASFRIdt,
+    sppEquiv,
+    sppEquivCol,
+    destinationPath
 ) {
   # The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
@@ -277,15 +277,15 @@ CASFRItoSpRasts <- function(
 #' @export
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_KNN <- function(
-  destinationPath,
-  outputPath,
-  url = NULL,
-  studyArea,
-  rasterToMatch,
-  sppEquiv,
-  sppEquivCol,
-  thresh = 10,
-  ...
+    destinationPath,
+    outputPath,
+    url = NULL,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    thresh = 10,
+    ...
 ) {
   stopifnot(requireNamespace("RCurl", quietly = TRUE))
 
@@ -342,14 +342,14 @@ prepSpeciesLayers_KNN <- function(
 #' @export
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_CASFRI <- function(
-  destinationPath,
-  outputPath,
-  url = NULL,
-  studyArea,
-  rasterToMatch,
-  sppEquiv,
-  sppEquivCol,
-  ...
+    destinationPath,
+    outputPath,
+    url = NULL,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    ...
 ) {
   if (is.null(url)) {
     url <- "https://drive.google.com/file/d/1y0ofr2H0c_IEMIpx19xf3_VTBheY0C9h"
@@ -408,14 +408,14 @@ prepSpeciesLayers_CASFRI <- function(
 #' @export
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_Pickell <- function(
-  destinationPath,
-  outputPath,
-  url = NULL,
-  studyArea,
-  rasterToMatch,
-  sppEquiv,
-  sppEquivCol,
-  ...
+    destinationPath,
+    outputPath,
+    url = NULL,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    ...
 ) {
   if (is.null(url)) {
     url <- "https://drive.google.com/file/d/1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
@@ -448,14 +448,14 @@ prepSpeciesLayers_Pickell <- function(
 #' @export
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_ForestInventory <- function(
-  destinationPath,
-  outputPath,
-  url = NULL,
-  studyArea,
-  rasterToMatch,
-  sppEquiv,
-  sppEquivCol,
-  ...
+    destinationPath,
+    outputPath,
+    url = NULL,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    ...
 ) {
   if (is.null(url)) {
     url <- "https://drive.google.com/file/d/1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1"
@@ -520,16 +520,16 @@ prepSpeciesLayers_ForestInventory <- function(
 #' @export
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_NTEMS <- function(
-  destinationPath,
-  outputPath,
-  url = NULL,
-  dataYear = 2020,
-  studyArea,
-  rasterToMatch,
-  sppEquiv,
-  sppEquivCol,
-  thresh = 10,
-  ...
+    destinationPath,
+    outputPath,
+    url = NULL,
+    dataYear = 2020,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    thresh = 10,
+    ...
 ) {
   stop("not yet implemented") ## TODO
 }
@@ -537,17 +537,17 @@ prepSpeciesLayers_NTEMS <- function(
 #' @export
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_SCANFI <- function(
-  destinationPath,
-  outputPath,
-  url = NULL,
-  dataYear = 2020,
-  dataVersion = "V2",
-  studyArea,
-  rasterToMatch,
-  sppEquiv,
-  sppEquivCol,
-  thresh = 10,
-  ...
+    destinationPath,
+    outputPath,
+    url = NULL,
+    dataYear = 2020,
+    dataVersion = "V2",
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    thresh = 10,
+    ...
 ) {
   stopifnot(requireNamespace("RCurl", quietly = TRUE))
 
@@ -605,7 +605,7 @@ prepSpeciesLayers_SCANFI <- function(
         stop("SCANFI V2 data is currently available for 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, and 2025 only")
       }
     }
-}
+  }
   shared_drive_url <- NULL
   if (!RCurl::url.exists(url)) {
     ## ping website and use gdrive if not available
@@ -641,14 +641,14 @@ prepSpeciesLayers_SCANFI <- function(
 #' @export
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_MBFRI <- function(
-  destinationPath,
-  outputPath,
-  url = NULL,
-  studyArea,
-  rasterToMatch,
-  sppEquiv,
-  sppEquivCol,
-  ...
+    destinationPath,
+    outputPath,
+    url = NULL,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    ...
 ) {
   if (is.null(url)) {
     url <- "https://drive.google.com/file/d/1KTqNBntNrEsDL6jk-5bchsBOcraDqNHe"
@@ -711,14 +711,14 @@ prepSpeciesLayers_MBFRI <- function(
 #' @export
 #' @rdname prepSpeciesLayers
 prepSpeciesLayers_ONFRI <- function(
-  destinationPath,
-  outputPath,
-  url = NULL,
-  studyArea,
-  rasterToMatch,
-  sppEquiv,
-  sppEquivCol,
-  ...
+    destinationPath,
+    outputPath,
+    url = NULL,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    ...
 ) {
   ## TODO: this is sneaky and annoying (studyAreaName is part of outputPath)
   if (grepl("AOU", dirname(outputPath))) {
@@ -803,15 +803,15 @@ prepSpeciesLayers_ONFRI <- function(
 #' @export
 #' @rdname LandR-deprecated
 prepSpeciesLayers_KNN2011 <- function(
-  destinationPath,
-  outputPath,
-  url = NULL,
-  studyArea,
-  rasterToMatch,
-  sppEquiv,
-  sppEquivCol,
-  thresh = 10,
-  ...
+    destinationPath,
+    outputPath,
+    url = NULL,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    thresh = 10,
+    ...
 ) {
   .Deprecated(
     "loadkNNSpeciesLayers",
@@ -944,11 +944,11 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
     ) {
       if (
         sp %in%
-          c(
-            equivalentName("Pinu_ban", sppEquiv, sppEquivCol),
-            equivalentName("Pinu_con", sppEquiv, sppEquivCol),
-            equivalentName("Pinu_sp", sppEquiv, sppEquivCol)
-          )
+        c(
+          equivalentName("Pinu_ban", sppEquiv, sppEquivCol),
+          equivalentName("Pinu_con", sppEquiv, sppEquivCol),
+          equivalentName("Pinu_sp", sppEquiv, sppEquivCol)
+        )
       ) {
         spRasts[[sp]] <- spRas
         spRasts[[sp]][PickellRaster[] %in% c(31, 32, 34)] <- 60
