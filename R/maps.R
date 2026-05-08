@@ -313,7 +313,9 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", ...) {
 
 #' Obtain an LCC layer for a given year from SCANFI, with forest matching the FAO definition
 #'
-#' @param year data year for LCC data. 2000, 2010, and 2020 possible.
+#' @param year data year for SCANFI landcover data. 2000, 2010, and 2020 possible for V1.
+#'    1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025 possible for V2.
+#' @param dataVersion Character. SCANFI product version for data. Default is currently V2. V1 also available.
 #' @param disturbedCode value assigned to pixels that are forest per FAO definition but not in LCC year
 #' @param resampleMethod method used when resampling LCC layers to match `rasterToMatch`
 #' @param ... passed to `prepInputs`
@@ -322,13 +324,20 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", ...) {
 #'
 #' @export
 prepInputs_SCANFI_LCC_FAO <- function(
-  year = 2010,
-  disturbedCode = 240,
-  resampleMethod = "near",
-  ...
+    year = 2020,
+    dataVersion = "V2",
+    disturbedCode = 240,
+    resampleMethod = "near",
+    ...
 ) {
-  if (!(year %in% c(2000, 2010, 2020))) {
-    stop("LCC for this year is unavailable")
+  if (dataVersion == "V1") {
+    if (!(year %in% c(2000, 2010, 2020))) {
+      stop("SCANFI V1 Landcover for this year is unavailable")
+    }
+  } else if (dataVersion == "V2") {
+    if (!(year %in% c(1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025))) {
+      stop("SCANFI V2 Landcover does not exist for this year")
+    }
   }
   newFilename <- NULL
   writeToFN <- NULL
@@ -355,6 +364,7 @@ prepInputs_SCANFI_LCC_FAO <- function(
   ## 0 = no change; 20 = water; 31 = snow_ice; 32 = rock_rubble; 33 = exposed_barren_land;
   ## 40 = bryoids; 50 = shrubs; 80 = wetland; 81 = wetland-treed; 100 = herbs; 210 = coniferous;
   ## 220 = broadleaf; 230 = mixedwood
+  if (dataVersion == "V1") {
   if (year == 2000) {
     lccURL <- "https://drive.google.com/file/d/1zqzTSDk9mtyRhcQuMsRMK2WDwkuk24kt"
   } else if (year == 2010) {
@@ -363,6 +373,28 @@ prepInputs_SCANFI_LCC_FAO <- function(
     lccURL <- "https://drive.google.com/file/d/1ZwEspwpcpZwIYvYEnYmd7Ux44goNvDB2"
   }
   lccTF <- paste0("SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_", year, "_v1_1.tif")
+  } else if (dataVersion == "V2") {
+    if (year == 1985) {
+      lccURL <- paste0("https://drive.google.com/file/d/1iAEEpkVofQBggIJaxwXKcKADU3zka7Wh")
+    } else if (year == 1990) {
+      lccURL <- paste0("https://drive.google.com/file/d/1LK5b2E1y31bwIqWYD53X9ZOt4mWvS_TB")
+    } else if (year == 1995) {
+      lccURL <- paste0("https://drive.google.com/file/d/15pvm2h9X6dreC9rKuC3oxr4c3hHsYRkI")
+    } else if (year == 2000) {
+      lccURL <- paste0("https://drive.google.com/file/d/1ykRG7u__DuMKI_DUGEJs6mXVul8YmRD_")
+    } else if (year == 2005) {
+      lccURL <- paste0("https://drive.google.com/file/d/1eKNGWrwGEFRFOK2TLVXldfd8hB3OsbSG")
+    } else if (year == 2010) {
+      lccURL <- paste0("https://drive.google.com/file/d/1cbKlKlXtjMRVg3_9xjlEWosU0fmLJxXt")
+    } else if (year == 2015) {
+      lccURL <- paste0("https://drive.google.com/file/d/1olWPzlM2SfMC8Fq_uXslJfYIINAd4wGP")
+    } else if (year == 2020) {
+      lccURL <- paste0("https://drive.google.com/file/d/1EGp7LUA7cXMR6KpXDmu617xsjwGM6aIx")
+    } else if (year == 2025) {
+      lccURL <- paste0("https://drive.google.com/file/d/1eb1zEWC3VRycA_aRzTB2ODhWDLZis-YG")
+    }
+    lccTF <- paste0("SCANFI_att_nfiLandcover_CanadaLCCclassCodes_", year, "_v2_20260119.tif")
+  }
 
   ## fix dots
   dots$url <- lccURL
