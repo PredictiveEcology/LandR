@@ -74,6 +74,7 @@ prepSpeciesLayers_SCANFI(
   outputPath,
   url = NULL,
   dataYear = 2020,
+  dataVersion = "V2",
   studyArea,
   rasterToMatch,
   sppEquiv,
@@ -134,6 +135,8 @@ Otherwise the raster is excluded from the output. Defaults to 10.}
 \item{...}{other arguments, used for compatibility with other \code{prepSpeciesLayers} functions.}
 
 \item{dataYear}{Year for the data obtained. 2000, 2010, or 2020 (default) possible.}
+
+\item{dataVersion}{character. Data version for SCANFI. V2 is default.}
 }
 \value{
 multilayer \code{SpatRaster} ("stack")
