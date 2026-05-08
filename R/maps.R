@@ -1624,6 +1624,42 @@ loadSCANFISpeciesLayers <- function(
   ) |>
     Cache(.functionName = "prepInputs_speciesLayers")
 
+  # if (is.null(studyArea) && is.null(rasterToMatch)) {
+  #   speciesLayers <- Map(
+  #     function(tf, url, outFile) {
+  #       if (!file.exists(tf)) {
+  #         id <- sub(".*?/d/([a-zA-Z0-9_-]+).*", "\\1", url)
+  #         googledrive::drive_download(googledrive::as_id(id), path = tf, overwrite = TRUE)
+  #       }
+  #       r <- terra::rast(tf)
+  #       terra::writeRaster(r, outFile, overwrite = TRUE)
+  #       return(rast(outFile))
+  #     },
+  #     tf = targetFiles,
+  #     url = URLs,
+  #     outFile = file.path(dPath, postProcessedFilenamesWithStudyAreaName)
+  #   ) |>
+  #     Cache()
+  # } else {
+  #   speciesLayers <- Map(
+  #     function(tf, url, outFile) {
+  #       if (!file.exists(tf)) {
+  #         id <- sub(".*?/d/([a-zA-Z0-9_-]+).*", "\\1", url)
+  #         googledrive::drive_download(googledrive::as_id(id), path = tf, overwrite = TRUE)
+  #       }
+  #       r <- terra::rast(tf)
+  #       r_resampled <- postProcess(r, rasterToMatch, method = "bilinear", writeTo = outFile) |>
+  #         suppressWarningsSpecific("method is bilinear")
+  #
+  #       return(r_resampled)
+  #     },
+  #     tf = file.path(dPath, targetFiles),
+  #     url = URLs,
+  #     outFile = file.path(oPath, postProcessedFilenamesWithStudyAreaName)
+  #   ) |>
+  #     Cache()
+  # }
+
   ## appending file name structure to eliminate double matches for subspecies:
   SCANFInames2 <- paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif")
   correctOrder <- sapply(unique(SCANFInames2), function(x) {
