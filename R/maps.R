@@ -1385,17 +1385,17 @@ loadkNNSpeciesLayersValidation <- function(
 #'
 #' @export
 loadSCANFISpeciesLayers <- function(
-  dPath,
-  rasterToMatch = NULL,
-  studyArea = NULL,
-  sppEquiv,
-  year = 2020,
-  dataVersion = "V2",
-  SCANFINamesCol = "SCANFI",
-  sppEquivCol = "SCANFI",
-  thresh = 10,
-  url = NULL,
-  ...
+    dPath,
+    rasterToMatch = NULL,
+    studyArea = NULL,
+    sppEquiv,
+    year = 2020,
+    dataVersion = "V2",
+    SCANFINamesCol = "SCANFI",
+    sppEquivCol = "SCANFI",
+    thresh = 10,
+    url = NULL,
+    ...
 ) {
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
@@ -1578,13 +1578,23 @@ loadSCANFISpeciesLayers <- function(
 
   ## select which targetFiles to extract
   ## use sapply to preserve pattern order
-  targetFiles <- sapply(
-    paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif"),
-    USE.NAMES = FALSE,
-    FUN = function(pat) {
-      grep(pat, fileNames, value = TRUE)
-    }
-  )
+  if (dataVersion == "V1") {
+    targetFiles <- sapply(
+      paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif"),
+      USE.NAMES = FALSE,
+      FUN = function(pat) {
+        grep(pat, fileNames, value = TRUE)
+      }
+    )
+  } else if (dataVersion == "V2") {
+    targetFiles <- sapply(
+      paste0("SCANFI_spsCC_", SCANFInames, "_", year, "_v2_20260119.tif"),
+      USE.NAMES = FALSE,
+      FUN = function(pat) {
+        grep(pat, fileNames, value = TRUE)
+      }
+    )
+  }
   ## the grep may partially match several species, resulting on a list.
   targetFiles <- unique(unlist(targetFiles))
 
@@ -1721,9 +1731,9 @@ loadSCANFISpeciesLayers <- function(
       lapply(
         seq_along(speciesLayers),
         FUN = function(
-          i,
-          rasters = speciesLayers,
-          filenames = postProcessedFilenamesWithStudyAreaName
+    i,
+    rasters = speciesLayers,
+    filenames = postProcessedFilenamesWithStudyAreaName
         ) {
           outFile <- file.path(oPath, paste0(filenames[i]))
           if (!file.exists(outFile)) {

@@ -506,8 +506,8 @@ loadAndAggregateKNN <- function(dPath, res, sa) {
 loadAndAggregateSCANFI <- function(year, dataVersion, dPath, res, sa) {
   ll <- loadSCANFISpeciesLayers(
     year = year,
-    dataVersion,
-    dPath,
+    dataVersion = dataVersion,
+    dPath = dPath,
     sppEquiv = LandR::sppEquivalencies_CA,
     sppEquivCol = "SCANFI"
   )
