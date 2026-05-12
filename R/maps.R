@@ -1592,6 +1592,10 @@ loadSCANFISpeciesLayers <- function(
     stop("None of the selected species were found in the SCANFI layers")
   }
 
+  if (dataVersion == "V1") { #removing 2 species that weren't present in SCANFI V1
+    SCANFInames <- SCANFInames[!SCANFInames %in% c("FRAX_AME", "POPU_GRA")]
+  }
+
   ## define suffix to append to file names
   suffix <- if (basename(cachePath) == "cache") {
     if (is.null(rasterToMatch)) {
