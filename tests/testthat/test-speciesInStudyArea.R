@@ -4,6 +4,7 @@ testthat::test_that("speciesInStudyArea works", {
   testthat::skip_on_ci()
   testthat::skip_if_not_installed("googledrive")
   testthat::skip_if_not_installed("withr")
+  testthat::skip_if_not(googledrive::drive_has_token(), "No Drive token")
 
   # googledrive::drive_deauth()
 
