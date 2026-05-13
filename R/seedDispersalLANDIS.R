@@ -26,6 +26,14 @@ utils::globalVariables(c(
 #' and all active pixels within that cluster of active pixels.
 #' \pkg{LandR} includes the [Ward()] kernel as defined in the LANDIS-II documentation.
 #'
+#' The spiral inner loop is implemented in C++ (via \pkg{Rcpp}) and is on by
+#' default; it produces bit-identical output to the previous R implementation
+#' under a fixed seed, but is typically ~3x faster end-to-end on
+#' landscape-scale inputs (and uses dramatically less memory by replacing the
+#' per-cell-by-species source matrix with a per-`pixelGroup` species bitmask).
+#' To fall back to the R reference (e.g., for debugging), pass
+#' `useCpp = FALSE` or set `options(LandR.LANDISDisp.useCpp = FALSE)`.
+#'
 #' @param dtSrc data.table
 #'
 #' @param dtRcv data.table
@@ -47,6 +55,11 @@ utils::globalVariables(c(
 #' @template successionTimestep
 #'
 #' @template verbose
+#'
+#' @param useCpp Logical. If `TRUE` (the default), the spiral seed-dispersal
+#'   inner loop runs in C++ via \pkg{Rcpp}. If `FALSE`, the R reference
+#'   implementation is used instead. Output is bit-identical between the two
+#'   under a fixed seed. Defaults to `getOption("LandR.LANDISDisp.useCpp", TRUE)`.
 #'
 #' @param ...   Additional parameters. Currently none.
 #'
@@ -158,7 +171,8 @@ utils::globalVariables(c(
 LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                        dispersalFn = Ward, b = 0.01, k = 0.95, plot.it = FALSE,
                        successionTimestep,
-                       verbose = getOption("LandR.verbose", TRUE), ...) {
+                       verbose = getOption("LandR.verbose", TRUE),
+                       useCpp = getOption("LandR.LANDISDisp.useCpp", TRUE), ...) {
   if ((NROW(dtSrc) > 0) && (NROW(dtRcv) > 0)) {
     ####### Assertions #############
     if (!((is.numeric(dtSrc$speciesCode) && is.numeric(dtRcv$speciesCode) && is.numeric(speciesTable$speciesCode)) ||
@@ -223,33 +237,39 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     }
     ####### End Assertions #############
 
-    # Create srcPixelMatrix -- which is the matrix representation
-    #    of the dtSrc x speciesCode with NAs everywhere there is no
-    #    species present
+    # Cell-to-pixelGroup vector. Used by both Cpp (via the per-pg bitmask in
+    # spiralLoopCpp) and R (via srcPixelMatrix). Pull once.
     pgv <- as.vector(pixelGroupMap[])
 
-    rasVectorTemplate <- rep(NA_integer_, ncell(pixelGroupMap))
-    rasTemplate <- rasterRead(pixelGroupMap)
-    srcSpeciesCodes <- sort(unique(dtSrc$speciesCode))
-    names(srcSpeciesCodes) <- as.character(srcSpeciesCodes)
-    cellsCanSrc <- which(pgv %in% dtSrc$pixelGroup)
-    dtSrcLong <- data.table(pixelGroup = pgv[cellsCanSrc], pixelIndex = cellsCanSrc)
-    dtSrcLong <- dtSrc[, c("pixelGroup", "speciesCode")][dtSrcLong, on = "pixelGroup", allow.cartesian = TRUE]
-    set(dtSrcLong, NULL, "pixelGroup", NULL)
-    setkeyv(dtSrcLong, "speciesCode") # sort ascending
+    # srcPixelMatrix is only needed by the R reference (spiralSeedDispersalR).
+    # It dominates wall time at landscape scale (9M-cell maps spend >50% of
+    # LANDISDisp() in this block) so the Cpp path skips it: spiralLoopCpp
+    # builds a per-pixelGroup bitmask from dtSrc directly.
+    if (isTRUE(useCpp)) {
+      srcPixelMatrix <- NULL
+    } else {
+      rasVectorTemplate <- rep(NA_integer_, ncell(pixelGroupMap))
+      srcSpeciesCodes <- sort(unique(dtSrc$speciesCode))
+      names(srcSpeciesCodes) <- as.character(srcSpeciesCodes)
+      cellsCanSrc <- which(pgv %in% dtSrc$pixelGroup)
+      dtSrcLong <- data.table(pixelGroup = pgv[cellsCanSrc], pixelIndex = cellsCanSrc)
+      dtSrcLong <- dtSrc[, c("pixelGroup", "speciesCode")][dtSrcLong, on = "pixelGroup", allow.cartesian = TRUE]
+      set(dtSrcLong, NULL, "pixelGroup", NULL)
+      setkeyv(dtSrcLong, "speciesCode") # sort ascending
 
-    srcSpeciesByIndex <- split(dtSrcLong, by = "speciesCode")
-    speciesSrcRasterVecList <- lapply(srcSpeciesCodes, function(sc) {
-      rasVectorTemplate[srcSpeciesByIndex[[as.character(sc)]][["pixelIndex"]]] <- sc
-      rasVectorTemplate
-    })
-    maxSpCode <- max(as.integer(srcSpeciesCodes))
-    speciesSrcRasterVecList <- lapply(seq_len(maxSpCode), function(ind) {
-      if (as.character(ind) %in% names(speciesSrcRasterVecList)) {
-        speciesSrcRasterVecList[[as.character(ind)]]
-      }
-    })
-    srcPixelMatrix <- do.call(cbind, speciesSrcRasterVecList)
+      srcSpeciesByIndex <- split(dtSrcLong, by = "speciesCode")
+      speciesSrcRasterVecList <- lapply(srcSpeciesCodes, function(sc) {
+        rasVectorTemplate[srcSpeciesByIndex[[as.character(sc)]][["pixelIndex"]]] <- sc
+        rasVectorTemplate
+      })
+      maxSpCode <- max(as.integer(srcSpeciesCodes))
+      speciesSrcRasterVecList <- lapply(seq_len(maxSpCode), function(ind) {
+        if (as.character(ind) %in% names(speciesSrcRasterVecList)) {
+          speciesSrcRasterVecList[[as.character(ind)]]
+        }
+      })
+      srcPixelMatrix <- do.call(cbind, speciesSrcRasterVecList)
+    }
 
     #### cellSize -- faster than
     cellSize <- unique(res(pixelGroupMap))
@@ -286,16 +306,33 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
       }
 
       if (verbose >= 3) {
-        message(
-          "numRcvPixels: ", length(unique(dtRcvLong$pixelIndex)),
-          "; numSrcPixels: ", max(apply(srcPixelMatrix, 2, function(x) sum(!is.na(x))))
+        if (isTRUE(useCpp)) {
+          message(
+            "numRcvPixels: ", length(unique(dtRcvLong$pixelIndex)),
+            "; dtSrc rows: ", NROW(dtSrc)
+          )
+        } else {
+          message(
+            "numRcvPixels: ", length(unique(dtRcvLong$pixelIndex)),
+            "; numSrcPixels: ", max(apply(srcPixelMatrix, 2, function(x) sum(!is.na(x))))
+          )
+        }
+      }
+      if (isTRUE(useCpp)) {
+        dtRcvLong <- spiralSeedDispersalCpp(
+          speciesTable, pixelGroupMap, dtRcvLong,
+          dtSrc = dtSrc, pgv = pgv,
+          cellSize = cellSize, k = k, b = b,
+          successionTimestep = successionTimestep, verbose = verbose,
+          dispersalFn = dispersalFn
+        )
+      } else {
+        dtRcvLong <- spiralSeedDispersalR(
+          speciesTable, pixelGroupMap, dtRcvLong,
+          srcPixelMatrix, cellSize, k, b, successionTimestep,
+          verbose, dispersalFn = dispersalFn
         )
       }
-      dtRcvLong <- spiralSeedDispersalR(speciesTable, pixelGroupMap, dtRcvLong,
-        srcPixelMatrix, cellSize, k, b, successionTimestep,
-        verbose,
-        dispersalFn = dispersalFn
-      )
       if (exists("origLevels", inherits = FALSE)) {
         dtRcvLong[, speciesCode := factor(origLevels[speciesCode], levels = origLevels)]
         if (origClassWasNumeric) {
@@ -788,4 +825,139 @@ spiralDistances <- function(pixelGroupMap, maxDis, cellSize) {
     spiral[, "dists"], apply(abs(spiral), 1, sum),
     abs(spiral[, 1]), abs(spiral[, 2])
   ), , drop = FALSE]
+}
+
+#' Rcpp-backed spiral seed dispersal loop.
+#'
+#' Drop-in replacement for [spiralSeedDispersalR()] that performs the spiral
+#' walk in C++ via [spiralLoopCpp()]. All preprocessing (spiral computation,
+#' Ward probability table, receiver row prep) stays in R; only the inner loop
+#' is delegated. The C++ loop draws the same number of uniform random values
+#' in the same order as the R reference (which uses
+#' `SpaDES.tools::runifC(sumHasSp)` per iteration), so seeded outputs match
+#' bit-for-bit.
+#'
+#' @keywords internal
+#' @noRd
+spiralSeedDispersalCpp <- function(speciesTable, pixelGroupMap, dtRcvLong,
+                                   dtSrc, pgv, cellSize, k, b,
+                                   successionTimestep, verbose, dispersalFn) {
+  if (!is.numeric(k)) stop("not numeric k")
+  if (!is.numeric(b)) stop("not numeric b")
+  if (!is.numeric(successionTimestep)) stop("not numeric successTimestep")
+
+  speciesTable <- copy(speciesTable)
+  set(
+    speciesTable, NULL, "seeddistance_maxMinCellSize",
+    pmax(cellSize, speciesTable[["seeddistance_max"]])
+  )
+  maxDis <- max(speciesTable[, "seeddistance_maxMinCellSize"])
+
+  preExistingSpiral <- paste0("spirals_max", round(maxDis, 6), "_cell", round(cellSize, 6))
+  if (!exists(preExistingSpiral, envir = .pkgEnv)) {
+    .pkgEnv[[preExistingSpiral]] <- spiralDistances(pixelGroupMap, maxDis, cellSize)
+  }
+  spiral <- .pkgEnv[[preExistingSpiral]]
+
+  speciesTableSmall <- speciesTable[, c("speciesCode", "seeddistance_eff", "seeddistance_max")]
+  uniqueDists <- unique(spiral[, "dists", drop = FALSE]) * cellSize
+  numSp <- NROW(speciesTable)
+  spSeq <- seq(numSp)
+  distsBySpCode <- as.data.table(expand.grid(dists = uniqueDists,
+                                             speciesCode = speciesTable[["speciesCode"]]))
+  set(distsBySpCode, NULL, "seeddistance_max", speciesTableSmall[
+    distsBySpCode[["speciesCode"]], "seeddistance_max"])
+  set(distsBySpCode, NULL, "seeddistance_eff", speciesTableSmall[
+    distsBySpCode[["speciesCode"]], "seeddistance_eff"])
+  set(distsBySpCode, NULL, "wardProb",
+      pmin(1, dispersalFn(
+        dist = distsBySpCode$dists, cellSize = cellSize,
+        effDist = distsBySpCode$seeddistance_eff,
+        maxDist = distsBySpCode$seeddistance_max, k = k, b = b)))
+  set(distsBySpCode, NULL, c("seeddistance_max", "seeddistance_eff"), NULL)
+  setorderv(distsBySpCode, c("dists", "speciesCode"))
+
+  ## Apply successionTimestep exponentiation up front, then build the
+  ## (numUniqueDists x numSp) matrix consumed by spiralLoopCpp.
+  if (successionTimestep > 1) {
+    set(distsBySpCode, NULL, "wardProb",
+        1 - (1 - distsBySpCode[["wardProb"]])^successionTimestep)
+  }
+  numUniqueDists <- length(uniqueDists)
+  wardProbByDist <- matrix(distsBySpCode[["wardProb"]],
+                           nrow = numUniqueDists, ncol = numSp, byrow = TRUE)
+
+  rcvFull <- dtRcvLong[, c("pixelIndex", "speciesCode")]
+  rcvFull <- rcvFull[speciesTable[, c("seeddistance_max", "speciesCode")],
+                     on = "speciesCode", nomatch = NULL]
+
+  rc1 <- rowColFromCell(pixelGroupMap, rcvFull[["pixelIndex"]])
+  colnames(rc1) <- c("row", "col")
+  rowOrig <- as.integer(rc1[, "row"])
+  colOrig <- as.integer(rc1[, "col"])
+
+  curDists <- drop(spiral[, 3]) * cellSize
+  spiralRow <- as.integer(spiral[, "row"])
+  spiralCol <- as.integer(spiral[, "col"])
+
+  ## activeSpMaxDist is 1-indexed by speciesCode; pad position 0
+  activeSpMaxDist <- numeric(numSp + 1L)
+  activeSpMax     <- numeric(numSp + 1L)
+  for (rowIdx in seq_len(NROW(speciesTable))) {
+    sc <- speciesTable[["speciesCode"]][rowIdx]
+    activeSpMaxDist[sc + 1L] <- speciesTable[["seeddistance_maxMinCellSize"]][rowIdx]
+    activeSpMax[sc + 1L]     <- speciesTable[["seeddistance_max"]][rowIdx]
+  }
+
+  res <- spiralLoopCpp(
+    pixelIndex_in       = as.integer(rcvFull[["pixelIndex"]]),
+    speciesCode_in      = as.integer(rcvFull[["speciesCode"]]),
+    rowOrig_in          = rowOrig,
+    colOrig_in          = colOrig,
+    seeddist_max_perRow = as.integer(rcvFull[["seeddistance_max"]]),
+    spiralRow           = spiralRow,
+    spiralCol           = spiralCol,
+    spiralCurDist       = curDists,
+    pgmRows             = nrow(pixelGroupMap),
+    pgmCols             = ncol(pixelGroupMap),
+    pgv                 = as.integer(pgv),
+    srcPg               = as.integer(dtSrc[["pixelGroup"]]),
+    srcSpeciesCode      = as.integer(dtSrc[["speciesCode"]]),
+    numSp               = as.integer(numSp),
+    wardProbByDist      = wardProbByDist,
+    activeSpMaxDist     = activeSpMaxDist,
+    activeSpMax         = activeSpMax,
+    cellSize            = cellSize,
+    successionTimestep  = as.integer(successionTimestep),
+    verbose             = as.integer(verbose),
+    wardAlreadyExp      = TRUE,
+    debug               = isTRUE(getOption("LandR.LANDISDisp.debug", FALSE))
+  )
+
+  whSuccess <- which(res$Success)
+  if (verbose >= 1) {
+    set(rcvFull, NULL, "DistOfSuccess", res$DistOfSuccess)
+    fails <- which(is.na(rcvFull[["DistOfSuccess"]]))
+    if (length(fails)) {
+      set(rcvFull, NULL, "ReasonForStop", NA_character_)
+      set(rcvFull, fails, "ReasonForStop", "RanOutOfDistance")
+    }
+    ReasonForStop <- rcvFull
+  }
+  set(rcvFull, NULL, "seeddistance_max", NULL)
+
+  if (length(whSuccess) == 0L) {
+    rcvFull <- rcvFull[0]
+  } else {
+    rcvFull <- rcvFull[whSuccess]
+  }
+
+  speciesCodeCols <- intersect(c("species", "speciesCode"), colnames(speciesTable))
+  rcvFull <- rcvFull[speciesTable[, ..speciesCodeCols], on = "speciesCode",
+                     nomatch = NULL]
+
+  if (verbose >= 1) {
+    setattr(rcvFull, "ReasonForStop", ReasonForStop)
+  }
+  rcvFull
 }

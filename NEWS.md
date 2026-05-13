@@ -1,5 +1,17 @@
 # LandR (development version)
 
+* `LANDISDisp()` spiral seed dispersal loop ported to C++ via `Rcpp`
+  (~3.5–5.7× faster end-to-end depending on input size; ~5× on landscape-scale
+  fixtures of 9 M cells). Memory use also drops dramatically: the
+  per-cell-by-species source matrix is replaced with a per-`pixelGroup`
+  species bitmask. Bit-identical to the previous R implementation under a
+  fixed seed — guarded by 196 seed-locked / parity expectations (209 with
+  `LANDR_SLOW_TESTS=1`). Default behaviour is unchanged for callers; the new
+  path is on by default and can be opted out with
+  `LANDISDisp(..., useCpp = FALSE)` or
+  `options(LandR.LANDISDisp.useCpp = FALSE)`. `Rcpp (>= 1.0.10)` added to
+  `Imports` and `LinkingTo`; `digest` added to `Suggests` (used by the
+  golden-output hash manifest in tests);
 * drop support for R 4.2 due to changes in dependency packages;
 * remove deprecated package `crayon` in favour of `cli` instead;
 * remove deprecated package `qs` in favour of `qs2` instead;

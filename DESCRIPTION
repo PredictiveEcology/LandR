@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     https://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2026-03-23
-Version: 1.1.5.9100
+Date: 2026-05-01
+Version: 1.1.5.9101
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -43,6 +43,7 @@ Imports:
     quickPlot (>= 1.0.4),
     raster,
     RColorBrewer,
+    Rcpp (>= 1.0.10),
     reproducible (>= 3.0.0),
     sf,
     sp,
@@ -53,6 +54,8 @@ Imports:
     tools,
     utils,
     viridis
+LinkingTo:
+    Rcpp
 Suggests:
     arrow,
     bbmle, 
@@ -60,6 +63,7 @@ Suggests:
     BioSIM,
     covr,
     curl (>= 6.4.0),
+    digest,
     dplyr,
     fasterize,
     future,
@@ -108,6 +112,7 @@ LazyData: true
 Collate: 
     'LANDIS-II-tables.R'
     'LandR-package.R'
+    'RcppExports.R'
     'SummarizeCanadianForestRasters.R'
     'assertions.R'
     'biomodWrappers.R'

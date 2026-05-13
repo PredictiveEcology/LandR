@@ -217,6 +217,7 @@ test_that("test Ward dispersal seeding algorithm", {
 test_that("test large files", {
   skip_if_not_installed("googledrive")
   skip_if_not_installed("withr")
+  testthat::skip_if_not(googledrive::drive_has_token(), "No Drive token")
 
   dp <- withr::local_tempdir("dest_")
 

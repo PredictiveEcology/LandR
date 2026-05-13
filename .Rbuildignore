@@ -13,3 +13,4 @@
 ^\.secret$
 ^[.]?air[.]toml$
 ^\.vscode$
+^\.dev_landisdisp$
