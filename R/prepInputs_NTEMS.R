@@ -30,7 +30,7 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
 
   if (is.null(dots$rasterToMatch) && is.null(dots$cropTo) && is.null(dots$to)) {
     stop("the NTEMS raster file is large; pass `rasterToMatch`, `cropTo`, or `to` to crop it, ",
-         "or process it on disk by setting e.g. `terraOptions(ondisk = TRUE, memfrac = 0)`")
+         "or process it on disk by setting e.g. `terraOptions(todisk = TRUE, memfrac = 0)`")
   }
 
   if (isTRUE(getOption("reproducible.gdalwarp"))) {
