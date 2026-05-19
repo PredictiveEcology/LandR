@@ -1707,14 +1707,22 @@ loadSCANFISpeciesLayers <- function(
   # }
 
   ## appending file name structure to eliminate double matches for subspecies:
-  SCANFInames2 <- paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif")
+  if (dataVersion == "V1") {
+    SCANFInames2 <- paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif")
+  } else if (dataVersion == "V2") {
+    SCANFInames2 <- paste0("SCANFI_spsCC_", SCANFInames, "_", year, "_v2_20260119.tif")
+  }
   correctOrder <- sapply(unique(SCANFInames2), function(x) {
     grep(pattern = x, x = targetFiles, value = TRUE)
   })
   names(speciesLayers) <- names(correctOrder)[match(correctOrder, targetFiles)]
-  names(speciesLayers) <- gsub(paste0("_?S_?", year, "_?v1_?1.tif"), "", names(speciesLayers))
-  names(speciesLayers) <- gsub("SCANFI_?sps_?", "", names(speciesLayers))
-
+  if (dataVersion == "V1") {
+    names(speciesLayers) <- gsub(paste0("_?S_?", year, "_?v1_?1.tif"), "", names(speciesLayers))
+    names(speciesLayers) <- gsub("SCANFI_?sps_?", "", names(speciesLayers))
+  } else if (dataVersion == "V2") {
+    names(speciesLayers) <- gsub(paste0("_", year, "_v2_.*\\.tif"), "", names(speciesLayers))
+    names(speciesLayers) <- gsub("SCANFI_spsCC_", "", names(speciesLayers))
+  }
   layerNames <- names(speciesLayers)
 
   ## converting to a stack because global() is much faster than sapply over the list
