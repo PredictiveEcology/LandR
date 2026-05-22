@@ -10,6 +10,7 @@ speciesInStudyArea(
   speciesPresentRas = NULL,
   sppEquivCol = NULL,
   dataSource = "SCANFI",
+  dataYear = 2025,
   dPath = getOption("reproducible.destinationPath")
 )
 }
@@ -29,6 +30,9 @@ If passed the KNN species will be returned according to this naming convention.}
 \item{dataSource}{Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain species from layer
 created using species cover data from KNN. Also able to obtain species from SCANFI species cover layers
 and NTEMS Dominant Species Layer (though less species will be included from the latter).}
+
+\item{dataYear}{Numeric. Different source data years are available for different data sources.
+2011 for KNN, 2011 for NTEMS, and every 5 years from 1985-2025 for SCANFI V2.}
 
 \item{dPath}{Passed to \code{destinationPath} in \code{preProcess}.}
 }
