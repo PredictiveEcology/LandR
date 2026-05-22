@@ -389,6 +389,9 @@ speciesPresentFromSCANFI <- function(
 #'   created using species cover data from KNN. Also able to obtain species from SCANFI species cover layers
 #'   and NTEMS Dominant Species Layer (though less species will be included from the latter).
 #'
+#' @param dataYear Numeric. Different source data years are available for different data sources.
+#'   2011 for KNN, 2011 for NTEMS, and every 5 years from 1985-2025 for SCANFI V2.
+#'
 #' @param dPath Passed to `destinationPath` in `preProcess`.
 #'
 #' @return A named list of length 2: `speciesRas` is a factor `RasterLayer`
@@ -397,19 +400,22 @@ speciesPresentFromSCANFI <- function(
 #'
 #' @export
 speciesInStudyArea <- function(
-  studyArea,
-  url = NULL,
-  speciesPresentRas = NULL,
-  sppEquivCol = NULL,
-  dataSource = "SCANFI",
-  dPath = getOption("reproducible.destinationPath")
+    studyArea,
+    url = NULL,
+    speciesPresentRas = NULL,
+    sppEquivCol = NULL,
+    dataSource = "SCANFI",
+    dataYear = 2025,
+    dPath = getOption("reproducible.destinationPath")
 ) {
   if (!(dataSource %in% c("KNN", "NTEMS", "SCANFI"))) {
     stop("Data Source must be either KNN, NTEMS, or SCANFI")
   }
   if (dataSource == "NTEMS") {
     warning(
-      "the NTEMS data includes only dominant species and thus using this dataset will likely result in fewer species returned"
+      "The NTEMS data includes only dominant species and thus using this dataset will likely result in fewer species returned.
+
+      speciesInStudyArea data for NTEMS is currently available for 2011 only."
     )
     if (is.null(speciesPresentRas)) {
       if (is.null(url)) {
@@ -438,9 +444,27 @@ speciesInStudyArea <- function(
     if (is.null(speciesPresentRas)) {
       if (is.null(url)) {
         if (dataSource == "KNN") {
-          url <- "https://drive.google.com/file/d/1J8fN7clZeqjd7yhiDWi13uoCBL8OensF"
+            url <- "https://drive.google.com/file/d/1J8fN7clZeqjd7yhiDWi13uoCBL8OensF"
         } else if (dataSource == "SCANFI") {
-          url <- "https://drive.google.com/file/d/1CvasOBS2UbRUv1LocDn_gGTwcoAxIFkv"
+          if (dataYear == 2025) {
+            url <- "https://drive.google.com/file/d/1dWL-iuZ7KQ2owRpDQ6VRHH0SgH2VuUYq"
+          } else if (dataYear == 2020) {
+            url <- "https://drive.google.com/file/d/1l9G1k9lOd53TeXP0rE8RNEzw4WUo9QOH"
+          } else if (dataYear == 2015) {
+            url <- "https://drive.google.com/file/d/1xU62QCQzQGpCRMD4AyfjOGXhjOOsx4Jx"
+          # } else if (dataYear == 2010) {
+          #   url <- "TEMP"
+          # } else if (dataYear == 2005) {
+          #   url <- "TEMP"
+          # } else if (dataYear == 2000) {
+          #   url <- "TEMP"
+          # } else if (dataYear == 1995) {
+          #   url <- "TEMP"
+          # } else if (dataYear == 1990) {
+          #   url <- "TEMP"
+          # } else if (dataYear == 1985) {
+          #   url <- "TEMP"
+          }
         }
         speciesPres <- preProcess(url = url, destinationPath = dPath)
         speciesPresRas <- rasterRead(speciesPres$targetFilePath)
