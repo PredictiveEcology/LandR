@@ -452,8 +452,8 @@ speciesInStudyArea <- function(
             url <- "https://drive.google.com/file/d/1l9G1k9lOd53TeXP0rE8RNEzw4WUo9QOH"
           } else if (dataYear == 2015) {
             url <- "https://drive.google.com/file/d/1xU62QCQzQGpCRMD4AyfjOGXhjOOsx4Jx"
-          # } else if (dataYear == 2010) {
-          #   url <- "TEMP"
+          } else if (dataYear == 2010) {
+            url <- "https://drive.google.com/file/d/1Cr1QC8Ze-4k0vJQ7o-DB9eGrlz1X2y3X"
           # } else if (dataYear == 2005) {
           #   url <- "TEMP"
           # } else if (dataYear == 2000) {
