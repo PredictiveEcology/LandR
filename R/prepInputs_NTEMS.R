@@ -86,24 +86,16 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240,
   newOpts <- do.call(terraOptions, optsNow)
   on.exit(do.call(terraOptions, opts[names(optsNow)]))
   
-  fp <- if (!is.null(dots$destinationPath)) {
-    file.path(dots$destinationPath, dots$writeTo)
-  } else { dots$writeTo }
-  if (length(fp) == 0)
-    fp <- file.path(dots$destinationPath, "LCC")
-  
-  st1 <- system.time({
-    keep <- c(210, 81, 220, 230)
-    is_keep <- terra::`%in%`(lcc, keep)   # SpatRaster -> 0/1 mask, in C++
-    out <- terra::ifel(
-      (fao == 2) & !is_keep,
-      disturbedCode,
-      lcc,
-      overwrite = TRUE,
-      filename = "out.tif",
-      wopt = list(datatype = "INT1U", gdal = c("COMPRESS=ZSTD", "TILED=YES"))
-    )
-  })
+  keep <- c(210, 81, 220, 230)
+  is_keep <- terra::`%in%`(lcc, keep)   # SpatRaster -> 0/1 mask, in C++
+  out <- terra::ifel(
+    (fao == 2) & !is_keep,
+    disturbedCode,
+    lcc,
+    overwrite = TRUE,
+    filename = tempfile(fileext = ".tif"),
+    wopt = list(datatype = "INT1U", gdal = c("COMPRESS=ZSTD", "TILED=YES"))
+  )
   # Eliot removed this May 22, 2026 as it was WAY too slow on 30m raster 
   # DisturbedAdjust <- function(LCC, FAO, newVal = disturbedCode) {
   #   LCC[FAO == 2 & !LCC %in% c(210, 81, 220, 230)] <- newVal
