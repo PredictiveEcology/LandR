@@ -454,14 +454,14 @@ speciesInStudyArea <- function(
             url <- "https://drive.google.com/file/d/1xU62QCQzQGpCRMD4AyfjOGXhjOOsx4Jx"
           } else if (dataYear == 2010) {
             url <- "https://drive.google.com/file/d/1Cr1QC8Ze-4k0vJQ7o-DB9eGrlz1X2y3X"
-          # } else if (dataYear == 2005) {
-          #   url <- "TEMP"
-          # } else if (dataYear == 2000) {
-          #   url <- "TEMP"
-          # } else if (dataYear == 1995) {
-          #   url <- "TEMP"
-          # } else if (dataYear == 1990) {
-          #   url <- "TEMP"
+          } else if (dataYear == 2005) {
+            url <- "https://drive.google.com/file/d/1kLQXLnBeeqHcFFVwmJ_GM12cnWEhtwl_"
+          } else if (dataYear == 2000) {
+            url <- "https://drive.google.com/file/d/1RC4iLL1ccP8cdm-tGAXPT3jwEVqk5dTK"
+          } else if (dataYear == 1995) {
+            url <- "https://drive.google.com/file/d/1uC0ZnsUITA_pOdbaVney4J_AoRIb6w_U"
+          } else if (dataYear == 1990) {
+            url <- "https://drive.google.com/file/d/1NQEyf4xvdjRRMlKxnWVpWXWqYZJ2Uw0w"
           # } else if (dataYear == 1985) {
           #   url <- "TEMP"
           }
