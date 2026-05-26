@@ -21,22 +21,61 @@ jobs:
       ## RNCan/BioSimClient_R — pre-existing WARNING tracked separately.
       ## Drop this override once that's resolved.
       error-on: '"error"'
-      ## `zonal=?ignore` works around a pak resolver failure on
-      ## mikejohnson51/zonal -> santoku (santoku is on CRAN but pak does
-      ## not find it during lockfile creation). NLMR/BioSIM follow the
-      ## same pattern. Each is installed via remotes in post-install,
-      ## which uses base install.packages() for transitive deps.
+      ## Resolve only hard deps via `dependencies: NA`, then enumerate
+      ## Suggests explicitly below. pak's default ("all") recurses into
+      ## transitive Suggests and currently hits a "dependency conflict"
+      ## via tidyverse/ggplot2 (pulled by PredictiveEcology/quickPlot's
+      ## own Remotes). Listing the Suggests as top-level refs sidesteps
+      ## the deep-resolution issue.
+      dependencies: 'NA'
+      ## `BioSIM`/`NLMR`/`zonal`/`map` are not on CRAN under those names
+      ## (Github-only or removed); skip pak resolution and install via
+      ## post-install for the ones we actually need.
+      ## `santoku` was archived from CRAN on 2026-05-15, breaking the
+      ## transitive `mikejohnson51/zonal` -> `santoku` resolution (which
+      ## is why `zonal` is also dropped from DESCRIPTION's `Remotes:`).
       extra-packages: |
         any::sf
         any::XML
+        arrow
+        bbmle
+        covr
+        curl
+        digest
+        dplyr
+        fasterize
+        future
+        future.apply
+        geodata
+        ggalluvial
+        ggpubr
+        ggrepel
+        googledrive
+        httr
+        lqmm
+        MASS
+        memuse
+        parallelly
+        purrr
+        qs2
+        rasterVis
+        RCurl
+        RhpcBLASctl
+        rlang
+        roxygen2
+        R.utils
+        SpaDES.core
+        spelling
+        testthat
+        withr
+        biomod2=?ignore
         BioSIM=?ignore
         NLMR=?ignore
+        map=?ignore
         zonal=?ignore
       post-install: |
         pak::pkg_install("remotes")
         remotes::install_github("RNCan/BioSimClient_R")
         remotes::install_github("ropensci/NLMR")
-        tryCatch(
-          remotes::install_github("mikejohnson51/zonal"),
-          error = function(e) message("zonal install failed: ", conditionMessage(e))
-        )
+        remotes::install_github("CeresBarros/biomod2@dev_currentCeres")
+        remotes::install_github("PredictiveEcology/map@development")
