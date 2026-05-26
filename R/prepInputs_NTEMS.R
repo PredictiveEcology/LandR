@@ -12,7 +12,8 @@ utils::globalVariables(c(
 #' @return a `SpatRaster` with corrected forest pixels
 #'
 #' @export
-prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleMethod = "near", ...) {
+prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, 
+                                     resampleMethod = "near", ...) {
   if (year > 2023 || year < 1984) {
     stop("LCC for this year is unavailable")
   }
@@ -78,13 +79,29 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
   ) # |> Cache(omitArgs = "to", .cacheExtra = digs)
   ## pixels may not be disturbed yet if year is prior to 2019 (FAO year)
   ## adjust non-forest LCC that are disturbed forest to disturbedCode
-  DisturbedAdjust <- function(LCC, FAO, newVal = disturbedCode) {
-    LCC[FAO == 2 & !LCC %in% c(210, 81, 220, 230)] <- newVal
-    return(LCC)
-  }
   message("Updating codes on LCC with FAO data...")
   input <- c(lcc, fao)
-  out <- terra::lapp(input, fun = DisturbedAdjust, usenames = FALSE)
+  opts <- terraOptions()
+  optsNow <- list(memmax = 4, todisk = TRUE)
+  newOpts <- do.call(terraOptions, optsNow)
+  on.exit(do.call(terraOptions, opts[names(optsNow)]))
+  
+  keep <- c(210, 81, 220, 230)
+  is_keep <- terra::`%in%`(lcc, keep)   # SpatRaster -> 0/1 mask, in C++
+  out <- terra::ifel(
+    (fao == 2) & !is_keep,
+    disturbedCode,
+    lcc,
+    overwrite = TRUE,
+    filename = tempfile(fileext = ".tif"),
+    wopt = list(datatype = "INT1U", gdal = c("COMPRESS=ZSTD", "TILED=YES"))
+  )
+  # Eliot removed this May 22, 2026 as it was WAY too slow on 30m raster 
+  # DisturbedAdjust <- function(LCC, FAO, newVal = disturbedCode) {
+  #   LCC[FAO == 2 & !LCC %in% c(210, 81, 220, 230)] <- newVal
+  #   return(LCC)
+  # }
+  # out <- terra::lapp(input, fun = DisturbedAdjust, usenames = FALSE)
   # lcc <- terra::init(lcc, as.vector(out))
 
   if (!is.null(dots$writeTo)) {
@@ -96,6 +113,18 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, resampleM
   }
   message("... done ... cleaning up RAM")
   rm(input, lcc, fao) # remove them before doing gc
+  
+  ## 0 = no change; 20 = water; 31 = snow_ice; 32 = rock_rubble; 33 = exposed_barren_land;
+  ## 40 = bryoids; 50 = shrubs; 80 = wetland; 81 = wetland-treed; 100 = herbs; 210 = coniferous;
+  ## 220 = broadleaf; 230 = mixedwood
+  cls <- data.frame(
+    value = c(0, 20, 31, 32, 33, 40, 50, 80, 81, 100, 210, 220, 230, 240),
+    label = c("no_change", "water", "snow_ice", "rock_rubble", "exposed_barren_land",
+              "bryoids", "shrubs", "wetland", "wetland_treed", "herbs",
+              "coniferous", "broadleaf", "mixedwood", "disturbed")
+  )
+  levels(out) <- cls
+  
   gc()
   return(out)
 }
