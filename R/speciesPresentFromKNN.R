@@ -462,8 +462,8 @@ speciesInStudyArea <- function(
             url <- "https://drive.google.com/file/d/1uC0ZnsUITA_pOdbaVney4J_AoRIb6w_U"
           } else if (dataYear == 1990) {
             url <- "https://drive.google.com/file/d/1NQEyf4xvdjRRMlKxnWVpWXWqYZJ2Uw0w"
-          # } else if (dataYear == 1985) {
-          #   url <- "TEMP"
+          } else if (dataYear == 1985) {
+            url <- "https://drive.google.com/file/d/1sYou5hkdv3rIeB-frupz7K7ImykK_GQg"
           }
         }
         speciesPres <- preProcess(url = url, destinationPath = dPath)
