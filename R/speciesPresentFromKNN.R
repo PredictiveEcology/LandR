@@ -274,7 +274,10 @@ speciesPresentFromNTEMS <- function(
 #'
 #' @param res The resolution (one dimension, in m) for the resulting raster
 #'
-#' @param year One of 2000, 2010, or 2020. Default is 2020.
+#' @param year data year for SCANFI data. 2000, 2010, and 2020 possible for V1.
+#'    1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020 (default), 2025 possible for V2.
+#'
+#' @param dataVersion Character. SCANFI product version for data. Default is currently V2. V1 also available.
 #'
 #' @param minPctCover An integer indicating what percent cover a species must have
 #' in a pixel to be considered present in that pixel.
@@ -306,6 +309,7 @@ speciesPresentFromNTEMS <- function(
 #' @export
 speciesPresentFromSCANFI <- function(
   year = 2020,
+  dataVersion = "V2",
   dPath = asPath("."),
   res = 2400,
   minPctCover = 10
@@ -335,9 +339,9 @@ speciesPresentFromSCANFI <- function(
     ),
     destinationPath = dPath
   )
-  sa <- vect(st_transform(st_as_sf(studyAreaER, crs = 7019), crs = crs(templateCRS))) #postProcess ruins this file so this is the only way to get a valid layer
+  sa <- terra::project(studyAreaER, templateCRS)
 
-  allForestedStk <- loadAndAggregateSCANFI(year = year, dPath, res, sa) |> Cache()
+  allForestedStk <- loadAndAggregateSCANFI(year = year, dataVersion, dPath, res, sa) |> Cache()
   allForestedStk <- round(allForestedStk, 0)
   allForestedStk[allForestedStk <= minPctCover] <- 0
 
@@ -385,6 +389,9 @@ speciesPresentFromSCANFI <- function(
 #'   created using species cover data from KNN. Also able to obtain species from SCANFI species cover layers
 #'   and NTEMS Dominant Species Layer (though less species will be included from the latter).
 #'
+#' @param dataYear Numeric. Different source data years are available for different data sources.
+#'   2011 for KNN, 2011 for NTEMS, and every 5 years from 1985-2025 for SCANFI V2.
+#'
 #' @param dPath Passed to `destinationPath` in `preProcess`.
 #'
 #' @return A named list of length 2: `speciesRas` is a factor `RasterLayer`
@@ -393,19 +400,22 @@ speciesPresentFromSCANFI <- function(
 #'
 #' @export
 speciesInStudyArea <- function(
-  studyArea,
-  url = NULL,
-  speciesPresentRas = NULL,
-  sppEquivCol = NULL,
-  dataSource = "SCANFI",
-  dPath = getOption("reproducible.destinationPath")
+    studyArea,
+    url = NULL,
+    speciesPresentRas = NULL,
+    sppEquivCol = NULL,
+    dataSource = "SCANFI",
+    dataYear = 2025,
+    dPath = getOption("reproducible.destinationPath")
 ) {
   if (!(dataSource %in% c("KNN", "NTEMS", "SCANFI"))) {
     stop("Data Source must be either KNN, NTEMS, or SCANFI")
   }
   if (dataSource == "NTEMS") {
     warning(
-      "the NTEMS data includes only dominant species and thus using this dataset will likely result in fewer species returned"
+      "The NTEMS data includes only dominant species and thus using this dataset will likely result in fewer species returned.
+
+      speciesInStudyArea data for NTEMS is currently available for 2011 only."
     )
     if (is.null(speciesPresentRas)) {
       if (is.null(url)) {
@@ -434,9 +444,27 @@ speciesInStudyArea <- function(
     if (is.null(speciesPresentRas)) {
       if (is.null(url)) {
         if (dataSource == "KNN") {
-          url <- "https://drive.google.com/file/d/1J8fN7clZeqjd7yhiDWi13uoCBL8OensF"
+            url <- "https://drive.google.com/file/d/1J8fN7clZeqjd7yhiDWi13uoCBL8OensF"
         } else if (dataSource == "SCANFI") {
-          url <- "https://drive.google.com/file/d/1CvasOBS2UbRUv1LocDn_gGTwcoAxIFkv"
+          if (dataYear == 2025) {
+            url <- "https://drive.google.com/file/d/1dWL-iuZ7KQ2owRpDQ6VRHH0SgH2VuUYq"
+          } else if (dataYear == 2020) {
+            url <- "https://drive.google.com/file/d/1l9G1k9lOd53TeXP0rE8RNEzw4WUo9QOH"
+          } else if (dataYear == 2015) {
+            url <- "https://drive.google.com/file/d/1xU62QCQzQGpCRMD4AyfjOGXhjOOsx4Jx"
+          } else if (dataYear == 2010) {
+            url <- "https://drive.google.com/file/d/1Cr1QC8Ze-4k0vJQ7o-DB9eGrlz1X2y3X"
+          } else if (dataYear == 2005) {
+            url <- "https://drive.google.com/file/d/1kLQXLnBeeqHcFFVwmJ_GM12cnWEhtwl_"
+          } else if (dataYear == 2000) {
+            url <- "https://drive.google.com/file/d/1RC4iLL1ccP8cdm-tGAXPT3jwEVqk5dTK"
+          } else if (dataYear == 1995) {
+            url <- "https://drive.google.com/file/d/1uC0ZnsUITA_pOdbaVney4J_AoRIb6w_U"
+          } else if (dataYear == 1990) {
+            url <- "https://drive.google.com/file/d/1NQEyf4xvdjRRMlKxnWVpWXWqYZJ2Uw0w"
+          } else if (dataYear == 1985) {
+            url <- "https://drive.google.com/file/d/1sYou5hkdv3rIeB-frupz7K7ImykK_GQg"
+          }
         }
         speciesPres <- preProcess(url = url, destinationPath = dPath)
         speciesPresRas <- rasterRead(speciesPres$targetFilePath)
@@ -499,10 +527,11 @@ loadAndAggregateKNN <- function(dPath, res, sa) {
 }
 
 #' @keywords internal
-loadAndAggregateSCANFI <- function(year, dPath, res, sa) {
+loadAndAggregateSCANFI <- function(year, dataVersion, dPath, res, sa) {
   ll <- loadSCANFISpeciesLayers(
     year = year,
-    dPath,
+    dataVersion = dataVersion,
+    dPath = dPath,
     sppEquiv = LandR::sppEquivalencies_CA,
     sppEquivCol = "SCANFI"
   )

@@ -61,7 +61,7 @@ chamnoot,CHAM.NOO,Cham_noo,Cham_Noo,Cham noot,Chamaecyparis nootkatensis,Yl ced,
 ,,Corn_nut,,Corn nutt,Cornus nuttallii,Pa dogw,Pacific dogwood,Pacific dogwood leading,Also known as western dogwood,,TRUE,Deciduous,,,CedrMplOther,Gp,,,,,,,CORN_NUT,1500,other hardwood code,,140,,
 ,,Crat_spp,Crat_Spp,Crat spp,Crataegus spp,Hawthorn,Hawthorn,Hawthorn leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Ht,CRA,,CRAT_SP,3910,,,163,,
 fagugran,FAGU.GRA,Fagu_gra,Fagu_Gra,Fagu gran,Fagus grandifolia,Am beech,American beech,American beech leading,,Fagu_Gra,TRUE,Deciduous,beech,,CedrMplOther,,,,,Be,HEG,Be,FAGU_GRA,2000,,,108,FAGU_GRA,
-fraxamer,FRAX.AME,Frax_ame,Frax_Ame,Frax amer,Fraxinus americana,Am ash,American ash,American ash leading,,Frax_Ame,TRUE,Deciduous,white ash,,CedrMplOther,,,,,Aw,FRA,wAs,FRAX_AME,3401,,,145,,#000033
+fraxamer,FRAX.AME,Frax_ame,Frax_Ame,Frax amer,Fraxinus americana,Am ash,American ash,American ash leading,,Frax_Ame,TRUE,Deciduous,white ash,,CedrMplOther,,,,,Aw,FRA,wAs,FRAX_AME,3401,,,145,FRAX_AME,#000033
 ,,Frax_lat,,Frax lati,Fraxinus latifolia,Or ash,Oregon ash,Oregon ash leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,,,FRAX_LAT,3400,generic ash code,,151,,
 ,,Frax_nig,Frax_Nig,Frax nigr,Fraxinus nigra,Bl ash,Black ash,Black ash leading,,Frax_Nig,TRUE,Deciduous,black ash,,CedrMplOther,,,,,Ab,FRN,bAs,FRAX_NIG,3402,,12,146,,#000033
 ,,Frax_pen,Frax_Pen_Sub,Frax penn,Fraxinus pennsylvanica var. subintegerrima,Gn ash,Green ash,Green ash leading,Fraxinus pennsylvanica subintegerrima is a synonym,,TRUE,Deciduous,red ash,,CedrMplOther,,,,,,FRP,,,3403,,,149,,
@@ -131,7 +131,7 @@ popubals,POPU.BAL,Popu_bal,Popu_Bal,Popu balb,Populus balsamifera v. balsamifera
 popudelt,,Popu_del,Popu_Del,Popu delt,Populus deltoides,E ctnwood,Eastern cottonwood,Eastern cottonwood leading,,,TRUE,Deciduous,eastern cotttonwood,,PopBrch,,,,CO,Pd,PED,,POPU_DEL,1205,,,67,,
 ,,Popu_del,Popu_Del,Popu delx,Populus deltoides,E ctnwood,Eastern cottonwood,Eastern cottonwood leading,,,TRUE,Deciduous,eastern cotttonwood,,PopBrch,,,,,,PED,,,1205,,,67,,
 ,,Popu_del,Popu_Del,Popu delo,Populus deltoides v. occidentalis,Pla ctnwood,Plains cottonwood,Plains cottonwood leading,,,TRUE,Deciduous,eastern cotttonwood,,PopBrch,,,,,,,,,1205,,,67,,
-,,Popu_gra,Popu_Gra,Popu gran,Populus grandidentata,Bigto asp,Bigtooth aspen,Bigtooth aspen leading,,Popu_Gra,TRUE,Deciduous,largetooth aspen,,PopBrch,,,,,Pl,PEG,ltA,POPU_GRA,1206,,28,68,,
+,,Popu_gra,Popu_Gra,Popu gran,Populus grandidentata,Bigto asp,Bigtooth aspen,Bigtooth aspen leading,,Popu_Gra,TRUE,Deciduous,largetooth aspen,,PopBrch,,,,,Pl,PEG,ltA,POPU_GRA,1206,,28,68,POPU_GRA,
 ,,Popu_nig,,Popu nigr,Populus nigra,Bl pop,Black poplar,Black poplar leading,,,TRUE,Deciduous,,,PopBrch,,,,,,,,POPU_NIG,1200,generic aspen code,,,,
 ,,Popu_spp,Popu_Spp,Popu spp,Populus spp.,Poplar,Poplar,Poplar leading,,Popu_Spp,TRUE,Deciduous,trembling aspen,,PopBrch,,,,,Po,,,POPU_SP,1200,,,62,,
 poputrem,POPU.TRE,Popu_tre,Popu_Tre,Popu trem,Populus tremuloides,Tr aspen,Trembling aspen,Trembling aspen leading,,Popu_Tre,TRUE,Deciduous,trembling aspen,,PopBrch,At,Aw,TA,TA,Pt,PET,tA,POPU_TRE,1201,,29,63,POPU_TRE,#FF00B6

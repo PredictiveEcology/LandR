@@ -4,10 +4,13 @@
 \alias{convert_SCANFI_LCC_codes}
 \title{Convert SCANFI Landcover layers from 1-8 codes to typical Canada LCC codes (0-230)}
 \usage{
-convert_SCANFI_LCC_codes(year = 2000, ...)
+convert_SCANFI_LCC_codes(year = 2000, dataVersion = "V2", ...)
 }
 \arguments{
-\item{year}{data year for SCANFI landcover data. 2000, 2010, and 2020 possible.}
+\item{year}{data year for SCANFI landcover data. 2000, 2010, and 2020 possible for V1.
+1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025 possible for V2.}
+
+\item{dataVersion}{Character. SCANFI product version for data. Default is currently V2. V1 also available.}
 
 \item{...}{additional args (not used)}
 }

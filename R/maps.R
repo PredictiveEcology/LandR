@@ -232,30 +232,70 @@ prepInputsLCC <- function(
 #' In the respective folder for each year, under the file name
 #' `SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_<YEAR>_v1_1.tif`
 #'
-#' @param year data year for SCANFI landcover data. 2000, 2010, and 2020 possible.
+#' @param year data year for SCANFI landcover data. 2000, 2010, and 2020 possible for V1.
+#'    1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025 possible for V2.
+#'
+#' @param dataVersion Character. SCANFI product version for data. Default is currently V2. V1 also available.
 #'
 #' @return a `SpatRaster` with corrected classification codes
 #'
 #' @param ... additional args (not used)
 #'
 #' @export
-convert_SCANFI_LCC_codes <- function(year = 2000, ...) {
-  if (!(year %in% c(2000, 2010, 2020))) {
-    stop("SCANFI Landcover does not exist for this year")
+convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", ...) {
+  if (dataVersion == "V1") {
+    if (!(year %in% c(2000, 2010, 2020))) {
+      stop("SCANFI V1 Landcover does not exist for this year")
+    }
+
+    if (year == 2000) {
+      lccURL <- paste0("https://drive.google.com/file/d/15AlzqODmeVs0Aev7o7PIzZti2XLPG78z")
+      lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
+    } else if (year == 2010) {
+      lccURL <- paste0("https://drive.google.com/file/d/1JOg9f7N4hZSCky_GhrPDZMYkp39XfS2h")
+      lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
+    } else if (year == 2020) {
+      lccURL <- paste0("https://drive.google.com/file/d/11sQu1mdPtVsWjFUBNx3TrzpksZ6ri1pJ")
+      lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
+    }
+
+  } else if (dataVersion == "V2") {
+
+    if (!(year %in% c(1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025))) {
+      stop("SCANFI V2 Landcover does not exist for this year")
+    }
+
+    if (year == 1985) {
+      lccURL <- paste0("https://drive.google.com/file/d/18HtwafwJN3_SyH2Kbq7dNL_vBmfCgMOv")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 1990) {
+      lccURL <- paste0("https://drive.google.com/file/d/11QpGMnH1Wxcy34jqiiriQgGDEgGicdkd")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 1995) {
+      lccURL <- paste0("https://drive.google.com/file/d/1GijrLGkMwnbBA5Y6gfto5CxgeNOrBbjU")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 2000) {
+      lccURL <- paste0("https://drive.google.com/file/d/142PscihDjTAoRIgSVG3n70CzLI3KC1KS")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 2005) {
+      lccURL <- paste0("https://drive.google.com/file/d/1i1353LETOoRLjOo4d875U-AquLe7MVFn")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 2010) {
+      lccURL <- paste0("https://drive.google.com/file/d/1ssvHvgPWd8hEBZz2ZPh0F67asz2VopVC")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 2015) {
+      lccURL <- paste0("https://drive.google.com/file/d/1Fn7NjV51Dlm9btZRtnhMZ7u4eC9weQLa")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 2020) {
+      lccURL <- paste0("https://drive.google.com/file/d/1LVQEXGZvQD0Z62CZdJ7FrA1RJw6e4VIX")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 2025) {
+      lccURL <- paste0("https://drive.google.com/file/d/1cw7yMTGX-t4B4OMhKpdHbYnj2Vjvnvpz")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    }
   }
+
   dots <- list(...)
-
-  if (year == 2000) {
-    lccURL <- paste0("https://drive.google.com/file/d/15AlzqODmeVs0Aev7o7PIzZti2XLPG78z")
-    lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
-  } else if (year == 2010) {
-    lccURL <- paste0("https://drive.google.com/file/d/1JOg9f7N4hZSCky_GhrPDZMYkp39XfS2h")
-    lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
-  } else if (year == 2020) {
-    lccURL <- paste0("https://drive.google.com/file/d/11sQu1mdPtVsWjFUBNx3TrzpksZ6ri1pJ")
-    lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
-  }
-
   dots$url <- lccURL
   dots$targetFile <- lccTF
 
@@ -273,7 +313,9 @@ convert_SCANFI_LCC_codes <- function(year = 2000, ...) {
 
 #' Obtain an LCC layer for a given year from SCANFI, with forest matching the FAO definition
 #'
-#' @param year data year for LCC data. 2000, 2010, and 2020 possible.
+#' @param year data year for SCANFI landcover data. 2000, 2010, and 2020 possible for V1.
+#'    1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025 possible for V2.
+#' @param dataVersion Character. SCANFI product version for data. Default is currently V2. V1 also available.
 #' @param disturbedCode value assigned to pixels that are forest per FAO definition but not in LCC year
 #' @param resampleMethod method used when resampling LCC layers to match `rasterToMatch`
 #' @param ... passed to `prepInputs`
@@ -282,13 +324,20 @@ convert_SCANFI_LCC_codes <- function(year = 2000, ...) {
 #'
 #' @export
 prepInputs_SCANFI_LCC_FAO <- function(
-  year = 2010,
-  disturbedCode = 240,
-  resampleMethod = "near",
-  ...
+    year = 2020,
+    dataVersion = "V2",
+    disturbedCode = 240,
+    resampleMethod = "near",
+    ...
 ) {
-  if (!(year %in% c(2000, 2010, 2020))) {
-    stop("LCC for this year is unavailable")
+  if (dataVersion == "V1") {
+    if (!(year %in% c(2000, 2010, 2020))) {
+      stop("SCANFI V1 Landcover for this year is unavailable")
+    }
+  } else if (dataVersion == "V2") {
+    if (!(year %in% c(1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025))) {
+      stop("SCANFI V2 Landcover does not exist for this year")
+    }
   }
   newFilename <- NULL
   writeToFN <- NULL
@@ -315,6 +364,7 @@ prepInputs_SCANFI_LCC_FAO <- function(
   ## 0 = no change; 20 = water; 31 = snow_ice; 32 = rock_rubble; 33 = exposed_barren_land;
   ## 40 = bryoids; 50 = shrubs; 80 = wetland; 81 = wetland-treed; 100 = herbs; 210 = coniferous;
   ## 220 = broadleaf; 230 = mixedwood
+  if (dataVersion == "V1") {
   if (year == 2000) {
     lccURL <- "https://drive.google.com/file/d/1zqzTSDk9mtyRhcQuMsRMK2WDwkuk24kt"
   } else if (year == 2010) {
@@ -323,6 +373,28 @@ prepInputs_SCANFI_LCC_FAO <- function(
     lccURL <- "https://drive.google.com/file/d/1ZwEspwpcpZwIYvYEnYmd7Ux44goNvDB2"
   }
   lccTF <- paste0("SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_", year, "_v1_1.tif")
+  } else if (dataVersion == "V2") {
+    if (year == 1985) {
+      lccURL <- paste0("https://drive.google.com/file/d/1iAEEpkVofQBggIJaxwXKcKADU3zka7Wh")
+    } else if (year == 1990) {
+      lccURL <- paste0("https://drive.google.com/file/d/1LK5b2E1y31bwIqWYD53X9ZOt4mWvS_TB")
+    } else if (year == 1995) {
+      lccURL <- paste0("https://drive.google.com/file/d/15pvm2h9X6dreC9rKuC3oxr4c3hHsYRkI")
+    } else if (year == 2000) {
+      lccURL <- paste0("https://drive.google.com/file/d/1ykRG7u__DuMKI_DUGEJs6mXVul8YmRD_")
+    } else if (year == 2005) {
+      lccURL <- paste0("https://drive.google.com/file/d/1eKNGWrwGEFRFOK2TLVXldfd8hB3OsbSG")
+    } else if (year == 2010) {
+      lccURL <- paste0("https://drive.google.com/file/d/1cbKlKlXtjMRVg3_9xjlEWosU0fmLJxXt")
+    } else if (year == 2015) {
+      lccURL <- paste0("https://drive.google.com/file/d/1olWPzlM2SfMC8Fq_uXslJfYIINAd4wGP")
+    } else if (year == 2020) {
+      lccURL <- paste0("https://drive.google.com/file/d/1EGp7LUA7cXMR6KpXDmu617xsjwGM6aIx")
+    } else if (year == 2025) {
+      lccURL <- paste0("https://drive.google.com/file/d/1eb1zEWC3VRycA_aRzTB2ODhWDLZis-YG")
+    }
+    lccTF <- paste0("SCANFI_att_nfiLandcover_CanadaLCCclassCodes_", year, "_v2_20260119.tif")
+  }
 
   ## fix dots
   dots$url <- lccURL
@@ -1322,7 +1394,10 @@ loadkNNSpeciesLayersValidation <- function(
 #'
 #' @template sppEquiv
 #'
-#' @param year which year's layers should be retrieved? One of 2000, 2010, or 2020 (default).
+#' @param year data year for SCANFI data. 2000, 2010, and 2020 possible for V1.
+#'    1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020 (default), 2025 possible for V2.
+#'
+#' @param dataVersion Character. SCANFI product version for data. Default is currently V2. V1 also available.
 #'
 #' @param SCANFINamesCol character string indicating the column in `sppEquiv` containing SCANFI
 #'                       species names. Default `"NFI"` for when `sppEquivalencies_CA` is used.
@@ -1342,16 +1417,17 @@ loadkNNSpeciesLayersValidation <- function(
 #'
 #' @export
 loadSCANFISpeciesLayers <- function(
-  dPath,
-  rasterToMatch = NULL,
-  studyArea = NULL,
-  sppEquiv,
-  year = 2020,
-  SCANFINamesCol = "SCANFI",
-  sppEquivCol = "SCANFI",
-  thresh = 10,
-  url = NULL,
-  ...
+    dPath,
+    rasterToMatch = NULL,
+    studyArea = NULL,
+    sppEquiv,
+    year = 2020,
+    dataVersion = "V2",
+    SCANFINamesCol = "SCANFI",
+    sppEquivCol = "SCANFI",
+    thresh = 10,
+    url = NULL,
+    ...
 ) {
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
@@ -1400,18 +1476,54 @@ loadSCANFISpeciesLayers <- function(
   }
 
   if (is.null(url)) {
-    if (year == 2000) {
-      url <- "https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp"
-    } else if (year == 2010) {
-      url <- "https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE"
-    } else if (year == 2020) {
-      url <- "https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ"
+    if (dataVersion == "V1") {
+      if (!(year %in% c(2000, 2010, 2020))) {
+        stop("SCANFI V1 species do not exist for this year")
+      }
+
+      if (year == 2000) {
+        url <- "https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp"
+      } else if (year == 2010) {
+        url <- "https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE"
+      } else if (year == 2020) {
+        url <- "https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ"
+      }
+
+    } else if (dataVersion == "V2") {
+
+      if (!(year %in% c(1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025))) {
+        stop("SCANFI V2 species does not exist for this year")
+      }
+
+      if (year == 1985) {
+        url <- paste0("https://drive.google.com/file/d/1zXkDkGIJaRB2Cwd7Ld2R7FFswRIDmAj4")
+      } else if (year == 1990) {
+        url <- paste0("https://drive.google.com/file/d/1GbKOGxxLG-pF-jjBjuJC6IuWIU3aVBo2")
+      } else if (year == 1995) {
+        url <- paste0("https://drive.google.com/file/d/1KfAxjccHE51pOmi0OMYqwyRkIhJH7knn")
+      } else if (year == 2000) {
+        url <- paste0("https://drive.google.com/file/d/19sddeWJCJq9uMkDjmtNtXKjOQEDeFKBl")
+      } else if (year == 2005) {
+        url <- paste0("https://drive.google.com/file/d/10Aw9PX_FEEhYHNTraKAb6l9DnaIom2qk")
+      } else if (year == 2010) {
+        url <- paste0("https://drive.google.com/file/d/1fjoiYf0lhkZF3SgDMGPuYB1J4sUmU_Vo")
+      } else if (year == 2015) {
+        url <- paste0("https://drive.google.com/file/d/1FcXFIfscxkO7o5WRTINDZfFnu102IMls")
+      } else if (year == 2020) {
+        url <- paste0("https://drive.google.com/file/d/15T4HIFeqzwp0TuOuxmYoexuXdLFnCZBi")
+      } else if (year == 2025) {
+        url <- paste0("https://drive.google.com/file/d/1jS2sscKe_tcw4qDC-9297_jrulFduyKg")
+      }
     }
   }
 
   driveFiles <- as.data.table(googledrive::with_drive_quiet(googledrive::drive_ls(url)))
   driveFiles <- driveFiles[grepl("SCANFI_sps", name)] ## selecting just species layers
   driveFiles <- driveFiles[grep("tif.", name, invert = TRUE)] ## removing .ovr and .aux files
+  if (dataVersion == "V2") {
+    driveFiles <- driveFiles[grep("prcB_other", name, invert = TRUE)] #Removing generic species layers
+    driveFiles <- driveFiles[grep("prcC_other", name, invert = TRUE)]
+  }
   fileURLs <- paste0("https://drive.google.com/file/d/", driveFiles$id)
   fileNames <- c(driveFiles$name)
   names(fileURLs) <- fileNames
@@ -1480,6 +1592,10 @@ loadSCANFISpeciesLayers <- function(
     stop("None of the selected species were found in the SCANFI layers")
   }
 
+  if (dataVersion == "V1") { #removing 2 species that weren't present in SCANFI V1
+    SCANFInames <- SCANFInames[!SCANFInames %in% c("FRAX_AME", "POPU_GRA")]
+  }
+
   ## define suffix to append to file names
   suffix <- if (basename(cachePath) == "cache") {
     if (is.null(rasterToMatch)) {
@@ -1498,13 +1614,23 @@ loadSCANFISpeciesLayers <- function(
 
   ## select which targetFiles to extract
   ## use sapply to preserve pattern order
-  targetFiles <- sapply(
-    paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif"),
-    USE.NAMES = FALSE,
-    FUN = function(pat) {
-      grep(pat, fileNames, value = TRUE)
-    }
-  )
+  if (dataVersion == "V1") {
+    targetFiles <- sapply(
+      paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif"),
+      USE.NAMES = FALSE,
+      FUN = function(pat) {
+        grep(pat, fileNames, value = TRUE)
+      }
+    )
+  } else if (dataVersion == "V2") {
+    targetFiles <- sapply(
+      paste0("SCANFI_spsCC_", SCANFInames, "_", year, "_v2_20260119.tif"),
+      USE.NAMES = FALSE,
+      FUN = function(pat) {
+        grep(pat, fileNames, value = TRUE)
+      }
+    )
+  }
   ## the grep may partially match several species, resulting on a list.
   targetFiles <- unique(unlist(targetFiles))
 
@@ -1581,14 +1707,22 @@ loadSCANFISpeciesLayers <- function(
   # }
 
   ## appending file name structure to eliminate double matches for subspecies:
-  SCANFInames2 <- paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif")
+  if (dataVersion == "V1") {
+    SCANFInames2 <- paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif")
+  } else if (dataVersion == "V2") {
+    SCANFInames2 <- paste0("SCANFI_spsCC_", SCANFInames, "_", year, "_v2_20260119.tif")
+  }
   correctOrder <- sapply(unique(SCANFInames2), function(x) {
     grep(pattern = x, x = targetFiles, value = TRUE)
   })
   names(speciesLayers) <- names(correctOrder)[match(correctOrder, targetFiles)]
-  names(speciesLayers) <- gsub(paste0("_?S_?", year, "_?v1_?1.tif"), "", names(speciesLayers))
-  names(speciesLayers) <- gsub("SCANFI_?sps_?", "", names(speciesLayers))
-
+  if (dataVersion == "V1") {
+    names(speciesLayers) <- gsub(paste0("_?S_?", year, "_?v1_?1.tif"), "", names(speciesLayers))
+    names(speciesLayers) <- gsub("SCANFI_?sps_?", "", names(speciesLayers))
+  } else if (dataVersion == "V2") {
+    names(speciesLayers) <- gsub(paste0("_", year, "_v2_.*\\.tif"), "", names(speciesLayers))
+    names(speciesLayers) <- gsub("SCANFI_spsCC_", "", names(speciesLayers))
+  }
   layerNames <- names(speciesLayers)
 
   ## converting to a stack because global() is much faster than sapply over the list
@@ -1641,9 +1775,9 @@ loadSCANFISpeciesLayers <- function(
       lapply(
         seq_along(speciesLayers),
         FUN = function(
-          i,
-          rasters = speciesLayers,
-          filenames = postProcessedFilenamesWithStudyAreaName
+    i,
+    rasters = speciesLayers,
+    filenames = postProcessedFilenamesWithStudyAreaName
         ) {
           outFile <- file.path(oPath, paste0(filenames[i]))
           if (!file.exists(outFile)) {

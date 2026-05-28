@@ -6,13 +6,17 @@
 \usage{
 speciesPresentFromSCANFI(
   year = 2020,
+  dataVersion = "V2",
   dPath = asPath("."),
   res = 2400,
   minPctCover = 10
 )
 }
 \arguments{
-\item{year}{One of 2000, 2010, or 2020. Default is 2020.}
+\item{year}{data year for SCANFI data. 2000, 2010, and 2020 possible for V1.
+1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020 (default), 2025 possible for V2.}
+
+\item{dataVersion}{Character. SCANFI product version for data. Default is currently V2. V1 also available.}
 
 \item{dPath}{A character string indicating where to download all the SCANFI layers}
 

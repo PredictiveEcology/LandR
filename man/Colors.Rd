@@ -11,7 +11,7 @@ Colors(ras, cols, n = NULL)
 \item{ras}{A \verb{Raster*} or \code{SpatRaster} class object.}
 
 \item{cols}{a character vector of colours. See examples.
-Can also be a \code{data.frame}, see \link[terra:colors]{terra::coltab}.}
+Can also be a \code{data.frame}, see \link[terra:coltab]{terra::coltab}.}
 
 \item{n}{A numeric scalar giving the number of colours to create.
 Passed to \verb{quickPlot::setColors(ras, n = n) <- }.

@@ -35,6 +35,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Eliot J B McIntire \email{eliot.mcintire@nrcan-rncan.gc.ca} (\href{https://orcid.org/0000-0002-6914-8316}{ORCID})
   \item Alex M Chubaty \email{achubaty@for-cast.ca} (\href{https://orcid.org/0000-0001-7146-8135}{ORCID})
   \item Ceres Barros \email{ceres.barros@ubc.ca} (\href{https://orcid.org/0000-0003-4036-977X}{ORCID})
   \item Ian M S Eddy \email{ian.eddy@nrcan-rncan.gc.ca} (\href{https://orcid.org/0000-0001-7397-2116}{ORCID})

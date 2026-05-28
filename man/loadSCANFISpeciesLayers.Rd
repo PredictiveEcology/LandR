@@ -10,6 +10,7 @@ loadSCANFISpeciesLayers(
   studyArea = NULL,
   sppEquiv,
   year = 2020,
+  dataVersion = "V2",
   SCANFINamesCol = "SCANFI",
   sppEquivCol = "SCANFI",
   thresh = 10,
@@ -32,7 +33,10 @@ See \code{data("sppEquivalencies_CA", "LandR")}.
 For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
 If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
 
-\item{year}{which year's layers should be retrieved? One of 2000, 2010, or 2020 (default).}
+\item{year}{data year for SCANFI data. 2000, 2010, and 2020 possible for V1.
+1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020 (default), 2025 possible for V2.}
+
+\item{dataVersion}{Character. SCANFI product version for data. Default is currently V2. V1 also available.}
 
 \item{SCANFINamesCol}{character string indicating the column in \code{sppEquiv} containing SCANFI
 species names. Default \code{"NFI"} for when \code{sppEquivalencies_CA} is used.}

@@ -8,6 +8,7 @@ prepInputsStandAgeMap(
   rasterToMatch = NULL,
   dataSource = "SCANFI",
   dataYear = 2020,
+  dataVersion = "V2",
   ageURL = NULL,
   ageFun = "terra::rast",
   maskWithRTM = TRUE,
@@ -48,7 +49,10 @@ National Fire Database (NFDB) fire polygons, allowing further stand age correcti
 for burned areas. To suppress this, set \code{fireURL = NULL} or \code{fireURL = NA}.
 }}
 
-\item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN or 2020/2000/2010 for SCANFI.}
+\item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN, 2020 for SCANFI V1,
+or 1985-2025 (5 year intervals) for SCANFI V2.}
+
+\item{dataVersion}{Character. SCANFI product version for data. Default is currently V2. V1 also available.}
 
 \item{ageURL}{URL for age map download. Will be supplied based on \code{dataSource} and \code{dataYear}}
 
