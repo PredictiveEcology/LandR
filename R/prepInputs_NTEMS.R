@@ -84,7 +84,7 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240,
   opts <- terraOptions()
   optsNow <- list(memmax = 4, todisk = TRUE)
   newOpts <- do.call(terraOptions, optsNow)
-  on.exit(do.call(terraOptions, opts[names(optsNow)]))
+  on.exit(do.call(terraOptions, opts[names(optsNow)]), add = TRUE)
   
   keep <- c(210, 81, 220, 230)
   is_keep <- terra::`%in%`(lcc, keep)   # SpatRaster -> 0/1 mask, in C++
