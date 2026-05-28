@@ -1,49 +1,66 @@
+# Thin caller — shared logic lives in PredictiveEcology/actions (reusable workflow).
 on:
   push:
-    branches:
-      - main
-      - development
+    branches: [main, development]
   pull_request:
-    branches:
-      - main
-      - development
+    branches: [main, development]
 
 name: test-coverage
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-coverage:
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: r-lib/actions/setup-pandoc@v2
-
-      - uses: PredictiveEcology/actions/install-spatial-deps@v0.2
-
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          extra-repositories: 'https://PredictiveEcology.r-universe.dev/'
-          use-public-rspm: false
-
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: |
-            any::covr
-            any::sf
-            any::XML
-            BioSIM=?ignore
-            NLMR=?ignore
-
-      - name: Install additional package dependencies
-        run: |
-          pak::pkg_install("remotes")
-          remotes::install_github("RNCan/BioSimClient_R")
-          remotes::install_github("ropensci/NLMR")
-        shell: Rscript {0}
-
-      - name: Test coverage
-        run: covr::codecov()
-        shell: Rscript {0}
+    if: "!contains(github.event.commits[0].message, '[skip-ci]')"
+    uses: PredictiveEcology/actions/.github/workflows/test-coverage.yaml@main
+    secrets: inherit
+    with:
+      ## See R-CMD-check.yaml for `dependencies: NA` rationale.
+      dependencies: 'NA'
+      extra-packages: |
+        any::sf
+        any::XML
+        arrow
+        bbmle
+        covr
+        curl
+        digest
+        dplyr
+        fasterize
+        future
+        future.apply
+        geodata
+        ggalluvial
+        ggpubr
+        ggrepel
+        googledrive
+        httr
+        lqmm
+        MASS
+        memuse
+        parallelly
+        purrr
+        qs2
+        rasterVis
+        RCurl
+        RhpcBLASctl
+        rlang
+        roxygen2
+        R.utils
+        SpaDES.core
+        spelling
+        testthat
+        withr
+        biomod2=?ignore
+        BioSIM=?ignore
+        NLMR=?ignore
+        map=?ignore
+        zonal=?ignore
+      post-install: |
+        pak::pkg_install("remotes")
+        remotes::install_github("RNCan/BioSimClient_R")
+        remotes::install_github("ropensci/NLMR")
+        remotes::install_github("CeresBarros/biomod2@dev_currentCeres")
+        remotes::install_github("PredictiveEcology/map@development")

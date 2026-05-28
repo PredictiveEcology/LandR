@@ -17,7 +17,7 @@ testthat::test_that("test .compareRas, .compareCRS -- rasters only", {
   targetFile <- basename(url)
 
   ras <- prepInputs(url = url, destinationPath = td, targetFile = targetFile)
-  ras2 <- terra::project(ras, "EPSG:2169")
+  ras2 <- terra::project(ras, "+proj=lcc +lat_0=0 +lon_0=-95 +lat_1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs")
   testthat::expect_true(.compareRas(ras, ras))
   testthat::expect_true(.compareRas(ras, ras, ras))
   testthat::expect_error(.compareRas(ras, ras, ras2))
@@ -33,7 +33,7 @@ testthat::test_that("test .compareRas, .compareCRS -- rasters only", {
     url = url, destinationPath = td,
     fun = "raster::raster", targetFile = targetFile
   )
-  ras2 <- raster::projectRaster(ras, crs = terra::crs("EPSG:2169", proj = TRUE))
+  ras2 <- raster::projectRaster(ras, crs = terra::crs("+proj=lcc +lat_0=0 +lon_0=-95 +lat_1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs", proj = TRUE))
   testthat::expect_true(.compareRas(ras, ras))
   testthat::expect_true(.compareRas(ras, ras, ras))
   testthat::expect_error(.compareRas(ras, ras, ras2))
@@ -54,7 +54,7 @@ testthat::test_that("test .compareRas, .compareCRS -- vectors only", {
   testthat::expect_true(.compareRas(v, v, v))
   testthat::expect_true(.compareRas(v, v, v2))
 
-  v2 <- terra::project(v2, "EPSG:2169")
+  v2 <- terra::project(v2, "+proj=lcc +lat_0=0 +lon_0=-95 +lat_1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs")
   testthat::expect_error(.compareRas(v, v2))
   testthat::expect_false(.compareRas(v, v2, stopOnError = FALSE))
 
@@ -98,7 +98,7 @@ testthat::test_that("test .compareRas, .compareCRS -- vectors and rasters", {
   testthat::expect_error(.compareRas(v, ras))
   testthat::expect_false(.compareRas(v, ras, stopOnError = FALSE))
 
-  v2 <- terra::project(v, "EPSG:2169")
+  v2 <- terra::project(v, "+proj=lcc +lat_0=0 +lon_0=-95 +lat_1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs")
   testthat::expect_error(.compareRas(ras, v2, ext = FALSE))
   testthat::expect_false(.compareRas(ras, v2, ext = FALSE, stopOnError = FALSE))
   testthat::expect_true(.compareRas(ras, v2, crs = FALSE, ext = FALSE))

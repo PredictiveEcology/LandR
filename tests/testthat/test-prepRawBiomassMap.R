@@ -4,6 +4,8 @@ testthat::test_that("test prepRawBiomassMap", {
   testthat::skip_on_ci()
 
   skip_if_not_installed("withr")
+  skip_if_not_installed("googledrive")
+  testthat::skip_if_not(googledrive::drive_has_token(), "No Drive token")
 
   withr::local_package("reproducible")
   withr::local_package("SpaDES.tools")
