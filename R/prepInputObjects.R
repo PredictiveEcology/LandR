@@ -584,23 +584,23 @@ prepInputsStandAgeMap <- function(
     }
     if (dataVersion == "V2") {
       if (dataYear == "1985") {
-        Args$url <- paste0("https://drive.google.com/file/d/1KoGbzQZB-wR8LkngAKTZGShDR0ILBK5r")
+        ageURL <- paste0("https://drive.google.com/file/d/1KoGbzQZB-wR8LkngAKTZGShDR0ILBK5r")
       } else if (dataYear == "1990") {
-        Args$url <- paste0("https://drive.google.com/file/d/1083izY1R-uBRdnnJL6KTYTPg3RFKCU6V")
+        ageURL <- paste0("https://drive.google.com/file/d/1083izY1R-uBRdnnJL6KTYTPg3RFKCU6V")
       } else if (dataYear == "1995") {
-        Args$url <- paste0("https://drive.google.com/file/d/12aqGD4YQKrZXUrzSPIOz2DcVY00mQZAT")
+        ageURL <- paste0("https://drive.google.com/file/d/12aqGD4YQKrZXUrzSPIOz2DcVY00mQZAT")
       } else if (dataYear == "2000") {
-        Args$url <- paste0("https://drive.google.com/file/d/1v-9sx1a_-WqKfuULT80QZ1b0CAI8lLGV")
+        ageURL <- paste0("https://drive.google.com/file/d/1v-9sx1a_-WqKfuULT80QZ1b0CAI8lLGV")
       } else if (dataYear == "2005") {
-        Args$url <- paste0("https://drive.google.com/file/d/1HSWZ7aHW9GxfYTI3aAZRz5i2rD9-pymq")
+        ageURL <- paste0("https://drive.google.com/file/d/1HSWZ7aHW9GxfYTI3aAZRz5i2rD9-pymq")
       } else if (dataYear == "2010") {
-        Args$url <- paste0("https://drive.google.com/file/d/1PIC0pvDUZFx7DfauJvB2WsJjgBgkCaXb")
+        ageURL <- paste0("https://drive.google.com/file/d/1PIC0pvDUZFx7DfauJvB2WsJjgBgkCaXb")
       } else if (dataYear == "2015") {
-        Args$url <- paste0("https://drive.google.com/file/d/1_ZGdjepqS3tGHKykAG5SCecic4Qn-Nx-")
+        ageURL <- paste0("https://drive.google.com/file/d/1_ZGdjepqS3tGHKykAG5SCecic4Qn-Nx-")
       } else if (dataYear == "2020") {
-        Args$url <- paste0("https://drive.google.com/file/d/1nXPS3bpFUESYieNfXO25OKlZJEgqtRnD")
+        ageURL <- paste0("https://drive.google.com/file/d/1nXPS3bpFUESYieNfXO25OKlZJEgqtRnD")
       } else if (dataYear == "2025") {
-        Args$url <- paste0("https://drive.google.com/file/d/1mM2z-_sjt9HGv1JQIt2VZkhW_HrldhgT")
+        ageURL <- paste0("https://drive.google.com/file/d/1mM2z-_sjt9HGv1JQIt2VZkhW_HrldhgT")
       } else {
         stop("SCANFI V2 data is currently available for 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, and 2025 only")
       }
