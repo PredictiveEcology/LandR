@@ -89,6 +89,16 @@
   often as the previous implementation, broadleaf **0.58×** and mixedwood **0.28×**, moving
   roughly one in fourteen unwanted pixels out of forest altogether. `"nearestWeighted"`
   gives the same determinism without that bias.
+* `loadSCANFISpeciesLayers()` now lists the SCANFI species-layer folder via
+  `reproducible::listGoogleDriveFolder()` instead of `googledrive::drive_ls()`.
+  When a directory-remap manifest is set (`options(reproducible.urlRemap = ...)`,
+  e.g. one built with `buckethost::makeMirrorManifest(directories = TRUE)`), the
+  SCANFI files are fetched from a public mirror with **no Google
+  authentication** — the immediate use case is training/workshops, where
+  participants can pull SCANFI layers without a Google account or `drive_auth()`.
+  Behaviour is unchanged when no manifest is set: it falls back to `drive_ls()`
+  and authenticates as before. (Requires the companion `reproducible` change that
+  adds `listGoogleDriveFolder()` and directory remaps.)
 * `LANDISDisp()` spiral seed dispersal loop ported to C++ via `Rcpp`
   (~3.5–5.7× faster end-to-end depending on input size; ~5× on landscape-scale
   fixtures of 9 M cells). Memory use also drops dramatically: the

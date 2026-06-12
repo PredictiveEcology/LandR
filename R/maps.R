@@ -1548,14 +1548,20 @@ loadSCANFISpeciesLayers <- function(
     }
   }
 
-  driveFiles <- as.data.table(googledrive::with_drive_quiet(googledrive::drive_ls(url)))
+  ## List the folder via reproducible's remap-aware helper: when a directory
+  ## remap manifest is set (reproducible.urlRemap), the files are enumerated from
+  ## a public mirror with NO Google authentication; otherwise it falls back to
+  ## googledrive::drive_ls(). The returned `url` column is the mirror URL when
+  ## remapped, else the Drive file URL -- used directly below instead of building
+  ## one from the Drive id (the mirror listing carries no Drive id).
+  driveFiles <- reproducible::listGoogleDriveFolder(url)
   driveFiles <- driveFiles[grepl("SCANFI_sps", name)] ## selecting just species layers
   driveFiles <- driveFiles[grep("tif.", name, invert = TRUE)] ## removing .ovr and .aux files
   if (dataVersion == "V2") {
     driveFiles <- driveFiles[grep("prcB_other", name, invert = TRUE)] #Removing generic species layers
     driveFiles <- driveFiles[grep("prcC_other", name, invert = TRUE)]
   }
-  fileURLs <- paste0("https://drive.google.com/file/d/", driveFiles$id)
+  fileURLs <- driveFiles$url
   fileNames <- c(driveFiles$name)
   names(fileURLs) <- fileNames
 
