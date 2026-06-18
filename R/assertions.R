@@ -164,8 +164,14 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
   if (doAssertion) {
     erg <- list()
     if (!missing(ecoregionMap)) {
-      erg[[1]] <- sort(na.omit(unique(factorValues2(ecoregionMap, as.vector(ecoregionMap[]),
-                                                    att = "ecoregionGroup"))))
+      ergMap <- sort(na.omit(unique(factorValues2(ecoregionMap, as.vector(ecoregionMap[]),
+                                                  att = "ecoregionGroup"))))
+      if (length(ergMap) == 0) {
+        stop("ecoregionMap has no 'ecoregionGroup' values; it is likely missing its ",
+             "categories/attribute table. Ensure the raster attribute table is loaded ",
+             "before calling assertERGs.")
+      }
+      erg[[1]] <- ergMap
       if (is.character(erg[[1]])) { # this can happen if SpatRaster
         erg[[1]] <- factor(erg[[1]])
       }

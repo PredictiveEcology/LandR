@@ -138,6 +138,7 @@
 
 * fix bug in `vegTypeMapGenerator()` when `mixedType = 1`;
 * allow `mixedType = 0` in `vegTypeMapGenerator()`;
+* `assertERGs()` now gives a clear error when `ecoregionMap` has no categories instead of a cryptic "subscript out of bounds";
 
 # LandR 1.1.3
 
