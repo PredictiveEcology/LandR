@@ -17,7 +17,8 @@ calc_raster_stats(
   raster,
   polygons = NULL,
   polygon_id = NULL,
-  filter_ids = NULL
+  filter_ids = NULL,
+  counts_df = NULL
 )
 
 plot_raster_stats(
@@ -89,20 +90,30 @@ a summary of statistics . Optionally, zero values can be removed from the
 analysis, and the raster can be aggregated to a lower resolution to speed up plotting.
 }
 \note{
-Large rasters should be processed on disk, where possible, e.g. by setting
-\code{terraOptions(memfrac = 0.0)}.
+Large rasters should be processed on disk wherever possible (see
+\code{\link[terra:terraOptions]{terra::terraOptions()}}). Cap the RAM terra uses per operation with \code{memmax}
+(in GB) and force results to disk with \code{todisk = TRUE}, e.g.
+\verb{terraOptions(memmax = 16, todisk = TRUE, tempdir = <fast local dir>)}.
+Prefer \code{memmax} over \code{memfrac}: \code{memfrac} is a \emph{fraction of free RAM} (not a hard
+cap), and \code{memfrac = 0.0} crashes (terra's block size collapses to 0). Point
+\code{tempdir} at fast \emph{local} storage (NVMe) -- never NFS, and never a tmpfs such
+as \verb{/tmp} on some systems, which is RAM-backed (so a raster "copied to disk"
+there really sits in RAM, e.g. via \code{withr::local_tempdir()}).
+
+For an integer raster, \code{calc_raster_stats()} can be derived from the
+value-frequency table produced by \code{calc_raster_counts()} (every statistic is
+an exact function of it), which avoids reading every pixel into memory.
 }
 \examples{
 if (interactive()) {
   if (requireNamespace("dplyr", quietly = TRUE) &&
       requireNamespace("geodata", quietly = TRUE) &&
       requireNamespace("purrr", quietly = TRUE) &&
-      requireNamespace("withr", quietly = TRUE) &&
-      requireNamespace("zonal", quietly = TRUE)) {
+      requireNamespace("withr", quietly = TRUE)) {
     tmp_pth <- withr::local_tempdir()
 
-    ## work with raster on disk instead of in memory
-    terraOptions(memfrac = 0.0)
+    ## process the raster on disk, with bounded RAM (see @note)
+    terraOptions(memmax = 16, todisk = TRUE, tempdir = tmp_pth)
 
     age <- prepInputsStandAgeMap(
       dataSource = "KNN",
@@ -126,10 +137,12 @@ if (interactive()) {
       polygon_id = id_col
     )
 
+    ## reuse the counts to avoid recomputing the frequency table
     ecozone_stats <- calc_raster_stats(
-     raster = age,
-     polygons = ecozones,
-      polygon_id = id_col
+      raster = age,
+      polygons = ecozones,
+      polygon_id = id_col,
+      counts_df = ecozone_counts
     )
 
     gc()

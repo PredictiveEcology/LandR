@@ -20,6 +20,13 @@
   `options(LandR.LANDISDisp.useCpp = FALSE)`. `Rcpp (>= 1.0.10)` added to
   `Imports` and `LinkingTo`; `digest` added to `Suggests` (used by the
   golden-output hash manifest in tests);
+* `calc_raster_stats()` now derives min/mean/max/quantiles/proportion-zero from
+  the value-frequency table produced by `calc_raster_counts()` instead of
+  reading every pixel via `exactextractr`, keeping memory bounded on very large
+  rasters; it gains a `counts_df` argument to reuse a precomputed table.
+  `plot_raster_stats()` now honours supplied `counts_df`/`stats_df` instead of
+  recomputing them, and fetches the Canada inset once, omitting it gracefully
+  when the source is unavailable. `zonal` removed from `Suggests`;
 * drop support for R 4.2 due to changes in dependency packages;
 * remove deprecated package `crayon` in favour of `cli` instead;
 * remove deprecated package `qs` in favour of `qs2` instead;

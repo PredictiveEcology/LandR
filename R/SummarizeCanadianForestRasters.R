@@ -25,8 +25,19 @@ prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL
 #' a summary of statistics . Optionally, zero values can be removed from the
 #' analysis, and the raster can be aggregated to a lower resolution to speed up plotting.
 #'
-#' @note Large rasters should be processed on disk, where possible, e.g. by setting
-#' `terraOptions(memfrac = 0.0)`.
+#' @note Large rasters should be processed on disk wherever possible (see
+#' [terra::terraOptions()]). Cap the RAM terra uses per operation with `memmax`
+#' (in GB) and force results to disk with `todisk = TRUE`, e.g.
+#' `terraOptions(memmax = 16, todisk = TRUE, tempdir = <fast local dir>)`.
+#' Prefer `memmax` over `memfrac`: `memfrac` is a *fraction of free RAM* (not a hard
+#' cap), and `memfrac = 0.0` crashes (terra's block size collapses to 0). Point
+#' `tempdir` at fast *local* storage (NVMe) -- never NFS, and never a tmpfs such
+#' as `/tmp` on some systems, which is RAM-backed (so a raster "copied to disk"
+#' there really sits in RAM, e.g. via `withr::local_tempdir()`).
+#'
+#' For an integer raster, `calc_raster_stats()` can be derived from the
+#' value-frequency table produced by `calc_raster_counts()` (every statistic is
+#' an exact function of it), which avoids reading every pixel into memory.
 #'
 #' @param raster A `SpatRaster` object.
 #'
@@ -43,12 +54,11 @@ prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL
 #'   if (requireNamespace("dplyr", quietly = TRUE) &&
 #'       requireNamespace("geodata", quietly = TRUE) &&
 #'       requireNamespace("purrr", quietly = TRUE) &&
-#'       requireNamespace("withr", quietly = TRUE) &&
-#'       requireNamespace("zonal", quietly = TRUE)) {
+#'       requireNamespace("withr", quietly = TRUE)) {
 #'     tmp_pth <- withr::local_tempdir()
 #'
-#'     ## work with raster on disk instead of in memory
-#'     terraOptions(memfrac = 0.0)
+#'     ## process the raster on disk, with bounded RAM (see @note)
+#'     terraOptions(memmax = 16, todisk = TRUE, tempdir = tmp_pth)
 #'
 #'     age <- prepInputsStandAgeMap(
 #'       dataSource = "KNN",
@@ -72,10 +82,12 @@ prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL
 #'       polygon_id = id_col
 #'     )
 #'
+#'     ## reuse the counts to avoid recomputing the frequency table
 #'     ecozone_stats <- calc_raster_stats(
-#'      raster = age,
-#'      polygons = ecozones,
-#'       polygon_id = id_col
+#'       raster = age,
+#'       polygons = ecozones,
+#'       polygon_id = id_col,
+#'       counts_df = ecozone_counts
 #'     )
 #'
 #'     gc()
@@ -128,61 +140,66 @@ calc_raster_counts <- function(raster, polygons = NULL, polygon_id = NULL, filte
     dplyr::arrange(ID, value)
 }
 
-prop_zero <- function(df, ...) {
-  stopifnot(requireNamespace("dplyr", quietly = TRUE))
+## Weighted quantile from a value-frequency table, using the inverse-ECDF
+## definition (smallest value whose cumulative proportion reaches `p`). This is
+## well-behaved for integer rasters with large point masses (e.g. many zeros),
+## where an interpolated definition would report a non-zero median even when the
+## majority of cells are zero.
+weighted_quantile <- function(value, count, probs) {
+  o <- order(value)
+  value <- value[o]
+  count <- count[o]
+  cprop <- cumsum(count) / sum(count)
+  vapply(probs, function(p) value[which(cprop >= p)[1]], numeric(1))
+}
 
-  na.omit(df) |> dplyr::summarise(prop_zero = sum(value == 0) / length(value))
+## Derive per-polygon summary statistics from a value-frequency table (as
+## returned by `calc_raster_counts()`). For an integer raster every statistic is
+## an exact function of that table, so only a few hundred rows per zone are held
+## in memory rather than every pixel.
+stats_from_counts <- function(counts_df) {
+  stopifnot(all(c("ID", "value", "count") %in% names(counts_df)))
+
+  counts_df <- counts_df[!is.na(counts_df$value), , drop = FALSE]
+
+  split(counts_df, counts_df$ID) |>
+    lapply(function(d) {
+      tot <- sum(d$count)
+      q <- weighted_quantile(d$value, d$count, c(0.25, 0.50, 0.75))
+      data.frame(
+        ID = d$ID[1],
+        min = min(d$value),
+        mean = sum(d$value * d$count) / tot,
+        max = max(d$value),
+        q25 = q[1],
+        q50 = q[2], ## median
+        q75 = q[3],
+        prop_zero = sum(d$count[d$value == 0]) / tot
+      )
+    }) |>
+    do.call(what = rbind) |>
+    `rownames<-`(NULL)
 }
 
 #' @export
 #' @rdname raster_stats
-calc_raster_stats <- function(raster, polygons = NULL, polygon_id = NULL, filter_ids = NULL) {
-  stopifnot(
-    requireNamespace("dplyr", quietly = TRUE),
-    requireNamespace("purrr", quietly = TRUE),
-    requireNamespace("zonal", quietly = TRUE),
-    !is.null(polygons),
-    !is.null(polygon_id)
-  )
+calc_raster_stats <- function(raster, polygons = NULL, polygon_id = NULL,
+                              filter_ids = NULL, counts_df = NULL) {
+  stopifnot(requireNamespace("dplyr", quietly = TRUE))
 
-  polygons <- prep_polygons(raster, polygons, polygon_id, filter_ids) |> sf::st_as_sf()
+  ## Statistics are derived from the on-disk value-frequency table rather than by
+  ## reading every pixel, which keeps memory use bounded on very large rasters.
+  ## (For a *continuous* / float raster the frequency table is no longer small;
+  ## summarize out-of-core instead -- e.g. with exactextractr/zonal, or by
+  ## extracting to a parquet dataset partitioned by zone and using `arrow`.)
+  ## Pass a precomputed `counts_df` (from calc_raster_counts()) to avoid
+  ## recomputing the frequency table.
+  if (is.null(counts_df)) {
+    stopifnot(!is.null(polygons), !is.null(polygon_id))
+    counts_df <- calc_raster_counts(raster, polygons, polygon_id, filter_ids)
+  }
 
-  ## functions known to exactextractr::extract_extract()
-  ee_funs <- list("min", "mean", "max", "quantile")
-
-  ## custom funs for use with
-  my_funs <- list("prop_zero")
-
-  all_funs <- append(ee_funs, my_funs)
-  ll <- lapply(all_funs, function(fun) {
-    gc()
-
-    if (fun == "quantile") {
-      zonal::execute_zonal(
-        data = raster,
-        geom = polygons,
-        ID = "ID",
-        fun = fun,
-        join = FALSE,
-        quantiles = c(0.25, 0.50, 0.75)
-      ) |>
-        setNames(c("ID", "q25", "q50", "q75")) ## q50 is the median
-    } else if (fun == "prop_zero") {
-      zonal::execute_zonal(
-        data = raster,
-        geom = polygons,
-        ID = "ID",
-        fun = prop_zero, ## pass function, not character
-        join = FALSE,
-        summarize_df = TRUE
-      ) |>
-        setNames(c("ID", "prop_zero"))
-    } else {
-      zonal::execute_zonal(data = raster, geom = polygons, ID = "ID", fun = fun, join = FALSE) |>
-        setNames(c("ID", fun))
-    }
-  }) |>
-    purrr::reduce(dplyr::inner_join, by = "ID")
+  stats_from_counts(counts_df)
 }
 
 #' @param csv_file Optional. Base filename to save the output CSV file.
@@ -259,9 +276,15 @@ plot_raster_stats <- function(
     raster <- terra::clamp(raster, lower = 1, value = FALSE) # also clamp original raster for consistency
   }
 
-  ## Calculated raster stats
-  counts_df <- calc_raster_counts(raster, polygons, polygon_id, filter_ids)
-  stats_df <- calc_raster_stats(raster, polygons, polygon_id, filter_ids)
+  ## Calculate raster stats only when not supplied. These can be very expensive
+  ## on large rasters, so callers may pass precomputed `counts_df`/`stats_df`
+  ## (e.g. from calc_raster_counts()/calc_raster_stats()) to avoid recomputation.
+  if (is.null(counts_df)) {
+    counts_df <- calc_raster_counts(raster, polygons, polygon_id, filter_ids)
+  }
+  if (is.null(stats_df)) {
+    stats_df <- calc_raster_stats(raster, polygons, polygon_id, filter_ids)
+  }
 
   polygons <- prep_polygons(raster, polygons, polygon_id, filter_ids) ## do after calculating stats
 
@@ -276,6 +299,25 @@ plot_raster_stats <- function(
       file.path(output_dir, .suffix(csv_file, "_stats")),
       row.names = FALSE
     )
+  }
+
+  ## Canada outline for the inset map: fetch ONCE (not once per polygon, which
+  ## is slow and fragile), and degrade gracefully to no inset if the data source
+  ## is temporarily unavailable rather than aborting the whole run.
+  canada <- NULL
+  if (inset_canada) {
+    canada <- tryCatch(
+      gadm_canada(src = "geodata", dst_path = tempdir()) |> terra::project(raster),
+      error = function(e) NULL
+    )
+    if (is.null(canada)) {
+      warning(
+        "Could not retrieve the Canada boundary for the inset map; ",
+        "plotting without inset.",
+        call. = FALSE
+      )
+      inset_canada <- FALSE
+    }
   }
 
   ## Build plots for each polygon
@@ -330,11 +372,7 @@ plot_raster_stats <- function(
       ggplot2::labs(title = paste("Map:", region_val), x = "Longitude", y = "Latitude")
 
     if (inset_canada) {
-      ## Canada outline for inset
-      canada <- gadm_canada(src = "geodata", dst_path = tempdir()) |> terra::project(raster)
-      canada_sf <- sf::st_as_sf(canada)
-
-      ## Inset map
+      ## Inset map (uses the Canada outline fetched once, above)
       inset_plot <- ggplot2::ggplot() +
         ggplot2::geom_sf(data = canada, fill = "grey85", color = NA) +
         ggplot2::geom_sf(data = poly, fill = "darkred", color = NA) +

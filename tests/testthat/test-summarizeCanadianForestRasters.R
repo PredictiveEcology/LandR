@@ -6,7 +6,6 @@ test_that("calc_raster_stats and plot_raster_stats work", {
   testthat::skip_if_not_installed("geodata")
   testthat::skip_if_not_installed("purrr")
   testthat::skip_if_not_installed("withr")
-  testthat::skip_if_not_installed("zonal")
 
   td <- withr::local_tempdir("dest_")
 
