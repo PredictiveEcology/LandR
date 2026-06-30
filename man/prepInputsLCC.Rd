@@ -19,9 +19,11 @@ prepInputsLCC(
 and save the file that comes from \code{url} and is also where the function
 will look for \code{archive} or \code{targetFile}. NOTE (still experimental):
 To prevent repeated downloads in different locations, the user can also set
-\code{options("reproducible.inputPaths")} to one or more local file paths to
+\code{options("reproducible.destinationPathShared")} to one or more local file paths to
 search for the file before attempting to download. Default for that option is
-\code{NULL} meaning do not search locally.}
+\code{NULL} meaning do not search locally. The previous name
+\code{options("reproducible.inputPaths")} is still accepted as a backwards-compatible
+alias.}
 
 \item{method}{passed to \link[terra:intersect]{terra::intersect} or \link[raster:intersect]{raster::intersect},
 and \link[reproducible:prepInputs]{reproducible::prepInputs}}
@@ -32,8 +34,7 @@ and \link[reproducible:prepInputs]{reproducible::prepInputs}}
 or \code{terra::writeRaster} (for \code{writeTo}) and not used for \code{cropTo}, as well \code{postProcess}'s
 \code{rasterToMatch} and \code{studyArea} arguments (see below). Commonly used arguments might be
 \code{method}, \code{touches}, and \code{datatype}. If \code{filename} is passed, it will be ignored; use
-\verb{writeTo = }. If \code{reproducible.gdalwarp = TRUE}, then these will be passed to the
-\verb{gdal*} functions. See them for details.}
+\verb{writeTo = }.}
 }
 \description{
 A wrapper around \code{prepInputs} for the Canadian Land Cover Classification product(s).

@@ -27,6 +27,10 @@
   `plot_raster_stats()` now honours supplied `counts_df`/`stats_df` instead of
   recomputing them, and fetches the Canada inset once, omitting it gracefully
   when the source is unavailable. `zonal` removed from `Suggests`;
+* **now requires `reproducible (>= 3.1.1.9063)`** following non-backwards-compatible
+  changes to the `reproducible` API: `options("reproducible.gdalwarp")` was removed,
+  and `reproducible.inputPaths` was renamed to `reproducible.destinationPathShared`
+  (the old name remains as a deprecated alias);
 * drop support for R 4.2 due to changes in dependency packages;
 * remove deprecated package `crayon` in favour of `cli` instead;
 * remove deprecated package `qs` in favour of `qs2` instead;
