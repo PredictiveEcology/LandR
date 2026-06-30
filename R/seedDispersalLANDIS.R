@@ -829,8 +829,8 @@ spiralDistances <- function(pixelGroupMap, maxDis, cellSize) {
 
 #' Rcpp-backed spiral seed dispersal loop.
 #'
-#' Drop-in replacement for [spiralSeedDispersalR()] that performs the spiral
-#' walk in C++ via [spiralLoopCpp()]. All preprocessing (spiral computation,
+#' Drop-in replacement for `spiralSeedDispersalR()` that performs the spiral
+#' walk in C++ via `spiralLoopCpp()`. All preprocessing (spiral computation,
 #' Ward probability table, receiver row prep) stays in R; only the inner loop
 #' is delegated. The C++ loop draws the same number of uniform random values
 #' in the same order as the R reference (which uses
