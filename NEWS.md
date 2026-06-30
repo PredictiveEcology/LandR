@@ -1,12 +1,36 @@
 # LandR (development version)
 
-* `makeAndCleanInitialCohortData()` now `stop()`s with an informative message
-  naming the species that cannot be age-imputed, instead of the cryptic
-  `predict.merMod()` "non-conformable arguments": a species with cohorts needing
-  age imputation but no usable known-age rows to fit the age model (all dropped
-  for zero biomass and/or cover) is absent from the model fit yet present in the
-  prediction set, so its fixed-effect `speciesCode` has no coefficient. A `TODO`
-  in the code outlines fix options;
+## Breaking changes
+
+* drop support for R 4.2 due to changes in dependency packages;
+* remove `rasterRead()` to use version from `reproducible`;
+* `columnsForPixelGroups` is now a function (i.e., use `columnsForPixelGroups()` for consistent `pixelGroup` definitions);
+
+## Dependency changes
+
+* **now requires `reproducible (>= 3.1.1.9063)`** following non-backwards-compatible
+  changes to the `reproducible` API: `options("reproducible.gdalwarp")` was removed,
+  and `reproducible.inputPaths` was renamed to `reproducible.destinationPathShared`
+  (the old name remains as a deprecated alias);
+* remove deprecated package `crayon` in favour of `cli` instead;
+* remove deprecated package `qs` in favour of `qs2` instead;
+* move `ggpubr` to Suggests;
+* add `arrow` to Suggests;
+
+## New features
+
+* add functions to visualize vegetation type transitions;
+* new function `cohortDefinitionCols()` to ensure consistent cohort definitions;
+* new function `lccMapGenerator()` to calculate landcover classes from `cohortData` and `pixelGroupMap`;
+* add new `prepInputs_NTEMS_DominantSpecies` function for importing dominant species layers from NTEMS website;
+* add new `speciesPresentFromNTEMS` function to import dominant species layer from NTEMS and create factor raster to be hosted on Google drive;
+* add `loadSCANFISpeciesLayers` and `prepSpeciesLayers_SCANFI` functions for loading SCANFI species data from Google drive;
+* add `adjustAgeToLongevity` to adjust initial cohort ages based on `longevity` for each species;
+* add `studyAreaEco` function to extend `studyArea` to ecological boundaries;
+  - `studyAreaEco` allows `studyArea = NULL`, uses `type = "ecozone"` by default;
+* add `plot_raster_stats` and `calc_raster_counts` for generating summaries of numeric rasters in Canada;
+
+## Enhancements
 
 * `LANDISDisp()` spiral seed dispersal loop ported to C++ via `Rcpp`
   (~3.5–5.7× faster end-to-end depending on input size; ~5× on landscape-scale
@@ -27,46 +51,35 @@
   `plot_raster_stats()` now honours supplied `counts_df`/`stats_df` instead of
   recomputing them, and fetches the Canada inset once, omitting it gracefully
   when the source is unavailable. `zonal` removed from `Suggests`;
-* **now requires `reproducible (>= 3.1.1.9063)`** following non-backwards-compatible
-  changes to the `reproducible` API: `options("reproducible.gdalwarp")` was removed,
-  and `reproducible.inputPaths` was renamed to `reproducible.destinationPathShared`
-  (the old name remains as a deprecated alias);
-* drop support for R 4.2 due to changes in dependency packages;
-* remove deprecated package `crayon` in favour of `cli` instead;
-* remove deprecated package `qs` in favour of `qs2` instead;
-* move `ggpubr` to Suggests;
-* add `arrow` to Suggests;
+* `makeAndCleanInitialCohortData()` now `stop()`s with an informative message
+  naming the species that cannot be age-imputed, instead of the cryptic
+  `predict.merMod()` "non-conformable arguments": a species with cohorts needing
+  age imputation but no usable known-age rows to fit the age model (all dropped
+  for zero biomass and/or cover) is absent from the model fit yet present in the
+  prediction set, so its fixed-effect `speciesCode` has no coefficient. A `TODO`
+  in the code outlines fix options (see #195);
 * SCANFI and 2020 now default data source and year for stand age and biomass functions;
-* `dropTerm` now can deal with random effects better (#105);
-* `prepRawBiomassMap` - needed `overwrite = TRUE` for cases where download was corrupt;
-* `prepRawBiomassMap` needs `httr2` package as remote site is failing with `download.file`;
-* add functions to visualize vegetation type transitions;
 * use `writeTo` instead of `filename2` in `prepInputs()` and related calls, following changes in `reproducible`;
-* remove `rasterRead()` to use version from `reproducible`;
-* `columnsForPixelGroups` is now a function (i.e., use `columnsForPixelGroups()` for consistent `pixelGroup` definitions);
-* new function `cohortDefinitionCols()` to ensure consistent cohort definitions;
-* new function `lccMapGenerator()` to calculate landcover classes from `cohortData` and `pixelGroupMap`;
-* don't delete `CA_forest_VLCE2` raster in `prepInputs_NTEMS_LCC_FAO()` (#110);
 * `minRelativeB` defaults updated based on discussion surrounding over-representation of shade tolerant species establishing and generating unreasonably high levels of understory cohorts;
-* add new `prepInputs_NTEMS_DominantSpecies` function for importing dominant species layers from NTEMS website;
-* add new `speciesPresentFromNTEMS` function to import dominant species layer from NTEMS and create factor raster to be hosted on Google drive;
 * update `speciesInStudyArea` function to create `dataSource` parameter to direct function to download KNN or NTEMS factor raster from google drive and create associated species list;
 * update `prepRawBiomassMap` function to allow for incorporation of NTEMS or SCANFI biomass;
 * update `prepInputsStandAgeMap` function to allow for incorporation of SCANFI age map;
-* add `loadSCANFISpeciesLayers` and `prepSpeciesLayers_SCANFI` functions for loading SCANFI species data from Google drive;
-* add `adjustAgeToLongevity` to adjust initial cohort ages based on `longevity` for each species;
-* add `studyAreaEco` function to extend `studyArea` to ecological boundaries;
-  - `studyAreaEco` allows `studyArea = NULL`, uses `type = "ecozone"` by default;
 * update documentation and citations for `prepSpeciesLayers_*` functions;
-* corrected some BC forestry tree species entries;
 * standardized `sppEquivalencies_CA` naming convention for provincial forestry columns with `<province>_forestry` ;
 * remove undifferentiated tree species variants from provincial forestry columns in `sppEquivalencies_CA`;
 * `plotVTM` now does not use `Plot` internally (with #140);
 * several minor updates to `loadSCANFISpeciesLayers`, `prepSpeciesLayers_SCANFI` to address more edge cases;
 * `prepSpeciesLayers_SCANFI` updates to improve join `sppEquiv` so "multiple - to - one" can be used;
-* add `plot_raster_stats` and `calc_raster_counts` for generating summaries of numeric rasters in Canada;
-* minor bug fixes to `prepInputsFireYear` pertaining to file structure of NFDB data;
 * improved transition plots, use `arrow` datasets to minimize memory use (important for large study areas);
+
+## Bug fixes
+
+* `dropTerm` now can deal with random effects better (#105);
+* `prepRawBiomassMap` - needed `overwrite = TRUE` for cases where download was corrupt;
+* `prepRawBiomassMap` needs `httr2` package as remote site is failing with `download.file`;
+* don't delete `CA_forest_VLCE2` raster in `prepInputs_NTEMS_LCC_FAO()` (#110);
+* corrected some BC forestry tree species entries;
+* minor bug fixes to `prepInputsFireYear` pertaining to file structure of NFDB data;
 
 # LandR 1.1.5
 
