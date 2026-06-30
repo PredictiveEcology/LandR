@@ -1264,6 +1264,24 @@ makeAndCleanInitialCohortData <- function(
       # paste with capture.output keeps table structure intact
       messageDF(outAge$rsq, 3, "blue")
 
+      ## A species in cohortDataMissingAge (needs an age imputed) can be absent from the fit set
+      ## cohortDataMissingAgeUnique when all its known-age cohorts were dropped just above for zero
+      ## biomass and/or cover. The age model then has no coefficient for that fixed-effect speciesCode,
+      ## so predict.merMod() below errors with the cryptic "non-conformable arguments" (allow.new.levels
+      ## = TRUE only forgives new RANDOM-effect levels, not fixed-effect speciesCode). Name the species.
+      ## TODO: handle gracefully rather than erroring -- e.g. enlarge studyArea_biomassParam (only helps
+      ## if the species is under-sampled, not structurally cover==0 in the data); or restrict the predict
+      ## newdata to species present in the fit set and fallback-impute the rest (e.g. ecoregion mean age);
+      ## or make imputeBadAgeModel tolerant of unseen fixed-effect speciesCode levels.
+      droppedSpecies <- setdiff(unique(as.character(cohortDataMissingAge$speciesCode)),
+                                unique(as.character(cohortDataMissingAgeUnique$speciesCode)))
+      if (length(droppedSpecies) > 0L) {
+        stop("Cannot impute missing cohort ages: species ", paste(shQuote(droppedSpecies), collapse = ", "),
+             " have no usable rows to fit the age model (all their known-age cohorts had zero biomass ",
+             "and/or cover), so predict() below would fail with 'non-conformable arguments'. ",
+             "See the TODO above for fixes.", call. = FALSE)
+      }
+
       ## allow.new.levels = TRUE because some groups will have only NA for age for all species
       cohortDataMissingAge[,
         imputedAge := pmax(

@@ -1,5 +1,13 @@
 # LandR (development version)
 
+* `makeAndCleanInitialCohortData()` now `stop()`s with an informative message
+  naming the species that cannot be age-imputed, instead of the cryptic
+  `predict.merMod()` "non-conformable arguments": a species with cohorts needing
+  age imputation but no usable known-age rows to fit the age model (all dropped
+  for zero biomass and/or cover) is absent from the model fit yet present in the
+  prediction set, so its fixed-effect `speciesCode` has no coefficient. A `TODO`
+  in the code outlines fix options;
+
 * `LANDISDisp()` spiral seed dispersal loop ported to C++ via `Rcpp`
   (~3.5–5.7× faster end-to-end depending on input size; ~5× on landscape-scale
   fixtures of 9 M cells). Memory use also drops dramatically: the
