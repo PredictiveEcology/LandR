@@ -53,17 +53,17 @@ BioSIM_getWindAnnual <- function(dem, years, climModel = "GCM4", rcp = "RCP45") 
     st <- system.time({
       ## TODO: need to split, apply, and recombine when nrow(locations) > 5000
       wind <- Cache(
-        BioSIM::getModelOutput,
+        BioSIM::generateWeather,
         fromYr = years[1],
         toYr = rev(years)[1],
         id = locations$Name,
         latDeg = locations$Lat,
         longDeg = locations$Long,
         elevM = locations$Elev,
-        modelName = windModel,
+        modelNames = windModel,
         rcp = rcp,
         climModel = climModel
-      )
+      )[[windModel]] ## generateWeather() returns a named list, one df per model
     })
 
     message("Fetched ", NROW(wind), " locations in ", st[3], "s.")
@@ -119,17 +119,17 @@ BioSIM_getWindMonthly <- function(dem, years, months, climModel = "GCM4", rcp = 
     st <- system.time({
       ## TODO: need to split, apply, and recombine when nrow(locations) > 5000
       wind <- Cache(
-        BioSIM::getModelOutput,
+        BioSIM::generateWeather,
         fromYr = years[1],
         toYr = rev(years)[1],
         id = locations$Name,
         latDeg = locations$Lat,
         longDeg = locations$Long,
         elevM = locations$Elev,
-        modelName = windModel,
+        modelNames = windModel,
         rcp = rcp,
         climModel = climModel
-      )
+      )[[windModel]] ## generateWeather() returns a named list, one df per model
     })
 
     message("Fetched ", NROW(wind), " locations in ", st[3], "s.")
@@ -177,14 +177,14 @@ BioSIM_getMPBSLR <- function(dem, years, SLR = "R", climModel = "GCM4", rcp = "R
     st <- system.time({
       ## TODO: need to split, apply, and recombine when nrow(locations) > 5000
       slr <- lapply(years, function(yr) { ## TODO: use future_lapply?
-        BioSIM::getModelOutput(
+        BioSIM::generateWeather(
           fromYr = yr - 1,
           toYr = yr,
           id = locations$Name,
           latDeg = locations$Lat,
           longDeg = locations$Long,
           elevM = locations$Elev,
-          modelName = mpbSLRmodel,
+          modelNames = mpbSLRmodel,
           rep = 1, ## TODO: how many?
           rcp = rcp,
           climModel = climModel
