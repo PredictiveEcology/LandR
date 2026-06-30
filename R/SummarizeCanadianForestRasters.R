@@ -350,8 +350,6 @@ plot_raster_stats <- function(
       next
     }
 
-    value_col <- terra::names(r_mask)
-
     ## Histogram from counts_df
     poly_counts_binned <- poly_counts |>
       dplyr::mutate(bin = floor(value / bin_width) * bin_width) |>
@@ -364,18 +362,23 @@ plot_raster_stats <- function(
       ggplot2::labs(title = paste("Histogram:", region_val), x = raster_label, y = "Count")
 
     ## Main map
+    ## raster + polygon outline -- use tidyterra for SpatRaster/SpatVector (mixing
+    ## terra objects with ggplot2::geom_sf() does not work). geom_spatraster()
+    ## auto-maps the (single) layer's values to `fill`; a continuous scale is
+    ## required for the continuous raster (scale_fill_viridis_d() collapsed every
+    ## cell to one colour -> solid rectangle).
     map_plot_base <- ggplot2::ggplot() +
-      tidyterra::geom_spatraster(data = r_mask, aes(fill = !!value_col)) +
-      ggplot2::geom_sf(data = poly, color = "black", fill = NA) +
-      ggplot2::scale_fill_viridis_d(name = raster_label, na.value = "transparent") +
+      tidyterra::geom_spatraster(data = r_mask) +
+      tidyterra::geom_spatvector(data = poly, color = "black", fill = NA) +
+      ggplot2::scale_fill_viridis_c(name = raster_label, na.value = "transparent") +
       ggplot2::theme_minimal() +
       ggplot2::labs(title = paste("Map:", region_val), x = "Longitude", y = "Latitude")
 
     if (inset_canada) {
       ## Inset map (uses the Canada outline fetched once, above)
       inset_plot <- ggplot2::ggplot() +
-        ggplot2::geom_sf(data = canada, fill = "grey85", color = NA) +
-        ggplot2::geom_sf(data = poly, fill = "darkred", color = NA) +
+        tidyterra::geom_spatvector(data = canada, fill = "grey85", color = NA) +
+        tidyterra::geom_spatvector(data = poly, fill = "darkred", color = NA) +
         ggplot2::theme_void() +
         ggplot2::theme(
           panel.border = ggplot2::element_rect(color = "black", fill = NA, linewidth = 1)
