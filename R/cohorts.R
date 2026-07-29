@@ -611,19 +611,26 @@ describeCohortData <- function(cohortData) {
 
 #' Convert Land Cover Classes (LCC) to another value in its neighbourhood
 #'
-#' This will search around the pixels on `rstLCC` that have
-#' `classesToReplace`, and search in iteratively increasing
-#' radii outwards for other Land Cover Classes than the those indicated in
-#' `classesToReplace`. This will constrain
-#' It will then take the cohorts that were in pixels with `classesToReplace`
-#' and assign them new values in the output object. This function will
-#' also check that it must be an `ecoregionCode` that already exists in
-#' `cohortData`, i.e., not create new `ecoregionCode` values. See Details.
+#' This searches around the pixels on `rstLCC` that have `classesToReplace` for the
+#' nearest neighbouring Land Cover Class other than those indicated in
+#' `classesToReplace`, and assigns the cohorts in those pixels the corresponding new
+#' `ecoregionCode`. Replacement codes must already exist in `availableERC_by_Sp`,
+#' i.e., no new `ecoregionCode` values are created. See Details.
 #'
 #' @details
 #' This function is designed to be used in highly constrained situations, where it is not
 #' just replacing a Land Cover Class by a neighbouring Land Cover Class. But it can
 #' be used for the simpler cases of simply replacing a Land Cover Class.
+#'
+#' Each pixel whose value is in `classesToReplace` is assigned the *nearest* available
+#' `initialEcoregionCode`. For each candidate land-cover class present in `rstLCC`, the
+#' distance from every pixel to the nearest cell of that class is computed with a single
+#' vectorized [terra::distance()] call; each unwanted pixel is then given the closest
+#' class whose implied `initialEcoregionCode` is available for that pixel's ecoregion
+#' (and all of its `speciesCode`s). Ties break to the lowest land-cover class, so the
+#' result is deterministic. This replaces an earlier iterative `spread2()`-based search
+#' whose run time grew with the square of the radius of the largest contiguous block of
+#' `classesToReplace`, which could take hours on large study areas with big lakes or burns.
 #'
 #' @param pixelClassesToReplace Deprecated. Use `classesToReplace`
 #'
@@ -726,7 +733,6 @@ convertUnwantedLCC <- function(
   if (doAssertion) {
     #  stop("values of 34 and 35 on pixelCohortData and sim$LCC2005 don't match")
   }
-  iterations <- 1
   # remove the lines that have the code "classesToReplace"
   availableERG2 <- if (hasPreDash) {
     availableERC_by_Sp[-which(gsub(".*_", "", initialEcoregionCode) %in% classesToReplace)]
@@ -757,123 +763,81 @@ convertUnwantedLCC <- function(
     numCharLCCCodes <- numCharIEC
   }
 
-  currentLenUnwantedPixels <- length(theUnwantedPixels)
-  repeatsOnSameUnwanted <- 0
-
-  while (length(theUnwantedPixels) > 0) {
-    message("Converting unwanted LCCs: ", length(theUnwantedPixels), " pixels remaining.")
-    out <- spread2(
-      rstLCC,
-      start = theUnwantedPixels,
-      asRaster = FALSE,
-      iterations = iterations,
-      allowOverlap = TRUE,
-      spreadProb = 1
-    )
-    out <- out[initialPixels != pixels] # rm pixels which are same as initialPixels --> these are known wrong
-    iterations <- iterations + 1
-    out[, lcc := as.vector(rstLCC[])[pixels]]
-    out[lcc %in% c(classesToReplace), lcc := NA]
-    out <- na.omit(out)
-    out5 <- availableERC_by_Sp[
-      out[, state := NULL],
-      allow.cartesian = TRUE,
-      on = c("pixelIndex" = "initialPixels"),
-      nomatch = NA
-    ] # join the availableERC_by_Sp which has initialEcoregionCode
-
-    if (hasPreDash) {
-      out5[,
-        possERC := paste0(
-          ecoregion,
-          "_",
-          paddedFloatToChar(as.integer(lcc), padL = numCharLCCCodes, padR = 0)
-        )
-      ]
-    } else {
-      out5[, possERC := lcc]
-    }
-    out7 <- out5[
-      availableERG2,
-      on = c("speciesCode", "possERC" = "initialEcoregionCode"),
-      nomatch = NA
-    ]
-    out6 <- na.omit(out7)
-
-    # These ones are missing at least something in the new possERC
-    possERCToRm <- out5[!availableERG2, on = c("speciesCode", "possERC" = "initialEcoregionCode")]
-    out6 <- out6[!possERC %in% unique(possERCToRm$possERC)]
-
-    # sanity check -- don't let an infinite loop
-    if (currentLenUnwantedPixels == length(theUnwantedPixels)) {
-      repeatsOnSameUnwanted <- repeatsOnSameUnwanted + 1
-    } else {
-      currentLenUnwantedPixels <- length(theUnwantedPixels)
-      repeatsOnSameUnwanted <- 0
-    }
-
-    if (repeatsOnSameUnwanted > 5) {
-      out2 <- data.table(newPossLCC = NA, pixelIndex = theUnwantedPixels, ecoregionGroup = NA)
-      message(
-        "  removing ",
-        NROW(theUnwantedPixels),
-        " pixel of class ",
-        paste(rstLCC[theUnwantedPixels], collapse = ", "),
-        " because couldn't",
-        " find a suitable replacement"
-      )
-      pixelsToNA <- theUnwantedPixels
-      theUnwantedPixels <- integer()
-    }
-
-    if (NROW(out6) > 0) {
-      ## take random sample of available, weighted by abundance
-      rowsToKeep <- out6[, list(keep = .resample(.I, 1)), by = c("pixelIndex")]
-      out8 <- out6[rowsToKeep$keep]
-      out2 <- out8[, list(newPossLCC = lcc, pixelIndex)]
-      if (hasPreDash) {
-        out2[, initialEcoregion := substr(out8[, initialEcoregionCode], 1, numCharEcoregion)]
-        out2[,
-          ecoregionGroup := paste0(
-            initialEcoregion,
-            "_",
-            paddedFloatToChar(as.integer(newPossLCC), padL = numCharLCCCodes, padR = 0)
-          )
-        ] #nolint
-        out2[, initialEcoregion := NULL]
-      } else {
-        out2[, ecoregionGroup := as.integer(newPossLCC)] #nolint
-      }
-
-      ## remove combinations of ecoregionGroup and speciesCode that don't exist
-      ## -- Now this excludes B = 0
-      keepPixels <- unique(out2$pixelIndex)
-      theUnwantedPixels <- theUnwantedPixels[!theUnwantedPixels %in% keepPixels]
-      out2 <- unique(out2)
-
-      if (!exists("out3")) {
-        out3 <- out2
-      } else {
-        out3 <- rbindlist(list(out2, out3))
-      }
-    }
-  }
-
-  if (!exists("out3")) {
+  ## Assign each unwanted pixel the *nearest* available `initialEcoregionCode`.
+  ## For each candidate land-cover class present in `rstLCC` (i.e. not a class to replace),
+  ## the distance from every pixel to the nearest cell of that class is computed with a
+  ## single vectorized `terra::distance()`; each unwanted pixel then takes the closest
+  ## class whose implied `possERC` is available for its ecoregion (and all of its
+  ## `speciesCode`s). Deterministic (ties break to the lowest class). This replaces the
+  ## former iterative `spread2()` search, whose cost grew with the square of the radius of
+  ## the largest contiguous block of `classesToReplace`.
+  if (length(theUnwantedPixels) == 0L) {
     out3 <- data.table(pixelIndex = NA, ecoregionGroup = NA)[!is.na(pixelIndex)]
   } else {
-    # setnames(out3, c("initialPixels", "initialEcoregionCode"), c("pixelIndex", "ecoregionGroup"))
-    # out3[, `:=`(newPossLCC = NULL)]
-    # out3 <- unique(out3, by = c("pixelIndex", "ecoregionGroup"))
-    out3 <- unique(out3)
-  }
+    message("Converting ", length(theUnwantedPixels),
+            " unwanted LCC pixels to the nearest available class.")
+    lccVals <- as.vector(rstLCC[])
+    candClasses <- sort(unique(lccVals[!is.na(lccVals) & !lccVals %in% classesToReplace]))
 
-  if (exists("pixelsToNA")) {
-    ## make sure these pixels get an NA ecoregion by rm them in case they are present
-    if (any(out3$pixelIndex %in% pixelsToNA)) {
-      out3 <- out3[!pixelIndex %in% pixelsToNA]
+    if (length(candClasses) == 0L) {
+      out3 <- data.table(pixelIndex = theUnwantedPixels, ecoregionGroup = NA)
+    } else {
+      ## distance from each unwanted pixel to the nearest cell of each candidate class
+      distByClass <- vapply(
+        candClasses,
+        function(cc) {
+          m <- terra::setValues(terra::rast(rstLCC), ifelse(lccVals == cc, 1L, NA_integer_))
+          terra::values(terra::distance(m))[theUnwantedPixels, 1]
+        },
+        numeric(length(theUnwantedPixels))
+      )
+      cand <- data.table(
+        pixelIndex = rep(theUnwantedPixels, times = length(candClasses)),
+        lcc = rep(candClasses, each = length(theUnwantedPixels)),
+        dist = as.vector(distByClass)
+      )[is.finite(dist)]
+
+      ## attach each unwanted pixel's ecoregion + speciesCode(s)
+      uwCols <- c("pixelIndex", "speciesCode", if (hasPreDash) "ecoregion")
+      uwInfo <- unique(availableERC_by_Sp[pixelIndex %in% theUnwantedPixels, uwCols, with = FALSE])
+      cand <- cand[uwInfo, on = "pixelIndex", allow.cartesian = TRUE]
+
+      ## candidate ecoregion-group code, formed exactly as the former loop did
+      if (hasPreDash) {
+        cand[,
+          possERC := paste0(
+            ecoregion,
+            "_",
+            paddedFloatToChar(as.integer(lcc), padL = numCharLCCCodes, padR = 0)
+          )
+        ]
+      } else {
+        cand[, possERC := as.character(lcc)]
+      }
+
+      ## keep only available (speciesCode, possERC) combinations; a (pixel, class) is
+      ## assignable only if valid for *all* of the pixel's speciesCodes (cf. possERCToRm)
+      validKey <- paste(availableERG2$speciesCode, availableERG2$initialEcoregionCode)
+      cand[, valid := paste(speciesCode, possERC) %in% validKey]
+      ok <- cand[,
+        list(allValid = all(valid), possERC = possERC[1L]),
+        by = c("pixelIndex", "lcc", "dist")
+      ][allValid == TRUE]
+
+      ## nearest available class wins; ties break to the lowest class (deterministic)
+      setorderv(ok, c("pixelIndex", "dist", "lcc"))
+      chosen <- ok[, .SD[1L], by = "pixelIndex"]
+      out3 <- chosen[,
+        list(pixelIndex, ecoregionGroup = if (hasPreDash) possERC else as.integer(lcc))
+      ]
+
+      ## unwanted pixels with no available replacement anywhere -> NA
+      missed <- setdiff(theUnwantedPixels, out3$pixelIndex)
+      if (length(missed) > 0L) {
+        out3 <- rbind(out3, data.table(pixelIndex = missed, ecoregionGroup = NA), fill = TRUE)
+      }
+      out3 <- unique(out3)
     }
-    out3 <- rbind(out3, data.table(pixelIndex = pixelsToNA, ecoregionGroup = NA), fill = TRUE)
   }
 
   if (doAssertion) {
