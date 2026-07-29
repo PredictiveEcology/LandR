@@ -32,6 +32,16 @@
 
 ## Enhancements
 
+* `convertUnwantedLCC()` now assigns each unwanted pixel its nearest available
+  land-cover class via a vectorized `terra::distance()` transform per candidate class
+  (deterministic; ties break to the lowest class), replacing the former iterative
+  `spread2()` search whose run time grew with the square of the radius of the largest
+  contiguous block of `classesToReplace`. On study areas containing large lakes/burns
+  masked to an irregular boundary this converts a run that could take **hours (or never
+  finish)** into **seconds** (e.g. a 3.8 M-cell Western-Alberta study area: >2.8 h and
+  unfinished before, 3.5 s after), with output within the previous algorithm's own
+  run-to-run variance (the old tie-break was random) and per-ecoregion availability
+  constraints preserved exactly.
 * `LANDISDisp()` spiral seed dispersal loop ported to C++ via `Rcpp`
   (~3.5–5.7× faster end-to-end depending on input size; ~5× on landscape-scale
   fixtures of 9 M cells). Memory use also drops dramatically: the

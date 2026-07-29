@@ -57,19 +57,26 @@ This represents the new codes to used in the \code{pixelIndex} locations.
 These should have no values overlapping with \code{classesToReplace}.
 }
 \description{
-This will search around the pixels on \code{rstLCC} that have
-\code{classesToReplace}, and search in iteratively increasing
-radii outwards for other Land Cover Classes than the those indicated in
-\code{classesToReplace}. This will constrain
-It will then take the cohorts that were in pixels with \code{classesToReplace}
-and assign them new values in the output object. This function will
-also check that it must be an \code{ecoregionCode} that already exists in
-\code{cohortData}, i.e., not create new \code{ecoregionCode} values. See Details.
+This searches around the pixels on \code{rstLCC} that have \code{classesToReplace} for the
+nearest neighbouring Land Cover Class other than those indicated in
+\code{classesToReplace}, and assigns the cohorts in those pixels the corresponding new
+\code{ecoregionCode}. Replacement codes must already exist in \code{availableERC_by_Sp},
+i.e., no new \code{ecoregionCode} values are created. See Details.
 }
 \details{
 This function is designed to be used in highly constrained situations, where it is not
 just replacing a Land Cover Class by a neighbouring Land Cover Class. But it can
 be used for the simpler cases of simply replacing a Land Cover Class.
+
+Each pixel whose value is in \code{classesToReplace} is assigned the \emph{nearest} available
+\code{initialEcoregionCode}. For each candidate land-cover class present in \code{rstLCC}, the
+distance from every pixel to the nearest cell of that class is computed with a single
+vectorized \code{\link[terra:distance]{terra::distance()}} call; each unwanted pixel is then
+given the closest class whose implied \code{initialEcoregionCode} is available for that pixel's
+ecoregion (and all of its \code{speciesCode}s). Ties break to the lowest land-cover class, so
+the result is deterministic. This replaces an earlier iterative \code{spread2()}-based search
+whose run time grew with the square of the radius of the largest contiguous block of
+\code{classesToReplace}, which could take hours on large study areas with big lakes or burns.
 }
 \author{
 Eliot McIntire
