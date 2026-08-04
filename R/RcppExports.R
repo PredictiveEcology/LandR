@@ -5,3 +5,7 @@ spiralLoopCpp <- function(pixelIndex_in, speciesCode_in, rowOrig_in, colOrig_in,
     .Call(`_LandR_spiralLoopCpp`, pixelIndex_in, speciesCode_in, rowOrig_in, colOrig_in, seeddist_max_perRow, spiralRow, spiralCol, spiralCurDist, pgmRows, pgmCols, pgv, srcPg, srcSpeciesCode, numSp, wardProbByDist, activeSpMaxDist, activeSpMax, cellSize, successionTimestep, verbose, wardAlreadyExp, debug)
 }
 
+windowCountsByClassCpp <- function(lccVals, candClasses, nrow, ncol, cells0, kx, ky) {
+    .Call(`_LandR_windowCountsByClassCpp`, lccVals, candClasses, nrow, ncol, cells0, kx, ky)
+}
+

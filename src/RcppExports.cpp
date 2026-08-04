@@ -42,9 +42,27 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// windowCountsByClassCpp
+IntegerMatrix windowCountsByClassCpp(IntegerVector lccVals, IntegerVector candClasses, int nrow, int ncol, IntegerVector cells0, IntegerVector kx, IntegerVector ky);
+RcppExport SEXP _LandR_windowCountsByClassCpp(SEXP lccValsSEXP, SEXP candClassesSEXP, SEXP nrowSEXP, SEXP ncolSEXP, SEXP cells0SEXP, SEXP kxSEXP, SEXP kySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type lccVals(lccValsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type candClasses(candClassesSEXP);
+    Rcpp::traits::input_parameter< int >::type nrow(nrowSEXP);
+    Rcpp::traits::input_parameter< int >::type ncol(ncolSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type cells0(cells0SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type kx(kxSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type ky(kySEXP);
+    rcpp_result_gen = Rcpp::wrap(windowCountsByClassCpp(lccVals, candClasses, nrow, ncol, cells0, kx, ky));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_LandR_spiralLoopCpp", (DL_FUNC) &_LandR_spiralLoopCpp, 22},
+    {"_LandR_windowCountsByClassCpp", (DL_FUNC) &_LandR_windowCountsByClassCpp, 7},
     {NULL, NULL, 0}
 };
 

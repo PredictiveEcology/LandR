@@ -1,0 +1,5 @@
+landscape,ncell,unwanted,t_old,t_nearest,t_nearestRandom,agree_old_vs_old,agree_nearest_vs_old,agree_rand_vs_old,tvd_old_vs_old,tvd_nearest_vs_old,tvd_rand_vs_old
+small,43681,254,0.07,0.07,0.11,53.9,52.5,53.8,0.0486,0.2953,0.0157
+medium,341056,2889,0.11,0.22,0.4,74.6,74.6,73.2,0.0072,0.1155,0.0098
+large,1175056,6770,0.61,0.97,1.3,79.2,78.7,78.4,0.0043,0.1008,0.0042
+bigblob,250000,1145,0.07,0.16,0.28,73.6,75.5,72.2,0.0207,0.1456,0.0041

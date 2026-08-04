@@ -13,7 +13,8 @@ overlayLCCs(
   remapTable = NULL,
   classesToReplace,
   availableERC_by_Sp,
-  forestEquivalencies = NULL
+  forestEquivalencies = NULL,
+  method = c("nearest", "nearestRandom")
 )
 }
 \arguments{
@@ -60,6 +61,11 @@ If \code{NULL}, this function will derive this table automatically from the
 other arguments. Otherwise, the user must provide a \code{data.frame} with
 \code{length(LCCs) + 1} columns, and \code{2 ^ length(LCCs)} rows.
 Currently not used.}
+
+\item{method}{Character; how to choose among the available land-cover classes in an
+unwanted pixel's neighbourhood. Either \code{"nearest"} (default; the closest one, ties
+broken to the lowest class, deterministic) or \code{"nearestRandom"} (a random one,
+weighted by each class's abundance in that neighbourhood). See Details.}
 }
 \description{
 Overlay different LCC data sources

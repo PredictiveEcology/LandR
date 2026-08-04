@@ -12,7 +12,8 @@ convertUnwantedLCC(
   ecoregionGroupVec,
   speciesEcoregion,
   pixelClassesToReplace,
-  doAssertion = getOption("LandR.assertions", TRUE)
+  doAssertion = getOption("LandR.assertions", TRUE),
+  method = c("nearest", "nearestRandom")
 )
 }
 \arguments{
@@ -50,11 +51,18 @@ the user to only replace some of the pixels with a given class.}
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
+
+\item{method}{Character; how to choose among the available land-cover classes in an
+unwanted pixel's neighbourhood. Either \code{"nearest"} (default; the closest one, ties
+broken to the lowest class, deterministic) or \code{"nearestRandom"} (a random one,
+weighted by each class's abundance in that neighbourhood). See Details.}
 }
 \value{
-A \code{data.table} with two columns, \code{pixelIndex} and \code{ecoregionGroup}.
+A \code{data.table} with three columns, \code{newPossLCC}, \code{pixelIndex} and \code{ecoregionGroup}.
 This represents the new codes to used in the \code{pixelIndex} locations.
 These should have no values overlapping with \code{classesToReplace}.
+\code{newPossLCC} is the assigned land-cover class itself, i.e. \code{ecoregionGroup} without
+its ecoregion prefix; it is \code{NA} for pixels that could not be assigned.
 }
 \description{
 This searches around the pixels on \code{rstLCC} that have \code{classesToReplace} for the
@@ -68,15 +76,35 @@ This function is designed to be used in highly constrained situations, where it 
 just replacing a Land Cover Class by a neighbouring Land Cover Class. But it can
 be used for the simpler cases of simply replacing a Land Cover Class.
 
-Each pixel whose value is in \code{classesToReplace} is assigned the \emph{nearest} available
-\code{initialEcoregionCode}. For each candidate land-cover class present in \code{rstLCC}, the
-distance from every pixel to the nearest cell of that class is computed with a single
-vectorized \code{\link[terra:distance]{terra::distance()}} call; each unwanted pixel is then
-given the closest class whose implied \code{initialEcoregionCode} is available for that pixel's
-ecoregion (and all of its \code{speciesCode}s). Ties break to the lowest land-cover class, so
-the result is deterministic. This replaces an earlier iterative \code{spread2()}-based search
+Each pixel whose value is in \code{classesToReplace} is assigned an available
+\code{initialEcoregionCode} taken from its neighbourhood. For each candidate land-cover
+class present in \code{rstLCC}, the distance from every pixel to the nearest cell of that
+class is computed with a single vectorized \code{\link[terra:distance]{terra::distance()}} call, and each unwanted
+pixel keeps only those classes whose implied \code{initialEcoregionCode} is available for
+that pixel's ecoregion (and all of its \code{speciesCode}s). \code{method} decides which of the
+surviving classes is then assigned:
+\itemize{
+\item \code{"nearest"} (default) assigns the closest one, breaking ties to the lowest
+land-cover class. The result is deterministic and does not consume random numbers.
+\item \code{"nearestRandom"} samples one of them at random, with probability proportional to
+how many cells of each class fall inside the pixel's neighbourhood. The
+neighbourhood is the smallest window reaching that pixel's nearest available class.
+}
+
+Both are \code{O(nClasses)} distance transforms, independent of the geometry of the
+\code{classesToReplace} blobs. They replace an earlier iterative \code{spread2()}-based search
 whose run time grew with the square of the radius of the largest contiguous block of
-\code{classesToReplace}, which could take hours on large study areas with big lakes or burns.
+\code{classesToReplace}, which could take hours -- or never finish -- on large study areas
+with big lakes or burns, or an irregular masked boundary.
+
+\code{"nearestRandom"} exists to restore the \emph{stochastic} character of that former search,
+which sampled among all valid cells within the radius at which it first found one, and
+so favoured classes in proportion to their local abundance. It reproduces that
+weighting -- deliberately, since the window is rectangular, matching the Chebyshev
+neighbourhood of \code{spread2(directions = 8)} -- but not that implementation's exact
+output: the radius here comes from a Euclidean distance transform rather than from
+counting spread iterations, and the random draws differ. Runs prior to LandR 1.2.0.9004
+cannot be reproduced bit-for-bit by any current \code{method}.
 }
 \author{
 Eliot McIntire

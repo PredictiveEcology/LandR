@@ -32,6 +32,20 @@
 
 ## Enhancements
 
+* `convertUnwantedLCC()` gains a `method` argument, which `overlayLCCs()` also accepts and
+  passes through. `method = "nearest"` (the default) is the deterministic nearest-available
+  allocation described below. The new `method = "nearestRandom"` instead samples one of the
+  available classes in the unwanted pixel's neighbourhood, with probability proportional to
+  how many cells of each class that neighbourhood holds. This restores the *stochastic*
+  character of the pre-1.2.0.9004 `spread2()`-based implementation without its cost: the
+  neighbourhood is the smallest window reaching the pixel's nearest available class, and
+  the counts come from a summed-area table, so a window 1500 cells across costs the same as
+  one 3 cells across. Being random, it reproduces only under a fixed seed — and note that
+  `Cache()` does not key on RNG state, so a cached call replays a single draw. It
+  reproduces the former implementation's *weighting*, but no current `method` reproduces
+  that implementation's exact output bit-for-bit: the window radius now comes from a
+  distance transform rather than from counting spread iterations. Runs needing the old
+  output exactly must pin `LandR (<= 1.2.0.9003)`.
 * `convertUnwantedLCC()` now assigns each unwanted pixel its nearest available
   land-cover class via a vectorized `terra::distance()` transform per candidate class
   (deterministic; ties break to the lowest class), replacing the former iterative
@@ -84,6 +98,12 @@
 
 ## Bug fixes
 
+* `convertUnwantedLCC()` again returns the `newPossLCC` column it returned prior to
+  1.2.0.9004 (the assigned land-cover class itself, i.e. `ecoregionGroup` without its
+  ecoregion prefix). Callers use it to write the replacement classes back into the LCC
+  raster — `Biomass_borealDataPrep` does so behind an `is.null()` guard, which silently
+  stopped firing when the column disappeared, leaving `rstLCCAdj` (and hence
+  `ecoregionMap`) still showing the replaced classes;
 * `dropTerm` now can deal with random effects better (#105);
 * `prepRawBiomassMap` - needed `overwrite = TRUE` for cases where download was corrupt;
 * `prepRawBiomassMap` needs `httr2` package as remote site is failing with `download.file`;
