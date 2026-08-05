@@ -26,6 +26,9 @@ spatial polygons object of the same class as \code{studyArea}
 Extend a study area boundary to include the full ecological boundary polygons intersecting it.
 }
 \examples{
+\dontshow{if (!isTRUE(as.logical(Sys.getenv("CI")))) withAutoprint(\{ # examplesIf}
+## NOTE: runs locally, skipped on CI -- downloads from sis.agr.gc.ca, which throttles
+## connections from CI runners (same predicate as testthat::skip_on_ci())
 ## using SpatVector objects
 sa <- randomStudyArea(size = 1e9)
 sa_eco <- studyAreaEco(studyArea = sa)
@@ -39,5 +42,5 @@ if (interactive()) {
     geom_sf(data = sa_eco_sf, fill = "gray") +
     geom_sf(data = sa_sf, fill = "violet", alpha = 0.3)
 }
-
+\dontshow{\}) # examplesIf}
 }
