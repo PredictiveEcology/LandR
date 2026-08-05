@@ -13,7 +13,7 @@ convertUnwantedLCC(
   speciesEcoregion,
   pixelClassesToReplace,
   doAssertion = getOption("LandR.assertions", TRUE),
-  method = c("nearest", "nearestRandom")
+  method = c("nearestWeighted", "nearestRandom")
 )
 }
 \arguments{
@@ -52,10 +52,11 @@ the user to only replace some of the pixels with a given class.}
 ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
 
-\item{method}{Character; how to choose among the available land-cover classes in an
-unwanted pixel's neighbourhood. Either \code{"nearest"} (default; the closest one, ties
-broken to the lowest class, deterministic) or \code{"nearestRandom"} (a random one,
-weighted by each class's abundance in that neighbourhood). See Details.}
+\item{method}{Character; where the draw among an unwanted pixel's available land-cover
+classes comes from. Both options weight the classes by their abundance in the pixel's
+neighbourhood and differ only in reproducibility: \code{"nearestWeighted"} (default) keys
+the draw on the pixel's ground position, so it is deterministic and seed-free, while
+\code{"nearestRandom"} draws from the RNG and so varies with \code{set.seed()}. See Details.}
 }
 \value{
 A \code{data.table} with three columns, \code{newPossLCC}, \code{pixelIndex} and \code{ecoregionGroup}.
@@ -81,14 +82,20 @@ Each pixel whose value is in \code{classesToReplace} is assigned an available
 class present in \code{rstLCC}, the distance from every pixel to the nearest cell of that
 class is computed with a single vectorized \code{\link[terra:distance]{terra::distance()}} call, and each unwanted
 pixel keeps only those classes whose implied \code{initialEcoregionCode} is available for
-that pixel's ecoregion (and all of its \code{speciesCode}s). \code{method} decides which of the
-surviving classes is then assigned:
+that pixel's ecoregion (and all of its \code{speciesCode}s). One of the surviving classes is
+then drawn with probability proportional to how many cells of that class fall inside
+the pixel's neighbourhood -- the smallest window reaching that pixel's nearest
+available class. \code{method} decides only where the draw comes from:
 \itemize{
-\item \code{"nearest"} (default) assigns the closest one, breaking ties to the lowest
-land-cover class. The result is deterministic and does not consume random numbers.
-\item \code{"nearestRandom"} samples one of them at random, with probability proportional to
-how many cells of each class fall inside the pixel's neighbourhood. The
-neighbourhood is the smallest window reaching that pixel's nearest available class.
+\item \code{"nearestWeighted"} (default) derives it from the pixel's own ground position, so the
+result is deterministic: it needs no \code{set.seed()}, is stable under \code{\link[reproducible:Cache]{reproducible::Cache()}}
+(which does not key on RNG state), and, because the key is the cell \emph{centre} rather than
+the cell \emph{index}, a grid-aligned crop reproduces its parent raster cell for cell --
+so a small development subset agrees with the full run. Reprojecting or changing
+resolution changes the pixels, and so changes the result.
+\item \code{"nearestRandom"} draws from the RNG instead, so it varies with \code{set.seed()}. Use it
+when replicates should differ; note that \code{Cache()} will replay a single draw unless
+the seed is part of the cache key.
 }
 
 Both are \code{O(nClasses)} distance transforms, independent of the geometry of the
@@ -97,14 +104,20 @@ whose run time grew with the square of the radius of the largest contiguous bloc
 \code{classesToReplace}, which could take hours -- or never finish -- on large study areas
 with big lakes or burns, or an irregular masked boundary.
 
-\code{"nearestRandom"} exists to restore the \emph{stochastic} character of that former search,
-which sampled among all valid cells within the radius at which it first found one, and
-so favoured classes in proportion to their local abundance. It reproduces that
-weighting -- deliberately, since the window is rectangular, matching the Chebyshev
-neighbourhood of \code{spread2(directions = 8)} -- but not that implementation's exact
-output: the radius here comes from a Euclidean distance transform rather than from
-counting spread iterations, and the random draws differ. Runs prior to LandR 1.2.0.9004
-cannot be reproduced bit-for-bit by any current \code{method}.
+The abundance weighting restores the behaviour of that former search, which sampled
+among all valid cells within the radius at which it first found one and so favoured
+classes in proportion to their local abundance. The window is rectangular, matching the
+Chebyshev neighbourhood of \code{spread2(directions = 8)}. What it does \emph{not} reproduce is
+that implementation's exact output: the radius here comes from a Euclidean distance
+transform rather than from counting spread iterations, and the draws differ. Runs prior
+to LandR 1.2.0.9004 cannot be reproduced bit-for-bit by any current \code{method}.
+
+LandR 1.2.0.9004's deterministic nearest-class rule, which broke ties to the lowest
+land-cover class, has been removed. Ties are common -- 35-41\% of unwanted pixels on real
+landscapes -- so always taking the lowest code biased the result toward low-numbered
+classes, which in the Canada LCC coding means toward sparse, non-forest cover: it
+assigned shrubs 1.69x as often as the previous implementation, and broadleaf 0.58x and
+mixedwood 0.28x as often.
 }
 \author{
 Eliot McIntire

@@ -1,14 +1,16 @@
 ## Real-landscape head-to-head for convertUnwantedLCC(method=): the pre-1.2.0.9004 spiral
-## (iterative spread2, stochastic) vs method = "nearest" (deterministic) vs the new
-## method = "nearestRandom" (stochastic, weighted by local abundance).
+## (iterative spread2, stochastic) vs method = "nearestWeighted" (deterministic) and
+## method = "nearestRandom" (stochastic). Both new methods weight by local abundance and
+## differ only in where the draw comes from, so they should agree with each other to within
+## sampling noise -- and both should reproduce the old algorithm's class mix.
 ##
-## The question a reviewer needs answered is NOT "does nearestRandom match the old output
-## pixel-for-pixel" -- it cannot, and neither could two runs of the old algorithm, which was
-## itself random. It is "does nearestRandom put the *same mix* of land-cover classes on the
-## ground as the old algorithm did, where 'nearest' does not". So alongside per-pixel
-## agreement we report the composition of the assigned classes, and the total-variation
-## distance between each method's composition and the old algorithm's. The old algorithm's
-## own seed-to-seed values are the noise floor every other column must be read against.
+## The question a reviewer needs answered is NOT "does either method match the old output
+## pixel-for-pixel" -- neither can, and neither could two runs of the old algorithm, which
+## was itself random. It is "do they put the *same mix* of land-cover classes on the ground
+## as the old algorithm did". So alongside per-pixel agreement we report the composition of
+## the assigned classes, and the total-variation distance between each method's composition
+## and the old algorithm's. The old algorithm's own seed-to-seed values are the noise floor
+## every other column must be read against.
 ##
 ## Inputs are the same four real SCANFI + FAO landscapes used by the previous PR's
 ## benchmark bundle (class 240 = FAO-forest pixels that are not a forest LCC class), plus
@@ -91,6 +93,22 @@ availDT <- function(r) {
   data.table(pixelIndex = keep, initialEcoregionCode = as.integer(v[keep]))
 }
 
+## The deterministic rule that shipped briefly in 1.2.0.9004 and has since been removed:
+## nearest class, ties broken to the lowest class code. Reconstructed here (it is no longer
+## a `method`) because its composition is the evidence for having removed it.
+lowestCodeAssign <- function(r, unw, cls) {
+  v <- values(r)[, 1]
+  D <- vapply(cls, function(cc) {
+    values(distance(setValues(rast(r), ifelse(v == cc, 1L, NA_integer_))))[unw, 1]
+  }, numeric(length(unw)))
+  minD <- do.call(pmin, as.data.frame(D))
+  tied <- D <= minD + 1e-9
+  data.table(
+    pixelIndex = unw,
+    ecoregionGroup = cls[apply(tied, 1, function(z) which(z)[1L])] # cls ascending
+  )
+}
+
 ## assigned-class composition over the unwanted pixels, as proportions
 composition <- function(out, classes) {
   tab <- table(factor(as.integer(out$ecoregionGroup), levels = classes))
@@ -134,7 +152,7 @@ for (lab in labs) {
   oldOK <- vapply(oldRuns, `[[`, logical(1), "finished")
 
   ## new: deterministic, then stochastic once per seed
-  det <- timeIt(suppressMessages(cuNew(UNW, L, copy(aDT), doAssertion = FALSE)))
+  det <- timeIt(suppressMessages(cuNew(UNW, L, copy(aDT), doAssertion = FALSE, method = "nearestWeighted")))
   rnd <- lapply(SEEDS, function(s) {
     set.seed(s)
     timeIt(suppressMessages(cuNew(UNW, L, copy(aDT), doAssertion = FALSE, method = "nearestRandom")))
@@ -146,6 +164,7 @@ for (lab in labs) {
   cDet <- composition(det$val, classes)
   cRndEach <- lapply(rnd, function(r) composition(r$val, classes))
   cRnd <- Reduce(`+`, cRndEach) / length(cRndEach)
+  cLow <- composition(lowestCodeAssign(L, which(v == UNW), classes), classes)
 
   ## noise floors: what the old algorithm's own seed-to-seed variation looks like
   oldPairs <- utils::combn(which(oldOK), 2, simplify = FALSE)
@@ -161,24 +180,26 @@ for (lab in labs) {
     ncell = ncell(L),
     unwanted = nUnw,
     t_old = round(mean(vapply(oldRuns, `[[`, numeric(1), "t")), 2),
-    t_nearest = round(det$t, 2),
+    t_nearestWeighted = round(det$t, 2),
     t_nearestRandom = round(mean(vapply(rnd, `[[`, numeric(1), "t")), 2),
     agree_old_vs_old = round(selfAgree, 1),
-    agree_nearest_vs_old = round(mean(vapply(oldRuns[oldOK], function(o) agree(det$val, o$out), numeric(1))), 1),
+    agree_weighted_vs_old = round(mean(vapply(oldRuns[oldOK], function(o) agree(det$val, o$out), numeric(1))), 1),
     agree_rand_vs_old = round(mean(mapply(function(r, o) agree(r$val, o$out), rnd[seq_len(sum(oldOK))], oldRuns[oldOK])), 1),
     tvd_old_vs_old = round(selfTVD, 4),
-    tvd_nearest_vs_old = round(tvd(cDet, cOld), 4),
+    tvd_lowestCode_vs_old = round(tvd(cLow, cOld), 4),
+    tvd_weighted_vs_old = round(tvd(cDet, cOld), 4),
     tvd_rand_vs_old = round(tvd(cRnd, cOld), 4)
   )
   comps[[lab]] <- data.table(
     landscape = lab, class = classes, old = round(cOld, 4),
-    nearest = round(cDet, 4), nearestRandom = round(cRnd, 4)
+    lowestCode = round(cLow, 4),
+    nearestWeighted = round(cDet, 4), nearestRandom = round(cRnd, 4)
   )
   cat(sprintf(
-    ">>> %-8s ncell=%8d unw=%5d | t: old=%6.2fs near=%5.2fs rand=%5.2fs | agree vs old: self=%.1f%% near=%.1f%% rand=%.1f%% | TVD vs old: self=%.4f near=%.4f rand=%.4f\n",
-    lab, ncell(L), nUnw, rows[[lab]]$t_old, rows[[lab]]$t_nearest, rows[[lab]]$t_nearestRandom,
-    rows[[lab]]$agree_old_vs_old, rows[[lab]]$agree_nearest_vs_old, rows[[lab]]$agree_rand_vs_old,
-    rows[[lab]]$tvd_old_vs_old, rows[[lab]]$tvd_nearest_vs_old, rows[[lab]]$tvd_rand_vs_old
+    ">>> %-8s ncell=%8d unw=%5d | t: old=%6.2fs wtd=%5.2fs rand=%5.2fs | agree vs old: self=%.1f%% wtd=%.1f%% rand=%.1f%% | TVD vs old: self=%.4f wtd=%.4f rand=%.4f\n",
+    lab, ncell(L), nUnw, rows[[lab]]$t_old, rows[[lab]]$t_nearestWeighted, rows[[lab]]$t_nearestRandom,
+    rows[[lab]]$agree_old_vs_old, rows[[lab]]$agree_weighted_vs_old, rows[[lab]]$agree_rand_vs_old,
+    rows[[lab]]$tvd_old_vs_old, rows[[lab]]$tvd_weighted_vs_old, rows[[lab]]$tvd_rand_vs_old
   ))
   flush.console()
   rm(L)
@@ -196,13 +217,13 @@ if (nzchar(WAU) && file.exists(WAU)) {
   v <- values(L)[, 1]
   if (sum(v == UNW, na.rm = TRUE) > 0) {
     aDT <- availDT(L)
-    det <- timeIt(suppressMessages(cuNew(UNW, L, copy(aDT), doAssertion = FALSE)))
+    det <- timeIt(suppressMessages(cuNew(UNW, L, copy(aDT), doAssertion = FALSE, method = "nearestWeighted")))
     set.seed(123)
     rnd <- timeIt(suppressMessages(cuNew(UNW, L, copy(aDT), doAssertion = FALSE, method = "nearestRandom")))
     wau <- data.table(
       study_area = "Western Alberta Upland", ncell = ncell(L),
       unwanted = sum(v == UNW, na.rm = TRUE),
-      t_nearest = round(det$t, 2), t_nearestRandom = round(rnd$t, 2),
+      t_nearestWeighted = round(det$t, 2), t_nearestRandom = round(rnd$t, 2),
       agree_rand_vs_nearest = round(agree(rnd$val, det$val), 1)
     )
     print(as.data.frame(wau), row.names = FALSE)

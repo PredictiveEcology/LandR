@@ -14,7 +14,7 @@ overlayLCCs(
   classesToReplace,
   availableERC_by_Sp,
   forestEquivalencies = NULL,
-  method = c("nearest", "nearestRandom")
+  method = c("nearestWeighted", "nearestRandom")
 )
 }
 \arguments{
@@ -62,10 +62,11 @@ other arguments. Otherwise, the user must provide a \code{data.frame} with
 \code{length(LCCs) + 1} columns, and \code{2 ^ length(LCCs)} rows.
 Currently not used.}
 
-\item{method}{Character; how to choose among the available land-cover classes in an
-unwanted pixel's neighbourhood. Either \code{"nearest"} (default; the closest one, ties
-broken to the lowest class, deterministic) or \code{"nearestRandom"} (a random one,
-weighted by each class's abundance in that neighbourhood). See Details.}
+\item{method}{Character; where the draw among an unwanted pixel's available land-cover
+classes comes from. Both options weight the classes by their abundance in the pixel's
+neighbourhood and differ only in reproducibility: \code{"nearestWeighted"} (default) keys
+the draw on the pixel's ground position, so it is deterministic and seed-free, while
+\code{"nearestRandom"} draws from the RNG and so varies with \code{set.seed()}. See Details.}
 }
 \description{
 Overlay different LCC data sources

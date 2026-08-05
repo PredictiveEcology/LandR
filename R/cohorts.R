@@ -629,14 +629,20 @@ describeCohortData <- function(cohortData) {
 #' class present in `rstLCC`, the distance from every pixel to the nearest cell of that
 #' class is computed with a single vectorized [terra::distance()] call, and each unwanted
 #' pixel keeps only those classes whose implied `initialEcoregionCode` is available for
-#' that pixel's ecoregion (and all of its `speciesCode`s). `method` decides which of the
-#' surviving classes is then assigned:
+#' that pixel's ecoregion (and all of its `speciesCode`s). One of the surviving classes is
+#' then drawn with probability proportional to how many cells of that class fall inside
+#' the pixel's neighbourhood -- the smallest window reaching that pixel's nearest
+#' available class. `method` decides only where the draw comes from:
 #'
-#' * `"nearest"` (default) assigns the closest one, breaking ties to the lowest
-#'   land-cover class. The result is deterministic and does not consume random numbers.
-#' * `"nearestRandom"` samples one of them at random, with probability proportional to
-#'   how many cells of each class fall inside the pixel's neighbourhood. The
-#'   neighbourhood is the smallest window reaching that pixel's nearest available class.
+#' * `"nearestWeighted"` (default) derives it from the pixel's own ground position, so the
+#'   result is deterministic: it needs no `set.seed()`, is stable under [reproducible::Cache()]
+#'   (which does not key on RNG state), and, because the key is the cell *centre* rather than
+#'   the cell *index*, a grid-aligned crop reproduces its parent raster cell for cell --
+#'   so a small development subset agrees with the full run. Reprojecting or changing
+#'   resolution changes the pixels, and so changes the result.
+#' * `"nearestRandom"` draws from the RNG instead, so it varies with `set.seed()`. Use it
+#'   when replicates should differ; note that `Cache()` will replay a single draw unless
+#'   the seed is part of the cache key.
 #'
 #' Both are `O(nClasses)` distance transforms, independent of the geometry of the
 #' `classesToReplace` blobs. They replace an earlier iterative `spread2()`-based search
@@ -644,14 +650,20 @@ describeCohortData <- function(cohortData) {
 #' `classesToReplace`, which could take hours -- or never finish -- on large study areas
 #' with big lakes or burns, or an irregular masked boundary.
 #'
-#' `"nearestRandom"` exists to restore the *stochastic* character of that former search,
-#' which sampled among all valid cells within the radius at which it first found one, and
-#' so favoured classes in proportion to their local abundance. It reproduces that
-#' weighting -- deliberately, since the window is rectangular, matching the Chebyshev
-#' neighbourhood of `spread2(directions = 8)` -- but not that implementation's exact
-#' output: the radius here comes from a Euclidean distance transform rather than from
-#' counting spread iterations, and the random draws differ. Runs prior to LandR 1.2.0.9004
-#' cannot be reproduced bit-for-bit by any current `method`.
+#' The abundance weighting restores the behaviour of that former search, which sampled
+#' among all valid cells within the radius at which it first found one and so favoured
+#' classes in proportion to their local abundance. The window is rectangular, matching the
+#' Chebyshev neighbourhood of `spread2(directions = 8)`. What it does *not* reproduce is
+#' that implementation's exact output: the radius here comes from a Euclidean distance
+#' transform rather than from counting spread iterations, and the draws differ. Runs prior
+#' to LandR 1.2.0.9004 cannot be reproduced bit-for-bit by any current `method`.
+#'
+#' LandR 1.2.0.9004's deterministic nearest-class rule, which broke ties to the lowest
+#' land-cover class, has been removed. Ties are common -- 35-41% of unwanted pixels on real
+#' landscapes -- so always taking the lowest code biased the result toward low-numbered
+#' classes, which in the Canada LCC coding means toward sparse, non-forest cover: it
+#' assigned shrubs 1.69x as often as the previous implementation, and broadleaf 0.58x and
+#' mixedwood 0.28x as often.
 #'
 #' @param pixelClassesToReplace Deprecated. Use `classesToReplace`
 #'
@@ -686,10 +698,11 @@ describeCohortData <- function(cohortData) {
 #'
 #' @template doAssertion
 #'
-#' @param method Character; how to choose among the available land-cover classes in an
-#'   unwanted pixel's neighbourhood. Either `"nearest"` (default; the closest one, ties
-#'   broken to the lowest class, deterministic) or `"nearestRandom"` (a random one,
-#'   weighted by each class's abundance in that neighbourhood). See Details.
+#' @param method Character; where the draw among an unwanted pixel's available land-cover
+#'   classes comes from. Both options weight the classes by their abundance in the pixel's
+#'   neighbourhood and differ only in reproducibility: `"nearestWeighted"` (default) keys
+#'   the draw on the pixel's ground position, so it is deterministic and seed-free, while
+#'   `"nearestRandom"` draws from the RNG and so varies with `set.seed()`. See Details.
 #'
 #' @return
 #' A `data.table` with three columns, `newPossLCC`, `pixelIndex` and `ecoregionGroup`.
@@ -709,7 +722,7 @@ convertUnwantedLCC <- function(
   speciesEcoregion,
   pixelClassesToReplace,
   doAssertion = getOption("LandR.assertions", TRUE),
-  method = c("nearest", "nearestRandom")
+  method = c("nearestWeighted", "nearestRandom")
 ) {
   method <- match.arg(method)
 
@@ -799,7 +812,8 @@ convertUnwantedLCC <- function(
   ## the distance from every pixel to the nearest cell of that class is computed with a
   ## single vectorized `terra::distance()`; each unwanted pixel then keeps those classes
   ## whose implied `possERC` is available for its ecoregion (and all of its `speciesCode`s),
-  ## and `method` picks one of them. Both methods cost `O(nClasses)` distance transforms,
+  ## and one is drawn weighted by local abundance -- `method` only decides whether the draw
+  ## is keyed on the pixel's position or on the RNG. Both cost `O(nClasses)` distance transforms,
   ## independent of blob geometry -- unlike the former iterative `spread2()` search, whose
   ## cost grew with the square of the radius of the largest contiguous block of
   ## `classesToReplace`.
@@ -809,12 +823,9 @@ convertUnwantedLCC <- function(
     message(
       "Converting ",
       length(theUnwantedPixels),
-      " unwanted LCC pixels to ",
-      if (identical(method, "nearest")) {
-        "the nearest available class."
-      } else {
-        "a nearby available class, sampled by local abundance."
-      }
+      " unwanted LCC pixels to a nearby available class, weighted by local abundance (",
+      method,
+      ")."
     )
     lccVals <- as.vector(rstLCC[])
     candClasses <- sort(unique(lccVals[!is.na(lccVals) & !lccVals %in% classesToReplace]))
@@ -864,13 +875,13 @@ convertUnwantedLCC <- function(
         by = c("pixelIndex", "lcc", "dist")
       ][allValid == TRUE]
 
-      chosen <- if (identical(method, "nearest")) {
-        ## nearest available class wins; ties break to the lowest class (deterministic)
-        setorderv(ok, c("pixelIndex", "dist", "lcc"))
-        ok[, .SD[1L], by = "pixelIndex"]
-      } else {
-        .chooseByLocalAbundance(ok, rstLCC = rstLCC, lccVals = lccVals, candClasses = candClasses)
-      }
+      chosen <- .chooseByLocalAbundance(
+        ok,
+        rstLCC = rstLCC,
+        lccVals = lccVals,
+        candClasses = candClasses,
+        deterministic = identical(method, "nearestWeighted")
+      )
       out3 <- chosen[, list(
         newPossLCC = as.integer(lcc),
         pixelIndex,
@@ -912,7 +923,7 @@ convertUnwantedLCC <- function(
 ## for, not only the nearest one, because a class whose nearest cell lies beyond the window
 ## radius can still have cells in the window's corners -- as it could under `spread2()`,
 ## whose `directions = 8` neighbourhood was itself square.
-.chooseByLocalAbundance <- function(ok, rstLCC, lccVals, candClasses) {
+.chooseByLocalAbundance <- function(ok, rstLCC, lccVals, candClasses, deterministic) {
   nRow <- terra::nrow(rstLCC)
   nCol <- terra::ncol(rstLCC)
   nCand <- length(candClasses)
@@ -980,9 +991,19 @@ convertUnwantedLCC <- function(
   setorderv(ok, c("pixelIndex", "lcc"))
   set(ok, NULL, "cumCells", ok[, cumsum(nCells), by = "pixelIndex"]$V1)
 
-  ## one uniform draw per pixel, over that pixel's total weight
+  ## One uniform draw per pixel, scaled to that pixel's total weight. `"nearestWeighted"`
+  ## takes it from the pixel's ground position, so the result is reproducible without a seed
+  ## and a grid-aligned crop reproduces its parent raster cell for cell; `"nearestRandom"`
+  ## takes it from the RNG, so it varies with `set.seed()` across replicates.
   draws <- ok[, list(drawTarget = sum(nCells)), by = "pixelIndex"]
-  set(draws, NULL, "drawTarget", runif(nrow(draws)) * draws$drawTarget)
+  u <- if (isTRUE(deterministic)) {
+    xy <- terra::xyFromCell(rstLCC, draws$pixelIndex)
+    resXY <- terra::res(rstLCC)
+    pixelUnifCpp(x = xy[, 1], y = xy[, 2], resx = resXY[1], resy = resXY[2])
+  } else {
+    runif(nrow(draws))
+  }
+  set(draws, NULL, "drawTarget", u * draws$drawTarget)
 
   ok <- ok[draws, on = "pixelIndex"]
   setorderv(ok, c("pixelIndex", "lcc"))

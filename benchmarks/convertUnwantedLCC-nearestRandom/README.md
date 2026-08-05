@@ -1,189 +1,176 @@
-# `convertUnwantedLCC(method = "nearestRandom")`
+# `convertUnwantedLCC(method = )`
 
-Supporting evidence for adding a `method` argument to `convertUnwantedLCC()`, restoring a
-*stochastic* allocation alongside the deterministic nearest-available allocation that
-replaced the `spread2()` search in 1.2.0.9004.
+Supporting evidence for how `convertUnwantedLCC()` allocates replacement land-cover classes:
+why the deterministic nearest-class rule briefly present in 1.2.0.9004 was **removed**, and
+why both surviving methods weight by local abundance.
 
 ## Why
 
-1.2.0.9004 made `convertUnwantedLCC()` deterministic: each unwanted pixel takes the nearest
-available class, ties breaking to the lowest class. That fixed a real blow-up (the previous
-`spread2()` search cost grew with the square of the blob radius and could run for hours
-without finishing) but it also changed *what gets imputed*. The previous implementation
-sampled among all valid cells within the radius at which it first found one, so a class was
-picked in proportion to how much of it was nearby. Taking only the nearest class instead
-gives no weight to abundance — and wherever two or more classes tie at the minimum distance,
-which happens at 35–41% of unwanted pixels, it resolves the tie to the lowest class code
-every time. The bias is not spatial; it is toward low-numbered classes.
+1.2.0.9004 replaced an iterative `spread2()` search — whose run time grew with the square of
+the blob radius, and which could run for hours without finishing — with a deterministic
+nearest-available allocation. That fixed the blow-up, but it also changed *what gets
+imputed*.
 
-Because the Canada LCC codes run non-vegetated → non-forest vegetation → forest, that lands
-squarely on cover type: pooled over four real landscapes, `method = "nearest"` assigns
-**shrubs 1.69×** as often as the old algorithm did, and **broadleaf 0.58×**, **mixedwood
-0.28×**. `method = "nearestRandom"` restores every cover type to within 0.96–1.01× while
-keeping the new cost profile. Details in
-[the tie-break section](#where-the-bias-actually-lives-the-tie-break-not-a-direction) below.
+The old search sampled among all valid cells within the radius at which it first found one,
+so a class was picked in proportion to how much of it was nearby. Taking only the nearest
+class gives no weight to abundance, and wherever two or more classes tie at the minimum
+distance it must fall back on a tie-break. The 1.2.0.9004 tie-break took the lowest class
+code, every time.
 
-`"nearestRandom"` samples one of the pixel's available classes weighted by how many cells of
-each the neighbourhood holds, where the neighbourhood is the smallest window reaching that
-pixel's nearest available class — the window at which `spread2()` would have stopped. The
-window is rectangular because `spread2(directions = 8)`'s was too. Counts come from a
-summed-area table, so a window 1500 cells across costs the same as one 3 cells across.
+Ties are not rare: **35–41%** of unwanted pixels on real landscapes. And because the Canada
+LCC codes run non-vegetated → non-forest vegetation → forest, "lowest code wins" is not a
+neutral rule. It moved roughly **one in fourteen** unwanted pixels out of forest altogether.
+That rule has therefore been removed; it is reconstructed in these scripts only as the
+baseline the current methods are scored against.
 
-## Real landscapes: does `nearestRandom` put the same mix on the ground?
+Both surviving methods draw one of the pixel's available classes with probability
+proportional to that class's abundance in the pixel's neighbourhood — the smallest window
+reaching its nearest available class, i.e. the window at which `spread2()` would have
+stopped. The window is rectangular because `spread2(directions = 8)`'s was too, and counts
+come from a summed-area table, so a window 1500 cells across costs the same as one 3 cells
+across. They differ only in where the draw comes from:
 
-`03_method_comparison.R` / `real_landscapes_methods.csv`. The same four real SCANFI + FAO
-landscapes as the 1.2.0.9004 benchmark bundle (class 240 = FAO-forest pixels that are not a
-forest LCC class). Each stochastic method is run under three seeds; the old algorithm's own
-seed-to-seed values are the **noise floor** every other column must be read against.
+* **`"nearestWeighted"`** (default) keys it on the pixel's ground position — deterministic,
+  no `set.seed()`, stable under `Cache()`, and because the key is the cell *centre* rather
+  than the cell *index*, a grid-aligned crop reproduces its parent raster cell for cell.
+* **`"nearestRandom"`** draws from the RNG, for when replicates should genuinely differ.
 
-Two things are measured, and only the second one discriminates:
+## The tie-break, measured
 
-* **per-pixel agreement** with the old algorithm. This cannot separate the methods, because
-  the old algorithm was itself random — it does not even agree with itself (53.9–79.2%).
-* **assigned-class composition**, summarised as total-variation distance from the old
-  algorithm's mix (0 = identical mix, 1 = disjoint). This is what changed in 1.2.0.9004.
+`05_bias_diagnostics.R`. "Share given the lowest tied class" is 100% by construction for the
+removed rule; the old algorithm's value is the target. "Adjacency" is the share of
+rook-adjacent unwanted-pixel pairs assigned the same class — a directional or patch artifact
+would push it up.
 
-| landscape | ncell | unwanted | spiral (s) | nearest (s) | nearestRandom (s) | agree: spiral self | nearest | nearestRandom | **TVD: spiral self** | **nearest** | **nearestRandom** |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| small   |    43,681 |   254 | 0.07 | 0.07 | 0.11 | 53.9% | 52.5% | 53.8% | 0.0486 | 0.2953 | **0.0157** |
-| medium  |   341,056 | 2,889 | 0.11 | 0.22 | 0.40 | 74.6% | 74.6% | 73.2% | 0.0072 | 0.1155 | **0.0098** |
-| large   | 1,175,056 | 6,770 | 0.61 | 0.97 | 1.30 | 79.2% | 78.7% | 78.4% | 0.0043 | 0.1008 | **0.0042** |
-| bigblob |   250,000 | 1,145 | 0.07 | 0.16 | 0.28 | 73.6% | 75.5% | 72.2% | 0.0207 | 0.1456 | **0.0041** |
+| landscape | pixels with a tie | lowest-tied share — spiral (old) | lowest-code (REMOVED) | nearestWeighted | nearestRandom |
+|---|---:|---:|---:|---:|---:|
+| medium  | 34.9% | 45.0% | **100.0%** | 48.3% | 46.1% |
+| bigblob | 40.6% | 52.7% | **100.0%** | 47.7% | 47.5% |
 
-Per-pixel agreement is the same for both new methods and sits at the old algorithm's own
-self-agreement — as it must; that column is saturated by tie-break noise. The composition
-column is the one to read: `nearest` sits **6–23×** further from the old mix than the old
-algorithm's own seed-to-seed variation, while `nearestRandom` sits below that noise floor on
-three of the four landscapes and within 1.4× of it on the fourth (`medium`, 0.0098 vs
-0.0072) — i.e. indistinguishable from re-running the old algorithm with a new seed.
+| landscape | adjacency — spiral | lowest-code | nearestWeighted | nearestRandom |
+|---|---:|---:|---:|---:|
+| medium  | 72.6% | 74.2% | 70.1% | 71.0% |
+| bigblob | 69.3% | 73.6% | 65.8% | 66.3% |
 
-### The composition itself (`assigned_class_composition.csv`)
-
-Proportion of unwanted pixels assigned to each class, `large` landscape:
-
-| class | spiral (old) | nearest | nearestRandom |
-|---|---:|---:|---:|
-| 40  | 0.0007 | 0.0012 | 0.0004 |
-| 50  | 0.0823 | **0.1458** | 0.0794 |
-| 100 | 0.0069 | 0.0112 | 0.0066 |
-| 210 | 0.7165 | 0.7490 | 0.7206 |
-| 220 | 0.1336 | **0.0765** | 0.1337 |
-| 230 | 0.0600 | **0.0162** | 0.0593 |
-
-`nearest` roughly halves 220 and quarters 230 while inflating 50; `nearestRandom` tracks the
-old algorithm to within a few parts in ten thousand.
-
-## Where the bias actually lives: the tie-break, not a direction
-
-[PR #196 raised](https://github.com/PredictiveEcology/LandR/pull/196#issuecomment-5184524397)
-that the function was made stochastic in the first place because a deterministic pick left a
-visible artifact — the recollection being that it "always chose the north east (or whatever)
-replacement". Worth pinning down which artifact this implementation actually has, since the
-two call for different fixes.
-
-It is **not directional**. `method = "nearest"` picks the class whose nearest cell is
-closest; only when two or more classes *tie* at that distance does the tie-break decide —
-and it always resolves to the lowest class code. `05_bias_diagnostics.R` measures both
-possibilities:
-
-| landscape | unwanted pixels with a tie | share given the lowest tied class — spiral | **nearest** | nearestRandom | adjacency — spiral | nearest | nearestRandom |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| medium  | 34.9% | 45.0% | **100.0%** | 46.1% | 72.6% | 74.2% | 71.0% |
-| bigblob | 40.6% | 52.7% | **100.0%** | 47.5% | 69.3% | 73.6% | 66.3% |
-
-Ties are common — a third to two fifths of all unwanted pixels — and `nearest` resolves
-**every one** of them to the lowest class code, where the old algorithm and `nearestRandom`
-take it roughly half the time. That is the whole of the composition shift in the previous
-section: a systematic pull toward low-numbered classes, applied at ~40% of pixels.
-
-Spatial structure, by contrast, barely moves (adjacency agreement among neighbouring
-unwanted pixels, 72.6% → 74.2%), so there is no directional or patch artifact to fix here —
-the concern is real, but its mechanism in this implementation is the class-code tie-break.
+The bias was never spatial — adjacency barely moves — it was entirely in the class-code
+tie-break. Both current methods resolve ties at close to the old algorithm's rate.
 
 ![bias diagnostics](fig2_bias_diagnostics.png)
 
-### What that costs in cover-type terms
+## What the removed rule cost, in cover type
 
-"Lowest code wins" is not a neutral rule. The Canada LCC class codes
-([`LandR::prepInputs_NTEMS_LCC_FAO()`](../../R/prepInputs_NTEMS.R)) run roughly
-non-vegetated → non-forest vegetation → forest, and within forest coniferous (210) <
-broadleaf (220) < mixedwood (230). So a tie-break to the lowest code systematically prefers
-sparse cover over forest, and coniferous over the deciduous-bearing classes.
+Pooled over four real landscapes, weighted by unwanted pixels (`06_class_bias_by_cover_type.R`).
+Values are % of all unwanted pixels; labels from LandR's own crosswalk in
+`prepInputs_NTEMS_LCC_FAO()`.
 
-Pooled over the four landscapes, weighted by unwanted pixels (`06_class_bias_by_cover_type.R`
-/ `class_bias_by_cover_type.csv`); values are % of all unwanted pixels:
+| class | cover type | spiral (old) | lowest-code (REMOVED) | nearestWeighted | nearestRandom |
+|---:|---|---:|---:|---:|---:|
+|  40 | bryoids    |  0.10 |  0.16 (1.61×) |  0.06 (0.60×) |  0.09 (0.97×) |
+|  50 | shrubs     |  9.63 | **16.25 (1.69×)** |  9.77 (1.01×) |  9.20 (0.96×) |
+| 100 | herbs      |  1.60 |  2.20 (1.37×) |  1.46 (0.91×) |  1.57 (0.98×) |
+| 210 | coniferous | 66.59 | 70.70 (1.06×) | 67.34 (1.01×) | 67.00 (1.01×) |
+| 220 | broadleaf  | 15.12 | **8.75 (0.58×)** | 14.93 (0.99×) | 15.21 (1.01×) |
+| 230 | mixedwood  |  6.97 | **1.96 (0.28×)** |  6.45 (0.92×) |  6.93 (0.99×) |
 
-| class | cover type | spiral (old) | nearest | nearestRandom | nearest ÷ old | nearestRandom ÷ old |
-|---:|---|---:|---:|---:|---:|---:|
-|  40 | bryoids    |  0.10 |  0.16 |  0.09 | 1.61× | 0.97× |
-|  50 | shrubs     |  9.63 | **16.25** |  9.20 | **1.69×** | 0.96× |
-| 100 | herbs      |  1.60 |  2.20 |  1.57 | 1.37× | 0.98× |
-| 210 | coniferous | 66.59 | 70.70 | 67.00 | 1.06× | 1.01× |
-| 220 | broadleaf  | 15.12 | **8.75** | 15.21 | **0.58×** | 1.01× |
-| 230 | mixedwood  |  6.97 | **1.96** |  6.93 | **0.28×** | 0.99× |
+| cover group | spiral (old) | lowest-code (REMOVED) | nearestWeighted | nearestRandom |
+|---|---:|---:|---:|---:|
+| non-forest vegetation | 11.33 | **18.61 (1.64×)** | 11.29 (**1.00×**) | 10.86 (0.96×) |
+| forest                | 88.68 | **81.41 (0.92×)** | 88.72 (**1.00×**) | 89.14 (1.01×) |
 
-| cover group | spiral (old) | nearest | nearestRandom |
-|---|---:|---:|---:|
-| non-forest vegetation | 11.33 | **18.61** (1.64×) | 10.86 (0.96×) |
-| forest                | 88.68 | **81.41** (0.92×) | 89.14 (1.01×) |
-
-So the deterministic rule **inflates shrubs by 69%** (+6.6 percentage points of all unwanted
-pixels) and thins **broadleaf by 42%** (−6.4 pp) and **mixedwood by 72%** (−5.0 pp), while
-nudging coniferous up 6% (+4.1 pp). Roughly one in fourteen pixels that the old algorithm
-would have made forest becomes non-forest vegetation instead.
-
-For a succession model this is not cosmetic: a pixel imputed as shrubs or herbs carries no
+The removed rule inflated shrubs by 69% and thinned broadleaf by 42% and mixedwood by 72%.
+That is not cosmetic for a succession model: a pixel imputed as shrubs or herbs carries no
 tree cohorts at all, and broadleaf/mixedwood → coniferous shifts the deciduous fraction that
-drives `partitionBiomass()` and the fire regime. `nearestRandom` lands within 0.96–1.01× of
-the old algorithm on every cover type.
+drives `partitionBiomass()` and the fire regime. Both current methods land on the old
+algorithm's forest/non-forest split to within 0–4%.
 
 ![class bias](fig3_class_bias.png)
 
-## Cost: does restoring the randomness restore the blow-up?
+## Were there better deterministic rules?
 
-`04_scaling_all_methods.R` / `scaling_all_methods.csv` — self-contained (no private data): a
-single unwanted blob of increasing radius, timed under all three methods. This is the sweep
-that motivated 1.2.0.9004, rerun with the new method added.
+`07_tiebreak_candidates.R` scores the alternatives that keep determinism, by total-variation
+distance from the old algorithm's class mix (lower is closer; `floor` is the old algorithm
+against itself under different seeds):
 
-| blob radius (cells) | ncell | unwanted | spiral (old) | nearest | nearestRandom | speedup vs spiral |
-|---:|---:|---:|---:|---:|---:|---:|
-|  10 |     676 |    316 |   0.12 s | 0.04 s | 0.05 s |     2× |
-|  20 |   2,704 |  1,264 |   1.23 s | 0.02 s | 0.04 s |    32× |
-|  40 |  10,816 |  5,024 |  26.89 s | 0.02 s | 0.04 s |   727× |
-|  80 |  43,264 | 20,108 | **DNF** (>120 s cap; 9,980 pixels still unresolved) | 0.06 s | 0.09 s | — |
-| 160 | 173,056 | 80,452 | **DNF** (>120 s cap; 68,052 pixels still unresolved) | 0.18 s | 0.25 s | — |
+| landscape | floor (old vs old) | lowest-code | modal among tied | modal overall | **nearestWeighted** | nearestRandom |
+|---|---:|---:|---:|---:|---:|---:|
+| small   | 0.0486 | 0.2953 | 0.0472 | 0.0472 | 0.0669 | 0.0157 |
+| medium  | 0.0072 | 0.1155 | 0.0352 | 0.0497 | 0.0148 | 0.0098 |
+| large   | 0.0043 | 0.1008 | 0.0407 | 0.0532 | 0.0099 | 0.0042 |
+| bigblob | 0.0207 | 0.1456 | 0.0640 | 0.0693 | 0.0143 | 0.0041 |
+
+Breaking ties by whichever tied class is locally most abundant (`modal among tied`), or
+taking the locally dominant class outright (`modal overall`), is a large improvement on
+lowest-code but still 3–9× above the noise floor: winner-take-all over-concentrates the
+dominant class. Keeping the full weighting and making only the *draw* deterministic is what
+lands at the floor.
+
+Note when reading that table: `nearestWeighted` is a single realization, so it carries one
+draw's worth of noise, whereas the `nearestRandom` column is averaged over three seeds. The
+fair comparison for `nearestWeighted` is the floor column, not `nearestRandom`.
+
+## Real landscapes: composition and cost
+
+`03_method_comparison.R`. Per-pixel agreement **cannot** discriminate here — the old
+algorithm does not agree with itself (53.9–79.2%), so that column is saturated by its own
+tie-break noise. Composition does.
+
+| landscape | ncell | unwanted | spiral (s) | nearestWeighted (s) | nearestRandom (s) | TVD: floor | lowest-code | nearestWeighted | nearestRandom |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| small   |    43,681 |   254 | 0.04 | 0.12 | 0.11 | 0.0486 | 0.2953 | 0.0669 | 0.0157 |
+| medium  |   341,056 | 2,889 | 0.11 | 0.40 | 0.39 | 0.0072 | 0.1155 | 0.0148 | 0.0098 |
+| large   | 1,175,056 | 6,770 | 0.41 | 1.47 | 1.41 | 0.0043 | 0.1008 | 0.0099 | 0.0042 |
+| bigblob |   250,000 | 1,145 | 0.07 | 0.27 | 0.27 | 0.0207 | 0.1456 | 0.0143 | 0.0041 |
+
+On these landscapes the unwanted pixels are *scattered*, so the old loop is already fast —
+its cost is driven by blob radius, not raster size.
+
+## Cost: no return of the blow-up
+
+`04_scaling_all_methods.R` — self-contained, no private data: a single unwanted blob of
+increasing radius.
+
+| blob radius (cells) | ncell | unwanted | spiral (old) | nearest-allocation | +weighted draw |
+|---:|---:|---:|---:|---:|---:|
+|  10 |     676 |    316 |   0.12 s | 0.04 s | 0.05 s |
+|  20 |   2,704 |  1,264 |   1.23 s | 0.02 s | 0.04 s |
+|  40 |  10,816 |  5,024 |  26.89 s | 0.02 s | 0.04 s |
+|  80 |  43,264 | 20,108 | **DNF** (>120 s cap; 9,980 unresolved) | 0.06 s | 0.09 s |
+| 160 | 173,056 | 80,452 | **DNF** (>120 s cap; 68,052 unresolved) | 0.18 s | 0.25 s |
+
+The weighted draw adds a second set of distance transforms (to size the window in cells,
+independent of CRS and resolution) and one summed-area table per candidate class — all
+`O(ncell)` and all independent of blob depth. It stays flat exactly where the old
+implementation diverges.
 
 ![scaling](fig1_scaling_all_methods.png)
-
-`nearestRandom` costs roughly 1.3–2× `nearest` — it adds a second set of distance transforms
-(to size the window in cells, independent of CRS and resolution) and one summed-area table
-per candidate class, all O(ncell) and all independent of blob depth. It stays flat exactly
-where the old implementation diverges.
 
 ## Tests
 
 `tests/testthat/test-cohorts.R`:
 
-* `"...samples by local abundance"` — a single unwanted pixel whose 8 neighbours are one
-  210 (the strictly nearest) and seven 220. `"nearest"` must always return 210;
-  `"nearestRandom"` must return it ~1 time in 8 — i.e. weighted by neighbourhood
-  composition, neither by proximity alone nor uniformly over the classes.
-* `"...is seed-reproducible and constrained"` — identical under a repeated seed, different
-  under a new one, still resolves every unwanted pixel, and still never emits an
-  ecoregion-class combination absent from `availableERC_by_Sp`.
-* `"...methods agree when only one class can be chosen"` — with no choice to make, the two
-  methods must return the same thing.
+* `"...replaces unwanted classes from the neighbourhood"` — return schema, every unwanted
+  pixel resolved, no `classesToReplace` emitted, per-ecoregion availability respected; both
+  methods.
+* `"...'nearestWeighted' is deterministic and crop-stable"` — identical across repeated
+  calls, unaffected by the RNG state, and a grid-aligned crop reproduces the parent raster
+  cell for cell.
+* `"...draws are weighted by local abundance"` — one unwanted pixel whose 8 neighbours are
+  one 210 (also the strictly nearest) and seven 220; must return 210 about 1 time in 8,
+  which neither a nearest-only nor a uniform rule would do.
+* `"...shows no bias toward low class codes"` — guards the removed defect directly.
+* `"...methods agree when only one class can be chosen"`.
 
 ## Reproducing
 
-The four real landscapes and the WAU study area are private LandWeb data; the synthetic
-sweep is self-contained.
+The four real landscapes are private LandWeb data; the scaling sweep is self-contained.
 
 ```sh
 LANDR_SRC=. Rscript benchmarks/convertUnwantedLCC-nearestRandom/04_scaling_all_methods.R
 LCC_BENCH_DIR=<dir with v2_input_*.tif> LANDR_SRC=. \
   Rscript benchmarks/convertUnwantedLCC-nearestRandom/03_method_comparison.R
+LANDR_SRC=. Rscript benchmarks/convertUnwantedLCC-nearestRandom/06_class_bias_by_cover_type.R
 LCC_BENCH_DIR=<dir with v2_input_*.tif> LANDR_SRC=. \
   Rscript benchmarks/convertUnwantedLCC-nearestRandom/05_bias_diagnostics.R
-LANDR_SRC=. Rscript benchmarks/convertUnwantedLCC-nearestRandom/06_class_bias_by_cover_type.R
+LCC_BENCH_DIR=<dir with v2_input_*.tif> LANDR_SRC=. \
+  Rscript benchmarks/convertUnwantedLCC-nearestRandom/07_tiebreak_candidates.R
 ```

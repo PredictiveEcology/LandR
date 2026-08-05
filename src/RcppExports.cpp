@@ -10,6 +10,20 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// pixelUnifCpp
+NumericVector pixelUnifCpp(NumericVector x, NumericVector y, double resx, double resy);
+RcppExport SEXP _LandR_pixelUnifCpp(SEXP xSEXP, SEXP ySEXP, SEXP resxSEXP, SEXP resySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< double >::type resx(resxSEXP);
+    Rcpp::traits::input_parameter< double >::type resy(resySEXP);
+    rcpp_result_gen = Rcpp::wrap(pixelUnifCpp(x, y, resx, resy));
+    return rcpp_result_gen;
+END_RCPP
+}
 // spiralLoopCpp
 List spiralLoopCpp(IntegerVector pixelIndex_in, IntegerVector speciesCode_in, IntegerVector rowOrig_in, IntegerVector colOrig_in, IntegerVector seeddist_max_perRow, IntegerVector spiralRow, IntegerVector spiralCol, NumericVector spiralCurDist, int pgmRows, int pgmCols, IntegerVector pgv, IntegerVector srcPg, IntegerVector srcSpeciesCode, int numSp, NumericMatrix wardProbByDist, NumericVector activeSpMaxDist, NumericVector activeSpMax, double cellSize, int successionTimestep, int verbose, bool wardAlreadyExp, bool debug);
 RcppExport SEXP _LandR_spiralLoopCpp(SEXP pixelIndex_inSEXP, SEXP speciesCode_inSEXP, SEXP rowOrig_inSEXP, SEXP colOrig_inSEXP, SEXP seeddist_max_perRowSEXP, SEXP spiralRowSEXP, SEXP spiralColSEXP, SEXP spiralCurDistSEXP, SEXP pgmRowsSEXP, SEXP pgmColsSEXP, SEXP pgvSEXP, SEXP srcPgSEXP, SEXP srcSpeciesCodeSEXP, SEXP numSpSEXP, SEXP wardProbByDistSEXP, SEXP activeSpMaxDistSEXP, SEXP activeSpMaxSEXP, SEXP cellSizeSEXP, SEXP successionTimestepSEXP, SEXP verboseSEXP, SEXP wardAlreadyExpSEXP, SEXP debugSEXP) {
@@ -61,6 +75,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_LandR_pixelUnifCpp", (DL_FUNC) &_LandR_pixelUnifCpp, 4},
     {"_LandR_spiralLoopCpp", (DL_FUNC) &_LandR_spiralLoopCpp, 22},
     {"_LandR_windowCountsByClassCpp", (DL_FUNC) &_LandR_windowCountsByClassCpp, 7},
     {NULL, NULL, 0}

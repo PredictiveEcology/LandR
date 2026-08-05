@@ -62,7 +62,7 @@ overlayLCCs <- function(
   classesToReplace,
   availableERC_by_Sp,
   forestEquivalencies = NULL,
-  method = c("nearest", "nearestRandom")
+  method = c("nearestWeighted", "nearestRandom")
 ) {
   method <- match.arg(method)
   forestedListFail <- FALSE

@@ -141,12 +141,18 @@ for (lab in labs) {
 
   set.seed(123)
   oldOut <- cuSpiral(UNW, L, aDT)
-  detOut <- suppressMessages(convertUnwantedLCC(UNW, L, copy(aDT), doAssertion = FALSE))
+  ## the removed 1.2.0.9004 rule, reconstructed locally: nearest class, ties -> lowest code.
+  ## `tieInfo()` already resolves exactly that, so no package call is needed (nor possible).
+  lowOut <- data.table(pixelIndex = ti$pixelIndex, ecoregionGroup = ti$lowestTied)
+  detOut <- suppressMessages(
+    convertUnwantedLCC(UNW, L, copy(aDT), doAssertion = FALSE, method = "nearestWeighted")
+  )
   set.seed(123)
   rndOut <- suppressMessages(
     convertUnwantedLCC(UNW, L, copy(aDT), doAssertion = FALSE, method = "nearestRandom")
   )
   old <- assignedOnly(L, oldOut)
+  low <- assignedOnly(L, lowOut)
   det <- assignedOnly(L, detOut)
   rnd <- assignedOnly(L, rndOut)
 
@@ -155,18 +161,20 @@ for (lab in labs) {
     unwanted = length(unw),
     pct_tied = round(100 * mean(ti$nTied >= 2L), 1),
     tie_spiral = round(tieBias(oldOut, ti), 1),
-    tie_nearest = round(tieBias(detOut, ti), 1),
+    tie_lowestCode = round(tieBias(lowOut, ti), 1),
+    tie_nearestWeighted = round(tieBias(detOut, ti), 1),
     tie_nearestRandom = round(tieBias(rndOut, ti), 1),
     adj_spiral = round(adjAgreement(old), 1),
-    adj_nearest = round(adjAgreement(det), 1),
+    adj_lowestCode = round(adjAgreement(low), 1),
+    adj_nearestWeighted = round(adjAgreement(det), 1),
     adj_nearestRandom = round(adjAgreement(rnd), 1)
   )
-  panels[[lab]] <- list(L = L, old = old, det = det, rnd = rnd)
+  panels[[lab]] <- list(L = L, old = old, low = low, det = det, rnd = rnd)
   cat(sprintf(
-    ">>> %-8s tied=%.1f%% | lowest-tied-class share: spiral=%.1f%% nearest=%.1f%% rand=%.1f%% | adjacency: spiral=%.1f%% nearest=%.1f%% rand=%.1f%%\n",
-    lab, rows[[lab]]$pct_tied, rows[[lab]]$tie_spiral, rows[[lab]]$tie_nearest,
-    rows[[lab]]$tie_nearestRandom, rows[[lab]]$adj_spiral, rows[[lab]]$adj_nearest,
-    rows[[lab]]$adj_nearestRandom
+    ">>> %-8s tied=%.1f%% | lowest-tied-class share: spiral=%.1f%% lowestCode=%.1f%% wtd=%.1f%% rand=%.1f%% | adjacency: spiral=%.1f%% lowestCode=%.1f%% wtd=%.1f%% rand=%.1f%%\n",
+    lab, rows[[lab]]$pct_tied, rows[[lab]]$tie_spiral, rows[[lab]]$tie_lowestCode,
+    rows[[lab]]$tie_nearestWeighted, rows[[lab]]$tie_nearestRandom, rows[[lab]]$adj_spiral,
+    rows[[lab]]$adj_lowestCode, rows[[lab]]$adj_nearestWeighted, rows[[lab]]$adj_nearestRandom
   ))
   flush.console()
 }
@@ -176,9 +184,9 @@ print(as.data.frame(tab), row.names = FALSE)
 fwrite(tab, file.path(OUT, "bias_diagnostics.csv"))
 
 png(file.path(OUT, "fig2_bias_diagnostics.png"),
-  width = 1500, height = 420 * length(panels), res = 115
+  width = 1500, height = 340 * length(panels), res = 115
 )
-par(mfrow = c(length(panels), 4), mar = c(1.5, 1.5, 3, 1))
+par(mfrow = c(length(panels), 5), mar = c(1.5, 1.5, 3, 1))
 for (lab in names(panels)) {
   p <- panels[[lab]]
   plot(p$L, main = sprintf("%s: input (grey = unwanted)", lab),
@@ -187,7 +195,10 @@ for (lab in names(panels)) {
   plot(p$old, main = sprintf("spiral (old, stochastic) adj %.1f%%", rows[[lab]]$adj_spiral),
     col = cols, type = "classes", legend = FALSE, axes = FALSE
   )
-  plot(p$det, main = sprintf("nearest (deterministic) adj %.1f%%", rows[[lab]]$adj_nearest),
+  plot(p$low, main = sprintf("lowest-code (REMOVED) adj %.1f%%", rows[[lab]]$adj_lowestCode),
+    col = cols, type = "classes", legend = FALSE, axes = FALSE
+  )
+  plot(p$det, main = sprintf("nearestWeighted adj %.1f%%", rows[[lab]]$adj_nearestWeighted),
     col = cols, type = "classes", legend = FALSE, axes = FALSE
   )
   plot(p$rnd, main = sprintf("nearestRandom adj %.1f%%", rows[[lab]]$adj_nearestRandom),
