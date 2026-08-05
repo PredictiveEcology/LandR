@@ -12,13 +12,16 @@ available class, ties breaking to the lowest class. That fixed a real blow-up (t
 without finishing) but it also changed *what gets imputed*. The previous implementation
 sampled among all valid cells within the radius at which it first found one, so a class was
 picked in proportion to how much of it was nearby. Taking only the nearest class instead
-systematically over-assigns whichever class happens to touch the blob edge first, and — via
-the lowest-class tie-break — the lower-numbered classes.
+gives no weight to abundance — and wherever two or more classes tie at the minimum distance,
+which happens at 35–41% of unwanted pixels, it resolves the tie to the lowest class code
+every time. The bias is not spatial; it is toward low-numbered classes.
 
-That is visible below: on the `large` landscape the old algorithm assigned class 230 to 6.0%
-of unwanted pixels, `method = "nearest"` assigns it 1.6%, and class 50 goes the other way,
-8.2% → 14.6%. `method = "nearestRandom"` restores the old proportions (5.9% and 7.9%) while
-keeping the new cost profile.
+Because the Canada LCC codes run non-vegetated → non-forest vegetation → forest, that lands
+squarely on cover type: pooled over four real landscapes, `method = "nearest"` assigns
+**shrubs 1.69×** as often as the old algorithm did, and **broadleaf 0.58×**, **mixedwood
+0.28×**. `method = "nearestRandom"` restores every cover type to within 0.96–1.01× while
+keeping the new cost profile. Details in
+[the tie-break section](#where-the-bias-actually-lives-the-tie-break-not-a-direction) below.
 
 `"nearestRandom"` samples one of the pixel's available classes weighted by how many cells of
 each the neighbourhood holds, where the neighbourhood is the smallest window reaching that
