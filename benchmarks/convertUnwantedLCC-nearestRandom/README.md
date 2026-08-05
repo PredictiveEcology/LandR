@@ -99,6 +99,43 @@ the concern is real, but its mechanism in this implementation is the class-code 
 
 ![bias diagnostics](fig2_bias_diagnostics.png)
 
+### What that costs in cover-type terms
+
+"Lowest code wins" is not a neutral rule. The Canada LCC class codes
+([`LandR::prepInputs_NTEMS_LCC_FAO()`](../../R/prepInputs_NTEMS.R)) run roughly
+non-vegetated → non-forest vegetation → forest, and within forest coniferous (210) <
+broadleaf (220) < mixedwood (230). So a tie-break to the lowest code systematically prefers
+sparse cover over forest, and coniferous over the deciduous-bearing classes.
+
+Pooled over the four landscapes, weighted by unwanted pixels (`06_class_bias_by_cover_type.R`
+/ `class_bias_by_cover_type.csv`); values are % of all unwanted pixels:
+
+| class | cover type | spiral (old) | nearest | nearestRandom | nearest ÷ old | nearestRandom ÷ old |
+|---:|---|---:|---:|---:|---:|---:|
+|  40 | bryoids    |  0.10 |  0.16 |  0.09 | 1.61× | 0.97× |
+|  50 | shrubs     |  9.63 | **16.25** |  9.20 | **1.69×** | 0.96× |
+| 100 | herbs      |  1.60 |  2.20 |  1.57 | 1.37× | 0.98× |
+| 210 | coniferous | 66.59 | 70.70 | 67.00 | 1.06× | 1.01× |
+| 220 | broadleaf  | 15.12 | **8.75** | 15.21 | **0.58×** | 1.01× |
+| 230 | mixedwood  |  6.97 | **1.96** |  6.93 | **0.28×** | 0.99× |
+
+| cover group | spiral (old) | nearest | nearestRandom |
+|---|---:|---:|---:|
+| non-forest vegetation | 11.33 | **18.61** (1.64×) | 10.86 (0.96×) |
+| forest                | 88.68 | **81.41** (0.92×) | 89.14 (1.01×) |
+
+So the deterministic rule **inflates shrubs by 69%** (+6.6 percentage points of all unwanted
+pixels) and thins **broadleaf by 42%** (−6.4 pp) and **mixedwood by 72%** (−5.0 pp), while
+nudging coniferous up 6% (+4.1 pp). Roughly one in fourteen pixels that the old algorithm
+would have made forest becomes non-forest vegetation instead.
+
+For a succession model this is not cosmetic: a pixel imputed as shrubs or herbs carries no
+tree cohorts at all, and broadleaf/mixedwood → coniferous shifts the deciduous fraction that
+drives `partitionBiomass()` and the fire regime. `nearestRandom` lands within 0.96–1.01× of
+the old algorithm on every cover type.
+
+![class bias](fig3_class_bias.png)
+
 ## Cost: does restoring the randomness restore the blow-up?
 
 `04_scaling_all_methods.R` / `scaling_all_methods.csv` — self-contained (no private data): a
@@ -145,4 +182,5 @@ LCC_BENCH_DIR=<dir with v2_input_*.tif> LANDR_SRC=. \
   Rscript benchmarks/convertUnwantedLCC-nearestRandom/03_method_comparison.R
 LCC_BENCH_DIR=<dir with v2_input_*.tif> LANDR_SRC=. \
   Rscript benchmarks/convertUnwantedLCC-nearestRandom/05_bias_diagnostics.R
+LANDR_SRC=. Rscript benchmarks/convertUnwantedLCC-nearestRandom/06_class_bias_by_cover_type.R
 ```
