@@ -1,6 +1,9 @@
 test_that("calc_raster_stats and plot_raster_stats work", {
   testthat::skip_on_cran()
-  # testthat::skip_on_ci()
+
+  ## NOTE: downloads from sis.agr.gc.ca, which throttles connections from CI runners
+  ## (connection-level failure; not a cert or User-Agent problem). Still runs locally.
+  testthat::skip_on_ci()
 
   testthat::skip_if_not_installed("dplyr")
   testthat::skip_if_not_installed("geodata")

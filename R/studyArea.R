@@ -20,7 +20,9 @@ randomStudyArea <- utils::getFromNamespace("randomStudyArea", "SpaDES.tools")
 #'
 #' @returns spatial polygons object of the same class as `studyArea`
 #'
-#' @examples
+#' @examplesIf !isTRUE(as.logical(Sys.getenv("CI")))
+#' ## NOTE: runs locally, skipped on CI -- downloads from sis.agr.gc.ca, which throttles
+#' ## connections from CI runners (same predicate as testthat::skip_on_ci())
 #' ## using SpatVector objects
 #' sa <- randomStudyArea(size = 1e9)
 #' sa_eco <- studyAreaEco(studyArea = sa)

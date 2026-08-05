@@ -24,6 +24,9 @@ a \code{SpatRaster} layer of fire perimeters with fire year values.
 Create a raster of fire perimeters
 }
 \examples{
+\dontshow{if (!isTRUE(as.logical(Sys.getenv("CI")))) withAutoprint(\{ # examplesIf}
+## NOTE: runs locally, skipped on CI -- downloads NFDB_poly.zip from
+## cwfis.cfs.nrcan.gc.ca (same predicate as testthat::skip_on_ci())
 withr::local_options(list(
   reproducible.useTerra = TRUE,
   reproducible.rasterRead = "terra::rast"
@@ -56,5 +59,5 @@ if (interactive()) {
 }
 
 withr::deferred_run()
-
+\dontshow{\}) # examplesIf}
 }

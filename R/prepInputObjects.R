@@ -852,7 +852,9 @@ prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", dataVers
 #'
 #' @export
 #'
-#' @examples
+#' @examplesIf !isTRUE(as.logical(Sys.getenv("CI")))
+#' ## NOTE: runs locally, skipped on CI -- downloads NFDB_poly.zip from
+#' ## cwfis.cfs.nrcan.gc.ca (same predicate as testthat::skip_on_ci())
 #' withr::local_options(list(
 #'   reproducible.useTerra = TRUE,
 #'   reproducible.rasterRead = "terra::rast"
