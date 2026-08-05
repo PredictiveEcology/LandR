@@ -70,6 +70,35 @@ Proportion of unwanted pixels assigned to each class, `large` landscape:
 `nearest` roughly halves 220 and quarters 230 while inflating 50; `nearestRandom` tracks the
 old algorithm to within a few parts in ten thousand.
 
+## Where the bias actually lives: the tie-break, not a direction
+
+[PR #196 raised](https://github.com/PredictiveEcology/LandR/pull/196#issuecomment-5184524397)
+that the function was made stochastic in the first place because a deterministic pick left a
+visible artifact — the recollection being that it "always chose the north east (or whatever)
+replacement". Worth pinning down which artifact this implementation actually has, since the
+two call for different fixes.
+
+It is **not directional**. `method = "nearest"` picks the class whose nearest cell is
+closest; only when two or more classes *tie* at that distance does the tie-break decide —
+and it always resolves to the lowest class code. `05_bias_diagnostics.R` measures both
+possibilities:
+
+| landscape | unwanted pixels with a tie | share given the lowest tied class — spiral | **nearest** | nearestRandom | adjacency — spiral | nearest | nearestRandom |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| medium  | 34.9% | 45.0% | **100.0%** | 46.1% | 72.6% | 74.2% | 71.0% |
+| bigblob | 40.6% | 52.7% | **100.0%** | 47.5% | 69.3% | 73.6% | 66.3% |
+
+Ties are common — a third to two fifths of all unwanted pixels — and `nearest` resolves
+**every one** of them to the lowest class code, where the old algorithm and `nearestRandom`
+take it roughly half the time. That is the whole of the composition shift in the previous
+section: a systematic pull toward low-numbered classes, applied at ~40% of pixels.
+
+Spatial structure, by contrast, barely moves (adjacency agreement among neighbouring
+unwanted pixels, 72.6% → 74.2%), so there is no directional or patch artifact to fix here —
+the concern is real, but its mechanism in this implementation is the class-code tie-break.
+
+![bias diagnostics](fig2_bias_diagnostics.png)
+
 ## Cost: does restoring the randomness restore the blow-up?
 
 `04_scaling_all_methods.R` / `scaling_all_methods.csv` — self-contained (no private data): a
@@ -114,4 +143,6 @@ sweep is self-contained.
 LANDR_SRC=. Rscript benchmarks/convertUnwantedLCC-nearestRandom/04_scaling_all_methods.R
 LCC_BENCH_DIR=<dir with v2_input_*.tif> LANDR_SRC=. \
   Rscript benchmarks/convertUnwantedLCC-nearestRandom/03_method_comparison.R
+LCC_BENCH_DIR=<dir with v2_input_*.tif> LANDR_SRC=. \
+  Rscript benchmarks/convertUnwantedLCC-nearestRandom/05_bias_diagnostics.R
 ```
