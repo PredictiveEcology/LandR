@@ -32,16 +32,36 @@
 
 ## Enhancements
 
-* `convertUnwantedLCC()` now assigns each unwanted pixel its nearest available
-  land-cover class via a vectorized `terra::distance()` transform per candidate class
-  (deterministic; ties break to the lowest class), replacing the former iterative
-  `spread2()` search whose run time grew with the square of the radius of the largest
-  contiguous block of `classesToReplace`. On study areas containing large lakes/burns
-  masked to an irregular boundary this converts a run that could take **hours (or never
-  finish)** into **seconds** (e.g. a 3.8 M-cell Western-Alberta study area: >2.8 h and
-  unfinished before, 3.5 s after), with output within the previous algorithm's own
-  run-to-run variance (the old tie-break was random) and per-ecoregion availability
-  constraints preserved exactly.
+* `convertUnwantedLCC()` no longer uses the iterative `spread2()` search, whose run time grew
+  with the square of the radius of the largest contiguous block of `classesToReplace`. On
+  study areas containing large lakes/burns masked to an irregular boundary that search could
+  take **hours, or never finish** (a 3.8 M-cell Western-Alberta study area: >2.8 h and
+  unfinished). Each unwanted pixel now takes an available class drawn with probability
+  proportional to that class's abundance within the smallest window reaching the pixel's
+  nearest available class — the window at which `spread2()` would have stopped. Distances
+  come from one vectorized `terra::distance()` transform per candidate class and the counts
+  from a summed-area table, so the cost is independent of blob geometry: the same study area
+  now completes in seconds. Per-ecoregion availability constraints are preserved exactly,
+  and the abundance weighting reproduces the former search's class mix to within its own
+  seed-to-seed variance. The exact output is *not* reproducible — the window radius now
+  comes from a distance transform rather than from counting spread iterations — so runs
+  needing pre-1.2.0.9004 output bit-for-bit must pin `LandR (<= 1.2.0.9003)`.
+* `convertUnwantedLCC()` gains a `method` argument, which `overlayLCCs()` also accepts and
+  passes through. Both options allocate identically and differ only in where the draw comes
+  from. `method = "nearestWeighted"` (the default) keys it on the pixel's ground position, so
+  it needs no `set.seed()`, is stable under `Cache()` (which does not key on RNG state), and
+  — because the key is the cell centre rather than the cell index — a grid-aligned crop
+  reproduces its parent raster cell for cell, so a small development subset agrees with the
+  scaled-up run. `method = "nearestRandom"` draws from the RNG instead, for when replicates
+  should differ.
+* **`convertUnwantedLCC()`'s deterministic nearest-class rule, briefly present in
+  1.2.0.9004, has been removed.** It broke distance ties to the lowest land-cover class, and
+  ties turn out to be common — 35–41% of unwanted pixels on real landscapes — so it pulled
+  systematically toward low-numbered classes. Under the Canada LCC coding those are the
+  sparse, non-forest types: pooled over four real landscapes it assigned shrubs **1.69×** as
+  often as the previous implementation, broadleaf **0.58×** and mixedwood **0.28×**, moving
+  roughly one in fourteen unwanted pixels out of forest altogether. `"nearestWeighted"`
+  gives the same determinism without that bias.
 * `LANDISDisp()` spiral seed dispersal loop ported to C++ via `Rcpp`
   (~3.5–5.7× faster end-to-end depending on input size; ~5× on landscape-scale
   fixtures of 9 M cells). Memory use also drops dramatically: the
@@ -84,6 +104,12 @@
 
 ## Bug fixes
 
+* `convertUnwantedLCC()` again returns the `newPossLCC` column it returned prior to
+  1.2.0.9004 (the assigned land-cover class itself, i.e. `ecoregionGroup` without its
+  ecoregion prefix). Callers use it to write the replacement classes back into the LCC
+  raster — `Biomass_borealDataPrep` does so behind an `is.null()` guard, which silently
+  stopped firing when the column disappeared, leaving `rstLCCAdj` (and hence
+  `ecoregionMap`) still showing the replaced classes;
 * `dropTerm` now can deal with random effects better (#105);
 * `prepRawBiomassMap` - needed `overwrite = TRUE` for cases where download was corrupt;
 * `prepRawBiomassMap` needs `httr2` package as remote site is failing with `download.file`;

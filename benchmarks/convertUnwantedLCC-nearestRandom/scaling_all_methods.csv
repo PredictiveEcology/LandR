@@ -1,0 +1,6 @@
+radius,ncell,unwanted,spiral_s,spiral_done,nearest_s,nearestRandom_s,speedup_vs_spiral
+10,676,316,0.12,TRUE,0.04,0.05,2
+20,2704,1264,1.23,TRUE,0.02,0.04,32
+40,10816,5024,26.89,TRUE,0.02,0.04,727
+80,43264,20108,,FALSE,0.06,0.09,
+160,173056,80452,,FALSE,0.18,0.25,

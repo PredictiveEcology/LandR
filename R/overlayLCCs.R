@@ -48,12 +48,23 @@ utils::globalVariables(c(
 #'   `length(LCCs) + 1` columns, and `2 ^ length(LCCs)` rows.
 #'   Currently not used.
 #'
+#' @inheritParams convertUnwantedLCC
+#'
 #' @author Eliot McIntire and Alex Chubaty
 #' @export
-overlayLCCs <- function(LCCs, forestedList, outputLayer,
-                        NAcondition, NNcondition, remapTable = NULL,
-                        classesToReplace, availableERC_by_Sp,
-                        forestEquivalencies = NULL) {
+overlayLCCs <- function(
+  LCCs,
+  forestedList,
+  outputLayer,
+  NAcondition,
+  NNcondition,
+  remapTable = NULL,
+  classesToReplace,
+  availableERC_by_Sp,
+  forestEquivalencies = NULL,
+  method = c("nearestWeighted", "nearestRandom")
+) {
+  method <- match.arg(method)
   forestedListFail <- FALSE
   if (is.null(names(forestedList))) forestedListFail <- TRUE
   if (!identical(sort(names(forestedList)), sort(names(LCCs)))) {
@@ -123,7 +134,8 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
             classesToReplace = classesToReplace,
             rstLCC = LCCs[[outputLayer]],
             theUnwantedPixels = dt1$pixelIndex,
-            availableERC_by_Sp = na.omit(dt)[, c("initialEcoregionCode", "pixelIndex")]
+            availableERC_by_Sp = na.omit(dt)[, c("initialEcoregionCode", "pixelIndex")],
+            method = method
           )
           dt <- a[dt, on = "pixelIndex"]
           dt[!is.na(ecoregionGroup), ecoregionCode := ecoregionGroup]
@@ -160,7 +172,8 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
           classesToReplace = classesToReplace,
           rstLCC = LCCs[[outputLayer]],
           # theUnwantedPixels = dt1$pixelIndex,
-          availableERC_by_Sp = na.omit(dt2)[, c("initialEcoregionCode", "pixelIndex")]
+          availableERC_by_Sp = na.omit(dt2)[, c("initialEcoregionCode", "pixelIndex")],
+          method = method
         )
         dt <- a[dt, on = "pixelIndex"]
         dt[!is.na(ecoregionGroup), ecoregionCode := ecoregionGroup]
