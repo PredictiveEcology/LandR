@@ -71,10 +71,10 @@ be used for the simpler cases of simply replacing a Land Cover Class.
 Each pixel whose value is in \code{classesToReplace} is assigned the \emph{nearest} available
 \code{initialEcoregionCode}. For each candidate land-cover class present in \code{rstLCC}, the
 distance from every pixel to the nearest cell of that class is computed with a single
-vectorized \code{\link[terra:distance]{terra::distance()}} call; each unwanted pixel is then
-given the closest class whose implied \code{initialEcoregionCode} is available for that pixel's
-ecoregion (and all of its \code{speciesCode}s). Ties break to the lowest land-cover class, so
-the result is deterministic. This replaces an earlier iterative \code{spread2()}-based search
+vectorized \code{\link[terra:distance]{terra::distance()}} call; each unwanted pixel is then given the closest
+class whose implied \code{initialEcoregionCode} is available for that pixel's ecoregion
+(and all of its \code{speciesCode}s). Ties break to the lowest land-cover class, so the
+result is deterministic. This replaces an earlier iterative \code{spread2()}-based search
 whose run time grew with the square of the radius of the largest contiguous block of
 \code{classesToReplace}, which could take hours on large study areas with big lakes or burns.
 }
