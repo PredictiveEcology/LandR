@@ -13,7 +13,6 @@ concurrency:
 
 jobs:
   R-CMD-check:
-    if: "!contains(github.event.commits[0].message, '[skip-ci]')"
     uses: PredictiveEcology/actions/.github/workflows/R-CMD-check.yaml@main
     secrets: inherit
     with:
@@ -28,12 +27,8 @@ jobs:
       ## own Remotes). Listing the Suggests as top-level refs sidesteps
       ## the deep-resolution issue.
       dependencies: 'NA'
-      ## `BioSIM`/`NLMR`/`zonal`/`map` are not on CRAN under those names
-      ## (Github-only or removed); skip pak resolution and install via
-      ## post-install for the ones we actually need.
-      ## `santoku` was archived from CRAN on 2026-05-15, breaking the
-      ## transitive `mikejohnson51/zonal` -> `santoku` resolution (which
-      ## is why `zonal` is also dropped from DESCRIPTION's `Remotes:`).
+      ## `BioSIM`/`map` are not on CRAN under those names (GitHub-only);
+      ## skip pak resolution for them and install via post-install below.
       extra-packages: |
         any::sf
         any::XML
@@ -70,12 +65,9 @@ jobs:
         withr
         biomod2=?ignore
         BioSIM=?ignore
-        NLMR=?ignore
         map=?ignore
-        zonal=?ignore
       post-install: |
         pak::pkg_install("remotes")
         remotes::install_github("RNCan/BioSimClient_R")
-        remotes::install_github("ropensci/NLMR")
         remotes::install_github("CeresBarros/biomod2@dev_currentCeres")
         remotes::install_github("PredictiveEcology/map@development")
