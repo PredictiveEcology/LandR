@@ -101,6 +101,7 @@
 * several minor updates to `loadSCANFISpeciesLayers`, `prepSpeciesLayers_SCANFI` to address more edge cases;
 * `prepSpeciesLayers_SCANFI` updates to improve join `sppEquiv` so "multiple - to - one" can be used;
 * improved transition plots, use `arrow` datasets to minimize memory use (important for large study areas);
+* use `.scanfi_v1_years` and `.scanfi_v2_years` instead of harcoded years in multiple places;
 
 ## Bug fixes
 

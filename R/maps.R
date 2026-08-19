@@ -6,6 +6,9 @@ utils::globalVariables(c(
   "totalB", "totalcover", "Type", "vals", "weightedAge"
 ))
 
+.scanfi_v1_years <- seq(2000L, 2020L, 10L)
+.scanfi_v2_years <- seq(1985L, 2025L, 5L)
+
 #' Canada administrative boundaries
 #'
 #' @param src Character. One of "stats_can" or (if `geodata` package is installed) "geodata".
@@ -244,7 +247,7 @@ prepInputsLCC <- function(
 #' @export
 convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", ...) {
   if (dataVersion == "V1") {
-    if (!(year %in% c(2000, 2010, 2020))) {
+    if (!(year %in% .scanfi_v1_years)) {
       stop("SCANFI V1 Landcover does not exist for this year")
     }
 
@@ -258,10 +261,8 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", ...) {
       lccURL <- paste0("https://drive.google.com/file/d/11sQu1mdPtVsWjFUBNx3TrzpksZ6ri1pJ")
       lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
     }
-
   } else if (dataVersion == "V2") {
-
-    if (!(year %in% c(1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025))) {
+    if (!(year %in% .scanfi_v2_years)) {
       stop("SCANFI V2 Landcover does not exist for this year")
     }
 
@@ -313,9 +314,10 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", ...) {
 
 #' Obtain an LCC layer for a given year from SCANFI, with forest matching the FAO definition
 #'
-#' @param year data year for SCANFI landcover data. 2000, 2010, and 2020 possible for V1.
-#'    1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025 possible for V2.
-#' @param dataVersion Character. SCANFI product version for data. Default is currently V2. V1 also available.
+#' @param year data year for SCANFI landcover data. `r .scanfi_v1_years` possible for V1.
+#'    `r .scanfi_v2_years` possible for V2.
+#' @param dataVersion Character. SCANFI product version for data. Default is currently "V2".
+#'    "V1" also available.
 #' @param disturbedCode value assigned to pixels that are forest per FAO definition but not in LCC year
 #' @param resampleMethod method used when resampling LCC layers to match `rasterToMatch`
 #' @param ... passed to `prepInputs`
@@ -324,18 +326,18 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", ...) {
 #'
 #' @export
 prepInputs_SCANFI_LCC_FAO <- function(
-    year = 2020,
-    dataVersion = "V2",
-    disturbedCode = 240,
-    resampleMethod = "near",
-    ...
+  year = 2020,
+  dataVersion = "V2",
+  disturbedCode = 240,
+  resampleMethod = "near",
+  ...
 ) {
   if (dataVersion == "V1") {
-    if (!(year %in% c(2000, 2010, 2020))) {
+    if (!(year %in% .scanfi_v1_years)) {
       stop("SCANFI V1 Landcover for this year is unavailable")
     }
   } else if (dataVersion == "V2") {
-    if (!(year %in% c(1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025))) {
+    if (!(year %in% .scanfi_v2_years)) {
       stop("SCANFI V2 Landcover does not exist for this year")
     }
   }
@@ -365,14 +367,14 @@ prepInputs_SCANFI_LCC_FAO <- function(
   ## 40 = bryoids; 50 = shrubs; 80 = wetland; 81 = wetland-treed; 100 = herbs; 210 = coniferous;
   ## 220 = broadleaf; 230 = mixedwood
   if (dataVersion == "V1") {
-  if (year == 2000) {
-    lccURL <- "https://drive.google.com/file/d/1zqzTSDk9mtyRhcQuMsRMK2WDwkuk24kt"
-  } else if (year == 2010) {
-    lccURL <- "https://drive.google.com/file/d/1q1LOewgbanVUAySCyJqjc8VcSl4958TP"
-  } else if (year == 2020) {
-    lccURL <- "https://drive.google.com/file/d/1ZwEspwpcpZwIYvYEnYmd7Ux44goNvDB2"
-  }
-  lccTF <- paste0("SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_", year, "_v1_1.tif")
+    if (year == 2000) {
+      lccURL <- "https://drive.google.com/file/d/1zqzTSDk9mtyRhcQuMsRMK2WDwkuk24kt"
+    } else if (year == 2010) {
+      lccURL <- "https://drive.google.com/file/d/1q1LOewgbanVUAySCyJqjc8VcSl4958TP"
+    } else if (year == 2020) {
+      lccURL <- "https://drive.google.com/file/d/1ZwEspwpcpZwIYvYEnYmd7Ux44goNvDB2"
+    }
+    lccTF <- paste0("SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_", year, "_v1_1.tif")
   } else if (dataVersion == "V2") {
     if (year == 1985) {
       lccURL <- paste0("https://drive.google.com/file/d/1iAEEpkVofQBggIJaxwXKcKADU3zka7Wh")
@@ -1417,17 +1419,17 @@ loadkNNSpeciesLayersValidation <- function(
 #'
 #' @export
 loadSCANFISpeciesLayers <- function(
-    dPath,
-    rasterToMatch = NULL,
-    studyArea = NULL,
-    sppEquiv,
-    year = 2020,
-    dataVersion = "V2",
-    SCANFINamesCol = "SCANFI",
-    sppEquivCol = "SCANFI",
-    thresh = 10,
-    url = NULL,
-    ...
+  dPath,
+  rasterToMatch = NULL,
+  studyArea = NULL,
+  sppEquiv,
+  year = 2020,
+  dataVersion = "V2",
+  SCANFINamesCol = "SCANFI",
+  sppEquivCol = "SCANFI",
+  thresh = 10,
+  url = NULL,
+  ...
 ) {
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
@@ -1477,7 +1479,7 @@ loadSCANFISpeciesLayers <- function(
 
   if (is.null(url)) {
     if (dataVersion == "V1") {
-      if (!(year %in% c(2000, 2010, 2020))) {
+      if (!(year %in% .scanfi_v1_years)) {
         stop("SCANFI V1 species do not exist for this year")
       }
 
@@ -1488,10 +1490,8 @@ loadSCANFISpeciesLayers <- function(
       } else if (year == 2020) {
         url <- "https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ"
       }
-
     } else if (dataVersion == "V2") {
-
-      if (!(year %in% c(1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025))) {
+      if (!(year %in% .scanfi_v2_years)) {
         stop("SCANFI V2 species does not exist for this year")
       }
 
@@ -1592,7 +1592,8 @@ loadSCANFISpeciesLayers <- function(
     stop("None of the selected species were found in the SCANFI layers")
   }
 
-  if (dataVersion == "V1") { #removing 2 species that weren't present in SCANFI V1
+  if (dataVersion == "V1") {
+    #removing 2 species that weren't present in SCANFI V1
     SCANFInames <- SCANFInames[!SCANFInames %in% c("FRAX_AME", "POPU_GRA")]
   }
 
@@ -1775,9 +1776,9 @@ loadSCANFISpeciesLayers <- function(
       lapply(
         seq_along(speciesLayers),
         FUN = function(
-    i,
-    rasters = speciesLayers,
-    filenames = postProcessedFilenamesWithStudyAreaName
+          i,
+          rasters = speciesLayers,
+          filenames = postProcessedFilenamesWithStudyAreaName
         ) {
           outFile <- file.path(oPath, paste0(filenames[i]))
           if (!file.exists(outFile)) {

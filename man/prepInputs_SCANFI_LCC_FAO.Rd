@@ -13,10 +13,11 @@ prepInputs_SCANFI_LCC_FAO(
 )
 }
 \arguments{
-\item{year}{data year for SCANFI landcover data. 2000, 2010, and 2020 possible for V1.
+\item{year}{data year for SCANFI landcover data. 2000, 2010, 2020 possible for V1.
 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025 possible for V2.}
 
-\item{dataVersion}{Character. SCANFI product version for data. Default is currently V2. V1 also available.}
+\item{dataVersion}{Character. SCANFI product version for data. Default is currently "V2".
+"V1" also available.}
 
 \item{disturbedCode}{value assigned to pixels that are forest per FAO definition but not in LCC year}
 
