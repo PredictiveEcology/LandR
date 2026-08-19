@@ -13,7 +13,6 @@ concurrency:
 
 jobs:
   test-coverage:
-    if: "!contains(github.event.commits[0].message, '[skip-ci]')"
     uses: PredictiveEcology/actions/.github/workflows/test-coverage.yaml@main
     secrets: inherit
     with:
@@ -55,12 +54,9 @@ jobs:
         withr
         biomod2=?ignore
         BioSIM=?ignore
-        NLMR=?ignore
         map=?ignore
-        zonal=?ignore
       post-install: |
         pak::pkg_install("remotes")
         remotes::install_github("RNCan/BioSimClient_R")
-        remotes::install_github("ropensci/NLMR")
         remotes::install_github("CeresBarros/biomod2@dev_currentCeres")
         remotes::install_github("PredictiveEcology/map@development")

@@ -20,7 +20,7 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -37,14 +37,12 @@ jobs:
             any::XML
             local::.
             BioSIM=?ignore
-            NLMR=?ignore
           needs: website
 
       - name: Install additional package dependencies
         run: |
           pak::pkg_install("remotes")
           remotes::install_github("RNCan/BioSimClient_R")
-          remotes::install_github("ropensci/NLMR")
         shell: Rscript {0}
 
       - name: Build site
