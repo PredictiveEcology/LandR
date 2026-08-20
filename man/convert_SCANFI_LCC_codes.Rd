@@ -4,7 +4,7 @@
 \alias{convert_SCANFI_LCC_codes}
 \title{Convert SCANFI Landcover layers from 1-8 codes to typical Canada LCC codes (0-230)}
 \usage{
-convert_SCANFI_LCC_codes(year = 2000, dataVersion = "V2", ...)
+convert_SCANFI_LCC_codes(year = 2000, dataVersion = "V2", writeTo = NULL, ...)
 }
 \arguments{
 \item{year}{data year for SCANFI landcover data. 2000, 2010, and 2020 possible for V1.
@@ -12,7 +12,14 @@ convert_SCANFI_LCC_codes(year = 2000, dataVersion = "V2", ...)
 
 \item{dataVersion}{Character. SCANFI product version for data. Default is currently V2. V1 also available.}
 
-\item{...}{additional args (not used)}
+\item{writeTo}{Optional character. If supplied, the converted layer is written to this
+file as a tiled, LZW-compressed \code{INT1U} GeoTIFF (\code{NAflag = 255}). All output codes
+lie in 20-230, so a single unsigned byte is sufficient; leaving \code{terra} to its
+\code{Float32} default roughly doubles the file and, because the default layout is
+full-width strips, makes windowed reads of these national
+(178400 x 119100) rasters needlessly expensive.}
+
+\item{...}{additional args passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}}
 }
 \value{
 a \code{SpatRaster} with corrected classification codes

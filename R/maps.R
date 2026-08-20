@@ -240,12 +240,19 @@ prepInputsLCC <- function(
 #'
 #' @param dataVersion Character. SCANFI product version for data. Default is currently V2. V1 also available.
 #'
+#' @param writeTo Optional character. If supplied, the converted layer is written to this
+#'    file as a tiled, LZW-compressed `INT1U` GeoTIFF (`NAflag = 255`). All output codes
+#'    lie in 20-230, so a single unsigned byte is sufficient; leaving `terra` to its
+#'    `Float32` default roughly doubles the file and, because the default layout is
+#'    full-width strips, makes windowed reads of these national
+#'    (178400 x 119100) rasters needlessly expensive.
+#'
 #' @return a `SpatRaster` with corrected classification codes
 #'
-#' @param ... additional args (not used)
+#' @param ... additional args passed to [reproducible::prepInputs()]
 #'
 #' @export
-convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", ...) {
+convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", writeTo = NULL, ...) {
   if (dataVersion == "V1") {
     if (!(year %in% .scanfi_v1_years)) {
       stop("SCANFI V1 Landcover does not exist for this year")
@@ -306,7 +313,31 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", ...) {
   oldVals <- 1:8
   newVals <- c(40, 100, 30, 50, 220, 210, 230, 20)
 
-  scanfi_lcc_corrected <- terra::subst(scanfi_lcc, from = oldVals, to = newVals)
+  ## The recode is a bijection over 8 classes; every output code is in 20-230 and NA is
+  ## flagged 255, so the result fits in one unsigned byte -- same footprint as the SCANFI
+  ## source, which is itself Byte. terra's default (Float32, full-width strips) instead
+  ## quadruples the per-pixel cost and forces any crop of these national rasters to read
+  ## entire 178400-pixel rows, so pin the datatype and tile the output.
+  substArgs <- list(
+    x = scanfi_lcc,
+    from = oldVals,
+    to = newVals,
+    datatype = "INT1U",
+    NAflag = 255
+  )
+
+  if (!is.null(writeTo)) {
+    substArgs <- c(substArgs, list(
+      filename = writeTo,
+      overwrite = TRUE,
+      gdal = c(
+        "COMPRESS=LZW", "TILED=YES", "BLOCKXSIZE=256", "BLOCKYSIZE=256",
+        "BIGTIFF=IF_SAFER"
+      )
+    ))
+  }
+
+  scanfi_lcc_corrected <- do.call(terra::subst, substArgs)
   rm(scanfi_lcc)
 
   return(scanfi_lcc_corrected)

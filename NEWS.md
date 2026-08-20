@@ -102,6 +102,18 @@
 * `prepSpeciesLayers_SCANFI` updates to improve join `sppEquiv` so "multiple - to - one" can be used;
 * improved transition plots, use `arrow` datasets to minimize memory use (important for large study areas);
 * use `.scanfi_v1_years` and `.scanfi_v2_years` instead of harcoded years in multiple places;
+* `convert_SCANFI_LCC_codes()` now writes an `INT1U`, 256x256-tiled, LZW-compressed
+  GeoTIFF (`NAflag = 255`) and gains a `writeTo` argument to name the output. The recode is
+  a bijection whose every output code lies in 20-230, so one unsigned byte suffices --- the
+  same footprint as the `Byte` SCANFI source. `terra`'s default of `Float32` in full-width
+  strips instead quadrupled the per-pixel cost and forced every crop of these national
+  178400 x 119100 rasters to read entire 178400-pixel rows. All 12 precomputed layers on
+  Google Drive (V2 1985-2025, V1 2000/2010/2020) were rebuilt and verified against their
+  distributed copies: **12/12 identical**, with zero value mismatches and zero NA-pattern
+  mismatches over all 21,247,440,000 pixels each, and per-class histograms equal (which for
+  V2 2020 also reproduce the counts published in NRCan's own `.tif.aux.xml` sidecar). Total
+  storage falls from 32.98 GB to 15.05 GB (~2.19x). Values are unchanged, so a rebuilt layer
+  is a drop-in replacement for the precomputed copy it replaces.
 
 ## Bug fixes
 
