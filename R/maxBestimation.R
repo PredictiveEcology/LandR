@@ -102,7 +102,7 @@ utils::globalVariables(c(
 #'   Alternatively, pass a named vector of parameter boundaries.
 #'
 #' @param nbWorkers integer. If > 1, the number of workers to use in `future.apply::future_apply`, otherwise
-#'   no parallellisation is done.
+#'   no parallelisation is done.
 #'
 #' @seealso [bbmle::mle2()]
 #' @export
@@ -521,7 +521,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 #' @param lower passed to [bbmle::mle2]
 #' @param upper passed to [bbmle::mle2]
 #' @param nbWorkers integer. If > 1, the number of workers to use in `parallelly::makeClusterPSOCK(nbWorkers = .)`,
-#'  otherwise no parallellisation is done.
+#'  otherwise no parallelisation is done.
 #'
 #' @return a `list` with entries `mll` (the maximum likelihood-estimated
 #' coefficients) and `AICbest` (the AIC of the best models generating these coefficients)
@@ -1033,7 +1033,7 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
     cols <- c("age", .getMaxBCoefs(mll)[[2]])
     missingCols <- setdiff(c("B", cols), names(data))
     if (length(missingCols)) {
-      stop("The following colums were not found in data: ",
+      stop("The following columns were not found in data: ",
            paste(missingCols, collapse = ", "))
     }
 
@@ -1396,7 +1396,7 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
     cols <- unique(c("age", targetCovar, .getMaxBCoefs(mll)[[2]]))
     missingCols <- setdiff(c("B", cols), names(data))
     if (length(missingCols)) {
-      stop("The following colums were not found in data: ",
+      stop("The following columns were not found in data: ",
            paste(missingCols, collapse = ", "))
     }
 
