@@ -24,7 +24,7 @@ source \url{http://www.borealbirds.ca/files/CAS_Document_Final_Mar_2010_ALL_APPE
 \item{Broadleaf}{logical indicating whether the species is broad leaf}
 \item{Type}{Whether the species is a deciduous or conifer species}
 \item{PSP}{Species name from the module \code{ianmseddy/PSP_Clean}}
-\item{ApproxFBP}{Species groups roughly corresponding to Canadian Forest Fire Behavior Prediction (FBP) System}
+\item{ApproxFBP}{Species groups roughly corresponding to Canadian Forest Fire Behaviour Prediction (FBP) System}
 \item{FuelClass}{The fuel class used by the module PredictiveEcology/fireSense}#'
 \item{BC_Forestry}{Species code adopted by the Government of British Columbia}
 \item{AB_Forestry}{Species code adopted by the Government of Alberta}
