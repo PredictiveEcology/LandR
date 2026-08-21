@@ -102,7 +102,7 @@ utils::globalVariables(c(
 #'   Alternatively, pass a named vector of parameter boundaries.
 #'
 #' @param nbWorkers integer. If > 1, the number of workers to use in `future.apply::future_apply`, otherwise
-#'   no parallelisation is done.
+#'   no parallellisation is done.
 #'
 #' @seealso [bbmle::mle2()]
 #' @export
@@ -534,7 +534,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 #' @param lower passed to [bbmle::mle2]
 #' @param upper passed to [bbmle::mle2]
 #' @param nbWorkers integer. If > 1, the number of workers to use in `parallelly::makeClusterPSOCK(nbWorkers = .)`,
-#'  otherwise no parallelisation is done.
+#'  otherwise no parallellisation is done.
 #'
 #' @return a `list` with entries `mll` (the maximum likelihood-estimated
 #' coefficients) and `AICbest` (the AIC of the best models generating these coefficients)
