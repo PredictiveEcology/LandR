@@ -1108,7 +1108,7 @@ ggplotMLL_maxB <- function(mll, data, maxCover = 1L, xCovar = "age",
     cols <- c("age", .getMaxBCoefs(mll)[[2]])
     missingCols <- setdiff(c("B", cols), names(data))
     if (length(missingCols)) {
-      stop("The following colums were not found in data: ", paste(missingCols, collapse = ", "))
+      stop("The following columns were not found in data: ", paste(missingCols, collapse = ", "))
     }
 
     df <- data[, ..cols]
@@ -1550,7 +1550,7 @@ partialggplotMLL_maxB <- function(mll, data, targetCovar = "cover", maxCover = 1
     cols <- unique(c("age", targetCovar, .getMaxBCoefs(mll)[[2]]))
     missingCols <- setdiff(c("B", cols), names(data))
     if (length(missingCols)) {
-      stop("The following colums were not found in data: ", paste(missingCols, collapse = ", "))
+      stop("The following columns were not found in data: ", paste(missingCols, collapse = ", "))
     }
 
     df <- data[, ..cols]
