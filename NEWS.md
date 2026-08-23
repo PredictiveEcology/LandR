@@ -117,6 +117,10 @@
 
 ## Bug fixes
 
+* `assertERGs()` now gives an informative error when `ecoregionMap` carries no
+  `ecoregionGroup` values (e.g. a GeoTIFF read without its companion `.aux.xml`,
+  so the raster attribute table is missing), instead of a cryptic
+  "subscript out of bounds" (#190, @SAY-5);
 * `convertUnwantedLCC()` again returns the `newPossLCC` column it returned prior to
   1.2.0.9004 (the assigned land-cover class itself, i.e. `ecoregionGroup` without its
   ecoregion prefix). Callers use it to write the replacement classes back into the LCC
