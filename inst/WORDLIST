@@ -1,7 +1,9 @@
 0's
 15x
 19x
+1e10
 1s
+20x
 250m
 256x256
 28x
@@ -38,6 +40,7 @@ Correia
 Cosco
 Cyr
 Cyr's
+ECDF
 ECODISTRICT
 ECOPROVINCE
 ECOREGION
@@ -49,6 +52,7 @@ FBP
 Fekedulegn
 FireDisturbance
 Gauthier
+GeoPackage
 GeoTIFF
 GrowthCurve
 Guindon
@@ -149,15 +153,20 @@ cohortData
 colors
 contorta
 csv
+ecodistrict
 ecodistricts
 ecolocation
+ecoprovinces
 ecoregion
 ecoregions
+ecostratification
+ecozone
 ecozones
 engelmannii
 et
 fireSense
 firetolerance
+gc
 geodata
 ggplot
 glauca

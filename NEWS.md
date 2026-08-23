@@ -29,6 +29,21 @@
 * add `studyAreaEco` function to extend `studyArea` to ecological boundaries;
   - `studyAreaEco` allows `studyArea = NULL`, uses `type = "ecozone"` by default;
 * add `plot_raster_stats` and `calc_raster_counts` for generating summaries of numeric rasters in Canada;
+* new vignette `scanfi-summary`, summarizing a national stand age map by ecozone
+  (closes #177). The rasters these summaries are designed for cannot be processed
+  during a build -- SCANFI at 30 m is ~1.1e10 pixels, a single pass reads tens of GB,
+  CI runners have ~14 GB of disk, and the ecostratification polygon host throttles CI
+  IP ranges -- so the vignette is split at the one expensive step. The value-frequency
+  table from `calc_raster_counts()` is precomputed by `data-raw/precompute-vignettes.R`
+  and committed under `inst/extdata/` (~660 KB, including a coarsened raster for maps
+  and simplified polygons); every statistic, histogram and map is then recomputed from
+  it when the vignette is built, offline, in seconds. The committed table is pinned to
+  a hash of the normalized source of the functions that produced it, so it cannot go
+  stale unnoticed: `tests/testthat/test-vignette-artifacts.R` fails when the two
+  diverge and names the script to re-run. The summary statistics are deliberately
+  excluded from that hash -- they are an exact function of the counts table, so
+  changing the quantile definition shows up in the next build rather than forcing a
+  multi-hour regeneration of a table that is still valid;
 
 ## Enhancements
 
@@ -114,6 +129,17 @@
   V2 2020 also reproduce the counts published in NRCan's own `.tif.aux.xml` sidecar). Total
   storage falls from 32.98 GB to 15.05 GB (~2.19x). Values are unchanged, so a rebuilt layer
   is a drop-in replacement for the precomputed copy it replaces.
+* `plot_raster_stats()` gains `fig_width`, `fig_height` and `fig_dpi`. The saved figure
+  size was hard-coded at 12 x 7.5 in and 300 dpi, which is ~20x larger than a web page
+  or vignette needs;
+* `plot_raster_stats()`'s per-polygon figure assembly is factored into internal panel
+  builders (`.hist_panel()`, `.map_panel()`, `.inset_panel()`, `.stats_panel()`,
+  `.write_polygon_figure()`), taking a 120-line loop body down to one call;
+* the `calc_raster_stats()`/`plot_raster_stats()` tests no longer skip on CI. They
+  previously downloaded the ecodistrict polygons from sis.agr.gc.ca, which throttles CI
+  runners; they now read a committed 23 KB fixture (`data-raw/make-test-fixtures.R`
+  regenerates it), so the full plotting path is exercised on every commit. A separate
+  test, still skipped on CI, checks the upstream source is reachable;
 
 ## Bug fixes
 
@@ -133,6 +159,18 @@
 * don't delete `CA_forest_VLCE2` raster in `prepInputs_NTEMS_LCC_FAO()` (#110);
 * corrected some BC forestry tree species entries;
 * minor bug fixes to `prepInputsFireYear` pertaining to file structure of NFDB data;
+* `prep_polygons()` no longer assumes the geometry column is named `geometry`. It is,
+  for a shapefile, but a GeoPackage names it `geom`, and the hard-coded
+  `st_union(geometry)` failed with `object 'geometry' not found`. The dissolve now goes
+  through `summarise()`'s own `do_union`, so the column name is irrelevant;
+* `prep_polygons()` now accepts the `SpatVector` its documentation promises; previously
+  only `sf` input worked, since `sf::st_transform()` was called on the object directly;
+* `plot_raster_stats()`'s statistics panel no longer runs labels together. Label and
+  value were pasted into one centred string, so a wide value collided with its
+  neighbour (`Min : 0Mean : 60.68Max : 395`); they are now drawn as right- and
+  left-aligned columns about a shared centre;
+* `plot_raster_stats()` no longer requires `purrr`, which it has not used for some time
+  but still gated on via `stopifnot(requireNamespace(...))`;
 
 # LandR 1.1.5
 
