@@ -1,10 +1,18 @@
 utils::globalVariables(c("bin", "count", "geometry", "ID", "id_col"))
 
 prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL) {
+  if (inherits(polygons, "SpatVector")) {
+    polygons <- sf::st_as_sf(polygons)
+  }
+
+  ## Don't name the geometry column: it is "geometry" for a shapefile but "geom"
+  ## for a GeoPackage, and sf stores the actual name in the `sf_column`
+  ## attribute. `summarise()` on a grouped sf dissolves the geometries itself
+  ## (`do_union = TRUE`), so there is no need to reference the column at all.
   polygons <- sf::st_transform(polygons, sf::st_crs(raster)) |>
     dplyr::rename(ID = !!polygon_id) |>
     dplyr::group_by(ID) |>
-    dplyr::summarise(geometry = sf::st_union(geometry), .groups = "drop")
+    dplyr::summarise(.groups = "drop")
 
   if (!is.null(filter_ids)) {
     polygons <- dplyr::filter(polygons, ID %in% filter_ids)
@@ -53,7 +61,6 @@ prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL
 #' if (interactive()) {
 #'   if (requireNamespace("dplyr", quietly = TRUE) &&
 #'       requireNamespace("geodata", quietly = TRUE) &&
-#'       requireNamespace("purrr", quietly = TRUE) &&
 #'       requireNamespace("withr", quietly = TRUE)) {
 #'     tmp_pth <- withr::local_tempdir()
 #'
@@ -202,6 +209,136 @@ calc_raster_stats <- function(raster, polygons = NULL, polygon_id = NULL,
   stats_from_counts(counts_df)
 }
 
+## ---------------------------------------------------------------------------
+## Panel builders for `plot_raster_stats()`
+##
+## These are factored out of the per-polygon loop so that the vignette artifact
+## manifest (see `.artifact_hash()`) can pin the committed figures to exactly the
+## code that draws them, and so the loop body stays readable.
+## ---------------------------------------------------------------------------
+
+.hist_panel <- function(poly_counts, bin_width, raster_label, region_val) {
+  poly_counts_binned <- poly_counts |>
+    dplyr::mutate(bin = floor(value / bin_width) * bin_width) |>
+    dplyr::group_by(bin) |>
+    dplyr::summarise(count = sum(count), .groups = "drop")
+
+  ggplot2::ggplot(poly_counts_binned, ggplot2::aes(x = bin, y = count)) +
+    ggplot2::geom_col(fill = "steelblue") +
+    ggplot2::theme_minimal() +
+    ggplot2::labs(title = paste("Histogram:", region_val), x = raster_label, y = "Count")
+}
+
+## raster + polygon outline -- use tidyterra for SpatRaster/SpatVector (mixing
+## terra objects with ggplot2::geom_sf() does not work). geom_spatraster()
+## auto-maps the (single) layer's values to `fill`; a continuous scale is
+## required for the continuous raster (scale_fill_viridis_d() collapsed every
+## cell to one colour -> solid rectangle).
+.map_panel <- function(r_mask, poly, raster_label, region_val) {
+  ggplot2::ggplot() +
+    tidyterra::geom_spatraster(data = r_mask) +
+    tidyterra::geom_spatvector(data = poly, color = "black", fill = NA) +
+    ggplot2::scale_fill_viridis_c(name = raster_label, na.value = "transparent") +
+    ggplot2::theme_minimal() +
+    ggplot2::labs(title = paste("Map:", region_val), x = "Longitude", y = "Latitude")
+}
+
+.inset_panel <- function(canada, poly) {
+  ggplot2::ggplot() +
+    tidyterra::geom_spatvector(data = canada, fill = "grey85", color = NA) +
+    tidyterra::geom_spatvector(data = poly, fill = "darkred", color = NA) +
+    ggplot2::theme_void() +
+    ggplot2::theme(
+      panel.border = ggplot2::element_rect(color = "black", fill = NA, linewidth = 1)
+    )
+}
+
+.stats_panel <- function(poly_stats, region_val) {
+  ## Label and value are drawn as two separate right/left-aligned columns about
+  ## a shared centre. Pasting them into one centred string (as this used to do)
+  ## runs them together as soon as a value is wide -- "Min : 0Mean : 60.6Max".
+  labels <- c("Min", "Mean", "Max", "25%", "Median", "75%", "% Zero")
+  values <- c(
+    round(poly_stats$min, 2),
+    round(poly_stats$mean, 2),
+    round(poly_stats$max, 2),
+    round(poly_stats$q25, 2),
+    round(poly_stats$q50, 2),
+    round(poly_stats$q75, 2),
+    paste0(round(poly_stats$prop_zero * 100, 2), "%")
+  )
+
+  ## three columns, three rows; the last row holds a single centred entry
+  centres <- c(1.9, 5.0, 8.1)
+  x <- c(centres, centres, 5.0)
+  y <- c(6.5, 6.5, 6.5, 5.0, 5.0, 5.0, 3.5)
+  gap <- 0.25
+
+  ggplot2::ggplot(data.frame(x = 0:10, y = 0:10)) +
+    ggplot2::geom_point(ggplot2::aes(x = x, y = y), alpha = 0.0) +
+    ggplot2::annotate(
+      "text",
+      x = x - gap,
+      y = y,
+      label = paste0(labels, ":"),
+      hjust = 1,
+      vjust = 0.5
+    ) +
+    ggplot2::annotate(
+      "text",
+      x = x + gap,
+      y = y,
+      label = as.character(values),
+      hjust = 0,
+      vjust = 0.5
+    ) +
+    ggplot2::theme_void() +
+    ggplot2::labs(title = paste0("Statistics: ", region_val))
+}
+
+## Assemble and write the combined figure for a single polygon. Everything that
+## determines the contents of the saved .png lives here (panels, layout, device
+## size/resolution, filename), so hashing this function plus the panel builders
+## is sufficient to detect that committed figures have gone stale.
+.write_polygon_figure <- function(poly, r_mask, poly_counts, poly_stats, region_val,
+                                  raster_label, bin_width, canada, output_dir,
+                                  fig_width = 12, fig_height = 7.5, fig_dpi = 300) {
+  hist_plot <- .hist_panel(poly_counts, bin_width, raster_label, region_val)
+  map_plot <- .map_panel(r_mask, poly, raster_label, region_val)
+  stats_plot <- .stats_panel(poly_stats, region_val)
+
+  if (!is.null(canada)) {
+    map_plot <- map_plot +
+      patchwork::inset_element(
+        .inset_panel(canada, poly),
+        left = 0.75,
+        right = 0.95,
+        bottom = 0.75,
+        top = 0.95,
+        align_to = "plot"
+      )
+  }
+
+  final_plot <- hist_plot |
+    (map_plot / stats_plot + patchwork::plot_layout(heights = c(3, 1))) +
+      patchwork::plot_annotation(title = region_val)
+
+  fig_file <- file.path(
+    output_dir,
+    paste0("region_", gsub("[^A-Za-z0-9]", "_", region_val), ".png")
+  )
+
+  ggplot2::ggsave(
+    filename = fig_file,
+    plot = final_plot,
+    width = fig_width,
+    height = fig_height,
+    dpi = fig_dpi
+  )
+
+  fig_file
+}
+
 #' @param csv_file Optional. Base filename to save the output CSV file.
 #' If provided, a suffix will be added to this filename to denote the 'counts' and 'stats' tables
 #' (e.g., if `csv_file = "ecozones.csv"`, the output files saved to `output_dir` will be
@@ -227,6 +364,13 @@ calc_raster_stats <- function(raster, polygons = NULL, polygon_id = NULL,
 #'
 #' @param output_dir Directory to save figures and optional csv file.
 #'
+#' @param fig_width,fig_height Numeric. Size of each saved figure, in inches.
+#'
+#' @param fig_dpi Numeric. Resolution of each saved figure. The defaults suit
+#' print; drop `fig_dpi` (and the dimensions) well below them when the figures
+#' are destined for a web page or a vignette, where a 300 dpi 12 x 7.5 in PNG is
+#' about 20x larger than it needs to be.
+#'
 #' @return A `data.frame` of computed statistics (via `calc_raster_stats()`), with side effects
 #' of saving summary plots (and optionally a \file{.csv}) to disk.
 #'
@@ -245,11 +389,13 @@ plot_raster_stats <- function(
   inset_canada = TRUE,
   bin_width = 10,
   output_dir = ".",
-  csv_file = NULL
+  csv_file = NULL,
+  fig_width = 12,
+  fig_height = 7.5,
+  fig_dpi = 300
 ) {
   stopifnot(
     requireNamespace("dplyr", quietly = TRUE),
-    requireNamespace("purrr", quietly = TRUE),
     inherits(raster, "SpatRaster"),
     inherits(polygons, c("sf", "SpatVector")),
     is.logical(inset_canada) && !is.na(inset_canada)
@@ -303,7 +449,8 @@ plot_raster_stats <- function(
 
   ## Canada outline for the inset map: fetch ONCE (not once per polygon, which
   ## is slow and fragile), and degrade gracefully to no inset if the data source
-  ## is temporarily unavailable rather than aborting the whole run.
+  ## is temporarily unavailable rather than aborting the whole run. A NULL
+  ## `canada` is the signal to `.write_polygon_figure()` to skip the inset.
   canada <- NULL
   if (inset_canada) {
     canada <- tryCatch(
@@ -316,7 +463,6 @@ plot_raster_stats <- function(
         "plotting without inset.",
         call. = FALSE
       )
-      inset_canada <- FALSE
     }
   }
 
@@ -350,91 +496,19 @@ plot_raster_stats <- function(
       next
     }
 
-    ## Histogram from counts_df
-    poly_counts_binned <- poly_counts |>
-      dplyr::mutate(bin = floor(value / bin_width) * bin_width) |>
-      dplyr::group_by(bin) |>
-      dplyr::summarise(count = sum(count), .groups = "drop")
-
-    hist_plot <- ggplot2::ggplot(poly_counts_binned, ggplot2::aes(x = bin, y = count)) +
-      ggplot2::geom_col(fill = "steelblue") +
-      ggplot2::theme_minimal() +
-      ggplot2::labs(title = paste("Histogram:", region_val), x = raster_label, y = "Count")
-
-    ## Main map
-    ## raster + polygon outline -- use tidyterra for SpatRaster/SpatVector (mixing
-    ## terra objects with ggplot2::geom_sf() does not work). geom_spatraster()
-    ## auto-maps the (single) layer's values to `fill`; a continuous scale is
-    ## required for the continuous raster (scale_fill_viridis_d() collapsed every
-    ## cell to one colour -> solid rectangle).
-    map_plot_base <- ggplot2::ggplot() +
-      tidyterra::geom_spatraster(data = r_mask) +
-      tidyterra::geom_spatvector(data = poly, color = "black", fill = NA) +
-      ggplot2::scale_fill_viridis_c(name = raster_label, na.value = "transparent") +
-      ggplot2::theme_minimal() +
-      ggplot2::labs(title = paste("Map:", region_val), x = "Longitude", y = "Latitude")
-
-    if (inset_canada) {
-      ## Inset map (uses the Canada outline fetched once, above)
-      inset_plot <- ggplot2::ggplot() +
-        tidyterra::geom_spatvector(data = canada, fill = "grey85", color = NA) +
-        tidyterra::geom_spatvector(data = poly, fill = "darkred", color = NA) +
-        ggplot2::theme_void() +
-        ggplot2::theme(
-          panel.border = ggplot2::element_rect(color = "black", fill = NA, linewidth = 1)
-        )
-
-      map_with_inset <- map_plot_base +
-        patchwork::inset_element(
-          inset_plot,
-          left = 0.75,
-          right = 0.95,
-          bottom = 0.75,
-          top = 0.95,
-          align_to = "plot"
-        )
-    }
-
-    ## Stats plot (centered text)
-    stats_text <- c(
-      paste0("Min    : ", round(poly_stats$min, 2)),
-      paste0("Mean   : ", round(poly_stats$mean, 2)),
-      paste0("Max    : ", round(poly_stats$max, 2)),
-      paste0("25%    : ", round(poly_stats$q25, 2)),
-      paste0("Median : ", round(poly_stats$q50, 2)),
-      paste0("75%    : ", round(poly_stats$q75, 2)),
-      paste0("% Zero : ", round(poly_stats$prop_zero * 100, 2), "%")
-    )
-    stats_plot <- ggplot2::ggplot(data.frame(x = 0:10, y = 0:10)) +
-      ggplot2::geom_point(aes(x = x, y = y), alpha = 0.0) +
-      ggplot2::annotate(
-        "text",
-        x = c(2.5, 5.0, 7.5, 2.5, 5.0, 7.5, 5.0),
-        y = c(6.5, 6.5, 6.5, 5.0, 5.0, 5.0, 3.5),
-        label = stats_text,
-        hjust = 0.5,
-        vjust = 0.5
-      ) +
-      ggplot2::theme_void() +
-      ggplot2::labs(title = paste0("Statistics: ", region_val))
-
-    if (inset_canada) {
-      final_plot <- hist_plot |
-        (map_with_inset / stats_plot + patchwork::plot_layout(heights = c(3, 1))) +
-          patchwork::plot_annotation(title = region_val)
-    } else {
-      final_plot <- hist_plot |
-        (map_plot_base / stats_plot + patchwork::plot_layout(heights = c(3, 1))) +
-          patchwork::plot_annotation(title = region_val)
-    }
-    fig_name <- paste0("region_", gsub("[^A-Za-z0-9]", "_", region_val), ".png")
-
-    ggplot2::ggsave(
-      filename = file.path(output_dir, fig_name),
-      plot = final_plot,
-      width = 12,
-      height = 7.5,
-      dpi = 300
+    .write_polygon_figure(
+      poly = poly,
+      r_mask = r_mask,
+      poly_counts = poly_counts,
+      poly_stats = poly_stats,
+      region_val = region_val,
+      raster_label = raster_label,
+      bin_width = bin_width,
+      canada = canada,
+      output_dir = output_dir,
+      fig_width = fig_width,
+      fig_height = fig_height,
+      fig_dpi = fig_dpi
     )
 
     gc()
