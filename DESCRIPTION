@@ -103,7 +103,7 @@ Remotes:
     PredictiveEcology/SpaDES.core@development,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
-VignetteBuilder: knitr
+VignetteBuilder: knitr, rmarkdown
 Language: en-CA
 License: GPL-3
 BugReports: https://github.com/PredictiveEcology/LandR/issues

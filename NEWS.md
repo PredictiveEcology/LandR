@@ -14,6 +14,10 @@
   (the old name remains as a deprecated alias);
 * remove deprecated package `crayon` in favour of `cli` instead;
 * remove deprecated package `qs` in favour of `qs2` instead;
+* add `knitr` and `rmarkdown` to Suggests for the new vignette, and declare both in
+  `VignetteBuilder`. Listing `rmarkdown` there is what lets the vignette be rebuilt
+  under `_R_CHECK_DEPENDS_ONLY_=true` (the `--as-cran` "no suggests" check), which
+  otherwise hides it from the build even when installed;
 * move `ggpubr` to Suggests;
 * add `arrow` to Suggests;
 
