@@ -47,6 +47,7 @@ jobs:
         ggrepel
         googledrive
         httr
+        knitr
         lqmm
         MASS
         memuse
@@ -57,6 +58,7 @@ jobs:
         RCurl
         RhpcBLASctl
         rlang
+        rmarkdown
         roxygen2
         R.utils
         SpaDES.core
