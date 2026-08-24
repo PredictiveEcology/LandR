@@ -307,7 +307,13 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", writeTo = 
   dots$url <- lccURL
   dots$targetFile <- lccTF
 
-  scanfi_lcc <- do.call(prepInputs, dots)
+  scanfi_lcc <- .withSCANFIAccess(
+    do.call(prepInputs, dots),
+    what = "the SCANFI land cover map",
+    dataYear = year,
+    dataVersion = dataVersion,
+    urlArg = "url"
+  )
 
   ## Bryoids, herbs, rock/exposed, shrubs, broadleaf, conifer, mixedwood, water
   oldVals <- 1:8
@@ -435,7 +441,13 @@ prepInputs_SCANFI_LCC_FAO <- function(
   dots$method <- resampleMethod
   dots$writeTo <- newFilename
   # digs <- .robustDigest(dots)
-  lcc <- do.call(prepInputs, dots) # |>
+  lcc <- .withSCANFIAccess(
+    do.call(prepInputs, dots),
+    what = "the SCANFI land cover map",
+    dataYear = year,
+    dataVersion = dataVersion,
+    urlArg = "url"
+  ) # |>
   #  Cache(.functionName = paste0("prepInputs_NTEMS_LCC_FAO_", year),
   #        omitArgs = c("targetFile", "writeTo"),
   #        .cacheExtra = digs)
@@ -1548,7 +1560,13 @@ loadSCANFISpeciesLayers <- function(
     }
   }
 
-  driveFiles <- as.data.table(googledrive::with_drive_quiet(googledrive::drive_ls(url)))
+  driveFiles <- .withSCANFIAccess(
+    as.data.table(googledrive::with_drive_quiet(googledrive::drive_ls(url))),
+    what = "the SCANFI species layers",
+    dataYear = year,
+    dataVersion = dataVersion,
+    urlArg = "url"
+  )
   driveFiles <- driveFiles[grepl("SCANFI_sps", name)] ## selecting just species layers
   driveFiles <- driveFiles[grep("tif.", name, invert = TRUE)] ## removing .ovr and .aux files
   if (dataVersion == "V2") {
@@ -1685,22 +1703,28 @@ loadSCANFISpeciesLayers <- function(
 
   URLs <- fileURLs[targetFiles]
 
-  speciesLayers <- Map(
-    function(tf, url, outFile) {
-      prepInputs(
-        url = url,
-        to = rasterToMatch,
-        destinationPath = dPath,
-        method = "bilinear",
-        writeTo = outFile,
-        overwrite = TRUE
-      )
-    },
-    tf = file.path(dPath, targetFiles),
-    url = URLs,
-    outFile = file.path(oPath, postProcessedFilenamesWithStudyAreaName)
-  ) |>
-    Cache(.functionName = "prepInputs_speciesLayers")
+  speciesLayers <- .withSCANFIAccess(
+    Map(
+      function(tf, url, outFile) {
+        prepInputs(
+          url = url,
+          to = rasterToMatch,
+          destinationPath = dPath,
+          method = "bilinear",
+          writeTo = outFile,
+          overwrite = TRUE
+        )
+      },
+      tf = file.path(dPath, targetFiles),
+      url = URLs,
+      outFile = file.path(oPath, postProcessedFilenamesWithStudyAreaName)
+    ) |>
+      Cache(.functionName = "prepInputs_speciesLayers"),
+    what = "the SCANFI species layers",
+    dataYear = year,
+    dataVersion = dataVersion,
+    urlArg = "url"
+  )
 
   # if (is.null(studyArea) && is.null(rasterToMatch)) {
   #   speciesLayers <- Map(
