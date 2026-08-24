@@ -44,7 +44,9 @@
   it when the vignette is built -- offline, in ~15 s. The committed table is pinned to
   a hash of the normalized source of the functions that produced it, so it cannot go
   stale unnoticed: `tests/testthat/test-vignette-artifacts.R` fails when the two
-  diverge and names the script to re-run. The summary statistics are deliberately
+  diverge and names the script to re-run (that check is skipped under `covr`, which
+  rewrites function bodies to insert trace counters, so the source it would hash is
+  not the source that produced the artifacts). The summary statistics are deliberately
   excluded from that hash -- they are an exact function of the counts table, so
   changing the quantile definition shows up in the next build rather than forcing a
   multi-hour regeneration of a table that is still valid;

@@ -1,4 +1,7 @@
-test_that("source normalisation ignores comments and formatting", {
+## covr::in_covr() without taking a dependency on covr being installed.
+covr_is_running <- function() identical(Sys.getenv("R_COVR"), "true")
+
+test_that("source normalization ignores comments and formatting", {
   ## This is the property the artifact manifest relies on: roxygen edits and
   ## reformatting must not flag committed artifacts as stale, but a real change
   ## to the code must.
@@ -44,6 +47,12 @@ test_that("artifact hashes are deterministic and cover the documented functions"
 
 test_that("committed vignette artifacts are not stale", {
   testthat::skip_if_not_installed("digest")
+
+  ## covr rewrites every function body in R/ to insert trace counters, so the
+  ## normalized source it sees is not the source that produced the artifacts and
+  ## the hash cannot match. Nothing is lost by skipping: the R CMD check legs run
+  ## this test against uninstrumented code.
+  testthat::skip_if(covr_is_running(), "function bodies are instrumented under covr")
 
   manifest <- LandR:::.read_artifact_manifest()
   testthat::skip_if(

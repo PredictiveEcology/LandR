@@ -17,7 +17,7 @@
 ## What *can* go stale is the committed counts table, if the code that produced
 ## it changes. So it is pinned to a hash of the normalized source of the
 ## functions it depends on. `removeSource()` + `deparse()` strips comments and
-## normalises whitespace, so roxygen edits and reformatting do not trigger false
+## normalizes whitespace, so roxygen edits and reformatting do not trigger false
 ## alarms; only a real change to the code does.
 ##
 ## Note what is deliberately absent below: `stats_from_counts()` and
@@ -38,7 +38,7 @@
 ## Normalized source of a single function: `removeSource()` drops the srcref
 ## that carries comments and original formatting, so `deparse()` returns
 ## canonical code. Two functions that differ only in comments or whitespace
-## normalise identically.
+## normalize identically.
 .normalize_src <- function(f) {
   paste(deparse(removeSource(f)), collapse = "\n")
 }
@@ -46,6 +46,11 @@
 ## Hash the normalized source of each function set. Function *names* are folded
 ## into the hashed payload, so adding or removing a helper also invalidates the
 ## artifact even if the remaining sources are untouched.
+##
+## Note this reads the *live* function objects, so anything that rewrites them
+## changes the hash. covr is the case that matters in practice -- it instruments
+## every body with trace counters -- which is why the staleness test skips when
+## `R_COVR` is set.
 .artifact_hashes <- function() {
   stopifnot(requireNamespace("digest", quietly = TRUE))
 
