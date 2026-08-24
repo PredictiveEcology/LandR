@@ -20,49 +20,18 @@ jobs:
       ## RNCan/BioSimClient_R — pre-existing WARNING tracked separately.
       ## Drop this override once that's resolved.
       error-on: '"error"'
-      ## Resolve only hard deps via `dependencies: NA`, then enumerate
-      ## Suggests explicitly below. pak's default ("all") recurses into
-      ## transitive Suggests and currently hits a "dependency conflict"
-      ## via tidyverse/ggplot2 (pulled by PredictiveEcology/quickPlot's
-      ## own Remotes). Listing the Suggests as top-level refs sidesteps
-      ## the deep-resolution issue.
-      dependencies: 'NA'
-      ## `BioSIM`/`map` are not on CRAN under those names (GitHub-only);
-      ## skip pak resolution for them and install via post-install below.
+      ## Take Suggests from DESCRIPTION rather than restating them here. The
+      ## hand-maintained copy this replaces drifted: it silently stopped covering
+      ## the vignette builder, and every leg failed to re-build the vignette.
+      ## `TRUE` resolves this package's own Suggests plus hard dependencies
+      ## transitively; it does NOT recurse into transitive Suggests, which is what
+      ## previously hit a pak "dependency conflict" via tidyverse/ggplot2 through
+      ## quickPlot's Remotes.
+      dependencies: 'TRUE'
+      ## Only the refs pak cannot resolve: `biomod2`/`BioSIM`/`map` are not on
+      ## CRAN under those names (GitHub-only), so skip resolution here and install
+      ## them via post-install below.
       extra-packages: |
-        any::sf
-        any::XML
-        arrow
-        bbmle
-        covr
-        curl
-        digest
-        dplyr
-        fasterize
-        future
-        future.apply
-        geodata
-        ggalluvial
-        ggpubr
-        ggrepel
-        googledrive
-        httr
-        lqmm
-        MASS
-        memuse
-        parallelly
-        purrr
-        qs2
-        rasterVis
-        RCurl
-        RhpcBLASctl
-        rlang
-        roxygen2
-        R.utils
-        SpaDES.core
-        spelling
-        testthat
-        withr
         biomod2=?ignore
         BioSIM=?ignore
         map=?ignore

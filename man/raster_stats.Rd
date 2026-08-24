@@ -32,9 +32,13 @@ plot_raster_stats(
   remove_zeros = FALSE,
   raster_label = NULL,
   inset_canada = TRUE,
+  inset_polygons = NULL,
   bin_width = 10,
   output_dir = ".",
-  csv_file = NULL
+  csv_file = NULL,
+  fig_width = 12,
+  fig_height = 7.5,
+  fig_dpi = 300
 )
 }
 \arguments{
@@ -62,6 +66,12 @@ Defaults to raster layer name.}
 
 \item{inset_canada}{Logical. Generates a small inset map of plotted polygons within Canada.}
 
+\item{inset_polygons}{Optional \code{sf} or \code{SpatVector} outline to draw as the
+backdrop of the inset map. When \code{NULL} (the default) the Canada boundary is
+downloaded via \code{\link[=gadm_canada]{gadm_canada()}}. Supply it to keep the call offline -- e.g.
+\code{sf::st_union()} of the polygons being summarized. Ignored when
+\code{inset_canada = FALSE}.}
+
 \item{bin_width}{Numeric. Bin size for histogram plots.}
 
 \item{output_dir}{Directory to save figures and optional csv file.}
@@ -70,6 +80,13 @@ Defaults to raster layer name.}
 If provided, a suffix will be added to this filename to denote the 'counts' and 'stats' tables
 (e.g., if \code{csv_file = "ecozones.csv"}, the output files saved to \code{output_dir} will be
 \code{ecozones_counts.csv} and \code{ecozones_stats.csv}).}
+
+\item{fig_width, fig_height}{Numeric. Size of each saved figure, in inches.}
+
+\item{fig_dpi}{Numeric. Resolution of each saved figure. The defaults suit
+print; drop \code{fig_dpi} (and the dimensions) well below them when the figures
+are destined for a web page or a vignette, where a 300 dpi 12 x 7.5 in PNG is
+about 20x larger than it needs to be.}
 }
 \value{
 A \code{data.frame} with columns: \code{ID}, \code{value}, \code{count}.
@@ -108,7 +125,6 @@ an exact function of it), which avoids reading every pixel into memory.
 if (interactive()) {
   if (requireNamespace("dplyr", quietly = TRUE) &&
       requireNamespace("geodata", quietly = TRUE) &&
-      requireNamespace("purrr", quietly = TRUE) &&
       requireNamespace("withr", quietly = TRUE)) {
     tmp_pth <- withr::local_tempdir()
 

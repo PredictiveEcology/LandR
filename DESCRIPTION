@@ -9,7 +9,7 @@ URL:
     https://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
 Date: 2026-08-23
-Version: 1.2.0.9008
+Version: 1.2.0.9009
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -74,6 +74,7 @@ Suggests:
     ggrepel,
     googledrive (>= 2.0.0),
     httr,
+    knitr,
     lqmm,
     map,
     MASS,
@@ -85,6 +86,7 @@ Suggests:
     RCurl,
     RhpcBLASctl,
     rlang,
+    rmarkdown,
     roxygen2,
     R.utils,
     SpaDES.core,
@@ -101,6 +103,7 @@ Remotes:
     PredictiveEcology/SpaDES.core@development,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
+VignetteBuilder: knitr, rmarkdown
 Language: en-CA
 License: GPL-3
 BugReports: https://github.com/PredictiveEcology/LandR/issues
@@ -147,6 +150,7 @@ Collate:
     'sppHarmonize.R'
     'studyArea.R'
     'terra-raster-utils.R'
+    'vignette-artifacts.R'
     'wildfire.R'
     'zzz.R'
 Roxygen: list(markdown = TRUE)
