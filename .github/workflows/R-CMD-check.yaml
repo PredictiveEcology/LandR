@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   R-CMD-check:
-    uses: PredictiveEcology/actions/.github/workflows/R-CMD-check.yaml@main
+    uses: PredictiveEcology/actions/.github/workflows/R-CMD-check.yaml@nosuggests-hard-deps-only
     secrets: inherit
     with:
       ## BioSIM::getModelOutput is referenced by LandR but not exported by
