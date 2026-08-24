@@ -155,7 +155,10 @@ calc_raster_counts <- function(raster, polygons = NULL, polygon_id = NULL, filte
 weighted_quantile <- function(value, count, probs) {
   o <- order(value)
   value <- value[o]
-  count <- count[o]
+  ## as.numeric() before accumulating: `count` comes from a pixel tally, and
+  ## cumsum() on an integer vector overflows silently past 2^31 - 1. A single
+  ## ecozone of SCANFI at 30 m is already ~1.5e9 pixels.
+  count <- as.numeric(count[o])
   cprop <- cumsum(count) / sum(count)
   vapply(probs, function(p) value[which(cprop >= p)[1]], numeric(1))
 }
@@ -171,17 +174,24 @@ stats_from_counts <- function(counts_df) {
 
   split(counts_df, counts_df$ID) |>
     lapply(function(d) {
-      tot <- sum(d$count)
-      q <- weighted_quantile(d$value, d$count, c(0.25, 0.50, 0.75))
+      ## Work in doubles. `value` and `count` are both integer as read, and at
+      ## national 30 m scale the products and totals blow past the 2^31 - 1
+      ## integer limit: one ecozone holds ~1.5e9 pixels, so `value * count`
+      ## overflows to NA (silently, apart from a warning) and even `sum(count)`
+      ## is within a factor of two of overflowing.
+      value <- as.numeric(d$value)
+      count <- as.numeric(d$count)
+      tot <- sum(count)
+      q <- weighted_quantile(value, count, c(0.25, 0.50, 0.75))
       data.frame(
         ID = d$ID[1],
         min = min(d$value),
-        mean = sum(d$value * d$count) / tot,
+        mean = sum(value * count) / tot,
         max = max(d$value),
         q25 = q[1],
         q50 = q[2], ## median
         q75 = q[3],
-        prop_zero = sum(d$count[d$value == 0]) / tot
+        prop_zero = sum(count[value == 0]) / tot
       )
     }) |>
     do.call(what = rbind) |>
@@ -360,6 +370,12 @@ calc_raster_stats <- function(raster, polygons = NULL, polygon_id = NULL,
 #'
 #' @param inset_canada Logical. Generates a small inset map of plotted polygons within Canada.
 #'
+#' @param inset_polygons Optional `sf` or `SpatVector` outline to draw as the
+#' backdrop of the inset map. When `NULL` (the default) the Canada boundary is
+#' downloaded via [gadm_canada()]. Supply it to keep the call offline -- e.g.
+#' `sf::st_union()` of the polygons being summarized. Ignored when
+#' `inset_canada = FALSE`.
+#'
 #' @param bin_width Numeric. Bin size for histogram plots.
 #'
 #' @param output_dir Directory to save figures and optional csv file.
@@ -387,6 +403,7 @@ plot_raster_stats <- function(
   remove_zeros = FALSE,
   raster_label = NULL,
   inset_canada = TRUE,
+  inset_polygons = NULL,
   bin_width = 10,
   output_dir = ".",
   csv_file = NULL,
@@ -447,16 +464,23 @@ plot_raster_stats <- function(
     )
   }
 
-  ## Canada outline for the inset map: fetch ONCE (not once per polygon, which
-  ## is slow and fragile), and degrade gracefully to no inset if the data source
-  ## is temporarily unavailable rather than aborting the whole run. A NULL
-  ## `canada` is the signal to `.write_polygon_figure()` to skip the inset.
+  ## Outline for the inset map: resolve ONCE (not once per polygon, which is slow
+  ## and fragile). A caller that already has a suitable outline can pass it as
+  ## `inset_polygons`, which avoids the download entirely -- useful offline, and
+  ## in vignettes and tests. Otherwise fetch it, and degrade gracefully to no
+  ## inset if the data source is temporarily unavailable rather than aborting the
+  ## whole run. A NULL `canada` is the signal to `.write_polygon_figure()` to
+  ## skip the inset.
   canada <- NULL
   if (inset_canada) {
-    canada <- tryCatch(
-      gadm_canada(src = "geodata", dst_path = tempdir()) |> terra::project(raster),
-      error = function(e) NULL
-    )
+    canada <- if (!is.null(inset_polygons)) {
+      terra::project(terra::vect(inset_polygons), raster)
+    } else {
+      tryCatch(
+        gadm_canada(src = "geodata", dst_path = tempdir()) |> terra::project(raster),
+        error = function(e) NULL
+      )
+    }
     if (is.null(canada)) {
       warning(
         "Could not retrieve the Canada boundary for the inset map; ",

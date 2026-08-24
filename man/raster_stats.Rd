@@ -32,6 +32,7 @@ plot_raster_stats(
   remove_zeros = FALSE,
   raster_label = NULL,
   inset_canada = TRUE,
+  inset_polygons = NULL,
   bin_width = 10,
   output_dir = ".",
   csv_file = NULL,
@@ -64,6 +65,12 @@ Useful to eliminate non-forested areas from forest rasters.}
 Defaults to raster layer name.}
 
 \item{inset_canada}{Logical. Generates a small inset map of plotted polygons within Canada.}
+
+\item{inset_polygons}{Optional \code{sf} or \code{SpatVector} outline to draw as the
+backdrop of the inset map. When \code{NULL} (the default) the Canada boundary is
+downloaded via \code{\link[=gadm_canada]{gadm_canada()}}. Supply it to keep the call offline -- e.g.
+\code{sf::st_union()} of the polygons being summarized. Ignored when
+\code{inset_canada = FALSE}.}
 
 \item{bin_width}{Numeric. Bin size for histogram plots.}
 

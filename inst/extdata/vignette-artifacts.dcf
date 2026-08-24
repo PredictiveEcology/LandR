@@ -1,11 +1,14 @@
-Generated: 2026-08-23 15:40:03 MDT
-LandRVersion: 1.2.0.9008
+Generated: 2026-08-24 08:58:06 MDT
+LandRVersion: 1.2.0.9009
 RVersion: R version 4.6.1 (2026-06-24)
-DataSource: KNN
-DataYear: 2011
+DataSource: SCANFI
+DataYear: 2020
+DataVersion: V2
+SourceRaster: SCANFI_age_median_2020_v2_20260119.tif
+SourceResolution: 30 m
 PolygonSource: https://sis.agr.gc.ca/cansis/nsdb/ecostrat/zone/ecozone_shp.zip
-CountsFile: knn_age_2011_counts_ecozone.csv.gz
-DisplayFile: knn_age_2011_display.tif
-DisplayResolution: 5000 m
+CountsFile: scanfi_age_2020_counts_ecozone.csv.gz
+DisplayFile: scanfi_age_2020_display.tif
+DisplayResolution: 5010 m
 PolygonFile: ecozones.gpkg
 counts_hash: a81fda035290bb8489c08e669b2c6e0b

@@ -36,6 +36,29 @@ test_that("stats_from_counts drops NA values and handles multiple polygons", {
   expect_equal(res$prop_zero, c(0.5, 0))
 })
 
+test_that("stats_from_counts does not overflow on national-scale pixel counts", {
+  ## A single ecozone of SCANFI at 30 m is ~1.5e9 pixels, so `value * count`
+  ## exceeds the 2^31 - 1 integer limit and used to come back NA; `sum(count)`
+  ## and `cumsum(count)` overflow just past it too. Counts are integer as read
+  ## from the committed .csv.gz, so the arithmetic must promote to double.
+  counts <- data.frame(
+    ID = "A",
+    value = c(0L, 300L),
+    count = c(1500000000L, 1500000000L)
+  )
+
+  expect_true(is.integer(counts$count)) ## guard the premise of this test
+
+  res <- expect_no_warning(LandR:::stats_from_counts(counts))
+
+  expect_false(anyNA(res))
+  expect_equal(res$mean, 150)
+  expect_equal(res$prop_zero, 0.5)
+  expect_equal(res$q25, 0)
+  expect_equal(res$q50, 0) ## the zeros are exactly half, so inverse-ECDF stays at 0
+  expect_equal(res$q75, 300)
+})
+
 test_that("calc_raster_stats reuses a supplied counts table", {
   counts <- data.frame(
     ID = c("A", "A", "B", "B"),
@@ -129,6 +152,42 @@ test_that("plot_raster_stats produces figures and CSVs for each polygon", {
     LandR:::stats_from_counts(counts)[order(LandR:::stats_from_counts(counts)$ID), ],
     ignore_attr = TRUE
   )
+})
+
+test_that("inset_polygons draws the inset without going to the network", {
+  testthat::skip_on_cran()
+  testthat::skip_if_not_installed("dplyr")
+  testthat::skip_if_not_installed("withr")
+
+  td <- withr::local_tempdir("inset_")
+
+  ras <- terra::rast(
+    terra::ext(c(-105, -104, 55, 56)),
+    crs = "EPSG:4326",
+    resolution = c(.1, .1),
+    vals = 1:100
+  )
+  ecodistricts <- readRDS(test_path("fixtures", "ecodistricts_88_115.rds"))
+
+  ## If `inset_polygons` is honoured, gadm_canada() must never be reached; this
+  ## mock turns any fallback to the download into a test failure.
+  testthat::local_mocked_bindings(
+    gadm_canada = function(...) stop("gadm_canada() was called; inset_polygons was ignored")
+  )
+
+  expect_no_error(
+    plot_raster_stats(
+      raster = ras,
+      polygons = ecodistricts,
+      polygon_id = "ECOREGION",
+      filter_ids = "88",
+      inset_canada = TRUE,
+      inset_polygons = sf::st_union(ecodistricts),
+      output_dir = td
+    )
+  )
+
+  expect_true(file.exists(file.path(td, "region_88.png")))
 })
 
 test_that("the ecodistrict polygons are still downloadable", {

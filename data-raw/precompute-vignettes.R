@@ -27,9 +27,15 @@
 
 ## ---- configuration --------------------------------------------------------
 
-DATA_SOURCE <- Sys.getenv("LANDR_VIGNETTE_SOURCE", "KNN")
-DATA_YEAR <- as.integer(Sys.getenv("LANDR_VIGNETTE_YEAR", "2011"))
+DATA_SOURCE <- Sys.getenv("LANDR_VIGNETTE_SOURCE", "SCANFI")
+DATA_YEAR <- as.integer(Sys.getenv("LANDR_VIGNETTE_YEAR", "2020"))
 DATA_VERSION <- Sys.getenv("LANDR_VIGNETTE_VERSION", "V2")
+
+## Path to an already-downloaded raster. SCANFI is distributed through a Google
+## Drive folder that `prepInputsStandAgeMap()` cannot reach without credentials
+## for it, so point this at a local copy when you have one; leave it unset to
+## let `prepInputsStandAgeMap()` fetch the data itself.
+RASTER_FILE <- Sys.getenv("LANDR_VIGNETTE_RASTER", "")
 
 ## Target resolution of the committed display raster. The statistics come from
 ## the full-resolution raster; this exists only so the vignette can draw maps
@@ -68,12 +74,23 @@ message("scratch: ", scratch)
 
 ## ---- inputs ---------------------------------------------------------------
 
-message("fetching ", DATA_SOURCE, " stand age (", DATA_YEAR, ") ...")
-age <- prepInputsStandAgeMap(
-  dataSource = DATA_SOURCE,
-  dataYear = DATA_YEAR,
-  dataVersion = DATA_VERSION,
-  destinationPath = scratch
+if (nzchar(RASTER_FILE)) {
+  stopifnot("LANDR_VIGNETTE_RASTER does not exist" = file.exists(RASTER_FILE))
+  message("using local raster: ", RASTER_FILE)
+  age <- terra::rast(RASTER_FILE)
+} else {
+  message("fetching ", DATA_SOURCE, " stand age (", DATA_YEAR, ") ...")
+  age <- prepInputsStandAgeMap(
+    dataSource = DATA_SOURCE,
+    dataYear = DATA_YEAR,
+    dataVersion = DATA_VERSION,
+    destinationPath = scratch
+  )
+}
+
+message(
+  "raster: ", paste(dim(age)[1:2], collapse = " x "), " cells at ",
+  round(terra::res(age)[1]), " m (", format(terra::ncell(age), big.mark = ","), " total)"
 )
 
 message("fetching ecozones ...")
@@ -139,6 +156,8 @@ message("wrote ", polygons_file, " (", round(file.size(polygons_file) / 1024), "
     DataSource = DATA_SOURCE,
     DataYear = DATA_YEAR,
     DataVersion = if (identical(DATA_SOURCE, "SCANFI")) DATA_VERSION else NA,
+    SourceRaster = if (nzchar(RASTER_FILE)) basename(RASTER_FILE) else NA,
+    SourceResolution = paste0(round(terra::res(age)[1]), " m"),
     PolygonSource = ECOZONE_URL,
     CountsFile = basename(counts_file),
     DisplayFile = basename(display_file),
