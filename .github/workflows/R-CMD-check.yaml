@@ -16,15 +16,18 @@ jobs:
     uses: PredictiveEcology/actions/.github/workflows/R-CMD-check.yaml@main
     secrets: inherit
     with:
-      ## Deep matrix legs pinned to exact R versions, not oldrel-N. The oldrel
+      ## Deep matrix leg pinned to an exact R version, not oldrel-N. The oldrel
       ## ladder is platform-dependent and not monotone: on ubuntu-latest
       ## oldrel-4 and oldrel-5 both resolve to 4.1.3 and R 4.2 is unreachable
       ## entirely; on ubuntu-22.04 oldrel-4 gives R 3.6.3. It also shifts every
-      ## time R releases. DESCRIPTION declares R (>= 4.3) and the base matrix
-      ## stopped at oldrel-1 (R 4.5), so the floor was never tested.
+      ## time R releases. The base matrix stopped at oldrel-1 (R 4.5).
+      ##
+      ## 4.4, not 4.3, despite DESCRIPTION declaring R (>= 4.3): MuMIn is in
+      ## Imports and requires R >= 4.4.0, so 4.3 is not installable today. See
+      ## the PR for the two ways to fix that; this leg tests the floor that is
+      ## actually reachable.
       extra-config: |
-        [{"config": {"os": "ubuntu-latest",  "nosuggests": false, "r": "4.4"}},
-         {"config": {"os": "ubuntu-latest",  "nosuggests": false, "r": "4.3"}}]
+        [{"config": {"os": "ubuntu-latest",  "nosuggests": false, "r": "4.4"}}]
       ## BioSIM::getModelOutput is referenced by LandR but not exported by
       ## RNCan/BioSimClient_R — pre-existing WARNING tracked separately.
       ## Drop this override once that's resolved.
