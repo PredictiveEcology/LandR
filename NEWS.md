@@ -153,6 +153,11 @@
 
 ## Bug fixes
 
+* `prepSpeciesLayers_SCANFI()`: the Google Drive fallback (taken when `RCurl::url.exists()`
+  fails, e.g. during a network blip) referenced `year`, which is not a formal, so it
+  resolved to `data.table::year` and failed with "cannot coerce type 'closure' to
+  vector of type 'character'". It now uses `dataYear`.
+
 * `assertERGs()` now gives an informative error when `ecoregionMap` carries no
   `ecoregionGroup` values (e.g. a GeoTIFF read without its companion `.aux.xml`,
   so the raster attribute table is missing), instead of a cryptic
