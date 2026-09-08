@@ -309,16 +309,15 @@ prepSpeciesLayers_KNN <- function(
   }
 
   shared_drive_url <- NULL
-  if (!RCurl::url.exists(url)) {
-    ## ping website and use gdrive if not available
+  ## A Drive source is used directly; see .isGoogleDriveUrl(). Anything else is
+  ## pinged, and the Drive copy used if it cannot be reached.
+  if (!.isGoogleDriveUrl(url) && !RCurl::url.exists(url)) {
     if (requireNamespace("googledrive", quietly = TRUE)) {
       driveFolder <- paste0("kNNForestAttributes_", year)
       shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
 
-      driveDT <- as.data.table(googledrive::drive_ls(googledrive::as_id(shared_drive_url)))
-      url <- googledrive::with_drive_quiet(
-        googledrive::drive_link(driveDT[name == driveFolder, id])
-      )
+      driveLs <- googledrive::drive_ls(googledrive::as_id(shared_drive_url))
+      url <- .driveFolderLink(driveLs, driveFolder, shared_drive_url)
     }
   }
 
@@ -607,16 +606,15 @@ prepSpeciesLayers_SCANFI <- function(
     }
   }
   shared_drive_url <- NULL
-  if (!RCurl::url.exists(url)) {
-    ## ping website and use gdrive if not available
+  ## A Drive source is used directly; see .isGoogleDriveUrl(). Anything else is
+  ## pinged, and the Drive copy used if it cannot be reached.
+  if (!.isGoogleDriveUrl(url) && !RCurl::url.exists(url)) {
     if (requireNamespace("googledrive", quietly = TRUE)) {
       driveFolder <- paste0("SCANFIForestAttributes_", dataYear)
       shared_drive_url <- "https://drive.google.com/drive/folders/1zLYV-wcDjJfSflH1VkXG6sosqZZF4SYc"
 
-      driveDT <- as.data.table(googledrive::drive_ls(googledrive::as_id(shared_drive_url)))
-      url <- googledrive::with_drive_quiet(
-        googledrive::drive_link(driveDT[name == driveFolder, id])
-      )
+      driveLs <- googledrive::drive_ls(googledrive::as_id(shared_drive_url))
+      url <- .driveFolderLink(driveLs, driveFolder, shared_drive_url)
     }
   }
 

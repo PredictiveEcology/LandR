@@ -9,7 +9,7 @@ URL:
     https://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
 Date: 2026-08-23
-Version: 1.2.0.9010
+Version: 1.2.0.9011
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -61,6 +61,7 @@ Suggests:
     bbmle, 
     biomod2 (>= 4.2-2),
     BioSIM (>= 1.1.0),
+    codetools,
     covr,
     curl (>= 6.4.0),
     digest,
@@ -122,6 +123,7 @@ Collate:
     'convertUnwantedLCC2.R'
     'dem.R'
     'disturbances.R'
+    'driveFallback.R'
     'ecoregions.R'
     'ecozones.R'
     'fireSeverity.R'
