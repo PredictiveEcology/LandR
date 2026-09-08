@@ -316,8 +316,8 @@ prepSpeciesLayers_KNN <- function(
       driveFolder <- paste0("kNNForestAttributes_", year)
       shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
 
-      driveDT <- as.data.table(googledrive::drive_ls(googledrive::as_id(shared_drive_url)))
-      url <- .driveFolderLink(driveDT, driveFolder, shared_drive_url)
+      driveLs <- googledrive::drive_ls(googledrive::as_id(shared_drive_url))
+      url <- .driveFolderLink(driveLs, driveFolder, shared_drive_url)
     }
   }
 
@@ -613,8 +613,8 @@ prepSpeciesLayers_SCANFI <- function(
       driveFolder <- paste0("SCANFIForestAttributes_", dataYear)
       shared_drive_url <- "https://drive.google.com/drive/folders/1zLYV-wcDjJfSflH1VkXG6sosqZZF4SYc"
 
-      driveDT <- as.data.table(googledrive::drive_ls(googledrive::as_id(shared_drive_url)))
-      url <- .driveFolderLink(driveDT, driveFolder, shared_drive_url)
+      driveLs <- googledrive::drive_ls(googledrive::as_id(shared_drive_url))
+      url <- .driveFolderLink(driveLs, driveFolder, shared_drive_url)
     }
   }
 
