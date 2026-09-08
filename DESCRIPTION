@@ -142,6 +142,7 @@ Collate:
     'prepInputObjects.R'
     'prepInputs_NTEMS.R'
     'prepSpeciesLayers.R'
+    'scanfi-access.R'
     'seedDispersalLANDIS.R'
     'serotiny-resprouting.R'
     'speciesPresentFromKNN.R'

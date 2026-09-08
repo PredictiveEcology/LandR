@@ -53,6 +53,17 @@
 
 ## Enhancements
 
+* SCANFI download failures now explain themselves (closes #163). SCANFI is distributed
+  through a Google Drive folder shared with collaborators, so a user without access saw only
+  `reproducible`'s generic `Could not access the Google Drive resource ... (404) Not Found`.
+  That reads like a dead link and invites a hunt for a public mirror that does not exist.
+  `prepInputsStandAgeMap()`, `prepRawBiomassMap()`, `loadSCANFISpeciesLayers()`,
+  `convert_SCANFI_LCC_codes()` and `prepInputs_SCANFI_LCC_FAO()` now report it as a
+  permissions problem, point at <https://opendata.nfis.org/> to request access, and name the
+  ways out -- supplying your own copy, or `dataSource = "KNN"` / `"NTEMS"` where the function
+  offers them. The underlying error is still shown in full, and failures that are *not* access
+  problems pass through untouched;
+
 * `convertUnwantedLCC()` no longer uses the iterative `spread2()` search, whose run time grew
   with the square of the radius of the largest contiguous block of `classesToReplace`. On
   study areas containing large lakes/burns masked to an irregular boundary that search could
