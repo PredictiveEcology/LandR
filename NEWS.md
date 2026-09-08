@@ -1,5 +1,11 @@
 # LandR (development version)
 
+* `makePickellStack()` no longer leaves `terra::terraOptions(memmax)` and
+  `raster::rasterOptions(maxmemory)` changed after it returns. Both are global,
+  process-wide settings, so a caller that had set its own memory ceiling silently
+  kept LandR's for the rest of the session -- visible in a long-lived worker that
+  set `memmax = 4` and later found it at 1.
+
 ## Breaking changes
 
 * drop support for R 4.2 due to changes in dependency packages;

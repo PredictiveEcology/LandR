@@ -885,6 +885,19 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
   spRas <- PickellRaster
   spRas[] <- NA_integer_
 
+  ## Both of these are global, process-wide settings, so they must not outlive this
+  ## function: a caller that deliberately set its own memory ceiling would silently
+  ## keep ours for the rest of the session. Observed in a long-lived worker that had
+  ## set memmax = 4 and found it at 1 afterwards.
+  origTerraMemmax <- terra::terraOptions(print = FALSE)$memmax
+  on.exit(try(terra::terraOptions(memmax = origTerraMemmax), silent = TRUE), add = TRUE)
+  if (requireNamespace("raster", quietly = TRUE)) {
+    ## capture.output: rasterOptions() prints as a side effect when read
+    invisible(utils::capture.output(
+      origRasterMaxmemory <- raster::rasterOptions(default = FALSE)$maxmemory))
+    on.exit(try(raster::rasterOptions(maxmemory = origRasterMaxmemory), silent = TRUE), add = TRUE)
+  }
+
   rasterOptions(maxmemory = 1e9)
   terraOptions(memmax = 1L)
 
