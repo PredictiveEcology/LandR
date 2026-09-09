@@ -1389,31 +1389,64 @@ makeAndCleanInitialCohortData <- function(
       # paste with capture.output keeps table structure intact
       messageDF(outAge$rsq, 3, "blue")
 
-      ## A species in cohortDataMissingAge (needs an age imputed) can be absent from the fit set
-      ## cohortDataMissingAgeUnique when all its known-age cohorts were dropped just above for zero
-      ## biomass and/or cover. The age model then has no coefficient for that fixed-effect speciesCode,
-      ## so predict.merMod() below errors with the cryptic "non-conformable arguments" (allow.new.levels
-      ## = TRUE only forgives new RANDOM-effect levels, not fixed-effect speciesCode). Name the species.
-      ## TODO: handle gracefully rather than erroring -- e.g. enlarge studyArea_biomassParam (only helps
-      ## if the species is under-sampled, not structurally cover==0 in the data); or restrict the predict
-      ## newdata to species present in the fit set and fallback-impute the rest (e.g. ecoregion mean age);
-      ## or make imputeBadAgeModel tolerant of unseen fixed-effect speciesCode levels.
-      droppedSpecies <- setdiff(unique(as.character(cohortDataMissingAge$speciesCode)),
-                                unique(as.character(cohortDataMissingAgeUnique$speciesCode)))
-      if (length(droppedSpecies) > 0L) {
-        stop("Cannot impute missing cohort ages: species ", paste(shQuote(droppedSpecies), collapse = ", "),
-             " have no usable rows to fit the age model (all their known-age cohorts had zero biomass ",
-             "and/or cover), so predict() below would fail with 'non-conformable arguments'. ",
-             "See the TODO above for fixes.", call. = FALSE)
+      ## The age model can have no coefficient for a species that still needs an age imputed,
+      ## and predict.merMod() then fails with the cryptic "non-conformable arguments"
+      ## (allow.new.levels = TRUE forgives new RANDOM-effect levels, not fixed-effect ones).
+      ##
+      ## Asking which species were *handed to* the fit is not enough, and was the hole in the
+      ## previous guard: lmer() silently drops rows with NA in any model variable, so a species
+      ## whose B or cover is entirely NA survives that check and still reaches predict() without
+      ## a coefficient. Ask the fitted model which species it actually used.
+      fittedSpecies <- tryCatch(
+        levels(droplevels(stats::model.frame(outAge$mod)[["speciesCode"]])),
+        error = function(e) NULL
+      )
+      canPredict <- if (is.null(fittedSpecies)) {
+        rep(TRUE, NROW(cohortDataMissingAge))
+      } else {
+        as.character(cohortDataMissingAge$speciesCode) %in% fittedSpecies
       }
 
-      ## allow.new.levels = TRUE because some groups will have only NA for age for all species
-      cohortDataMissingAge[,
-        imputedAge := pmax(
-          0L,
-          asInteger(predict(outAge$mod, newdata = cohortDataMissingAge, allow.new.levels = TRUE))
+      set(cohortDataMissingAge, j = "imputedAge", value = NA_integer_)
+      if (any(canPredict)) {
+        ## allow.new.levels = TRUE because some groups will have only NA for age for all species
+        idx <- which(canPredict)
+        set(
+          cohortDataMissingAge, i = idx, j = "imputedAge",
+          value = pmax(0L, asInteger(predict(
+            outAge$mod,
+            newdata = cohortDataMissingAge[idx],
+            allow.new.levels = TRUE
+          )))
         )
-      ]
+      }
+
+      if (any(!canPredict)) {
+        ## Fall back rather than failing the whole run for a few cohorts: use the median imputed
+        ## age of the same ecoregion, then the overall median. An imputed age is already an
+        ## estimate; refusing to produce one for these species would discard every other pixel
+        ## in the study area too.
+        missingSpp <- sort(unique(as.character(cohortDataMissingAge$speciesCode[!canPredict])))
+        byEco <- cohortDataMissingAge[canPredict & !is.na(imputedAge),
+                                      .(.fillAge = asInteger(stats::median(imputedAge, na.rm = TRUE))),
+                                      by = "initialEcoregionCode"]
+        overall <- asInteger(stats::median(
+          cohortDataMissingAge$imputedAge[canPredict], na.rm = TRUE
+        ))
+        if (NROW(byEco)) {
+          cohortDataMissingAge[byEco, .fillAge := i..fillAge, on = "initialEcoregionCode"]
+          cohortDataMissingAge[!canPredict & !is.na(.fillAge), imputedAge := .fillAge]
+          set(cohortDataMissingAge, j = ".fillAge", value = NULL)
+        }
+        if (!is.na(overall))
+          cohortDataMissingAge[!canPredict & is.na(imputedAge), imputedAge := overall]
+
+        warning("Age model has no coefficient for species ",
+                paste(shQuote(missingSpp), collapse = ", "),
+                ": their known-age cohorts had zero biomass and/or cover, or NA in a model ",
+                "variable, so lmer() never fitted them. Their ages were imputed from the ",
+                "median of the same ecoregion instead of the model.", call. = FALSE)
+      }
 
       cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
         cohortData,

@@ -187,3 +187,37 @@ testthat::test_that("convertUnwantedLCC methods agree when only one class can be
   ))
   expect_identical(det[order(pixelIndex)], rnd[order(pixelIndex)])
 })
+
+testthat::test_that("makeAndCleanInitialCohortData imputes ages when lmer drops a species (#215)", {
+  skip_if_not_installed("lme4")
+
+  ## predict.merMod() fails with "non-conformable arguments" when newdata uses a
+  ## fixed-effect level the fit never saw; allow.new.levels = TRUE forgives new RANDOM
+  ## levels only. The guard this replaced compared against the data HANDED TO the fit,
+  ## but lmer() silently drops rows with NA in any model variable -- so a species whose
+  ## B is all NA passed the guard and still reached predict() without a coefficient.
+  set.seed(1)
+  n <- 300
+  d <- data.table(
+    B = runif(n, 1, 100), cover = runif(n, 1, 100),
+    initialEcoregionCode = factor(rep(c("e1", "e2"), length.out = n)),
+    speciesCode = factor(rep(c("a", "b", "c"), length.out = n))
+  )
+  d[, age := 10 + 0.1 * B + rnorm(n)]
+  d[speciesCode == "c", B := NA_real_]
+
+  mod <- suppressMessages(suppressWarnings(lme4::lmer(
+    age ~ B * speciesCode + cover * speciesCode + (1 | initialEcoregionCode), data = d
+  )))
+
+  ## the premise: the model has no coefficient for "c", though "c" is in the data
+  fitted <- levels(droplevels(stats::model.frame(mod)[["speciesCode"]]))
+  expect_setequal(fitted, c("a", "b"))
+  expect_true("c" %in% as.character(d$speciesCode))
+  expect_error(predict(mod, newdata = d, allow.new.levels = TRUE), "non-conformable")
+
+  ## the fix: predict what the model can, fall back for the rest, never error
+  canPredict <- as.character(d$speciesCode) %in% fitted
+  expect_error(predict(mod, newdata = d[which(canPredict)], allow.new.levels = TRUE), NA)
+  expect_equal(sum(!canPredict), sum(d$speciesCode == "c"))
+})
