@@ -1375,78 +1375,66 @@ makeAndCleanInitialCohortData <- function(
       )
       message(cli::col_blue("Impute missing age values: started", Sys.time()))
 
+      ## The fitting data MUST be part of the cache key. With `omitArgs = ".specialData"`
+      ## the key was only the formula -- identical for every study area -- plus the
+      ## ecoregion group labels, which are generic sequential names ("01_NA" ... "19_NA").
+      ## Any two study areas with the same number of ecoregion groups therefore collided,
+      ## and the second silently received the first one's fitted model. That crashed when
+      ## the two species sets differed in model-matrix width ("non-conformable arguments"),
+      ## and, worse, imputed ages from a foreign model with no error at all when they
+      ## happened to line up.
+      ##
+      ## Digesting this is cheap beside fitting the lmer: subsetDT() above has already
+      ## reduced it to at most 50 rows per ecoregion x species.
       outAge <- Cache(
         statsModel,
         modelFn = imputeBadAgeModel,
         uniqueEcoregionGroups = .sortDotsUnderscoreFirst(as.character(unique(
           cohortDataMissingAgeUnique$initialEcoregionCode
         ))),
-        .specialData = cohortDataMissingAgeUnique,
-        omitArgs = ".specialData"
+        .specialData = cohortDataMissingAgeUnique
       )
       message(cli::col_blue("                           completed", Sys.time()))
 
       # paste with capture.output keeps table structure intact
       messageDF(outAge$rsq, 3, "blue")
 
-      ## The age model can have no coefficient for a species that still needs an age imputed,
-      ## and predict.merMod() then fails with the cryptic "non-conformable arguments"
-      ## (allow.new.levels = TRUE forgives new RANDOM-effect levels, not fixed-effect ones).
+      ## Every species needing an age must be one the MODEL was fitted on. The fit may know
+      ## MORE species than the prediction needs -- that is fine, those coefficients simply go
+      ## unused -- but it must not know fewer, or predict.merMod() fails with the cryptic
+      ## "non-conformable arguments" (allow.new.levels = TRUE forgives new RANDOM-effect
+      ## levels, not fixed-effect speciesCode).
       ##
-      ## Asking which species were *handed to* the fit is not enough, and was the hole in the
-      ## previous guard: lmer() silently drops rows with NA in any model variable, so a species
-      ## whose B or cover is entirely NA survives that check and still reaches predict() without
-      ## a coefficient. Ask the fitted model which species it actually used.
-      fittedSpecies <- tryCatch(
+      ## Ask the fitted model, not `cohortDataMissingAgeUnique`. The previous check compared
+      ## the two data sets, which are both drawn from the study area being run and so agree
+      ## with each other even when the MODEL came from somewhere else entirely -- exactly
+      ## what a cache collision produces. Deliberately no fallback: imputing these ages from
+      ## a model that never saw the species would turn a loud failure into a silent one.
+      fitSpecies <- tryCatch(
         levels(droplevels(stats::model.frame(outAge$mod)[["speciesCode"]])),
         error = function(e) NULL
       )
-      canPredict <- if (is.null(fittedSpecies)) {
-        rep(TRUE, NROW(cohortDataMissingAge))
-      } else {
-        as.character(cohortDataMissingAge$speciesCode) %in% fittedSpecies
+      predSpecies <- sort(unique(as.character(cohortDataMissingAge$speciesCode)))
+      unfitted <- if (is.null(fitSpecies)) character(0) else setdiff(predSpecies, fitSpecies)
+      if (length(unfitted) > 0L) {
+        stop("Cannot impute missing cohort ages. The age model has no coefficient for ",
+             "species ", paste(shQuote(unfitted), collapse = ", "), ", which need ages.\n",
+             "  model was fitted on: ", paste(fitSpecies, collapse = ", "), "\n",
+             "  ages needed for    : ", paste(predSpecies, collapse = ", "), "\n",
+             "Two causes are known. (1) The model was fitted on a DIFFERENT study area and ",
+             "reached here through the cache -- check that the species above belong to this ",
+             "study area at all. (2) Those species have no known-age cohorts here, so they ",
+             "could not enter the fit. Neither is repaired by imputing from this model.",
+             call. = FALSE)
       }
 
-      set(cohortDataMissingAge, j = "imputedAge", value = NA_integer_)
-      if (any(canPredict)) {
-        ## allow.new.levels = TRUE because some groups will have only NA for age for all species
-        idx <- which(canPredict)
-        set(
-          cohortDataMissingAge, i = idx, j = "imputedAge",
-          value = pmax(0L, asInteger(predict(
-            outAge$mod,
-            newdata = cohortDataMissingAge[idx],
-            allow.new.levels = TRUE
-          )))
+      ## allow.new.levels = TRUE because some groups will have only NA for age for all species
+      cohortDataMissingAge[,
+        imputedAge := pmax(
+          0L,
+          asInteger(predict(outAge$mod, newdata = cohortDataMissingAge, allow.new.levels = TRUE))
         )
-      }
-
-      if (any(!canPredict)) {
-        ## Fall back rather than failing the whole run for a few cohorts: use the median imputed
-        ## age of the same ecoregion, then the overall median. An imputed age is already an
-        ## estimate; refusing to produce one for these species would discard every other pixel
-        ## in the study area too.
-        missingSpp <- sort(unique(as.character(cohortDataMissingAge$speciesCode[!canPredict])))
-        byEco <- cohortDataMissingAge[canPredict & !is.na(imputedAge),
-                                      .(.fillAge = asInteger(stats::median(imputedAge, na.rm = TRUE))),
-                                      by = "initialEcoregionCode"]
-        overall <- asInteger(stats::median(
-          cohortDataMissingAge$imputedAge[canPredict], na.rm = TRUE
-        ))
-        if (NROW(byEco)) {
-          cohortDataMissingAge[byEco, .fillAge := i..fillAge, on = "initialEcoregionCode"]
-          cohortDataMissingAge[!canPredict & !is.na(.fillAge), imputedAge := .fillAge]
-          set(cohortDataMissingAge, j = ".fillAge", value = NULL)
-        }
-        if (!is.na(overall))
-          cohortDataMissingAge[!canPredict & is.na(imputedAge), imputedAge := overall]
-
-        warning("Age model has no coefficient for species ",
-                paste(shQuote(missingSpp), collapse = ", "),
-                ": their known-age cohorts had zero biomass and/or cover, or NA in a model ",
-                "variable, so lmer() never fitted them. Their ages were imputed from the ",
-                "median of the same ecoregion instead of the model.", call. = FALSE)
-      }
+      ]
 
       cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
         cohortData,
@@ -1612,18 +1600,23 @@ dropTerm <- function(form, term, dropRanEff = TRUE) {
 #' This does a few things including R squared, gets the fitted values.
 #' It appears that running the models "as is" without this wrapper does not work with `Cache`.
 #' The return of the model in a list solves this problem.
-#' For Caching, the `.specialData` should be "omitted" via `omitArgs`, and
-#' `uniqueEcoregionGroups` should not be omitted.
+#' For Caching, do NOT omit `.specialData` via `omitArgs`. It was once recommended, on the
+#' reasoning that `uniqueEcoregionGroups` identifies the data well enough to stand in for
+#' it. It does not: those labels are generic sequential names (`"01_NA"`, `"02_NA"`, ...),
+#' so two study areas with the same number of ecoregion groups and the same `modelFn`
+#' produce the same cache key, and the second silently receives the first one's fitted
+#' model. That fails loudly only when the two species sets differ in model-matrix width;
+#' otherwise it imputes from a foreign model with no error at all. Digesting the data is
+#' cheap beside fitting the model.
 #'
 #' @param modelFn A quoted expression of type `package::model(Y ~ X, ...)`, omitting
 #'   the `data` argument. E.g., `lme4::glmer(Y ~ X + (X|G), family = poisson)`.
 #'
 #' @param uniqueEcoregionGroups Unique values of `ecoregionGroups`.
-#'   This is the basis for the statistics, and can be used to optimize caching,
-#'   e.g., ignore `.specialData` in `.omitArgs`.
+#'   This is the basis for the statistics. It is NOT a safe cache key on its own: see the
+#'   note above about study areas colliding.
 #'
 #' @param sumResponse a sum of all the response variable values.
-#'   Also to be used to optimize caching, e.g. ignore `.specialData` in `.omitArgs`.
 #' @param .specialData The custom dataset required for the model.
 #'
 #' @export
