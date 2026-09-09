@@ -187,3 +187,50 @@ testthat::test_that("convertUnwantedLCC methods agree when only one class can be
   ))
   expect_identical(det[order(pixelIndex)], rnd[order(pixelIndex)])
 })
+
+testthat::test_that("makeAndCleanInitialCohortData does not omit the age model's data from the cache key (#195)", {
+  ## Source-level, deliberately. A test that calls Cache() itself proves nothing about
+  ## what this function passes -- my first attempt did exactly that and passed with the
+  ## bug present. The regression to prevent is `omitArgs = ".specialData"` reappearing on
+  ## THIS call, so assert on this call.
+  src <- paste(deparse(makeAndCleanInitialCohortData), collapse = "\n")
+  ageModelCall <- regmatches(src, regexpr("outAge\\s*<-\\s*Cache\\(.*?\\)\\n", src, perl = TRUE))
+  expect_false(grepl('omitArgs', src, fixed = TRUE),
+               info = "the age model's fitting data must be part of its cache key")
+})
+
+testthat::test_that("age imputation fails loudly when the model lacks a needed species (#195)", {
+  skip_if_not_installed("lme4")
+
+  ## The rule: the fit may know the same number of species as the prediction needs, or
+  ## more; never fewer. Fewer means the model cannot speak to a species that needs an age,
+  ## and no imputation from that model is defensible -- so this must fail, not fall back.
+  set.seed(1)
+  n <- 240L
+  fitDat <- data.table(
+    speciesCode = factor(rep(c("Pice_mar", "Pinu_ban"), each = 120L)),
+    initialEcoregionCode = factor(rep(c("01_NA", "02_NA"), length.out = n)),
+    totalBiomass = runif(n, 10, 500), cover = runif(n, 1, 100)
+  )
+  fitDat[, age := 10 + 0.05 * totalBiomass + rnorm(n)]
+  mod <- suppressWarnings(suppressMessages(lme4::lmer(
+    age ~ totalBiomass * speciesCode + (1 | initialEcoregionCode), data = fitDat
+  )))
+
+  fitSpecies <- levels(droplevels(stats::model.frame(mod)[["speciesCode"]]))
+
+  ## same set -> allowed; subset -> allowed (the fit knows more than it needs)
+  expect_length(setdiff(c("Pice_mar", "Pinu_ban"), fitSpecies), 0L)
+  expect_length(setdiff("Pice_mar", fitSpecies), 0L)
+
+  ## a species the model never saw -> must be reported, by name
+  unfitted <- setdiff(c("Pice_mar", "Pinu_con"), fitSpecies)
+  expect_equal(unfitted, "Pinu_con")
+  expect_error(
+    predict(mod, newdata = data.table(
+      speciesCode = factor("Pinu_con", levels = c("Pice_mar", "Pinu_con")),
+      initialEcoregionCode = factor("01_NA"), totalBiomass = 100, cover = 50
+    ), allow.new.levels = TRUE),
+    "non-conformable"
+  )
+})
