@@ -372,7 +372,6 @@ prepSpeciesLayers_CASFRI <- function(
     method = "bilinear", ## ignore warning re: ngb (#5)
     datatype = "INT4U",
     writeTo = NULL,
-    overwrite = TRUE,
     userTags = c("CASFRIRas", "stable")
   )
 
@@ -432,7 +431,6 @@ prepSpeciesLayers_Pickell <- function(
     method = "bilinear", ## ignore warning re: ngb (#5)
     datatype = "INT2U",
     writeTo = NULL,
-    overwrite = TRUE,
     userTags = c("speciesLayers", "KNN", "Pickell", "stable")
   )
 
