@@ -1,5 +1,9 @@
 # LandR (development version)
 
+* `sppEquivalencies_CA`: coastal Douglas-fir (`PSEU_MEN_MEN`) now has `FuelClass`
+  "DgFrPoPine", like the other two `Pseu_men` rows. It had "CedrMplOther", so any study
+  area containing Douglas-fir got two fuel classes for `Pseu_men` and
+  `fireSenseUtils::cohortsToFuelClasses()` stopped.
 * `makePickellStack()` no longer leaves `terra::terraOptions(memmax)` and
   `raster::rasterOptions(maxmemory)` changed after it returns. Both are global,
   process-wide settings, so a caller that had set its own memory ceiling silently

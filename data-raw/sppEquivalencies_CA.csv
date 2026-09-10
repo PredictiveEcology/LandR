@@ -145,7 +145,7 @@ poputrem,POPU.TRE,Popu_tre,Popu_Tre,Popu trem,Populus tremuloides,Tr aspen,Tremb
 ,,Prun_vir,Prun_Vir,Prun virg,Prunus virginiana,Chk cherry,Chokecherry,Chokecherry leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,C,PRV,PRUVI,PRUN_VIR,2804,,,134,,
 pseumenz,PSEU.MEN,Pseu_men,Pseu_Men,Pseu menz,Pseudotsuga menziesii,Doug-fir,Douglas-fir,Douglas-fir leading,,,FALSE,Conifer,douglas-fir,,DgFrPoPine,Fd,Fd,,,,,,PSEU_MEN,500,,30,41,PSEU_MEN,#720055
 pseumenz,PSEU.MEN,Pseu_men,Pseu_Men_Gla,Pseu meng,Pseudotsuga menziesii var. glauca,Int doug-fir,Interior douglas-fir,Interior douglas-fir leading,,,FALSE,Conifer,douglas-fir,C7,DgFrPoPine,Fdi,,,,,,,PSEU_MEN_GLA,500,,30,41,PSEU_MEN_GLA,#720055
-pseumenz,PSEU.MEN,Pseu_men,Pseu_Men_Men,Pseu menm,Pseudotsuga menziesii var. menziesii,Co doug-fir,Coastal douglas-fir,Coastal douglas-fir leading,,,FALSE,Conifer,douglas-fir,,CedrMplOther,Fdc,,,,,,,PSEU_MEN_MEN,500,,30,41,PSEU_MEN_MEN,#720055
+pseumenz,PSEU.MEN,Pseu_men,Pseu_Men_Men,Pseu menm,Pseudotsuga menziesii var. menziesii,Co doug-fir,Coastal douglas-fir,Coastal douglas-fir leading,,,FALSE,Conifer,douglas-fir,,DgFrPoPine,Fdc,,,,,,,PSEU_MEN_MEN,500,,30,41,PSEU_MEN_MEN,#720055
 ,,Pyru_com,,Pyru comm,Pyrus communis,Pear,Common pear,Common pear leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,,,PYRU_COM,1500,other hardwood code,,,,
 ,,Quer_alb,Quer_Alb,Quer alba,Quercus alba,Wh oak,White oak,White oak leading,,,TRUE,Deciduous,white oak,,CedrMplOther,,,,,Ow,CHB,,QUER_ALB,2101,,,110,,
 ,,Quer_bic,Quer_Bic,Quer bico,Quercus bicolor,Sw Wh oak,Swamp white oak,Swamp white oak leading,swamp white oak hybridizes with bur oak,,TRUE,Deciduous,bur oak,,CedrMplOther,,,,,Osw,CHE,,QUER_BIC,2102,,,111,,
