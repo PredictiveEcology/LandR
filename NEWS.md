@@ -1,5 +1,12 @@
 # LandR (development version)
 
+* `speciesInStudyArea()` also returns `sppEquiv`: the rows of `sppEquivalencies_CA` for the
+  species in the study area, without `_Spp` genus entries, only species with LANDIS traits,
+  and with Engelmann spruce (`Pice_eng`, `Pice_eng_gla`) merged into one `Pice_eng`. This is
+  the table fireSense modules built for themselves.
+* `speciesInStudyArea()` no longer stops with "object 'bb' not found" when `speciesPresentRas`
+  is supplied, and uses a supplied `url` instead of ignoring it.
+
 * `makePickellStack()` no longer leaves `terra::terraOptions(memmax)` and
   `raster::rasterOptions(maxmemory)` changed after it returns. Both are global,
   process-wide settings, so a caller that had set its own memory ceiling silently
