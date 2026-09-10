@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "allPres", "allPresFac", "KNN", "NTEMS_Species_Code", "pixel", "variable"
+  "allPres", "allPresFac", "KNN", "LANDIS_traits", "NTEMS_Species_Code", "pixel", "variable"
 ))
 
 ####kNN ####
@@ -384,6 +384,7 @@ speciesPresentFromSCANFI <- function(
 #'
 #' @param sppEquivCol An optional column from `LandR::sppEquivalencies_CA`.
 #'   If passed the KNN species will be returned according to this naming convention.
+#'   It is also the column the returned `sppEquiv` table is built on (`"LandR"` if not passed).
 #'
 #' @param dataSource Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain species from layer
 #'   created using species cover data from KNN. Also able to obtain species from SCANFI species cover layers
@@ -394,9 +395,12 @@ speciesPresentFromSCANFI <- function(
 #'
 #' @param dPath Passed to `destinationPath` in `preProcess`.
 #'
-#' @return A named list of length 2: `speciesRas` is a factor `RasterLayer`
-#' and `speciesList` is a character string containing the unique, sorted
-#' species on the `speciesRas`, for convenience.
+#' @return A named list of length 3: `speciesRas` is a factor `RasterLayer`,
+#' `speciesList` is a character string containing the unique, sorted
+#' species on the `speciesRas`, for convenience, and `sppEquiv` is a `data.table`:
+#' the rows of `sppEquivalencies_CA` for those species, keyed on `sppEquivCol`
+#' (`"LandR"` if not passed), without `_Spp` genus entries, keeping only species
+#' with `LANDIS_traits`, and with `Pice_eng_gla` merged into `Pice_eng`.
 #'
 #' @export
 speciesInStudyArea <- function(
@@ -432,6 +436,7 @@ speciesInStudyArea <- function(
 
     speciesCommunities <- na.omit(rasLevs[rasLevs[["value"]] %in% as.vector(bb[[1]])]$category)
 
+    sppNames <- speciesCommunities
     # else
     if (!is.null(sppEquivCol)) {
       sppEquiv <- LandR::sppEquivalencies_CA
@@ -441,6 +446,9 @@ speciesInStudyArea <- function(
       species <- speciesCommunities
     }
   } else if (dataSource == "KNN" | dataSource == "SCANFI") {
+    ## Only the download belongs under `is.null(speciesPresentRas)`. The postProcess and the
+    ## species extraction used to be inside it too, so a supplied raster stopped with
+    ## "object 'bb' not found", and a supplied `url` was never downloaded.
     if (is.null(speciesPresentRas)) {
       if (is.null(url)) {
         if (dataSource == "KNN") {
@@ -466,32 +474,49 @@ speciesInStudyArea <- function(
             url <- "https://drive.google.com/file/d/1sYou5hkdv3rIeB-frupz7K7ImykK_GQg"
           }
         }
-        speciesPres <- preProcess(url = url, destinationPath = dPath)
-        speciesPresRas <- rasterRead(speciesPres$targetFilePath)
-      } else {
-        speciesPresRas <- speciesPresentRas
       }
+      speciesPres <- preProcess(url = url, destinationPath = dPath)
+      speciesPresRas <- rasterRead(speciesPres$targetFilePath)
+    } else {
+      speciesPresRas <- speciesPresentRas
+    }
 
-      bb <- postProcess(x = speciesPresRas, studyArea = studyArea)
+    bb <- postProcess(x = speciesPresRas, studyArea = studyArea)
 
-      rasLevs <- as.data.table(levels(bb))
-      # if (is(speciesPresRas, "RasterLayer")) {
-      #   bb <- raster::deratify(bb)
-      # }
-      IDcol <- names(rasLevs)[1]
-      speciesCommunities <- na.omit(rasLevs[rasLevs[[IDcol]] %in% as.vector(bb[[1]])]$category)
-      species <- as.character(speciesCommunities)
-      species <- unique(unlist(strsplit(species, "__")))
+    rasLevs <- as.data.table(levels(bb))
+    # if (is(speciesPresRas, "RasterLayer")) {
+    #   bb <- raster::deratify(bb)
+    # }
+    IDcol <- names(rasLevs)[1]
+    speciesCommunities <- na.omit(rasLevs[rasLevs[[IDcol]] %in% as.vector(bb[[1]])]$category)
+    species <- as.character(speciesCommunities)
+    species <- unique(unlist(strsplit(species, "__")))
+    sppNames <- species
 
-      if (!is.null(sppEquivCol) & is.null(speciesPresentRas)) {
-        sppEquiv <- LandR::sppEquivalencies_CA
-        species <- unique(sppEquiv[get(dataSource) %in% species, .SD, ][[sppEquivCol]])
-        species <- species[!species == ""]
-      }
+    if (!is.null(sppEquivCol) & is.null(speciesPresentRas)) {
+      sppEquiv <- LandR::sppEquivalencies_CA
+      species <- unique(sppEquiv[get(dataSource) %in% species, .SD, ][[sppEquivCol]])
+      species <- species[!species == ""]
     }
   }
 
-  return(list(speciesRas = bb, speciesList = species))
+  ## The species table for the study area, built as fireSense_ELFs built it for itself: no
+  ## `_Spp` genus entries, only species with LANDIS traits, and Engelmann spruce's two
+  ## entries merged into one `Pice_eng` (added for ForSITE). Built from the names on the
+  ## raster, before any `sppEquivCol` renaming of `speciesList`.
+  tableCol <- if (is.null(sppEquivCol)) "LandR" else sppEquivCol
+  spp <- grep("_Spp", as.character(sppNames), invert = TRUE, value = TRUE)
+  inStudyArea <- equivalentName(spp, LandR::sppEquivalencies_CA, column = tableCol,
+                                searchColumn = equivalentNameColumn(spp, LandR::sppEquivalencies_CA))
+  sppEquiv <- LandR::sppEquivalencies_CA[get(tableCol) %in% inStudyArea]
+  sppEquiv <- sppEquiv[LANDIS_traits != ""]
+  if ("PICE_ENG_GLA" %in% spp | "PICE_ENG" %in% spp) {
+    sppEquiv <- rbind(sppEquiv, LandR::sppEquivalencies_CA[LandR %in% c("Pice_eng", "Pice_eng_gla")])
+    sppEquiv[LandR == "Pice_eng_gla", LandR := "Pice_eng"]
+    sppEquiv <- unique(sppEquiv)
+  }
+
+  return(list(speciesRas = bb, speciesList = species, sppEquiv = sppEquiv))
 }
 
 

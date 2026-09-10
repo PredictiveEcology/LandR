@@ -25,7 +25,8 @@ species names, separated by 2 underscores, sorted alphabetically. Can be produce
 with \code{speciesPresentFromKNN}}
 
 \item{sppEquivCol}{An optional column from \code{LandR::sppEquivalencies_CA}.
-If passed the KNN species will be returned according to this naming convention.}
+If passed the KNN species will be returned according to this naming convention.
+It is also the column the returned \code{sppEquiv} table is built on (\code{"LandR"} if not passed).}
 
 \item{dataSource}{Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain species from layer
 created using species cover data from KNN. Also able to obtain species from SCANFI species cover layers
@@ -37,9 +38,12 @@ and NTEMS Dominant Species Layer (though less species will be included from the 
 \item{dPath}{Passed to \code{destinationPath} in \code{preProcess}.}
 }
 \value{
-A named list of length 2: \code{speciesRas} is a factor \code{RasterLayer}
-and \code{speciesList} is a character string containing the unique, sorted
-species on the \code{speciesRas}, for convenience.
+A named list of length 3: \code{speciesRas} is a factor \code{RasterLayer},
+\code{speciesList} is a character string containing the unique, sorted
+species on the \code{speciesRas}, for convenience, and \code{sppEquiv} is a \code{data.table}:
+the rows of \code{sppEquivalencies_CA} for those species, keyed on \code{sppEquivCol}
+(\code{"LandR"} if not passed), without \verb{_Spp} genus entries, keeping only species
+with \code{LANDIS_traits}, and with \code{Pice_eng_gla} merged into \code{Pice_eng}.
 }
 \description{
 \code{speciesInStudyArea} defaults to use a URL of a dataset uploaded to Google Drive that is
