@@ -488,6 +488,7 @@ prepInputsStandAgeMap <- function(
     ...
 ) {
 
+  digRTM <- .robustDigest(rasterToMatch)
   dots <- list(...)
   if (is.null(writeTo) && !is.null(dots$filename2)) {
     writeTo <- dots$filename2
@@ -510,7 +511,8 @@ prepInputsStandAgeMap <- function(
         datatype = datatype,
         to = rasterToMatch,
         ...
-      ) |> Cache(.functionName = "prepInputs_ageMapFromSCANFI")
+      ) |> Cache(.functionName = "prepInputs_ageMapFromSCANFI", omitArgs = "to",
+                 .cacheExtra = digRTM)
 
       if (dataYear != "2020") {
         #use NTEMS to identify disturbances (harvest and fire) that occurred between dataYear and 2020
@@ -611,10 +613,12 @@ prepInputsStandAgeMap <- function(
         datatype = datatype,
         method = method,
         fun = ageFun,
-        datatype = datatype,
+        # datatype = datatype,
         to = rasterToMatch,
         ...
-      ) |> Cache(.functionName = "prepInputs_ageMapFromSCANFI")
+      ) |> Cache(.functionName = paste0("prepInputs_ageMapFromSCANFI", "_", dataYear), 
+                 omitArgs = "to",
+                 .cacheExtra = digRTM)
 
     }
   }
@@ -677,15 +681,15 @@ prepInputsStandAgeMap <- function(
 
   if (getFires) {
     if (isFALSE(is.null(rasterToMatch))) {
-      firePerimeters <- Cache(
-        prepInputsFireYear,
+      firePerimeters <- prepInputsFireYear(
         ...,
         url = fireURL,
         fun = fireFun,
         fireField = fireField,
         destinationPath = destinationPath,
         rasterToMatch = rasterToMatch
-      )
+      ) |> Cache(omitArgs = "rasterToMatch",
+                 .cacheExtra = digRTM)
     } else {
       message(
         "No 'rasterToMatch' or 'firePerimeters' supplied; ages will NOT be adjusted using fire data."
@@ -917,20 +921,31 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
   preProcessArgs2$url <- NULL
 
   ## There are at least 2 .shp files now (as of Dec 2, 2025)
-  lots <- Map(shp = shpFiles, function(shp) {
-    preProcessArgs2$targetFile = file.path(preProcessArgs2$destinationPath, shp)
-    shp1 <- terra::vect(preProcessArgs2$targetFile)
-    preProcessArgs2$targetFile <- NULL
-    do.call(postProcess, append(list(x = shp1), preProcessArgs2))
-  })
-
-  allFires <- lots[[1]]
-
-  if (length(lots) > 1) {
-    for (i in 2:length(lots)) {
-      allFires <- rbind(allFires, lots[[i]])
-    }
-  }
+  vv <- Map(shp = shpFiles, function(shp) terra::vect(file.path(preProcessArgs2$destinationPath, shp)))
+  vvv <- terra::vect(vv)
+  # 
+  # unique(vvv$SRC_AGENCY)
+  # sa <- setupStudyArea(list(NAME_1 = c("Alberta", "British Columbia", "Yukon", "Northwest Territories") |> 
+  #                             paste(collapse = "|"))) |> 
+  #   terra::project(terra::crs(rasterToMatch))
+  # unique(vvv$SRC_AGENCY)
+  # 
+  
+  allFires <- do.call(postProcess, append(list(vvv), preProcessArgs2))
+  # lots <- Map(shp = shpFiles, function(shp) {
+  #   preProcessArgs2$targetFile = file.path(preProcessArgs2$destinationPath, shp)
+  #   shp1 <- terra::vect(preProcessArgs2$targetFile)
+  #   preProcessArgs2$targetFile <- NULL
+  #   do.call(postProcess, append(list(x = shp1), preProcessArgs2))
+  # })
+  # 
+  # allFires <- lots[[1]]
+  # 
+  # if (length(lots) > 1) {
+  #   for (i in 2:length(lots)) {
+  #     allFires <- rbind(allFires, lots[[i]])
+  #   }
+  # }
 
   # allFires <- do.call(prepInputs, append(list(fun = fun), preProcessArgs))
 

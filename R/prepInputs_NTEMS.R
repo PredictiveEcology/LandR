@@ -52,11 +52,10 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240,
   dots$method <- resampleMethod
   dots$writeTo <- newFilename
   # digs <- .robustDigest(dots)
-  lcc <- do.call(prepInputs, dots) # |>
-  #  Cache(.functionName = paste0("prepInputs_NTEMS_LCC_FAO_", year),
-  #        omitArgs = c("targetFile", "writeTo"),
-  #        .cacheExtra = digs)
-
+  lcc <- do.call(prepInputs, dots) |>
+    Cache(.functionName = paste0("prepInputs_NTEMS_LCC_FAO_", year),
+          omitArgs = c("targetFile", "writeTo"))
+  
   dots$writeTo <- writeToFN
 
   ## 2024-12: see #110; don't delete CA_forest_VLCE2 raster even though it's 24GB
@@ -76,26 +75,54 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240,
     url = url,
     method = resampleMethod, destinationPath = dots$destinationPath, to = lcc
     # cropTo = lcc, maskTo = lcc, projectTo = lcc
-  ) # |> Cache(omitArgs = "to", .cacheExtra = digs)
+  ) |> Cache(omitArgs = "to", .cacheExtra = list(cacheId(lcc))) # lcc seems to be prone to false fails; seems like the cacheId is reliable
   ## pixels may not be disturbed yet if year is prior to 2019 (FAO year)
   ## adjust non-forest LCC that are disturbed forest to disturbedCode
   message("Updating codes on LCC with FAO data...")
   input <- c(lcc, fao)
-  opts <- terraOptions()
+  opts <- terraOptions(print = FALSE)
   optsNow <- list(memmax = 4, todisk = TRUE)
-  newOpts <- do.call(terraOptions, optsNow)
-  on.exit(do.call(terraOptions, opts[names(optsNow)]), add = TRUE)
+  newOpts <- do.call(terraOptions, append(optsNow, list(print = FALSE)))
+  on.exit(do.call(terraOptions, append(opts[names(optsNow)], list(print = FALSE))), add = TRUE)
   
-  keep <- c(210, 81, 220, 230)
-  is_keep <- terra::`%in%`(lcc, keep)   # SpatRaster -> 0/1 mask, in C++
-  out <- terra::ifel(
-    (fao == 2) & !is_keep,
-    disturbedCode,
-    lcc,
-    overwrite = TRUE,
-    filename = tempfile(fileext = ".tif"),
-    wopt = list(datatype = "INT1U", gdal = c("COMPRESS=ZSTD", "TILED=YES"))
-  )
+  # These are needed for the digest below
+  keepCodes <- c(210, 81, 220, 230)
+  woptArgs <- list(datatype = "INT1U", gdal = c("COMPRESS=ZSTD", "TILED=YES"))
+  fp <- if (!is.null(dots$writeTo)) {
+    if (!is.null(dots$destinationPath)) {
+      file.path(dots$destinationPath, dots$writeTo)
+    } else { dots$writeTo }
+    # assign it to itself or it stays in memory
+    # out <- writeRaster(out, filename = fp, overwrite = TRUE) #overwrite lcc
+  } else {
+    tempfile(fileext = ".tif")
+  }
+  dig <- .robustDigest(list(lcc = cacheId(lcc), 
+                            keepCodes = keepCodes, disturbedCode = disturbedCode,
+                            woptArgs = woptArgs, fp = fp))
+  out <- { lcc |>
+    terra::`%in%`(keepCodes) |>
+    (\(is_keep) terra::ifel(
+      (fao == 2) & !is_keep,
+      disturbedCode,
+      lcc,
+      overwrite = TRUE,
+      filename = fp,
+      wopt = woptArgs
+    ))() } |>
+    Cache(.functionName = "convertCodes", omitArgs = TRUE, 
+          .cacheExtra = dig)
+  
+  # keep <- c(210, 81, 220, 230)
+  # is_keep <- terra::`%in%`(lcc, keep)   # SpatRaster -> 0/1 mask, in C++
+  # out <- terra::ifel(
+  #   (fao == 2) & !is_keep,
+  #   disturbedCode,
+  #   lcc,
+  #   overwrite = TRUE,
+  #   filename = tempfile(fileext = ".tif"),
+  #   wopt = list(datatype = "INT1U", gdal = c("COMPRESS=ZSTD", "TILED=YES"))
+  # )
   # Eliot removed this May 22, 2026 as it was WAY too slow on 30m raster 
   # DisturbedAdjust <- function(LCC, FAO, newVal = disturbedCode) {
   #   LCC[FAO == 2 & !LCC %in% c(210, 81, 220, 230)] <- newVal
@@ -104,13 +131,7 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240,
   # out <- terra::lapp(input, fun = DisturbedAdjust, usenames = FALSE)
   # lcc <- terra::init(lcc, as.vector(out))
 
-  if (!is.null(dots$writeTo)) {
-    fp <- if (!is.null(dots$destinationPath)) {
-      file.path(dots$destinationPath, dots$writeTo)
-    } else { dots$writeTo }
-    #assign it to itself or it stays in memory
-    out <- writeRaster(out, filename = fp, overwrite = TRUE) #overwrite lcc
-  }
+  
   message("... done ... cleaning up RAM")
   rm(input, lcc, fao) # remove them before doing gc
   
