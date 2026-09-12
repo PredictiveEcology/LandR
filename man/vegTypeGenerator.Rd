@@ -47,9 +47,8 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 of each group defined by \code{pixelGroupColName}
 }
 \description{
-This function is a simplification of \code{vegTypeMapGenerator}
-and instead of generating a map, it adds the vegetation type column
-to the \code{cohortData} table.
+This function is a simplification of \code{vegTypeMapGenerator} and instead of generating a map,
+it adds the vegetation type column to the \code{cohortData} table.
 }
 \examples{
 library(data.table)

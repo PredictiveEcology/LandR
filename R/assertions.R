@@ -1,5 +1,6 @@
-utils::globalVariables(c(".N", "V1", "V2", "relativeAbundObsrvd", "relativeAbund",
-                         "reps", "years"))
+utils::globalVariables(c(
+  ".N", "V1", "V2", "relativeAbundObsrvd", "relativeAbund", "reps", "years"
+))
 
 #' Assertions
 #'
@@ -21,20 +22,23 @@ utils::globalVariables(c(".N", "V1", "V2", "relativeAbundObsrvd", "relativeAbund
 assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote, classesToReplace = 34:36,
                     doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    allCodesAre34to36 <- all(grepl(paste(paste0(".*_", classesToReplace), collapse = "|"),
-                                   as.character(cohortData34to36$initialEcoregionCode)))
-    if (!allCodesAre34to36)
+    allCodesAre34to36 <- all(grepl(
+      paste(paste0(".*_", classesToReplace), collapse = "|"),
+      as.character(cohortData34to36$initialEcoregionCode)
+    ))
+    if (!allCodesAre34to36) {
       stop("lcc classes were mismanaged; contact developers: code 234")
+    }
 
     ## do they match the codes found for pre selected areas (e.g. areas with biomass)?
     ## if not, is this because the non-matching codes had no biomass to start with?
     ## or is it because they need to be masked?
     if (!is.null(rmZeroBiomassQuote)) {
       onlyExistingCodes <- all(unique(cohortData34to36$ecoregionGroup) %in%
-                                 unique(cohortData[eval(rmZeroBiomassQuote), initialEcoregionCode]))
+        unique(cohortData[eval(rmZeroBiomassQuote), initialEcoregionCode]))
     } else {
       onlyExistingCodes <- all(unique(cohortData34to36$ecoregionGroup) %in%
-                                 unique(cohortData$initialEcoregionCode))
+        unique(cohortData$initialEcoregionCode))
     }
 
     if (!onlyExistingCodes) {
@@ -45,8 +49,9 @@ assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote, classesToR
         nonMatching <- setdiff(temp1, temp2)
 
         nonMatchingB <- sum(cohortData[initialEcoregionCode %in% nonMatching, B], na.rm = TRUE)
-        if (nonMatchingB)
+        if (nonMatchingB) {
           stop("There are some ecoregionCodes created post replacement of 34 and 35")
+        }
       }
 
       ## are they pixels that will be masked because they couldn't be converted?
@@ -54,8 +59,9 @@ assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote, classesToR
         temp1 <- unique(cohortData34to36$ecoregionGroup)
         temp2 <- unique(cohortData[, initialEcoregionCode])
         nonMatching <- setdiff(temp1, temp2)
-        if (!all(is.na(nonMatching)))
+        if (!all(is.na(nonMatching))) {
           stop("There are some ecoregionCodes created post replacement of 34 and 35")
+        }
       }
     }
   }
@@ -76,11 +82,14 @@ assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote, classesToR
 assert2 <- function(cohortDataNo34to36, classesToReplace = 34:36,
                     doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    noCodesAre34to36 <- all(!grepl(paste(paste0(".*_", classesToReplace), collapse = "|"),
-                                   as.character(cohortDataNo34to36$ecoregionGroup)))
-    if (!noCodesAre34to36)
+    noCodesAre34to36 <- all(!grepl(
+      paste(paste0(".*_", classesToReplace), collapse = "|"),
+      as.character(cohortDataNo34to36$ecoregionGroup)
+    ))
+    if (!noCodesAre34to36) {
       stop("lcc classes were mismanaged and some classes were not replaced correctly;
            contact developers: code 235")
+    }
   }
 }
 
@@ -102,16 +111,20 @@ assertSppMaxBMaxANPP <- function(speciesEcoregion,
                                by = speciesCode]
     if (any(tempDT$V1 == 0)) {
       noMaxB <- tempDT[V1 == 0, speciesCode]
-      stop("The following species have no maxB values throughout the landscape:\n",
-           paste(noMaxB, collapse = ", "), "\n",
-           "This may be due to missing trait values.")
+      stop(
+        "The following species have no maxB values throughout the landscape:\n",
+        paste(noMaxB, collapse = ", "), "\n",
+        "This may be due to missing trait values."
+      )
     }
 
     if (any(tempDT$V2 == 0)) {
       noMaxANPP <- tempDT[V2 == 0, speciesCode]
-      stop("The following species have no maxANPP values throughout the landscape:\n",
-           paste(noMaxANPP, collapse = ", "), "\n",
-           "This may be due to missing trait values")
+      stop(
+        "The following species have no maxANPP values throughout the landscape:\n",
+        paste(noMaxANPP, collapse = ", "), "\n",
+        "This may be due to missing trait values"
+      )
     }
   }
 }
@@ -129,9 +142,12 @@ assertUniqueCohortData <- function(cohortData, columns,
     obj <- cohortData[, .N, by = columns]
     whNEQOne <- which(obj$N != 1)
     test1 <- length(whNEQOne) == 0
-    if (!test1)
-      stop("There are identical cohorts (based on ", paste(columns, collapse = ", "),
-           ") within the same pixelGroup")
+    if (!test1) {
+      stop(
+        "There are identical cohorts (based on ", paste(columns, collapse = ", "),
+        ") within the same pixelGroup"
+      )
+    }
   }
 }
 
@@ -148,18 +164,30 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
   if (doAssertion) {
     erg <- list()
     if (!missing(ecoregionMap)) {
-      erg[[1]] <- sort(na.omit(unique(factorValues2(ecoregionMap, as.vector(ecoregionMap[]),
-                                                    att = "ecoregionGroup"))))
+      ergMap <- sort(na.omit(unique(factorValues2(ecoregionMap, as.vector(ecoregionMap[]),
+                                                  att = "ecoregionGroup"))))
+      if (length(ergMap) == 0) {
+        stop(
+          "`ecoregionMap` has no 'ecoregionGroup' values. Either its raster attribute\n",
+          "table is missing, it has no 'ecoregionGroup' column, or all its values are NA.\n",
+          "Note that a GeoTIFF stores its categories in a companion '.aux.xml' file,\n",
+          "which must be retrieved alongside the '.tif'."
+        )
+      }
+      erg[[1]] <- ergMap
       if (is.character(erg[[1]])) { # this can happen if SpatRaster
         erg[[1]] <- factor(erg[[1]])
       }
     }
-    if (!missing(cohortData))
+    if (!missing(cohortData)) {
       erg[[2]] <- sort(unique(cohortData$ecoregionGroup))
-    if (!missing(speciesEcoregion))
+    }
+    if (!missing(speciesEcoregion)) {
       erg[[3]] <- sort(unique(speciesEcoregion$ecoregionGroup))
-    if (!missing(minRelativeB))
+    }
+    if (!missing(minRelativeB)) {
       erg[[4]] <- sort(unique(minRelativeB$ecoregionGroup))
+    }
 
     ## first test will detect differences in both factor levels and values
     lens <- vapply(erg, function(x) length(x) > 1, FUN.VALUE = logical(1))
@@ -176,15 +204,19 @@ assertERGs <- function(ecoregionMap, cohortData, speciesEcoregion, minRelativeB,
 
     if (!test4) {
       message(str(erg, 1))
-      stop("speciesEcoregion, cohortData, and ecoregionMap should all have exactly the same",
-           "\n  ecoregionGroups. They do not. This needs to be fixed before proceeding.")
+      stop(
+        "speciesEcoregion, cohortData, and ecoregionMap should all have exactly the same",
+        " ecoregionGroups. They do not. This needs to be fixed before proceeding."
+      )
     }
 
     ## only necessary to check this one if the first doesn't fail.
     if (!test3) {
       message(str(erg, 1))
-      stop("speciesEcoregion, cohortData, and ecoregionMap should all have exactly the same",
-           "\n  ecoregionGroup levels. They do not. This needs to be fixed before proceeding.")
+      stop(
+        "speciesEcoregion, cohortData, and ecoregionMap should all have exactly the same",
+        " ecoregionGroup levels. They do not. This needs to be fixed before proceeding."
+      )
     }
   }
 }
@@ -210,18 +242,24 @@ assertColumns <- function(obj, colClasses,
     colClasses2 <- colClasses[na.omit(match(names(obj), names(colClasses)))]
     colNames2 <- names(colClasses2)
     test2Indiv <- vapply(seq_len(NCOL(obj[, colNames2, with = FALSE])),
-                         function(colNum) {
-                           is(obj[, colNames2[colNum], with = FALSE][[1]],
-                              colClasses2[colNum])
-                         }, FUN.VALUE = logical(1))
+      function(colNum) {
+        is(
+          obj[, colNames2[colNum], with = FALSE][[1]],
+          colClasses2[colNum]
+        )
+      },
+      FUN.VALUE = logical(1)
+    )
     test2 <- all(test2Indiv)
     mess2 <- character()
     if (!test2) {
       wh <- which(!test2Indiv)
       wrongCols <- colClasses2[wh]
-      mess2 <- paste("obj column classes need correction.",
-                      "It should have the following class(es):",
-                      paste(names(wrongCols), "=", wrongCols, collapse = ", "))
+      mess2 <- paste(
+        "obj column classes need correction.",
+        "It should have the following class(es):",
+        paste(names(wrongCols), "=", wrongCols, collapse = ", ")
+      )
     }
     if (!test1 || !test2) {
       stop(paste(mess1, mess2, sep = "\n"))
@@ -250,35 +288,75 @@ assertColumns <- function(obj, colClasses,
 assertCohortData <- function(cohortData, pixelGroupMap, maxExpectedNumDiverge = 1,
                              message = "", doAssertion = getOption("LandR.assertions", TRUE),
                              verbose = getOption("LandR.verbose", TRUE),
-                             cohortDefinitionCols = c("pixelGroup", "age", "speciesCode")) {
+                             cohortDefinitionCols = LandR::cohortDefinitionCols()) {
   if (doAssertion) {
     if (!isTRUE("pixelGroup" %in% names(cohortData))) {
       stop("cohortData must have pixelGroup")
     }
+
     a <- sort(unique(na.omit(as.vector(pixelGroupMap[]))))
     b <- sort(unique(na.omit(cohortData$pixelGroup)))
     ## test1 and test2 can be 1 because there could be pixelGroup of 0, which is OK to not match
     test1 <- sum(!a %in% b)
     test2 <- sum(!b %in% a)
 
-    cohortDataN <- cohortData[, .N, by = cohortDefinitionCols]
-    test3 <- which(cohortDataN$N != 1)
     if (test1 > maxExpectedNumDiverge || test2 > maxExpectedNumDiverge) {
-      if (nchar(message) > 0) message(message)
-      if (verbose) {
-        if (test1 > maxExpectedNumDiverge) message("test1 is ", test1,
-                                                   " -- too many pixelGroups on pixelGroupMap")
-        if (test2 > maxExpectedNumDiverge) message("test2 is ", test2,
-                                                   " -- too many pixelGroups in cohortData")
+      if (nchar(message) > 0) {
+        message(message)
       }
-      stop("The sim$pixelGroupMap and cohortData have unmatching pixelGroup.",
-           " They must be matching. Please contact the module developers")
+      if (verbose) {
+        if (test1 > maxExpectedNumDiverge) {
+          message("test1 is ", test1, " -- too many pixelGroups on pixelGroupMap")
+        }
+        if (test2 > maxExpectedNumDiverge) {
+          message("test2 is ", test2, " -- too many pixelGroups in cohortData")
+        }
+      }
+      stop(
+        "pixelGroup in 'pixelGroupMap' and 'cohortData' objects are mismatched.",
+        " Please contact the module developers."
+      )
     }
-    if (length(test3) != 0)
+
+    maxPixelGroupFromCohortData <- max(cohortData$pixelGroup)
+    maxPixelGroup <- as.integer(maxFn(pixelGroupMap))
+    test3 <- (!identical(maxPixelGroup, maxPixelGroupFromCohortData))
+    if (test3) {
+      if (verbose) {
+        message(
+          "test3 is ", test3,
+          " -- max(cohortData$pixelGroup) != max(pixelGroup) from pixelGroupMap"
+        )
+      }
+      stop(
+        "pixelGroup in 'pixelGroupMap' and 'cohortData' objects are mismatched.",
+        " Please contact the module developers."
+      )
+    }
+
+    cohortDataN <- cohortData[, .N, by = cohortDefinitionCols]
+    test4 <- which(cohortDataN$N != 1)
+    if (length(test4) != 0) {
       stop("There are duplicate, identical cohorts: ", print(cohortDataN[test3]))
+    }
 
     if (verbose > 1) {
-      message(crayon::green("  -- assertion passed using assertCohortData --"))
+      message(cli::col_green("  -- assertion passed using assertCohortData --"))
+    }
+  }
+}
+
+#' - `assertCohortDataERG`: test that `cohortData` contains exactly one `ecoregionGroup` per
+#'   `pixelGroup`;
+#'
+#' @export
+#' @rdname assertions
+assertCohortDataERG <- function(cohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
+  if (isTRUE(doAssertion)) {
+    if (NROW(unique(cohortData, by = c("ecoregionGroup", "pixelGroup"))) !=
+      NROW(unique(cohortData$pixelGroup))) {
+      browser()
+      stop("there should only be one ecoregionGroup per pixelGroup in cohortData")
     }
   }
 }
@@ -305,16 +383,20 @@ assertPixelCohortData <- function(pixelCohortData, pixelGroupMap,
     tableB <- sum(!is.na(allPixelsNotInCohortData)) # 25166
 
     test2 <- identical(as.integer(pixelsOnMap - tableB), lenUniquePixelsInCohorts)
-    test3 <- identical(as.integer(pixelsOnMap - (lenBurnedPixels - pixelsRegeneratedOnZeros)),
-                       lenUniquePixelsInCohorts)
+    test3 <- identical(
+      as.integer(pixelsOnMap - (lenBurnedPixels - pixelsRegeneratedOnZeros)),
+      lenUniquePixelsInCohorts
+    )
 
     uniqueAllPixelsNotInCohortData <- unique(allPixelsNotInCohortData)
     ## after converting to `terra` NAs sometimes appear as NaNs
     test1 <- all(uniqueAllPixelsNotInCohortData %in% c(NA, NaN, 0L))
     if (!test1 || !test2 || !test3) {
-      stop("Every value on pixelGroupMap >0 must have a pixelIndex in pixelCohortData.\n",
-           "This test is failing, i.e., there are some pixelGroups in pixelGroupMap",
-           " that aren't in pixelCohortData.")
+      stop(
+        "Every value on pixelGroupMap >0 must have a pixelIndex in pixelCohortData.\n",
+        "This test is failing, i.e., there are some pixelGroups in pixelGroupMap",
+        " that aren't in pixelCohortData."
+      )
     }
   }
 }
@@ -331,15 +413,16 @@ assertPixelCohortData <- function(pixelCohortData, pixelGroupMap,
 assertSpeciesPlotLabels <- function(speciesNames, sppEquiv,
                                     doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    sppLabelsENshort <- equivalentName(speciesNames,  sppEquiv, "EN_generic_short")
-    sppLabelsLeading <- equivalentName(speciesNames,  sppEquiv, "Leading")
+    sppLabelsENshort <- equivalentName(speciesNames, sppEquiv, "EN_generic_short")
+    sppLabelsLeading <- equivalentName(speciesNames, sppEquiv, "Leading")
     if (any(duplicated(sppLabelsENshort)) ||
-            any(duplicated(sppLabelsLeading)))
+      any(duplicated(sppLabelsLeading))) {
       stop(paste(
-      "Two or more species share the same label under the 'EN_generic_short' or",
-      "'Leading' columns of 'sppEquiv'.\n",
-      "Please provide unique 'EN_generic_short' and 'Leading' for each species."
-     ))
+        "Two or more species share the same label under the 'EN_generic_short' or",
+        "'Leading' columns of 'sppEquiv'.\n",
+        "Please provide unique 'EN_generic_short' and 'Leading' for each species."
+      ))
+    }
   }
 }
 
@@ -356,25 +439,30 @@ assertFireToleranceDif <- function(burnedPixelCohortData,
     test1 <- TRUE
     test2 <- TRUE
     if (min(burnedPixelCohortData$severityToleranceDif, na.rm = TRUE) < -4 ||
-        max(burnedPixelCohortData$severityToleranceDif, na.rm = TRUE) > 4) {
+      max(burnedPixelCohortData$severityToleranceDif, na.rm = TRUE) > 4) {
       if (min(burnedPixelCohortData$firetolerance, na.rm = TRUE) < 1 ||
-          min(burnedPixelCohortData$firetolerance, na.rm = TRUE) < 5)
+        min(burnedPixelCohortData$firetolerance, na.rm = TRUE) < 5) {
         test1 <- FALSE
+      }
       if (min(burnedPixelCohortData$severity, na.rm = TRUE) < 1 ||
-          min(burnedPixelCohortData$severity, na.rm = TRUE) < 5)
+        min(burnedPixelCohortData$severity, na.rm = TRUE) < 5) {
         test2 <- FALSE
+      }
     }
-    if (!test1)
+    if (!test1) {
       stop("The difference between severity and species fire tolerance must be [-4,4].
            Fire tolerance has values outside of [1,5], please check your
            species traits table ('species')")
-    if (!test2)
+    }
+    if (!test2) {
       stop("The difference between severity and species fire tolerance must be [-4,4].
            Severity has values outside of [1,5], please debug Biomass_regenerationPM")
-    if (!test1 && !test2)
+    }
+    if (!test1 && !test2) {
       stop("The difference between severity and species fire tolerance must be [-4,4].
            Severity and fire tolerances have values outside of [1,5], please debug
            Biomass_regenerationPM and check your species traits table ('species')")
+    }
   }
 }
 
@@ -403,9 +491,12 @@ assertSpeciesLayers <- function(speciesLayers, thresh,
       all(is.na(as.vector(values(x))))
     }, FUN.VALUE = logical(1))
 
-    if (all(test1))
-      stop("no pixels found were found with species % cover >=", thresh,
-           ". Try lowering the threshold.")
+    if (all(test1)) {
+      stop(
+        "no pixels found were found with species % cover >=", thresh,
+        ". Try lowering the threshold."
+      )
+    }
   }
 }
 
@@ -422,7 +513,9 @@ assertRstLCChange <- function(rstLCChange, rasterToMatch,
   if (doAssertion) {
     ## check conformity with RTM
     if (!.compareRas(rstLCChange,
-                     rasterToMatch, stopOnError = FALSE)) {
+      rasterToMatch,
+      stopOnError = FALSE
+    )) {
       stop("'rstLCChange' and 'rasterToMatch' differ in
          their properties. Please check")
     }
@@ -451,17 +544,27 @@ assertSpeciesEcoregionCohortDataMatch <- function(
     cohortData, speciesEcoregion,
     doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
-    a <- setdiff(unique(paste(speciesEcoregion$ecoregionGroup, speciesEcoregion$speciesCode)),
-                 unique(paste(cohortData$ecoregionGroup, cohortData$speciesCode)))
+    a <- setdiff(
+      unique(paste(speciesEcoregion$ecoregionGroup, speciesEcoregion$speciesCode)),
+      unique(paste(cohortData$ecoregionGroup, cohortData$speciesCode))
+    )
 
-    if (length(a) > 0)
-      stop("speciesEcoregion has ecoregionGroup x speciesCode values that are not in cohortData: ",
-           paste(a, collapse = ", "))
-    b <- setdiff(unique(paste(cohortData$ecoregionGroup, cohortData$speciesCode)),
-                 unique(paste(speciesEcoregion$ecoregionGroup, speciesEcoregion$speciesCode)))
-    if (length(b) > 0)
-      stop("cohortData has ecoregionGroup x speciesCode values that are not in speciesEcoregion: ",
-           paste(b, collapse = ", "))
+    if (length(a) > 0) {
+      stop(
+        "speciesEcoregion has ecoregionGroup x speciesCode values that are not in cohortData: ",
+        paste(a, collapse = ", ")
+      )
+    }
+    b <- setdiff(
+      unique(paste(cohortData$ecoregionGroup, cohortData$speciesCode)),
+      unique(paste(speciesEcoregion$ecoregionGroup, speciesEcoregion$speciesCode))
+    )
+    if (length(b) > 0) {
+      stop(
+        "cohortData has ecoregionGroup x speciesCode values that are not in speciesEcoregion: ",
+        paste(b, collapse = ", ")
+      )
+    }
   }
 }
 
@@ -478,13 +581,15 @@ assertPixelCohortDataValid <- function(standCohortData,
   if (doAssertion) {
     test <- standCohortData[, vapply(.SD, FUN = function(x) any(is.na(x)), FUN.VALUE = logical(1))]
     if (any(test)) {
-      stop("There are NAs in either the observed or simulated data.\n",
-           "Please check 'standCohortData'.")
+      stop(
+        "There are NAs in either the observed or simulated data.\n",
+        "Please check 'standCohortData'."
+      )
     }
 
-    test2 <- standCohortData[, sum(relativeAbundObsrvd), by = .(rep, year, pixelIndex)]$V1 |>
+    test2 <- standCohortData[, sum(relativeAbundObsrvd), by = .(rep, year, pixelIndex)][["V1"]] |>
       unique()
-    test3 <- standCohortData[, sum(relativeAbund), by = .(rep, year, pixelIndex)]$V1 |>
+    test3 <- standCohortData[, sum(relativeAbund), by = .(rep, year, pixelIndex)][["V1"]] |>
       unique()
 
     ## need to round, because some values "appear" to be 1, but probably have v. small decimals.
@@ -520,8 +625,10 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
       set(test2, NULL, "rep", NULL)
 
       if (!identical(test1, test2)) {
-        stop(paste("Simulation starting conditions are not identical between reps",
-                   reps[1], "and", x))
+        stop(paste(
+          "Simulation starting conditions are not identical between reps",
+          reps[1], "and", x
+        ))
       } else {
         TRUE
       }
@@ -538,18 +645,19 @@ assertRepsAllCohortData <- function(allCohortData, reps, years,
 #'
 #' @export
 #' @rdname assertions
-assertStandAgeMapAttr <- function(standAgeMap,
-                                  doAssertion = getOption("LandR.assertions", TRUE)) {
+assertStandAgeMapAttr <- function(standAgeMap, doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     if (!inherits(standAgeMap, c("RasterLayer", "SpatRaster"))) {
       stop("standAgeMap should be a RasterLayer or SpatRaster")
     }
     if (is.null(attr(standAgeMap, "imputedPixID"))) {
-      stop("standAgeMap should have a 'imputedPixID' attribute.",
-           " If no pixel ages were imputed, please set attribute to `integer(0)`")
+      stop(
+        "standAgeMap should have a 'imputedPixID' attribute.",
+        " If no pixel ages were imputed, please set attribute to `integer(0)`"
+      )
     } else {
       if (!(is(attr(standAgeMap, "imputedPixID"), "numeric") ||
-            is(attr(standAgeMap, "imputedPixID"), "integer"))) {
+        is(attr(standAgeMap, "imputedPixID"), "integer"))) {
         stop("standAgeMap attribute 'imputedPixID' should be numeric/integer")
       }
     }
@@ -563,14 +671,13 @@ assertStandAgeMapAttr <- function(standAgeMap,
 #'
 #' @export
 #' @rdname assertions
-assertCohortDataAttr <- function(cohortData,
-                                 doAssertion = getOption("LandR.assertions", TRUE)) {
+assertCohortDataAttr <- function(cohortData, doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {
     if (is.null(attr(cohortData, "imputedPixID"))) {
       stop("cohortData should have a 'imputedPixID' attribute")
     } else {
       if (!(is(attr(cohortData, "imputedPixID"), "numeric") ||
-            is(attr(cohortData, "imputedPixID"), "integer"))) {
+        is(attr(cohortData, "imputedPixID"), "integer"))) {
         stop("cohortData attribute 'imputedPixID' should be numeric/integer")
       }
     }
@@ -612,8 +719,10 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
     sppInSppEquiv <- unique(sppEquiv[[sppEquivCol]])
 
     if (!is.null(sppNameVector)) {
-      test1 <- any(length(union(sppInSppEquiv, sppNameVector)) != length(sppInSppEquiv),
-                   length(union(sppInSppEquiv, sppNameVector)) != length(sppNameVector))
+      test1 <- any(
+        length(union(sppInSppEquiv, sppNameVector)) != length(sppInSppEquiv),
+        length(union(sppInSppEquiv, sppNameVector)) != length(sppNameVector)
+      )
 
       if (test1) {
         stop("Species listed in 'sppEquiv' and 'sppNameVector' differ.")
@@ -622,8 +731,10 @@ assertSppVectors <- function(sppEquiv = NULL, sppNameVector = NULL, sppColorVect
 
     if (!is.null(sppColorVect)) {
       sppInColourV <- setdiff(names(sppColorVect), "Mixed")
-      test2 <- any(length(union(sppInSppEquiv, sppInColourV)) != length(sppInColourV),
-                   length(union(sppInSppEquiv, sppInColourV)) != length(sppInSppEquiv))
+      test2 <- any(
+        length(union(sppInSppEquiv, sppInColourV)) != length(sppInColourV),
+        length(union(sppInSppEquiv, sppInColourV)) != length(sppInSppEquiv)
+      )
 
       if (test2) {
         stop("Species listed in 'sppEquiv' and 'sppColorVect' differ (excluding 'Mixed' type).")
@@ -688,25 +799,29 @@ assertPostPartialDist <- function(cohortDataOrig, pixelGroupMapOrig,
 #' @rdname assertions
 assertSpeciesTableRaw <- function(speciesTableRaw,
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
-  assertColumns(speciesTableRaw,
-                c(LandisCode = "character",
-                  Area = "factor",
-                  Longevity = "integer",
-                  Maturity = "integer",
-                  Shade = "numeric",
-                  Fire = "integer",
-                  SeedEffDist = "integer",
-                  SeedMaxDist = "integer",
-                  VegProb = "numeric",
-                  MinAgeVeg = "integer",
-                  MaxAgeVeg = "integer",
-                  PostFireRegen = "factor",
-                  LeafLongevity = "integer",
-                  WoodDecayRate = "numeric",
-                  MortalityCurve = "numeric",
-                  GrowthCurve = "numeric",
-                  LeafLignin = "numeric",
-                  HardSoft = "character"))
+  assertColumns(
+    speciesTableRaw,
+    c(
+      LandisCode = "character",
+      Area = "factor",
+      Longevity = "integer",
+      Maturity = "integer",
+      Shade = "numeric",
+      Fire = "integer",
+      SeedEffDist = "integer",
+      SeedMaxDist = "integer",
+      VegProb = "numeric",
+      MinAgeVeg = "integer",
+      MaxAgeVeg = "integer",
+      PostFireRegen = "factor",
+      LeafLongevity = "integer",
+      WoodDecayRate = "numeric",
+      MortalityCurve = "numeric",
+      GrowthCurve = "numeric",
+      LeafLignin = "numeric",
+      HardSoft = "character"
+    )
+  )
 }
 
 #' Assert species table column types
@@ -715,15 +830,28 @@ assertSpeciesTableRaw <- function(speciesTableRaw,
 #'
 #' @export
 #' @rdname assertions
-assertSpeciesTable <- function(speciesTable,
-                               doAssertion = getOption("LandR.assertions", TRUE)) {
-  assertColumns(speciesTable,
-                c(species = "character", Area = "factor", longevity = "integer",
-                  sexualmature = "integer", shadetolerance = "numeric",
-                  firetolerance = "integer", seeddistance_eff = "integer",
-                  seeddistance_max = "integer", resproutprob = "numeric",
-                  resproutage_min = "integer", resproutage_max = "integer",
-                  postfireregen = "factor", leaflongevity = "integer",
-                  wooddecayrate = "numeric", mortalityshape = "integer",
-                  growthcurve = "numeric", leafLignin = "numeric", hardsoft = "factor"))
+assertSpeciesTable <- function(speciesTable, doAssertion = getOption("LandR.assertions", TRUE)) {
+  assertColumns(
+    speciesTable,
+    c(
+      species = "character",
+      Area = "factor",
+      longevity = "integer",
+      sexualmature = "integer",
+      shadetolerance = "numeric",
+      firetolerance = "integer",
+      seeddistance_eff = "integer",
+      seeddistance_max = "integer",
+      resproutprob = "numeric",
+      resproutage_min = "integer",
+      resproutage_max = "integer",
+      postfireregen = "factor",
+      leaflongevity = "integer",
+      wooddecayrate = "numeric",
+      mortalityshape = "integer",
+      growthcurve = "numeric",
+      leafLignin = "numeric",
+      hardsoft = "factor"
+    )
+  )
 }

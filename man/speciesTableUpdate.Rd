@@ -4,7 +4,7 @@
 \alias{speciesTableUpdate}
 \title{Change species table of parameters/traits}
 \usage{
-speciesTableUpdate(species, speciesTable, sppEquiv, sppEquivCol)
+speciesTableUpdate(species, speciesTable, sppEquiv = NULL, sppEquivCol = NULL)
 }
 \arguments{
 \item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.
@@ -69,19 +69,41 @@ An updated species \code{data.table}
 \description{
 Changes longevity and shade tolerance values in the species table.
 Longevity values are changed to follow Burton & Cumming (1995) for the following species:
-\emph{Abies balsamea}, \emph{Abies lasiocarpa}, \emph{Betula papyrifera}, \emph{Larix laricina},
-\emph{Larix occidentalis}, \emph{Picea engelmannii}, \emph{Picea glauca}, \emph{Picea mariana},
-\emph{Pinus banksiana}, \emph{Pinus contorta}, \emph{Pinus resinosa}, \emph{Pinus strobus},
-\emph{Populus balsamifera v. balsamifera}, \emph{Populus tremuloides}, \emph{Pseudotsuga menziesii var. glauca},
-\emph{Pseudotsuga menziesii}, \emph{Thuja plicata}, \emph{Tsuga heterophylla},
-\emph{Tsuga mertensiana x heterophylla}, and only for the  Boreal Shield West (BSW), Boreal Plains (BP)
-and Montane Cordillera (MC) \code{speciesTable$Area}s.
-Note that BSW and BP areas correspond more closely to the region considered in Table 2 of
-Burton & Cumming (1995), while MC will correspond to both tables.
+\itemize{
+\item \emph{Abies balsamea};
+\item \emph{Abies lasiocarpa};
+\item \emph{Betula papyrifera};
+\item \emph{Larix laricina};
+\item \emph{Larix occidentalis};
+\item \emph{Picea engelmannii};
+\item \emph{Picea glauca};
+\item \emph{Picea mariana};
+\item \emph{Pinus banksiana};
+\item \emph{Pinus contorta};
+\item \emph{Pinus resinosa};
+\item \emph{Pinus strobus};
+\item \emph{Populus balsamifera v. balsamifera};
+\item \emph{Populus tremuloides};
+\item \emph{Pseudotsuga menziesii var. glauca};
+\item \emph{Pseudotsuga menziesii};
+\item \emph{Thuja plicata};
+\item \emph{Tsuga heterophylla};
+\item \emph{Tsuga mertensiana x heterophylla};
+}
 }
 \details{
+and only for the following \code{speciesTable$Area}s:
+\itemize{
+\item Boreal Shield West (BSW);
+\item Boreal Plains (BP);
+\item Montane Cordillera (MC).
+}
+
+Note that BSW and BP areas correspond more closely to the region considered in Table 2 of
+Burton & Cumming (1995), while MC will correspond to both tables.
+
 Of the above species, shade tolerance values are changed for \emph{Abies spp}, \emph{Picea spp},
-and \emph{Tsuga spp.} to reflect western boreal shade tolerances better.
+and \emph{Tsuga spp} to better reflect the western boreal.
 
 When different longevity/shade tolerance trait values exist for a given species, the minimum
 value across \code{Area}'s (BSW, BP, MC) is kept.
@@ -89,6 +111,6 @@ value across \code{Area}'s (BSW, BP, MC) is kept.
 ATTENTION: if none of species in \code{species} are from BSW, BP or MC area this function will not
 change any values.
 
-All other species/Area trait values follow Dominic Cyr and Yan Boulanger's trait values available at:
+All other species/Area trait values follow Dominic Cyr and Yan Boulanger's trait values
 (\url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).
 }

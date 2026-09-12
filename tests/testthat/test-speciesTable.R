@@ -1,21 +1,21 @@
-test_that("speciesTable has correct column types", {
-  skip_if_offline()
+testthat::test_that("speciesTable has correct column types", {
+  testthat::skip_if_not_installed("withr")
+  testthat::skip_if_offline()
 
-  test_dir <- file.path(tempdir(), "test_speciesTable")
-  dir.create(test_dir, recursive = TRUE)
-  on.exit({
+  test_dir <- withr::local_tempdir("test_speciesTable")
+
+  withr::defer({
     reproducible::clearCache(ask = FALSE)
-    unlink(test_dir, recursive = TRUE)
-  }, add = TRUE)
+  })
 
-  expect_no_warning({
+  testthat::expect_no_warning({
     sTraw <- getSpeciesTable(dPath = test_dir)
   })
-  expect_no_error(assertSpeciesTableRaw(sTraw))
+  testthat::expect_no_error(assertSpeciesTableRaw(sTraw))
 
   sT <- data.table::copy(sTraw)
-  expect_no_warning({
+  testthat::expect_no_warning({
     sT <- prepSpeciesTable(sT)
   })
-  expect_no_error(assertSpeciesTable(sT))
+  testthat::expect_no_error(assertSpeciesTable(sT))
 })

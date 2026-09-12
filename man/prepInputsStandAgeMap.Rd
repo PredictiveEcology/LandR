@@ -5,39 +5,68 @@
 \title{Create \code{standAgeMap}}
 \usage{
 prepInputsStandAgeMap(
-  ...,
+  rasterToMatch = NULL,
+  dataSource = "SCANFI",
+  dataYear = 2020,
+  dataVersion = "V2",
   ageURL = NULL,
-  ageFun = "raster::raster",
+  ageFun = "terra::rast",
   maskWithRTM = TRUE,
   method = "bilinear",
   datatype = "INT2U",
   destinationPath = NULL,
-  filename2 = NULL,
+  writeTo = NULL,
   firePerimeters = NULL,
   fireURL = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/",
     "fire_poly/current_version/NFDB_poly.zip"),
   fireFun = "terra::vect",
   fireField = "YEAR",
-  rasterToMatch = NULL,
-  startTime
+  ...
 )
 }
 \arguments{
-\item{...}{additional arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
-\item{ageURL}{url where age map is downloaded}
+\item{dataSource}{Character. One of KNN, NTEMS, or SCANFI.
+Defaults to SCANFI for \code{dataYear} 2020.
+Also available:
+\itemize{
+\item KNN for \code{dataYear} 2011; 2001
+When \code{dataSource = "SCANFI"}:
+\item For \code{dataYear = 2020}, the SCANFI stand age map for 2020 is used directly.
+\item For \code{dataYear != 2020}, the 2020 SCANFI map is \strong{back-adjusted} to the requested
+\code{dataYear} using NTEMS fire and harvest disturbance layers (1985–2020) and the
+2001 kNN stand age map.
+Disturbed pixels are assigned ages based on year of disturbance and kNN-based
+estimates where applicable, while undisturbed areas are aged by subtracting
+the difference between \code{dataYear} and 2020. Negative ages are set to zero.
+This process fills missing or inconsistent SCANFI values and records pixel IDs
+that were imputed or adjusted.
+A separate \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} call can be used to source Canadian
+National Fire Database (NFDB) fire polygons, allowing further stand age correction
+for burned areas. To suppress this, set \code{fireURL = NULL} or \code{fireURL = NA}.
+}}
+
+\item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN, 2020 for SCANFI V1,
+or 1985-2025 (5 year intervals) for SCANFI V2.}
+
+\item{dataVersion}{Character. SCANFI product version for data. Default is currently V2. V1 also available.}
+
+\item{ageURL}{URL for age map download. Will be supplied based on \code{dataSource} and \code{dataYear}}
 
 \item{ageFun}{passed to 'fun' arg of \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} of stand age map}
 
 \item{maskWithRTM}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} of stand age map}
 
-\item{method}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} of stand age map}
+\item{method}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} for reprojecting the stand age map}
 
 \item{datatype}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} of stand age map}
 
 \item{destinationPath}{path to data directory where objects will be downloaded or saved to}
 
-\item{filename2}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} of stand age map}
+\item{writeTo}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} of stand age map}
 
 \item{firePerimeters}{fire raster layer fire year values.}
 
@@ -51,11 +80,7 @@ is missing.}
 \item{fireField}{field used to rasterize fire polys. Only used if \code{firePerimeters}
 is missing.}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
-
-\item{startTime}{date of the last fire year to be considered (e.g., start of fire
-period counting backwards). If missing, last fire year available will be used.}
+\item{...}{additional arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}}
 }
 \value{
 a raster layer stand age map corrected for fires, with an attribute vector of pixel IDs
@@ -71,36 +96,39 @@ data to update ages of recently burned pixels. To suppress this, pass NULL/NA \c
 library(SpaDES.tools)
 library(terra)
 library(reproducible)
-randomPoly <- vect(randomStudyArea(size = 1e7))
+randomPoly <- randomStudyArea(size = 1e7)
 randomPoly
 ras2match <- rast(res = 250, ext = ext(randomPoly), crs = crs(randomPoly))
 ras2match <- rasterize(randomPoly, ras2match)
-tempDir <- tempdir()
+tempDir <- file.path(tempdir(), "ex_prepInputsStandAgeMap")
 
 ## NOT USING FIRE PERIMETERS TO CORRECT STAND AGE
 ## rasterToMatch does not need to be provided, but can be for masking/cropping.
-standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
-                                  rasterToMatch = ras2match,
-                                  fireURL = NA)   ## or NULL
+standAge <- prepInputsStandAgeMap(
+  destinationPath = tempDir,
+  rasterToMatch = ras2match,
+  fireURL = NA
+) ## or NULL
 attr(standAge, "imputedPixID")
 
 ## USING FIRE PERIMETERS TO CORRECT STAND AGE
 ## ideally, get the firePerimenters layer first
 firePerimeters <- Cache(prepInputsFireYear,
-                        url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
-                        "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-                        destinationPath = tempDir,
-                        rasterToMatch = ras2match)
+  url = paste0(
+    "https://cwfis.cfs.nrcan.gc.ca/downloads",
+    "/nfdb/fire_poly/current_version/NFDB_poly.zip"
+  ),
+  destinationPath = tempDir,
+  rasterToMatch = ras2match
+)
 
-standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
-                                  firePerimeters = firePerimeters,
-                                  rasterToMatch = ras2match)
-attr(standAge, "imputedPixID")
-
-## not providing firePerimeters is still possible, but will be deprecated
-## in this case 'rasterToMatch' MUST be provided
-standAge <- prepInputsStandAgeMap(destinationPath = tempDir,
-                                  rasterToMatch = ras2match)
-attr(standAge, "imputedPixID")
+## Example adjusting SCANFI to 2000 using NTEMS and kNN
+standAge2000 <- prepInputsStandAgeMap(
+  destinationPath = tempdir(),
+  dataSource = "SCANFI",
+  dataYear = 2000,
+  rasterToMatch = rast(res = 250, ext = ext(vect(randomStudyArea(size = 1e7))))
+)
+attr(standAge2000, "imputedPixID")
 }
 }

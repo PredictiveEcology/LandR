@@ -65,9 +65,6 @@ utils::globalVariables(c(
 #' @references Scheller, R.M. & Miranda, B.R. (2015). LANDIS-II Biomass Succession v3.2 Extension  – User Guide.
 #' @references Scheller, R.M. & Mladenoff, D.J. (2004). A forest growth and biomass module for a landscape simulation model, LANDIS: design, validation, and application. Ecological Modelling, 180, 211–229.
 #'
-#' @importFrom terra ncell as.int
-#' @importFrom data.table copy data.table rbindlist
-#'
 #' @export
 #' @rdname Disturbances
 FireDisturbance <- function(cohortData = copy(sim$cohortData), cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
@@ -99,21 +96,25 @@ FireDisturbance <- function(cohortData = copy(sim$cohortData), cohortDefinitionC
   ## save for later
   treedFirePixelTableSinceLastDispOrig <- copy(treedFirePixelTableSinceLastDisp)
 
-  postFirePixelCohortData <- cohortData[0,]
-  postFirePixelCohortData[, `:=`(pixelIndex = integer(),
-                                 age = NULL, B = NULL, mortality = NULL,
-                                 aNPPAct = NULL)]
+  postFirePixelCohortData <- cohortData[0, ]
+  postFirePixelCohortData[, `:=`(
+    pixelIndex = integer(),
+    age = NULL, B = NULL, mortality = NULL,
+    aNPPAct = NULL
+  )]
 
   # In some cases sumB exists, but not always -- we want to remove it too here.
   if (isTRUE("sumB" %in% colnames(postFirePixelCohortData))) {
     set(postFirePixelCohortData, NULL, "sumB", NULL)
   }
 
-  if (calibrate && is.null(postFireRegenSummary)) {  ## don't overwrite
-    postFireRegenSummary <- data.table(year = numeric(),
-                                       regenMode = character(),
-                                       species = character(),
-                                       numberOfRegen = numeric())
+  if (calibrate && is.null(postFireRegenSummary)) { ## don't overwrite
+    postFireRegenSummary <- data.table(
+      year = numeric(),
+      regenMode = character(),
+      species = character(),
+      numberOfRegen = numeric()
+    )
   }
 
   # if (!is.null(rstCurrentBurn)) { # anything related to fire disturbance
@@ -131,13 +132,17 @@ FireDisturbance <- function(cohortData = copy(sim$cohortData), cohortDefinitionC
     burnedLoci
   }
   treedFirePixelTableSinceLastDisp <- if (length(treedBurnLoci) > 0) {
-    data.table(pixelIndex = as.integer(treedBurnLoci),
-               pixelGroup = as.integer(as.vector(pixelGroupMap[])[treedBurnLoci]),
-               burnTime = currentTime)
+    data.table(
+      pixelIndex = as.integer(treedBurnLoci),
+      pixelGroup = as.integer(as.vector(pixelGroupMap[])[treedBurnLoci]),
+      burnTime = currentTime
+    )
   } else {
-    data.table(pixelIndex = integer(0),
-               pixelGroup = integer(0),
-               burnTime = numeric(0))
+    data.table(
+      pixelIndex = integer(0),
+      pixelGroup = integer(0),
+      burnTime = numeric(0)
+    )
   }
 
   ## TODO: Ceres: maybe this should come at the end, lest we introduce pixelGroups that burned in previous years,
@@ -154,8 +159,10 @@ FireDisturbance <- function(cohortData = copy(sim$cohortData), cohortDefinitionC
   ## select the pixels that have burned survivors and assess them
   burnedPixelTable <- treedFirePixelTableSinceLastDisp[pixelGroup %in% unique(burnedPixelCohortData$pixelGroup)]
   ## expand table to pixels
-  burnedPixelCohortData <- burnedPixelTable[burnedPixelCohortData, allow.cartesian = TRUE,
-                                            nomatch = 0, on = "pixelGroup"]
+  burnedPixelCohortData <- burnedPixelTable[burnedPixelCohortData,
+    allow.cartesian = TRUE,
+    nomatch = 0, on = "pixelGroup"
+  ]
 
   ## CALCULATE SEVERITY -----------------------------
   ## add biomass-based severity to severityData
@@ -175,39 +182,45 @@ FireDisturbance <- function(cohortData = copy(sim$cohortData), cohortDefinitionC
   ## DO SEROTINY -----------------------------
   ## assess potential serotiny reg: add sexual maturity to the table and compare w/ age
   ## as long as one cohort is sexually mature, serotiny is activated
-  serotinyOutputs <- doSerotiny(burnedPixelCohortData = burnedPixelCohortData,
-                                species = species, currentTime = currentTime,
-                                treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
-                                sufficientLight = sufficientLight,
-                                speciesEcoregion = speciesEcoregion,
-                                calibrate = calibrate,
-                                postFirePixelCohortData = postFirePixelCohortData,
-                                postFireRegenSummary = postFireRegenSummary)
+  serotinyOutputs <- doSerotiny(
+    burnedPixelCohortData = burnedPixelCohortData,
+    species = species, currentTime = currentTime,
+    treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
+    sufficientLight = sufficientLight,
+    speciesEcoregion = speciesEcoregion,
+    calibrate = calibrate,
+    postFirePixelCohortData = postFirePixelCohortData,
+    postFireRegenSummary = postFireRegenSummary
+  )
 
   postFirePixelCohortData <- serotinyOutputs$postFirePixelCohortData
   serotinyPixel <- serotinyOutputs$serotinyPixel
 
-  if (!is.null(serotinyOutputs$postFireRegenSummary))
+  if (!is.null(serotinyOutputs$postFireRegenSummary)) {
     postFireRegenSummary <- serotinyOutputs$postFireRegenSummary
+  }
 
   rm(serotinyOutputs)
 
   ## DO RESPROUTING --------------------------
   ## assess resprouting reproduction:
   ## basically same thing as serotiny
-  resproutingOutputs <- doResprouting(serotinyPixel = serotinyPixel,
-                                      treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
-                                      burnedPixelCohortData = burnedPixelCohortData,
-                                      postFirePixelCohortData = postFirePixelCohortData,
-                                      currentTime = currentTime, species = species,
-                                      sufficientLight = sufficientLight,
-                                      calibrate = calibrate,
-                                      postFireRegenSummary = postFireRegenSummary)
+  resproutingOutputs <- doResprouting(
+    serotinyPixel = serotinyPixel,
+    treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
+    burnedPixelCohortData = burnedPixelCohortData,
+    postFirePixelCohortData = postFirePixelCohortData,
+    currentTime = currentTime, species = species,
+    sufficientLight = sufficientLight,
+    calibrate = calibrate,
+    postFireRegenSummary = postFireRegenSummary
+  )
 
   postFirePixelCohortData <- resproutingOutputs$postFirePixelCohortData
   serotinyResproutSuccessPixels <- resproutingOutputs$serotinyResproutSuccessPixels
-  if (!is.null(resproutingOutputs$postFireRegenSummary))
+  if (!is.null(resproutingOutputs$postFireRegenSummary)) {
     postFireRegenSummary <- resproutingOutputs$postFireRegenSummary
+  }
 
   rm(resproutingOutputs)
 
@@ -216,21 +229,23 @@ FireDisturbance <- function(cohortData = copy(sim$cohortData), cohortDefinitionC
   if (NROW(postFirePixelCohortData) > 0) {
     ## redo post-fire pixel groups by adding the maxPixelGroup to their ecoregionMap values
     if (!is.null(serotinyResproutSuccessPixels)) {
-
       # Add new cohorts to BOTH the cohortData and pixelGroupMap
       ## reclassify pixel groups as burnt (0L)
-      if (verbose > 0)
-        message(blue("Post serotiny and resprouting"))
+      if (verbose > 0) {
+        message(cli::col_blue("Post serotiny and resprouting"))
+      }
 
-      outs <- updateCohortData(newPixelCohortData = copy(postFirePixelCohortData),
-                               cohortData = copy(cohortData),
-                               pixelGroupMap = pixelGroupMap,
-                               currentTime = round(currentTime),
-                               speciesEcoregion = copy(speciesEcoregion),
-                               cohortDefinitionCols = cohortDefinitionCols,
-                               treedFirePixelTableSinceLastDisp = copy(treedFirePixelTableSinceLastDisp),
-                               initialB = initialB,
-                               successionTimestep = successionTimestep)
+      outs <- updateCohortData(
+        newPixelCohortData = copy(postFirePixelCohortData),
+        cohortData = copy(cohortData),
+        pixelGroupMap = pixelGroupMap,
+        currentTime = round(currentTime),
+        speciesEcoregion = copy(speciesEcoregion),
+        cohortDefinitionCols = LandR::cohortDefinitionCols(),
+        treedFirePixelTableSinceLastDisp = copy(treedFirePixelTableSinceLastDisp),
+        initialB = initialB,
+        successionTimestep = successionTimestep
+      )
 
       cohortData <- outs$cohortData
       pixelGroupMap <- outs$pixelGroupMap
@@ -242,15 +257,20 @@ FireDisturbance <- function(cohortData = copy(sim$cohortData), cohortDefinitionC
   ## TODO: Ceres potential bug fix. Move this from beginning to here.
   treedFirePixelTableSinceLastDispOrig[, pixelGroup := as.integer(as.vector(pixelGroupMap[]))[pixelIndex]]
   # append previous year's
-  treedFirePixelTableSinceLastDisp <- rbindlist(list(treedFirePixelTableSinceLastDispOrig,
-                                                     treedFirePixelTableSinceLastDisp))
+  treedFirePixelTableSinceLastDisp <- rbindlist(list(
+    treedFirePixelTableSinceLastDispOrig,
+    treedFirePixelTableSinceLastDisp
+  ))
 
-  outList <- list(cohortData = cohortData, pixelGroupMap = pixelGroupMap,
-                  lastFireYear = lastFireYear, treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
-                  serotinyResproutSuccessPixels = serotinyResproutSuccessPixels,
-                  severityBMap = severityBMap, severityData = severityData)
-  if (!is.null(postFireRegenSummary))
+  outList <- list(
+    cohortData = cohortData, pixelGroupMap = pixelGroupMap,
+    lastFireYear = lastFireYear, treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
+    serotinyResproutSuccessPixels = serotinyResproutSuccessPixels,
+    severityBMap = severityBMap, severityData = severityData
+  )
+  if (!is.null(postFireRegenSummary)) {
     outList <- c(outList, postFireRegenSummary = postFireRegenSummary)
+  }
 
   return(outList)
 }
@@ -294,14 +314,10 @@ FireDisturbance <- function(cohortData = copy(sim$cohortData), cohortDefinitionC
 #'
 #' @references Sturtevant, B.R., Miranda, B.R., Scheller, R.M. & Shinneman, D. (2018). LANDIS-II Dynamic Fire System Extension v3.0  – User Guide.
 #'
-#' @importFrom crayon red
-#' @importFrom terra ncell as.int
-#' @importFrom data.table copy data.table rbindlist
-#'
 #' @export
 #' @rdname Disturbances
 FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
-                              colsForPixelGroups = LandR::columnsForPixelGroups,
+                              colsForPixelGroups = LandR::columnsForPixelGroups(),
                               calibrate = FALSE, LANDISPM = TRUE, postFireRegenSummary = copy(sim$postFireRegenSummary),
                               treedFirePixelTableSinceLastDisp = copy(sim$treedFirePixelTableSinceLastDisp),
                               rstCurrentBurn = sim$rstCurrentBurn, inactivePixelIndex = sim$inactivePixelIndex,
@@ -324,13 +340,17 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
 
   ## checks
   ## partial mortality needs the following objects
-  if (any(!is.null(fireRSORas),
-          !is.null(fireROSRas),
-          !is.null(fireCFBRas))) {
-    message(red(paste0("Biomass_regenerationPM is missing one/several of the following rasters:\n",
-                       "  fireRSORas, fireROSRas and fireCFBRas.\n",
-                       "  DUMMY RASTERS will be used - if this is not intended, please \n",
-                       "  use a module that provides them (e.g. PredictiveEcology/fireProperties)")))
+  if (any(
+    !is.null(fireRSORas),
+    !is.null(fireROSRas),
+    !is.null(fireCFBRas)
+  )) {
+    message(cli::col_red(paste0(
+      "Biomass_regenerationPM is missing one/several of the following rasters:\n",
+      "  fireRSORas, fireROSRas and fireCFBRas.\n",
+      "  DUMMY RASTERS will be used - if this is not intended, please \n",
+      "  use a module that provides them (e.g. PredictiveEcology/fireProperties)"
+    )))
     vals <- as.vector(rstCurrentBurn[])
     valsRSO <- valsROS <- valsCFB <- integer(0)
     valsRSO[!is.na(vals)] <- as.integer(round(runif(sum(!is.na(vals)), 0, 100)))
@@ -353,10 +373,12 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
   treedFirePixelTableSinceLastDispOrig <- copy(treedFirePixelTableSinceLastDisp)
 
   ## make table where survivor, serotiny and resprouting cohorts will be stored
-  postFirePixelCohortData <- cohortData[0,]
-  postFirePixelCohortData[, `:=`(pixelIndex = integer(),
-                                 age = NULL, B = NULL, mortality = NULL,
-                                 aNPPAct = NULL)]
+  postFirePixelCohortData <- cohortData[0, ]
+  postFirePixelCohortData[, `:=`(
+    pixelIndex = integer(),
+    age = NULL, B = NULL, mortality = NULL,
+    aNPPAct = NULL
+  )]
 
   ## In some cases sumB exists, but not always -- we want to remove it too here.
   if (isTRUE("sumB" %in% colnames(postFirePixelCohortData))) {
@@ -365,10 +387,12 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
 
   if (calibrate && is.null(postFireRegenSummary)) {
     ## don't overwrite
-    postFireRegenSummary <- data.table(year = numeric(),
-                                       regenMode = character(),
-                                       species = character(),
-                                       numberOfRegen = numeric())
+    postFireRegenSummary <- data.table(
+      year = numeric(),
+      regenMode = character(),
+      species = character(),
+      numberOfRegen = numeric()
+    )
   }
 
   ## extract burn pixel indices/groups and remove potentially inactive pixels
@@ -413,16 +437,18 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
   burnedPixelCohortData <- burnedPixelTable[burnedPixelCohortData, allow.cartesian = TRUE,
                                             nomatch = 0, on = "pixelGroup"]
 
-  severityData <- data.table(pixelIndex = 1:ncell(pixelGroupMap),
-                             pixelGroup = as.vector(pixelGroupMap[]),
-                             burntPixels = as.vector(rstCurrentBurn[]),
-                             RSO = as.vector(fireRSORas[]),
-                             ROS = as.vector(fireROSRas[]),
-                             CFB = as.vector(fireCFBRas[]))
+  severityData <- data.table(
+    pixelIndex = 1:ncell(pixelGroupMap),
+    pixelGroup = as.vector(pixelGroupMap[]),
+    burntPixels = as.vector(rstCurrentBurn[]),
+    RSO = as.vector(fireRSORas[]),
+    ROS = as.vector(fireROSRas[]),
+    CFB = as.vector(fireCFBRas[])
+  )
   severityData <- na.omit(severityData)
 
-  severityData[CFB < 0.1 & ROS < (RSO + 0.458)/2, severity := 1]
-  severityData[CFB < 0.1 & ROS >= (RSO + 0.458)/2, severity := 2]
+  severityData[CFB < 0.1 & ROS < (RSO + 0.458) / 2, severity := 1]
+  severityData[CFB < 0.1 & ROS >= (RSO + 0.458) / 2, severity := 2]
   severityData[CFB >= 0.1 & CFB < 0.495, severity := 3]
   severityData[CFB >= 0.495 & CFB < 0.9, severity := 4]
   severityData[CFB >= 0.9, severity := 5]
@@ -433,18 +459,21 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
   ## add severity to survivor table.
   if (doAssertion) {
     if (!all(burnedPixelCohortData$pixelGroup %in% severityData$pixelGroup)) {
-      warning("Some burnt pixels no fire behaviour indices or severity.\n",
-              "Please debug Biomass_regenerationPM::fireDisturbance")
+      warning(
+        "Some burnt pixels no fire behaviour indices or severity.\n",
+        "Please debug Biomass_regenerationPM::fireDisturbance"
+      )
     }
   }
 
   burnedPixelCohortData <- severityData[burnedPixelCohortData,
-                                        on = .(pixelGroup, pixelIndex),
-                                        allow.cartesian = TRUE]
+    on = .(pixelGroup, pixelIndex),
+    allow.cartesian = TRUE
+  ]
 
   ## DO MORTALITY -----------------------------
   ## Highest severity kills all cohorts
-  burnedPixelCohortData[severity == 5, `:=` (B = 0, mortality = 0, aNPPAct = 0)]
+  burnedPixelCohortData[severity == 5, `:=`(B = 0, mortality = 0, aNPPAct = 0)]
 
   if (LANDISPM) {
     ## FIRE DAMAGE ---------------------------
@@ -454,7 +483,8 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
 
     ## add fire tolerance and longevity
     burnedPixelCohortData <- burnedPixelCohortData[species[, .(speciesCode, longevity, firetolerance)],
-                                                   on = "speciesCode", nomatch = 0]
+      on = "speciesCode", nomatch = 0
+    ]
     ## calculate dif between severity and tolerance
     burnedPixelCohortData[, severityToleranceDif := severity - firetolerance]
     assertFireToleranceDif(burnedPixelCohortData)
@@ -468,27 +498,38 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
                                              nomatch = NA]
 
     if (doAssertion) {
-      if (!all(is.na(burnedPixelCohortData[(severityToleranceDif > max(fireDamageTable$severityToleranceDif) &
-                                            severityToleranceDif < min(fireDamageTable$severityToleranceDif)),
-                                           agesKilled])))
+      if (!all(is.na(burnedPixelCohortData[
+        (severityToleranceDif > max(fireDamageTable$severityToleranceDif) &
+          severityToleranceDif < min(fireDamageTable$severityToleranceDif)),
+        agesKilled
+      ]))) {
         stop("The join of fireDamageTable and burnedPixelCohortData went wrong. agesKilled should be NA
                for site fire damage values outside the range of values in fireDamageTable")
+      }
     }
 
     ## add extreme values
-    burnedPixelCohortData[severityToleranceDif > max(fireDamageTable$severityToleranceDif),
-                          agesKilled := 1.0]
-    burnedPixelCohortData[severityToleranceDif < min(fireDamageTable$severityToleranceDif),
-                          agesKilled := 0.0]
+    burnedPixelCohortData[
+      severityToleranceDif > max(fireDamageTable$severityToleranceDif),
+      agesKilled := 1.0
+    ]
+    burnedPixelCohortData[
+      severityToleranceDif < min(fireDamageTable$severityToleranceDif),
+      agesKilled := 0.0
+    ]
 
     ## and kill cohorts below longevity * prop. - still not partial cohort mortality
     ## but partial stand mortality  -- a lot are being killed because longevities are so large now (disparity from landis)
-    burnedPixelCohortData[age/longevity <= agesKilled,
-                          `:=`(B = 0, mortality = 0, aNPPAct = 0)]
+    burnedPixelCohortData[
+      age / longevity <= agesKilled,
+      `:=`(B = 0, mortality = 0, aNPPAct = 0)
+    ]
 
     ## remove unnecessary cols, but keep dead cohorts for serotiny/resprouting
-    cols <- c("pixelGroup", "pixelIndex", "speciesCode",
-              "ecoregionGroup", "age", "B", "mortality", "aNPPAct")
+    cols <- c(
+      "pixelGroup", "pixelIndex", "speciesCode",
+      "ecoregionGroup", "age", "B", "mortality", "aNPPAct"
+    )
     burnedPixelCohortData <- burnedPixelCohortData[, ..cols]
 
     ## calculate amount of biomass lost per pixel and make severityMap
@@ -505,13 +546,17 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
     ## TODO MAYBE KEEP THE SAME SEVERITY NOTION, BUT THEN USE cfb TO DETERMINE AMOUNT OF BIOMASS
     ## REMOVED PER COHORT ON AN INVERSE AGE WEIGHTED AWAY
     ## USE SPECIES TRAITS TO WEIGHT BIOMASS REMOVAL WITHIN EACH COHORT
-    stop("Only LANDIS-II partial mortality mechanisms have been implemented. ",
-         "Set 'LANDISPM' to TRUE.")
+    stop(
+      "Only LANDIS-II partial mortality mechanisms have been implemented. ",
+      "Set 'LANDISPM' to TRUE."
+    )
   }
 
   ## CALCULATE SIDE SHADE -----------------------------
-  siteShade <- data.table(calcSiteShade(currentTime = round(currentTime), burnedPixelCohortData,
-                                        speciesEcoregion, minRelativeB))
+  siteShade <- data.table(calcSiteShade(
+    currentTime = round(currentTime), burnedPixelCohortData,
+    speciesEcoregion, minRelativeB
+  ))
   siteShade <- siteShade[, .(pixelGroup, siteShade)]
 
   burnedPixelCohortData <- siteShade[burnedPixelCohortData, on = "pixelGroup", nomatch = NA]
@@ -527,39 +572,45 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
   ## DO SEROTINY -----------------------------
   ## assess potential serotiny reg: add sexual maturity to the table and compare w/ age
   ## as long as one cohort is sexually mature, serotiny is activated
-  serotinyOutputs <- doSerotiny(burnedPixelCohortData = burnedPixelCohortData,
-                                species = species, currentTime = currentTime,
-                                treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
-                                sufficientLight = sufficientLight,
-                                speciesEcoregion = speciesEcoregion,
-                                calibrate = calibrate,
-                                postFirePixelCohortData = postFirePixelCohortData,
-                                postFireRegenSummary = postFireRegenSummary)
+  serotinyOutputs <- doSerotiny(
+    burnedPixelCohortData = burnedPixelCohortData,
+    species = species, currentTime = currentTime,
+    treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
+    sufficientLight = sufficientLight,
+    speciesEcoregion = speciesEcoregion,
+    calibrate = calibrate,
+    postFirePixelCohortData = postFirePixelCohortData,
+    postFireRegenSummary = postFireRegenSummary
+  )
 
   postFirePixelCohortData <- serotinyOutputs$postFirePixelCohortData
   serotinyPixel <- serotinyOutputs$serotinyPixel
 
-  if (!is.null(serotinyOutputs$postFireRegenSummary))
+  if (!is.null(serotinyOutputs$postFireRegenSummary)) {
     postFireRegenSummary <- serotinyOutputs$postFireRegenSummary
+  }
 
   rm(serotinyOutputs)
 
   ## DO RESPROUTING --------------------------
   ## assess resprouting reproduction:
   ## basically same thing as serotiny
-  resproutingOutputs <- doResprouting(serotinyPixel = serotinyPixel,
-                                      treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
-                                      burnedPixelCohortData = burnedPixelCohortData,
-                                      postFirePixelCohortData = postFirePixelCohortData,
-                                      currentTime = currentTime, species = species,
-                                      sufficientLight = sufficientLight,
-                                      calibrate = calibrate,
-                                      postFireRegenSummary = postFireRegenSummary)
+  resproutingOutputs <- doResprouting(
+    serotinyPixel = serotinyPixel,
+    treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
+    burnedPixelCohortData = burnedPixelCohortData,
+    postFirePixelCohortData = postFirePixelCohortData,
+    currentTime = currentTime, species = species,
+    sufficientLight = sufficientLight,
+    calibrate = calibrate,
+    postFireRegenSummary = postFireRegenSummary
+  )
 
   postFirePixelCohortData <- resproutingOutputs$postFirePixelCohortData
   serotinyResproutSuccessPixels <- resproutingOutputs$serotinyResproutSuccessPixels
-  if (!is.null(resproutingOutputs$postFireRegenSummary))
+  if (!is.null(resproutingOutputs$postFireRegenSummary)) {
     postFireRegenSummary <- resproutingOutputs$postFireRegenSummary
+  }
 
   rm(resproutingOutputs)
 
@@ -568,28 +619,31 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
   if (NROW(postFirePixelCohortData)) {
     ## redo post-fire pixel groups by adding the maxPixelGroup to their ecoregioMap values
     if (!is.null(serotinyResproutSuccessPixels)) {
-
       # Add new cohorts to BOTH the cohortData and pixelGroupMap
       ## reclassify pixel groups as burnt (0L)
-      if (verbose > 0)
-        message(blue("Post serotiny and resprouting"))
+      if (verbose > 0) {
+        message(cli::col_blue("Post serotiny and resprouting"))
+      }
 
       ## add the survivors cohorts to the serotiny/reprouting ones
       cols <- c("pixelGroup", "pixelIndex", "speciesCode", "ecoregionGroup", "age", "B")
       postFirePixelCohortData <- rbind(postFirePixelCohortData, burnedPixelCohortData[B > 0, ..cols],
-                                       use.names = TRUE, fill = TRUE)
+        use.names = TRUE, fill = TRUE
+      )
       postFirePixelCohortData[is.na(type), type := "survivor"]
 
       ## set ages to 1 here, because updateCohortData will only do so if there isn't an age column
       postFirePixelCohortData[is.na(age), age := 1L]
 
       ## redo PGs in all burnt pixels
-      tempObjs <- genPGsPostDisturbance(cohortData = copy(cohortData),
-                                        pixelGroupMap = sim$pixelGroupMap,
-                                        disturbedPixelTable = copy(treedFirePixelTableSinceLastDisp),
-                                        disturbedPixelCohortData = copy(burnedPixelCohortData),
-                                        colsForPixelGroups = colsForPixelGroups,
-                                        doAssertion = doAssertion)
+      tempObjs <- genPGsPostDisturbance(
+        cohortData = copy(cohortData),
+        pixelGroupMap = sim$pixelGroupMap,
+        disturbedPixelTable = copy(treedFirePixelTableSinceLastDisp),
+        disturbedPixelCohortData = copy(burnedPixelCohortData),
+        colsForPixelGroups = colsForPixelGroups,
+        doAssertion = doAssertion
+      )
 
       outs <- updateCohortData(
         newPixelCohortData = copy(postFirePixelCohortData[, -"pixelGroup", with = FALSE]),
@@ -602,13 +656,15 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
         successionTimestep = successionTimestep
       )
 
-      assertPostPartialDist(cohortDataOrig = tempObjs$cohortData,
-                            pixelGroupMapOrig = tempObjs$pixelGroupMap,
-                            cohortDataNew = outs$cohortData,
-                            pixelGroupMapNew = outs$pixelGroupMap,
-                            postDistPixelCohortData = postFirePixelCohortData,
-                            distrbdPixelCohortData = burnedPixelCohortData,
-                            doAssertion = doAssertion)
+      assertPostPartialDist(
+        cohortDataOrig = tempObjs$cohortData,
+        pixelGroupMapOrig = tempObjs$pixelGroupMap,
+        cohortDataNew = outs$cohortData,
+        pixelGroupMapNew = outs$pixelGroupMap,
+        postDistPixelCohortData = postFirePixelCohortData,
+        distrbdPixelCohortData = burnedPixelCohortData,
+        doAssertion = doAssertion
+      )
 
       cohortData <- outs$cohortData
       pixelGroupMap <- outs$pixelGroupMap
@@ -622,15 +678,20 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
   ## update past pixelGroup number to match current ones.
   treedFirePixelTableSinceLastDispOrig[, pixelGroup := as.integer(as.vector(pixelGroupMap[]))[pixelIndex]]
   # append previous year's
-  treedFirePixelTableSinceLastDisp <- rbindlist(list(treedFirePixelTableSinceLastDispOrig,
-                                                     treedFirePixelTableSinceLastDisp))
+  treedFirePixelTableSinceLastDisp <- rbindlist(list(
+    treedFirePixelTableSinceLastDispOrig,
+    treedFirePixelTableSinceLastDisp
+  ))
 
-  outList <- list(cohortData = cohortData, pixelGroupMap = pixelGroupMap,
-                  lastFireYear = lastFireYear, treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
-                  serotinyResproutSuccessPixels = serotinyResproutSuccessPixels,
-                  severityBMap = severityBMap, severityData = severityData)
-  if (!is.null(postFireRegenSummary))
+  outList <- list(
+    cohortData = cohortData, pixelGroupMap = pixelGroupMap,
+    lastFireYear = lastFireYear, treedFirePixelTableSinceLastDisp = treedFirePixelTableSinceLastDisp,
+    serotinyResproutSuccessPixels = serotinyResproutSuccessPixels,
+    severityBMap = severityBMap, severityData = severityData
+  )
+  if (!is.null(postFireRegenSummary)) {
     outList <- c(outList, postFireRegenSummary = postFireRegenSummary)
+  }
 
   return(outList)
 }
@@ -665,9 +726,6 @@ FireDisturbancePM <- function(cohortData = copy(sim$cohortData), cohortDefinitio
 #'  the `burnTime` year.
 #' @param wetlands binary SpatRaster with current wetland pixels.
 #'
-#' @importFrom terra ncell as.int
-#' @importFrom data.table copy data.table rbindlist
-#'
 #' @references Scheller, R.M. & Domingo, J.B. (2021). LANDIS-II Biomass Harvest v4.4 Extension – User Guide
 #'
 #' @export
@@ -676,8 +734,8 @@ PeatlandThermokarst <- function(thawedPixIDs = copy(sim$thawedPixIDs),
                                 treedThawedPixelTableSinceLastDisp = copy(sim$treedThawedPixelTableSinceLastDisp),
                                 wetlands = sim$wetlands, cohortData = copy(sim$cohortData),
                                 pixelGroupMap = sim$pixelGroupMap, rasterToMatch = sim$rasterToMatch,
-                                species = copy(sim$species),  speciesEcoregion = copy(sim$speciesEcoregion),
-                                cohortDefinitionCols = c("pixelGroup", "speciesCode", "age"),
+                                species = copy(sim$species), speciesEcoregion = copy(sim$speciesEcoregion),
+                                cohortDefinitionCols = LandR::cohortDefinitionCols(),
                                 initialB = 10L, inactivePixelIndex = sim$inactivePixelIndex, currentTime = NULL,
                                 successionTimestep = 10L) {
   ## check
@@ -716,10 +774,12 @@ PeatlandThermokarst <- function(thawedPixIDs = copy(sim$thawedPixIDs),
       newWetlands
     }
 
-    treedThawedPixelTableSinceLastDisp <- suppressWarnings({   ## treedThawedLoci may have length
-      data.table(pixelIndex = as.integer(treedThawedLoci),
-                 pixelGroup = as.integer(as.vector(pixelGroupMap[])[treedThawedLoci]),
-                 thawTime = currentTime)
+    treedThawedPixelTableSinceLastDisp <- suppressWarnings({ ## treedThawedLoci may have length
+      data.table(
+        pixelIndex = as.integer(treedThawedLoci),
+        pixelGroup = as.integer(as.vector(pixelGroupMap[])[treedThawedLoci]),
+        thawTime = currentTime
+      )
     })
 
     ## make table spp/ecoregionGroup/age in thawed pixels
@@ -728,8 +788,10 @@ PeatlandThermokarst <- function(thawedPixIDs = copy(sim$thawedPixIDs),
     ## select the pixels that have burned survivors and assess them
     thawedPixelTable <- treedThawedPixelTableSinceLastDisp[pixelGroup %in% unique(thawedPixelCohortData$pixelGroup)]
     ## expand table to pixels
-    thawedPixelCohortData <- thawedPixelTable[thawedPixelCohortData, allow.cartesian = TRUE,
-                                              nomatch = 0, on = "pixelGroup"]
+    thawedPixelCohortData <- thawedPixelTable[thawedPixelCohortData,
+      allow.cartesian = TRUE,
+      nomatch = 0, on = "pixelGroup"
+    ]
 
     ## add thermokarst tolerance
     thawedPixelCohortData <- species[, .(speciesCode, thermokarsttol)][thawedPixelCohortData, on = .(speciesCode)]
@@ -742,47 +804,59 @@ PeatlandThermokarst <- function(thawedPixIDs = copy(sim$thawedPixIDs),
     postThawPixelCohortData[, type := "survivor"]
 
     ## redo PGs in all burnt pixels
-    tempObjs <- genPGsPostDisturbance(cohortData = copy(cohortData),
-                                      pixelGroupMap = pixelGroupMap,
-                                      disturbedPixelTable = copy(treedThawedPixelTableSinceLastDisp),
-                                      disturbedPixelCohortData = thawedPixelCohortData,
-                                      doAssertion = getOption("LandR.assertions", TRUE))
+    tempObjs <- genPGsPostDisturbance(
+      cohortData = copy(cohortData),
+      pixelGroupMap = pixelGroupMap,
+      disturbedPixelTable = copy(treedThawedPixelTableSinceLastDisp),
+      disturbedPixelCohortData = thawedPixelCohortData,
+      doAssertion = getOption("LandR.assertions", TRUE)
+    )
 
-    outs <- updateCohortData(newPixelCohortData = copy(postThawPixelCohortData[, -"pixelGroup", with = FALSE]),
-                             cohortData = copy(tempObjs$cohortData),
-                             pixelGroupMap = tempObjs$pixelGroupMap,
-                             currentTime = round(currentTime),
-                             speciesEcoregion = copy(speciesEcoregion),
-                             cohortDefinitionCols = cohortDefinitionCols,
-                             treedFirePixelTableSinceLastDisp = copy(treedThawedPixelTableSinceLastDisp),
-                             initialB = initialB,
-                             successionTimestep = successionTimestep)
+    outs <- updateCohortData(
+      newPixelCohortData = copy(postThawPixelCohortData[, -"pixelGroup", with = FALSE]),
+      cohortData = copy(tempObjs$cohortData),
+      pixelGroupMap = tempObjs$pixelGroupMap,
+      currentTime = round(currentTime),
+      speciesEcoregion = copy(speciesEcoregion),
+      cohortDefinitionCols = LandR::cohortDefinitionCols(),
+      treedFirePixelTableSinceLastDisp = copy(treedThawedPixelTableSinceLastDisp),
+      initialB = initialB,
+      successionTimestep = successionTimestep
+    )
 
     ## can use the same assertion.
-    assertPostPartialDist(cohortDataOrig = copy(tempObjs$cohortData),
-                          pixelGroupMapOrig = tempObjs$pixelGroupMap,
-                          cohortDataNew = copy(outs$cohortData),
-                          pixelGroupMapNew = outs$pixelGroupMap,
-                          postDistPixelCohortData = copy(postThawPixelCohortData),
-                          distrbdPixelCohortData = copy(thawedPixelCohortData),
-                          doAssertion = getOption("LandR.assertions", TRUE))
+    assertPostPartialDist(
+      cohortDataOrig = copy(tempObjs$cohortData),
+      pixelGroupMapOrig = tempObjs$pixelGroupMap,
+      cohortDataNew = copy(outs$cohortData),
+      pixelGroupMapNew = outs$pixelGroupMap,
+      postDistPixelCohortData = copy(postThawPixelCohortData),
+      distrbdPixelCohortData = copy(thawedPixelCohortData),
+      doAssertion = getOption("LandR.assertions", TRUE)
+    )
 
-    cohortData <- outs$cohortData[, .SD, .SDcols = names(cohortData)]  ## discard unnecessary columns
+    cohortData <- outs$cohortData[, .SD, .SDcols = names(cohortData)] ## discard unnecessary columns
     pixelGroupMap <- outs$pixelGroupMap
     pixelGroupMap <- as.int(pixelGroupMap)
 
     ## update past PGs to match current ones
     treedThawedPixelTableSinceLastDispOrig[, pixelGroup := as.integer(as.vector(pixelGroupMap[]))[pixelIndex]]
     # append previous year's
-    treedThawedPixelTableSinceLastDisp <- rbindlist(list(treedThawedPixelTableSinceLastDispOrig,
-                                                         treedThawedPixelTableSinceLastDisp))
+    treedThawedPixelTableSinceLastDisp <- rbindlist(list(
+      treedThawedPixelTableSinceLastDispOrig,
+      treedThawedPixelTableSinceLastDisp
+    ))
   } else {
-    message(cyan("'thawedPixIDs' is NULL. Assuming no pixels have thawed",
-                 "and no thermokarst mortality"))
+    message(cli::col_cyan(
+      "'thawedPixIDs' is NULL. Assuming no pixels have thawed",
+      "and no thermokarst mortality"
+    ))
   }
 
-  outList <- list(cohortData = cohortData, pixelGroupMap = pixelGroupMap,
-                  treedThawedPixelTableSinceLastDisp = treedThawedPixelTableSinceLastDisp)
+  outList <- list(
+    cohortData = cohortData, pixelGroupMap = pixelGroupMap,
+    treedThawedPixelTableSinceLastDisp = treedThawedPixelTableSinceLastDisp
+  )
   return(outList)
 }
 
@@ -823,7 +897,7 @@ PeatlandThermokarst <- function(thawedPixIDs = copy(sim$thawedPixIDs),
 #' @export
 genPGsPostDisturbance <- function(cohortData, pixelGroupMap,
                                   disturbedPixelTable, disturbedPixelCohortData,
-                                  colsForPixelGroups = LandR::columnsForPixelGroups,
+                                  colsForPixelGroups = LandR::columnsForPixelGroups(),
                                   doAssertion = getOption("LandR.assertions", TRUE)) {
   ## check - are there duplicated cohorts, dead, surviving or regenerating in a given pixel?
   cols <- c("pixelIndex", "speciesCode", "age", "B")
@@ -850,8 +924,8 @@ genPGsPostDisturbance <- function(cohortData, pixelGroupMap,
 
   ## remove dead cohorts and re-do pixelGroups
   newPCohortData <- newPCohortData[B > 0]
-  cd <- newPCohortData[, c("pixelIndex", columnsForPixelGroups), with = FALSE]
-  newPCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = columnsForPixelGroups)]
+  cd <- newPCohortData[, c("pixelIndex", columnsForPixelGroups()), with = FALSE]
+  newPCohortData[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = LandR::columnsForPixelGroups())]
   pixelGroupMap[newPCohortData$pixelIndex] <- newPCohortData$pixelGroup
 
   ## recalculate sumB
@@ -877,4 +951,3 @@ genPGsPostDisturbance <- function(cohortData, pixelGroupMap,
   }
   return(list(cohortData = tempCohortData, pixelGroupMap = pixelGroupMap))
 }
-

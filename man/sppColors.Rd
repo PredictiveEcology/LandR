@@ -2,9 +2,10 @@
 % Please edit documentation in R/plotting.R
 \name{sppColors}
 \alias{sppColors}
+\alias{sppColours}
 \title{Create species colour vector from a \code{sppEquiv} table}
 \usage{
-sppColors(sppEquiv, sppEquivCol, newVals = NULL, palette)
+sppColors(sppEquiv, sppEquivCol, newVals = NULL, palette = "Accent")
 }
 \arguments{
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.

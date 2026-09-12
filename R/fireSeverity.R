@@ -41,7 +41,7 @@ calcSeverityB <- function(cohortData, burnedPixelCohortData) {
   ## calculate severity in terms of absolute biomass lost
   severityData[, severityB := prefireB - postfireB]
   ## calculate severity in terms of percent biomass lost
-  severityData[, severityPropB := severityB/prefireB]
+  severityData[, severityPropB := severityB / prefireB]
 
   ## drop prefireB and postfireB columns
   return(severityData[, .(pixelGroup, pixelIndex, severityB, severityPropB)])

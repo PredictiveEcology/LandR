@@ -2,20 +2,24 @@
 #'
 #' @keywords internal
 #' @rdname dot-speciesTableColNames
-.speciesTableRawColNames <- c("LandisCode", "Area", "Longevity", "Maturity", "Shade", "Fire",
-                              "SeedEffDist", "SeedMaxDist", "VegProb", "MinAgeVeg", "MaxAgeVeg",
-                              "PostFireRegen", "LeafLongevity", "WoodDecayRate", "MortalityCurve",
-                              "GrowthCurve", "LeafLignin", "HardSoft")
+.speciesTableRawColNames <- c(
+  "LandisCode", "Area", "Longevity", "Maturity", "Shade", "Fire",
+  "SeedEffDist", "SeedMaxDist", "VegProb", "MinAgeVeg", "MaxAgeVeg",
+  "PostFireRegen", "LeafLongevity", "WoodDecayRate", "MortalityCurve",
+  "GrowthCurve", "LeafLignin", "HardSoft"
+)
 
 #' @keywords internal
 #' @rdname dot-speciesTableColNames
-.speciesTableColNames <- c("species", "Area", "longevity", "sexualmature", "shadetolerance",
-                           "firetolerance", "seeddistance_eff", "seeddistance_max", "resproutprob",
-                           "resproutage_min", "resproutage_max", "postfireregen", "leaflongevity",
-                           "wooddecayrate", "mortalityshape", "growthcurve", "leafLignin",
-                           "hardsoft")
+.speciesTableColNames <- c(
+  "species", "Area", "longevity", "sexualmature", "shadetolerance",
+  "firetolerance", "seeddistance_eff", "seeddistance_max", "resproutprob",
+  "resproutage_min", "resproutage_max", "postfireregen", "leaflongevity",
+  "wooddecayrate", "mortalityshape", "growthcurve", "leafLignin",
+  "hardsoft"
+)
 
-
+## NOTE: depends on species table col names above
 utils::globalVariables(c(
   ":=", ".SD", "col1", "species1", "species2",
   .speciesTableRawColNames, .speciesTableColNames
@@ -24,9 +28,11 @@ utils::globalVariables(c(
 #' Default LANDIS-II project repo url
 #'
 #' @keywords internal
-landisIIrepo <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/",
-                       "Extensions-Succession/master/biomass-succession-archive/",
-                       "trunk/tests/v6.0-2.0/")
+landisIIrepo <- paste0(
+  "https://raw.githubusercontent.com/LANDIS-II-Foundation/",
+  "Extensions-Succession/master/biomass-succession-archive/",
+  "trunk/tests/v6.0-2.0/"
+)
 
 #' Download and prepare a species traits table for use with `Biomass_core` module
 #'
@@ -35,7 +41,7 @@ landisIIrepo <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/"
 #' @note This one is tailored to Canadian forests
 #'
 #' @param url If NULL (the default), uses one from D. Cyr's LANDIS-II files:
-#' <https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv>).
+#' <https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/blob/master/speciesTraits.csv>).
 #'
 #' @param dPath The destination path.
 #'
@@ -49,37 +55,42 @@ landisIIrepo <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/"
 #' @seealso [assertSpeciesTableRaw()]
 getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
   if (is.null(url)) {
-    url <- paste0("https://raw.githubusercontent.com/",
-                  "dcyr/LANDIS-II_IA_generalUseFiles/",
-                  "master/speciesTraits.csv")
+    url <- paste0(
+      "https://raw.githubusercontent.com/",
+      "dcyr/LANDIS-II_IA_generalUseFiles/",
+      "master/speciesTraits.csv"
+    )
   }
 
   speciesTable <- Cache(prepInputs, "speciesTraits.csv",
-                        destinationPath = asPath(dPath),
-                        url = url,
-                        fun = "data.table::fread",
-                        header = TRUE, stringsAsFactors = FALSE,
-                        userTags = c(cacheTags, "speciesTable"))
+    destinationPath = asPath(dPath),
+    url = url,
+    fun = "data.table::fread",
+    header = TRUE, stringsAsFactors = FALSE,
+    userTags = c(cacheTags, "speciesTable")
+  )
 
   ## use integers (instead of numerics) where possible
-  speciesTable[, `:=`(LandisCode = as.character(LandisCode),
-                      Area = as.factor(Area),
-                      Longevity = as.integer(Longevity),
-                      Maturity = as.integer(Maturity),
-                      Shade = as.numeric(Shade),
-                      Fire = as.integer(Fire),
-                      SeedEffDist = as.integer(SeedEffDist),
-                      SeedMaxDist = as.integer(SeedMaxDist),
-                      VegProb = as.numeric(VegProb),
-                      MinAgeVeg = as.integer(MinAgeVeg),
-                      MaxAgeVeg = as.integer(MaxAgeVeg),
-                      PostFireRegen = as.factor(PostFireRegen),
-                      LeafLongevity = as.integer(LeafLongevity),
-                      WoodDecayRate = as.numeric(WoodDecayRate),
-                      MortalityCurve = as.numeric(MortalityCurve),
-                      GrowthCurve = as.numeric(GrowthCurve),
-                      LeafLignin = as.numeric(LeafLignin),
-                      HardSoft = as.character(HardSoft))]
+  speciesTable[, `:=`(
+    LandisCode = as.character(LandisCode),
+    Area = as.factor(Area),
+    Longevity = as.integer(Longevity),
+    Maturity = as.integer(Maturity),
+    Shade = as.numeric(Shade),
+    Fire = as.integer(Fire),
+    SeedEffDist = as.integer(SeedEffDist),
+    SeedMaxDist = as.integer(SeedMaxDist),
+    VegProb = as.numeric(VegProb),
+    MinAgeVeg = as.integer(MinAgeVeg),
+    MaxAgeVeg = as.integer(MaxAgeVeg),
+    PostFireRegen = as.factor(PostFireRegen),
+    LeafLongevity = as.integer(LeafLongevity),
+    WoodDecayRate = as.numeric(WoodDecayRate),
+    MortalityCurve = as.numeric(MortalityCurve),
+    GrowthCurve = as.numeric(GrowthCurve),
+    LeafLignin = as.numeric(LeafLignin),
+    HardSoft = as.character(HardSoft)
+  )]
 
   return(speciesTable)
 }
@@ -120,40 +131,73 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
 
+  LandisTraitColName <- grep("LANDIS.*trait", colnames(sppEquiv), value = TRUE)
+
   # some species don't have trait values in every "area", however, those species do exist, as rare species.
   #  Now this selection is 2 stage -- first, the species, then the areas, but keep species in Areas not
   #  in areas, e.g., Fraxinus americana is rare in prairies, but only has traits for Acadian
-  speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv, "LANDIS_traits", multi = TRUE)]
+  speciesTable <- speciesTable[species %in% equivalentName(sppNameVector, sppEquiv, LandisTraitColName, multi = TRUE)]
   # Areas:
-  keepers <- speciesTable[, .(keep = if (any(Area %in% areas)) { .I[Area %in% areas] } else { .I[1]}), by = species]
+  keepers <- speciesTable[, .(keep = if (any(Area %in% areas)) {
+    .I[Area %in% areas]
+  } else {
+    .I[1]
+  }), by = species]
   speciesTable <- speciesTable[keepers$keep]
-  speciesTable[, species := equivalentName(speciesTable$species, sppEquiv, sppEquivCol)]
+  # Keep the LANDIS.traits column
+  set(speciesTable, NULL, LandisTraitColName, speciesTable[["species"]])
+  # many of the Areas are not unique ... e.g., BETU.PAP has the same traits in all western areas
+  speciesTable <- unique(speciesTable, by = setdiff(colnames(speciesTable), "Area"))
+
+  # This next line previously would eliminate examples like Pice_gla_eng hybrid; need the join approach to keep this
+  # stt <- copy(speciesTable)
+  speciesTable <- sppEquiv[speciesTable, on = LandisTraitColName]
+  # setorderv(speciesTable, "species", order = 1L)
+  # equivalentNameColumn(speciesTable[[LandisTraitColName]], sppEquiv, multi = TRUE)
+  # speciesTable <- speciesTable[sppEquiv, on = LandisTraitColName]
+  # speciesTable[, species := equivalentName(speciesTable$species, sppEquiv, sppEquivCol, multi = TRUE)]
+  set(speciesTable, NULL, setdiff(colnames(sppEquiv), c(LandisTraitColName, sppEquivCol)), NULL)
+  set(speciesTable, NULL, "species", speciesTable[[sppEquivCol]])
+  setcolorder(speciesTable, neworder = c(LandisTraitColName, sppEquivCol), after = tail(colnames(speciesTable), 1))
+
+  # The next block was wrong because it would remove species that had 2 rows in sppEquivCol, but one row in "species" col
+  #    We want all records, even if they map to 1 column in LandisTraitColName and "species"
+  #    Example, Pice_eng_gla is currently using Pice_eng traits, but this would remove that...
+  # suppressWarnings({
+  #   speciesTable <- speciesTable[, lapply(.SD, function(x) {
+  #     if (is.numeric(x)) min(x, na.rm = TRUE) else x[1]
+  #   }), by = "species"]
+  # })
 
   suppressWarnings({
     speciesTable <- speciesTable[, lapply(.SD, function(x) {
       if (is.numeric(x)) min(x, na.rm = TRUE) else x[1]
-    }), by = "species"]
+    }), by = sppEquivCol]
   })
 
-  if (any(!speciesTable$Area %in% areas))  {
+  if (any(!speciesTable$Area %in% areas)) {
     kept <- speciesTable[!Area %in% areas]
-    message(paste(kept$species, collapse = ", "), " was/were kept, even though there are no trait values in ",
-            "the parameter `areas`, namely: ", paste(areas, collapse = ", "),
-            ". Please confirm this is a suitable set of traits")
+    message(
+      paste(kept$species, collapse = ", "), " was/were kept, even though there are no trait values in ",
+      "the parameter `areas`, namely: ", paste(areas, collapse = ", "),
+      ". Please confirm this is a suitable set of traits"
+    )
     print(kept)
   }
 
   ## use integers (instead of numerics) where possible; these are asserted in Biomass_core
-  speciesTable[, `:=`(Area = as.factor(Area),
-                      growthcurve = as.numeric(growthcurve),
-                      shadetolerance = as.numeric(shadetolerance),
-                      hardsoft = as.factor(hardsoft),
-                      seeddistance_eff = asInteger(seeddistance_eff),
-                      seeddistance_max = asInteger(seeddistance_max),
-                      resproutage_min = asInteger(resproutage_min),
-                      resproutage_max = asInteger(resproutage_max),
-                      mortalityshape = asInteger(mortalityshape),
-                      postfireregen = as.factor(postfireregen))]
+  speciesTable[, `:=`(
+    Area = as.factor(Area),
+    growthcurve = as.numeric(growthcurve),
+    shadetolerance = as.numeric(shadetolerance),
+    hardsoft = as.factor(hardsoft),
+    seeddistance_eff = asInteger(seeddistance_eff),
+    seeddistance_max = asInteger(seeddistance_max),
+    resproutage_min = asInteger(resproutage_min),
+    resproutage_max = asInteger(resproutage_max),
+    mortalityshape = asInteger(mortalityshape),
+    postfireregen = as.factor(postfireregen)
+  )]
 
   return(speciesTable[])
 }
@@ -162,18 +206,36 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #'
 #' Changes longevity and shade tolerance values in the species table.
 #' Longevity values are changed to follow Burton & Cumming (1995) for the following species:
-#' *Abies balsamea*, *Abies lasiocarpa*, *Betula papyrifera*, *Larix laricina*,
-#' *Larix occidentalis*, *Picea engelmannii*, *Picea glauca*, *Picea mariana*,
-#' *Pinus banksiana*, *Pinus contorta*, *Pinus resinosa*, *Pinus strobus*,
-#' *Populus balsamifera v. balsamifera*, *Populus tremuloides*, *Pseudotsuga menziesii var. glauca*,
-#' *Pseudotsuga menziesii*, *Thuja plicata*, *Tsuga heterophylla*,
-#' *Tsuga mertensiana x heterophylla*, and only for the  Boreal Shield West (BSW), Boreal Plains (BP)
-#'  and Montane Cordillera (MC) `speciesTable$Area`s.
+#' - *Abies balsamea*;
+#' - *Abies lasiocarpa*;
+#' - *Betula papyrifera*;
+#' - *Larix laricina*;
+#' - *Larix occidentalis*;
+#' - *Picea engelmannii*;
+#' - *Picea glauca*;
+#' - *Picea mariana*;
+#' - *Pinus banksiana*;
+#' - *Pinus contorta*;
+#' - *Pinus resinosa*;
+#' - *Pinus strobus*;
+#' - *Populus balsamifera v. balsamifera*;
+#' - *Populus tremuloides*;
+#' - *Pseudotsuga menziesii var. glauca*;
+#' - *Pseudotsuga menziesii*;
+#' - *Thuja plicata*;
+#' - *Tsuga heterophylla*;
+#' - *Tsuga mertensiana x heterophylla*;
+#'
+#' and only for the following `speciesTable$Area`s:
+#' - Boreal Shield West (BSW);
+#' - Boreal Plains (BP);
+#' - Montane Cordillera (MC).
+#'
 #' Note that BSW and BP areas correspond more closely to the region considered in Table 2 of
 #' Burton & Cumming (1995), while MC will correspond to both tables.
 #'
 #' Of the above species, shade tolerance values are changed for *Abies spp*, *Picea spp*,
-#' and *Tsuga spp.* to reflect western boreal shade tolerances better.
+#' and *Tsuga spp* to better reflect the western boreal.
 #'
 #' When different longevity/shade tolerance trait values exist for a given species, the minimum
 #' value across `Area`'s (BSW, BP, MC) is kept.
@@ -181,7 +243,7 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #' ATTENTION: if none of species in `species` are from BSW, BP or MC area this function will not
 #' change any values.
 #'
-#' All other species/Area trait values follow Dominic Cyr and Yan Boulanger's trait values available at:
+#' All other species/Area trait values follow Dominic Cyr and Yan Boulanger's trait values
 #' (<https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv>).
 #'
 #'
@@ -197,7 +259,7 @@ prepSpeciesTable <- function(speciesTable, speciesLayers = NULL,
 #'
 #' @export
 #' @rdname speciesTableUpdate
-speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
+speciesTableUpdate <- function(species, speciesTable, sppEquiv = NULL, sppEquivCol = NULL) {
   ## if "Area"is a column in the (final) traits table, then check and warn the user for area
   ## mismatches
   if (!"Area" %in% names(species)) {
@@ -205,57 +267,70 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
 
     test <- !any(unique(species$Area) %in% c("BSW", "BP", "MC"))
     if (test) {
-      message(red("Areas in 'species$Area' do not match any of 'BSW', 'BP' or 'MC',",
-                  "\nno changes made to 'sim$species'."))
+      message(cli::col_red(
+        "Areas in 'species$Area' do not match any of 'BSW', 'BP' or 'MC',",
+        "\nno changes made to 'sim$species'."
+      ))
       return(species)
     }
   }
 
-  if (is.null(sppEquiv))
-    sppEquiv <- data.table(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
+  if (is.null(sppEquiv)) {
+    sppEquiv <- data.table(
+      utils::data("sppEquivalencies_CA", package = "LandR", envir = environment())
+    )
+  }
 
-  if (is.null(sppEquivCol))
+  if (is.null(sppEquivCol)) {
     stop("Please provide sppEquivCol")
+  }
 
   names(speciesTable) <- .speciesTableColNames
 
   ## make temporary table that will have new parameters for Boreal spp.
   ## longevity values from Burton & Cumming (1995)
-  speciesTableShort <- speciesTable[Area %in% c("BSW", "BP", "MC"), .(species, longevity, shadetolerance)]
-  speciesTableShort[species == "ABIE.BAL", longevity := 200] #default 150
-  speciesTableShort[species == "ABIE.LAS", longevity := 240] #default 250
-  speciesTableShort[species == "BETU.PAP", longevity := 140] #default 150
-  speciesTableShort[species == "LARI.LAR", longevity := 350] #default 150
-  speciesTableShort[species == "LARI.OCC", longevity := 450] #default 900!
-  speciesTableShort[species == "PICE.ENG", longevity := 460] #default 450
-  speciesTableShort[species == "PICE.GLA", longevity := 400] #default 250
-  speciesTableShort[species == "PICE.MAR", longevity := 250] #default 200
-  speciesTableShort[species == "PINU.BAN", longevity := 150]  #default 150 - no change
-  speciesTableShort[species == "PINU.CON.LAT", longevity := 335] #default 300
-  speciesTableShort[species == "PINU.PON", longevity := 575] #default 500
-  speciesTableShort[species == "POPU.BAL", longevity := 200] #default 130
-  speciesTableShort[species == "POPU.TRE", longevity := 200] #default 150
+  speciesTableShort <- speciesTable[
+    Area %in% c("BSW", "BP", "MC"),
+    .(species, longevity, shadetolerance)
+  ]
+  speciesTableShort[species == "ABIE.BAL", longevity := 200] ## default 150
+  speciesTableShort[species == "ABIE.LAS", longevity := 240] ## default 250
+  speciesTableShort[species == "BETU.PAP", longevity := 140] ## default 150
+  speciesTableShort[species == "LARI.LAR", longevity := 350] ## default 150
+  speciesTableShort[species == "LARI.OCC", longevity := 450] ## default 900!
+  speciesTableShort[species == "PICE.ENG", longevity := 460] ## default 450
+  speciesTableShort[species == "PICE.GLA", longevity := 400] ## default 250
+  speciesTableShort[species == "PICE.MAR", longevity := 250] ## default 200
+  speciesTableShort[species == "PINU.BAN", longevity := 150] ## default 150 - no change
+  speciesTableShort[species == "PINU.CON.LAT", longevity := 335] ## default 300
+  speciesTableShort[species == "PINU.PON", longevity := 575] ## default 500
+  speciesTableShort[species == "POPU.BAL", longevity := 200] ## default 130
+  speciesTableShort[species == "POPU.TRE", longevity := 200] ## default 150
   speciesTableShort[species == "PSEU.MEN", longevity := 525] ## default 600, only in MC area, corresponding to var. glauca
-  speciesTableShort[species == "THUJ.PLI", longevity := 1500] ##default 700, 1500 may be incorrect for MC
-  speciesTableShort[species == "TSUG.HET", longevity := 500] #default 475
-  speciesTableShort[species == "TSUG.MER", longevity := 800] #default 700
+  speciesTableShort[species == "THUJ.PLI", longevity := 1500] ## default 700, 1500 may be incorrect for MC
+  speciesTableShort[species == "TSUG.HET", longevity := 500] ## default 475
+  speciesTableShort[species == "TSUG.MER", longevity := 800] ## default 700
 
-  speciesTableShort[species == "ABIE.BAL", shadetolerance := 3] #default 5
-  speciesTableShort[species == "ABIE.LAS", shadetolerance := 3] #default 4
-  speciesTableShort[species == "PICE.ENG", shadetolerance := 3] #default 4
-  speciesTableShort[species == "PICE.GLA", shadetolerance := 2] #default 3
-  speciesTableShort[species == "PICE.MAR", shadetolerance := 3] #default 4
-  speciesTableShort[species == "TSUG.HET", shadetolerance := 4] #default 5
-  speciesTableShort[species == "TSUG.MER", shadetolerance := 3] #default 4
+  speciesTableShort[species == "ABIE.BAL", shadetolerance := 3] ## default 5
+  speciesTableShort[species == "ABIE.LAS", shadetolerance := 3] ## default 4
+  speciesTableShort[species == "PICE.ENG", shadetolerance := 3] ## default 4
+  speciesTableShort[species == "PICE.GLA", shadetolerance := 2] ## default 3
+  speciesTableShort[species == "PICE.MAR", shadetolerance := 3] ## default 4
+  speciesTableShort[species == "TSUG.HET", shadetolerance := 4] ## default 5
+  speciesTableShort[species == "TSUG.MER", shadetolerance := 3] ## default 4
 
   ## subset, rename and "merge" species by using the minimum value
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
   sppNameVector <- species$species
   speciesTableShort <- speciesTableShort[species %in% equivalentName(sppNameVector, sppEquiv,
-                                                                     "LANDIS_traits", multi = TRUE)]
+    "LANDIS_traits",
+    multi = TRUE
+  )]
   speciesTableShort[, species := equivalentName(speciesTableShort$species, sppEquiv, sppEquivCol)]
-  speciesTableShort <- speciesTableShort[, .(longevity = min(longevity),
-                                             shadetolerance = min(shadetolerance)), by = "species"]
+  speciesTableShort <- speciesTableShort[, .(
+    longevity = min(longevity),
+    shadetolerance = min(shadetolerance)
+  ), by = "species"]
 
   ## join to deal with eventual non-matching species ordering
   ## subset species table to common species, then add missing species lines
@@ -296,7 +371,7 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
 #' @note This one is tailored to Canadian forests (?)
 #'
 #' @param url If NULL (the default), uses one from the LANDIS-II project:
-#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/biomass-succession_test.txt">).
+#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/blob/master/biomass-succession-archive/trunk/tests/v6.0-2.0/biomass-succession_test.txt">).
 #'
 #' @param dPath The destination path.
 #'
@@ -307,50 +382,58 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv, sppEquivCol) {
 #' @export
 #' @rdname prepInputsSpecies
 prepInputsSpecies <- function(url = NULL, dPath, cacheTags = NULL) {
-  if (is.null(url))
+  if (is.null(url)) {
     url <- paste0(landisIIrepo, "species.txt")
+  }
 
   mainInput <- prepInputsMainInput(url = NULL, dPath, cacheTags) ## uses default URL
 
-  maxcol <- 13 #max(count.fields(file.path(dPath, "species.txt"), sep = ""))
+  maxcol <- 13 # max(count.fields(file.path(dPath, "species.txt"), sep = ""))
   species <- Cache(prepInputs,
-                   url = url,
-                   targetFile = "species.txt",
-                   destinationPath = dPath,
-                   fun = "utils::read.table",
-                   fill = TRUE, row.names = NULL, #purge = 7,
-                   sep = "",
-                   header = FALSE,
-                   blank.lines.skip = TRUE,
-                   col.names = c(paste("col", 1:maxcol, sep = "")),
-                   stringsAsFactors = FALSE,
-                   overwrite = TRUE)
+    url = url,
+    targetFile = "species.txt",
+    destinationPath = dPath,
+    fun = "utils::read.table",
+    fill = TRUE, row.names = NULL, # purge = 7,
+    sep = "",
+    header = FALSE,
+    blank.lines.skip = TRUE,
+    col.names = c(paste("col", 1:maxcol, sep = "")),
+    stringsAsFactors = FALSE,
+    overwrite = TRUE
+  )
   species <- data.table(species[, 1:11])
   species <- species[col1 != "LandisData", ]
   species <- species[col1 != ">>", ]
-  colNames <- c("species", "longevity", "sexualmature", "shadetolerance",
-                "firetolerance", "seeddistance_eff", "seeddistance_max",
-                "resproutprob", "resproutage_min", "resproutage_max",
-                "postfireregen")
+  colNames <- c(
+    "species", "longevity", "sexualmature", "shadetolerance",
+    "firetolerance", "seeddistance_eff", "seeddistance_max",
+    "resproutprob", "resproutage_min", "resproutage_max",
+    "postfireregen"
+  )
   names(species) <- colNames
-  species[, ':='(seeddistance_eff = gsub(",", "", seeddistance_eff),
-                 seeddistance_max = gsub(",", "", seeddistance_max))]
+  species[, ":="(seeddistance_eff = gsub(",", "", seeddistance_eff),
+    seeddistance_max = gsub(",", "", seeddistance_max))]
   # change all columns to integer
-  species <- species[, lapply(.SD, as.integer), .SDcols = names(species)[-c(1, NCOL(species))],
-                     by = "species,postfireregen"]
+  species <- species[, lapply(.SD, as.integer),
+    .SDcols = names(species)[-c(1, NCOL(species))],
+    by = "species,postfireregen"
+  ]
   setcolorder(species, colNames)
 
   # get additional species traits
   speciesAddon <- mainInput
   startRow <- which(speciesAddon$col1 == "SpeciesParameters")
   speciesAddon <- speciesAddon[(startRow + 1):(startRow + nrow(species)), 1:6, with = FALSE]
-  names(speciesAddon) <- c("species", "leaflongevity", "wooddecayrate",
-                           "mortalityshape", "growthcurve", "leafLignin")
-  speciesAddon[, ':='(leaflongevity = as.numeric(leaflongevity),
-                      wooddecayrate = as.numeric(wooddecayrate),
-                      mortalityshape = as.numeric(mortalityshape),
-                      growthcurve = as.numeric(growthcurve),
-                      leafLignin = as.numeric(leafLignin))]
+  names(speciesAddon) <- c(
+    "species", "leaflongevity", "wooddecayrate",
+    "mortalityshape", "growthcurve", "leafLignin"
+  )
+  speciesAddon[, ":="(leaflongevity = as.numeric(leaflongevity),
+    wooddecayrate = as.numeric(wooddecayrate),
+    mortalityshape = as.numeric(mortalityshape),
+    growthcurve = as.numeric(growthcurve),
+    leafLignin = as.numeric(leafLignin))]
 
   species <- setkey(species, species)[setkey(speciesAddon, species), nomatch = 0]
 
@@ -358,11 +441,13 @@ prepInputsSpecies <- function(url = NULL, dPath, cacheTags = NULL) {
   ## rename species for compatibility across modules (Genu_spe)
   species$species1 <- as.character(substring(species$species, 1, 4))
   species$species2 <- as.character(substring(species$species, 5, 7))
-  species[, ':='(species = paste0(toupper(substring(species1, 1, 1)),
-                                  substring(species1, 2, 4), "_",
-                                  species2))]
+  species[, ":="(species = paste0(
+    toupper(substring(species1, 1, 1)),
+    substring(species1, 2, 4), "_",
+    species2
+  ))]
 
-  species[, ':='(species1 = NULL, species2 = NULL)]
+  species[, ":="(species1 = NULL, species2 = NULL)]
 
   return(species)
 }
@@ -370,27 +455,31 @@ prepInputsSpecies <- function(url = NULL, dPath, cacheTags = NULL) {
 #' @export
 #' @rdname prepInputsSpecies
 prepInputsMainInput <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
-  if (is.null(url))
-    url <- paste0("https://raw.githubusercontent.com/LANDIS-II-Foundation/",
-                  "Extensions-Succession/master/biomass-succession-archive/",
-                  "trunk/tests/v6.0-2.0/biomass-succession_test.txt")
+  if (is.null(url)) {
+    url <- paste0(
+      "https://raw.githubusercontent.com/LANDIS-II-Foundation/",
+      "Extensions-Succession/master/biomass-succession-archive/",
+      "trunk/tests/v6.0-2.0/biomass-succession_test.txt"
+    )
+  }
 
   maxcol <- 7L
   mainInput <- Cache(prepInputs,
-                     url = url,
-                     targetFile = "biomass-succession_test.txt",
-                     destinationPath = dPath,
-                     userTags = cacheTags,
-                     fun = "utils::read.table",
-                     fill = TRUE,  #purge = 7,
-                     sep = "",
-                     header = FALSE,
-                     col.names = c(paste("col", 1:maxcol, sep = "")),
-                     blank.lines.skip = TRUE,
-                     stringsAsFactors = FALSE)
+    url = url,
+    targetFile = "biomass-succession_test.txt",
+    destinationPath = dPath,
+    userTags = cacheTags,
+    fun = "utils::read.table",
+    fill = TRUE, # purge = 7,
+    sep = "",
+    header = FALSE,
+    col.names = c(paste("col", 1:maxcol, sep = "")),
+    blank.lines.skip = TRUE,
+    stringsAsFactors = FALSE
+  )
 
   mainInput <- data.table(mainInput)
-  mainInput <- mainInput[col1 != ">>",]
+  mainInput <- mainInput[col1 != ">>", ]
 
   return(mainInput)
 }
@@ -400,7 +489,7 @@ prepInputsMainInput <- function(url = NULL, dPath = tempdir(), cacheTags = NULL)
 #' Get the dummy ecoregion table from LANDIS-II examples.
 #'
 #' @param url If NULL (the default), uses one from the LANDIS-II project:
-#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/ecoregion.txt">).
+#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/blob/master/biomass-succession-archive/trunk/tests/v6.0-2.0/ecoregion.txt">).
 #'
 #' @param dPath The destination path.
 #'
@@ -411,27 +500,29 @@ prepInputsMainInput <- function(url = NULL, dPath = tempdir(), cacheTags = NULL)
 #' @export
 #' @rdname prepInputsEcoregion
 prepInputsEcoregion <- function(url = NULL, dPath, cacheTags = NULL) {
-  if (is.null(url))
+  if (is.null(url)) {
     url <- paste0(landisIIrepo, "ecoregions.txt")
+  }
 
-  maxcol <- 5 #max(count.fields(file.path(dPath, "ecoregions.txt"), sep = ""))
+  maxcol <- 5 # max(count.fields(file.path(dPath, "ecoregions.txt"), sep = ""))
   ecoregion <- Cache(prepInputs,
-                     url = url,
-                     targetFile = "ecoregions.txt",
-                     destinationPath = dPath,
-                     fun = "utils::read.table",
-                     fill = TRUE,
-                     sep = "",
-                     # purge = 7,
-                     header = FALSE,
-                     blank.lines.skip = TRUE,
-                     stringsAsFactors = FALSE,
-                     userTags = cacheTags)
+    url = url,
+    targetFile = "ecoregions.txt",
+    destinationPath = dPath,
+    fun = "utils::read.table",
+    fill = TRUE,
+    sep = "",
+    # purge = 7,
+    header = FALSE,
+    blank.lines.skip = TRUE,
+    stringsAsFactors = FALSE,
+    userTags = cacheTags
+  )
   maxcol <- max(count.fields(file.path(dPath, "ecoregions.txt"), sep = ""))
   colnames(ecoregion) <- c(paste("col", 1:maxcol, sep = ""))
   ecoregion <- data.table(ecoregion)
-  ecoregion <- ecoregion[col1 != "LandisData",]
-  ecoregion <- ecoregion[col1 != ">>",]
+  ecoregion <- ecoregion[col1 != "LandisData", ]
+  ecoregion <- ecoregion[col1 != ">>", ]
   names(ecoregion)[1:4] <- c("active", "mapcode", "ecoregion", "description")
   ecoregion$mapcode <- as.integer(ecoregion$mapcode)
 
@@ -443,7 +534,7 @@ prepInputsEcoregion <- function(url = NULL, dPath, cacheTags = NULL) {
 #' Get the dummy ecoregion table from LANDIS-II examples.
 #'
 #' @param url If NULL (the default), uses one from the LANDIS-II project:
-#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/biomass-succession-dynamic-inputs_test.txt">).
+#' <https://github.com/LANDIS-II-Foundation/Extensions-Succession/blob/master/biomass-succession-archive/trunk/tests/v6.0-2.0/biomass-succession-dynamic-inputs_test.txt">).
 #'
 #' @param dPath The destination path.
 #'
@@ -454,26 +545,29 @@ prepInputsEcoregion <- function(url = NULL, dPath, cacheTags = NULL) {
 #' @export
 #' @rdname prepInputsSpeciesEcoregion
 prepInputsSpeciesEcoregion <- function(url = NULL, dPath, cacheTags = NULL) {
-  if (is.null(url))
+  if (is.null(url)) {
     url <- paste0(landisIIrepo, "biomass-succession-dynamic-inputs_test.txt")
+  }
 
   speciesEcoregion <- Cache(prepInputs,
-                            url = url,
-                            fun = "utils::read.table",
-                            destinationPath = dPath,
-                            targetFile = "biomass-succession-dynamic-inputs_test.txt",
-                            fill = TRUE,
-                            sep = "",
-                            header = FALSE,
-                            blank.lines.skip = TRUE,
-                            stringsAsFactors = FALSE,
-                            userTags = cacheTags)
+    url = url,
+    fun = "utils::read.table",
+    destinationPath = dPath,
+    targetFile = "biomass-succession-dynamic-inputs_test.txt",
+    fill = TRUE,
+    sep = "",
+    header = FALSE,
+    blank.lines.skip = TRUE,
+    stringsAsFactors = FALSE,
+    userTags = cacheTags
+  )
   maxcol <- max(count.fields(file.path(dPath, "biomass-succession-dynamic-inputs_test.txt"),
-                             sep = ""))
+    sep = ""
+  ))
   colnames(speciesEcoregion) <- paste("col", 1:maxcol, sep = "")
   speciesEcoregion <- data.table(speciesEcoregion)
-  speciesEcoregion <- speciesEcoregion[col1 != "LandisData",]
-  speciesEcoregion <- speciesEcoregion[col1 != ">>",]
+  speciesEcoregion <- speciesEcoregion[col1 != "LandisData", ]
+  speciesEcoregion <- speciesEcoregion[col1 != ">>", ]
   keepColNames <- c("year", "ecoregion", "species", "establishprob", "maxANPP", "maxB")
   names(speciesEcoregion)[1:6] <- keepColNames
   speciesEcoregion <- speciesEcoregion[, keepColNames, with = FALSE]
@@ -484,10 +578,12 @@ prepInputsSpeciesEcoregion <- function(url = NULL, dPath, cacheTags = NULL) {
   ## rename species for compatibility across modules (Genu_spe)
   speciesEcoregion$species1 <- as.character(substring(speciesEcoregion$species, 1, 4))
   speciesEcoregion$species2 <- as.character(substring(speciesEcoregion$species, 5, 7))
-  speciesEcoregion[, ':='(species = paste0(toupper(substring(species1, 1, 1)),
-                                           substring(species1, 2, 4), "_", species2))]
+  speciesEcoregion[, ":="(species = paste0(
+    toupper(substring(species1, 1, 1)),
+    substring(species1, 2, 4), "_", species2
+  ))]
 
-  speciesEcoregion[, ':='(species1 = NULL, species2 = NULL)]
+  speciesEcoregion[, ":="(species1 = NULL, species2 = NULL)]
 
   return(speciesEcoregion)
 }

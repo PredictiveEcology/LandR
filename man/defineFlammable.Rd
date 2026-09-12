@@ -9,7 +9,8 @@ defineFlammable(
   nonFlammClasses = c(0L, 25L, 30L, 33L, 36L, 37L, 38L, 39L),
   mask = NULL,
   to = NULL,
-  filename2 = NULL
+  writeTo = NULL,
+  ...
 )
 }
 \arguments{
@@ -23,7 +24,9 @@ defineFlammable(
 \item{to}{Passed to \code{postProcessTo(..., to = to)} and to the \code{mask} arg here, if
 \code{mask} is not supplied.}
 
-\item{filename2}{See \code{\link[reproducible:postProcess]{reproducible::postProcess()}}. Default \code{NULL}.}
+\item{writeTo}{See \code{\link[reproducible:postProcess]{reproducible::postProcess()}}. Default \code{NULL}.}
+
+\item{...}{additional args (not used)}
 }
 \description{
 Define flammability map

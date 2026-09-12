@@ -4,24 +4,37 @@
 \alias{prepRawBiomassMap}
 \title{Create \code{rawBiomassMap}}
 \usage{
-prepRawBiomassMap(studyAreaName, cacheTags, ...)
+prepRawBiomassMap(
+  dataSource = "SCANFI",
+  dataYear = "2020",
+  dataVersion = "V2",
+  ...
+)
 }
 \arguments{
-\item{studyAreaName}{character string giving the study area name.}
-
-\item{cacheTags}{a character vector of strings to pass to \code{Cache(userTags)}}
-
-\item{...}{arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} and \code{\link[reproducible:Cache]{reproducible::Cache()}}. If the following arguments
-are not provided, the following values will be used:
+\item{dataSource}{Character. One of KNN, NTEMS, or SCANFI.
+Defaults to KNN for \code{dataYear} 2001.
+Also available:
 \itemize{
-\item{\code{url}: by default, the 2001 kNN stand biomass map is downloaded from
-the NRCan National Forest Inventory}
+\item KNN for \code{dataYear} 2011;
+\item NTEMS for \code{dataYear} 2015;
+\item SCANFI for \code{dataYear} 2000, 2010, or 2020.
+}}
+
+\item{dataYear}{Numeric. Year for which data is obtained. Can be 2001 or 2011 for KNN, 2015 for NTEMS,
+2000, 2010, or 2020 for SCANFI V1, or 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020 (default), 2025 possible for V2.}
+
+\item{dataVersion}{Character. SCANFI product version for data. Default is currently V2. V1 also available.}
+
+\item{...}{arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} and \code{\link[reproducible:Cache]{reproducible::Cache()}}.
+If the following arguments are not provided, the following values will be used:
+\itemize{
+\item{\code{url}: by default, the 2020 SCANFI stand biomass map is downloaded from
+a private google drive }
 \item{\code{useSAcrs} and \code{projectTo}: \code{FALSE} and \code{NA}}
 \item{\code{method}: \code{"bilinear"}}
 \item{\code{datatype}: \code{"INT2U"}}
-\item{\code{filename2}: \code{suffix("rawBiomassMap.tif", paste0("_", studyAreaName))}}
 \item{\code{overwrite}: \code{TRUE}}
-\item{\code{userTags}: \code{c(cacheTags, "rawBiomassMap")}}
 \item{\code{omitArgs}: \code{c("destinationPath", "targetFile", "userTags", "stable")}}
 }}
 }
@@ -29,7 +42,5 @@ the NRCan National Forest Inventory}
 a \code{rawBiomassMap} raster
 }
 \description{
-Create the \code{rawBiomassMap} raster containing biomass estimates for
-\code{pixelCohortData}.
-Wrapper on \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} that will rasterize fire polygons.
+Create the \code{rawBiomassMap} raster containing biomass estimates for \code{pixelCohortData}.
 }

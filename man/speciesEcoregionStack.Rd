@@ -23,10 +23,13 @@ aboveground net primary productivity and \code{SEP} the species establishment pr
 May contain columns \code{inflationFactor}  (used to adjust \code{maxB}) and \code{mANPPproportion}
 (used to calculate \code{maxANPP}).}
 
-\item{columns}{The columns to use in the \code{speciesEcoregion} data.table.
+\item{columns}{The columns to use in the \code{speciesEcoregion} table.
 Default is \code{c("establishprob", "maxB", "maxANPP")}}
 }
+\value{
+list of \code{RasterStack} or \code{SpatRaster} objects
+}
 \description{
-This will output a list of \code{RasterStack} objects. Each \code{RasterStack} show raster maps
-of one of the columns listed in \code{columns} and each \code{RasterLayer} will be one species.
+Each \code{RasterStack} show raster maps of one of the columns listed in \code{columns}
+and each \code{RasterLayer} will be one species.
 }

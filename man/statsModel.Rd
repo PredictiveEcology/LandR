@@ -8,15 +8,13 @@ statsModel(modelFn, uniqueEcoregionGroups, sumResponse, .specialData)
 }
 \arguments{
 \item{modelFn}{A quoted expression of type \code{package::model(Y ~ X, ...)}, omitting
-the \code{data} argument. E.g. \code{lme4::glmer(Y ~ X + (X|G), family = poisson)}}
+the \code{data} argument. E.g., \code{lme4::glmer(Y ~ X + (X|G), family = poisson)}.}
 
 \item{uniqueEcoregionGroups}{Unique values of \code{ecoregionGroups}.
-This is the basis for the statistics, and can be used to optimize caching,
-e.g. ignore \code{.specialData} in \code{.omitArgs}.}
+This is the basis for the statistics. It is NOT a safe cache key on its own: see the
+note above about study areas colliding.}
 
-\item{sumResponse}{a sum of all the response variable values
-Also to be used to optimize caching, e.g. ignore \code{.specialData}
-in \code{.omitArgs}.}
+\item{sumResponse}{a sum of all the response variable values.}
 
 \item{.specialData}{The custom dataset required for the model.}
 }
@@ -24,6 +22,12 @@ in \code{.omitArgs}.}
 This does a few things including R squared, gets the fitted values.
 It appears that running the models "as is" without this wrapper does not work with \code{Cache}.
 The return of the model in a list solves this problem.
-For Caching, the \code{.specialData} should be "omitted" via \code{omitArgs}, and
-\code{uniqueEcoregionGroups} should not be omitted.
+For Caching, do NOT omit \code{.specialData} via \code{omitArgs}. It was once recommended, on the
+reasoning that \code{uniqueEcoregionGroups} identifies the data well enough to stand in for
+it. It does not: those labels are generic sequential names (\code{"01_NA"}, \code{"02_NA"}, ...),
+so two study areas with the same number of ecoregion groups and the same \code{modelFn}
+produce the same cache key, and the second silently receives the first one's fitted
+model. That fails loudly only when the two species sets differ in model-matrix width;
+otherwise it imputes from a foreign model with no error at all. Digesting the data is
+cheap beside fitting the model.
 }

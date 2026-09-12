@@ -1,9 +1,38 @@
 utils::globalVariables(c(
-  ".", "..pgdAndScAndLeading", ":=", "B", "HQ", "leading", "LQ", "mixed", "N",
+  ".", "..pgdAndScAndLeading", ":=",
+  "B", "HQ", "leading", "LQ", "mixed", "N",
   "pixelGroup", "postfireB", "prefireB", "pure",
   "severityB", "speciesCode", "speciesGroupB", "speciesProportion", "SPP",
   "totalB", "totalcover", "Type", "vals", "weightedAge"
 ))
+
+.scanfi_v1_years <- seq(2000L, 2020L, 10L)
+.scanfi_v2_years <- seq(1985L, 2025L, 5L)
+
+#' Canada administrative boundaries
+#'
+#' @param src Character. One of "stats_can" or (if `geodata` package is installed) "geodata".
+#'
+#' @param dst_path Character specifying the path to download to.
+#'
+#' @export
+gadm_canada <- function(src = "stats_can", dst_path = tempdir()) {
+  if (src == "geodata") {
+    stopifnot(requireNamespace("geodata", quietly = TRUE))
+
+    can <- geodata::gadm(country = "CA", level = 1, path = dst_path, version = "4.1")
+  } else if (src == "stats_can") {
+    can <- reproducible::prepInputs(
+      url = "https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/boundary-limites/files-fichiers/lpr_000b21a_e.zip",
+      destinationPath = dst_path,
+      fun = "terra::vect"
+    )
+  } else {
+    stop("src must be one of 'stats_can' or 'geodata'.")
+  }
+
+  return(can)
+}
 
 #' Define flammability map
 #'
@@ -16,13 +45,24 @@ utils::globalVariables(c(
 #' @param to Passed to `postProcessTo(..., to = to)` and to the `mask` arg here, if
 #'   `mask` is not supplied.
 #'
-#' @param filename2 See [reproducible::postProcess()]. Default `NULL`.
+#' @param writeTo See [reproducible::postProcess()]. Default `NULL`.
+#'
+#' @param ... additional args (not used)
 #'
 #' @export
-#' @importFrom reproducible postProcessTo
-defineFlammable <- function(LandCoverClassifiedMap = NULL,
-                            nonFlammClasses = c(0L, 25L, 30L, 33L,  36L, 37L, 38L, 39L),
-                            mask = NULL, to = NULL, filename2 = NULL) {
+defineFlammable <- function(
+  LandCoverClassifiedMap = NULL,
+  nonFlammClasses = c(0L, 25L, 30L, 33L, 36L, 37L, 38L, 39L),
+  mask = NULL,
+  to = NULL,
+  writeTo = NULL,
+  ...
+) {
+  dots <- list(...)
+  if (is.null(writeTo) && !is.null(dots$filename2)) {
+    writeTo <- dots$filename2
+  }
+
   if (!inherits(LandCoverClassifiedMap, c("RasterLayer", "SpatRaster"))) {
     stop("Need a classified land cover map that is a RasterLayer or SpatRaster")
   }
@@ -32,8 +72,10 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
   }
 
   if (is.null(nonFlammClasses)) {
-    stop("Need nonFlammClasses, which are the classes that cannot burn in",
-         "the LandCoverClassifiedMap")
+    stop(
+      "Need nonFlammClasses, which are the classes that cannot burn in",
+      "the LandCoverClassifiedMap"
+    )
   }
 
   if (!is.integer(nonFlammClasses)) {
@@ -45,8 +87,9 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
     if (!same) {
       LandCoverClassifiedMap <- postProcessTo(LandCoverClassifiedMap, to)
     }
-    if (is.null(mask))
+    if (is.null(mask)) {
       mask <- to
+    }
   }
 
   if (!is.null(mask)) {
@@ -67,14 +110,16 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
     ratify(reclassed)
   }
 
-  if (!is.null(filename2))
-    rstFlammable <- writeRaster(rstFlammable, filename = filename2, overwrite = TRUE)
+  if (!is.null(writeTo)) {
+    rstFlammable <- writeRaster(rstFlammable, filename = writeTo, overwrite = TRUE)
+  }
 
   cols <- colorRampPalette(c("blue", "red"))(2)
-  if (is(rstFlammable, "SpatRaster"))
+  if (is(rstFlammable, "SpatRaster")) {
     coltab(rstFlammable, layer = 1) <- cols
-  else
+  } else {
     setColors(rstFlammable, n = 2) <- cols
+  }
 
   if (!is.null(mask)) {
     rstFlammable <- mask(rstFlammable, mask)
@@ -82,6 +127,8 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 
   rstFlammable <- asInt(rstFlammable)
   # rstFlammable[] <- as.integer(as.vector(rstFlammable[]))
+  set.names(rstFlammable, "flammable") ## drop whatever name baggage file carries
+
   rstFlammable
 }
 
@@ -100,14 +147,22 @@ defineFlammable <- function(LandCoverClassifiedMap = NULL,
 #' @param year Numeric, either 2010 or 2015. See note re: backwards compatibility for 2005.
 #' @param method passed to [terra::intersect] or [raster::intersect],
 #'   and [reproducible::prepInputs]
-#' @param filename2 passed to [reproducible::prepInputs]
+#' @param writeTo passed to [reproducible::prepInputs]
 #'
 #' @export
-prepInputsLCC <- function(year = 2010,
-                          destinationPath = asPath("."),
-                          method = c("ngb", "near"),
-                          filename2 = NULL, ...) {
+prepInputsLCC <- function(
+  year = 2010,
+  destinationPath = asPath("."),
+  method = c("ngb", "near"),
+  writeTo = NULL,
+  ...
+) {
   dots <- list(...)
+
+  if (is.null(writeTo) && !is.null(dots$filename2)) {
+    writeTo <- dots$filename2
+  }
+
   if (is.null(dots$url)) {
     if (identical(as.integer(year), 2005L)) {
       ## May 2021: LCC2005 data no longer being hosted by NRCAN
@@ -118,15 +173,19 @@ prepInputsLCC <- function(year = 2010,
       filename <- asPath("LCC2005_V1_4a.tif")
       archive <- asPath("LandCoverOfCanada2005_V1_4.zip")
     } else if (identical(as.integer(year), 2010L)) {
-      url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/",
-                    "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
-                    "CanadaLandcover2010.zip")
+      url <- paste0(
+        "https://ftp.maps.canada.ca/pub/nrcan_rncan/",
+        "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
+        "CanadaLandcover2010.zip"
+      )
       filename <- asPath("CAN_LC_2010_CAL.tif")
       archive <- asPath("CanadaLandcover2010.zip")
     } else if (identical(as.integer(year), 2015L)) {
-      url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/",
-                    "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
-                    "CanadaLandcover2015.zip")
+      url <- paste0(
+        "https://ftp.maps.canada.ca/pub/nrcan_rncan/",
+        "Land-cover_Couverture-du-sol/canada-landcover_canada-couverture-du-sol/",
+        "CanadaLandcover2015.zip"
+      )
       filename <- asPath("CAN_LC_2015_CAL.tif")
       archive <- asPath("CanadaLandcover2015.zip")
     } else {
@@ -139,7 +198,7 @@ prepInputsLCC <- function(year = 2010,
     ## try to guess targetFile/archive if not passed
     urlFile <- basename(dots$url)
     if (grepl("\\.zip$", urlFile) && is.null(dots$archive)) {
-      dots$archive  <- urlFile
+      dots$archive <- urlFile
     } else {
       if (is.null(dots$targetFile)) {
         dots$targetFile <- urlFile
@@ -147,21 +206,285 @@ prepInputsLCC <- function(year = 2010,
     }
   }
 
-  if (identical(eval(parse(text = getOption("reproducible.rasterRead"))),
-                terra::rast))
+  if (identical(eval(parse(text = getOption("reproducible.rasterRead"))), terra::rast)) {
     method <- intersect("near", method)
-  else
+  } else {
     method <- intersect("ngb", method)
+  }
 
-  fullArgs <- append(dots,
-                     list("destinationPath" = asPath(destinationPath),
-                          "method" = method,
-                          "datatype" = "INT2U",
-                          "filename2" = filename2))
+  fullArgs <- append(
+    dots,
+    list(
+      destinationPath = asPath(destinationPath),
+      method = method,
+      datatype = "INT2U",
+      writeTo = writeTo
+    )
+  )
 
   out <- do.call(prepInputs, fullArgs)
   out[] <- as.integer(as.vector(values(out)))
   out
+}
+
+#' Convert SCANFI Landcover layers from 1-8 codes to typical Canada LCC codes (0-230)
+#'
+#' This function has been run previously to create layers with the correct codes which
+#' are available on Google Drive. These corrected layers are available here:
+#' <https://drive.google.com/drive/folders/1zLYV-wcDjJfSflH1VkXG6sosqZZF4SYc>
+#' In the respective folder for each year, under the file name
+#' `SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_<YEAR>_v1_1.tif`
+#'
+#' @param year data year for SCANFI landcover data. 2000, 2010, and 2020 possible for V1.
+#'    1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025 possible for V2.
+#'
+#' @param dataVersion Character. SCANFI product version for data. Default is currently V2. V1 also available.
+#'
+#' @param writeTo Optional character. If supplied, the converted layer is written to this
+#'    file as a tiled, LZW-compressed `INT1U` GeoTIFF (`NAflag = 255`). All output codes
+#'    lie in 20-230, so a single unsigned byte is sufficient; leaving `terra` to its
+#'    `Float32` default roughly doubles the file and, because the default layout is
+#'    full-width strips, makes windowed reads of these national
+#'    (178400 x 119100) rasters needlessly expensive.
+#'
+#' @return a `SpatRaster` with corrected classification codes
+#'
+#' @param ... additional args passed to [reproducible::prepInputs()]
+#'
+#' @export
+convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", writeTo = NULL, ...) {
+  if (dataVersion == "V1") {
+    if (!(year %in% .scanfi_v1_years)) {
+      stop("SCANFI V1 Landcover does not exist for this year")
+    }
+
+    if (year == 2000) {
+      lccURL <- paste0("https://drive.google.com/file/d/15AlzqODmeVs0Aev7o7PIzZti2XLPG78z")
+      lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
+    } else if (year == 2010) {
+      lccURL <- paste0("https://drive.google.com/file/d/1JOg9f7N4hZSCky_GhrPDZMYkp39XfS2h")
+      lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
+    } else if (year == 2020) {
+      lccURL <- paste0("https://drive.google.com/file/d/11sQu1mdPtVsWjFUBNx3TrzpksZ6ri1pJ")
+      lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
+    }
+  } else if (dataVersion == "V2") {
+    if (!(year %in% .scanfi_v2_years)) {
+      stop("SCANFI V2 Landcover does not exist for this year")
+    }
+
+    if (year == 1985) {
+      lccURL <- paste0("https://drive.google.com/file/d/18HtwafwJN3_SyH2Kbq7dNL_vBmfCgMOv")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 1990) {
+      lccURL <- paste0("https://drive.google.com/file/d/11QpGMnH1Wxcy34jqiiriQgGDEgGicdkd")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 1995) {
+      lccURL <- paste0("https://drive.google.com/file/d/1GijrLGkMwnbBA5Y6gfto5CxgeNOrBbjU")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 2000) {
+      lccURL <- paste0("https://drive.google.com/file/d/142PscihDjTAoRIgSVG3n70CzLI3KC1KS")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 2005) {
+      lccURL <- paste0("https://drive.google.com/file/d/1i1353LETOoRLjOo4d875U-AquLe7MVFn")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 2010) {
+      lccURL <- paste0("https://drive.google.com/file/d/1ssvHvgPWd8hEBZz2ZPh0F67asz2VopVC")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 2015) {
+      lccURL <- paste0("https://drive.google.com/file/d/1Fn7NjV51Dlm9btZRtnhMZ7u4eC9weQLa")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 2020) {
+      lccURL <- paste0("https://drive.google.com/file/d/1LVQEXGZvQD0Z62CZdJ7FrA1RJw6e4VIX")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    } else if (year == 2025) {
+      lccURL <- paste0("https://drive.google.com/file/d/1cw7yMTGX-t4B4OMhKpdHbYnj2Vjvnvpz")
+      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
+    }
+  }
+
+  dots <- list(...)
+  dots$url <- lccURL
+  dots$targetFile <- lccTF
+
+  scanfi_lcc <- do.call(prepInputs, dots)
+
+  ## Bryoids, herbs, rock/exposed, shrubs, broadleaf, conifer, mixedwood, water
+  oldVals <- 1:8
+  newVals <- c(40, 100, 30, 50, 220, 210, 230, 20)
+
+  ## The recode is a bijection over 8 classes; every output code is in 20-230 and NA is
+  ## flagged 255, so the result fits in one unsigned byte -- same footprint as the SCANFI
+  ## source, which is itself Byte. terra's default (Float32, full-width strips) instead
+  ## quadruples the per-pixel cost and forces any crop of these national rasters to read
+  ## entire 178400-pixel rows, so pin the datatype and tile the output.
+  substArgs <- list(
+    x = scanfi_lcc,
+    from = oldVals,
+    to = newVals,
+    datatype = "INT1U",
+    NAflag = 255
+  )
+
+  if (!is.null(writeTo)) {
+    substArgs <- c(substArgs, list(
+      filename = writeTo,
+      overwrite = TRUE,
+      gdal = c(
+        "COMPRESS=LZW", "TILED=YES", "BLOCKXSIZE=256", "BLOCKYSIZE=256",
+        "BIGTIFF=IF_SAFER"
+      )
+    ))
+  }
+
+  scanfi_lcc_corrected <- do.call(terra::subst, substArgs)
+  rm(scanfi_lcc)
+
+  return(scanfi_lcc_corrected)
+}
+
+#' Obtain an LCC layer for a given year from SCANFI, with forest matching the FAO definition
+#'
+#' @param year data year for SCANFI landcover data. `r .scanfi_v1_years` possible for V1.
+#'    `r .scanfi_v2_years` possible for V2.
+#' @param dataVersion Character. SCANFI product version for data. Default is currently "V2".
+#'    "V1" also available.
+#' @param disturbedCode value assigned to pixels that are forest per FAO definition but not in LCC year
+#' @param resampleMethod method used when resampling LCC layers to match `rasterToMatch`
+#' @param ... passed to `prepInputs`
+#'
+#' @return a `SpatRaster` with corrected forest pixels
+#'
+#' @export
+prepInputs_SCANFI_LCC_FAO <- function(
+  year = 2020,
+  dataVersion = "V2",
+  disturbedCode = 240,
+  resampleMethod = "near",
+  ...
+) {
+  if (dataVersion == "V1") {
+    if (!(year %in% .scanfi_v1_years)) {
+      stop("SCANFI V1 Landcover for this year is unavailable")
+    }
+  } else if (dataVersion == "V2") {
+    if (!(year %in% .scanfi_v2_years)) {
+      stop("SCANFI V2 Landcover does not exist for this year")
+    }
+  }
+  newFilename <- NULL
+  writeToFN <- NULL
+  dots <- list(...)
+  if (!is.null(dots$writeTo)) {
+    ## must pass a different file name to prepInputs as the object that is Cached
+    ## will inevitably be modified later in this function
+    writeToFN <- dots$writeTo
+    ## assign a temporary filename for the raw LCC
+    newFilename <- paste0("raw_", dots$writeTo)
+    dots$writeTo <- NULL
+  }
+
+  # if (is.null(dots$rasterToMatch) && is.null(dots$cropTo) && is.null(dots$to)) {
+  #   stop("the NTEMS raster file is too large to process without cropping via `rasterToMatch` or `cropTo`")
+  # }
+
+  if (isTRUE(getOption("reproducible.gdalwarp"))) {
+    message("temporarily setting reproducible.usegdalwarp to FALSE to avoid error")
+    opts <- options(reproducible.gdalwarp = FALSE)
+    on.exit(options(opts), add = TRUE)
+  }
+  ## Data codes:
+  ## 0 = no change; 20 = water; 31 = snow_ice; 32 = rock_rubble; 33 = exposed_barren_land;
+  ## 40 = bryoids; 50 = shrubs; 80 = wetland; 81 = wetland-treed; 100 = herbs; 210 = coniferous;
+  ## 220 = broadleaf; 230 = mixedwood
+  if (dataVersion == "V1") {
+    if (year == 2000) {
+      lccURL <- "https://drive.google.com/file/d/1zqzTSDk9mtyRhcQuMsRMK2WDwkuk24kt"
+    } else if (year == 2010) {
+      lccURL <- "https://drive.google.com/file/d/1q1LOewgbanVUAySCyJqjc8VcSl4958TP"
+    } else if (year == 2020) {
+      lccURL <- "https://drive.google.com/file/d/1ZwEspwpcpZwIYvYEnYmd7Ux44goNvDB2"
+    }
+    lccTF <- paste0("SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_", year, "_v1_1.tif")
+  } else if (dataVersion == "V2") {
+    if (year == 1985) {
+      lccURL <- paste0("https://drive.google.com/file/d/1iAEEpkVofQBggIJaxwXKcKADU3zka7Wh")
+    } else if (year == 1990) {
+      lccURL <- paste0("https://drive.google.com/file/d/1LK5b2E1y31bwIqWYD53X9ZOt4mWvS_TB")
+    } else if (year == 1995) {
+      lccURL <- paste0("https://drive.google.com/file/d/15pvm2h9X6dreC9rKuC3oxr4c3hHsYRkI")
+    } else if (year == 2000) {
+      lccURL <- paste0("https://drive.google.com/file/d/1ykRG7u__DuMKI_DUGEJs6mXVul8YmRD_")
+    } else if (year == 2005) {
+      lccURL <- paste0("https://drive.google.com/file/d/1eKNGWrwGEFRFOK2TLVXldfd8hB3OsbSG")
+    } else if (year == 2010) {
+      lccURL <- paste0("https://drive.google.com/file/d/1cbKlKlXtjMRVg3_9xjlEWosU0fmLJxXt")
+    } else if (year == 2015) {
+      lccURL <- paste0("https://drive.google.com/file/d/1olWPzlM2SfMC8Fq_uXslJfYIINAd4wGP")
+    } else if (year == 2020) {
+      lccURL <- paste0("https://drive.google.com/file/d/1EGp7LUA7cXMR6KpXDmu617xsjwGM6aIx")
+    } else if (year == 2025) {
+      lccURL <- paste0("https://drive.google.com/file/d/1eb1zEWC3VRycA_aRzTB2ODhWDLZis-YG")
+    }
+    lccTF <- paste0("SCANFI_att_nfiLandcover_CanadaLCCclassCodes_", year, "_v2_20260119.tif")
+  }
+
+  ## fix dots
+  dots$url <- lccURL
+  dots$targetFile <- lccTF
+  dots$method <- resampleMethod
+  dots$writeTo <- newFilename
+  # digs <- .robustDigest(dots)
+  lcc <- do.call(prepInputs, dots) # |>
+  #  Cache(.functionName = paste0("prepInputs_NTEMS_LCC_FAO_", year),
+  #        omitArgs = c("targetFile", "writeTo"),
+  #        .cacheExtra = digs)
+
+  dots$writeTo <- writeToFN
+
+  ## 2024-12: see #110; don't delete CA_forest_VLCE2 raster even though it's 24GB
+  ## deleting it results in redownload every time and breaks parallel sims (race condition)
+  # toUnlink <- ifelse(is.null(dots$destinationPath), lccTF,
+  #                    file.path(dots$destinationPath, lccTF))
+  # unlink(toUnlink)
+
+  ## restore dots$writeTo - it will be NULL if it wasn't passed
+
+  ## 1 is forest, 2 is land that can meet the FAO definition of forest
+  ## do not pass dots, or the filename is passed and is overwritten
+  url <- "https://opendata.nfis.org/downloads/forest_change/CA_FAO_forest_2019.zip"
+  ## let terra options dictate whether fao is on disk or not
+
+  fao <- prepInputs(
+    url = url,
+    method = resampleMethod,
+    destinationPath = dots$destinationPath,
+    to = lcc
+  ) # |> Cache(omitArgs = "to", .cacheExtra = digs)
+  ## pixels may not be disturbed yet if year is prior to 2019 (FAO year)
+  ## adjust non-forest LCC that are disturbed forest to disturbedCode
+  DisturbedAdjust <- function(LCC, FAO, newVal = disturbedCode) {
+    LCC[FAO == 2 & !LCC %in% c(210, 220, 230)] <- newVal
+    return(LCC)
+  }
+  message("Updating codes on LCC with FAO data...")
+  input <- c(lcc, fao)
+  out <- terra::lapp(input, fun = DisturbedAdjust, usenames = FALSE)
+  # lcc <- terra::init(lcc, as.vector(out))
+
+  if (!is.null(dots$writeTo)) {
+    fp <- if (!is.null(dots$destinationPath)) {
+      file.path(dots$destinationPath, dots$writeTo)
+    } else {
+      dots$writeTo
+    }
+    ## assign it to itself or it stays in memory
+    out <- writeRaster(out, filename = fp, overwrite = TRUE) ## overwrite lcc
+  }
+  message("... done ... cleaning up RAM")
+  rm(input, lcc, fao) ## remove them before doing gc
+  gc()
+  return(out)
 }
 
 #' Produce stand age map based on `cohortData`
@@ -175,9 +498,12 @@ prepInputsLCC <- function(year = 2010,
 #' @return raster of the same type as `pixelGroupMap`.
 #'
 #' @export
-#' @importFrom SpaDES.tools rasterizeReduced
-standAgeMapGenerator <- function(cohortData, pixelGroupMap, weight = "biomass",
-                                 doAssertion = getOption("LandR.assertions", FALSE)) {
+standAgeMapGenerator <- function(
+  cohortData,
+  pixelGroupMap,
+  weight = "biomass",
+  doAssertion = getOption("LandR.assertions", FALSE)
+) {
   if (identical(tolower(weight), "biomass")) {
     cohortData[, weightedAge := floor(sum(age * B) / sum(B) / 10) * 10, .(pixelGroup)]
   } else {
@@ -188,7 +514,12 @@ standAgeMapGenerator <- function(cohortData, pixelGroupMap, weight = "biomass",
   cohortDataReduced <- unique(cohortDataReduced)
 
   names(pixelGroupMap) <- "pixelGroup"
-  standAgeMap <- rasterizeReduced(cohortDataReduced, pixelGroupMap, "weightedAge", mapCode = "pixelGroup")
+  standAgeMap <- rasterizeReduced(
+    cohortDataReduced,
+    pixelGroupMap,
+    "weightedAge",
+    mapCode = "pixelGroup"
+  )
 
   return(standAgeMap)
 }
@@ -215,10 +546,16 @@ standAgeMapGenerator <- function(cohortData, pixelGroupMap, weight = "biomass",
 makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
   .Deprecated("vegTypeMapGenerator")
 
-  if (isTRUE(mixed)) mixed <- 2
+  if (isTRUE(mixed)) {
+    mixed <- 2
+  }
 
-  vegTypeMapGenerator(x = speciesStack, vegLeadingProportion = vegLeadingProportion,
-                      mixedType = as.numeric(mixed), ...)
+  vegTypeMapGenerator(
+    x = speciesStack,
+    vegLeadingProportion = vegLeadingProportion,
+    mixedType = as.numeric(mixed),
+    ...
+  )
 }
 
 #' Generate vegetation type map
@@ -255,22 +592,38 @@ vegTypeMapGenerator <- function(x, ...) {
 
 #' @export
 #' @rdname vegTypeMapGenerator
-vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.assertions", FALSE)) {
+vegTypeMapGenerator.default <- function(
+  x,
+  ...,
+  doAssertion = getOption("LandR.assertions", FALSE)
+) {
   if (inherits(x, c("Raster", "SpatRaster"))) {
-    pixelTable <- suppressMessages(makePixelTable(x, printSummary = FALSE, doAssertion = doAssertion))
+    pixelTable <- suppressMessages(makePixelTable(
+      x,
+      printSummary = FALSE,
+      doAssertion = doAssertion
+    ))
     sppCols <- grep("cover", colnames(pixelTable), value = TRUE)
-    cohortTable <- suppressMessages(.createCohortData(pixelTable, sppColumns = sppCols, rescale = FALSE, doAssertion = doAssertion))
+    cohortTable <- suppressMessages(.createCohortData(
+      pixelTable,
+      sppColumns = sppCols,
+      rescale = FALSE,
+      doAssertion = doAssertion
+    ))
     cohortTable <- cohortTable[cover > 0]
-    pixelGroupMap <- rasterRead(x[[1]])  ## works in x is multi or single layer
+    pixelGroupMap <- rasterRead(x[[1]]) ## works in x is multi or single layer
     names(pixelGroupMap) <- names(rasterRead())
     pixelGroupMap[pixelTable[["pixelIndex"]]] <- pixelTable[["initialEcoregionCode"]]
-    vegTypeMap <- vegTypeMapGenerator(x = cohortTable,
-                                      pixelGroupMap = pixelGroupMap,
-                                      pixelGroupColName = "initialEcoregionCode",
-                                      doAssertion = doAssertion,
-                                      ...)
+    vegTypeMap <- vegTypeMapGenerator(
+      x = cohortTable,
+      pixelGroupMap = pixelGroupMap,
+      pixelGroupColName = "initialEcoregionCode",
+      doAssertion = doAssertion,
+      ...
+    )
 
-    if (FALSE) { # This is the old version -- Eliot & Alex July 11, 2019
+    if (FALSE) {
+      # This is the old version -- Eliot & Alex July 11, 2019
       sumVegPct <- sum(speciesStack) ## TODO: how is the sum >100 ?
 
       if (isTRUE(mixed)) {
@@ -279,7 +632,9 @@ vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.a
         ## All layers must be below vegLeadingProportion to be called Mixed.
         ## This check turns stack to binary: 1 if < vegLeadingProportion; 0 if more than.
         ## Then, sum should be numLayers of all are below vegLeadingProportion
-        whMixed <- which(sum(speciesStack < (100 * vegLeadingProportion))[] == numLayers(speciesStack))
+        whMixed <- which(
+          sum(speciesStack < (100 * vegLeadingProportion))[] == numLayers(speciesStack)
+        )
         MixedRas <- speciesStack[[1]]
         MixedRas[!is.na(as.vector(speciesStack[[1]][]))] <- 0
         MixedRas[whMixed] <- max(maxFn(speciesStack)) * 1.01
@@ -303,10 +658,12 @@ vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.a
 
       layerNames <- names(speciesStack)
       names(layerNames) <- layerNames
-      levels(vegTypeMap) <- data.frame(ID = seq(layerNames), Species = names(layerNames),
-                                       stringsAsFactors = TRUE)
+      levels(vegTypeMap) <- data.frame(
+        ID = seq(layerNames),
+        Species = names(layerNames),
+        stringsAsFactors = TRUE
+      )
       vegTypeMap
-
     }
     return(vegTypeMap)
   } else {
@@ -317,9 +674,11 @@ vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.a
 #' @examples
 #' library(data.table)
 #' library(terra)
-#' x <- data.table(pixelGroup = rep(1:2, each = 2), B = c(100, 200, 20, 400),
-#'                 speciesCode = rep(c("Pice_Gla", "Popu_Tre"), 2))
-#' pixelGroupMap <- rast(ext(0,3, 0, 3), res = 1)
+#' x <- data.table(
+#'   pixelGroup = rep(1:2, each = 2), B = c(100, 200, 20, 400),
+#'   speciesCode = rep(c("Pice_Gla", "Popu_Tre"), 2)
+#' )
+#' pixelGroupMap <- rast(ext(0, 3, 0, 3), res = 1)
 #' pixelGroupMap[] <- sample(1:2, size = 9, replace = TRUE)
 #' vtm <- vegTypeMapGenerator(x, pixelGroupMap = pixelGroupMap)
 #'
@@ -327,164 +686,125 @@ vegTypeMapGenerator.default <- function(x, ..., doAssertion = getOption("LandR.a
 #' @include cohorts.R
 #'
 #' @rdname vegTypeMapGenerator
-vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportion = 0.8,
-                                           mixedType = 2, sppEquiv = NULL, sppEquivCol, colors,
-                                           pixelGroupColName = "pixelGroup",
-                                           doAssertion = getOption("LandR.assertions", TRUE), ...) {
-  stopifnot(
-    mixedType %in% 0:2,
-    length(mixedType) == 1
-  )
+vegTypeMapGenerator.data.table <- function(
+  x,
+  pixelGroupMap,
+  vegLeadingProportion = 0.8,
+  mixedType = 2,
+  sppEquiv = NULL,
+  sppEquivCol,
+  colors,
+  pixelGroupColName = "pixelGroup",
+  doAssertion = getOption("LandR.assertions", TRUE),
+  ...
+) {
+  stopifnot(mixedType %in% 0:2, length(mixedType) == 1)
 
   nrowCohortData <- NROW(x)
   leadingBasedOn <- preambleVTG(x, vegLeadingProportion, doAssertion, nrowCohortData)
 
   if (mixedType == 2) {
     if (is.null(sppEquiv)) {
-      sppEquiv <- get(data("sppEquivalencies_CA", package = "LandR", envir = environment()),
-                      inherits = FALSE)
+      sppEquiv <- get(
+        data("sppEquivalencies_CA", package = "LandR", envir = environment()),
+        inherits = FALSE
+      )
 
       # Find the sppEquivCol that best matches what you have in x
-      sppEquivCol <- names(sort(sapply(sppEquiv, function(xx) sum(xx %in% unique(x$species))),
-                                decreasing = TRUE)[1])
-      message(paste0("Using mixedType == 2, but no sppEquiv provided. ",
-                     "Attempting to use data('sppEquivalencies_CA', 'LandR') ",
-                     "and sppEquivCol == '", sppEquivCol, "'"))
+      sppEquivCol <- names(sort(
+        sapply(sppEquiv, function(xx) sum(xx %in% unique(x$species))),
+        decreasing = TRUE
+      )[1])
+      message(paste0(
+        "Using mixedType == 2, but no sppEquiv provided. ",
+        "Attempting to use data('sppEquivalencies_CA', 'LandR') ",
+        "and sppEquivCol == '",
+        sppEquivCol,
+        "'"
+      ))
     }
   }
-
-  ## use new vs old algorithm based on size of x. new one (2) is faster in most cases.
-  ## enable assertions to view timings for each algorithm before deciding which to use.
-  algo <- ifelse(nrowCohortData > 3.5e6, 1, 2)
 
   pgdAndSc <- c(pixelGroupColName, "speciesCode")
   pgdAndScAndLeading <- c(pgdAndSc, leadingBasedOn)
   totalOfLeadingBasedOn <- paste0("total", leadingBasedOn)
   speciesOfLeadingBasedOn <- paste0("speciesGroup", leadingBasedOn)
-  if (algo == 1 || isTRUE(doAssertion)) {
-    # slower -- older, but simpler Eliot June 5, 2019
-    # 1. Find length of each pixelGroup -- don't include pixelGroups in "by" that have only 1 cohort: N = 1
-    cohortData1 <- copy(x)
-    systimePre1 <- Sys.time()
-    pixelGroupData1 <- cohortData1[, list(N = .N), by = pixelGroupColName]
 
-    # Calculate speciesProportion from cover or B
-    pixelGroupData1 <- cohortData1[, ..pgdAndScAndLeading][pixelGroupData1, on = pixelGroupColName]
-    set(pixelGroupData1, NULL, totalOfLeadingBasedOn, pixelGroupData1[[leadingBasedOn]])
+  ## 1. Find length of each pixelGroup -- don't include pixelGroups in "by" that have only 1 cohort: N = 1
+  cohortData1 <- copy(x)
+  systimePre1 <- Sys.time()
+  pixelGroupData1 <- cohortData1[, list(N = .N), by = pixelGroupColName]
 
-    if (identical(leadingBasedOn, "cover")) {
-      pixelGroupData1[N != 1, (totalOfLeadingBasedOn) := sum(cover, na.rm = TRUE), by = pixelGroupColName]
-      pixelGroupData1 <- pixelGroupData1[, list(sum(cover, na.rm = TRUE), totalcover[1]), by = pgdAndSc]
-    } else {
-      pixelGroupData1[N != 1, (totalOfLeadingBasedOn) := sum(B, na.rm = TRUE), by = pixelGroupColName]
-      pixelGroupData1 <- pixelGroupData1[, list(sum(B, na.rm = TRUE), totalB[1]), by = pgdAndSc]
-    }
-    setnames(pixelGroupData1, old = c("V1", "V2"), new = c(speciesOfLeadingBasedOn, totalOfLeadingBasedOn))
+  ## Calculate speciesProportion from cover or B
+  pixelGroupData1 <- cohortData1[, ..pgdAndScAndLeading][pixelGroupData1, on = pixelGroupColName]
+  set(pixelGroupData1, NULL, totalOfLeadingBasedOn, pixelGroupData1[[leadingBasedOn]])
 
-    set(pixelGroupData1, NULL, "speciesProportion", pixelGroupData1[[speciesOfLeadingBasedOn]] /
-          pixelGroupData1[[totalOfLeadingBasedOn]])
-    systimePost1 <- Sys.time()
-
-    setorderv(pixelGroupData1, pixelGroupColName)
+  if (identical(leadingBasedOn, "cover")) {
+    pixelGroupData1[
+      N != 1,
+      (totalOfLeadingBasedOn) := sum(cover, na.rm = TRUE),
+      by = pixelGroupColName
+    ]
+    pixelGroupData1 <- pixelGroupData1[,
+      list(sum(cover, na.rm = TRUE), totalcover[1]),
+      by = pgdAndSc
+    ]
+  } else {
+    pixelGroupData1[N != 1, (totalOfLeadingBasedOn) := sum(B, na.rm = TRUE), by = pixelGroupColName]
+    pixelGroupData1 <- pixelGroupData1[, list(sum(B, na.rm = TRUE), totalB[1]), by = pgdAndSc]
   }
+  setnames(
+    pixelGroupData1,
+    old = c("V1", "V2"),
+    new = c(speciesOfLeadingBasedOn, totalOfLeadingBasedOn)
+  )
 
-  if (algo == 2 || isTRUE(doAssertion)) {
-    # Replacement algorithm to calculate speciesProportion
-    #  Logic is similar to above --
-    #  1. sort by pixelGroup
-    #  2. calculate N, use this to repeat itself (instead of a join above)
-    #  3. calculate speciesProportion, noting to calculate with by only if N > 1, otherwise
-    #     it is a simpler non-by calculation
-    cohortData2 <- copy(x)
-    systimePre2 <- Sys.time()
-    setkeyv(cohortData2, pgdAndSc)
-    # setorderv(x, pixelGroupColName)
-    pixelGroupData2 <- cohortData2[, list(N = .N), by = pixelGroupColName]
-    cohortData2 <- cohortData2[, ..pgdAndScAndLeading]
+  set(
+    pixelGroupData1,
+    NULL,
+    "speciesProportion",
+    pixelGroupData1[[speciesOfLeadingBasedOn]] / pixelGroupData1[[totalOfLeadingBasedOn]]
+  )
+  systimePost1 <- Sys.time()
 
-    N <- rep.int(pixelGroupData2$N, pixelGroupData2$N)
-    wh1 <- N == 1
-    set(cohortData2, which(wh1), totalOfLeadingBasedOn, cohortData2[[leadingBasedOn]][wh1])
-    if (identical(leadingBasedOn, "cover")) {
-      totalBNot1 <- cohortData2[!wh1, list(N = .N, totalcover = sum(cover, na.rm = TRUE)), by = pixelGroupColName]
-    } else {
-      totalBNot1 <- cohortData2[!wh1, list(N = .N, totalB = sum(B, na.rm = TRUE)), by = pixelGroupColName]
-    }
-    totalBNot1 <- rep.int(totalBNot1[[totalOfLeadingBasedOn]], totalBNot1[["N"]])
-    set(cohortData2, which(!wh1), totalOfLeadingBasedOn, totalBNot1)
+  setorderv(pixelGroupData1, pixelGroupColName)
 
-    b <- cohortData2[, list(N = .N), by = pgdAndSc]
-    b <- rep.int(b[["N"]], b[["N"]])
-    GT1 <- (b > 1)
-    if (any(GT1)) {
-      pixelGroupData2List <- list()
-      cohortData2[GT1, speciesProportion := sum(B, na.rm = TRUE) / totalB[1], by = pgdAndSc]
-      cohortData2[!GT1, speciesProportion := B / totalB]
-      #pixelGroupData2List[[2]] <- cohortData2[!GT1]
-      #pixelGroupData2 <- rbindlist(pixelGroupData2List)
-    } else {
-      # cols <- c(pixelGroupColName, "speciesCode", "speciesProportion")
-      set(cohortData2, NULL, "speciesProportion", cohortData2[[leadingBasedOn]] /
-            cohortData2[[totalOfLeadingBasedOn]])
-      # pixelGroupData2[[NROW(pixelGroupData2) + 1]] <- cohortData2[!GT1, ..cols]
-    }
-    pixelGroupData2 <- cohortData2
-    systimePost2 <- Sys.time()
-  }
+  x <- cohortData1
+  pixelGroupData <- pixelGroupData1
+  rm(pixelGroupData1)
 
-  if (isTRUE(doAssertion)) {
-    ## slower -- older, but simpler Eliot June 5, 2019
-    ## TODO: these algorithm tests should be deleted after a while. See date on prev line.
-    if (!exists("oldAlgoVTM", envir = .pkgEnv)) .pkgEnv$oldAlgoVTM <- 0
-    if (!exists("newAlgoVTM", envir = .pkgEnv)) .pkgEnv$newAlgoVTM <- 0
-    .pkgEnv$oldAlgoVTM <- .pkgEnv$oldAlgoVTM + (systimePost1 - systimePre1)
-    .pkgEnv$newAlgoVTM <- .pkgEnv$newAlgoVTM + (systimePost2 - systimePre2)
-    message("LandR::vegTypeMapGenerator: new algo ", .pkgEnv$newAlgoVTM)
-    message("LandR::vegTypeMapGenerator: old algo ", .pkgEnv$oldAlgoVTM)
-    setorderv(pixelGroupData2, pgdAndSc)
-    whNA <- unique(unlist(sapply(pixelGroupData2, function(xx) which(is.na(xx)))))
-    pixelGroupData1 <- pixelGroupData1[!pixelGroupData2[whNA], on = pgdAndSc]
-    setkeyv(pixelGroupData1, pgdAndSc)
-    setkeyv(pixelGroupData2, pgdAndSc)
-    aa <- pixelGroupData1[pixelGroupData2, on = pgdAndSc]
-    if (!isTRUE(all.equal(aa[["speciesProportion"]], aa[["i.speciesProportion"]])))
-      stop("Old algorithm in vegMapGenerator is different than new map")
-  }
-
-  if (algo == 1) {
-    x <- cohortData1
-    pixelGroupData <- pixelGroupData1
-    rm(pixelGroupData1)
-  } else if (algo == 2) {
-    x <- cohortData2
-    pixelGroupData <- pixelGroupData2
-    rm(pixelGroupData2)
-  }
-
-  ########################################################
-  #### Determine "mixed"
-  ########################################################
+  ## Determine "mixed" -----------------------------------
   if (FALSE) {
     ## old algorithm; keep this code as reference -- it's simpler to follow
     b1 <- Sys.time()
-    pixelGroupData4 <- x[, list(totalB = sum(B, na.rm = TRUE),
-                                speciesCode, B), by = pixelGroup]
-    pixelGroupData4 <- pixelGroupData4[, .(speciesGroupB = sum(B, na.rm = TRUE),
-                                           totalB = totalB[1]),
-                                       by = pgdAndSc]
-    set(pixelGroupData4, NULL, "speciesProportion", pixelGroupData4$speciesGroupB /
-          pixelGroupData4$totalB)
+    pixelGroupData4 <- x[, list(totalB = sum(B, na.rm = TRUE), speciesCode, B), by = pixelGroup]
+    pixelGroupData4 <- pixelGroupData4[,
+      .(speciesGroupB = sum(B, na.rm = TRUE), totalB = totalB[1]),
+      by = pgdAndSc
+    ]
+    set(
+      pixelGroupData4,
+      NULL,
+      "speciesProportion",
+      pixelGroupData4$speciesGroupB / pixelGroupData4$totalB
+    )
     pixelGroupData4[, speciesProportion := speciesGroupB / totalB]
     b2 <- Sys.time()
-    mussage(b2 - b1)
-    all.equal(pixelGroupData4[, .(pixelGroup, speciesCode, totalB)], pixelGroupData[
-      , .(pixelGroup, speciesCode, totalB)])
+    message(b2 - b1)
+    all.equal(
+      pixelGroupData4[, .(pixelGroup, speciesCode, totalB)],
+      pixelGroupData[, .(pixelGroup, speciesCode, totalB)]
+    )
   }
 
   if (mixedType == 0) {
     ## 1. sort on pixelGroup and speciesProportion, reverse so 1st row of each pixelGroup is the largest
     ## 2. Keep only first row in each pixelGroup
-    pixelGroupData3 <- pixelGroupData[, list(speciesCode, get(pixelGroupColName), speciesProportion)]
+    pixelGroupData3 <- pixelGroupData[, list(
+      speciesCode,
+      get(pixelGroupColName),
+      speciesProportion
+    )]
     setnames(pixelGroupData3, "V2", pixelGroupColName)
     setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
     set(pixelGroupData3, NULL, "speciesProportion", NULL)
@@ -496,8 +816,12 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     ## 2. sort on pixelGroup and speciesProportion, reverse so that 1st row of each pixelGroup is the largest
     ## 3. Keep only first row in each pixelGroup
     ## 4. change column names and convert pure to mixed ==> mixed <- !pure
-    pixelGroupData3 <- pixelGroupData[, list(pure = speciesProportion >= vegLeadingProportion,
-                                             speciesCode, get(pixelGroupColName), speciesProportion)]
+    pixelGroupData3 <- pixelGroupData[, list(
+      pure = speciesProportion >= vegLeadingProportion,
+      speciesCode,
+      get(pixelGroupColName),
+      speciesProportion
+    )]
     setnames(pixelGroupData3, "V3", pixelGroupColName)
     setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
     set(pixelGroupData3, NULL, "speciesProportion", NULL)
@@ -515,15 +839,16 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     # pixelGroupData2[mixed == TRUE, leading := "Mixed"]
     # b2 <- Sys.time()
   } else if (mixedType == 2) {
-    if (!sppEquivCol %in% colnames(sppEquiv))
+    if (!sppEquivCol %in% colnames(sppEquiv)) {
       stop(sppEquivCol, " is not in sppEquiv. Please pass an existing sppEquivCol")
+    }
 
     sppEq <- data.table(sppEquiv[[sppEquivCol]], sppEquiv[["Type"]])
 
     names(sppEq) <- c("speciesCode", "Type")
     setkey(pixelGroupData, speciesCode)
 
-    # don't need all columns now
+    ## don't need all columns now
     colsToDelete <- c("rasterToMatch", leadingBasedOn, totalOfLeadingBasedOn)
     colsToDelete <- colsToDelete[colsToDelete %in% colnames(pixelGroupData)]
     set(pixelGroupData, NULL, colsToDelete, NULL)
@@ -531,38 +856,38 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     setkeyv(pixelGroupData, pgdAndSc)
 
     setkeyv(pixelGroupData3, pgdAndSc)
-    mixedType2Condition <- quote(Type == "Deciduous" &
-                                   speciesProportion < vegLeadingProportion &
-                                   speciesProportion > 1 - vegLeadingProportion)
+    mixedType2Condition <- quote(
+      Type == "Deciduous" &
+        speciesProportion < vegLeadingProportion &
+        speciesProportion > 1 - vegLeadingProportion
+    )
     pixelGroupData3[, mixed := FALSE]
 
-    if (algo == 2 || isTRUE(doAssertion)) {
-      b <- pixelGroupData3[, list(N = .N), by = pixelGroupColName]
-      b <- rep.int(b[["N"]], b[["N"]])
-      GT1 <- b > 1
-
-
-      pgd3GT1 <- pixelGroupData3[GT1]
-      pgd3NGT1 <- pixelGroupData3[!GT1]
-
-      pgd3GT1[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColName]
-      pgd3GT1[, mixed := any(mixed), by = pixelGroupColName]
-      pixelGroupData3 <- rbindlist(list(pgd3NGT1, pgd3GT1))
-    } else {
-      pixelGroupData3[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColName]
-      pixelGroupData3[, mixed := any(mixed), by = pixelGroupColName]
-    }
+    pixelGroupColNameChar <- paste0(pixelGroupColName, "Char")
+    set(
+      pixelGroupData3,
+      NULL,
+      pixelGroupColNameChar,
+      as.character(pixelGroupData3[[pixelGroupColName]])
+    )
+    pixelGroupData3[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColNameChar]
+    pixelGroupData3[, mixed := any(mixed), by = pixelGroupColNameChar]
+    # pixelGroupData3[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColName]
+    # pixelGroupData3[, mixed := any(mixed), by = pixelGroupColName]
 
     setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
     set(pixelGroupData3, NULL, "speciesProportion", NULL)
     set(pixelGroupData3, NULL, "Type", NULL)
+    set(pixelGroupData3, NULL, pixelGroupColNameChar, NULL)
+
     pixelGroupData3 <- pixelGroupData3[, .SD[1], by = pixelGroupColName] ## sp. w/ highest prop. per pixelGroup
     pixelGroupData3[mixed == TRUE, speciesCode := "Mixed"]
     setnames(pixelGroupData3, "speciesCode", "leading")
     set(pixelGroupData3, NULL, "leading", factor(pixelGroupData3[["leading"]]))
   }
 
-  if ("pixelIndex" %in% colnames(pixelGroupData3)) { #(!any(duplicated(pixelGroupData3[[pixelGroupColName]]))) {
+  if ("pixelIndex" %in% colnames(pixelGroupData3)) {
+    # (!any(duplicated(pixelGroupData3[[pixelGroupColName]]))) {
     if (!is.factor(pixelGroupData3[["leading"]])) {
       pixelGroupData3[["leading"]] <- factor(pixelGroupData3[["leading"]])
     }
@@ -571,9 +896,11 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     names(vegTypeMap) <- names(rasterRead())
 
     vegTypeMap[pixelGroupData3[["pixelIndex"]]] <- pixelGroupData3[["leading"]]
-    levels(vegTypeMap) <- data.frame(ID = seq_along(levels(pixelGroupData3[["leading"]])),
-                                     species = levels(pixelGroupData3[["leading"]]),
-                                     stringsAsFactors = TRUE)
+    levels(vegTypeMap) <- data.frame(
+      ID = seq_along(levels(pixelGroupData3[["leading"]])),
+      species = levels(pixelGroupData3[["leading"]]),
+      stringsAsFactors = TRUE
+    )
   } else {
     if (is.factor(pixelGroupData3[[pixelGroupColName]])) {
       f <- pixelGroupData3[[pixelGroupColName]]
@@ -584,23 +911,31 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
   }
 
   if (missing(colors)) {
-    colors <- if (mixedType > 0 && vegLeadingProportion > 0)
+    colors <- if (mixedType > 0 && vegLeadingProportion > 0) {
       sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
-    else
+    } else {
       sppColors(sppEquiv, sppEquivCol, palette = "Accent")
+    }
   }
 
   assertSppVectors(sppEquiv = sppEquiv, sppEquivCol = sppEquivCol, sppColorVect = colors)
 
   rasLevels <- levels(vegTypeMap)[[1]]
   if (!is.null(dim(rasLevels))) {
-    levels(vegTypeMap) <- cbind(rasLevels,
-                                colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
-                                stringsAsFactors = FALSE)
+    levels(vegTypeMap) <- cbind(
+      rasLevels,
+      colors = colors[match(levels(vegTypeMap)[[1]][[2]], names(colors))],
+      stringsAsFactors = FALSE
+    )
     if (is(vegTypeMap, "RasterLayer")) {
       setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
     } else {
-      ## TODO: setColors needs to be adapted to SpatRaster...
+      temp <- levels(vegTypeMap)[[1]]
+      rasColors <- data.table(col = colors, values = names(colors))
+      rasColors <- rasColors[temp, on = "values"]
+      setcolorder(rasColors, "id")
+      rasColors[, values := NULL]
+      coltab(vegTypeMap) <- rasColors
     }
   }
 
@@ -628,29 +963,48 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
     pgTest[, Type := equivalentName(speciesCode, sppEquiv, "Type")]
 
     if (mixedType == 0) {
-      pgTest2 <- pgTest[, list(leading = speciesCode[which.max(speciesProportion)]),
-                        by = pixelGroupColName]
+      pgTest2 <- pgTest[,
+        list(leading = speciesCode[which.max(speciesProportion)]),
+        by = pixelGroupColName
+      ]
       out <- pgTest2
     } else if (mixedType == 1) {
-      pgTest2 <- pgTest[, list(mixed = all(speciesProportion < vegLeadingProportion),
-                               leading = speciesCode[which.max(speciesProportion)]),
-                        by = pixelGroupColName]
+      pgTest2 <- pgTest[,
+        list(
+          mixed = all(speciesProportion < vegLeadingProportion),
+          leading = speciesCode[which.max(speciesProportion)]
+        ),
+        by = pixelGroupColName
+      ]
       out <- pgTest2[mixed == TRUE, leading := "Mixed"]
     } else if (mixedType == 2) {
-      pgTest2 <- pgTest[, list(mixed = eval(mixedType2Condition),
-                               leading = speciesCode[which.max(speciesProportion)]),
-                        by = pixelGroupColName]
-      pgTest2[, mixed := any(mixed), by = pixelGroupColName]
+      # pixelGroupColNameChar <- paste0(pixelGroupColName, "Char")
+      set(pgTest, NULL, pixelGroupColNameChar, as.character(pgTest[[pixelGroupColName]]))
+
+      pgTest2 <- pgTest[,
+        list(
+          mixed = eval(mixedType2Condition),
+          leading = speciesCode[which.max(speciesProportion)],
+          "pixelGroupColNameCustom" = get(pixelGroupColName) # is renamed below
+        ),
+        by = pixelGroupColNameChar
+      ]
+
+      pgTest2[, mixed := any(mixed), by = pixelGroupColNameChar]
       pgTest2[mixed == TRUE, leading := "Mixed"]
       pgTest2 <- pgTest2[!duplicated(pgTest2)]
+
+      setnames(pgTest2, old = "pixelGroupColNameCustom", new = pixelGroupColName)
+      set(pgTest2, NULL, pixelGroupColNameChar, NULL)
       out <- pgTest2
     }
 
     length(unique(out[[pixelGroupColName]]))
     length(pgs %in% unique(pgTest2[[pixelGroupColName]]))
     pgs2 <- pgs[pgs %in% unique(pgTest2[[pixelGroupColName]])]
-    if (!isTRUE(all(setkeyv(pgTest2, pixelGroupColName)[["leading"]] == names(pgs)[order(pgs)])))
+    if (!isTRUE(all(setkeyv(pgTest2, pixelGroupColName)[["leading"]] == names(pgs)[order(pgs)]))) {
       stop("The vegTypeMap is incorrect. Please debug LandR::vegTypeMapGenerator")
+    }
   }
 
   return(vegTypeMap)
@@ -689,28 +1043,45 @@ vegTypeMapGenerator.data.table <- function(x, pixelGroupMap, vegLeadingProportio
 #' @return A raster stack of percent cover layers by species.
 #'
 #' @export
-loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, sppEquiv, year = 2001,
-                                 knnNamesCol = "KNN", sppEquivCol = "Boreal", thresh = 10, url = NULL,
-                                 ...) {
+loadkNNSpeciesLayers <- function(
+  dPath,
+  rasterToMatch = NULL,
+  studyArea = NULL,
+  sppEquiv,
+  year = 2001,
+  knnNamesCol = "KNN",
+  sppEquivCol = "Boreal",
+  thresh = 10,
+  url = NULL,
+  ...
+) {
   rcurl <- requireNamespace("RCurl", quietly = TRUE)
   xml <- requireNamespace("XML", quietly = TRUE)
   if (!rcurl || !xml) {
-    stop("Suggested packages 'RCurl' and 'XML' required to download kNN species layers.\n",
-         "Install using `install.packages(c('RCurl', 'XML'))`.")
+    stop(
+      "Suggested packages 'RCurl' and 'XML' required to download kNN species layers.\n",
+      "Install using `install.packages(c('RCurl', 'XML'))`."
+    )
   }
 
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
 
-  sppEquivalencies_CA <- get(data("sppEquivalencies_CA", package = "LandR",
-                                  envir = environment()), inherits = FALSE)
+  sppEquivalencies_CA <- get(
+    data("sppEquivalencies_CA", package = "LandR", envir = environment()),
+    inherits = FALSE
+  )
 
   if ("shared_drive_url" %in% names(dots)) {
     shared_drive_url <- dots[["shared_drive_url"]]
   }
+
   if (missing(sppEquiv)) {
-    message("sppEquiv argument is missing, using LandR::sppEquivalencies_CA, with ",
-            sppEquivCol," column (taken from sppEquivCol arg value)")
+    message(
+      "sppEquiv argument is missing, using LandR::sppEquivalencies_CA, with ",
+      sppEquivCol,
+      " column (taken from sppEquivCol arg value)"
+    )
     sppEquiv <- sppEquivalencies_CA[get(sppEquivCol) != ""]
   }
 
@@ -728,28 +1099,33 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
     cachePath <- getOption("reproducible.cachePath")
   }
 
-  if (is.null(url))
-    url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                  "canada-forests-attributes_attributs-forests-canada/2011-",
-                  "attributes_attributs-2011/")
+  if (is.null(url)) {
+    url <- paste0(
+      "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+      "canada-forests-attributes_attributs-forests-canada/2011-",
+      "attributes_attributs-2011/"
+    )
+  }
 
   ## get all online file names
-  if (RCurl::url.exists(url)) {   ## ping the website first
+  if (suppressWarnings(RCurl::url.exists(url))) {
+    ## ping the website first
     ## is it a google drive url?
     if (grepl("drive.google.com", url)) {
       if (requireNamespace("googledrive", quietly = TRUE)) {
-        fileURLs <- googledrive::with_drive_quiet(
-          googledrive::drive_link(
-            googledrive::drive_ls(url, shared_drive = googledrive::as_id(shared_drive_url))
-          )
-        )
+        fileURLs <- googledrive::with_drive_quiet(googledrive::drive_link(googledrive::drive_ls(
+          url,
+          shared_drive = googledrive::as_id(shared_drive_url)
+        )))
         fileNames <- googledrive::with_drive_quiet(googledrive::drive_ls(url)$name)
         names(fileURLs) <- fileNames
       } else {
         stop("package 'googledrive' needs to be installed to access google drive files.")
       }
     } else {
-      fileURLs <- RCurl::getURL(url, dirlistonly = TRUE, .opts = list(followlocation = TRUE))
+      fileURLs <- suppressWarnings({
+        RCurl::getURL(url, dirlistonly = TRUE, .opts = list(followlocation = TRUE))
+      }) ## WARNING: partial argument match of 'length' to 'length.out'
       fileNames <- XML::getHTMLLinks(fileURLs)
     }
     fileNames <- grep("(Species|SpeciesGroups)_.*\\.tif$", fileNames, value = TRUE)
@@ -757,39 +1133,47 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
     ## for offline work or when website is not reachable try making these names
     ## with "wild cards"
     url <- NULL
-    fileNames <- paste0("NFI_MODIS250m_", year, "_kNN_Species_",
-                        unique(sppEquivalencies_CA$KNN), "_v1.tif")
+    fileNames <- paste0(
+      "NFI_MODIS250m_",
+      year,
+      "_kNN_Species_",
+      unique(sppEquivalencies_CA$KNN),
+      "_v1.tif"
+    )
     fileNames <- fileNames[!grepl("Species__v1", fileNames)]
   }
 
   ## get all kNN species - names only
-  allSpp <- fileNames |>
-    sub("_v1\\.tif", "", x = _) |>
-    sub(".*(Species|SpeciesGroups)_", "", x = _)
+  allSpp <- fileNames |> sub("_v1\\.tif", "", x = _) |> sub(".*(Species|SpeciesGroups)_", "", x = _)
 
-  if (getRversion() < "4.0.0") {
-    if (length(allSpp) == 0)
-      stop("Incomplete file list retrieved from server.")
-  } else {
-    stopifnot("Incomplete file list retrieved from server." = length(allSpp) > 1)
-  }
+  stopifnot("Incomplete file list retrieved from server." = length(allSpp) > 1)
 
   ## Make sure spp names are compatible with kNN names
   kNNnames <- if (knnNamesCol %in% colnames(sppEquiv)) {
-    as.character(equivalentName(sppNameVector, sppEquiv, column = knnNamesCol, multi = TRUE))
+    equivalentName(sppNameVector, sppEquiv, column = knnNamesCol, multi = TRUE) |> as.character()
   } else {
-    as.character(equivalentName(sppNameVector, sppEquivalencies_CA,
-                                column = knnNamesCol, multi = TRUE,
-                                searchColumn = sppEquivCol))
+    equivalentName(
+      sppNameVector,
+      sppEquivalencies_CA,
+      column = knnNamesCol,
+      multi = TRUE,
+      searchColumn = sppEquivCol
+    ) |>
+      as.character()
   }
-  sppNameVector <- as.character(equivalentName(sppNameVector, sppEquiv, column = sppEquivCol,
-                                               multi = TRUE))
+  sppNameVector <- equivalentName(sppNameVector, sppEquiv, column = sppEquivCol, multi = TRUE) |>
+    as.character()
 
   ## if there are NA's, that means some species can't be found in kNN database
   if (any(is.na(kNNnames))) {
-    warning(paste0("Can't find ", sppNameVector[is.na(kNNnames)], " in `sppEquiv$",
-                   knnNamesCol, ".\n",
-                   "Will use remaining matching species, but check if this is correct."))
+    warning(paste0(
+      "Can't find ",
+      sppNameVector[is.na(kNNnames)],
+      " in `sppEquiv$",
+      knnNamesCol,
+      ".\n",
+      "Will use remaining matching species, but check if this is correct."
+    ))
     ## select only available species
     sppNameVector <- sppNameVector[!is.na(kNNnames)]
     kNNnames <- kNNnames[!is.na(kNNnames)]
@@ -805,8 +1189,12 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   ## same as above
   missingKnn <- setdiff(kNNnames, allSpp)
   if (length(missingKnn)) {
-    warning(paste0("Can't find ", paste(missingKnn, collapse = ", "), " in kNN database.\n",
-                   "Will use remaining matching species, but check if this is correct."))
+    warning(paste0(
+      "Can't find ",
+      paste(missingKnn, collapse = ", "),
+      " in kNN database.\n",
+      "Will use remaining matching species, but check if this is correct."
+    ))
     sppNameVector <- sppNameVector[kNNnames %in% allSpp]
     kNNnames <- kNNnames[kNNnames %in% allSpp]
   }
@@ -822,7 +1210,6 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
     } else {
       paste0(as.character(ncell(rasterToMatch)), "px")
     }
-
   } else {
     basename(cachePath)
   }
@@ -836,19 +1223,21 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   ## the grep may partially match several species, resulting on a list.
   targetFiles <- unique(unlist(targetFiles))
 
-  postProcessedFilenames <- .suffix(targetFiles, suffix = suffix)
+  postProcessedFilenames <- .suffix(targetFiles, suffix = suffix) |> gsub("^[.]/", "", x = _)
   postProcessedFilenamesWithStudyAreaName <- if (is.null(dots$studyAreaName)) {
     postProcessedFilenames
   } else {
-    .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName))
+    .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName)) |> gsub("^[.]/", "", x = _)
   }
 
   message("Running prepInputs for ", paste(kNNnames, collapse = ", "))
   if (length(kNNnames) > 15) {
-    message("This looks like a lot of species;",
-            " did you mean to pass only a subset of this to sppEquiv?\n",
-            " You can use the list above to choose species, then select only those rows",
-            " in sppEquiv before passing here.")
+    message(
+      "This looks like a lot of species;",
+      " did you mean to pass only a subset of this to sppEquiv?\n",
+      " You can use the list above to choose species, then select only those rows",
+      " in sppEquiv before passing here."
+    )
   }
 
   if (is.null(url)) {
@@ -861,47 +1250,65 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
     }
   }
 
-  speciesLayers <- Cache(Map,
-                         targetFile = targetFiles,
-                         filename2 = postProcessedFilenamesWithStudyAreaName,
-                         url = URLs,
-                         MoreArgs = list(destinationPath = dPath,
-                                         # fun = "raster::raster",
-                                         maskTo = studyArea,
-                                         to = rasterToMatch,
-                                         method = "bilinear",
-                                         datatype = "INT2U",
-                                         overwrite = TRUE,
-                                         userTags = dots$userTags
-                         ),
-                         .functionName = "prepInputs",
-                         prepInputs, quick = c("targetFile", "filename2", "destinationPath"))
+  speciesLayers <- Cache(
+    Map,
+    targetFile = targetFiles,
+    writeTo = postProcessedFilenamesWithStudyAreaName,
+    url = URLs,
+    MoreArgs = list(
+      destinationPath = dPath,
+      # fun = "raster::raster",
+      maskTo = studyArea,
+      to = rasterToMatch,
+      method = "bilinear",
+      datatype = "INT2U",
+      overwrite = TRUE,
+      userTags = dots$userTags
+    ),
+    .functionName = "prepInputs",
+    prepInputs,
+    quick = c("targetFile", "writeTo", "destinationPath")
+  )
 
-  correctOrder <- sapply(unique(kNNnames), function(x) grep(pattern = x, x = targetFiles, value = TRUE))
+  correctOrder <- sapply(unique(kNNnames), function(x) {
+    grep(pattern = x, x = targetFiles, value = TRUE)
+  })
   names(speciesLayers) <- names(correctOrder)[match(correctOrder, targetFiles)]
 
   # remove "no data" first
   noData <- sapply(speciesLayers, function(xx) is.na(maxFn(xx)))
   if (any(noData)) {
-    message(paste(paste(names(noData)[noData], collapse = " "),
-                  " has no data in this study area; omitting it"))
+    message(paste(
+      paste(names(noData)[noData], collapse = " "),
+      " has no data in this study area; omitting it"
+    ))
     speciesLayers <- speciesLayers[!noData]
   }
 
-  # remove "little data" first
+  # remove "little data" next
   layersWdata <- sapply(speciesLayers, function(xx) if (maxFn(xx) < thresh) FALSE else TRUE)
   if (sum(!layersWdata) > 0) {
     sppKeep <- names(speciesLayers)[layersWdata]
     if (length(sppKeep)) {
-      message("removing ", sum(!layersWdata), " species because they had <", thresh,
-              " % cover in the study area\n",
-              "  These species are retained (and could be further culled manually, if desired):\n",
-              paste(sppKeep, collapse = " "))
+      message(
+        "removing ",
+        sum(!layersWdata),
+        " species because they had <",
+        thresh,
+        " % cover in the study area\n",
+        "  These species are retained (and could be further culled manually, if desired):\n",
+        paste(sppKeep, collapse = " ")
+      )
     } else {
-      message("no pixels for ", paste(names(layersWdata), collapse = " "),
-              " were found with >=", thresh, " % cover in the study area.",
-              "\n  No species layers were retained. Try lowering the threshold",
-              " to retain species with low % cover")
+      message(
+        "no pixels for ",
+        paste(names(layersWdata), collapse = " "),
+        " were found with >=",
+        thresh,
+        " % cover in the study area.",
+        "\n  No species layers were retained. Try lowering the threshold",
+        " to retain species with low % cover"
+      )
     }
   }
   speciesLayers <- speciesLayers[layersWdata]
@@ -909,15 +1316,24 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
     if (length(sppMerge) == 0) {
       lapply(
         seq_along(speciesLayers),
-        FUN = function(i, rasters = speciesLayers,
-                       filenames = postProcessedFilenamesWithStudyAreaName) {
-          writeRaster(rasters[[i]], file.path(oPath, paste0(filenames[i], '.tif')), overwrite = TRUE)
+        FUN = function(
+          i,
+          rasters = speciesLayers,
+          filenames = postProcessedFilenamesWithStudyAreaName
+        ) {
+          outFile <- file.path(oPath, paste0(filenames[i], ".tif"))
+          writeRaster(rasters[[i]], outFile, overwrite = TRUE)
         }
       )
     } else {
-      speciesLayers <- mergeSppRaster(sppMerge = sppMerge, speciesLayers = speciesLayers,
-                                      sppEquiv = sppEquiv, column = "KNN", suffix = suffix,
-                                      dPath = oPath)
+      speciesLayers <- mergeSppRaster(
+        sppMerge = sppMerge,
+        speciesLayers = speciesLayers,
+        sppEquiv = sppEquiv,
+        column = "KNN",
+        suffix = suffix,
+        dPath = oPath
+      )
     }
   }
   ## Rename species layers - There will be 2 groups -- one
@@ -925,8 +1341,11 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
   nameChangeNA <- is.na(nameChanges)
   names(speciesLayers)[!nameChangeNA] <- nameChanges[!nameChangeNA]
 
-  nameChangesNonMerged <- equivalentName(names(speciesLayers)[nameChangeNA],
-                                         sppEquiv, column = sppEquivCol)
+  nameChangesNonMerged <- equivalentName(
+    names(speciesLayers)[nameChangeNA],
+    sppEquiv,
+    column = sppEquivCol
+  )
   names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
 
   ## return stack
@@ -965,17 +1384,474 @@ loadkNNSpeciesLayers <- function(dPath, rasterToMatch = NULL, studyArea = NULL, 
 #'
 #' @export
 #' @rdname LandR-deprecated
-loadkNNSpeciesLayersValidation <- function(dPath, rasterToMatch, studyArea, sppEquiv,
-                                           knnNamesCol = "KNN", sppEquivCol, thresh = 1, url, ...) {
+loadkNNSpeciesLayersValidation <- function(
+  dPath,
+  rasterToMatch,
+  studyArea,
+  sppEquiv,
+  knnNamesCol = "KNN",
+  sppEquivCol,
+  thresh = 1,
+  url,
+  ...
+) {
   .Deprecated(
     "loadkNNSpeciesLayers",
-    msg = paste("loadkNNSpeciesLayersValidation is deprecated.",
-                "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers.")
+    msg = paste(
+      "loadkNNSpeciesLayersValidation is deprecated.",
+      "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers."
+    )
   )
 
-  loadkNNSpeciesLayers(dPath = dPath, rasterToMatch = rasterToMatch, studyArea = studyArea,
-                       sppEquiv = sppEquiv, year = 2011, knnNamesCol = knnNamesCol,
-                       sppEquivCol = sppEquivCol, thresh = thresh, url = url, ...)
+  loadkNNSpeciesLayers(
+    dPath = dPath,
+    rasterToMatch = rasterToMatch,
+    studyArea = studyArea,
+    sppEquiv = sppEquiv,
+    year = 2011,
+    knnNamesCol = knnNamesCol,
+    sppEquivCol = sppEquivCol,
+    thresh = thresh,
+    url = url,
+    ...
+  )
+}
+
+#' Load SCANFI species layers from online data repository
+#'
+#' @param dPath path to the data directory
+#'
+#' @template rasterToMatch
+#'
+#' @template studyArea
+#'
+#' @template sppEquiv
+#'
+#' @param year data year for SCANFI data. 2000, 2010, and 2020 possible for V1.
+#'    1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020 (default), 2025 possible for V2.
+#'
+#' @param dataVersion Character. SCANFI product version for data. Default is currently V2. V1 also available.
+#'
+#' @param SCANFINamesCol character string indicating the column in `sppEquiv` containing SCANFI
+#'                       species names. Default `"NFI"` for when `sppEquivalencies_CA` is used.
+#'
+#' @template sppEquivCol
+#'
+#' @param thresh the minimum percent cover a species must have (per pixel)
+#'               to be considered present in the study area.
+#'               Defaults to 10.
+#'
+#' @param url a source url for the data
+#'
+#' @param ... Additional arguments passed to [reproducible::Cache()]
+#'            and [equivalentName()]. Also valid: `outputPath`, and `studyAreaName`.
+#'
+#' @return A raster stack of percent cover layers by species.
+#'
+#' @export
+loadSCANFISpeciesLayers <- function(
+  dPath,
+  rasterToMatch = NULL,
+  studyArea = NULL,
+  sppEquiv,
+  year = 2020,
+  dataVersion = "V2",
+  SCANFINamesCol = "SCANFI",
+  sppEquivCol = "SCANFI",
+  thresh = 10,
+  url = NULL,
+  ...
+) {
+  dots <- list(...)
+  oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
+  if (!is.null(dots$to) && missing(studyArea)) {
+    studyArea <- dots$to
+  }
+
+  if (!is.null(dots$to) && missing(rasterToMatch) && reproducible::.isGridded(dots$to)) {
+    rasterToMatch <- dots$to
+  }
+
+  if (
+    !is.null(dots$projectTo) && missing(rasterToMatch) && reproducible::.isGridded(dots$projectTo)
+  ) {
+    rasterToMatch <- dots$projectTo
+  }
+
+  sppEquivalencies_CA <- get(
+    data("sppEquivalencies_CA", package = "LandR", envir = environment()),
+    inherits = FALSE
+  )
+
+  if (missing(sppEquiv)) {
+    message(
+      "sppEquiv argument is missing, using LandR::sppEquivalencies_CA, with ",
+      sppEquivCol,
+      " column (taken from sppEquivCol arg value)"
+    )
+    sppEquiv <- sppEquivalencies_CA[get(sppEquivCol) != ""]
+  } else {
+    sppEquiv <- sppEquiv[get(sppEquivCol) != ""]
+  }
+
+  sppEquiv <- sppEquiv[, lapply(.SD, as.character)]
+  sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
+  sppNameVector <- unique(sppEquiv[[sppEquivCol]])
+  ## remove empty names
+  sppNameVector <- sppNameVector[sppNameVector != ""]
+
+  sppMerge <- unique(sppEquiv[[sppEquivCol]][duplicated(sppEquiv[[sppEquivCol]])])
+  sppMerge <- sppMerge[nzchar(sppMerge)]
+  if ("cachePath" %in% names(dots)) {
+    cachePath <- dots$cachePath
+  } else {
+    cachePath <- getOption("reproducible.cachePath")
+  }
+
+  if (is.null(url)) {
+    if (dataVersion == "V1") {
+      if (!(year %in% .scanfi_v1_years)) {
+        stop("SCANFI V1 species do not exist for this year")
+      }
+
+      if (year == 2000) {
+        url <- "https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp"
+      } else if (year == 2010) {
+        url <- "https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE"
+      } else if (year == 2020) {
+        url <- "https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ"
+      }
+    } else if (dataVersion == "V2") {
+      if (!(year %in% .scanfi_v2_years)) {
+        stop("SCANFI V2 species does not exist for this year")
+      }
+
+      if (year == 1985) {
+        url <- paste0("https://drive.google.com/file/d/1zXkDkGIJaRB2Cwd7Ld2R7FFswRIDmAj4")
+      } else if (year == 1990) {
+        url <- paste0("https://drive.google.com/file/d/1GbKOGxxLG-pF-jjBjuJC6IuWIU3aVBo2")
+      } else if (year == 1995) {
+        url <- paste0("https://drive.google.com/file/d/1KfAxjccHE51pOmi0OMYqwyRkIhJH7knn")
+      } else if (year == 2000) {
+        url <- paste0("https://drive.google.com/file/d/19sddeWJCJq9uMkDjmtNtXKjOQEDeFKBl")
+      } else if (year == 2005) {
+        url <- paste0("https://drive.google.com/file/d/10Aw9PX_FEEhYHNTraKAb6l9DnaIom2qk")
+      } else if (year == 2010) {
+        url <- paste0("https://drive.google.com/file/d/1fjoiYf0lhkZF3SgDMGPuYB1J4sUmU_Vo")
+      } else if (year == 2015) {
+        url <- paste0("https://drive.google.com/file/d/1FcXFIfscxkO7o5WRTINDZfFnu102IMls")
+      } else if (year == 2020) {
+        url <- paste0("https://drive.google.com/file/d/15T4HIFeqzwp0TuOuxmYoexuXdLFnCZBi")
+      } else if (year == 2025) {
+        url <- paste0("https://drive.google.com/file/d/1jS2sscKe_tcw4qDC-9297_jrulFduyKg")
+      }
+    }
+  }
+
+  ## List the folder via reproducible's remap-aware helper: when a directory
+  ## remap manifest is set (reproducible.urlRemap), the files are enumerated from
+  ## a public mirror with NO Google authentication; otherwise it falls back to
+  ## googledrive::drive_ls(). The returned `url` column is the mirror URL when
+  ## remapped, else the Drive file URL -- used directly below instead of building
+  ## one from the Drive id (the mirror listing carries no Drive id).
+  driveFiles <- reproducible::listGoogleDriveFolder(url)
+  driveFiles <- driveFiles[grepl("SCANFI_sps", name)] ## selecting just species layers
+  driveFiles <- driveFiles[grep("tif.", name, invert = TRUE)] ## removing .ovr and .aux files
+  if (dataVersion == "V2") {
+    driveFiles <- driveFiles[grep("prcB_other", name, invert = TRUE)] #Removing generic species layers
+    driveFiles <- driveFiles[grep("prcC_other", name, invert = TRUE)]
+  }
+  fileURLs <- driveFiles$url
+  fileNames <- c(driveFiles$name)
+  names(fileURLs) <- fileNames
+
+  ## get all SCANFI species - names only
+  allSpp <- fileNames |>
+    sub("SCANFI_sps_", "", x = _) |>
+    sub(paste0("_S_", year, "_v1_1.tif"), "", x = _)
+
+  stopifnot("Incomplete file list retrieved from server." = length(allSpp) > 1)
+
+  ## Make sure spp names are compatible with SCANFI names
+  SCANFInames <- if (SCANFINamesCol %in% colnames(sppEquiv)) {
+    equivalentName(sppNameVector, sppEquiv, column = SCANFINamesCol, multi = TRUE) |> as.character()
+  } else {
+    equivalentName(
+      sppNameVector,
+      sppEquivalencies_CA,
+      column = SCANFINamesCol,
+      multi = TRUE,
+      searchColumn = sppEquivCol
+    ) |>
+      as.character()
+  }
+  sppNameVector <- equivalentName(sppNameVector, sppEquiv, column = sppEquivCol, multi = TRUE) |>
+    as.character()
+
+  ## if there are NA's, that means some species can't be found in kNN database
+  if (any(is.na(SCANFInames))) {
+    warning(paste0(
+      "Can't find ",
+      sppNameVector[is.na(SCANFInames)],
+      " in `sppEquiv$",
+      SCANFINamesCol,
+      ".\n",
+      "Will use remaining matching species, but check if this is correct."
+    ))
+    ## select only available species
+    sppNameVector <- sppNameVector[!is.na(SCANFInames)]
+    SCANFInames <- SCANFInames[!is.na(SCANFInames)]
+  }
+
+  emptySppNames <- SCANFInames == ""
+  if (any(emptySppNames)) {
+    ## select only available species
+    SCANFInames <- SCANFInames[!emptySppNames]
+    sppNameVector <- sppNameVector[!emptySppNames]
+  }
+
+  ## same as above
+  whInSCANFI <- sapply(SCANFInames, grep, x = allSpp)
+  missingSCANFI <- setdiff(SCANFInames, names(whInSCANFI))
+  # missingSCANFI <- setdiff(SCANFInames, allSpp)
+  if (length(missingSCANFI)) {
+    warning(paste0(
+      "Can't find ",
+      paste(missingSCANFI, collapse = ", "),
+      " in SCANFI database.\n",
+      "Will use remaining matching species, but check if this is correct."
+    ))
+    sppNameVector <- sppNameVector[SCANFInames %in% allSpp]
+    SCANFInames <- SCANFInames[SCANFInames %in% allSpp]
+  }
+
+  if (!length(SCANFInames)) {
+    stop("None of the selected species were found in the SCANFI layers")
+  }
+
+  if (dataVersion == "V1") {
+    #removing 2 species that weren't present in SCANFI V1
+    SCANFInames <- SCANFInames[!SCANFInames %in% c("FRAX_AME", "POPU_GRA")]
+  }
+
+  ## define suffix to append to file names
+  suffix <- if (basename(cachePath) == "cache") {
+    if (is.null(rasterToMatch)) {
+      ""
+    } else {
+      paste0(as.character(ncell(rasterToMatch)), "px")
+    }
+  } else {
+    if (is.null(dots$studyAreaName) || basename(cachePath) != dots$studyAreaName) {
+      basename(cachePath)
+    } else {
+      NULL ## will add studyAreaName below, so don't also add it here
+    }
+  }
+  suffix <- ifelse(is.null(suffix), "", paste0("_", suffix))
+
+  ## select which targetFiles to extract
+  ## use sapply to preserve pattern order
+  if (dataVersion == "V1") {
+    targetFiles <- sapply(
+      paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif"),
+      USE.NAMES = FALSE,
+      FUN = function(pat) {
+        grep(pat, fileNames, value = TRUE)
+      }
+    )
+  } else if (dataVersion == "V2") {
+    targetFiles <- sapply(
+      paste0("SCANFI_spsCC_", SCANFInames, "_", year, "_v2_20260119.tif"),
+      USE.NAMES = FALSE,
+      FUN = function(pat) {
+        grep(pat, fileNames, value = TRUE)
+      }
+    )
+  }
+  ## the grep may partially match several species, resulting on a list.
+  targetFiles <- unique(unlist(targetFiles))
+
+  postProcessedFilenames <- .suffix(targetFiles, suffix = suffix) |> gsub("^[.]/", "", x = _)
+  postProcessedFilenamesWithStudyAreaName <- if (is.null(dots$studyAreaName)) {
+    postProcessedFilenames
+  } else {
+    .suffix(postProcessedFilenames, paste0("_", dots$studyAreaName)) |> gsub("^[.]/", "", x = _)
+  }
+
+  message("Running prepInputs for ", paste(SCANFInames, collapse = ", "))
+  if (length(SCANFInames) > 15) {
+    message(
+      "This looks like a lot of species;",
+      " did you mean to pass only a subset of this to sppEquiv?\n",
+      " You can use the list above to choose species, then select only those rows",
+      " in sppEquiv before passing here."
+    )
+  }
+
+  URLs <- fileURLs[targetFiles]
+
+  speciesLayers <- Map(
+    function(tf, url, outFile) {
+      prepInputs(
+        url = url,
+        to = rasterToMatch,
+        destinationPath = dPath,
+        method = "bilinear",
+        writeTo = outFile,
+        overwrite = TRUE
+      )
+    },
+    tf = file.path(dPath, targetFiles),
+    url = URLs,
+    outFile = file.path(oPath, postProcessedFilenamesWithStudyAreaName)
+  ) |>
+    Cache(.functionName = "prepInputs_speciesLayers")
+
+  # if (is.null(studyArea) && is.null(rasterToMatch)) {
+  #   speciesLayers <- Map(
+  #     function(tf, url, outFile) {
+  #       if (!file.exists(tf)) {
+  #         id <- sub(".*?/d/([a-zA-Z0-9_-]+).*", "\\1", url)
+  #         googledrive::drive_download(googledrive::as_id(id), path = tf, overwrite = TRUE)
+  #       }
+  #       r <- terra::rast(tf)
+  #       terra::writeRaster(r, outFile, overwrite = TRUE)
+  #       return(rast(outFile))
+  #     },
+  #     tf = targetFiles,
+  #     url = URLs,
+  #     outFile = file.path(dPath, postProcessedFilenamesWithStudyAreaName)
+  #   ) |>
+  #     Cache()
+  # } else {
+  #   speciesLayers <- Map(
+  #     function(tf, url, outFile) {
+  #       if (!file.exists(tf)) {
+  #         id <- sub(".*?/d/([a-zA-Z0-9_-]+).*", "\\1", url)
+  #         googledrive::drive_download(googledrive::as_id(id), path = tf, overwrite = TRUE)
+  #       }
+  #       r <- terra::rast(tf)
+  #       r_resampled <- postProcess(r, rasterToMatch, method = "bilinear", writeTo = outFile) |>
+  #         suppressWarningsSpecific("method is bilinear")
+  #
+  #       return(r_resampled)
+  #     },
+  #     tf = file.path(dPath, targetFiles),
+  #     url = URLs,
+  #     outFile = file.path(oPath, postProcessedFilenamesWithStudyAreaName)
+  #   ) |>
+  #     Cache()
+  # }
+
+  ## appending file name structure to eliminate double matches for subspecies:
+  if (dataVersion == "V1") {
+    SCANFInames2 <- paste0("SCANFI_sps_", SCANFInames, "_S_", year, "_v1_1.tif")
+  } else if (dataVersion == "V2") {
+    SCANFInames2 <- paste0("SCANFI_spsCC_", SCANFInames, "_", year, "_v2_20260119.tif")
+  }
+  correctOrder <- sapply(unique(SCANFInames2), function(x) {
+    grep(pattern = x, x = targetFiles, value = TRUE)
+  })
+  names(speciesLayers) <- names(correctOrder)[match(correctOrder, targetFiles)]
+  if (dataVersion == "V1") {
+    names(speciesLayers) <- gsub(paste0("_?S_?", year, "_?v1_?1.tif"), "", names(speciesLayers))
+    names(speciesLayers) <- gsub("SCANFI_?sps_?", "", names(speciesLayers))
+  } else if (dataVersion == "V2") {
+    names(speciesLayers) <- gsub(paste0("_", year, "_v2_.*\\.tif"), "", names(speciesLayers))
+    names(speciesLayers) <- gsub("SCANFI_spsCC_", "", names(speciesLayers))
+  }
+  layerNames <- names(speciesLayers)
+
+  ## converting to a stack because global() is much faster than sapply over the list
+  speciesLayers <- terra::rast(speciesLayers)
+  maxs <- terra::global(speciesLayers, "max", na.rm = TRUE)
+
+  speciesLayers <- as.list(speciesLayers)
+  names(speciesLayers) <- layerNames
+
+  ## remove "no data" first
+  noData <- is.na(maxs)
+  if (any(noData)) {
+    message(paste(
+      paste(names(noData)[noData], collapse = " "),
+      " has no data in this study area; omitting it"
+    ))
+    speciesLayers <- speciesLayers[[!noData]]
+  }
+
+  ## remove "little data" next
+  layersWdata <- ifelse(maxs > thresh, TRUE, FALSE)
+  if (sum(!layersWdata) > 0) {
+    sppKeep <- names(speciesLayers)[layersWdata]
+    if (length(sppKeep)) {
+      message(
+        "removing ",
+        sum(!layersWdata),
+        " species because they had <",
+        thresh,
+        " % cover in the study area\n",
+        "  These species are retained (and could be further culled manually, if desired):\n",
+        paste(sppKeep, collapse = " ")
+      )
+    } else {
+      message(
+        "no pixels for ",
+        paste(names(layersWdata), collapse = " "),
+        " were found with >=",
+        thresh,
+        " % cover in the study area.",
+        "\n  No species layers were retained. Try lowering the threshold",
+        " to retain species with low % cover"
+      )
+    }
+  }
+
+  speciesLayers <- speciesLayers[layersWdata]
+  if (!is.null(sppMerge)) {
+    if (length(sppMerge) == 0) {
+      lapply(
+        seq_along(speciesLayers),
+        FUN = function(
+          i,
+          rasters = speciesLayers,
+          filenames = postProcessedFilenamesWithStudyAreaName
+        ) {
+          outFile <- file.path(oPath, paste0(filenames[i]))
+          if (!file.exists(outFile)) {
+            writeRaster(rasters[[i]], outFile, overwrite = TRUE)
+            message("Wrote file: ", outFile)
+          } else {
+            message("Skipped file: ", outFile, " (already exists)")
+          }
+        }
+      )
+    } else {
+      speciesLayers <- mergeSppRaster(
+        sppMerge = sppMerge,
+        speciesLayers = speciesLayers,
+        sppEquiv = sppEquiv,
+        column = "SCANFI",
+        suffix = suffix,
+        dPath = oPath
+      )
+    }
+  }
+
+  ## Rename species layers - There will be 2 groups -- one
+  nameChanges <- equivalentName(names(speciesLayers), sppEquiv, column = sppEquivCol)
+  nameChangeNA <- is.na(nameChanges)
+  names(speciesLayers)[!nameChangeNA] <- nameChanges[!nameChangeNA]
+
+  nameChangesNonMerged <- equivalentName(
+    names(speciesLayers)[nameChangeNA],
+    sppEquiv,
+    column = sppEquivCol
+  )
+  names(speciesLayers)[nameChangeNA] <- nameChangesNonMerged
+
+  ## return stack
+  .stack(speciesLayers)
 }
 
 #' Function to sum rasters of species layers
@@ -1015,12 +1891,18 @@ sumRastersBySpecies <- function(speciesLayers, layersToSum, filenameToSave, newL
 #' @template destinationPath
 #'
 #' @export
-overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffix = "overlay",
-                          destinationPath) {
+overlayStacks <- function(
+  highQualityStack,
+  lowQualityStack,
+  outputFilenameSuffix = "overlay",
+  destinationPath
+) {
   ## check if there are any layers/values in the lowQualityStack
   ## if not return the HQ one
-  if (!(is(lowQualityStack, "RasterStack") || is(lowQualityStack, "SpatRaster")) &&
-      all(is.na(lowQualityStack[]))) {
+  if (
+    !(is(lowQualityStack, "RasterStack") || is(lowQualityStack, "SpatRaster")) &&
+      all(is.na(lowQualityStack[]))
+  ) {
     highQualityStack
   } else {
     ## check if HQ resolution > LQ resolutions
@@ -1030,21 +1912,30 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
     ## make table of species layers in HQ and LQ
     dt1 <- data.table(SPP = names(highQualityStack), HQ = names(highQualityStack))
     dt2 <- data.table(SPP = names(lowQualityStack), LQ = names(lowQualityStack))
-    setkey(dt1, SPP); setkey(dt2, SPP)
+    setkey(dt1, SPP)
+    setkey(dt2, SPP)
     dtj <- merge(dt1, dt2, all = TRUE)
     dtj[, c("HQ", "LQ") := list(!is.na(HQ), !is.na(LQ))]
 
     ## check which layers have species info in HQ and LQ
-    #dtj[, HQ := any(!is.na(highQualityStack[[SPP]][])), by = 1:nrow(dtj)] #nolint
-    #dtj[, LQ := any(!is.na(lowQualityStack[[SPP]][])), by = 1:nrow(dtj)] #nolint
+    # dtj[, HQ := any(!is.na(highQualityStack[[SPP]][])), by = 1:nrow(dtj)] #nolint
+    # dtj[, LQ := any(!is.na(lowQualityStack[[SPP]][])), by = 1:nrow(dtj)] #nolint
 
     stackRas <- list()
     for (x in seq_len(nrow(dtj))) {
-      stackRas[[x]] <- dtj[x, .overlay(SPP, HQ, LQ, hqLarger = hqLarger,
-                                       highQualityStack = highQualityStack,
-                                       lowQualityStack = lowQualityStack,
-                                       outputFilenameSuffix = outputFilenameSuffix,
-                                       destinationPath = destinationPath)]
+      stackRas[[x]] <- dtj[
+        x,
+        .overlay(
+          SPP,
+          HQ,
+          LQ,
+          hqLarger = hqLarger,
+          highQualityStack = highQualityStack,
+          lowQualityStack = lowQualityStack,
+          outputFilenameSuffix = outputFilenameSuffix,
+          destinationPath = destinationPath
+        )
+      ]
     }
     names(stackRas) <- dtj$SPP
 
@@ -1065,25 +1956,43 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
 #' @param LQ `data.table` column of whether `SPP` is present in LQ layers
 #'
 #' @keywords internal
-.overlay <- function(SPP, HQ, LQ, hqLarger, highQualityStack, lowQualityStack, #nolint
-                     outputFilenameSuffix = "overlay", destinationPath) {
+.overlay <- function(
+  SPP,
+  HQ,
+  LQ,
+  hqLarger,
+  highQualityStack,
+  lowQualityStack, #nolint
+  outputFilenameSuffix = "overlay",
+  destinationPath
+) {
   ## if HQ & LQ have data, pool
   if (HQ && LQ) {
     ## check equality of raster attributes and correct if necessary
-    if (!all(
-      isTRUE(all.equal(ext(lowQualityStack), ext(highQualityStack))),
-      isTRUE(all.equal(crs(lowQualityStack), crs(highQualityStack))),
-      isTRUE(all.equal(res(lowQualityStack), res(highQualityStack))))) {
-      message("  ", SPP, " extents, or resolution, or projection did not match; ",
-              "using gdalwarp to make them overlap")
+    if (
+      !all(
+        isTRUE(all.equal(ext(lowQualityStack), ext(highQualityStack))),
+        isTRUE(all.equal(crs(lowQualityStack), crs(highQualityStack))),
+        isTRUE(all.equal(res(lowQualityStack), res(highQualityStack)))
+      )
+    ) {
+      message(
+        "  ",
+        SPP,
+        " extents, or resolution, or projection did not match; ",
+        "using gdalwarp to make them overlap"
+      )
       if (!nzchar(Filenames(lowQualityStack[[SPP]]))) {
         LQCurName <- basename(tempfile(fileext = ".tif"))
         lowQualityStack[[SPP]][] <- as.integer(as.vector(lowQualityStack[[SPP]][]))
 
         NAval <- 65535L
-        lowQualityStack[[SPP]] <- writeRaster(lowQualityStack[[SPP]],
-                                              filename = LQCurName,
-                                              datatype = "INT2U", NAflag = NAval)
+        lowQualityStack[[SPP]] <- writeRaster(
+          lowQualityStack[[SPP]],
+          filename = LQCurName,
+          datatype = "INT2U",
+          NAflag = NAval
+        )
         ## NAvals need to be converted back to NAs
         lowQualityStack[[SPP]] <- .NAvalueFlag(lowQualityStack[[SPP]], NAval)
       }
@@ -1092,8 +2001,11 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
       LQRastInHQcrs <- .projectExtent(lowQualityStack, crs = crs(highQualityStack))
 
       ## create a template raster to use as RTM
-      templateRas <- rast(ext = LQRastInHQcrs, crs = crs(highQualityStack),
-                          res = res(highQualityStack))
+      templateRas <- rast(
+        ext = LQRastInHQcrs,
+        crs = crs(highQualityStack),
+        res = res(highQualityStack)
+      )
 
       # project LQ raster into HQ dimensions
       ## TODO: moving away from gdal and using postProcess --
@@ -1124,8 +2036,7 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
       # LQRast <- postProcess(LQRast, rasterToMatch = templateRas,
       #                         maskWithRTM = FALSE)  ## not working
       LQRast <- cropInputs(lowQualityStack[[SPP]], rasterToMatch = templateRas)
-      LQRast <- projectInputs(LQRast, rasterToMatch = templateRas,
-                              maskWithRTM = FALSE)
+      LQRast <- projectInputs(LQRast, rasterToMatch = templateRas, maskWithRTM = FALSE)
 
       if (hqLarger) {
         ## TODO: postProcess returns NaN values and always tries to mask despite maskWithRTM = FALSE
@@ -1145,18 +2056,22 @@ overlayStacks <- function(highQualityStack, lowQualityStack, outputFilenameSuffi
     ## TODO: .compareRas (compareGeom) is less tolerant than st_crs, but projecting
     ## manually is a pain (we can't use postProcess because it also uses st_crs internally)
     ## for now use st_crs to compare CRS, but this is unlikely to be the best
-    if (!.compareRas(LQRast, HQRast, stopOnError = FALSE))
+    if (!.compareRas(LQRast, HQRast, stopOnError = FALSE)) {
       stop("Stacks not identical, something is wrong with overlayStacks function.")
+    }
 
     NAs <- is.na(as.vector(HQRast[]))
 
     ## complete missing HQ data with LQ data
     HQRast[NAs] <- LQRast[][NAs]
-    NAval <- 255L
-    HQRast <- writeRaster(HQRast, datatype = "INT1U",
-                          filename = file.path(destinationPath,
-                                               paste0(SPP, "_", outputFilenameSuffix, ".tif")),
-                          overwrite = TRUE, NAflag = NAval)
+    NAval <- 65535L
+    HQRast <- writeRaster(
+      HQRast,
+      datatype = "INT2U",
+      filename = file.path(destinationPath, paste0(SPP, "_", outputFilenameSuffix, ".tif")),
+      overwrite = TRUE,
+      NAflag = NAval
+    )
     names(HQRast) <- SPP
 
     ## NAvals need to be converted back to NAs
@@ -1200,12 +2115,16 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
 
   ## make sure species names and list names are in the right formats
   names(sppMerge) <- sppMerge
-  sppMerges <- lapply(sppMerge, FUN = function(x) {
-    unique(equivalentName(x, sppEquiv,  column = column, multi = TRUE))
-  })
+  sppMerges <- sapply(
+    sppMerge,
+    FUN = function(x) {
+      unique(equivalentName(x, sppEquiv, column = column, multi = TRUE))
+    },
+    simplify = FALSE
+  )
 
   ## keep species present in the data
-  sppMerges <- lapply(sppMerges, FUN = function(x) x[x %in% names(speciesLayers)])
+  sppMerges <- sapply(sppMerges, FUN = function(x) x[x %in% names(speciesLayers)], simplify = FALSE)
 
   for (i in seq_along(sppMerges)) {
     sumSpecies <- sppMerges[[i]]
@@ -1213,10 +2132,11 @@ mergeSppRaster <- function(sppMerge, speciesLayers, sppEquiv, column, suffix, dP
       newLayerName <- names(sppMerges)[i]
 
       fname <- .suffix(file.path(dPath, paste0(column, "_", newLayerName, ".tif")), suffix)
-      if (is(speciesLayers[sumSpecies][1], "Raster"))
+      if (is(speciesLayers[sumSpecies][1], "Raster")) {
         a <- calc(stack(speciesLayers[sumSpecies]), sum, na.rm = TRUE)
-      else
+      } else {
         a <- sum(rast(speciesLayers[sumSpecies]), na.rm = TRUE)
+      }
       names(a) <- newLayerName
       a <- writeRaster(a, filename = fname, overwrite = TRUE, ...)
       ## replace spp rasters by the summed one
@@ -1272,8 +2192,9 @@ aggregateRasByDT <- function(ras, newRas, fn = sum) {
   whNonNA <- which(!is.na(ras[]))
   rc2 <- rowColFromCell(ras, whNonNA)
 
-  if (!all(((res(newRas) / res(ras)) %% 1) == 0))
+  if (!all(((res(newRas) / res(ras)) %% 1) == 0)) {
     stop("The resolutions of the original raster and new raster are not integer multiples")
+  }
 
   disaggregateFactor <- unique(res(newRas) / res(ras))
   dt <- data.table(vals = ras[][whNonNA], ceiling(rc2 / disaggregateFactor))
@@ -1284,4 +2205,3 @@ aggregateRasByDT <- function(ras, newRas, fn = sum) {
   names(newRasOut) <- names(ras)
   newRasOut
 }
-

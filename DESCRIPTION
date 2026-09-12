@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     https://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2024-06-06
-Version: 1.1.4
+Date: 2026-09-11
+Version: 1.2.1
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -24,49 +24,65 @@ Authors@R: c(
            role = "cph")
     )
 Depends:
-    R (>= 4.2)
+    R (>= 4.3)
 Imports:
-    crayon,
+    cli,
     data.table,
+    Formula,
     fpCompare,
     ggplot2,
-    ggpubr,
     ggspatial,
     grDevices,
+    httr2,
     lme4,
     methods,
     MuMIn (>= 1.42.5),
     parallel,
+    patchwork,
     pemisc (>= 0.0.4.9011),
-    quickPlot,
+    quickPlot (>= 1.0.4),
     raster,
     RColorBrewer,
-    reproducible (>= 2.0.8),
+    Rcpp (>= 1.0.10),
+    reproducible (>= 3.1.1.9063),
     sf,
     sp,
-    SpaDES.tools (>= 2.0.4),
+    SpaDES.tools (>= 2.1.1),
     stats,
     terra,
     tidyterra,
     tools,
     utils,
     viridis
+LinkingTo:
+    Rcpp
 Suggests:
+    arrow,
     bbmle, 
     biomod2 (>= 4.2-2),
-    BioSIM,
+    BioSIM (>= 1.1.0),
+    codetools,
     covr,
-    curl,
+    curl (>= 6.4.0),
+    digest,
+    dplyr,
     fasterize,
     future,
     future.apply,
+    geodata,
+    ggalluvial,
+    ggpubr,
+    ggrepel,
     googledrive (>= 2.0.0),
     httr,
     knitr,
     lqmm,
+    map,
     MASS,
+    memuse,
     parallelly,
-    qs,
+    purrr,
+    qs2,
     rasterVis,
     RCurl,
     RhpcBLASctl,
@@ -74,6 +90,7 @@ Suggests:
     rmarkdown,
     roxygen2,
     R.utils,
+    SpaDES.core,
     spelling,
     testthat,
     withr,
@@ -83,20 +100,21 @@ Remotes:
     RNCan/BioSimClient_R,
     PredictiveEcology/map@development,
     PredictiveEcology/pemisc@development,
-    PredictiveEcology/quickPlot@development,
     PredictiveEcology/reproducible@development,
     PredictiveEcology/SpaDES.core@development,
     PredictiveEcology/SpaDES.tools@development
 Encoding: UTF-8
+VignetteBuilder: knitr, rmarkdown
 Language: en-CA
 License: GPL-3
-VignetteBuilder: knitr, rmarkdown
 BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
 Collate: 
     'LANDIS-II-tables.R'
     'LandR-package.R'
+    'RcppExports.R'
+    'SummarizeCanadianForestRasters.R'
     'assertions.R'
     'biomodWrappers.R'
     'biosim.R'
@@ -105,9 +123,12 @@ Collate:
     'convertUnwantedLCC2.R'
     'dem.R'
     'disturbances.R'
+    'driveFallback.R'
     'ecoregions.R'
     'ecozones.R'
     'fireSeverity.R'
+    'imports.R'
+    'lccMapGenerator.R'
     'light-shade.R'
     'makeDummyInputs.R'
     'maps.R'
@@ -116,7 +137,8 @@ Collate:
     'nullClimate.R'
     'overlayLCCs.R'
     'partitionBiomass.R'
-    'plot_summaries.R'
+    'plot-summaries.R'
+    'plot-transitions.R'
     'plotting.R'
     'prepEcoregions.R'
     'prepInputObjects.R'
@@ -130,7 +152,11 @@ Collate:
     'sppHarmonize.R'
     'studyArea.R'
     'terra-raster-utils.R'
+    'vignette-artifacts.R'
     'wildfire.R'
     'zzz.R'
-RoxygenNote: 7.3.1
 Roxygen: list(markdown = TRUE)
+Config/testthat/edition: 3
+Config/testthat/parallel: true
+Config/testthat/start-first: prep*
+Config/roxygen2/version: 8.1.0

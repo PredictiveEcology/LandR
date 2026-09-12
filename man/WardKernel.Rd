@@ -23,8 +23,7 @@ with same length as \code{dist}}
 
 \item{b}{A parameter in the kernel}
 
-\item{algo}{Either 1 or 2. 2 is faster and is default. 1 is "simpler code" as it
-uses \code{ifelse}}
+\item{algo}{Either 1 or 2. 1 is "simpler code" as it uses \code{ifelse}; 2 is faster and is default.}
 }
 \description{
 A probability distribution used in LANDIS-II.

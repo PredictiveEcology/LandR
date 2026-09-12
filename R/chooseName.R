@@ -82,7 +82,9 @@ sppEquivCheck <- function(sppEquiv, ensureColumns = NULL, sppEquivCol = NULL) {
     if (!all(c(ensureColumns) %in% colnames(sppEquiv))) {
       if (all(colnames(sppEquiv) %in% colnames(sppEquivalencies_CA))) {
         sppEquiv <- sppEquivalencies_CA[
-          sppEquiv, on = intersect(colnames(sppEquiv), colnames(sppEquivalencies_CA))]
+          sppEquiv,
+          on = intersect(colnames(sppEquiv), colnames(sppEquivalencies_CA))
+        ]
       } else {
         stop(
           "Please provide 'sppEquiv' as a data.table with at least one column of species names ",

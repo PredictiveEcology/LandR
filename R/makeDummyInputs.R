@@ -11,9 +11,11 @@ utils::globalVariables(c())
 #' @export
 #' @rdname dummy-inputs
 makeDummyEcoregionMap <- function(rasterToMatch) {
-  ecoregionMap <- randomPolygons(ras = rasterToMatch,
-                                 res = res(rasterToMatch),
-                                 numTypes = 2)
+  ecoregionMap <- randomPolygons(
+    ras = rasterToMatch,
+    res = res(rasterToMatch),
+    numTypes = 2
+  )
   ecoregionMap <- mask(ecoregionMap, rasterToMatch)
   return(ecoregionMap)
 }
@@ -28,10 +30,11 @@ makeDummyEcoregionMap <- function(rasterToMatch) {
 #' @rdname dummy-inputs
 makeDummyRawBiomassMap <- function(rasterToMatch) {
   rawBiomassMap <- neutralLandscapeMap(rasterToMatch,
-                                       roughness = 0.65,
-                                       rand_dev = 200,
-                                       rescale = FALSE,
-                                       verbose = FALSE)
+    roughness = 0.65,
+    rand_dev = 200,
+    rescale = FALSE,
+    verbose = FALSE
+  )
 
   rawBiomassMap[] <- round(abs(as.vector(rawBiomassMap[])))
   return(rawBiomassMap)
@@ -61,9 +64,11 @@ makeDummyStandAgeMap <- function(rawBiomassMap) {
 #' @export
 #' @rdname dummy-inputs
 makeDummyRstLCC <- function(rasterToMatch) {
-  rstLCC <- randomPolygons(ras = rasterToMatch,
-                           res = res(rasterToMatch),
-                           numTypes = 5)
+  rstLCC <- randomPolygons(
+    ras = rasterToMatch,
+    res = res(rasterToMatch),
+    numTypes = 5
+  )
   rstLCC <- mask(rstLCC, rasterToMatch)
   return(rstLCC)
 }
@@ -81,15 +86,18 @@ makeDummyRstLCC <- function(rasterToMatch) {
 #' @export
 #' @rdname dummy-inputs
 makeDummyEcoregionFiles <- function(ecoregionMap, rstLCC, rasterToMatch) {
-  ecoregionstatus <- data.table(active = "yes",
-                                ecoregion = unique(as.vector(ecoregionMap[])))
+  ecoregionstatus <- data.table(
+    active = "yes",
+    ecoregion = unique(as.vector(ecoregionMap[]))
+  )
   ecoregionstatus <- ecoregionstatus[complete.cases(ecoregionstatus)]
 
   ecoregionFiles <- Cache(ecoregionProducer,
-                          ecoregionMaps = list(ecoregionMap, rstLCC),
-                          ecoregionName = "ECODISTRIC",
-                          rasterToMatch = rasterToMatch,
-                          userTags = "ecoregionFiles")
+    ecoregionMaps = list(ecoregionMap, rstLCC),
+    ecoregionName = "ECODISTRIC",
+    rasterToMatch = rasterToMatch,
+    userTags = "ecoregionFiles"
+  )
   return(ecoregionFiles)
 }
 
@@ -104,6 +112,8 @@ rescale <- function(x, to) {
   ## This is a simple function copied from the scales package.
   ## (package too heavy to use one simple function)
   from <- range(x, na.rm = TRUE, finite = TRUE)
-  if (diff(range(to)) %==% 0 || diff(range(from)) %==% 0) return(mean(to))
-  (x - from[1])/diff(from) * diff(to) + to[1]
+  if (diff(range(to)) %==% 0 || diff(range(from)) %==% 0) {
+    return(mean(to))
+  }
+  (x - from[1]) / diff(from) * diff(to) + to[1]
 }

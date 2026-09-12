@@ -1,0 +1,5 @@
+landscape,side_km,ncell,unwanted,pct_unw,terra_s,landr_s,landr_done,Nend,landr_self_agree,terra_vs_landr,speedup
+small,50,43681,254,0.59,0.15,0.1,TRUE,1,52.8,50.8,1
+medium,140,341056,2889,0.85,0.31,0.3,TRUE,11,74.5,74.5,1
+large,260,1175056,6770,0.58,1.01,0.9,TRUE,11,79.5,78.8,1
+bigblob,120,250000,1145,0.46,0.15,0.2,TRUE,35,72.7,75.5,1

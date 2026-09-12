@@ -1,4 +1,6 @@
-utils::globalVariables(c(".", ":=", "X1", "X2", "X3", "X4", "X5", "maxMaxB", "prevMortality"))
+utils::globalVariables(c(
+  ".", ":=", "X1", "X2", "X3", "X4", "X5", "maxMaxB", "prevMortality"
+))
 
 #' Calculate site shade
 #'
@@ -15,22 +17,24 @@ utils::globalVariables(c(".", ":=", "X1", "X2", "X3", "X4", "X5", "maxMaxB", "pr
 calcSiteShade <- function(currentTime, cohortData, speciesEcoregion, minRelativeB) {
   # the siteshade was calculated based on the code:
   # https://github.com/LANDIS-II-Foundation/Extensions-Succession/blob/master/biomass-succession/trunk/src/PlugIn.cs
-  if (nrow(cohortData[age > 5,]) > 0) {
-
-    bAMterm1 <- cohortData[age > 5, ':='(prevMortality = sum(mortality, na.rm = TRUE),
-                                         sumB = asInteger(sum(B, na.rm = TRUE)),
-                                         ecoregionGroup = ecoregionGroup),
-                           by = .(pixelGroup)] #had to move ecoregionGroup from 'by' to 'j' to account for EGsinPG
+  if (nrow(cohortData[age > 5, ]) > 0) {
+    bAMterm1 <- cohortData[age > 5, ":="(prevMortality = sum(mortality, na.rm = TRUE),
+      sumB = asInteger(sum(B, na.rm = TRUE)),
+      ecoregionGroup = ecoregionGroup),
+    by = .(pixelGroup)
+    ] # had to move ecoregionGroup from 'by' to 'j' to account for EGsinPG
     bAMterm1[is.na(sumB), sumB := 0L]
     bAMterm1[is.na(prevMortality), prevMortality := 0]
     bAMterm1 <- unique(bAMterm1, by = c("pixelGroup", "ecoregionGroup"))
-    #set(cohortData, NULL, "prevMortality", NULL)
+    # set(cohortData, NULL, "prevMortality", NULL)
   } else {
     bAMterm1 <- unique(cohortData, by = c("pixelGroup", "ecoregionGroup"))[
-      , .(pixelGroup, ecoregionGroup)][
-        , ':='(prevMortality = 0, sumB = 0)]
+      , .(pixelGroup, ecoregionGroup)
+    ][
+      , ":="(prevMortality = 0, sumB = 0)
+    ]
   }
-  #bAM <- data.table(speciesEcoregion)[year <= time(sim) & (year > (time(sim)-P(sim)$successionTimestep))]
+  # bAM <- data.table(speciesEcoregion)[year <= time(sim) & (year > (time(sim)-P(sim)$successionTimestep))]
   bAM <- speciesEcoregionLatestYear(speciesEcoregion, currentTime)
   bAM <- na.omit(bAM) # remove ecoregion-species groups with no maxB or maxANPP
   bAM <- bAM[, .(maxMaxB = max(maxB, na.rm = TRUE)), by = ecoregionGroup]

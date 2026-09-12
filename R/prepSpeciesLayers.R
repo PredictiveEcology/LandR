@@ -4,30 +4,36 @@ utils::globalVariables(c(
 
 #' Load CASFRI data
 #'
-#' TODO: description needed
+#' Loads CASFRIv4 data specifically supplied for the LandWeb project
 #'
-#' @param CASFRIRas TODO: description needed
-#' @param attrFile TODO: description needed
-#' @param headerFile TODO: description needed
+#' @param CASFRIRas `RasterLayer` object
+#' @param attrFile character string specifying a CASFRI attribute filename
+#' @param headerFile character string specifying a CASFRI header filename
 #' @template sppEquiv
 #' @template sppEquivCol
 #' @param type Character string. Either `"cover"` or `"age"`.
 #'
-#' @return TODO: description needed
+#' @return list with named elements: `CASFRIattrLong` and `CASFRIdt` (both data.tables)
 #'
 #' @export
-loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
-                       type = c("cover", "age")) {
+loadCASFRI <- function(
+    CASFRIRas,
+    attrFile,
+    headerFile,
+    sppEquiv,
+    sppEquivCol,
+    type = c("cover", "age")
+) {
   # The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
-  # Take this from the sppEquiv table; user cannot supply manually
+  ## Take this from the sppEquiv table; user cannot supply manually
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   names(sppNameVector) <- sppNameVector
 
-  sppNameVectorCASFRI <- equivalentName(sppNameVector, sppEquiv,  column = "CASFRI", multi = TRUE)
+  sppNameVectorCASFRI <- equivalentName(sppNameVector, sppEquiv, column = "CASFRI", multi = TRUE)
 
-  # CASFRI stuff
+  ## CASFRI stuff
   CASFRIheader <- fread(headerFile, skip = 14, nrows = 49, header = FALSE, sep = "", fill = TRUE)
   header <- apply(CASFRIheader, 1, function(x) sub(pattern = "(\t+| ).*$", "", x))
   CASFRIheader <- header[nchar(header) != 0]
@@ -43,26 +49,38 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
   numSpeciesColumns <- length(grep("SPECIES_PER", names(CASFRIattr), value = TRUE))
   if (type[1] == "cover") {
     for (i in seq(numSpeciesColumns)) {
-      set(CASFRIattr, which(CASFRIattr[[paste0("SPECIES_", i)]] %in% NAVals),
-          paste0("SPECIES_", i), NA_character_)
-      set(CASFRIattr, which(CASFRIattr[[paste0("SPECIES_PER_", i)]] %in% NAVals),
-          paste0("SPECIES_", i), NA_character_)
+      set(
+        CASFRIattr,
+        which(CASFRIattr[[paste0("SPECIES_", i)]] %in% NAVals),
+        paste0("SPECIES_", i),
+        NA_character_
+      )
+      set(
+        CASFRIattr,
+        which(CASFRIattr[[paste0("SPECIES_PER_", i)]] %in% NAVals),
+        paste0("SPECIES_", i),
+        NA_character_
+      )
     }
     for (i in 1:1) {
-      message("remove CASFRI entries with <15 cover as dominant species,",
-              " i.e., these pixels are deemed untreed")
+      message(
+        "remove CASFRI entries with <15 cover as dominant species,",
+        " i.e., these pixels are deemed untreed"
+      )
       CASFRIattr <- CASFRIattr[which(CASFRIattr[[paste0("SPECIES_PER_", i)]] > 15), ]
     }
     message("set CASFRI entries with <15 cover in 2nd-5th dominance class to NA")
     for (i in 2:5) {
-      set(CASFRIattr, which(CASFRIattr[[paste0("SPECIES_PER_", i)]] <= 15),
-          paste0("SPECIES_", i), NA_character_)
+      set(
+        CASFRIattr,
+        which(CASFRIattr[[paste0("SPECIES_PER_", i)]] <= 15),
+        paste0("SPECIES_", i),
+        NA_character_
+      )
     }
 
-    CASFRIattrLong <- melt(CASFRIattr, id.vars = c("GID"),
-                           measure.vars = paste0("SPECIES_", 1:5))
-    CA2 <- melt(CASFRIattr, id.vars = c("GID"),
-                measure.vars = c(paste0("SPECIES_PER_", 1:5)))
+    CASFRIattrLong <- melt(CASFRIattr, id.vars = c("GID"), measure.vars = paste0("SPECIES_", 1:5))
+    CA2 <- melt(CASFRIattr, id.vars = c("GID"), measure.vars = c(paste0("SPECIES_PER_", 1:5)))
     CASFRIattrLong[, pct := CA2$value]
     rm(CA2)
     CASFRIattrLong <- na.omit(CASFRIattrLong)
@@ -74,40 +92,45 @@ loadCASFRI <- function(CASFRIRas, attrFile, headerFile, sppEquiv, sppEquivCol,
 
   CASFRIdt <- data.table(GID = as.vector(values(CASFRIRas)), rastInd = 1:ncell(CASFRIRas))
   CASFRIdt <- CASFRIdt[!is.na(GID)]
-  #CASFRIdt <- CASFRIdt[isNA == FALSE]
+  # CASFRIdt <- CASFRIdt[isNA == FALSE]
   setkey(CASFRIdt, GID)
-  #set(CASFRIdt, NULL, "isNA", NULL)
+  # set(CASFRIdt, NULL, "isNA", NULL)
 
   return(list(CASFRIattrLong = CASFRIattrLong, CASFRIdt = CASFRIdt))
 }
 
 #' `CASFRItoSpRasts`
 #'
-#' TODO: description and title needed
+#' Extract CASFRI data.table values and create species layer rasters
 #'
-#' @param CASFRIRas TODO: description needed
-#' @param CASFRIattrLong TODO: description needed
-#' @param CASFRIdt TODO: description needed
+#' @param CASFRIRas `RasterLayer` object
+#' @param CASFRIattrLong data.table of CASFRI attributes (long format) (i.e., from [loadCASFRI])
+#' @param CASFRIdt data.table of CASFRI raster values (i.e., from [loadCASFRI])
 #' @template sppEquiv
 #' @template sppEquivCol
 #' @template destinationPath
 #'
-#' @return TODO: description needed
+#' @return `RasterStack` (or equivalent)
 #'
 #' @export
-CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
-                            sppEquiv, sppEquivCol, destinationPath) {
+CASFRItoSpRasts <- function(
+    CASFRIRas,
+    CASFRIattrLong,
+    CASFRIdt,
+    sppEquiv,
+    sppEquivCol,
+    destinationPath
+) {
   # The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
-  # Take this from the sppEquiv table; user cannot supply manually
+  ## Take this from the sppEquiv table; user cannot supply manually
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   names(sppNameVector) <- sppNameVector
 
-  # This
-  sppListMergesCASFRI <- lapply(sppNameVector, function(x)
-    equivalentName(x, sppEquiv,  column = "CASFRI", multi = TRUE)
-  )
+  sppListMergesCASFRI <- lapply(sppNameVector, function(x) {
+    equivalentName(x, sppEquiv, column = "CASFRI", multi = TRUE)
+  })
 
   ## create list and template raster
   spRasts <- list()
@@ -116,25 +139,31 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 
   ## NOT SURE IF THESE LINES ABOUT NA are relevant -- Eliot Dec 7
   ## selected spp absent from CASFRI data
-  NA_Sp <- which(is.na(sppListMergesCASFRI))#setdiff(speciesLandR, unique(keepSpecies$spGroup))
+  NA_Sp <- which(is.na(sppListMergesCASFRI)) # setdiff(speciesLandR, unique(keepSpecies$spGroup))
 
   ## All NA_Sp species codes should be in CASFRI spp list
-  if (length(NA_Sp))
-    warning("Not all selected species are in loadedCASFRI. Check if this is correct:\n",
-            paste(paste0(keepSpecies$CASFRI[NA_Sp], collapse = ", "), "absent\n"))
+  if (length(NA_Sp)) {
+    warning(
+      "Not all selected species are in loadedCASFRI. Check if this is correct:\n",
+      paste(paste0(keepSpecies$CASFRI[NA_Sp], collapse = ", "), "absent\n")
+    )
+  }
 
   ## empty rasters for NA_sp
   for (sp in NA_Sp) {
     message("  running ", sp, ". Assigning NA, because absent from CASFRI")
     spRasts[[sp]] <- spRas
     NAval <- 65535L
-    spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
-                           filename = asPath(file.path(destinationPath,
-                                                       paste0("CASFRI_", sp, ".tif"))),
-                           overwrite = TRUE, datatype = "INT2U", NAflag = NAval)
+    spRasts[[sp]] <- Cache(
+      writeRaster,
+      spRasts[[sp]],
+      filename = asPath(file.path(destinationPath, paste0("CASFRI_", sp, ".tif"))),
+      overwrite = TRUE,
+      datatype = "INT2U",
+      NAflag = NAval
+    )
     ## NAvals need to be converted back to NAs
     spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
-
   }
 
   sppTODO <- unique(names(sppListMergesCASFRI))
@@ -143,22 +172,25 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
     spCASFRI <- sppListMergesCASFRI[[sp]]
     spRasts[[sp]] <- spRas
     message("starting ", sp)
-    if (length(spCASFRI) > 1)
+    if (length(spCASFRI) > 1) {
       message("  Merging ", paste(spCASFRI, collapse = ", "), "; becoming: ", sp)
+    }
     aa2 <- CASFRIattrLong[value %in% spCASFRI][, min(100L, sum(pct)), by = GID]
     setkey(aa2, GID)
-    cc <- aa2[CASFRIdt] |>
-      na.omit()
+    cc <- aa2[CASFRIdt] |> na.omit()
     rm(aa2)
     spRasts[[sp]][cc$rastInd] <- cc$V1
     message("  ", sp, " writing to disk")
 
     startCRS <- crs(spRasts[[sp]])
     NAval <- 255L
-    spRasts[[sp]] <- writeRaster(spRasts[[sp]],
-                                 filename = asPath(file.path(destinationPath,
-                                                             paste0("CASFRI_", sp, ".tif"))),
-                                 datatype = "INT1U", overwrite = TRUE, NAflag = NAval)
+    spRasts[[sp]] <- writeRaster(
+      spRasts[[sp]],
+      filename = asPath(file.path(destinationPath, paste0("CASFRI_", sp, ".tif"))),
+      datatype = "INT1U",
+      overwrite = TRUE,
+      NAflag = NAval
+    )
     ## NAvals need to be converted back to NAs
     spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
 
@@ -168,8 +200,9 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
       # +proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
       # should have stayed at
       # +proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0
-      if (!identical(startCRS, crs(spRasts[[sp]])))
+      if (!identical(startCRS, crs(spRasts[[sp]]))) {
         crs(spRasts[[sp]]) <- startCRS
+      }
     }
     message("  ", sp, " done")
   }
@@ -182,11 +215,54 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 
 #' Prepare species layers
 #'
-#' TODO: description needed
+#' Download and prepare species layers for a given study area, from one of several sources:
+#' - [prepSpeciesLayers_CASFRI()] uses CASFRIv4 described in Cosco (2011);
+#' - [prepSpeciesLayers_ForestInventory()] uses data prepared for Western Canada as part of the LandWeb project;
+#' - [prepSpeciesLayers_KNN()] uses the layers from Beaudoin *et al.* (2014, 2017);
+#' - [prepSpeciesLayers_MBFRI()] uses data derived from Manitoba Forest Resource Inventories;
+#' - [prepSpeciesLayers_NTEMS()] uses the National Terrestrial Ecosystem Monitoring System for
+#'   Canada (NTEMS) tree species data described in Hermosilla *et al.* (2024);
+#' - [prepSpeciesLayers_ONFRI()] uses data derived from Ontario Forest Resource Inventories;
+#' - [prepSpeciesLayers_Pickell()] uses data prepared for Western Canada by Pickell & Coops (2016)
+#'   as part of the LandWeb project;
+#' - [prepSpeciesLayers_SCANFI()] uses SCANFI data described in Guidon *et al.* (2023, 2024);
+#'
+#' @references
+#' Beaudoin, A., Bernier, P.Y., Guindon, L., Villemaire, P., Guo, X.J., Stinson, G., et al. (2014).
+#'   Mapping attributes of Canada’s forests at moderate resolution through kNN and MODIS imagery.
+#'   Canadian Journal of Forest Research, 44, 521–532.
+#'
+#' Beaudoin, A., Bernier, P.Y., Villemaire, P., Guindon, L. & Guo, X.J. (2017).
+#'   Species composition, forest properties and land cover types across Canada’s forests at 250m
+#'   resolution for 2001 and 2011. <https://doi.org/10.23687/EC9E2659-1C29-4DDB-87A2-6ACED147A990>
+#'
+#' Cosco, J.A. (2011). Common Attribute Schema (CAS) for Forest Inventories Across Canada.
+#'   Timberline Natural Resource Group for Boreal Avian Modelling Project and Canadian BEACONs Project.
+#'
+#' Guindon L., Villemaire P., Correia D.L.P., Manka F., Lacarte S., Smiley B. (2023).
+#'   SCANFI: Spatialized Canadian National Forest Inventory data product.
+#'   Natural Resources Canada, Canadian Forest Service, Laurentian Forestry Centre, Quebec, Canada.
+#'   <https://doi.org/10.23687/18e6a919-53fd-41ce-b4e2-44a9707c52dc>
+#'
+#' Guindon L., Manka F, Correia L.P. D., Villemaire P., Smiley B., Bernier P., Gauthier S.,
+#'   Beaudoin A., Boucher J., Boulanger Y. (2024). A new approach for Spatializing the Canadian National
+#'   Forest Inventory (SCANFI) using Landsat dense time series.
+#'   Canadian Journal of Forest Research. <https://doi.org/10.1139/cjfr-2023-0118>
+#'
+#' Hermosilla, T., Wulder, M.A., White, J.C., Coops, N.C., Bater, C.W., Hobart, G.W. (2024).
+#'   Characterizing long-term tree species dynamics in Canada's forested ecosystems using annual
+#'   time series remote sensing data. Forest Ecology and Management, 122313.
+#'   <https://doi.org/10.1016/j.foreco.2024.122313>
+#'
+#' Pickell, P.D. & Coops, N.C. (2016). Development of historical forest attribute layers using
+#'   Landsat time series and kNN imputation for the western Canadian boreal forest.
+#'   University of British Columbia.
 #'
 #' @template destinationPath
-#' @param outputPath TODO: description needed
+#' @param outputPath character, specifying the output directory to use
 #' @param url if `NULL`, the default, use the default source url
+#' @param dataYear Year for the data obtained. 2000, 2010, or 2020 (default) possible.
+#' @param dataVersion character. Data version for SCANFI. V2 is default.
 #' @template studyArea
 #' @template rasterToMatch
 #' @template sppEquiv
@@ -196,16 +272,21 @@ CASFRItoSpRasts <- function(CASFRIRas, CASFRIattrLong, CASFRIdt,
 #'    Otherwise the raster is excluded from the output. Defaults to 10.
 #' @param ... other arguments, used for compatibility with other `prepSpeciesLayers` functions.
 #'
-#' @return TODO: description needed
+#' @return multilayer `SpatRaster` ("stack")
 #'
 #' @export
 #' @rdname prepSpeciesLayers
-prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
-                                  url = NULL,
-                                  studyArea, rasterToMatch,
-                                  sppEquiv,
-                                  sppEquivCol,
-                                  thresh = 10, ...) {
+prepSpeciesLayers_KNN <- function(
+    destinationPath,
+    outputPath,
+    url = NULL,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    thresh = 10,
+    ...
+) {
   stopifnot(requireNamespace("RCurl", quietly = TRUE))
 
   dots <- list(...)
@@ -217,29 +298,26 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
   }
 
   if (is.null(url)) {
-    url <- paste0("https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                  "canada-forests-attributes_attributs-forests-canada/", year,
-                  "-attributes_attributs-", year, "/")
+    url <- paste0(
+      "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+      "canada-forests-attributes_attributs-forests-canada/",
+      year,
+      "-attributes_attributs-",
+      year,
+      "/"
+    )
   }
 
   shared_drive_url <- NULL
-  if (!RCurl::url.exists(url)) {  ## ping website and use gdrive if not available
+  ## A Drive source is used directly; see .isGoogleDriveUrl(). Anything else is
+  ## pinged, and the Drive copy used if it cannot be reached.
+  if (!.isGoogleDriveUrl(url) && !RCurl::url.exists(url)) {
     if (requireNamespace("googledrive", quietly = TRUE)) {
       driveFolder <- paste0("kNNForestAttributes_", year)
       shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
-      # url <- googledrive::with_drive_quiet(
-      #   googledrive::drive_link(
-      #     googledrive::drive_ls(
-      #       driveFolder,
-      #       shared_drive = googledrive::as_id(shared_drive_url)
-      #     )
-      #   )
-      # )
 
-      driveDT <- as.data.table(googledrive::drive_ls(googledrive::as_id(shared_drive_url)))
-      url <- googledrive::with_drive_quiet(
-        googledrive::drive_link(driveDT[name == driveFolder, id])
-      )
+      driveLs <- googledrive::drive_ls(googledrive::as_id(shared_drive_url))
+      url <- .driveFolderLink(driveLs, driveFolder, shared_drive_url)
     }
   }
 
@@ -262,124 +340,160 @@ prepSpeciesLayers_KNN <- function(destinationPath, outputPath,
 
 #' @export
 #' @rdname prepSpeciesLayers
-prepSpeciesLayers_CASFRI <- function(destinationPath, outputPath,
-                                     url = NULL,
-                                     studyArea, rasterToMatch,
-                                     sppEquiv,
-                                     sppEquivCol, ...) {
-  if (is.null(url))
+prepSpeciesLayers_CASFRI <- function(
+    destinationPath,
+    outputPath,
+    url = NULL,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    ...
+) {
+  if (is.null(url)) {
     url <- "https://drive.google.com/file/d/1y0ofr2H0c_IEMIpx19xf3_VTBheY0C9h"
+  }
 
   CASFRItiffFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs.tif"))
   CASFRIattrFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs_attributes3.csv"))
   CASFRIheaderFile <- asPath(file.path(destinationPath, "Landweb_CASFRI_GIDs_README.txt"))
 
   message("  Loading CASFRI layers...")
-  CASFRIRas <- Cache(prepInputs,
-                     #targetFile = asPath("Landweb_CASFRI_GIDs.tif"),
-                     targetFile = basename(CASFRItiffFile),
-                     archive = asPath("CASFRI for Landweb.zip"),
-                     url = url,
-                     alsoExtract = c(CASFRItiffFile, CASFRIattrFile, CASFRIheaderFile),
-                     destinationPath = destinationPath,
-                     studyArea = studyArea,
-                     rasterToMatch = rasterToMatch,
-                     method = "bilinear", ## ignore warning re: ngb (#5)
-                     datatype = "INT4U",
-                     filename2 = NULL,
-                     overwrite = TRUE,
-                     userTags =  c("CASFRIRas", "stable"))
+  CASFRIRas <- Cache(
+    prepInputs,
+    # targetFile = asPath("Landweb_CASFRI_GIDs.tif"),
+    targetFile = basename(CASFRItiffFile),
+    archive = asPath("CASFRI for Landweb.zip"),
+    url = url,
+    alsoExtract = c(CASFRItiffFile, CASFRIattrFile, CASFRIheaderFile),
+    destinationPath = destinationPath,
+    studyArea = studyArea,
+    rasterToMatch = rasterToMatch,
+    method = "bilinear", ## ignore warning re: ngb (#5)
+    datatype = "INT4U",
+    writeTo = NULL,
+    userTags = c("CASFRIRas", "stable")
+  )
 
   message("Load CASFRI data and headers, and convert to long format, and define species groups")
 
-  #Cache
-  loadedCASFRI <- Cache(loadCASFRI,
-                        CASFRIRas = CASFRIRas,
-                        attrFile = CASFRIattrFile,
-                        headerFile = CASFRIheaderFile, ## TODO: this isn't used internally
-                        sppEquiv = sppEquiv,
-                        sppEquivCol = sppEquivCol,
-                        type = "cover"#,
-                        #userTags = c("function:loadCASFRI", "BigDataTable",
-                        #"speciesLayers", "KNN")
+  # Cache
+  loadedCASFRI <- Cache(
+    loadCASFRI,
+    CASFRIRas = CASFRIRas,
+    attrFile = CASFRIattrFile,
+    headerFile = CASFRIheaderFile, ## TODO: this isn't used internally
+    sppEquiv = sppEquiv,
+    sppEquivCol = sppEquivCol,
+    type = "cover" # ,
+    # userTags = c("function:loadCASFRI", "BigDataTable",
+    # "speciesLayers", "KNN")
   )
 
   message("Make stack from CASFRI data and headers")
-  CASFRISpStack <- CASFRItoSpRasts(CASFRIRas = CASFRIRas,
-                                   sppEquiv = sppEquiv,
-                                   sppEquivCol = sppEquivCol,
-                                   CASFRIattrLong = loadedCASFRI$CASFRIattrLong,
-                                   CASFRIdt = loadedCASFRI$CASFRIdt,
-                                   destinationPath = outputPath)
+  CASFRISpStack <- CASFRItoSpRasts(
+    CASFRIRas = CASFRIRas,
+    sppEquiv = sppEquiv,
+    sppEquivCol = sppEquivCol,
+    CASFRIattrLong = loadedCASFRI$CASFRIattrLong,
+    CASFRIdt = loadedCASFRI$CASFRIdt,
+    destinationPath = outputPath
+  )
 
   return(CASFRISpStack)
 }
 
 #' @export
 #' @rdname prepSpeciesLayers
-prepSpeciesLayers_Pickell <- function(destinationPath, outputPath,
-                                      url = NULL,
-                                      studyArea, rasterToMatch,
-                                      sppEquiv,
-                                      sppEquivCol, ...) {
-  if (is.null(url))
+prepSpeciesLayers_Pickell <- function(
+    destinationPath,
+    outputPath,
+    url = NULL,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    ...
+) {
+  if (is.null(url)) {
     url <- "https://drive.google.com/file/d/1M_L-7ovDpJLyY8dDOxG3xQTyzPx2HSg4"
+  }
 
-  speciesLayers <- Cache(prepInputs,
-                         targetFile = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.dat"),
-                         url = url,
-                         archive = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.zip"),
-                         alsoExtract = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.hdr"),
-                         destinationPath = destinationPath,
-                         studyArea = studyArea,
-                         rasterToMatch = rasterToMatch,
-                         method = "bilinear", ## ignore warning re: ngb (#5)
-                         datatype = "INT2U",
-                         filename2 = NULL,
-                         overwrite = TRUE,
-                         userTags = c("speciesLayers", "KNN", "Pickell", "stable"))
+  speciesLayers <- Cache(
+    prepInputs,
+    targetFile = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.dat"),
+    url = url,
+    archive = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.zip"),
+    alsoExtract = asPath("SPP_1990_100m_NAD83_LCC_BYTE_VEG_NO_TIES_FILLED_FINAL.hdr"),
+    destinationPath = destinationPath,
+    studyArea = studyArea,
+    rasterToMatch = rasterToMatch,
+    method = "bilinear", ## ignore warning re: ngb (#5)
+    datatype = "INT2U",
+    writeTo = NULL,
+    userTags = c("speciesLayers", "KNN", "Pickell", "stable")
+  )
 
-  makePickellStack(PickellRaster = speciesLayers,
-                   sppEquiv = sppEquiv,
-                   sppEquivCol = sppEquivCol,
-                   destinationPath = outputPath)
+  makePickellStack(
+    PickellRaster = speciesLayers,
+    sppEquiv = sppEquiv,
+    sppEquivCol = sppEquivCol,
+    destinationPath = outputPath
+  )
 }
 
 #' @export
 #' @rdname prepSpeciesLayers
-prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
-                                              url = NULL,
-                                              studyArea, rasterToMatch,
-                                              sppEquiv,
-                                              sppEquivCol, ...) {
-  if (is.null(url))
+prepSpeciesLayers_ForestInventory <- function(
+    destinationPath,
+    outputPath,
+    url = NULL,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    ...
+) {
+  if (is.null(url)) {
     url <- "https://drive.google.com/file/d/1JnKeXrw0U9LmrZpixCDooIm62qiv4_G1"
+  }
 
   ## TODO: add terra compatible methods.
 
-  # The ones we want
+  ## The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
 
-  # Take this from the sppEquiv table; user cannot supply manually
+  ## Take this from the sppEquiv table; user cannot supply manually
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   names(sppNameVector) <- sppNameVector
 
-  # This includes LandType because it will use that at the bottom of this function to
-  #  remove NAs
+  ## This includes LandType because it will use that at the bottom of this function to remove NAs
   CClayerNames <- c("Pine", "Black Spruce", "Deciduous", "Fir", "White Spruce", "LandType")
   CClayerNamesFiles <- paste0(gsub(" ", "", CClayerNames), "1.tif")
 
-  lr <- lapply(CClayerNamesFiles, prepInputs, studyArea = studyArea, rasterToMatch = rasterToMatch,
-               url = url, alsoExtract = "similar", method = "ngb",
-               destinationPath = destinationPath, filename2 = NULL)
+  lr <- lapply(
+    CClayerNamesFiles,
+    prepInputs,
+    studyArea = studyArea,
+    rasterToMatch = rasterToMatch,
+    url = url,
+    alsoExtract = "similar",
+    method = "ngb",
+    destinationPath = destinationPath,
+    writeTo = NULL
+  )
   rs <- raster::stack(lr)
   names(rs) <- CClayerNames
 
   CCstack <- dropLayer(rs, which(grepl("LandType", CClayerNames)))
   CCstackNames <- names(CCstack)
 
-  if (!all(min(CCstack[], na.rm = TRUE) >= 0)) stop("problem with min. of CCstack (< 0)")
-  if (!all(max(CCstack[], na.rm = TRUE) <= 10)) stop("problem with max. of CCstack (> 10)")
+  if (!all(min(CCstack[], na.rm = TRUE) >= 0)) {
+    stop("problem with min. of CCstack (< 0)")
+  }
+  if (!all(max(CCstack[], na.rm = TRUE) <= 10)) {
+    stop("problem with max. of CCstack (> 10)")
+  }
 
   CCstack <- CCstack * 10 ## convert back to percent
   ## NA means outside of studyArea polygon; 1 is cities, Set to NA here:
@@ -402,13 +516,139 @@ prepSpeciesLayers_ForestInventory <- function(destinationPath, outputPath,
 
 #' @export
 #' @rdname prepSpeciesLayers
-prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
-                                    url = NULL,
-                                    studyArea, rasterToMatch,
-                                    sppEquiv,
-                                    sppEquivCol, ...) {
-  if (is.null(url))
+prepSpeciesLayers_NTEMS <- function(
+    destinationPath,
+    outputPath,
+    url = NULL,
+    dataYear = 2020,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    thresh = 10,
+    ...
+) {
+  stop("not yet implemented") ## TODO
+}
+
+#' @export
+#' @rdname prepSpeciesLayers
+prepSpeciesLayers_SCANFI <- function(
+    destinationPath,
+    outputPath,
+    url = NULL,
+    dataYear = 2020,
+    dataVersion = "V2",
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    thresh = 10,
+    ...
+) {
+  stopifnot(requireNamespace("RCurl", quietly = TRUE))
+
+  dots <- list(...)
+  if (!is.null(dots$to) && missing(studyArea))
+    studyArea <- dots$to
+
+  if (!is.null(dots$projectTo) && missing(rasterToMatch))
+    rasterToMatch <- dots$projectTo
+
+  if (is.null(sppEquiv)) {
+    message(
+      "No species list provided, this will download all available species layers.",
+      "\n  Did you mean to download all layers?",
+      "\n  Provide a list of species via 'sppEquiv' to filter layers."
+    )
+  }
+  # if ("year" %in% ...names()) {
+  #   year <- dots[["year"]]
+  # } else {
+  #   year <- dataYear
+  # }
+
+  if (is.null(url)) {
+    if (dataVersion == "V1") {
+      if (dataYear == 2000) {
+        url <- paste0("https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp")
+      } else if (dataYear == 2010) {
+        url <- paste0("https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE")
+      } else if (dataYear == 2020) {
+        url <- paste0("https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ")
+      } else {
+        stop("SCANFI V1 data is currently available for 2000, 2010, and 2020 only")
+      }
+    } else if (dataVersion == "V2") {
+      if (dataYear == "1985") {
+        url <- paste0("https://drive.google.com/file/d/1zXkDkGIJaRB2Cwd7Ld2R7FFswRIDmAj4")
+      } else if (dataYear == "1990") {
+        url <- paste0("https://drive.google.com/file/d/1GbKOGxxLG-pF-jjBjuJC6IuWIU3aVBo2")
+      } else if (dataYear == "1995") {
+        url <- paste0("https://drive.google.com/file/d/1KfAxjccHE51pOmi0OMYqwyRkIhJH7knn")
+      } else if (dataYear == "2000") {
+        url <- paste0("https://drive.google.com/file/d/19sddeWJCJq9uMkDjmtNtXKjOQEDeFKBl")
+      } else if (dataYear == "2005") {
+        url <- paste0("https://drive.google.com/file/d/10Aw9PX_FEEhYHNTraKAb6l9DnaIom2qk")
+      } else if (dataYear == "2010") {
+        url <- paste0("https://drive.google.com/file/d/1fjoiYf0lhkZF3SgDMGPuYB1J4sUmU_Vo")
+      } else if (dataYear == "2015") {
+        url <- paste0("https://drive.google.com/file/d/1FcXFIfscxkO7o5WRTINDZfFnu102IMls")
+      } else if (dataYear == "2020") {
+        url <- paste0("https://drive.google.com/file/d/15T4HIFeqzwp0TuOuxmYoexuXdLFnCZBi")
+      } else if (dataYear == "2025") {
+        url <- paste0("https://drive.google.com/file/d/1jS2sscKe_tcw4qDC-9297_jrulFduyKg")
+      } else {
+        stop("SCANFI V2 data is currently available for 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, and 2025 only")
+      }
+    }
+  }
+  shared_drive_url <- NULL
+  ## A Drive source is used directly; see .isGoogleDriveUrl(). Anything else is
+  ## pinged, and the Drive copy used if it cannot be reached.
+  if (!.isGoogleDriveUrl(url) && !RCurl::url.exists(url)) {
+    if (requireNamespace("googledrive", quietly = TRUE)) {
+      driveFolder <- paste0("SCANFIForestAttributes_", dataYear)
+      shared_drive_url <- "https://drive.google.com/drive/folders/1zLYV-wcDjJfSflH1VkXG6sosqZZF4SYc"
+
+      driveLs <- googledrive::drive_ls(googledrive::as_id(shared_drive_url))
+      url <- .driveFolderLink(driveLs, driveFolder, shared_drive_url)
+    }
+  }
+
+  loadSCANFISpeciesLayers(
+    dPath = destinationPath,
+    SCANFINamesCol = "SCANFI",
+    outputPath = outputPath,
+    projectTo = rasterToMatch,
+    to = studyArea,
+    projectTo = rasterToMatch,
+    studyAreaName = dots$studyAreaName,
+    sppEquiv = sppEquiv,
+    sppEquivCol = sppEquivCol,
+    thresh = thresh,
+    url = url,
+    year = dataYear,
+    shared_drive_url = shared_drive_url,
+    userTags = c("speciesLayers", "KNN")
+  )
+}
+
+#' @export
+#' @rdname prepSpeciesLayers
+prepSpeciesLayers_MBFRI <- function(
+    destinationPath,
+    outputPath,
+    url = NULL,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    ...
+) {
+  if (is.null(url)) {
     url <- "https://drive.google.com/file/d/1KTqNBntNrEsDL6jk-5bchsBOcraDqNHe"
+  }
 
   # The ones we want
   sppEquiv <- sppEquiv[!is.na(sppEquiv[[sppEquivCol]]), ]
@@ -422,16 +662,28 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
   CClayerNames2 <- c("Pine", "Black Spruce", "Deciduous", "Fir", "White Spruce", "LandType") ## needs 'LandType'
   CClayerNamesFiles <- paste0("MB_", gsub(" ", "", CClayerNames), "2016_NRV.tif")
 
-  lr <- lapply(CClayerNamesFiles, prepInputs, studyArea = studyArea, rasterToMatch = rasterToMatch,
-               url = url, alsoExtract = "similar", method = "ngb",
-               destinationPath = destinationPath, filename2 = NULL)
+  lr <- lapply(
+    CClayerNamesFiles,
+    prepInputs,
+    studyArea = studyArea,
+    rasterToMatch = rasterToMatch,
+    url = url,
+    alsoExtract = "similar",
+    method = "ngb",
+    destinationPath = destinationPath,
+    writeTo = NULL
+  )
   rs <- stack(lr)
   names(rs) <- CClayerNames2
 
   CCstack <- dropLayer(rs, which(grepl("LandType", CClayerNames2)))
 
-  if (!all(min(CCstack[], na.rm = TRUE) >= 0)) stop("problem with min. of CCstack (< 0)")
-  if (!all(max(CCstack[], na.rm = TRUE) <= 10)) stop("problem with max. of CCstack (> 10)")
+  if (!all(min(CCstack[], na.rm = TRUE) >= 0)) {
+    stop("problem with min. of CCstack (< 0)")
+  }
+  if (!all(max(CCstack[], na.rm = TRUE) <= 10)) {
+    stop("problem with max. of CCstack (> 10)")
+  }
 
   CCstack <- CCstack * 10 # convert back to percent
   ## NA means outside of studyArea polygon; 1 is cities, Set to NA here:
@@ -454,12 +706,16 @@ prepSpeciesLayers_MBFRI <- function(destinationPath, outputPath,
 
 #' @export
 #' @rdname prepSpeciesLayers
-prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
-                                    url = NULL,
-                                    studyArea, rasterToMatch,
-                                    sppEquiv,
-                                    sppEquivCol, ...) {
-
+prepSpeciesLayers_ONFRI <- function(
+    destinationPath,
+    outputPath,
+    url = NULL,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    ...
+) {
   ## TODO: this is sneaky and annoying (studyAreaName is part of outputPath)
   if (grepl("AOU", dirname(outputPath))) {
     sA <- "ceon"
@@ -497,22 +753,34 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
   sppNameVector <- unique(sppEquiv[[sppEquivCol]])
   names(sppNameVector) <- sppNameVector
 
-  if (is.null(sppEquiv[["ONFRI"]]))
+  if (is.null(sppEquiv[["ONFRI"]])) {
     stop("Column 'ONFRI' not found in species equivalent table (sppEquiv).")
+  }
 
   FRIlayerNames <- unique(sppEquiv[["ONFRI"]])
   FRIlayerNamesFiles <- paste0(FRIlayerNames, "_fri_", sA, "_", res, "m.tif")
   FRIlccname <- paste0("lcc_fri_", sA, "_", res, "m.tif")
 
   sppLayers <- rast(lapply(FRIlayerNamesFiles, function(f) {
-    prepInputs(url = url, studyArea = studyArea, rasterToMatch = rasterToMatch,
-               destinationPath = destinationPath, targetFile = f, filename2 = NULL,
-               alsoExtract = NA, method = "near")
+    prepInputs(
+      url = url,
+      studyArea = studyArea,
+      rasterToMatch = rasterToMatch,
+      destinationPath = destinationPath,
+      targetFile = f,
+      writeTo = NULL,
+      alsoExtract = NA,
+      method = "near"
+    )
   }))
   names(sppLayers) <- FRIlayerNames
 
-  if (!all(minmax(sppLayers)[1, ] >= 0)) stop("problem with min. of species layers stack (< 0)")
-  if (!all(minmax(sppLayers)[2, ] <= 100)) stop("problem with max. of species layers stack (> 100)")
+  if (!all(minmax(sppLayers)[1, ] >= 0)) {
+    stop("problem with min. of species layers stack (< 0)")
+  }
+  if (!all(minmax(sppLayers)[2, ] <= 100)) {
+    stop("problem with max. of species layers stack (> 100)")
+  }
 
   ## merge species layers (currently only Popu; TODO: pine?)
   idsPopu <- grep("Popu", FRIlayerNames)
@@ -530,11 +798,24 @@ prepSpeciesLayers_ONFRI <- function(destinationPath, outputPath,
 #' @param outputPath path to output directory
 #' @export
 #' @rdname LandR-deprecated
-prepSpeciesLayers_KNN2011 <- function(destinationPath, outputPath, url = NULL, studyArea,
-                                      rasterToMatch, sppEquiv, sppEquivCol, thresh = 10, ...) {
-  .Deprecated("loadkNNSpeciesLayers",
-              msg = paste("prepSpeciesLayers_KNN2011 is deprecated.",
-                          "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers."))
+prepSpeciesLayers_KNN2011 <- function(
+    destinationPath,
+    outputPath,
+    url = NULL,
+    studyArea,
+    rasterToMatch,
+    sppEquiv,
+    sppEquivCol,
+    thresh = 10,
+    ...
+) {
+  .Deprecated(
+    "loadkNNSpeciesLayers",
+    msg = paste(
+      "prepSpeciesLayers_KNN2011 is deprecated.",
+      "Please use 'loadkNNSpeciesLayers' and supply URL/year to validation layers."
+    )
+  )
 
   loadkNNSpeciesLayers(
     dPath = destinationPath,
@@ -577,14 +858,18 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
 
   # Pick the full LandR dataset, which should be broad. We will change to sppEquivCol below
   sppOfInterest <- equivalentName(sppNameVector, sppEquiv, "LandR", multi = TRUE)
-  sppInPickell <- lapply(PickellSpp, function(sp)
+  sppInPickell <- lapply(PickellSpp, function(sp) {
     equivalentName(sp, sppEquiv, "LandR", multi = TRUE)
-  )
+  })
 
   # Check that each of the layers that Pickell did are actually desired in speciesEquivalency
-  needPickell <- vapply(sppInPickell, function(sp) {
-    any(sp %in% sppOfInterest)
-  }, logical(1))
+  needPickell <- vapply(
+    sppInPickell,
+    function(sp) {
+      any(sp %in% sppOfInterest)
+    },
+    logical(1)
+  )
 
   # These are the ones in Pickell data set that we want according to speciesEquivalency
   PickellSpp <- equivalentName(PickellSpp[needPickell], sppEquiv, sppEquivCol)
@@ -597,6 +882,19 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
   spRasts <- list()
   spRas <- PickellRaster
   spRas[] <- NA_integer_
+
+  ## Both of these are global, process-wide settings, so they must not outlive this
+  ## function: a caller that deliberately set its own memory ceiling would silently
+  ## keep ours for the rest of the session. Observed in a long-lived worker that had
+  ## set memmax = 4 and found it at 1 afterwards.
+  origTerraMemmax <- terra::terraOptions(print = FALSE)$memmax
+  on.exit(try(terra::terraOptions(memmax = origTerraMemmax), silent = TRUE), add = TRUE)
+  if (requireNamespace("raster", quietly = TRUE)) {
+    ## capture.output: rasterOptions() prints as a side effect when read
+    invisible(utils::capture.output(
+      origRasterMaxmemory <- raster::rasterOptions(default = FALSE)$maxmemory))
+    on.exit(try(raster::rasterOptions(maxmemory = origRasterMaxmemory), silent = TRUE), add = TRUE)
+  }
 
   rasterOptions(maxmemory = 1e9)
   terraOptions(memmax = 1L)
@@ -612,10 +910,14 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(44)] <- 80
         spRasts[[sp]][PickellRaster[] %in% c(14, 34)] <- 40
         NAval <- 255L
-        spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
-                               filename = asPath(file.path(destinationPath,
-                                                           paste0("Pickell_", sp, ".tif"))),
-                               overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
+        spRasts[[sp]] <- Cache(
+          writeRaster,
+          spRasts[[sp]],
+          filename = asPath(file.path(destinationPath, paste0("Pickell_", sp, ".tif"))),
+          overwrite = TRUE,
+          datatype = "INT1U",
+          NAflag = NAval
+        )
         ## NAvals need to be converted back to NAs
         spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
       }
@@ -629,31 +931,48 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(32, 42)] <- 40
 
         NAval <- 255L
-        spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
-                               filename = asPath(file.path(destinationPath,
-                                                           paste0("Pickell_", sp, ".tif"))),
-                               overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
+        spRasts[[sp]] <- Cache(
+          writeRaster,
+          spRasts[[sp]],
+          filename = asPath(file.path(destinationPath, paste0("Pickell_", sp, ".tif"))),
+          overwrite = TRUE,
+          datatype = "INT1U",
+          NAflag = NAval
+        )
         ## NAvals need to be converted back to NAs
         spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
       }
     }
 
-    if (any(!is.na(equivalentName("Pinu_ban", sppEquiv, sppEquivCol)),
-            !is.na(equivalentName("Pinu_con", sppEquiv, sppEquivCol)),
-            !is.na(equivalentName("Pinu_spp", sppEquiv, sppEquivCol)))) {
-      if (sp %in% c(equivalentName("Pinu_ban", sppEquiv, sppEquivCol),
-                    equivalentName("Pinu_con", sppEquiv, sppEquivCol),
-                    equivalentName("Pinu_sp", sppEquiv, sppEquivCol))) {
+    if (
+      any(
+        !is.na(equivalentName("Pinu_ban", sppEquiv, sppEquivCol)),
+        !is.na(equivalentName("Pinu_con", sppEquiv, sppEquivCol)),
+        !is.na(equivalentName("Pinu_spp", sppEquiv, sppEquivCol))
+      )
+    ) {
+      if (
+        sp %in%
+        c(
+          equivalentName("Pinu_ban", sppEquiv, sppEquivCol),
+          equivalentName("Pinu_con", sppEquiv, sppEquivCol),
+          equivalentName("Pinu_sp", sppEquiv, sppEquivCol)
+        )
+      ) {
         spRasts[[sp]] <- spRas
         spRasts[[sp]][PickellRaster[] %in% c(31, 32, 34)] <- 60
         spRasts[[sp]][PickellRaster[] %in% c(33)] <- 80
         spRasts[[sp]][PickellRaster[] %in% c(23, 43)] <- 40
 
         NAval <- 255L
-        spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
-                               filename = asPath(file.path(destinationPath,
-                                                           paste0("Pickell_", sp, ".tif"))),
-                               overwrite = TRUE, datatype = "INT1U", NAflag = NAval)
+        spRasts[[sp]] <- Cache(
+          writeRaster,
+          spRasts[[sp]],
+          filename = asPath(file.path(destinationPath, paste0("Pickell_", sp, ".tif"))),
+          overwrite = TRUE,
+          datatype = "INT1U",
+          NAflag = NAval
+        )
         ## NAvals need to be converted back to NAs
         spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
       }
@@ -667,10 +986,14 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
         spRasts[[sp]][PickellRaster[] %in% c(31, 41)] <- 40
 
         NAval <- 65535L
-        spRasts[[sp]] <- Cache(writeRaster, spRasts[[sp]],
-                               filename = asPath(file.path(destinationPath,
-                                                           paste0("Pickell_", sp, ".tif"))),
-                               overwrite = TRUE, datatype = "INT2U", NAflag = NAval)
+        spRasts[[sp]] <- Cache(
+          writeRaster,
+          spRasts[[sp]],
+          filename = asPath(file.path(destinationPath, paste0("Pickell_", sp, ".tif"))),
+          overwrite = TRUE,
+          datatype = "INT2U",
+          NAflag = NAval
+        )
         ## NAvals need to be converted back to NAs
         spRasts[[sp]] <- .NAvalueFlag(spRasts[[sp]], NAval)
       }
@@ -694,12 +1017,6 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
 #'
 #' @export
 NAcover2zero <- function(speciesLayers, rasterToMatch) {
-  if (!requireNamespace("terra", quietly = TRUE)) {
-    ## since terra is dependency of raster, it should already be installed, but just in case...
-    stop("Suggested package 'terra' not installed.\n",
-         "Install it using `install.packages('terra')`.")
-  }
-
   tempRas <- rasterToMatch
   tempRas[!is.na(as.vector(tempRas[]))] <- 0
   namesLayers <- names(speciesLayers)

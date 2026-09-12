@@ -2,7 +2,7 @@
   ## set options using the approach used by devtools
   opts <- options()
   reproCachePath <- getOption("reproducible.cachePath")
-  opts.LandR <- list( # nolint
+  opts.LandR <- list( #nolint
     LandR.assertions = TRUE,
     LandR.verbose = 1
   )

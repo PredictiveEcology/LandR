@@ -15,6 +15,7 @@ LANDISDisp(
   plot.it = FALSE,
   successionTimestep,
   verbose = getOption("LandR.verbose", TRUE),
+  useCpp = getOption("LandR.LANDISDisp.useCpp", TRUE),
   ...
 )
 }
@@ -48,13 +49,18 @@ Default is "Ward" (temporarily unused, as it is hard coded inside Rcpp function)
 \item{k}{LANDIS Ward seed dispersal the probability that seed will disperse within
 the effective distance (e.g., 0.95)}
 
-\item{plot.it}{Deprecated. If TRUE, then plot the raster at every interaction,
+\item{plot.it}{Deprecated. If \code{TRUE}, then plot the raster at every interaction,
 so one can watch the \code{LANDISDisp} event grow.}
 
 \item{successionTimestep}{The time between successive seed dispersal events.
 In LANDIS-II, this is called "Succession Timestep".}
 
 \item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
+
+\item{useCpp}{Logical. If \code{TRUE} (the default), the spiral seed-dispersal
+inner loop runs in C++ via \pkg{Rcpp}. If \code{FALSE}, the R reference
+implementation is used instead. Output is bit-identical between the two
+under a fixed seed. Defaults to \code{getOption("LandR.LANDISDisp.useCpp", TRUE)}.}
 
 \item{...}{Additional parameters. Currently none.}
 }
@@ -77,15 +83,22 @@ a receiving cell has lots of seed sources around it vs. a single seed source.
 The difference will come with a higher probability of successfully receiving a "seed".
 }
 \details{
-\code{dispersalFn} (temporarily unused as code is converted to Rcpp -- the
-default \code{dispersalFn} is hard coded within the \code{spiralSeedDispersal}
-function that uses C++) must be an expression that returns a probability
-distribution. Because it is a dispersal kernel, it must be a probability
-distribution. The expression that can take an argument named "dis" (without
-quotes) as this will be calculated internally and represents the distance
-from the initial (receiving) pixel and all active pixels within that cluster
-of active pixels. \code{SpaDES} includes the \code{\link[=Ward]{Ward()}} kernel as
-defined in the LANDIS-II documentation.
+\code{dispersalFn} (temporarily unused as code is converted to Rcpp -- the default \code{dispersalFn}
+is hard coded within the \code{spiralSeedDispersal} function that uses C++) must be an expression
+that returns a probability distribution.
+Because it is a dispersal kernel, it must be a probability distribution.
+The expression that can take an argument named "dis" (without quotes) as this will be
+calculated internally and represents the distance from the initial (receiving) pixel
+and all active pixels within that cluster of active pixels.
+\pkg{LandR} includes the \code{\link[=Ward]{Ward()}} kernel as defined in the LANDIS-II documentation.
+
+The spiral inner loop is implemented in C++ (via \pkg{Rcpp}) and is on by
+default; it produces bit-identical output to the previous R implementation
+under a fixed seed, but is typically ~3x faster end-to-end on
+landscape-scale inputs (and uses dramatically less memory by replacing the
+per-cell-by-species source matrix with a per-\code{pixelGroup} species bitmask).
+To fall back to the R reference (e.g., for debugging), pass
+\code{useCpp = FALSE} or set \code{options(LandR.LANDISDisp.useCpp = FALSE)}.
 }
 \examples{
 if (require("googledrive")) {
@@ -94,7 +107,7 @@ if (require("googledrive")) {
   library(data.table)
 
   # keep this here for interactive testing with a larger raster
-  rasterTemplate <- LandR:::rasterRead(terra::ext(0, 2500, 0, 2500), res = 100)
+  rasterTemplate <- reproducible::rasterRead(terra::ext(0, 2500, 0, 2500), res = 100)
 
   # make a pixelGroupMap
   pgs <- 4 # make even just because of approach below requires even
@@ -118,7 +131,8 @@ if (require("googledrive")) {
   seedSource[, pixelGroup := pixelGroup + pgs / 2]
 
   # Get a species table -- if using in Canada, can use this
-  speciesTable <- getSpeciesTable(dPath = tempdir())
+  destPath <- file.path(tempdir(), "ex_LANDISDisp")
+  speciesTable <- getSpeciesTable(dPath = destPath)
   speciesTable <- speciesTable[Area == "BSW"]
   speciesTable[, speciesCode := as.factor(LandisCode)]
   speciesTable[, seeddistance_eff := SeedEffDist]
@@ -146,18 +160,18 @@ if (require("googledrive")) {
     spMap$pixelGroupMap <- pixelGroupMap
     for (sppp in unique(output$speciesCode)) {
       spppChar <- paste0("Sp_", sppp)
-      spMap[[spppChar]] <- LandR:::rasterRead(pixelGroupMap)
+      spMap[[spppChar]] <- reproducible::rasterRead(pixelGroupMap)
       ss <- unique(seedSource[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
       spMap[[spppChar]][pixelGroupMap[] \%in\% ss$pixelGroup] <- 1
 
-      receivable <- LandR:::rasterRead(pixelGroupMap)
+      receivable <- reproducible::rasterRead(pixelGroupMap)
       srf <- unique(seedReceiveFull[speciesCode == sppp], on = c("pixelGroup", "speciesCode"))
       receivable[pixelGroupMap[] \%in\% srf$pixelGroup] <- 1
 
       forest <- which(!is.na(pixelGroupMap[]))
       src <- which(!is.na(spMap[[spppChar]][]))
       recvable <- which(!is.na(receivable[]))
-      rcvd <- output[speciesCode == sppp]$pixelIndex
+      rcvd <- output[speciesCode == sppp][["pixelIndex"]]
 
       spMap[[spppChar]][forest] <- 0
       spMap[[spppChar]][recvable] <- 2
@@ -165,18 +179,22 @@ if (require("googledrive")) {
       spMap[[spppChar]][rcvd] <- 3
       spMap[[spppChar]][intersect(src, rcvd)] <- 4
 
-      levels(spMap[[spppChar]]) <- data.frame(ID = 0:4,
-                                              type = c("OtherForest", "Source", "Didn't receive",
-                                                       "Received", "Src&Rcvd"))
+      levels(spMap[[spppChar]]) <- data.frame(
+        ID = 0:4,
+        type = c(
+          "OtherForest", "Source", "Didn't receive",
+          "Received", "Src&Rcvd"
+        )
+      )
     }
     Plot(spMap, cols = "Set2")
 
     # A summary
     rr <- apply(rast(spMap)[[-1]][] + 1, 2, tabulate)
-    rownames(rr) <- raster::levels(spMap[[2]])[[1]][,"type"][1:NROW(rr)]
+    rownames(rr) <- raster::levels(spMap[[2]])[[1]][, "type"][1:NROW(rr)]
     # next line only works if there are some places that are both source and potential to receive
     # rr <- rbind(rr, propSrcRcved = round(rr[5,]/ (rr[5,]+rr[2,]), 2))
- }
+  }
 }
 
 }

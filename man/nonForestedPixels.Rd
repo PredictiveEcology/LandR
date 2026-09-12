@@ -18,7 +18,7 @@ should contain species cover data in the study area}
 \item{omitNonTreedPixels}{logical. Should pixels with classes in \code{forestedLCCClasses} be
 included as non-forested?}
 
-\item{forestedLCCClasses}{vector of non-forested land-cover classes in \code{rstLCC}}
+\item{forestedLCCClasses}{vector of forested land-cover classes in \code{rstLCC}}
 
 \item{rstLCC}{raster of land-cover class, e.g., LCC2005}
 }

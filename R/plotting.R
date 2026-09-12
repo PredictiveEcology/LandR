@@ -1,5 +1,5 @@
 utils::globalVariables(c(
-  "band1"
+  "band1", "colorHex"
 ))
 
 #' Summary plots of leading vegetation types
@@ -19,8 +19,8 @@ utils::globalVariables(c(
 #'
 #' @template sppEquivCol
 #'
-#' @param colors Named vector of colour codes, named using species names. NOTE:
-#'               plot order will follow this order.
+#' @param colors Named vector of colour codes, named using species names.
+#'               NOTE: plot order will follow this order.
 #'
 #' @param title The title to use for the generated plots.
 #'
@@ -28,15 +28,19 @@ utils::globalVariables(c(
 #' @export
 plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
                     sppEquiv, sppEquivCol, colors, title = "Leading vegetation types") {
+  stopifnot(requireNamespace("ggpubr", quietly = TRUE))
 
   if (is(speciesStack, "RasterBrick")) {
     speciesStack <- raster::stack(speciesStack)
   }
 
   colorsEN <- equivalentName(names(colors), sppEquiv, "EN_generic_short")
-  colDT <- data.table(cols = colors, species = colorsEN,
-                      speciesOrig = names(colors),
-                      speciesOrigOrder = seq(colors))
+  colDT <- data.table(
+    cols = colors,
+    species = colorsEN,
+    speciesOrig = names(colors),
+    speciesOrigOrder = seq(colors)
+  )
   mixedString <- "Mixed"
   hasMixed <- isTRUE(mixedString %in% names(colors))
   if (hasMixed) {
@@ -51,14 +55,16 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 
   if (is.null(vtm)) {
     if (!is.null(speciesStack)) {
-      vtm <- Cache(vegTypeMapGenerator,
-                   x = speciesStack,
-                   vegLeadingProportion = vegLeadingProportion,
-                   mixedType = 2,
-                   sppEquiv = sppEquiv,
-                   sppEquivCol = sppEquivCol,
-                   colors = colors,
-                   doAssertion = getOption("LandR.assertions", TRUE))
+      vtm <- vegTypeMapGenerator(
+        x = speciesStack,
+        vegLeadingProportion = vegLeadingProportion,
+        mixedType = 2,
+        sppEquiv = sppEquiv,
+        sppEquivCol = sppEquivCol,
+        colors = colors,
+        doAssertion = getOption("LandR.assertions", TRUE)
+      ) |>
+        Cache()
     } else {
       stop(
         "plotVTM requires either a speciesStack of percent cover or a vegetation type map (vtm)."
@@ -80,7 +86,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   vtmTypes <- equivalentName(vtmTypes, sppEquiv, "EN_generic_short")
   vtmTypes[whMixed] <- "Mixed"
   names(vtmCols) <- vtmTypes
-  facLevels$Species <- vtmTypes #nolint
+  facLevels$Species <- vtmTypes
 
   ## plot initial types bar chart
   facVals <- factorValues2(vtm, as.vector(vtm[]), att = 2, na.rm = TRUE) ## 'species', 'Species', 'VALUE'
@@ -93,15 +99,16 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 
     df$species <- speciesEN
 
-    if (hasMixed)
+    if (hasMixed) {
       df[whMixed, species := mixedString]
+    }
 
-    df <- colDT[df, on = "species"] # merge color and species
+    df <- colDT[df, on = "species"] ## merge color and species
   } else {
     stop("Species names of 'colors' must match those in 'speciesStack'.")
   }
 
-  # Needs to be factor so ggplot2 knows that there may be missing levels
+  ## Needs to be factor so ggplot2 knows that there may be missing levels
   df$species <- factor(df$species, levels = unique(colDT$species), ordered = FALSE)
 
   cols2 <- colDT$cols
@@ -112,19 +119,16 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
     guides(fill = guide_legend(reverse = TRUE)) +
     scale_fill_manual(values = cols2, drop = FALSE) +
     geom_bar(position = "stack") +
-    theme(legend.text = element_text(size = 6), legend.title = element_blank(),
-          axis.text = element_text(size = 6))
+    theme(
+      legend.text = element_text(size = 6),
+      legend.title = element_blank(),
+      axis.text = element_text(size = 6)
+    ) +
+    ggtitle(title)
 
-  Plot(initialLeadingPlot, title = title)
-
-  ## plot inital types raster
+  ## plot initial types raster
   levels(vtm) <- facLevels
-  if (is(vtm, "RasterLayer")) {
-    setColors(vtm, length(vtmTypes)) <- vtmCols ## setColors for factors must have an
-    ## entry for each row in raster::levels
-  } else {
-    ## TODO: setColors needs to be adapted to SpatRaster...
-  }
+  vtm <- Colors(vtm, vtmCols, n = length(vtmTypes))
 
   cols2 <- colDT$cols
   names(cols2) <- colDT$speciesOrig
@@ -133,17 +137,20 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
   names(labs) <- colDT$speciesOrig
 
   vtmPlot <- if (is(vtm, "RasterLayer")) {
-     ggplot() + geom_raster(data = vtm)
+    ggplot() + geom_raster(data = vtm)
   } else {
     ggplot() + geom_spatraster(data = vtm)
   }
   vtmPlot <- vtmPlot +
-    scale_fill_manual(values = cols2,  labels = labs,
-                        na.value = "grey80") +
-    theme(legend.text = element_text(size = 6), legend.title = element_blank(),
-          axis.text = element_text(size = 6))
+    scale_fill_manual(values = cols2, labels = labs, na.value = "grey80") +
+    theme(
+      legend.text = element_text(size = 6),
+      legend.title = element_blank(),
+      axis.text = element_text(size = 6)
+    ) +
+    ggtitle(title)
 
-  Plot(vtmPlot, title = title)
+  ggpubr::ggarrange(initialLeadingPlot, vtmPlot)
 }
 
 #' Helper for setting Raster or `SpatRaster` colors
@@ -153,11 +160,12 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 #'
 #' @param ras A `Raster*` or `SpatRaster` class object.
 #'
-#' @param cols a character vector of colours. See examples. Can also be a `data.frame`,
-#'   see `terra::coltab`
+#' @param cols a character vector of colours. See examples.
+#'   Can also be a `data.frame`, see [terra::coltab].
 #'
-#' @param n A numeric scalar giving the number of colours to create. Passed to
-#'   `quickPlot::setColors(ras, n = n) <- `. If missing, then `n` will be `length(cols)`
+#' @param n A numeric scalar giving the number of colours to create.
+#'   Passed to `quickPlot::setColors(ras, n = n) <- `.
+#'   If missing, then `n` will be `length(cols)`.
 #'
 #' @examples
 #' \donttest{
@@ -171,6 +179,7 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
 #' raster::plot(ras)
 #' }
 #'
+#' @aliases Colours
 #' @export
 Colors <- function(ras, cols, n = NULL) {
   if (is(ras, "SpatRaster")) {
@@ -204,39 +213,106 @@ Colors <- function(ras, cols, n = NULL) {
 #' @return A named vector of colour codes, where the names are the species names
 #' plus any extra names passed with `newVals`.
 #'
+#' @aliases sppColours
 #' @export
-sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette) {
-  sppColorNames <- c(na.omit(unique(sppEquiv[[sppEquivCol]])), newVals)
+sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette = "Accent") {
+  standardizedColors <- FALSE
+  #test if standardized plotting is an option - if so, override palette
+  if (!is.null(sppEquiv$colorHex)) {
+    if (
+      nrow(sppEquiv[colorHex == "", ]) == 0 &
+        !any(is.na(sppEquiv$colorHex)) &
+        c(is.null(newVals) | length(newVals) < 2) &
+        length(unique(sppEquiv[[sppEquivCol]] <= length(unique(sppEquiv$colorHex))))
+    ) {
+      standardizedColors <- TRUE
+    }
+  }
 
-  sppColors <- NULL
-  sppColors <- if (is.character(palette))
-    if (palette %in% rownames(RColorBrewer::brewer.pal.info)) {
-      colorPalette <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 7, name = palette))
-      colorPalette(length(sppColorNames))
+  if (standardizedColors) {
+    sppColors <- sppEquiv$colorHex
+    names(sppColors) <- sppEquiv[[sppEquivCol]]
+    if (length(newVals == 1)) {
+      mediumGray <- "#AAA7AD"
+      names(mediumGray) <- newVals
+      sppColors <- c(sppColors, mediumGray)
+    }
+    #unique strips names...so use duplicated
+    #strip out the duplicated names - either subspecies or genus-level spp (e.g. Popu_spp)
+    sppColors <- sppColors[!duplicated(names(sppColors))]
+  } else {
+    sppColorNames <- c(na.omit(unique(sppEquiv[[sppEquivCol]])), newVals)
+
+    sppColors <- NULL
+    sppColors <- if (is.character(palette)) {
+      if (palette %in% rownames(RColorBrewer::brewer.pal.info)) {
+        colorPalette <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 7, name = palette))
+        colorPalette(length(sppColorNames))
+      }
     }
 
-  if (is.null(sppColors))
-    stop("Currently palette must be one of the RColorBrewer::brewer.pal names")
+    if (is.null(sppColors)) {
+      stop("Currently palette must be one of the RColorBrewer::brewer.pal names")
+    }
 
-  names(sppColors) <- sppColorNames
+    names(sppColors) <- sppColorNames
+  }
   sppColors
 }
 
 plotFunction <- function(ras, studyArea, limits = NULL) {
-  if (is.null(limits))
+  .requireNamespace("ggpubr", stopOnFALSE = TRUE)
+
+  if (is.null(limits)) {
     limits <- range(as.vector(ras[]), na.rm = TRUE)
+  }
   ggplot() +
     layer_spatial(ras, aes(fill = stat(band1))) +
     layer_spatial(data = studyArea, fill = "transparent", colour = "black") +
-    annotation_north_arrow(style = north_arrow_minimal,
-                           height = unit(1, "cm"), width = unit(1, "cm"),
-                           location = "tr", which_north = "true") +
-    theme_pubr(legend = "bottom") +
+    annotation_north_arrow(
+      style = north_arrow_minimal,
+      height = unit(1, "cm"),
+      width = unit(1, "cm"),
+      location = "tr",
+      which_north = "true"
+    ) +
+    ggpubr::theme_pubr(legend = "bottom") +
     theme(plot.margin = unit(c(0, 0, 0, 0), units = "mm")) +
-    scale_fill_distiller(palette = "Greys", na.value = "transparent",
-                         direction = 1,
-                         breaks = seq(limits[1], limits[2], length.out = 6),
-                         limits = limits) +
-    labs(x = "longitude", y = "latitude", fill = "Cover",
-         title = sub("\\.|_", " ", names(ras)))
+    scale_fill_distiller(
+      palette = "Greys",
+      na.value = "transparent",
+      direction = 1,
+      breaks = seq(limits[1], limits[2], length.out = 6),
+      limits = limits
+    ) +
+    labs(x = "longitude", y = "latitude", fill = "Cover", title = sub("\\.|_", " ", names(ras)))
+}
+
+#' Plot raster objects using ggplot
+#'
+#' @param x A `SpatRaster` object
+#' @param title character, the plot title
+#' @param subtitle character, the plot subtitle
+#'
+#' @returns ggplot object
+#'
+#' @export
+plot_raster <- function(x, title = NULL, subtitle = NULL) {
+  if (!inherits(x, "SpatRaster")) {
+    x <- rast(x)
+  }
+
+  gg_raster <- ggplot() +
+    geom_spatraster(data = x) +
+    scale_fill_viridis(na.value = "transparent") +
+    theme_bw()
+
+  if (!is.null(title)) {
+    gg_raster <- gg_raster + ggtitle(title)
+  }
+  if (!is.null(subtitle)) {
+    gg_raster <- gg_raster + labs(subtitle = subtitle)
+  }
+
+  gg_raster # return ggplot object
 }

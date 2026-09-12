@@ -19,6 +19,7 @@ export(PeatlandThermokarst)
 export(Ward)
 export(addNoPixel2CohortData)
 export(addPixels2CohortData)
+export(adjustAgeToLongevity)
 export(aggregateRasByDT)
 export(asInt)
 export(asInteger)
@@ -26,6 +27,7 @@ export(assert1)
 export(assert2)
 export(assertCohortData)
 export(assertCohortDataAttr)
+export(assertCohortDataERG)
 export(assertColumns)
 export(assertERGs)
 export(assertFireToleranceDif)
@@ -51,11 +53,15 @@ export(biomodModelingWrapper)
 export(biomodProjWrapper)
 export(calcSeverityB)
 export(calcSiteShade)
+export(calc_raster_counts)
+export(calc_raster_stats)
 export(calculateClimateEffect)
 export(checkSpeciesTraits)
+export(cohortDefinitionCols)
 export(columnsForPixelGroups)
 export(convertUnwantedLCC)
 export(convertUnwantedLCC2)
+export(convert_SCANFI_LCC_codes)
 export(defineFlammable)
 export(describeCohortData)
 export(doResprouting)
@@ -67,6 +73,7 @@ export(equivalentNameColumn)
 export(extractMaxB)
 export(fasterizeFromSp)
 export(fitNLMModels)
+export(gadm_canada)
 export(genPGsPostDisturbance)
 export(generatePixelGroups)
 export(genericExtract)
@@ -74,7 +81,9 @@ export(getSpeciesTable)
 export(getWildfire_NFI)
 export(installBioSIM)
 export(isInt)
+export(lccMapGenerator)
 export(loadCASFRI)
+export(loadSCANFISpeciesLayers)
 export(loadkNNSpeciesLayers)
 export(loadkNNSpeciesLayersValidation)
 export(makeAndCleanInitialCohortData)
@@ -105,6 +114,9 @@ export(plantNewCohorts)
 export(plotLeadingSpecies)
 export(plotSpatial)
 export(plotVTM)
+export(plotVegTransitions)
+export(plot_raster)
+export(plot_raster_stats)
 export(prepEcoregions)
 export(prepEcozonesRst)
 export(prepInputsCanDEM)
@@ -115,8 +127,10 @@ export(prepInputsMainInput)
 export(prepInputsSpecies)
 export(prepInputsSpeciesEcoregion)
 export(prepInputsStandAgeMap)
+export(prepInputs_NTEMS_DominantSpecies)
 export(prepInputs_NTEMS_LCC_FAO)
 export(prepInputs_NTEMS_Nonforest)
+export(prepInputs_SCANFI_LCC_FAO)
 export(prepRasterToMatch)
 export(prepRawBiomassMap)
 export(prepSpeciesLayers_CASFRI)
@@ -124,11 +138,12 @@ export(prepSpeciesLayers_ForestInventory)
 export(prepSpeciesLayers_KNN)
 export(prepSpeciesLayers_KNN2011)
 export(prepSpeciesLayers_MBFRI)
+export(prepSpeciesLayers_NTEMS)
 export(prepSpeciesLayers_ONFRI)
 export(prepSpeciesLayers_Pickell)
+export(prepSpeciesLayers_SCANFI)
 export(prepSpeciesTable)
 export(randomStudyArea)
-export(rasterRead)
 export(reclass)
 export(replaceAgeInFires)
 export(rescale)
@@ -137,12 +152,15 @@ export(scheduleDisturbance)
 export(speciesEcoregionLatestYear)
 export(speciesInStudyArea)
 export(speciesPresentFromKNN)
+export(speciesPresentFromNTEMS)
+export(speciesPresentFromSCANFI)
 export(speciesTableUpdate)
 export(sppColors)
 export(sppEquivCheck)
 export(sppHarmonize)
 export(standAgeMapGenerator)
 export(statsModel)
+export(studyAreaEco)
 export(subsetDT)
 export(sumRastersBySpecies)
 export(uniqueCohortDefinition)
@@ -150,191 +168,224 @@ export(uniqueSpeciesEcoregionDefinition)
 export(updateCohortData)
 export(updateCohortDataPostHarvest)
 export(updateSpeciesTable)
+export(vegTransitions)
 export(vegTypeGenerator)
 export(vegTypeMapGenerator)
+export(vtm2conifdecid)
+import(ggplot2)
 import(methods)
+import(patchwork)
+importFrom(Formula,Formula)
 importFrom(MuMIn,r.squaredGLMM)
-importFrom(RColorBrewer,brewer.pal)
-importFrom(RColorBrewer,brewer.pal.info)
-importFrom(SpaDES.tools,inRange)
-importFrom(SpaDES.tools,neutralLandscapeMap)
-importFrom(SpaDES.tools,randomPolygons)
-importFrom(SpaDES.tools,rasterizeReduced)
-importFrom(SpaDES.tools,runifC)
-importFrom(SpaDES.tools,spread2)
-importFrom(crayon,blue)
-importFrom(crayon,cyan)
-importFrom(crayon,green)
-importFrom(crayon,magenta)
-importFrom(crayon,red)
-importFrom(data.table,as.data.table)
-importFrom(data.table,copy)
-importFrom(data.table,data.table)
-importFrom(data.table,fread)
-importFrom(data.table,is.data.table)
-importFrom(data.table,last)
-importFrom(data.table,melt)
-importFrom(data.table,rbindlist)
-importFrom(data.table,set)
-importFrom(data.table,setDT)
-importFrom(data.table,setDTthreads)
-importFrom(data.table,setattr)
-importFrom(data.table,setcolorder)
-importFrom(data.table,setkey)
-importFrom(data.table,setkeyv)
-importFrom(data.table,setnames)
-importFrom(data.table,setorderv)
-importFrom(fpCompare,"%<<%")
-importFrom(fpCompare,"%==%")
-importFrom(fpCompare,"%>>%")
-importFrom(ggplot2,aes)
-importFrom(ggplot2,coord_equal)
-importFrom(ggplot2,coord_sf)
-importFrom(ggplot2,element_blank)
-importFrom(ggplot2,element_text)
-importFrom(ggplot2,facet_wrap)
-importFrom(ggplot2,geom_bar)
-importFrom(ggplot2,geom_hline)
-importFrom(ggplot2,geom_line)
-importFrom(ggplot2,geom_point)
-importFrom(ggplot2,geom_raster)
-importFrom(ggplot2,geom_ribbon)
-importFrom(ggplot2,geom_sf)
-importFrom(ggplot2,ggplot)
-importFrom(ggplot2,guide_legend)
-importFrom(ggplot2,guides)
-importFrom(ggplot2,labs)
-importFrom(ggplot2,scale_color_distiller)
-importFrom(ggplot2,scale_fill_distiller)
-importFrom(ggplot2,scale_fill_manual)
-importFrom(ggplot2,scale_fill_viridis_c)
-importFrom(ggplot2,scale_fill_viridis_d)
-importFrom(ggplot2,scale_x_discrete)
-importFrom(ggplot2,stat)
-importFrom(ggplot2,stat_summary)
-importFrom(ggplot2,sym)
-importFrom(ggplot2,theme)
-importFrom(ggplot2,theme_classic)
-importFrom(ggplot2,unit)
-importFrom(ggpubr,theme_pubr)
-importFrom(ggspatial,annotation_north_arrow)
-importFrom(ggspatial,layer_spatial)
-importFrom(ggspatial,north_arrow_minimal)
-importFrom(grDevices,colorRampPalette)
-importFrom(grDevices,dev.off)
-importFrom(grDevices,png)
-importFrom(lme4,glmer)
-importFrom(lme4,lmer)
+importFrom(RColorBrewer,
+  brewer.pal,
+  brewer.pal.info
+)
+importFrom(Rcpp,evalCpp)
+importFrom(SpaDES.tools,
+  inRange,
+  neutralLandscapeMap,
+  randomPolygons,
+  rasterizeReduced,
+  runifC,
+  spread2
+)
+importFrom(cli,
+  col_blue,
+  col_cyan,
+  col_green,
+  col_magenta,
+  col_red
+)
+importFrom(data.table,
+  as.data.table,
+  copy,
+  data.table,
+  dcast,
+  fifelse,
+  fread,
+  is.data.table,
+  last,
+  melt,
+  rbindlist,
+  set,
+  setDT,
+  setDTthreads,
+  setattr,
+  setcolorder,
+  setkey,
+  setkeyv,
+  setnames,
+  setorderv
+)
+importFrom(fpCompare,
+  "%<<%",
+  "%<=%",
+  "%==%",
+  "%>>%"
+)
+importFrom(ggspatial,
+  annotation_north_arrow,
+  layer_spatial,
+  north_arrow_minimal
+)
+importFrom(grDevices,
+  colorRampPalette,
+  dev.off,
+  png
+)
+importFrom(httr2,request)
+importFrom(lme4,
+  glmer,
+  lmer
+)
 importFrom(parallel,mclapply)
-importFrom(pemisc,factorValues2)
-importFrom(pemisc,termsInData)
-importFrom(quickPlot,"setColors<-")
-importFrom(quickPlot,Plot)
-importFrom(quickPlot,layerNames)
-importFrom(quickPlot,numLayers)
-importFrom(quickPlot,setColors)
-importFrom(raster,"NAvalue<-")
-importFrom(raster,calc)
-importFrom(raster,deratify)
-importFrom(raster,dropLayer)
-importFrom(raster,extension)
-importFrom(raster,levels)
-importFrom(raster,projectExtent)
-importFrom(raster,raster)
-importFrom(raster,rasterOptions)
-importFrom(raster,ratify)
-importFrom(raster,reclassify)
-importFrom(raster,stack)
-importFrom(raster,unstack)
-importFrom(reproducible,.prefix)
-importFrom(reproducible,.requireNamespace)
-importFrom(reproducible,.sortDotsUnderscoreFirst)
-importFrom(reproducible,.suffix)
-importFrom(reproducible,Cache)
-importFrom(reproducible,Filenames)
-importFrom(reproducible,asPath)
-importFrom(reproducible,basename2)
-importFrom(reproducible,cropInputs)
-importFrom(reproducible,fixErrors)
-importFrom(reproducible,maxFn)
-importFrom(reproducible,messageDF)
-importFrom(reproducible,minFn)
-importFrom(reproducible,paddedFloatToChar)
-importFrom(reproducible,postProcess)
-importFrom(reproducible,postProcessTerra)
-importFrom(reproducible,postProcessTo)
-importFrom(reproducible,preProcess)
-importFrom(reproducible,prepInputs)
-importFrom(reproducible,projectInputs)
-importFrom(reproducible,writeOutputs)
-importFrom(sf,as_Spatial)
-importFrom(sf,st_as_sf)
-importFrom(sf,st_cast)
-importFrom(sf,st_coordinates)
-importFrom(sf,st_crs)
-importFrom(sf,st_intersects)
-importFrom(sf,st_read)
-importFrom(sf,st_transform)
-importFrom(sf,st_zm)
-importFrom(sp,CRS)
-importFrom(sp,SpatialPoints)
-importFrom(sp,proj4string)
-importFrom(stats,as.formula)
-importFrom(stats,complete.cases)
-importFrom(stats,fitted)
-importFrom(stats,glm)
-importFrom(stats,na.omit)
-importFrom(stats,predict)
-importFrom(stats,quantile)
-importFrom(stats,runif)
-importFrom(stats,terms)
-importFrom(stats,update)
-importFrom(stats,vcov)
-importFrom(terra,"NAflag<-")
-importFrom(terra,"coltab<-")
-importFrom(terra,"crs<-")
-importFrom(terra,app)
-importFrom(terra,as.int)
-importFrom(terra,cellFromRowCol)
-importFrom(terra,cellFromXY)
-importFrom(terra,classify)
-importFrom(terra,compareGeom)
-importFrom(terra,crop)
-importFrom(terra,crs)
-importFrom(terra,ext)
-importFrom(terra,extract)
-importFrom(terra,focalMat)
-importFrom(terra,intersect)
-importFrom(terra,is.factor)
-importFrom(terra,is.int)
-importFrom(terra,is.points)
-importFrom(terra,levels)
-importFrom(terra,mask)
-importFrom(terra,minmax)
-importFrom(terra,ncell)
-importFrom(terra,nlyr)
-importFrom(terra,project)
-importFrom(terra,rast)
-importFrom(terra,rasterize)
-importFrom(terra,res)
-importFrom(terra,rowColFromCell)
-importFrom(terra,terraOptions)
-importFrom(terra,values)
-importFrom(terra,vect)
-importFrom(terra,writeRaster)
-importFrom(terra,xmax)
-importFrom(terra,xmin)
-importFrom(terra,xyFromCell)
-importFrom(terra,ymax)
-importFrom(terra,ymin)
+importFrom(pemisc,
+  factorValues2,
+  termsInData
+)
+importFrom(quickPlot,
+  "setColors<-",
+  Plot,
+  layerNames,
+  numLayers,
+  setColors
+)
+importFrom(raster,
+  "NAvalue<-",
+  calc,
+  deratify,
+  dropLayer,
+  extension,
+  levels,
+  projectExtent,
+  raster,
+  rasterOptions,
+  ratify,
+  reclassify,
+  stack,
+  unstack
+)
+importFrom(reproducible,
+  .prefix,
+  .requireNamespace,
+  .sortDotsUnderscoreFirst,
+  .suffix,
+  Cache,
+  CacheDigest,
+  Filenames,
+  asPath,
+  basename2,
+  cropInputs,
+  fixErrors,
+  maxFn,
+  messageDF,
+  minFn,
+  paddedFloatToChar,
+  postProcess,
+  postProcessTerra,
+  postProcessTo,
+  preProcess,
+  prepInputs,
+  projectInputs,
+  rasterRead,
+  writeOutputs,
+  writeTo
+)
+importFrom(sf,
+  as_Spatial,
+  st_as_sf,
+  st_cast,
+  st_coordinates,
+  st_crs,
+  st_intersects,
+  st_read,
+  st_transform,
+  st_union,
+  st_zm
+)
+importFrom(sp,
+  CRS,
+  SpatialPoints,
+  proj4string
+)
+importFrom(stats,
+  approx,
+  as.formula,
+  complete.cases,
+  fitted,
+  glm,
+  na.omit,
+  predict,
+  quantile,
+  runif,
+  setNames,
+  terms,
+  update,
+  vcov
+)
+importFrom(terra,
+  "NAflag<-",
+  "coltab<-",
+  "crs<-",
+  app,
+  as.factor,
+  as.int,
+  cellFromRowCol,
+  cellFromXY,
+  classify,
+  compareGeom,
+  crop,
+  crosstab,
+  crs,
+  deepcopy,
+  ext,
+  extract,
+  focalMat,
+  intersect,
+  is.factor,
+  is.int,
+  is.points,
+  is.valid,
+  levels,
+  mask,
+  minmax,
+  ncell,
+  nlyr,
+  project,
+  rast,
+  rasterize,
+  res,
+  rowColFromCell,
+  set.names,
+  set.values,
+  terraOptions,
+  unique,
+  values,
+  vect,
+  writeRaster,
+  xmax,
+  xmin,
+  xyFromCell,
+  ymax,
+  ymin
+)
 importFrom(tidyterra,geom_spatraster)
-importFrom(tools,file_path_sans_ext)
-importFrom(utils,capture.output)
-importFrom(utils,combn)
-importFrom(utils,count.fields)
-importFrom(utils,data)
-importFrom(utils,getFromNamespace)
-importFrom(utils,install.packages)
-importFrom(utils,str)
-importFrom(utils,tail)
-importFrom(utils,untar)
+importFrom(tools,
+  file_ext,
+  file_path_sans_ext
+)
+importFrom(utils,
+  capture.output,
+  combn,
+  count.fields,
+  data,
+  getFromNamespace,
+  head,
+  install.packages,
+  str,
+  tail,
+  untar
+)
+importFrom(viridis,scale_fill_viridis)
+useDynLib(LandR, .registration = TRUE)

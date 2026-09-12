@@ -8,7 +8,7 @@ prepInputsLCC(
   year = 2010,
   destinationPath = asPath("."),
   method = c("ngb", "near"),
-  filename2 = NULL,
+  writeTo = NULL,
   ...
 )
 }
@@ -17,23 +17,24 @@ prepInputsLCC(
 
 \item{destinationPath}{Character string of a directory in which to download
 and save the file that comes from \code{url} and is also where the function
-will look for \code{archive} or \code{targetFile}. NOTE (still experimental):
+will look for \code{archive} or \code{targetFile}.
 To prevent repeated downloads in different locations, the user can also set
-\code{options("reproducible.inputPaths")} to one or more local file paths to
+\code{options("reproducible.destinationPathShared")} to one or more local file paths to
 search for the file before attempting to download. Default for that option is
-\code{NULL} meaning do not search locally.}
+\code{NULL} meaning do not search locally. The previous name
+\code{options("reproducible.inputPaths")} is still accepted as a backwards-compatible
+alias.}
 
 \item{method}{passed to \link[terra:intersect]{terra::intersect} or \link[raster:intersect]{raster::intersect},
 and \link[reproducible:prepInputs]{reproducible::prepInputs}}
 
-\item{filename2}{passed to \link[reproducible:prepInputs]{reproducible::prepInputs}}
+\item{writeTo}{passed to \link[reproducible:prepInputs]{reproducible::prepInputs}}
 
 \item{...}{Arguments passed to \code{terra::mask} (for \code{maskTo}), \code{terra::project} (for \code{projectTo})
 or \code{terra::writeRaster} (for \code{writeTo}) and not used for \code{cropTo}, as well \code{postProcess}'s
 \code{rasterToMatch} and \code{studyArea} arguments (see below). Commonly used arguments might be
 \code{method}, \code{touches}, and \code{datatype}. If \code{filename} is passed, it will be ignored; use
-\verb{writeTo = }. If \code{reproducible.gdalwarp = TRUE}, then these will be passed to the
-\verb{gdal*} functions. See them for details.}
+\verb{writeTo = }.}
 }
 \description{
 A wrapper around \code{prepInputs} for the Canadian Land Cover Classification product(s).
