@@ -28,28 +28,6 @@ utils::globalVariables(c(
   ras
 }
 
-#' Make an empty (zero-layer) `SpatRaster` with the geometry of a template
-#'
-#' Used to represent "no species" while remaining comparable to `rasterToMatch`
-#' via [.compareRas()]. terra exports no way to build a zero-layer `SpatRaster`
-#' (`x[[0]]`, `subset()` and `rast(list())` all error), hence the use of its
-#' underlying C++ constructor.
-#'
-#' @param template a `SpatRaster` whose CRS, extent and resolution are copied
-#'
-#' @return a `SpatRaster` with `nlyr() == 0`
-#'
-#' @rdname rasterTerraHelpers
-.emptySpatRaster <- function(template) {
-  out <- methods::new("SpatRaster")
-  out@pntr <- terra:::SpatRaster$new(
-    c(nrow(template), ncol(template), 0),
-    as.vector(ext(template)),
-    crs(template)
-  )
-  out
-}
-
 #' Make stacked raster
 #'
 #' @param rasList a list of `Raster` or `SpatRaster` objects

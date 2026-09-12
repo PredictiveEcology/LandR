@@ -7,10 +7,12 @@ rtmFixture <- function() {
   ras
 }
 
-test_that("assertSpeciesLayers passes with zero species layers", {
-  empty <- LandR:::.emptySpatRaster(rtmFixture())
-  expect_equal(terra::nlyr(empty), 0L)
-  expect_no_error(assertSpeciesLayers(empty, thresh = 10, doAssertion = TRUE))
+## "No tree species" is carried as speciesLayers = NULL. A zero-layer SpatRaster was tried
+## first and rejected: terra can build one only through its private constructor, and cannot
+## wrap(), unwrap() or write it, so it did not survive Cache (2026-09-12).
+test_that("assertSpeciesLayers passes with no species layers (NULL)", {
+  expect_no_error(assertSpeciesLayers(NULL, thresh = 10, doAssertion = TRUE))
+  expect_silent(assertSpeciesLayers(NULL, thresh = 10, doAssertion = TRUE))
 })
 
 test_that("assertSpeciesLayers still stops when all pixels are NA", {
@@ -20,12 +22,4 @@ test_that("assertSpeciesLayers still stops when all pixels are NA", {
     assertSpeciesLayers(allNA, thresh = 10, doAssertion = TRUE),
     "no pixels found"
   )
-})
-
-test_that("the empty speciesLayers preserves the geometry of rasterToMatch", {
-  rtm <- rtmFixture()
-  empty <- LandR:::.emptySpatRaster(rtm)
-  expect_equal(terra::nlyr(empty), 0L)
-  expect_equal(names(empty), character(0))
-  expect_true(LandR:::.compareRas(empty, rtm, stopOnError = FALSE))
 })
