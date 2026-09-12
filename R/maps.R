@@ -1626,7 +1626,9 @@ loadSCANFISpeciesLayers <- function(
   }
 
   if (!length(SCANFInames)) {
-    stop("None of the selected species were found in the SCANFI layers")
+    ## no species is a valid state (e.g. non-forested study areas); the informative
+    ## message belongs upstream, where "no tree species" is first established
+    return(.emptySpatRaster(rasterToMatch))
   }
 
   if (dataVersion == "V1") {

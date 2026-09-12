@@ -2,6 +2,7 @@
 % Please edit documentation in R/terra-raster-utils.R
 \name{.NAvalueFlag}
 \alias{.NAvalueFlag}
+\alias{.emptySpatRaster}
 \alias{.stack}
 \alias{.projectExtent}
 \alias{asInt}
@@ -10,6 +11,8 @@
 \title{Set NA values in \code{Raster} or \code{SpatRaster}}
 \usage{
 .NAvalueFlag(ras, NAval)
+
+.emptySpatRaster(template)
 
 .stack(rasList)
 
@@ -26,6 +29,8 @@ reclass(ras, tab)
 
 \item{NAval}{the value to use as \code{NA}}
 
+\item{template}{a \code{SpatRaster} whose CRS, extent and resolution are copied}
+
 \item{rasList}{a list of \code{Raster} or \code{SpatRaster} objects}
 
 \item{crs}{passed to \code{raster::projectRaster(..., crs = crs)} and \code{terra::project(..., y = crs)}}
@@ -34,6 +39,8 @@ reclass(ras, tab)
 }
 \value{
 a raster with attributed NA values
+
+a \code{SpatRaster} with \code{nlyr() == 0}
 
 a stacked raster
 
@@ -47,5 +54,10 @@ the projected extent
 and \code{raster::reclassify}.
 }
 \description{
+Used to represent "no species" while remaining comparable to \code{rasterToMatch}
+via \code{\link[=.compareRas]{.compareRas()}}. terra exports no way to build a zero-layer \code{SpatRaster}
+(\code{x[[0]]}, \code{subset()} and \code{rast(list())} all error), hence the use of its
+underlying C++ constructor.
+
 These all create a single function that can be used for either \code{Raster} or \code{SpatRaster} objects.
 }
