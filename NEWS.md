@@ -1,4 +1,4 @@
-# LandR (development version)
+# LandR 1.2.1
 
 * `sppEquivalencies_CA`: coastal Douglas-fir (`PSEU_MEN_MEN`) now has `FuelClass`
   "DgFrPoPine", like the other two `Pseu_men` rows. It had "CedrMplOther", so any study
