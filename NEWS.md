@@ -1,4 +1,4 @@
-# LandR (development version)
+# LandR 1.2.1
 
 * **Forest-land inputs are prepared once per study area.** `prepInputs_SCANFI_LCC_FAO()` and
   `prepInputs_NTEMS_LCC_FAO()` prepare their forest-land inputs -- the FAO forest layer and the
