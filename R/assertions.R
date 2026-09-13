@@ -487,6 +487,11 @@ assertSpeciesLayers <- function(speciesLayers, thresh,
       speciesLayers <- list(speciesLayers)
     }
 
+    ## no species layers at all (NULL) is a valid state, distinct from "layers are all NA"
+    if (is.null(speciesLayers)) {
+      return(invisible(NULL))
+    }
+
     test1 <- vapply(speciesLayers, FUN = function(x) {
       all(is.na(as.vector(values(x))))
     }, FUN.VALUE = logical(1))
