@@ -1626,7 +1626,11 @@ loadSCANFISpeciesLayers <- function(
   }
 
   if (!length(SCANFInames)) {
-    stop("None of the selected species were found in the SCANFI layers")
+    ## no species is a valid state (e.g. non-forested study areas); the informative
+    ## message belongs upstream, where "no tree species" is first established.
+    ## NULL, not a zero-layer SpatRaster: terra cannot wrap(), write or unwrap() one,
+    ## so it does not survive Cache.
+    return(NULL)
   }
 
   if (dataVersion == "V1") {
