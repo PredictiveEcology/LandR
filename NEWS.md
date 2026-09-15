@@ -6,6 +6,10 @@
   (`Pice_eng`). This is the table fireSense modules built for themselves. The new argument
   `mergeHybridSpruce` (default `getOption("LandR.mergeHybridSpruce", "engelmann")`) merges it
   into white spruce (`"white"`, `Pice_gla`) instead, or leaves it as its own species (`NA`).
+  Only the hybrid being on the raster triggers the merge, and its rows take the target's
+  `LandR`, `LANDIS_traits` and `sppEquivCol` names. Rows are matched on `LandR` whatever
+  naming the raster uses (SCANFI/NFI `PICE_ENG_GLA` or KNN `Pice_Eng_Gla`), so the table has
+  the same rows for any `sppEquivCol`.
 * `speciesInStudyArea()` no longer stops with "object 'bb' not found" when `speciesPresentRas`
   is supplied, and uses a supplied `url` instead of ignoring it.
 * `sppEquivalencies_CA`: coastal Douglas-fir (`PSEU_MEN_MEN`) now has `FuelClass`

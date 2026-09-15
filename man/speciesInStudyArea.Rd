@@ -27,7 +27,8 @@ with \code{speciesPresentFromKNN}}
 
 \item{sppEquivCol}{An optional column from \code{LandR::sppEquivalencies_CA}.
 If passed the KNN species will be returned according to this naming convention.
-It is also the column the returned \code{sppEquiv} table is built on (\code{"LandR"} if not passed).}
+It does not change which rows the returned \code{sppEquiv} has; a merged hybrid spruce row
+reports the target species' name in this column.}
 
 \item{dataSource}{Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain species from layer
 created using species cover data from KNN. Also able to obtain species from SCANFI species cover layers
@@ -41,15 +42,19 @@ and NTEMS Dominant Species Layer (though less species will be included from the 
 \item{mergeHybridSpruce}{Which species the hybrid white x Engelmann spruce (\code{Pice_eng_gla})
 is merged into in the returned \code{sppEquiv}: \code{"engelmann"} (\code{Pice_eng}), \code{"white"}
 (\code{Pice_gla}), or \code{NA} to keep \code{Pice_eng_gla} as its own species.
+Only the hybrid being on the raster triggers the merge. Its rows then take the target
+species' \code{LandR}, \code{LANDIS_traits} and \code{sppEquivCol} names, and the target's row is added
+if the target is not on the raster.
 Defaults to \code{getOption("LandR.mergeHybridSpruce", "engelmann")}.}
 }
 \value{
 A named list of length 3: \code{speciesRas} is a factor \code{RasterLayer},
 \code{speciesList} is a character string containing the unique, sorted
 species on the \code{speciesRas}, for convenience, and \code{sppEquiv} is a \code{data.table}:
-the rows of \code{sppEquivalencies_CA} for those species, keyed on \code{sppEquivCol}
-(\code{"LandR"} if not passed), without \verb{_Spp} genus entries, keeping only species
-with \code{LANDIS_traits}, and with \code{Pice_eng_gla} merged as set by \code{mergeHybridSpruce}.
+the rows of \code{sppEquivalencies_CA} for those species, matched on the \code{LandR} column
+whatever naming the raster uses (so the rows are the same for any \code{sppEquivCol}),
+without \verb{_Spp} genus entries, keeping only species with \code{LANDIS_traits}, and with
+\code{Pice_eng_gla} merged as set by \code{mergeHybridSpruce}.
 }
 \description{
 \code{speciesInStudyArea} defaults to use a URL of a dataset uploaded to Google Drive that is

@@ -384,7 +384,8 @@ speciesPresentFromSCANFI <- function(
 #'
 #' @param sppEquivCol An optional column from `LandR::sppEquivalencies_CA`.
 #'   If passed the KNN species will be returned according to this naming convention.
-#'   It is also the column the returned `sppEquiv` table is built on (`"LandR"` if not passed).
+#'   It does not change which rows the returned `sppEquiv` has; a merged hybrid spruce row
+#'   reports the target species' name in this column.
 #'
 #' @param dataSource Character. Either KNN, NTEMS, or SCANFI. Defaults to KNN to obtain species from layer
 #'   created using species cover data from KNN. Also able to obtain species from SCANFI species cover layers
@@ -398,14 +399,18 @@ speciesPresentFromSCANFI <- function(
 #' @param mergeHybridSpruce Which species the hybrid white x Engelmann spruce (`Pice_eng_gla`)
 #'   is merged into in the returned `sppEquiv`: `"engelmann"` (`Pice_eng`), `"white"`
 #'   (`Pice_gla`), or `NA` to keep `Pice_eng_gla` as its own species.
+#'   Only the hybrid being on the raster triggers the merge. Its rows then take the target
+#'   species' `LandR`, `LANDIS_traits` and `sppEquivCol` names, and the target's row is added
+#'   if the target is not on the raster.
 #'   Defaults to `getOption("LandR.mergeHybridSpruce", "engelmann")`.
 #'
 #' @return A named list of length 3: `speciesRas` is a factor `RasterLayer`,
 #' `speciesList` is a character string containing the unique, sorted
 #' species on the `speciesRas`, for convenience, and `sppEquiv` is a `data.table`:
-#' the rows of `sppEquivalencies_CA` for those species, keyed on `sppEquivCol`
-#' (`"LandR"` if not passed), without `_Spp` genus entries, keeping only species
-#' with `LANDIS_traits`, and with `Pice_eng_gla` merged as set by `mergeHybridSpruce`.
+#' the rows of `sppEquivalencies_CA` for those species, matched on the `LandR` column
+#' whatever naming the raster uses (so the rows are the same for any `sppEquivCol`),
+#' without `_Spp` genus entries, keeping only species with `LANDIS_traits`, and with
+#' `Pice_eng_gla` merged as set by `mergeHybridSpruce`.
 #'
 #' @export
 speciesInStudyArea <- function(
@@ -514,20 +519,25 @@ speciesInStudyArea <- function(
   ## The species table for the study area, built as fireSense_ELFs built it for itself: no
   ## `_Spp` genus entries, only species with LANDIS traits, and the hybrid white x Engelmann
   ## spruce (`Pice_eng_gla`) merged into the species `mergeHybridSpruce` names (Engelmann by
-  ## default, added for ForSITE; NA for no merge). Built from the names on the
-  ## raster, before any `sppEquivCol` renaming of `speciesList`.
-  tableCol <- if (is.null(sppEquivCol)) "LandR" else sppEquivCol
+  ## default, added for ForSITE; NA for no merge). Built from the names on the raster, before
+  ## any `sppEquivCol` renaming of `speciesList`. Rows are found and merged on the `LandR`
+  ## column, whatever naming the raster uses, so `sppEquivCol` does not change which rows come
+  ## back; it is only the name a merged hybrid row reports, with `LandR` and `LANDIS_traits`.
   spp <- grep("_Spp", as.character(sppNames), invert = TRUE, value = TRUE)
-  inStudyArea <- equivalentName(spp, LandR::sppEquivalencies_CA, column = tableCol,
-                                searchColumn = equivalentNameColumn(spp, LandR::sppEquivalencies_CA))
-  sppEquiv <- LandR::sppEquivalencies_CA[get(tableCol) %in% inStudyArea]
-  sppEquiv <- sppEquiv[LANDIS_traits != ""]
-  if (!is.na(mergeHybridSpruce)) {
+  sppLandR <- equivalentName(spp, LandR::sppEquivalencies_CA, column = "LandR",
+                             searchColumn = equivalentNameColumn(spp, LandR::sppEquivalencies_CA))
+  sppLandR <- sppLandR[!is.na(sppLandR) & nzchar(sppLandR)]
+  mergeHybrid <- !is.na(mergeHybridSpruce) && "Pice_eng_gla" %in% sppLandR
+  if (mergeHybrid) {
     mergeInto <- c(engelmann = "Pice_eng", white = "Pice_gla")[[mergeHybridSpruce]]
-    if ("PICE_ENG_GLA" %in% spp | toupper(mergeInto) %in% spp) {
-      sppEquiv <- rbind(sppEquiv, LandR::sppEquivalencies_CA[LandR %in% c(mergeInto, "Pice_eng_gla")])
-      sppEquiv[LandR == "Pice_eng_gla", LandR := mergeInto]
-      sppEquiv <- unique(sppEquiv)
+    sppLandR <- union(sppLandR, mergeInto)
+  }
+  sppEquiv <- LandR::sppEquivalencies_CA[LandR %in% sppLandR & LANDIS_traits != ""]
+  if (mergeHybrid) {
+    target <- LandR::sppEquivalencies_CA[LandR == mergeInto][1]
+    hybridRows <- which(sppEquiv$LandR == "Pice_eng_gla")
+    for (nameCol in unique(c("LandR", "LANDIS_traits", sppEquivCol))) {
+      set(sppEquiv, hybridRows, nameCol, target[[nameCol]])
     }
   }
 

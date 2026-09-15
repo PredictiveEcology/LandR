@@ -83,3 +83,47 @@ test_that("sppEquiv is keyed on sppEquivCol when one is given", {
   out <- speciesInStudyArea(studyAreaFor(r), speciesPresentRas = r, sppEquivCol = "LandR")
   expect_true(all(c("Abie_ama", "Pseu_men") %in% out$sppEquiv$LandR))
 })
+
+test_that("sppEquiv: only the hybrid on the raster triggers the merge", {
+  withr::local_package("data.table")
+  r <- speciesPresence(c("PICE_ENG__PSEU_MEN"))
+  out <- speciesInStudyArea(studyAreaFor(r), speciesPresentRas = r)
+  expect_false("Pice_Eng_Gla" %in% out$sppEquiv$KNN)
+
+  r <- speciesPresence(c("PICE_GLA__PSEU_MEN"))
+  out <- speciesInStudyArea(studyAreaFor(r), speciesPresentRas = r, mergeHybridSpruce = "white")
+  expect_false("Pice_Eng_Gla" %in% out$sppEquiv$KNN)
+  expect_false("Pice_eng" %in% out$sppEquiv$LandR)
+})
+
+test_that("sppEquiv: the hybrid merges whatever naming the raster uses", {
+  withr::local_package("data.table")
+  r <- speciesPresence(c("Pice_Eng_Gla__Pseu_Men"))
+  out <- speciesInStudyArea(studyAreaFor(r), speciesPresentRas = r)
+  expect_identical(unique(out$sppEquiv[KNN == "Pice_Eng_Gla"]$LandR), "Pice_eng")
+  expect_true("Pice_eng" %in% out$sppEquiv$LandR)
+})
+
+test_that("sppEquiv: 'white' gives the hybrid white spruce's LANDIS traits", {
+  withr::local_package("data.table")
+  r <- speciesPresence(c("PICE_ENG_GLA__PSEU_MEN"))
+  out <- speciesInStudyArea(studyAreaFor(r), speciesPresentRas = r, mergeHybridSpruce = "white")
+  expect_identical(unique(out$sppEquiv[LandR == "Pice_gla"]$LANDIS_traits), "PICE.GLA")
+})
+
+test_that("sppEquiv: the same rows come back for any sppEquivCol", {
+  withr::local_package("data.table")
+  r <- speciesPresence(c("ABIE_AMA__PSEU_MEN__POPU_TRE", "PICE_ENG_GLA"))
+  byLandR <- speciesInStudyArea(studyAreaFor(r), speciesPresentRas = r)$sppEquiv
+  for (col in c("Boreal", "LANDIS_traits", "EN_generic_short")) {
+    out <- speciesInStudyArea(studyAreaFor(r), speciesPresentRas = r, sppEquivCol = col)$sppEquiv
+    expect_identical(out$LandR, byLandR$LandR)
+    expect_identical(out$KNN, byLandR$KNN)
+  }
+  ## species not on the raster (e.g. the many with a blank Boreal name) are not pulled in
+  expect_setequal(unique(byLandR$LandR), c("Abie_ama", "Pseu_men", "Popu_tre", "Pice_eng"))
+  ## the merged hybrid reports the target's name in the chosen column
+  out <- speciesInStudyArea(studyAreaFor(r), speciesPresentRas = r, sppEquivCol = "Boreal")$sppEquiv
+  expect_identical(unique(out[KNN == "Pice_Eng_Gla"]$Boreal),
+                   LandR::sppEquivalencies_CA[LandR == "Pice_eng"]$Boreal)
+})
