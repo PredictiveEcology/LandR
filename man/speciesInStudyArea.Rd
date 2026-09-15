@@ -11,7 +11,8 @@ speciesInStudyArea(
   sppEquivCol = NULL,
   dataSource = "SCANFI",
   dataYear = 2025,
-  dPath = getOption("reproducible.destinationPath")
+  dPath = getOption("reproducible.destinationPath"),
+  mergeHybridSpruce = getOption("LandR.mergeHybridSpruce", "engelmann")
 )
 }
 \arguments{
@@ -36,6 +37,11 @@ and NTEMS Dominant Species Layer (though less species will be included from the 
 2011 for KNN, 2011 for NTEMS, and every 5 years from 1985-2025 for SCANFI V2.}
 
 \item{dPath}{Passed to \code{destinationPath} in \code{preProcess}.}
+
+\item{mergeHybridSpruce}{Which species the hybrid white x Engelmann spruce (\code{Pice_eng_gla})
+is merged into in the returned \code{sppEquiv}: \code{"engelmann"} (\code{Pice_eng}), \code{"white"}
+(\code{Pice_gla}), or \code{NA} to keep \code{Pice_eng_gla} as its own species.
+Defaults to \code{getOption("LandR.mergeHybridSpruce", "engelmann")}.}
 }
 \value{
 A named list of length 3: \code{speciesRas} is a factor \code{RasterLayer},
@@ -43,7 +49,7 @@ A named list of length 3: \code{speciesRas} is a factor \code{RasterLayer},
 species on the \code{speciesRas}, for convenience, and \code{sppEquiv} is a \code{data.table}:
 the rows of \code{sppEquivalencies_CA} for those species, keyed on \code{sppEquivCol}
 (\code{"LandR"} if not passed), without \verb{_Spp} genus entries, keeping only species
-with \code{LANDIS_traits}, and with \code{Pice_eng_gla} merged into \code{Pice_eng}.
+with \code{LANDIS_traits}, and with \code{Pice_eng_gla} merged as set by \code{mergeHybridSpruce}.
 }
 \description{
 \code{speciesInStudyArea} defaults to use a URL of a dataset uploaded to Google Drive that is

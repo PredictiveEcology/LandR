@@ -11,6 +11,10 @@
 #'
 #' - `LandR.assertions`: If `TRUE`, additional code checks are run during function calls.
 #'   Default `FALSE`.
+#' - `LandR.mergeHybridSpruce`: which species the hybrid white x Engelmann spruce
+#'   (`Pice_eng_gla`) is merged into in the `sppEquiv` returned by [speciesInStudyArea()]:
+#'   `"engelmann"` (`Pice_eng`), `"white"` (`Pice_gla`), or `NA` for no merging.
+#'   Default `"engelmann"`.
 #'
 #' @import ggplot2
 #' @import patchwork

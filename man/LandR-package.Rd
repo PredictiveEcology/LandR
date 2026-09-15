@@ -18,6 +18,10 @@ Models are implemented as 'SpaDES' modules.
 \itemize{
 \item \code{LandR.assertions}: If \code{TRUE}, additional code checks are run during function calls.
 Default \code{FALSE}.
+\item \code{LandR.mergeHybridSpruce}: which species the hybrid white x Engelmann spruce
+(\code{Pice_eng_gla}) is merged into in the \code{sppEquiv} returned by \code{\link[=speciesInStudyArea]{speciesInStudyArea()}}:
+\code{"engelmann"} (\code{Pice_eng}), \code{"white"} (\code{Pice_gla}), or \code{NA} for no merging.
+Default \code{"engelmann"}.
 }
 }
 

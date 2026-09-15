@@ -4,6 +4,7 @@
   reproCachePath <- getOption("reproducible.cachePath")
   opts.LandR <- list( #nolint
     LandR.assertions = TRUE,
+    LandR.mergeHybridSpruce = "engelmann",
     LandR.verbose = 1
   )
   toset <- !(names(opts.LandR) %in% names(opts))

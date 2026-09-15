@@ -395,12 +395,17 @@ speciesPresentFromSCANFI <- function(
 #'
 #' @param dPath Passed to `destinationPath` in `preProcess`.
 #'
+#' @param mergeHybridSpruce Which species the hybrid white x Engelmann spruce (`Pice_eng_gla`)
+#'   is merged into in the returned `sppEquiv`: `"engelmann"` (`Pice_eng`), `"white"`
+#'   (`Pice_gla`), or `NA` to keep `Pice_eng_gla` as its own species.
+#'   Defaults to `getOption("LandR.mergeHybridSpruce", "engelmann")`.
+#'
 #' @return A named list of length 3: `speciesRas` is a factor `RasterLayer`,
 #' `speciesList` is a character string containing the unique, sorted
 #' species on the `speciesRas`, for convenience, and `sppEquiv` is a `data.table`:
 #' the rows of `sppEquivalencies_CA` for those species, keyed on `sppEquivCol`
 #' (`"LandR"` if not passed), without `_Spp` genus entries, keeping only species
-#' with `LANDIS_traits`, and with `Pice_eng_gla` merged into `Pice_eng`.
+#' with `LANDIS_traits`, and with `Pice_eng_gla` merged as set by `mergeHybridSpruce`.
 #'
 #' @export
 speciesInStudyArea <- function(
@@ -410,10 +415,16 @@ speciesInStudyArea <- function(
     sppEquivCol = NULL,
     dataSource = "SCANFI",
     dataYear = 2025,
-    dPath = getOption("reproducible.destinationPath")
+    dPath = getOption("reproducible.destinationPath"),
+    mergeHybridSpruce = getOption("LandR.mergeHybridSpruce", "engelmann")
 ) {
   if (!(dataSource %in% c("KNN", "NTEMS", "SCANFI"))) {
     stop("Data Source must be either KNN, NTEMS, or SCANFI")
+  }
+  if (length(mergeHybridSpruce) != 1 ||
+      !(is.na(mergeHybridSpruce) || mergeHybridSpruce %in% c("engelmann", "white"))) {
+    stop("mergeHybridSpruce (option 'LandR.mergeHybridSpruce') must be \"engelmann\", ",
+         "\"white\" or NA; got ", deparse(mergeHybridSpruce))
   }
   if (dataSource == "NTEMS") {
     warning(
@@ -501,8 +512,9 @@ speciesInStudyArea <- function(
   }
 
   ## The species table for the study area, built as fireSense_ELFs built it for itself: no
-  ## `_Spp` genus entries, only species with LANDIS traits, and Engelmann spruce's two
-  ## entries merged into one `Pice_eng` (added for ForSITE). Built from the names on the
+  ## `_Spp` genus entries, only species with LANDIS traits, and the hybrid white x Engelmann
+  ## spruce (`Pice_eng_gla`) merged into the species `mergeHybridSpruce` names (Engelmann by
+  ## default, added for ForSITE; NA for no merge). Built from the names on the
   ## raster, before any `sppEquivCol` renaming of `speciesList`.
   tableCol <- if (is.null(sppEquivCol)) "LandR" else sppEquivCol
   spp <- grep("_Spp", as.character(sppNames), invert = TRUE, value = TRUE)
@@ -510,10 +522,13 @@ speciesInStudyArea <- function(
                                 searchColumn = equivalentNameColumn(spp, LandR::sppEquivalencies_CA))
   sppEquiv <- LandR::sppEquivalencies_CA[get(tableCol) %in% inStudyArea]
   sppEquiv <- sppEquiv[LANDIS_traits != ""]
-  if ("PICE_ENG_GLA" %in% spp | "PICE_ENG" %in% spp) {
-    sppEquiv <- rbind(sppEquiv, LandR::sppEquivalencies_CA[LandR %in% c("Pice_eng", "Pice_eng_gla")])
-    sppEquiv[LandR == "Pice_eng_gla", LandR := "Pice_eng"]
-    sppEquiv <- unique(sppEquiv)
+  if (!is.na(mergeHybridSpruce)) {
+    mergeInto <- c(engelmann = "Pice_eng", white = "Pice_gla")[[mergeHybridSpruce]]
+    if ("PICE_ENG_GLA" %in% spp | toupper(mergeInto) %in% spp) {
+      sppEquiv <- rbind(sppEquiv, LandR::sppEquivalencies_CA[LandR %in% c(mergeInto, "Pice_eng_gla")])
+      sppEquiv[LandR == "Pice_eng_gla", LandR := mergeInto]
+      sppEquiv <- unique(sppEquiv)
+    }
   }
 
   return(list(speciesRas = bb, speciesList = species, sppEquiv = sppEquiv))

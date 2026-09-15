@@ -2,8 +2,10 @@
 
 * `speciesInStudyArea()` also returns `sppEquiv`: the rows of `sppEquivalencies_CA` for the
   species in the study area, without `_Spp` genus entries, only species with LANDIS traits,
-  and with Engelmann spruce (`Pice_eng`, `Pice_eng_gla`) merged into one `Pice_eng`. This is
-  the table fireSense modules built for themselves.
+  and with the hybrid white x Engelmann spruce (`Pice_eng_gla`) merged into Engelmann spruce
+  (`Pice_eng`). This is the table fireSense modules built for themselves. The new argument
+  `mergeHybridSpruce` (default `getOption("LandR.mergeHybridSpruce", "engelmann")`) merges it
+  into white spruce (`"white"`, `Pice_gla`) instead, or leaves it as its own species (`NA`).
 * `speciesInStudyArea()` no longer stops with "object 'bb' not found" when `speciesPresentRas`
   is supplied, and uses a supplied `url` instead of ignoring it.
 

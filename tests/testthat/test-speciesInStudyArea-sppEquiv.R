@@ -41,6 +41,42 @@ test_that("sppEquiv: Engelmann spruce's two entries become one Pice_eng", {
   expect_identical(anyDuplicated(out$sppEquiv), 0L)
 })
 
+test_that("sppEquiv: mergeHybridSpruce = 'white' merges Pice_eng_gla into Pice_gla", {
+  withr::local_package("data.table")
+  r <- speciesPresence(c("PICE_GLA__PSEU_MEN", "PICE_ENG_GLA"))
+  out <- speciesInStudyArea(studyAreaFor(r), speciesPresentRas = r, mergeHybridSpruce = "white")
+
+  expect_true("Pice_gla" %in% out$sppEquiv$LandR)
+  expect_false(any(c("Pice_eng", "Pice_eng_gla") %in% out$sppEquiv$LandR))
+  expect_identical(anyDuplicated(out$sppEquiv), 0L)
+})
+
+test_that("sppEquiv: mergeHybridSpruce = NA keeps Pice_eng_gla as its own species", {
+  withr::local_package("data.table")
+  r <- speciesPresence(c("PICE_ENG__PSEU_MEN", "PICE_ENG_GLA"))
+  out <- speciesInStudyArea(studyAreaFor(r), speciesPresentRas = r, mergeHybridSpruce = NA)
+
+  expect_true(all(c("Pice_eng", "Pice_eng_gla") %in% out$sppEquiv$LandR))
+})
+
+test_that("mergeHybridSpruce defaults to the LandR.mergeHybridSpruce option", {
+  withr::local_package("data.table")
+  withr::local_options(LandR.mergeHybridSpruce = "white")
+  r <- speciesPresence(c("PICE_ENG__PICE_GLA", "PICE_ENG_GLA"))
+  out <- speciesInStudyArea(studyAreaFor(r), speciesPresentRas = r)
+
+  expect_false("Pice_eng_gla" %in% out$sppEquiv$LandR)
+  expect_identical(unique(out$sppEquiv[KNN == "Pice_Eng_Gla"]$LandR), "Pice_gla")
+})
+
+test_that("an invalid mergeHybridSpruce is an error", {
+  r <- speciesPresence(c("PICE_ENG_GLA"))
+  expect_error(
+    speciesInStudyArea(studyAreaFor(r), speciesPresentRas = r, mergeHybridSpruce = "black"),
+    "must be \"engelmann\", \"white\" or NA"
+  )
+})
+
 test_that("sppEquiv is keyed on sppEquivCol when one is given", {
   withr::local_package("data.table")
   r <- speciesPresence(c("ABIE_AMA__PSEU_MEN"))
