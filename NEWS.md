@@ -1,5 +1,21 @@
 # LandR (development version)
 
+* `prepInputs_NTEMS_LCC_FAO()` and `prepInputs_SCANFI_LCC_FAO()` now decide *forest land* --
+  ground that grows trees, whether or not it carries any in the year being prepared -- from
+  the new `forestLandFrom` argument, and share one implementation of the rule (#221).
+  Previously both used the 2019 FAO layer's code 2 alone, i.e. "an opening in 2019", so a
+  stand that was open in the year being prepared but had grown back by 2019 was code 1 and
+  was left as shrubland, dropping it from the simulated forest. Now:
+    - `"fao"` uses FAO codes 1 and 2, from `faoYear` (2022 by default, was fixed at 2019);
+    - `"lccYears"` calls a pixel forest land if it is treed in any of `forestLandYears`,
+      which also sees openings whose disturbance predates the 1984 start of the fire and
+      harvest record;
+    - `"both"` (default) takes the union. Each scanned year is one more layer to read.
+  New `forestLandMask()` and `prepInputs_FAO_forest()` are exported. `convertibleClasses`
+  controls which classes may be relabelled; the default, every non-treed class, is
+  unchanged behaviour. The NTEMS year range is now 1984-2022: 2023 was accepted although
+  NFIS publishes no 2023 land cover. The SCANFI path also gains the fast `terra::ifel`
+  implementation, which the NTEMS path already had.
 * `sppEquivalencies_CA`: coastal Douglas-fir (`PSEU_MEN_MEN`) now has `FuelClass`
   "DgFrPoPine", like the other two `Pseu_men` rows. It had "CedrMplOther", so any study
   area containing Douglas-fir got two fuel classes for `Pseu_men` and
