@@ -7,7 +7,8 @@
 plotVTM(
   speciesStack = NULL,
   vtm = NULL,
-  vegLeadingProportion = 0.8,
+  vegLeadingProportion = getOption("NTEMS.mixedwoodProp",
+    getOption("LandR.vegLeadingProportion", 0.8)),
   sppEquiv,
   sppEquivCol,
   colors,
@@ -22,7 +23,15 @@ of percent-cover-by-species layers.}
 If not supplied, will be produced internally by \code{makeVegTypeMap}.}
 
 \item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
-threshold a species needs to pass to be considered "leading".}
+threshold a species needs to pass to be considered "leading".
+The default is a nested pair of options,
+\code{getOption("NTEMS.mixedwoodProp", getOption("LandR.vegLeadingProportion", 0.8))}
+-- set \code{NTEMS.mixedwoodProp} to move every such threshold at once, or the
+inner option to move only the vegetation-typing functions.
+\code{\link[=lccMapGenerator]{lccMapGenerator()}} nests the same outer option over
+\code{LandR.lccLeadingProportion} (0.75), the NTEMS/EOSD value: Wulder & Nelson
+(2003) call a stand coniferous or broadleaf at 75\% or more of total basal
+area, and mixed wood when neither reaches 75\%.}
 
 \item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
 See \code{data("sppEquivalencies_CA", "LandR")}.

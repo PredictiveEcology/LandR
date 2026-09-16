@@ -1,5 +1,15 @@
 # LandR (development version)
 
+* the "leading" threshold is no longer hard-coded in each function. Every site now reads a
+  nested pair of options,
+  `getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))`,
+  where `LandR.vegLeadingProportion` (0.8) serves `vegTypeMapGenerator()`, `vegTypeGenerator()`
+  and `plotVTM()`, and `LandR.lccLeadingProportion` (0.75) serves `lccMapGenerator()`.
+  Setting `NTEMS.mixedwoodProp` moves all of them at once; leaving it unset (the default --
+  it is not set at load) leaves each on the value it has always had, so no existing result
+  changes. The two inner defaults differ by history rather than by concept: both are the same
+  purity threshold on a biomass-like share, and 0.75 is the NTEMS/EOSD value (Wulder & Nelson
+  2003: coniferous or broadleaf at 75% or more of total basal area, mixed wood below that).
 * `sppEquivalencies_CA`: coastal Douglas-fir (`PSEU_MEN_MEN`) now has `FuelClass`
   "DgFrPoPine", like the other two `Pseu_men` rows. It had "CedrMplOther", so any study
   area containing Douglas-fir got two fuel classes for `Pseu_men` and
