@@ -1576,6 +1576,18 @@ dropTerm <- function(form, term, dropRanEff = TRUE) {
         ## Fixed effect terms
         idc <- which(as.logical(facPartial[rn, ]))
         toDrop <- names(facPartial[rn, ][idc])
+
+        ## A name can match a row of the factors matrix without taking part in any term of it:
+        ## `statsModel()` passes every *data column* whose name appears anywhere in the formula
+        ## string, so a constant response-side variable arrives here -- e.g. `coverNum` in
+        ## `cbind(coverPres, coverNum - coverPres) ~ speciesCode * ecoregionGroup`, whose only
+        ## factors rowname is the whole `cbind(...)` expression. `idc` is then empty and
+        ## `paste(character(0), collapse = " - ")` yields "", so the update below built
+        ## ". ~ . -" and stopped with "str2lang: unexpected end of input". Nothing to drop here.
+        if (!length(toDrop)) {
+          next
+        }
+
         needsParenth <- vapply(
           paste0("(", toDrop, ")"),
           FUN = grepl,
