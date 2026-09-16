@@ -1,5 +1,10 @@
 # LandR (development version)
 
+* `prepSpeciesLayers_SCANFI()` passed `projectTo = rasterToMatch` twice to
+  `loadSCANFISpeciesLayers()`. R accepts duplicate names in `...`, so this was silent
+  rather than an error; the duplicate is removed. Its cache entry was also tagged
+  `"KNN"`, which is now `"SCANFI"` -- the tag is what `Cache()` searches on, so SCANFI
+  species layers were indistinguishable from kNN ones in the cache.
 * `sppEquivalencies_CA`: coastal Douglas-fir (`PSEU_MEN_MEN`) now has `FuelClass`
   "DgFrPoPine", like the other two `Pseu_men` rows. It had "CedrMplOther", so any study
   area containing Douglas-fir got two fuel classes for `Pseu_men` and

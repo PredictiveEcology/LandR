@@ -622,7 +622,6 @@ prepSpeciesLayers_SCANFI <- function(
     outputPath = outputPath,
     projectTo = rasterToMatch,
     to = studyArea,
-    projectTo = rasterToMatch,
     studyAreaName = dots$studyAreaName,
     sppEquiv = sppEquiv,
     sppEquivCol = sppEquivCol,
@@ -630,7 +629,7 @@ prepSpeciesLayers_SCANFI <- function(
     url = url,
     year = dataYear,
     shared_drive_url = shared_drive_url,
-    userTags = c("speciesLayers", "KNN")
+    userTags = c("speciesLayers", "SCANFI")
   )
 }
 
