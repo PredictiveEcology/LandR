@@ -55,7 +55,7 @@
 #'   consistent with each other, subsetting `sppEquiv` to the species being simulated.
 #' - [speciesInStudyArea()]: the species present in a study area, and the rows of
 #'   `sppEquivalencies_CA` for them (element `sppEquiv`); see also the option
-#'   `LandR.mergeHybridSpruce` in [LandR-package].
+#'   `LandR.mergeHybridSpruce` in [LandROptions()].
 #' - [sppColors()]: a named colour vector for the species in `sppEquivCol`, using `colorHex`
 #'   when every row has one.
 #' - [assertSppVectors()], [assertSpeciesPlotLabels()]: check `sppEquiv` against

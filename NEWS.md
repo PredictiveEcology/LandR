@@ -1,5 +1,15 @@
 # LandR (development version)
 
+* new `LandROptions()`, which lists the `LandR` options and their defaults, following
+  `reproducible::reproducibleOptions()` and `SpaDES.core::spadesOptions()`. `?LandROptions`
+  (or `?opts.LandR`) documents each one, and `.onLoad()` now sets the options from it instead
+  of from its own inline list. `NTEMS.mixedwoodProp` is a full member with a `NULL` default,
+  so it is documented without being set and the
+  `getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))`
+  fallthrough still reaches the inner default. The package-level help now points at
+  `LandROptions()` rather than repeating a two-option list that said `LandR.assertions`
+  defaults to `FALSE`, when `.onLoad()` has always set it to `TRUE`.
+
 * `speciesInStudyArea()` also returns `sppEquiv`: the rows of `sppEquivalencies_CA` for the
   species in the study area, without `_Spp` genus entries, only species with LANDIS traits,
   and with the hybrid white x Engelmann spruce (`Pice_eng_gla`) merged into Engelmann spruce

@@ -121,7 +121,7 @@ if it lacks any \code{ensureColumns}, join it with \code{sppEquivalencies_CA} to
 consistent with each other, subsetting \code{sppEquiv} to the species being simulated.
 \item \code{\link[=speciesInStudyArea]{speciesInStudyArea()}}: the species present in a study area, and the rows of
 \code{sppEquivalencies_CA} for them (element \code{sppEquiv}); see also the option
-\code{LandR.mergeHybridSpruce} in \link{LandR-package}.
+\code{LandR.mergeHybridSpruce} in \code{\link[=LandROptions]{LandROptions()}}.
 \item \code{\link[=sppColors]{sppColors()}}: a named colour vector for the species in \code{sppEquivCol}, using \code{colorHex}
 when every row has one.
 \item \code{\link[=assertSppVectors]{assertSppVectors()}}, \code{\link[=assertSpeciesPlotLabels]{assertSpeciesPlotLabels()}}: check \code{sppEquiv} against
