@@ -19,7 +19,10 @@
   Only the hybrid being on the raster triggers the merge, and its rows take the target's
   `LandR`, `LANDIS_traits` and `sppEquivCol` names. Rows are matched on `LandR` whatever
   naming the raster uses (SCANFI/NFI `PICE_ENG_GLA` or KNN `Pice_Eng_Gla`), so the table has
-  the same rows for any `sppEquivCol`.
+  the same rows for any `sppEquivCol`. This merged into `development` at 1.2.0.9020, the
+  version already there, so **1.2.0.9021 is the first version a caller can require** for it:
+  a `reqdPkgs` floor of `>= 1.2.0.9020` is also met by a 1.2.0.9020 from before the merge,
+  which returns no `sppEquiv` and fails at run time instead of at install time.
 * `?sppEquiv` (an alias of `?sppEquivalencies_CA`) now describes the `sppEquiv` table in one
   place: its naming conventions, how rows and `sppEquivCol` work, the helpers that use it,
   and which columns `LandR` functions read. The column list now matches the data (30 columns,
