@@ -37,7 +37,15 @@ parameter in \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} for details on 
 forest types).}
 
 \item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
-threshold a species needs to pass to be considered "leading".}
+threshold a species needs to pass to be considered "leading".
+The default is a nested pair of options,
+\code{getOption("NTEMS.mixedwoodProp", getOption("LandR.vegLeadingProportion", 0.8))}
+-- set \code{NTEMS.mixedwoodProp} to move every such threshold at once, or the
+inner option to move only the vegetation-typing functions.
+\code{\link[=lccMapGenerator]{lccMapGenerator()}} nests the same outer option over
+\code{LandR.lccLeadingProportion} (0.75), the NTEMS/EOSD value: Wulder & Nelson
+(2003) call a stand coniferous or broadleaf at 75\% or more of total basal
+area, and mixed wood when neither reaches 75\%.}
 
 \item{studyArea}{A \code{SpatVector} or \code{sf} polygons object used as the principle study region,
 passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}

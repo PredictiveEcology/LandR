@@ -689,7 +689,8 @@ vegTypeMapGenerator.default <- function(
 vegTypeMapGenerator.data.table <- function(
   x,
   pixelGroupMap,
-  vegLeadingProportion = 0.8,
+  vegLeadingProportion = getOption("NTEMS.mixedwoodProp",
+                                   getOption("LandR.vegLeadingProportion", 0.8)),
   mixedType = 2,
   sppEquiv = NULL,
   sppEquivCol,
@@ -1421,9 +1422,13 @@ loadkNNSpeciesLayersValidation <- function(
 #'
 #' @param dPath path to the data directory
 #'
-#' @template rasterToMatch
-#'
-#' @template studyArea
+#' @param to,cropTo,projectTo,maskTo passed to [reproducible::prepInputs()]; see
+#'   [reproducible::postProcessTo()]. The legacy `rasterToMatch` and `studyArea` are still
+#'   accepted through `...` and are translated onto these by `.legacyToTo()`, following the
+#'   table in [reproducible::postProcess()]: a `rasterToMatch` on its own is `to`; a
+#'   `studyArea` on its own crops and masks but does not reproject (unless `useSAcrs`); and
+#'   when both are supplied the raster gives extent, resolution, projection and alignment
+#'   while the polygon gives the mask. An argument passed here explicitly always wins.
 #'
 #' @template sppEquiv
 #'
@@ -1451,8 +1456,10 @@ loadkNNSpeciesLayersValidation <- function(
 #' @export
 loadSCANFISpeciesLayers <- function(
   dPath,
-  rasterToMatch = NULL,
-  studyArea = NULL,
+  to = NULL,
+  cropTo = NULL,
+  projectTo = NULL,
+  maskTo = NULL,
   sppEquiv,
   year = 2020,
   dataVersion = "V2",
@@ -1464,19 +1471,28 @@ loadSCANFISpeciesLayers <- function(
 ) {
   dots <- list(...)
   oPath <- if (!is.null(dots$outputPath)) dots$outputPath else dPath
-  if (!is.null(dots$to) && missing(studyArea)) {
-    studyArea <- dots$to
-  }
 
-  if (!is.null(dots$to) && missing(rasterToMatch) && reproducible::.isGridded(dots$to)) {
-    rasterToMatch <- dots$to
-  }
+  ## `rasterToMatch`/`studyArea` still work; they arrive through `...` now and .legacyToTo()
+  ## resolves them onto the *to family per ?reproducible::postProcess. Anything the caller
+  ## passed explicitly as a *to argument wins.
+  toArgs <- .legacyToTo(
+    to = to, cropTo = cropTo, projectTo = projectTo, maskTo = maskTo,
+    rasterToMatch = dots$rasterToMatch, studyArea = dots$studyArea,
+    useSAcrs = isTRUE(dots$useSAcrs),
+    maskWithRTM = if (is.null(dots$maskWithRTM)) TRUE else isTRUE(dots$maskWithRTM)
+  )
+  to <- toArgs$to
+  cropTo <- toArgs$cropTo
+  projectTo <- toArgs$projectTo
+  maskTo <- toArgs$maskTo
 
-  if (
-    !is.null(dots$projectTo) && missing(rasterToMatch) && reproducible::.isGridded(dots$projectTo)
-  ) {
-    rasterToMatch <- dots$projectTo
-  }
+  ## whichever of these is gridded is the template for the file-name suffix below; it used to
+  ## be `rasterToMatch`, which no longer exists as a formal
+  template <- Filter(
+    function(x) !is.null(x) && !isTRUE(is.na(x)) && reproducible::.isGridded(x),
+    list(to, projectTo, cropTo)
+  )
+  template <- if (length(template)) template[[1]] else NULL
 
   sppEquivalencies_CA <- get(
     data("sppEquivalencies_CA", package = "LandR", envir = environment()),
@@ -1640,10 +1656,10 @@ loadSCANFISpeciesLayers <- function(
 
   ## define suffix to append to file names
   suffix <- if (basename(cachePath) == "cache") {
-    if (is.null(rasterToMatch)) {
+    if (is.null(template)) {
       ""
     } else {
-      paste0(as.character(ncell(rasterToMatch)), "px")
+      paste0(as.character(ncell(template)), "px")
     }
   } else {
     if (is.null(dots$studyAreaName) || basename(cachePath) != dots$studyAreaName) {
@@ -1699,7 +1715,10 @@ loadSCANFISpeciesLayers <- function(
     function(tf, url, outFile) {
       prepInputs(
         url = url,
-        to = rasterToMatch,
+        to = to,
+        cropTo = cropTo,
+        projectTo = projectTo,
+        maskTo = maskTo,
         destinationPath = dPath,
         method = "bilinear",
         writeTo = outFile,

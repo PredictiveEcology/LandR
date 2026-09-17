@@ -6,8 +6,10 @@
 \usage{
 loadSCANFISpeciesLayers(
   dPath,
-  rasterToMatch = NULL,
-  studyArea = NULL,
+  to = NULL,
+  cropTo = NULL,
+  projectTo = NULL,
+  maskTo = NULL,
   sppEquiv,
   year = 2020,
   dataVersion = "V2",
@@ -21,12 +23,13 @@ loadSCANFISpeciesLayers(
 \arguments{
 \item{dPath}{path to the data directory}
 
-\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).
-\code{rasterToMatch} should correspond to \code{studyArea} if used.}
-
-\item{studyArea}{A \code{SpatVector} or \code{sf} polygons object used as the principle study region,
-passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
+\item{to, cropTo, projectTo, maskTo}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}; see
+\code{\link[reproducible:postProcessTo]{reproducible::postProcessTo()}}. The legacy \code{rasterToMatch} and \code{studyArea} are still
+accepted through \code{...} and are translated onto these by \code{.legacyToTo()}, following the
+table in \code{\link[reproducible:postProcess]{reproducible::postProcess()}}: a \code{rasterToMatch} on its own is \code{to}; a
+\code{studyArea} on its own crops and masks but does not reproject (unless \code{useSAcrs}); and
+when both are supplied the raster gives extent, resolution, projection and alignment
+while the polygon gives the mask. An argument passed here explicitly always wins.}
 
 \item{sppEquiv}{table with species name equivalencies between naming conventions
 (see \link{sppEquivalencies_CA}, also \code{?sppEquiv}).
