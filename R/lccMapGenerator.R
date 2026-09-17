@@ -55,10 +55,7 @@ utils::globalVariables(c(
 lccMapGenerator <- function(cohortData, pixelGroupMap,
                             lccTable = NULL,
                             deciduousCoverDiscount = 0.8418911, ## from Biomass_borealDataPrep
-                            vegLeadingProportion = getOption(
-                              "NTEMS.mixedwoodProp",
-                              getOption("LandR.lccLeadingProportion", 0.75)
-                            ),
+                            vegLeadingProportion = mixedwoodProp(),
                             decidousSpp = NULL,
                             rstLCC) {
   stopifnot(

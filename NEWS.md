@@ -1,5 +1,27 @@
 # LandR (development version)
 
+* **Two leading/mixedwood thresholds replace three options.** `LandR.mixedwoodProp` (0.75) is the
+  GROUP threshold -- all conifers, or all broadleaves -- and is the definition the national
+  products use (NTEMS/EOSD, NFI photo plots: 75% of total basal area or volume).
+  `LandR.leadingSpeciesProp` is the SINGLE-SPECIES threshold, and takes the mixedwood value unless
+  set, so `options(LandR.leadingSpeciesProp = 0.51)` gives "just a majority" without moving the
+  mixedwood definition. Read them with the new `mixedwoodProp()` and `leadingSpeciesProp()`.
+  `NTEMS.mixedwoodProp`, `LandR.vegLeadingProportion` and `LandR.lccLeadingProportion` are gone.
+  The number itself is written down only in `LandROptions()`; no function carries its own default.
+  **This changes results:** the single-species threshold was 0.8 and is now 0.75, everywhere.
+* **`mixedType = 2` now sums the broadleaf group**, which is what it always claimed to do. It
+  tested each deciduous species separately, so three broadleaf species at 15% each -- 45%
+  broadleaf, mixedwood by the definition -- was called pure conifer. Deciduous conifers stay
+  conifers: `Larix` is `Type == "Conifer"` in `sppEquivalencies_CA`, so tamarack never makes a
+  stand mixedwood. Calling `vegTypeMapGenerator()` or `vegTypeGenerator()` with `mixedType = 2`
+  and a `LandR.leadingSpeciesProp` that differs from `LandR.mixedwoodProp` now warns, because
+  `mixedType = 2` asks the mixedwood question and uses the mixedwood threshold.
+* **`subsetDT()`'s default subsample is 500, was 50** (new `subsetDataSize()`, option
+  `LandR.subsetDataSize`). 50 was chosen when these fits were expensive; it was small enough that
+  repeated runs of the same simulation gave visibly different `maxB` -- a median coefficient of
+  variation of 10% across ecoregion x species, up to 62%, on a 60 km boreal test window. The
+  `LandR` modules take their `subsetData*Model` defaults from `subsetDataSize()`, so the number
+  lives in one place.
 * SCANFI files are now fetched from the PredictiveEcology arbutus mirror by default. LandR
   addresses SCANFI v2 by Google Drive id, and some of those ids 404 for anonymous users -- the
   2020 land cover and 2020 stand age among them, which stopped `Biomass_borealDataPrep`'s default

@@ -9,7 +9,7 @@ URL:
     https://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
 Date: 2026-09-17
-Version: 1.2.0.9023
+Version: 1.2.0.9024
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -111,10 +111,6 @@ BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
 Collate: 
-    'LANDIS-II-tables.R'
-    'LandR-package.R'
-    'RcppExports.R'
-    'SummarizeCanadianForestRasters.R'
     'assertions.R'
     'biomodWrappers.R'
     'biosim.R'
@@ -129,7 +125,10 @@ Collate:
     'fireSeverity.R'
     'forestLand.R'
     'imports.R'
+    'LANDIS-II-tables.R'
+    'LandR-package.R'
     'lccMapGenerator.R'
+    'leadingProportions.R'
     'legacyToTo.R'
     'light-shade.R'
     'makeDummyInputs.R'
@@ -147,6 +146,7 @@ Collate:
     'prepInputObjects.R'
     'prepInputs_NTEMS.R'
     'prepSpeciesLayers.R'
+    'RcppExports.R'
     'scanfiMirror.R'
     'seedDispersalLANDIS.R'
     'serotiny-resprouting.R'
@@ -155,6 +155,8 @@ Collate:
     'sppEquivalencies_CA.R'
     'sppHarmonize.R'
     'studyArea.R'
+    'subsetDataSize.R'
+    'SummarizeCanadianForestRasters.R'
     'terra-raster-utils.R'
     'vignette-artifacts.R'
     'wetland.R'
