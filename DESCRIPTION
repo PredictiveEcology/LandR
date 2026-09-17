@@ -147,6 +147,7 @@ Collate:
     'prepInputs_NTEMS.R'
     'prepSpeciesLayers.R'
     'RcppExports.R'
+    'scanfiMirror.R'
     'seedDispersalLANDIS.R'
     'serotiny-resprouting.R'
     'speciesPresentFromKNN.R'

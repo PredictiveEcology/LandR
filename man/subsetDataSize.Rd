@@ -7,7 +7,7 @@
 subsetDataSize()
 }
 \value{
-A single number: the maximum rows per group to keep.
+A single integer: the maximum rows per group to keep.
 }
 \description{
 \code{\link[=subsetDT]{subsetDT()}} keeps at most this many rows per group (e.g., per \code{ecoregionGroup} x
@@ -17,7 +17,7 @@ lives once in \code{\link[=LandROptions]{LandROptions()}}, so a project can move
 \code{options(LandR.subsetDataSize = ...)} and every module follows.
 }
 \details{
-The default is 500. It was 50 for years, chosen when the fits were computationally
+The default is 500L. It was 50 for years, chosen when the fits were computationally
 expensive; that subsample was small enough that repeated runs of the same simulation gave
 visibly different \code{maxB} (a median coefficient of variation of 10\% across
 ecoregion x species, up to 62\%, on a 60 km boreal test window). Ten times as many rows is

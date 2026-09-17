@@ -42,6 +42,11 @@
 #'     [sppEquivalencies_CA]). Read with [mixedwoodProp()]; used by [vegTypeMapGenerator()]
 #'     and [vegTypeGenerator()] with `mixedType = 2`, [lccMapGenerator()] and [plotVTM()].
 #'   }
+#'   \item{`scanfiMirror`}{
+#'     Default: `TRUE`. When `LandR` is loaded and no `reproducible.urlRemap` is set, fetch
+#'     SCANFI from the PredictiveEcology arbutus mirror instead of Google Drive, so the ids
+#'     that 404 for anonymous users resolve and no login is needed; see [scanfiUrlRemap()].
+#'   }
 #'   \item{`verbose`}{
 #'     Default: `1`. The default `verbose` argument of functions that report their progress,
 #'     e.g., [updateCohortData()] and [LANDISDisp()]. Higher numbers give more messages.
@@ -66,6 +71,9 @@ LandROptions <- function() {
     ## THE one place a leading/mixedwood threshold is written down. Everything reads it through
     ## mixedwoodProp() / leadingSpeciesProp(); no function carries its own default.
     LandR.mixedwoodProp = 0.75,
+    ## fetch SCANFI from the arbutus mirror when no reproducible.urlRemap is set; see
+    ## ?scanfiUrlRemap
+    LandR.scanfiMirror = TRUE,
     ## THE one place the subsample size is written down; see subsetDataSize().
     LandR.subsetDataSize = 500L,
     LandR.verbose = 1

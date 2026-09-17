@@ -33,7 +33,7 @@ Read with \code{\link[=leadingSpeciesProp]{leadingSpeciesProp()}}; used by \code
 \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} for \code{mixedType} other than 2.
 }
 \item{\code{subsetDataSize}}{
-Default: \code{500}. The maximum number of rows \code{\link[=subsetDT]{subsetDT()}} keeps per group when
+Default: \code{500L}. The maximum number of rows \code{\link[=subsetDT]{subsetDT()}} keeps per group when
 subsampling data for model fitting, and the default of the \code{LandR} modules'
 \code{subsetData*Model} parameters. Read with \code{\link[=subsetDataSize]{subsetDataSize()}}. It was 50 for years, set
 when these fits were expensive; at that size repeated runs of the same simulation gave
@@ -53,6 +53,11 @@ basal area (photo plots: total tree volume), mixed wood when neither group reach
 Deciduous conifers count as conifers (\code{Larix} is \code{Type == "Conifer"} in
 \link{sppEquivalencies_CA}). Read with \code{\link[=mixedwoodProp]{mixedwoodProp()}}; used by \code{\link[=vegTypeMapGenerator]{vegTypeMapGenerator()}}
 and \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} with \code{mixedType = 2}, \code{\link[=lccMapGenerator]{lccMapGenerator()}} and \code{\link[=plotVTM]{plotVTM()}}.
+}
+\item{\code{scanfiMirror}}{
+Default: \code{TRUE}. When \code{LandR} is loaded and no \code{reproducible.urlRemap} is set, fetch
+SCANFI from the PredictiveEcology arbutus mirror instead of Google Drive, so the ids
+that 404 for anonymous users resolve and no login is needed; see \code{\link[=scanfiUrlRemap]{scanfiUrlRemap()}}.
 }
 \item{\code{verbose}}{
 Default: \code{1}. The default \code{verbose} argument of functions that report their progress,
