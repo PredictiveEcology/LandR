@@ -9,6 +9,90 @@
   needs no Google login. A remap you set yourself is never replaced; `scanfiUrlRemap()` is
   exported so it can be combined with one.
 
+* new `prepInputs_CWIM()` builds a wetland *site* layer from the Canadian Wetland Inventory Map
+  v3A (10 m, national, public cloud-optimised GeoTIFF), reading only the study window. SCANFI's
+  land cover has no wetland classes, so without it a SCANFI-based map cannot tell treed wetland
+  from upland forest. Bog, fen, marsh and swamp count as wet; shallow water and NoData do not.
+  A target cell is wet when at least `wetThreshold` (0.5) of it is.
+* new `wetlandToLCC()` adds the NTEMS wetland codes to a land-cover map from such a layer: wet
+  and treed (210, 220, 230, and 240) becomes 81, wet otherwise becomes 80; water and existing
+  wetland codes are left alone.
+
+* `prepInputs_NTEMS_LCC_FAO()` and `prepInputs_SCANFI_LCC_FAO()` now decide *forest land* --
+  ground that grows trees, whether or not it carries any in the year being prepared -- from
+  the new `forestLandFrom` argument, and share one implementation of the rule (#221).
+  Previously both used the 2019 FAO layer's code 2 alone, i.e. "an opening in 2019", so a
+  stand that was open in the year being prepared but had grown back by 2019 was code 1 and
+  was left as shrubland, dropping it from the simulated forest. Now:
+    - `"fao"` uses FAO codes 1 and 2, from `faoYear` (2022 by default, was fixed at 2019);
+    - `"lccYears"` calls a pixel forest land if it is treed in any of `forestLandYears`,
+      which also sees openings whose disturbance predates the 1984 start of the fire and
+      harvest record;
+    - `"both"` (default) takes the union. Each scanned year is one more layer to read.
+  New `forestLandMask()` and `prepInputs_FAO_forest()` are exported. `convertibleClasses`
+  controls which classes may be relabelled; the default, every non-treed class, is
+  unchanged behaviour. The NTEMS year range is now 1984-2022: 2023 was accepted although
+  NFIS publishes no 2023 land cover. The SCANFI path also gains the fast `terra::ifel`
+  implementation, which the NTEMS path already had.
+* new `LandROptions()`, which lists the `LandR` options and their defaults, following
+  `reproducible::reproducibleOptions()` and `SpaDES.core::spadesOptions()`. `?LandROptions`
+  (or `?opts.LandR`) documents each one, and `.onLoad()` now sets the options from it instead
+  of from its own inline list. `NTEMS.mixedwoodProp` is a full member with a `NULL` default,
+  so it is documented without being set and the
+  `getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))`
+  fallthrough still reaches the inner default. The package-level help now points at
+  `LandROptions()` rather than repeating a two-option list that said `LandR.assertions`
+  defaults to `FALSE`, when `.onLoad()` has always set it to `TRUE`.
+
+* `speciesInStudyArea()` also returns `sppEquiv`: the rows of `sppEquivalencies_CA` for the
+  species in the study area, without `_Spp` genus entries, only species with LANDIS traits,
+  and with the hybrid white x Engelmann spruce (`Pice_eng_gla`) merged into Engelmann spruce
+  (`Pice_eng`). This is the table fireSense modules built for themselves. The new argument
+  `mergeHybridSpruce` (default `getOption("LandR.mergeHybridSpruce", "engelmann")`) merges it
+  into white spruce (`"white"`, `Pice_gla`) instead, or leaves it as its own species (`NA`).
+  Only the hybrid being on the raster triggers the merge, and its rows take the target's
+  `LandR`, `LANDIS_traits` and `sppEquivCol` names. Rows are matched on `LandR` whatever
+  naming the raster uses (SCANFI/NFI `PICE_ENG_GLA` or KNN `Pice_Eng_Gla`), so the table has
+  the same rows for any `sppEquivCol`. This merged into `development` at 1.2.0.9020, the
+  version already there, so **1.2.0.9021 is the first version a caller can require** for it:
+  a `reqdPkgs` floor of `>= 1.2.0.9020` is also met by a 1.2.0.9020 from before the merge,
+  which returns no `sppEquiv` and fails at run time instead of at install time.
+* `?sppEquiv` (an alias of `?sppEquivalencies_CA`) now describes the `sppEquiv` table in one
+  place: its naming conventions, how rows and `sppEquivCol` work, the helpers that use it,
+  and which columns `LandR` functions read. The column list now matches the data (30 columns,
+  not 27; `*_forestry` names; `SK_forestry`, `ON_forestry` and `NB_forestry` added), and the
+  `sppEquiv`/`sppEquivCol` argument docs link to it. The documented `SCANFINamesCol` default of
+  `loadSCANFISpeciesLayers()` is corrected to `"SCANFI"`.
+* `speciesInStudyArea()` no longer stops with "object 'bb' not found" when `speciesPresentRas`
+  is supplied, and uses a supplied `url` instead of ignoring it.
+* `speciesTableUpdate()` no longer fails when `sppEquiv` is `NULL`. It built its default from
+  `data.table(utils::data("sppEquivalencies_CA", ...))`, which holds the *name* of the dataset
+  rather than the dataset, so the call died in `data.table` with "Column or expression 1 of
+  'by' ... is type 'list'". It now `get()`s the table, as `prepSpeciesTable()` does.
+* `sppColors()`: the test for whether `sppEquiv` has enough distinct `colorHex` values read
+  `length(unique(sppEquiv[[sppEquivCol]] <= length(unique(sppEquiv$colorHex))))`, which
+  compares species names to a number and takes the length of the result (1 or 2, both
+  truthy), so it always passed. Two species sharing one `colorHex` were both given that
+  colour instead of falling back to the palette. Also `length(newVals == 1)` is now
+  `length(newVals) == 1`.
+* `sppEquivalencies_CA`: the `KNN` column was shifted up by one row across the `Ulmus` block,
+  so *U. pumila* carried `Ulmu_Rub`, *U. rubra* carried `Ulmu_Spp` and *Ulmus* spp. carried
+  `Ulmu_Tho`. `equivalentName("Ulmu_Tho", column = "LandR")` returned the elm genus and
+  `"Ulmu_Rub"` returned Siberian elm. Each name now sits on its own species.
+* `sppEquivalencies_CA`: rock elm (`ULMU_THO`) and pagoda dogwood (`CORN_ALT`) now have the
+  `LandR` names `Ulmu_tho` and `Corn_alt`. Both were blank, and `LandR` is the column rows
+  are keyed on, so neither species could be matched.
+
+* the "leading" threshold is no longer hard-coded in each function. Every site now reads a
+  nested pair of options,
+  `getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))`,
+  where `LandR.vegLeadingProportion` (0.8) serves `vegTypeMapGenerator()`, `vegTypeGenerator()`
+  and `plotVTM()`, and `LandR.lccLeadingProportion` (0.75) serves `lccMapGenerator()`.
+  Setting `NTEMS.mixedwoodProp` moves all of them at once; leaving it unset (the default --
+  it is not set at load) leaves each on the value it has always had, so no existing result
+  changes. The two inner defaults differ by history rather than by concept: both are the same
+  purity threshold on a biomass-like share, and 0.75 is the NTEMS/EOSD value (Wulder & Nelson
+  2003: coniferous or broadleaf at 75% or more of total basal area, mixed wood below that).
 * **`loadSCANFISpeciesLayers()` and `prepSpeciesLayers_SCANFI()` now take the `*to` family
   (`to`, `cropTo`, `projectTo`, `maskTo`) as formals**, as a first step in retiring
   `rasterToMatch`/`studyArea`. Both still accept the legacy pair -- it arrives through `...`

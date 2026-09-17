@@ -2,19 +2,39 @@ utils::globalVariables(c(
   "currentLCC", "destinationPath", "endLCC", "pixelID", "writeTo"
 ))
 
+## NTEMS VLCE2 land cover is published annually for these years
+.ntemsLCCYears <- 1984L:2022L
+
 #' Obtain an LCC layer for a given year from NTEMS, with forest matching the FAO definition
 #'
-#' @param year stack of species layers rasters. 1984 to 2023 possible.
-#' @param disturbedCode value assigned to pixels that are forest per FAO definition but not in LCC year
+#' Pixels that are forest land but carry no trees in `year` are given `disturbedCode`, so
+#' that a recent burn or cutblock is still simulated as forest rather than dropped as
+#' shrubland. [forestLandMask()] describes how forest land is decided, and
+#' [.applyForestLand()] which pixels are relabelled.
+#'
+#' @param year `r min(.ntemsLCCYears)` to `r max(.ntemsLCCYears)` possible.
+#' @param disturbedCode value assigned to pixels that are forest land but not treed in `year`
 #' @param resampleMethod method used when resampling LCC layers to match `rasterToMatch`
+#' @param forestLandFrom how forest land is decided: `"fao"` (the FAO forest layer),
+#'   `"lccYears"` (treed in any of `forestLandYears`), or `"both"` (the default union).
+#'   See [forestLandMask()].
+#' @param forestLandYears the land-cover years scanned when `forestLandFrom` is `"both"` or
+#'   `"lccYears"`. `NULL` (default) uses [.defaultForestLandYears()], roughly one year per
+#'   decade plus the most recent. Each year is one more layer to read.
+#' @param faoYear the year of the FAO forest layer: `r .faoForestYears`.
+#' @param convertibleClasses the classes that may become `disturbedCode`; `NULL` (default)
+#'   means every class that is not treed. See [.applyForestLand()].
 #' @param ... passed to `prepInputs`
 #'
 #' @return a `SpatRaster` with corrected forest pixels
 #'
 #' @export
-prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240, 
-                                     resampleMethod = "near", ...) {
-  if (year > 2023 || year < 1984) {
+prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240,
+                                     resampleMethod = "near",
+                                     forestLandFrom = c("both", "fao", "lccYears"),
+                                     forestLandYears = NULL, faoYear = 2022,
+                                     convertibleClasses = NULL, ...) {
+  if (!(year %in% .ntemsLCCYears)) {
     stop("LCC for this year is unavailable")
   }
   newFilename <- NULL
@@ -67,42 +87,37 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240,
 
   #restore dots$writeTo - it will be NULL if it wasn't passed
 
-  ## 1 is forest, 2 is land that can meet the FAO definition of forest
-  ## do not pass dots, or the filename is passed and is overwritten
-  url <- "https://opendata.nfis.org/downloads/forest_change/CA_FAO_forest_2019.zip"
-  #let terra options dictate whether fao is on disk or not
-
-  fao <- prepInputs(
-    url = url,
-    method = resampleMethod, destinationPath = dots$destinationPath, to = lcc
-    # cropTo = lcc, maskTo = lcc, projectTo = lcc
-  ) # |> Cache(omitArgs = "to", .cacheExtra = digs)
-  ## pixels may not be disturbed yet if year is prior to 2019 (FAO year)
-  ## adjust non-forest LCC that are disturbed forest to disturbedCode
-  message("Updating codes on LCC with FAO data...")
-  input <- c(lcc, fao)
+  ## Which pixels are forest land -- ground that grows trees, whether or not it carries
+  ## any in `year`. Before 2026-09 this was the FAO layer's code 2 alone, i.e. "an opening
+  ## in 2019", which dropped every stand that had grown back by then (#221).
+  ## let terra options dictate whether the layers are on disk or not
   opts <- terraOptions()
   optsNow <- list(memmax = 4, todisk = TRUE)
   newOpts <- do.call(terraOptions, optsNow)
   on.exit(do.call(terraOptions, opts[names(optsNow)]), add = TRUE)
-  
-  keep <- c(210, 81, 220, 230)
-  is_keep <- terra::`%in%`(lcc, keep)   # SpatRaster -> 0/1 mask, in C++
-  out <- terra::ifel(
-    (fao == 2) & !is_keep,
-    disturbedCode,
-    lcc,
-    overwrite = TRUE,
-    filename = tempfile(fileext = ".tif"),
-    wopt = list(datatype = "INT1U", gdal = c("COMPRESS=ZSTD", "TILED=YES"))
+
+  if (is.null(forestLandYears)) {
+    forestLandYears <- .defaultForestLandYears(.ntemsLCCYears)
+  }
+  forestLand <- .forestLandFor(
+    lcc = lcc,
+    forestLandFrom = forestLandFrom,
+    forestLandYears = setdiff(forestLandYears, year), ## `year` itself adds nothing
+    faoYear = faoYear,
+    lccFor = function(y) {
+      prepInputs(
+        url = paste0("https://opendata.nfis.org/downloads/forest_change/CA_forest_VLCE2_", y, ".zip"),
+        targetFile = paste0("CA_forest_VLCE2_", y, ".tif"),
+        method = resampleMethod, destinationPath = dots$destinationPath, to = lcc
+      )
+    },
+    destinationPath = dots$destinationPath,
+    resampleMethod = resampleMethod
   )
-  # Eliot removed this May 22, 2026 as it was WAY too slow on 30m raster 
-  # DisturbedAdjust <- function(LCC, FAO, newVal = disturbedCode) {
-  #   LCC[FAO == 2 & !LCC %in% c(210, 81, 220, 230)] <- newVal
-  #   return(LCC)
-  # }
-  # out <- terra::lapp(input, fun = DisturbedAdjust, usenames = FALSE)
-  # lcc <- terra::init(lcc, as.vector(out))
+
+  message("Updating codes on LCC with forest land data...")
+  out <- .applyForestLand(lcc, forestLand, convertibleClasses = convertibleClasses,
+                          disturbedCode = disturbedCode)
 
   if (!is.null(dots$writeTo)) {
     fp <- if (!is.null(dots$destinationPath)) {
@@ -112,7 +127,7 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240,
     out <- writeRaster(out, filename = fp, overwrite = TRUE) #overwrite lcc
   }
   message("... done ... cleaning up RAM")
-  rm(input, lcc, fao) # remove them before doing gc
+  rm(lcc, forestLand) # remove them before doing gc
   
   ## 0 = no change; 20 = water; 31 = snow_ice; 32 = rock_rubble; 33 = exposed_barren_land;
   ## 40 = bryoids; 50 = shrubs; 80 = wetland; 81 = wetland-treed; 100 = herbs; 210 = coniferous;

@@ -7,7 +7,8 @@
 plotVTM(
   speciesStack = NULL,
   vtm = NULL,
-  vegLeadingProportion = 0.8,
+  vegLeadingProportion = getOption("NTEMS.mixedwoodProp",
+    getOption("LandR.vegLeadingProportion", 0.8)),
   sppEquiv,
   sppEquivCol,
   colors,
@@ -22,16 +23,25 @@ of percent-cover-by-species layers.}
 If not supplied, will be produced internally by \code{makeVegTypeMap}.}
 
 \item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
-threshold a species needs to pass to be considered "leading".}
+threshold a species needs to pass to be considered "leading".
+The default is a nested pair of options,
+\code{getOption("NTEMS.mixedwoodProp", getOption("LandR.vegLeadingProportion", 0.8))}
+-- set \code{NTEMS.mixedwoodProp} to move every such threshold at once, or the
+inner option to move only the vegetation-typing functions.
+\code{\link[=lccMapGenerator]{lccMapGenerator()}} nests the same outer option over
+\code{LandR.lccLeadingProportion} (0.75), the NTEMS/EOSD value: Wulder & Nelson
+(2003) call a stand coniferous or broadleaf at 75\% or more of total basal
+area, and mixed wood when neither reaches 75\%.}
 
-\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
-See \code{data("sppEquivalencies_CA", "LandR")}.
+\item{sppEquiv}{table with species name equivalencies between naming conventions
+(see \link{sppEquivalencies_CA}, also \code{?sppEquiv}).
 For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
+If not provided and \code{mixedType == 2}, will attempt to use \code{LandR::sppEquivalencies_CA}.}
 
-\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+\item{sppEquivCol}{the column name to use from \code{sppEquiv} (see \link{sppEquivalencies_CA}).
 For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
+If \code{sppEquiv} is not provided and \code{mixedType == 2}, will use the column of
+\code{LandR::sppEquivalencies_CA} that best matches the species names.}
 
 \item{colors}{Named vector of colour codes, named using species names.
 NOTE: plot order will follow this order.}

@@ -37,7 +37,15 @@ prepSpeciesLayers_KNN2011(
 This must be one \code{RasterLayer} per species.}
 
 \item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
-threshold a species needs to pass to be considered "leading".}
+threshold a species needs to pass to be considered "leading".
+The default is a nested pair of options,
+\code{getOption("NTEMS.mixedwoodProp", getOption("LandR.vegLeadingProportion", 0.8))}
+-- set \code{NTEMS.mixedwoodProp} to move every such threshold at once, or the
+inner option to move only the vegetation-typing functions.
+\code{\link[=lccMapGenerator]{lccMapGenerator()}} nests the same outer option over
+\code{LandR.lccLeadingProportion} (0.75), the NTEMS/EOSD value: Wulder & Nelson
+(2003) call a stand coniferous or broadleaf at 75\% or more of total basal
+area, and mixed wood when neither reaches 75\%.}
 
 \item{mixed}{Deprecated. See \code{mixedType} argument to \link{vegTypeMapGenerator}.}
 
@@ -53,18 +61,19 @@ raster operations (i.e., the one used throughout the simulation).
 \item{studyArea}{A \code{SpatVector} or \code{sf} polygons object used as the principle study region,
 passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
-\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
-See \code{data("sppEquivalencies_CA", "LandR")}.
+\item{sppEquiv}{table with species name equivalencies between naming conventions
+(see \link{sppEquivalencies_CA}, also \code{?sppEquiv}).
 For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
+If not provided and \code{mixedType == 2}, will attempt to use \code{LandR::sppEquivalencies_CA}.}
 
 \item{knnNamesCol}{character string indicating the column in \code{sppEquiv}
 containing kNN species names.
 Default \code{"KNN"} for when \code{sppEquivalencies_CA} is used.}
 
-\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+\item{sppEquivCol}{the column name to use from \code{sppEquiv} (see \link{sppEquivalencies_CA}).
 For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
+If \code{sppEquiv} is not provided and \code{mixedType == 2}, will use the column of
+\code{LandR::sppEquivalencies_CA} that best matches the species names.}
 
 \item{thresh}{the minimum number of pixels where the species must have
 \code{biomass > 0} to be considered present in the study area.
