@@ -111,10 +111,6 @@ BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
 Collate: 
-    'LANDIS-II-tables.R'
-    'LandR-package.R'
-    'RcppExports.R'
-    'SummarizeCanadianForestRasters.R'
     'assertions.R'
     'biomodWrappers.R'
     'biosim.R'
@@ -129,7 +125,10 @@ Collate:
     'fireSeverity.R'
     'forestLand.R'
     'imports.R'
+    'LANDIS-II-tables.R'
+    'LandR-package.R'
     'lccMapGenerator.R'
+    'leadingProportions.R'
     'legacyToTo.R'
     'light-shade.R'
     'makeDummyInputs.R'
@@ -147,6 +146,7 @@ Collate:
     'prepInputObjects.R'
     'prepInputs_NTEMS.R'
     'prepSpeciesLayers.R'
+    'RcppExports.R'
     'seedDispersalLANDIS.R'
     'serotiny-resprouting.R'
     'speciesPresentFromKNN.R'
@@ -154,6 +154,8 @@ Collate:
     'sppEquivalencies_CA.R'
     'sppHarmonize.R'
     'studyArea.R'
+    'subsetDataSize.R'
+    'SummarizeCanadianForestRasters.R'
     'terra-raster-utils.R'
     'vignette-artifacts.R'
     'wetland.R'
