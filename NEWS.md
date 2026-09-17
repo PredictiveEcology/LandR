@@ -1,5 +1,10 @@
 # LandR (development version)
 
+* `speciesTableUpdate()` no longer fails when `sppEquiv` is `NULL`. It built its default from
+  `data.table(utils::data("sppEquivalencies_CA", ...))`, which holds the *name* of the dataset
+  rather than the dataset, so the call died in `data.table` with "Column or expression 1 of
+  'by' ... is type 'list'". It now `get()`s the table, as `prepSpeciesTable()` does.
+
 * the "leading" threshold is no longer hard-coded in each function. Every site now reads a
   nested pair of options,
   `getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))`,
