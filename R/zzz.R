@@ -1,7 +1,6 @@
 .onLoad <- function(libname, pkgname) {
   ## set options using the approach used by devtools
   opts <- options()
-  reproCachePath <- getOption("reproducible.cachePath")
   opts.LandR <- LandROptions()
 
   toset <- !(names(opts.LandR) %in% names(opts))
