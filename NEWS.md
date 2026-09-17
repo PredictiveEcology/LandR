@@ -28,6 +28,24 @@
   `loadSCANFISpeciesLayers()` is corrected to `"SCANFI"`.
 * `speciesInStudyArea()` no longer stops with "object 'bb' not found" when `speciesPresentRas`
   is supplied, and uses a supplied `url` instead of ignoring it.
+* `speciesTableUpdate()` no longer fails when `sppEquiv` is `NULL`. It built its default from
+  `data.table(utils::data("sppEquivalencies_CA", ...))`, which holds the *name* of the dataset
+  rather than the dataset, so the call died in `data.table` with "Column or expression 1 of
+  'by' ... is type 'list'". It now `get()`s the table, as `prepSpeciesTable()` does.
+* `sppColors()`: the test for whether `sppEquiv` has enough distinct `colorHex` values read
+  `length(unique(sppEquiv[[sppEquivCol]] <= length(unique(sppEquiv$colorHex))))`, which
+  compares species names to a number and takes the length of the result (1 or 2, both
+  truthy), so it always passed. Two species sharing one `colorHex` were both given that
+  colour instead of falling back to the palette. Also `length(newVals == 1)` is now
+  `length(newVals) == 1`.
+* `sppEquivalencies_CA`: the `KNN` column was shifted up by one row across the `Ulmus` block,
+  so *U. pumila* carried `Ulmu_Rub`, *U. rubra* carried `Ulmu_Spp` and *Ulmus* spp. carried
+  `Ulmu_Tho`. `equivalentName("Ulmu_Tho", column = "LandR")` returned the elm genus and
+  `"Ulmu_Rub"` returned Siberian elm. Each name now sits on its own species.
+* `sppEquivalencies_CA`: rock elm (`ULMU_THO`) and pagoda dogwood (`CORN_ALT`) now have the
+  `LandR` names `Ulmu_tho` and `Corn_alt`. Both were blank, and `LandR` is the column rows
+  are keyed on, so neither species could be matched.
+
 * the "leading" threshold is no longer hard-coded in each function. Every site now reads a
   nested pair of options,
   `getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))`,
