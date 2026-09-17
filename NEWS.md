@@ -1,5 +1,11 @@
 # LandR (development version)
 
+* `sppColors()`: the test for whether `sppEquiv` has enough distinct `colorHex` values read
+  `length(unique(sppEquiv[[sppEquivCol]] <= length(unique(sppEquiv$colorHex))))`, which
+  compares species names to a number and takes the length of the result (1 or 2, both
+  truthy), so it always passed. Two species sharing one `colorHex` were both given that
+  colour instead of falling back to the palette. Also `length(newVals == 1)` is now
+  `length(newVals) == 1`.
 * `sppEquivalencies_CA`: the `KNN` column was shifted up by one row across the `Ulmus` block,
   so *U. pumila* carried `Ulmu_Rub`, *U. rubra* carried `Ulmu_Spp` and *Ulmus* spp. carried
   `Ulmu_Tho`. `equivalentName("Ulmu_Tho", column = "LandR")` returned the elm genus and
