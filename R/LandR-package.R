@@ -7,10 +7,8 @@
 #'
 #' @section Package options:
 #'
-#' `LandR` packages use the following [options()] to configure behaviour:
-#'
-#' - `LandR.assertions`: If `TRUE`, additional code checks are run during function calls.
-#'   Default `FALSE`.
+#' `LandR` packages use [options()] to configure behaviour.
+#' See [LandROptions()] for the options and their defaults.
 #'
 #' @import ggplot2
 #' @import patchwork

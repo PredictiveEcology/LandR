@@ -15,10 +15,10 @@ sppHarmonize(
 )
 }
 \arguments{
-\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
-See \code{data("sppEquivalencies_CA", "LandR")}.
+\item{sppEquiv}{table with species name equivalencies between naming conventions
+(see \link{sppEquivalencies_CA}, also \code{?sppEquiv}).
 For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
+If not provided and \code{mixedType == 2}, will attempt to use \code{LandR::sppEquivalencies_CA}.}
 
 \item{sppNameVector}{A character vector of species to use. These species must all
 be from one naming convention, i.e., from one column in the \code{sppEquiv}.}

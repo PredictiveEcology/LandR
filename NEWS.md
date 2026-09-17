@@ -1,5 +1,33 @@
 # LandR (development version)
 
+* new `LandROptions()`, which lists the `LandR` options and their defaults, following
+  `reproducible::reproducibleOptions()` and `SpaDES.core::spadesOptions()`. `?LandROptions`
+  (or `?opts.LandR`) documents each one, and `.onLoad()` now sets the options from it instead
+  of from its own inline list. `NTEMS.mixedwoodProp` is a full member with a `NULL` default,
+  so it is documented without being set and the
+  `getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))`
+  fallthrough still reaches the inner default. The package-level help now points at
+  `LandROptions()` rather than repeating a two-option list that said `LandR.assertions`
+  defaults to `FALSE`, when `.onLoad()` has always set it to `TRUE`.
+
+* `speciesInStudyArea()` also returns `sppEquiv`: the rows of `sppEquivalencies_CA` for the
+  species in the study area, without `_Spp` genus entries, only species with LANDIS traits,
+  and with the hybrid white x Engelmann spruce (`Pice_eng_gla`) merged into Engelmann spruce
+  (`Pice_eng`). This is the table fireSense modules built for themselves. The new argument
+  `mergeHybridSpruce` (default `getOption("LandR.mergeHybridSpruce", "engelmann")`) merges it
+  into white spruce (`"white"`, `Pice_gla`) instead, or leaves it as its own species (`NA`).
+  Only the hybrid being on the raster triggers the merge, and its rows take the target's
+  `LandR`, `LANDIS_traits` and `sppEquivCol` names. Rows are matched on `LandR` whatever
+  naming the raster uses (SCANFI/NFI `PICE_ENG_GLA` or KNN `Pice_Eng_Gla`), so the table has
+  the same rows for any `sppEquivCol`.
+* `?sppEquiv` (an alias of `?sppEquivalencies_CA`) now describes the `sppEquiv` table in one
+  place: its naming conventions, how rows and `sppEquivCol` work, the helpers that use it,
+  and which columns `LandR` functions read. The column list now matches the data (30 columns,
+  not 27; `*_forestry` names; `SK_forestry`, `ON_forestry` and `NB_forestry` added), and the
+  `sppEquiv`/`sppEquivCol` argument docs link to it. The documented `SCANFINamesCol` default of
+  `loadSCANFISpeciesLayers()` is corrected to `"SCANFI"`.
+* `speciesInStudyArea()` no longer stops with "object 'bb' not found" when `speciesPresentRas`
+  is supplied, and uses a supplied `url` instead of ignoring it.
 * `speciesTableUpdate()` no longer fails when `sppEquiv` is `NULL`. It built its default from
   `data.table(utils::data("sppEquivalencies_CA", ...))`, which holds the *name* of the dataset
   rather than the dataset, so the call died in `data.table` with "Column or expression 1 of
