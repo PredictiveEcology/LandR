@@ -32,3 +32,6 @@ must be found in. The return value will still be from \code{column}}
 This is simply a wrapper around \code{match} or \verb{\\\%in\\\%} for
 a specific \code{data.frame} of values.
 }
+\seealso{
+\link{sppEquivalencies_CA} for the \code{sppEquiv} table.
+}

@@ -28,10 +28,10 @@ raster operations (i.e., the one used throughout the simulation).
 \item{studyArea}{A \code{SpatVector} or \code{sf} polygons object used as the principle study region,
 passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
-\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
-See \code{data("sppEquivalencies_CA", "LandR")}.
+\item{sppEquiv}{table with species name equivalencies between naming conventions
+(see \link{sppEquivalencies_CA}, also \code{?sppEquiv}).
 For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
+If not provided and \code{mixedType == 2}, will attempt to use \code{LandR::sppEquivalencies_CA}.}
 
 \item{year}{data year for SCANFI data. 2000, 2010, and 2020 possible for V1.
 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020 (default), 2025 possible for V2.}
@@ -39,11 +39,12 @@ If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEq
 \item{dataVersion}{Character. SCANFI product version for data. Default is currently V2. V1 also available.}
 
 \item{SCANFINamesCol}{character string indicating the column in \code{sppEquiv} containing SCANFI
-species names. Default \code{"NFI"} for when \code{sppEquivalencies_CA} is used.}
+species names. Default \code{"SCANFI"} for when \code{sppEquivalencies_CA} is used.}
 
-\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+\item{sppEquivCol}{the column name to use from \code{sppEquiv} (see \link{sppEquivalencies_CA}).
 For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
+If \code{sppEquiv} is not provided and \code{mixedType == 2}, will use the column of
+\code{LandR::sppEquivalencies_CA} that best matches the species names.}
 
 \item{thresh}{the minimum percent cover a species must have (per pixel)
 to be considered present in the study area.

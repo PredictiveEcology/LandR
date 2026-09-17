@@ -10,6 +10,12 @@
   `LandR`, `LANDIS_traits` and `sppEquivCol` names. Rows are matched on `LandR` whatever
   naming the raster uses (SCANFI/NFI `PICE_ENG_GLA` or KNN `Pice_Eng_Gla`), so the table has
   the same rows for any `sppEquivCol`.
+* `?sppEquiv` (an alias of `?sppEquivalencies_CA`) now describes the `sppEquiv` table in one
+  place: its naming conventions, how rows and `sppEquivCol` work, the helpers that use it,
+  and which columns `LandR` functions read. The column list now matches the data (30 columns,
+  not 27; `*_forestry` names; `SK_forestry`, `ON_forestry` and `NB_forestry` added), and the
+  `sppEquiv`/`sppEquivCol` argument docs link to it. The documented `SCANFINamesCol` default of
+  `loadSCANFISpeciesLayers()` is corrected to `"SCANFI"`.
 * `speciesInStudyArea()` no longer stops with "object 'bb' not found" when `speciesPresentRas`
   is supplied, and uses a supplied `url` instead of ignoring it.
 * `sppEquivalencies_CA`: coastal Douglas-fir (`PSEU_MEN_MEN`) now has `FuelClass`

@@ -1433,7 +1433,7 @@ loadkNNSpeciesLayersValidation <- function(
 #' @param dataVersion Character. SCANFI product version for data. Default is currently V2. V1 also available.
 #'
 #' @param SCANFINamesCol character string indicating the column in `sppEquiv` containing SCANFI
-#'                       species names. Default `"NFI"` for when `sppEquivalencies_CA` is used.
+#'                       species names. Default `"SCANFI"` for when `sppEquivalencies_CA` is used.
 #'
 #' @template sppEquivCol
 #'
