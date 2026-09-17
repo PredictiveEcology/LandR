@@ -1,5 +1,30 @@
 # LandR (development version)
 
+* new `prepInputs_CWIM()` builds a wetland *site* layer from the Canadian Wetland Inventory Map
+  v3A (10 m, national, public cloud-optimised GeoTIFF), reading only the study window. SCANFI's
+  land cover has no wetland classes, so without it a SCANFI-based map cannot tell treed wetland
+  from upland forest. Bog, fen, marsh and swamp count as wet; shallow water and NoData do not.
+  A target cell is wet when at least `wetThreshold` (0.5) of it is.
+* new `wetlandToLCC()` adds the NTEMS wetland codes to a land-cover map from such a layer: wet
+  and treed (210, 220, 230, and 240) becomes 81, wet otherwise becomes 80; water and existing
+  wetland codes are left alone.
+
+* `prepInputs_NTEMS_LCC_FAO()` and `prepInputs_SCANFI_LCC_FAO()` now decide *forest land* --
+  ground that grows trees, whether or not it carries any in the year being prepared -- from
+  the new `forestLandFrom` argument, and share one implementation of the rule (#221).
+  Previously both used the 2019 FAO layer's code 2 alone, i.e. "an opening in 2019", so a
+  stand that was open in the year being prepared but had grown back by 2019 was code 1 and
+  was left as shrubland, dropping it from the simulated forest. Now:
+    - `"fao"` uses FAO codes 1 and 2, from `faoYear` (2022 by default, was fixed at 2019);
+    - `"lccYears"` calls a pixel forest land if it is treed in any of `forestLandYears`,
+      which also sees openings whose disturbance predates the 1984 start of the fire and
+      harvest record;
+    - `"both"` (default) takes the union. Each scanned year is one more layer to read.
+  New `forestLandMask()` and `prepInputs_FAO_forest()` are exported. `convertibleClasses`
+  controls which classes may be relabelled; the default, every non-treed class, is
+  unchanged behaviour. The NTEMS year range is now 1984-2022: 2023 was accepted although
+  NFIS publishes no 2023 land cover. The SCANFI path also gains the fast `terra::ifel`
+  implementation, which the NTEMS path already had.
 * new `LandROptions()`, which lists the `LandR` options and their defaults, following
   `reproducible::reproducibleOptions()` and `SpaDES.core::spadesOptions()`. `?LandROptions`
   (or `?opts.LandR`) documents each one, and `.onLoad()` now sets the options from it instead

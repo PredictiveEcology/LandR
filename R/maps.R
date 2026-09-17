@@ -343,14 +343,61 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", writeTo = 
   return(scanfi_lcc_corrected)
 }
 
+#' Where one year of SCANFI land cover, in Canada LCC class codes, comes from
+#'
+#' @param year A year the given `dataVersion` publishes.
+#' @param dataVersion "V1" or "V2".
+#'
+#' @return A list with `url` and `targetFile`.
+#'
+#' @keywords internal
+.scanfiLCCFAOSource <- function(year, dataVersion = "V2") {
+  ids <- if (dataVersion == "V1") {
+    c("2000" = "1zqzTSDk9mtyRhcQuMsRMK2WDwkuk24kt",
+      "2010" = "1q1LOewgbanVUAySCyJqjc8VcSl4958TP",
+      "2020" = "1ZwEspwpcpZwIYvYEnYmd7Ux44goNvDB2")
+  } else {
+    c("1985" = "1iAEEpkVofQBggIJaxwXKcKADU3zka7Wh",
+      "1990" = "1LK5b2E1y31bwIqWYD53X9ZOt4mWvS_TB",
+      "1995" = "15pvm2h9X6dreC9rKuC3oxr4c3hHsYRkI",
+      "2000" = "1ykRG7u__DuMKI_DUGEJs6mXVul8YmRD_",
+      "2005" = "1eKNGWrwGEFRFOK2TLVXldfd8hB3OsbSG",
+      "2010" = "1cbKlKlXtjMRVg3_9xjlEWosU0fmLJxXt",
+      "2015" = "1olWPzlM2SfMC8Fq_uXslJfYIINAd4wGP",
+      "2020" = "1EGp7LUA7cXMR6KpXDmu617xsjwGM6aIx",
+      "2025" = "1eb1zEWC3VRycA_aRzTB2ODhWDLZis-YG")
+  }
+  id <- ids[[as.character(year)]]
+  targetFile <- if (dataVersion == "V1") {
+    paste0("SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_", year, "_v1_1.tif")
+  } else {
+    paste0("SCANFI_att_nfiLandcover_CanadaLCCclassCodes_", year, "_v2_20260119.tif")
+  }
+  list(url = paste0("https://drive.google.com/file/d/", id), targetFile = targetFile)
+}
+
 #' Obtain an LCC layer for a given year from SCANFI, with forest matching the FAO definition
+#'
+#' Pixels that are forest land but carry no trees in `year` are given `disturbedCode`, so
+#' that a recent burn or cutblock is still simulated as forest rather than dropped as
+#' shrubland. [forestLandMask()] describes how forest land is decided, and
+#' [.applyForestLand()] which pixels are relabelled.
 #'
 #' @param year data year for SCANFI landcover data. `r .scanfi_v1_years` possible for V1.
 #'    `r .scanfi_v2_years` possible for V2.
 #' @param dataVersion Character. SCANFI product version for data. Default is currently "V2".
 #'    "V1" also available.
-#' @param disturbedCode value assigned to pixels that are forest per FAO definition but not in LCC year
+#' @param disturbedCode value assigned to pixels that are forest land but not treed in `year`
 #' @param resampleMethod method used when resampling LCC layers to match `rasterToMatch`
+#' @param forestLandFrom how forest land is decided: `"fao"` (the FAO forest layer),
+#'   `"lccYears"` (treed in any of `forestLandYears`), or `"both"` (the default union).
+#'   See [forestLandMask()].
+#' @param forestLandYears the SCANFI years scanned when `forestLandFrom` is `"both"` or
+#'   `"lccYears"`. `NULL` (default) uses [.defaultForestLandYears()], roughly one year per
+#'   decade plus the most recent. Each year is one more layer to read.
+#' @param faoYear the year of the FAO forest layer: `r .faoForestYears`.
+#' @param convertibleClasses the classes that may become `disturbedCode`; `NULL` (default)
+#'   means every class that is not treed. See [.applyForestLand()].
 #' @param ... passed to `prepInputs`
 #'
 #' @return a `SpatRaster` with corrected forest pixels
@@ -361,6 +408,10 @@ prepInputs_SCANFI_LCC_FAO <- function(
   dataVersion = "V2",
   disturbedCode = 240,
   resampleMethod = "near",
+  forestLandFrom = c("both", "fao", "lccYears"),
+  forestLandYears = NULL,
+  faoYear = 2022,
+  convertibleClasses = NULL,
   ...
 ) {
   if (dataVersion == "V1") {
@@ -397,41 +448,11 @@ prepInputs_SCANFI_LCC_FAO <- function(
   ## 0 = no change; 20 = water; 31 = snow_ice; 32 = rock_rubble; 33 = exposed_barren_land;
   ## 40 = bryoids; 50 = shrubs; 80 = wetland; 81 = wetland-treed; 100 = herbs; 210 = coniferous;
   ## 220 = broadleaf; 230 = mixedwood
-  if (dataVersion == "V1") {
-    if (year == 2000) {
-      lccURL <- "https://drive.google.com/file/d/1zqzTSDk9mtyRhcQuMsRMK2WDwkuk24kt"
-    } else if (year == 2010) {
-      lccURL <- "https://drive.google.com/file/d/1q1LOewgbanVUAySCyJqjc8VcSl4958TP"
-    } else if (year == 2020) {
-      lccURL <- "https://drive.google.com/file/d/1ZwEspwpcpZwIYvYEnYmd7Ux44goNvDB2"
-    }
-    lccTF <- paste0("SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_", year, "_v1_1.tif")
-  } else if (dataVersion == "V2") {
-    if (year == 1985) {
-      lccURL <- paste0("https://drive.google.com/file/d/1iAEEpkVofQBggIJaxwXKcKADU3zka7Wh")
-    } else if (year == 1990) {
-      lccURL <- paste0("https://drive.google.com/file/d/1LK5b2E1y31bwIqWYD53X9ZOt4mWvS_TB")
-    } else if (year == 1995) {
-      lccURL <- paste0("https://drive.google.com/file/d/15pvm2h9X6dreC9rKuC3oxr4c3hHsYRkI")
-    } else if (year == 2000) {
-      lccURL <- paste0("https://drive.google.com/file/d/1ykRG7u__DuMKI_DUGEJs6mXVul8YmRD_")
-    } else if (year == 2005) {
-      lccURL <- paste0("https://drive.google.com/file/d/1eKNGWrwGEFRFOK2TLVXldfd8hB3OsbSG")
-    } else if (year == 2010) {
-      lccURL <- paste0("https://drive.google.com/file/d/1cbKlKlXtjMRVg3_9xjlEWosU0fmLJxXt")
-    } else if (year == 2015) {
-      lccURL <- paste0("https://drive.google.com/file/d/1olWPzlM2SfMC8Fq_uXslJfYIINAd4wGP")
-    } else if (year == 2020) {
-      lccURL <- paste0("https://drive.google.com/file/d/1EGp7LUA7cXMR6KpXDmu617xsjwGM6aIx")
-    } else if (year == 2025) {
-      lccURL <- paste0("https://drive.google.com/file/d/1eb1zEWC3VRycA_aRzTB2ODhWDLZis-YG")
-    }
-    lccTF <- paste0("SCANFI_att_nfiLandcover_CanadaLCCclassCodes_", year, "_v2_20260119.tif")
-  }
+  lccSource <- .scanfiLCCFAOSource(year, dataVersion)
 
   ## fix dots
-  dots$url <- lccURL
-  dots$targetFile <- lccTF
+  dots$url <- lccSource$url
+  dots$targetFile <- lccSource$targetFile
   dots$method <- resampleMethod
   dots$writeTo <- newFilename
   # digs <- .robustDigest(dots)
@@ -450,27 +471,34 @@ prepInputs_SCANFI_LCC_FAO <- function(
 
   ## restore dots$writeTo - it will be NULL if it wasn't passed
 
-  ## 1 is forest, 2 is land that can meet the FAO definition of forest
+  ## Which pixels are forest land -- ground that grows trees, whether or not it carries
+  ## any in `year`. Before 2026-09 this was the FAO layer's code 2 alone, i.e. "an opening
+  ## in 2019", which dropped every stand that had grown back by then (#221).
   ## do not pass dots, or the filename is passed and is overwritten
-  url <- "https://opendata.nfis.org/downloads/forest_change/CA_FAO_forest_2019.zip"
-  ## let terra options dictate whether fao is on disk or not
-
-  fao <- prepInputs(
-    url = url,
-    method = resampleMethod,
-    destinationPath = dots$destinationPath,
-    to = lcc
-  ) # |> Cache(omitArgs = "to", .cacheExtra = digs)
-  ## pixels may not be disturbed yet if year is prior to 2019 (FAO year)
-  ## adjust non-forest LCC that are disturbed forest to disturbedCode
-  DisturbedAdjust <- function(LCC, FAO, newVal = disturbedCode) {
-    LCC[FAO == 2 & !LCC %in% c(210, 220, 230)] <- newVal
-    return(LCC)
+  if (is.null(forestLandYears)) {
+    forestLandYears <- .defaultForestLandYears(
+      if (dataVersion == "V1") .scanfi_v1_years else .scanfi_v2_years
+    )
   }
-  message("Updating codes on LCC with FAO data...")
-  input <- c(lcc, fao)
-  out <- terra::lapp(input, fun = DisturbedAdjust, usenames = FALSE)
-  # lcc <- terra::init(lcc, as.vector(out))
+  forestLand <- .forestLandFor(
+    lcc = lcc,
+    forestLandFrom = forestLandFrom,
+    forestLandYears = setdiff(forestLandYears, year), ## `year` itself adds nothing
+    faoYear = faoYear,
+    lccFor = function(y) {
+      src <- .scanfiLCCFAOSource(y, dataVersion)
+      prepInputs(
+        url = src$url, targetFile = src$targetFile,
+        method = resampleMethod, destinationPath = dots$destinationPath, to = lcc
+      )
+    },
+    destinationPath = dots$destinationPath,
+    resampleMethod = resampleMethod
+  )
+
+  message("Updating codes on LCC with forest land data...")
+  out <- .applyForestLand(lcc, forestLand, convertibleClasses = convertibleClasses,
+                          disturbedCode = disturbedCode)
 
   if (!is.null(dots$writeTo)) {
     fp <- if (!is.null(dots$destinationPath)) {
@@ -482,7 +510,7 @@ prepInputs_SCANFI_LCC_FAO <- function(
     out <- writeRaster(out, filename = fp, overwrite = TRUE) ## overwrite lcc
   }
   message("... done ... cleaning up RAM")
-  rm(input, lcc, fao) ## remove them before doing gc
+  rm(lcc, forestLand) ## remove them before doing gc
   gc()
   return(out)
 }

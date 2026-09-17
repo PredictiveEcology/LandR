@@ -234,3 +234,47 @@ testthat::test_that("age imputation fails loudly when the model lacks a needed s
     "non-conformable"
   )
 })
+
+## `statsModel()` drops factor terms that have a single level in the data, and it finds them by
+## name: every *data column* whose name appears anywhere in the formula string. A constant
+## response-side variable therefore reaches `dropTerm()` -- `coverNum` in
+## `cbind(coverPres, coverNum - coverPres) ~ ...` -- but has no row of its own in
+## `terms(form)$factors`, whose only response rowname is the whole `cbind(...)` expression.
+## `toDrop` came back empty and the formula update built ". ~ . -", stopping with
+## "str2lang: unexpected end of input". Seen in Biomass_borealDataPrep, whose `coverNum` is
+## pixels-per-ecoregionGroup and so is constant whenever one group dominates the study area.
+testthat::test_that("dropTerm ignores a name that matches no term", {
+  form <- stats::as.formula("cbind(coverPres, coverNum - coverPres) ~ speciesCode * ecoregionGroup")
+
+  ## a response-side variable: nothing to drop, formula unchanged
+  expect_equal(dropTerm(form, "coverNum"), form)
+
+  ## mixed with a real term, the real one is still dropped
+  expect_equal(
+    dropTerm(form, c("coverNum", "ecoregionGroup")),
+    stats::as.formula("cbind(coverPres, coverNum - coverPres) ~ speciesCode")
+  )
+
+  ## terms that do exist keep working
+  expect_equal(dropTerm(form, "ecoregionGroup"),
+               stats::as.formula("cbind(coverPres, coverNum - coverPres) ~ speciesCode"))
+  expect_equal(dropTerm(form, "speciesCode"),
+               stats::as.formula("cbind(coverPres, coverNum - coverPres) ~ ecoregionGroup"))
+})
+
+testthat::test_that("statsModel fits when a response-side column is constant", {
+  withr::local_package("data.table")
+  egs <- paste0(sprintf("%03d", 1:3), "_230")
+  cds <- data.table::CJ(ecoregionGroup = factor(egs),
+                        speciesCode = factor(c("Pice_mar", "Pice_gla", "Pinu_ban")))
+  set.seed(1)
+  cds[, coverNum := 50L]                                   ## constant: the failing case
+  cds[, coverPres := pmin(coverNum, sample(0:40, .N, TRUE))]
+
+  coverModel <- quote(glm(cbind(coverPres, coverNum - coverPres) ~ speciesCode * ecoregionGroup,
+                          family = binomial))
+  out <- statsModel(modelFn = coverModel, uniqueEcoregionGroups = egs,
+                    sumResponse = sum(cds$coverPres, cds$coverNum), .specialData = cds)
+  expect_true(is.list(out))
+  expect_s3_class(out$mod, "glm")
+})

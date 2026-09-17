@@ -9,6 +9,10 @@ prepInputs_SCANFI_LCC_FAO(
   dataVersion = "V2",
   disturbedCode = 240,
   resampleMethod = "near",
+  forestLandFrom = c("both", "fao", "lccYears"),
+  forestLandYears = NULL,
+  faoYear = 2022,
+  convertibleClasses = NULL,
   ...
 )
 }
@@ -19,9 +23,22 @@ prepInputs_SCANFI_LCC_FAO(
 \item{dataVersion}{Character. SCANFI product version for data. Default is currently "V2".
 "V1" also available.}
 
-\item{disturbedCode}{value assigned to pixels that are forest per FAO definition but not in LCC year}
+\item{disturbedCode}{value assigned to pixels that are forest land but not treed in \code{year}}
 
 \item{resampleMethod}{method used when resampling LCC layers to match \code{rasterToMatch}}
+
+\item{forestLandFrom}{how forest land is decided: \code{"fao"} (the FAO forest layer),
+\code{"lccYears"} (treed in any of \code{forestLandYears}), or \code{"both"} (the default union).
+See \code{\link[=forestLandMask]{forestLandMask()}}.}
+
+\item{forestLandYears}{the SCANFI years scanned when \code{forestLandFrom} is \code{"both"} or
+\code{"lccYears"}. \code{NULL} (default) uses \code{\link[=.defaultForestLandYears]{.defaultForestLandYears()}}, roughly one year per
+decade plus the most recent. Each year is one more layer to read.}
+
+\item{faoYear}{the year of the FAO forest layer: 2019, 2022.}
+
+\item{convertibleClasses}{the classes that may become \code{disturbedCode}; \code{NULL} (default)
+means every class that is not treed. See \code{\link[=.applyForestLand]{.applyForestLand()}}.}
 
 \item{...}{passed to \code{prepInputs}}
 }
@@ -29,5 +46,8 @@ prepInputs_SCANFI_LCC_FAO(
 a \code{SpatRaster} with corrected forest pixels
 }
 \description{
-Obtain an LCC layer for a given year from SCANFI, with forest matching the FAO definition
+Pixels that are forest land but carry no trees in \code{year} are given \code{disturbedCode}, so
+that a recent burn or cutblock is still simulated as forest rather than dropped as
+shrubland. \code{\link[=forestLandMask]{forestLandMask()}} describes how forest land is decided, and
+\code{\link[=.applyForestLand]{.applyForestLand()}} which pixels are relabelled.
 }
