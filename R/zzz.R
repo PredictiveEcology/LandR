@@ -4,10 +4,14 @@
   reproCachePath <- getOption("reproducible.cachePath")
   opts.LandR <- list( #nolint
     LandR.assertions = TRUE,
-    LandR.verbose = 1
+    LandR.verbose = 1,
+    ## fetch SCANFI from the arbutus mirror when no reproducible.urlRemap is set; see
+    ## ?scanfiUrlRemap
+    LandR.scanfiMirror = TRUE
   )
   toset <- !(names(opts.LandR) %in% names(opts))
   if (any(toset)) options(opts.LandR[toset])
+  .setScanfiMirror()
 
   invisible()
 }
