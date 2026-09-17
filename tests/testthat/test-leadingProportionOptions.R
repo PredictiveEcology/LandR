@@ -139,8 +139,8 @@ test_that("mixedType = 1 uses the single-species threshold", {
 ## ---- subsample size -------------------------------------------------------------------------
 
 test_that("subsetDataSize() is 500 and comes from LandROptions()", {
-  expect_identical(subsetDataSize(), 500)
-  expect_identical(LandROptions()[["LandR.subsetDataSize"]], 500)
+  expect_identical(subsetDataSize(), 500L)
+  expect_identical(LandROptions()[["LandR.subsetDataSize"]], 500L)
 })
 
 test_that("options(LandR.subsetDataSize) moves what subsetDT() keeps", {

@@ -21,7 +21,7 @@
 #'     [vegTypeGenerator()] for `mixedType` other than 2.
 #'   }
 #'   \item{`subsetDataSize`}{
-#'     Default: `500`. The maximum number of rows [subsetDT()] keeps per group when
+#'     Default: `500L`. The maximum number of rows [subsetDT()] keeps per group when
 #'     subsampling data for model fitting, and the default of the `LandR` modules'
 #'     `subsetData*Model` parameters. Read with [subsetDataSize()]. It was 50 for years, set
 #'     when these fits were expensive; at that size repeated runs of the same simulation gave
@@ -67,7 +67,7 @@ LandROptions <- function() {
     ## mixedwoodProp() / leadingSpeciesProp(); no function carries its own default.
     LandR.mixedwoodProp = 0.75,
     ## THE one place the subsample size is written down; see subsetDataSize().
-    LandR.subsetDataSize = 500,
+    LandR.subsetDataSize = 500L,
     LandR.verbose = 1
   )
 }
