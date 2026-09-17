@@ -75,8 +75,10 @@ prepSpeciesLayers_SCANFI(
   url = NULL,
   dataYear = 2020,
   dataVersion = "V2",
-  studyArea,
-  rasterToMatch,
+  to = NULL,
+  cropTo = NULL,
+  projectTo = NULL,
+  maskTo = NULL,
   sppEquiv,
   sppEquivCol,
   thresh = 10,
@@ -137,6 +139,15 @@ Otherwise the raster is excluded from the output. Defaults to 10.}
 \item{dataYear}{Year for the data obtained. 2000, 2010, or 2020 (default) possible.}
 
 \item{dataVersion}{character. Data version for SCANFI. V2 is default.}
+
+\item{to, cropTo, projectTo, maskTo}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}; see
+\code{\link[reproducible:postProcessTo]{reproducible::postProcessTo()}}. \strong{\code{prepSpeciesLayers_SCANFI()} only} -- the other
+\verb{prepSpeciesLayers_*()} functions still take \code{studyArea} and \code{rasterToMatch} as formals.
+That function accepts the legacy pair through \code{...} and translates it onto these
+following the table in \code{\link[reproducible:postProcess]{reproducible::postProcess()}}: a \code{rasterToMatch} on its own is
+\code{to}; a \code{studyArea} on its own crops and masks but does not reproject (unless
+\code{useSAcrs}); and when both are given, the raster supplies extent, resolution, projection
+and alignment while the polygon supplies the mask. An argument passed explicitly wins.}
 }
 \value{
 multilayer \code{SpatRaster} ("stack")

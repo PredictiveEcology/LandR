@@ -10,6 +10,25 @@
   changes. The two inner defaults differ by history rather than by concept: both are the same
   purity threshold on a biomass-like share, and 0.75 is the NTEMS/EOSD value (Wulder & Nelson
   2003: coniferous or broadleaf at 75% or more of total basal area, mixed wood below that).
+* **`loadSCANFISpeciesLayers()` and `prepSpeciesLayers_SCANFI()` now take the `*to` family
+  (`to`, `cropTo`, `projectTo`, `maskTo`) as formals**, as a first step in retiring
+  `rasterToMatch`/`studyArea`. Both still accept the legacy pair -- it arrives through `...`
+  and is translated by a new internal `.legacyToTo()`, which implements the table documented
+  in `?reproducible::postProcess`: a `rasterToMatch` on its own is `to`; a `studyArea` on its
+  own crops and masks but does not reproject (unless `useSAcrs`); and when both are supplied
+  the raster gives extent, resolution, projection and alignment while the polygon gives the
+  mask. An explicitly passed `*to` argument always wins.
+  **This changes output for callers that supplied both.** The previous shims mapped
+  `to` -> `studyArea` and `projectTo` -> `rasterToMatch`, then called
+  `prepInputs(to = rasterToMatch)`, so the mask was taken from the *raster* rather than from
+  the study area -- the reverse of the documented behaviour. Callers that supplied only one
+  of the two are unaffected.
+  The other `prepSpeciesLayers_*()` functions are unchanged and still take the legacy formals.
+* `prepSpeciesLayers_SCANFI()` passed `projectTo = rasterToMatch` twice to
+  `loadSCANFISpeciesLayers()`. R accepts duplicate names in `...`, so this was silent
+  rather than an error; the duplicate is removed. Its cache entry was also tagged
+  `"KNN"`, which is now `"SCANFI"` -- the tag is what `Cache()` searches on, so SCANFI
+  species layers were indistinguishable from kNN ones in the cache.
 * `sppEquivalencies_CA`: coastal Douglas-fir (`PSEU_MEN_MEN`) now has `FuelClass`
   "DgFrPoPine", like the other two `Pseu_men` rows. It had "CedrMplOther", so any study
   area containing Douglas-fir got two fuel classes for `Pseu_men` and

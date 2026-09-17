@@ -265,6 +265,14 @@ CASFRItoSpRasts <- function(
 #' @param dataVersion character. Data version for SCANFI. V2 is default.
 #' @template studyArea
 #' @template rasterToMatch
+#' @param to,cropTo,projectTo,maskTo passed to [reproducible::prepInputs()]; see
+#'   [reproducible::postProcessTo()]. **`prepSpeciesLayers_SCANFI()` only** -- the other
+#'   `prepSpeciesLayers_*()` functions still take `studyArea` and `rasterToMatch` as formals.
+#'   That function accepts the legacy pair through `...` and translates it onto these
+#'   following the table in [reproducible::postProcess()]: a `rasterToMatch` on its own is
+#'   `to`; a `studyArea` on its own crops and masks but does not reproject (unless
+#'   `useSAcrs`); and when both are given, the raster supplies extent, resolution, projection
+#'   and alignment while the polygon supplies the mask. An argument passed explicitly wins.
 #' @template sppEquiv
 #' @template sppEquivCol
 #' @param thresh threshold \% cover used to defined the species as "present" in the study area.
@@ -539,8 +547,10 @@ prepSpeciesLayers_SCANFI <- function(
     url = NULL,
     dataYear = 2020,
     dataVersion = "V2",
-    studyArea,
-    rasterToMatch,
+    to = NULL,
+    cropTo = NULL,
+    projectTo = NULL,
+    maskTo = NULL,
     sppEquiv,
     sppEquivCol,
     thresh = 10,
@@ -549,11 +559,20 @@ prepSpeciesLayers_SCANFI <- function(
   stopifnot(requireNamespace("RCurl", quietly = TRUE))
 
   dots <- list(...)
-  if (!is.null(dots$to) && missing(studyArea))
-    studyArea <- dots$to
 
-  if (!is.null(dots$projectTo) && missing(rasterToMatch))
-    rasterToMatch <- dots$projectTo
+  ## `rasterToMatch`/`studyArea` still work, arriving through `...`; see .legacyToTo(). The
+  ## previous shim mapped `projectTo` -> `rasterToMatch` and `to` -> `studyArea`, which
+  ## ?reproducible::postProcess says is the wrong way round when both are present.
+  toArgs <- .legacyToTo(
+    to = to, cropTo = cropTo, projectTo = projectTo, maskTo = maskTo,
+    rasterToMatch = dots$rasterToMatch, studyArea = dots$studyArea,
+    useSAcrs = isTRUE(dots$useSAcrs),
+    maskWithRTM = if (is.null(dots$maskWithRTM)) TRUE else isTRUE(dots$maskWithRTM)
+  )
+  to <- toArgs$to
+  cropTo <- toArgs$cropTo
+  projectTo <- toArgs$projectTo
+  maskTo <- toArgs$maskTo
 
   if (is.null(sppEquiv)) {
     message(
@@ -620,9 +639,10 @@ prepSpeciesLayers_SCANFI <- function(
     dPath = destinationPath,
     SCANFINamesCol = "SCANFI",
     outputPath = outputPath,
-    projectTo = rasterToMatch,
-    to = studyArea,
-    projectTo = rasterToMatch,
+    to = to,
+    cropTo = cropTo,
+    projectTo = projectTo,
+    maskTo = maskTo,
     studyAreaName = dots$studyAreaName,
     sppEquiv = sppEquiv,
     sppEquivCol = sppEquivCol,
@@ -630,7 +650,7 @@ prepSpeciesLayers_SCANFI <- function(
     url = url,
     year = dataYear,
     shared_drive_url = shared_drive_url,
-    userTags = c("speciesLayers", "KNN")
+    userTags = c("speciesLayers", "SCANFI")
   )
 }
 
