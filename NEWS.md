@@ -1,5 +1,14 @@
 # LandR (development version)
 
+* SCANFI files are now fetched from the PredictiveEcology arbutus mirror by default. LandR
+  addresses SCANFI v2 by Google Drive id, and some of those ids 404 for anonymous users -- the
+  2020 land cover and 2020 stand age among them, which stopped `Biomass_borealDataPrep`'s default
+  SCANFI path. LandR now ships the mirror manifest and, when loaded, sets
+  `options(reproducible.urlRemap = scanfiUrlRemap())` -- only if no remap is set and
+  `LandR.scanfiMirror` is `TRUE` (the default). Species folders are remapped too, so listing them
+  needs no Google login. A remap you set yourself is never replaced; `scanfiUrlRemap()` is
+  exported so it can be combined with one.
+
 * new `prepInputs_CWIM()` builds a wetland *site* layer from the Canadian Wetland Inventory Map
   v3A (10 m, national, public cloud-optimised GeoTIFF), reading only the study window. SCANFI's
   land cover has no wetland classes, so without it a SCANFI-based map cannot tell treed wetland

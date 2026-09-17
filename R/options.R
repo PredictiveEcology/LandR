@@ -24,6 +24,11 @@
 #'     (`Pice_eng_gla`) is merged into in the `sppEquiv` returned by [speciesInStudyArea()]:
 #'     `"engelmann"` (`Pice_eng`), `"white"` (`Pice_gla`), or `NA` for no merging.
 #'   }
+#'   \item{`scanfiMirror`}{
+#'     Default: `TRUE`. When `LandR` is loaded and no `reproducible.urlRemap` is set, fetch
+#'     SCANFI from the PredictiveEcology arbutus mirror instead of Google Drive, so the ids
+#'     that 404 for anonymous users resolve and no login is needed; see [scanfiUrlRemap()].
+#'   }
 #'   \item{`vegLeadingProportion`}{
 #'     Default: `0.8`. The share of a stand held by one type, above which the stand stops
 #'     being called mixed. Used by [vegTypeMapGenerator()], [vegTypeGenerator()] and
@@ -65,6 +70,9 @@ LandROptions <- function() {
     ## share, and are kept apart so that adding these options changed no existing result.
     LandR.lccLeadingProportion = 0.75,
     LandR.mergeHybridSpruce = "engelmann",
+    ## fetch SCANFI from the arbutus mirror when no reproducible.urlRemap is set; see
+    ## ?scanfiUrlRemap
+    LandR.scanfiMirror = TRUE,
     LandR.vegLeadingProportion = 0.8, ## vegTypeMapGenerator(), vegTypeGenerator(), plotVTM()
     LandR.verbose = 1,
     ## A NULL default documents the option without setting it: `options()` ignores a NULL, so
