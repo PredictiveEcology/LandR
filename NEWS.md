@@ -1,5 +1,13 @@
 # LandR (development version)
 
+* `sppEquivalencies_CA`: the `KNN` column was shifted up by one row across the `Ulmus` block,
+  so *U. pumila* carried `Ulmu_Rub`, *U. rubra* carried `Ulmu_Spp` and *Ulmus* spp. carried
+  `Ulmu_Tho`. `equivalentName("Ulmu_Tho", column = "LandR")` returned the elm genus and
+  `"Ulmu_Rub"` returned Siberian elm. Each name now sits on its own species.
+* `sppEquivalencies_CA`: rock elm (`ULMU_THO`) and pagoda dogwood (`CORN_ALT`) now have the
+  `LandR` names `Ulmu_tho` and `Corn_alt`. Both were blank, and `LandR` is the column rows
+  are keyed on, so neither species could be matched.
+
 * the "leading" threshold is no longer hard-coded in each function. Every site now reads a
   nested pair of options,
   `getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))`,
