@@ -1,5 +1,12 @@
 # LandR (development version)
 
+* `sppColors()`: the test for whether `sppEquiv` has enough distinct `colorHex` values read
+  `length(unique(sppEquiv[[sppEquivCol]] <= length(unique(sppEquiv$colorHex))))`, which
+  compares species names to a number and takes the length of the result (1 or 2, both
+  truthy), so it always passed. Two species sharing one `colorHex` were both given that
+  colour instead of falling back to the palette. Also `length(newVals == 1)` is now
+  `length(newVals) == 1`.
+
 * the "leading" threshold is no longer hard-coded in each function. Every site now reads a
   nested pair of options,
   `getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))`,
