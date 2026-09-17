@@ -1488,7 +1488,7 @@ makeAndCleanInitialCohortData <- function(
 subsetDT <- function(DT, by, doSubset = TRUE, indices = FALSE) {
   if (!is.null(doSubset)) {
     if (!isFALSE(doSubset)) {
-      sam <- if (is.numeric(doSubset)) doSubset else 50
+      sam <- if (is.numeric(doSubset)) doSubset else subsetDataSize()
       message(
         "subsampling initial dataset for faster model estimation: ",
         "using maximum of ",
@@ -2370,8 +2370,7 @@ pixelFate <- function(
 #' vegTypeGenerator(x)
 vegTypeGenerator <- function(
   x,
-  vegLeadingProportion = getOption("NTEMS.mixedwoodProp",
-                                   getOption("LandR.vegLeadingProportion", 0.8)),
+  vegLeadingProportion = NULL,
   mixedType = 2,
   sppEquiv = NULL,
   sppEquivCol,
@@ -2383,6 +2382,7 @@ vegTypeGenerator <- function(
 
   nrowCohortData <- NROW(x)
 
+  vegLeadingProportion <- .leadingProp(vegLeadingProportion, mixedType)
   leadingBasedOn <- preambleVTG(x, vegLeadingProportion, doAssertion, nrowCohortData)
 
   if (mixedType == 2) {
@@ -2518,15 +2518,10 @@ vegTypeGenerator <- function(
     setkeyv(pixelGroupData, pgdAndSc)
 
     setkeyv(pixelGroupData3, pgdAndSc)
-    mixedType2Condition <- quote(
-      Type == "Deciduous" &
-        speciesProportion < vegLeadingProportion &
-        speciesProportion > 1 - vegLeadingProportion
-    )
-    pixelGroupData3[, mixed := FALSE]
-
-    pixelGroupData3[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColName]
-    pixelGroupData3[, mixed := any(mixed), by = pixelGroupColName]
+    pixelGroupData3[,
+      mixed := .isMixedwood(speciesProportion, Type, vegLeadingProportion),
+      by = pixelGroupColName
+    ]
 
     setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
     set(pixelGroupData3, NULL, "speciesProportion", NULL)

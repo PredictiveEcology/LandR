@@ -13,8 +13,7 @@ vegTypeMapGenerator(x, ...)
 \method{vegTypeMapGenerator}{data.table}(
   x,
   pixelGroupMap,
-  vegLeadingProportion = getOption("NTEMS.mixedwoodProp",
-    getOption("LandR.vegLeadingProportion", 0.8)),
+  vegLeadingProportion = NULL,
   mixedType = 2,
   sppEquiv = NULL,
   sppEquivCol,
@@ -36,16 +35,15 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 \item{pixelGroupMap}{A \code{RasterLayer} with pixel values equal to a pixel group
 number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}.}
 
-\item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
-threshold a species needs to pass to be considered "leading".
-The default is a nested pair of options,
-\code{getOption("NTEMS.mixedwoodProp", getOption("LandR.vegLeadingProportion", 0.8))}
--- set \code{NTEMS.mixedwoodProp} to move every such threshold at once, or the
-inner option to move only the vegetation-typing functions.
-\code{\link[=lccMapGenerator]{lccMapGenerator()}} nests the same outer option over
-\code{LandR.lccLeadingProportion} (0.75), the NTEMS/EOSD value: Wulder & Nelson
-(2003) call a stand coniferous or broadleaf at 75\% or more of total basal
-area, and mixed wood when neither reaches 75\%.}
+\item{vegLeadingProportion}{Numeric between 0-1, the share of a stand above which it stops
+being called mixed. Which share depends on what is being asked, and the two
+questions have their own options (see \link{leadingProportions}):
+with \code{mixedType = 2} it is the whole broadleaf group against the whole conifer
+group, and defaults to \code{mixedwoodProp()} (\code{LandR.mixedwoodProp}, the NTEMS/EOSD
+and NFI value: coniferous or broadleaf at 75\% or more of total basal area,
+mixed wood when neither reaches it); otherwise it is one species' share and
+defaults to \code{leadingSpeciesProp()} (\code{LandR.leadingSpeciesProp}, which takes the
+mixedwood value unless it is set). Deciduous conifers count as conifers.}
 
 \item{mixedType}{An integer defining whether mixed stands are:
 not differentiated (0), any kind of species admixture (1),

@@ -717,8 +717,7 @@ vegTypeMapGenerator.default <- function(
 vegTypeMapGenerator.data.table <- function(
   x,
   pixelGroupMap,
-  vegLeadingProportion = getOption("NTEMS.mixedwoodProp",
-                                   getOption("LandR.vegLeadingProportion", 0.8)),
+  vegLeadingProportion = NULL,
   mixedType = 2,
   sppEquiv = NULL,
   sppEquivCol,
@@ -730,6 +729,7 @@ vegTypeMapGenerator.data.table <- function(
   stopifnot(mixedType %in% 0:2, length(mixedType) == 1)
 
   nrowCohortData <- NROW(x)
+  vegLeadingProportion <- .leadingProp(vegLeadingProportion, mixedType)
   leadingBasedOn <- preambleVTG(x, vegLeadingProportion, doAssertion, nrowCohortData)
 
   if (mixedType == 2) {
@@ -885,11 +885,6 @@ vegTypeMapGenerator.data.table <- function(
     setkeyv(pixelGroupData, pgdAndSc)
 
     setkeyv(pixelGroupData3, pgdAndSc)
-    mixedType2Condition <- quote(
-      Type == "Deciduous" &
-        speciesProportion < vegLeadingProportion &
-        speciesProportion > 1 - vegLeadingProportion
-    )
     pixelGroupData3[, mixed := FALSE]
 
     pixelGroupColNameChar <- paste0(pixelGroupColName, "Char")
@@ -899,8 +894,10 @@ vegTypeMapGenerator.data.table <- function(
       pixelGroupColNameChar,
       as.character(pixelGroupData3[[pixelGroupColName]])
     )
-    pixelGroupData3[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColNameChar]
-    pixelGroupData3[, mixed := any(mixed), by = pixelGroupColNameChar]
+    pixelGroupData3[,
+      mixed := .isMixedwood(speciesProportion, Type, vegLeadingProportion),
+      by = pixelGroupColNameChar
+    ]
     # pixelGroupData3[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColName]
     # pixelGroupData3[, mixed := any(mixed), by = pixelGroupColName]
 
@@ -1012,7 +1009,7 @@ vegTypeMapGenerator.data.table <- function(
 
       pgTest2 <- pgTest[,
         list(
-          mixed = eval(mixedType2Condition),
+          mixed = .isMixedwood(speciesProportion, Type, vegLeadingProportion),
           leading = speciesCode[which.max(speciesProportion)],
           "pixelGroupColNameCustom" = get(pixelGroupColName) # is renamed below
         ),

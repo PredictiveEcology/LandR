@@ -7,14 +7,13 @@ test_that("LandROptions() defaults are what .onLoad() sets", {
   }
 })
 
-test_that("NTEMS.mixedwoodProp is a member of LandROptions() but stays unset", {
-  ## It is the outer option of
-  ##   getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))
-  ## so setting it would consume that slot and no inner default could ever be reached. A NULL
-  ## default documents the option while leaving it unset, because options() ignores a NULL.
+test_that("LandR.leadingSpeciesProp is a member of LandROptions() but stays unset", {
+  ## Unset, leadingSpeciesProp() falls through to LandR.mixedwoodProp, so the two track each
+  ## other and moving the mixedwood value moves both. Setting it at load would fix it there. A
+  ## NULL default documents the option while leaving it unset, because options() ignores a NULL.
   opts <- LandROptions()
 
-  expect_true("NTEMS.mixedwoodProp" %in% names(opts))
-  expect_null(opts[["NTEMS.mixedwoodProp"]])
-  expect_false("NTEMS.mixedwoodProp" %in% names(options()))
+  expect_true("LandR.leadingSpeciesProp" %in% names(opts))
+  expect_null(opts[["LandR.leadingSpeciesProp"]])
+  expect_false("LandR.leadingSpeciesProp" %in% names(options()))
 })

@@ -13,40 +13,38 @@
 #'     Default: `TRUE`. If `TRUE`, additional code checks are run during function calls;
 #'     see [assertions].
 #'   }
-#'   \item{`lccLeadingProportion`}{
-#'     Default: `0.75`. The same threshold as `vegLeadingProportion` below, for
-#'     [lccMapGenerator()], which works from land-cover legend codes. NTEMS/EOSD
-#'     (Wulder & Nelson 2003) call a stand coniferous or broadleaf at 75% or more of total
-#'     basal area, and mixed wood below that.
+#'   \item{`leadingSpeciesProp`}{
+#'     Default: unset, which means it takes the value of `mixedwoodProp`. The share ONE
+#'     species must hold for the stand to be called its own rather than mixed. A user who
+#'     wants "just a majority" can set it to `0.51` without moving the mixedwood definition.
+#'     Read with [leadingSpeciesProp()]; used by [vegTypeMapGenerator()] and
+#'     [vegTypeGenerator()] for `mixedType` other than 2.
+#'   }
+#'   \item{`subsetDataSize`}{
+#'     Default: `500`. The maximum number of rows [subsetDT()] keeps per group when
+#'     subsampling data for model fitting, and the default of the `LandR` modules'
+#'     `subsetData*Model` parameters. Read with [subsetDataSize()]. It was 50 for years, set
+#'     when these fits were expensive; at that size repeated runs of the same simulation gave
+#'     visibly different `maxB`.
 #'   }
 #'   \item{`mergeHybridSpruce`}{
 #'     Default: `"engelmann"`. Which species the hybrid white x Engelmann spruce
 #'     (`Pice_eng_gla`) is merged into in the `sppEquiv` returned by [speciesInStudyArea()]:
 #'     `"engelmann"` (`Pice_eng`), `"white"` (`Pice_gla`), or `NA` for no merging.
 #'   }
-#'   \item{`vegLeadingProportion`}{
-#'     Default: `0.8`. The share of a stand held by one type, above which the stand stops
-#'     being called mixed. Used by [vegTypeMapGenerator()], [vegTypeGenerator()] and
-#'     [plotVTM()].
+#'   \item{`mixedwoodProp`}{
+#'     Default: `0.75`. The share of a stand held by a GROUP -- all conifers, or all
+#'     broadleaves -- at or above which the stand stops being mixedwood. This is the
+#'     definition the national products use: NTEMS/EOSD (Wulder & Nelson 2003) and the NFI
+#'     photo plot dictionary call a stand coniferous or broadleaf at 75% or more of total
+#'     basal area (photo plots: total tree volume), mixed wood when neither group reaches it.
+#'     Deciduous conifers count as conifers (`Larix` is `Type == "Conifer"` in
+#'     [sppEquivalencies_CA]). Read with [mixedwoodProp()]; used by [vegTypeMapGenerator()]
+#'     and [vegTypeGenerator()] with `mixedType = 2`, [lccMapGenerator()] and [plotVTM()].
 #'   }
 #'   \item{`verbose`}{
 #'     Default: `1`. The default `verbose` argument of functions that report their progress,
 #'     e.g., [updateCohortData()] and [LANDISDisp()]. Higher numbers give more messages.
-#'   }
-#' }
-#'
-#' One option does not use the `LandR.` prefix, because it is shared with the NTEMS-derived
-#' products the leading-species thresholds come from:
-#'
-#' \describe{
-#'   \item{`NTEMS.mixedwoodProp`}{
-#' Default: `NULL`, i.e., left unset. Every function that needs a purity threshold reads a
-#' nested pair of options,
-#' `getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))`,
-#' so setting `NTEMS.mixedwoodProp` moves `vegLeadingProportion` and `lccLeadingProportion`
-#' together, while leaving it unset keeps each of them on its own default. Its `NULL` default
-#' here documents the option without setting it: `options()` ignores a `NULL`, so the
-#' fallthrough still happens.
 #'   }
 #' }
 #'
@@ -60,17 +58,16 @@
 LandROptions <- function() {
   list(
     LandR.assertions = TRUE,
-    ## lccMapGenerator(): a land-cover legend code, so a different historical default than
-    ## LandR.vegLeadingProportion. The two are the same purity threshold on a biomass-like
-    ## share, and are kept apart so that adding these options changed no existing result.
-    LandR.lccLeadingProportion = 0.75,
-    LandR.mergeHybridSpruce = "engelmann",
-    LandR.vegLeadingProportion = 0.8, ## vegTypeMapGenerator(), vegTypeGenerator(), plotVTM()
-    LandR.verbose = 1,
     ## A NULL default documents the option without setting it: `options()` ignores a NULL, so
-    ## the `getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", ...))`
-    ## fallthrough still reaches the inner default. Setting it here would consume the outer
-    ## slot and the fallthrough could never happen.
-    NTEMS.mixedwoodProp = NULL
+    ## leadingSpeciesProp() still falls through to LandR.mixedwoodProp. Setting it here would
+    ## fix it at load, and moving LandR.mixedwoodProp afterwards would no longer move it.
+    LandR.leadingSpeciesProp = NULL,
+    LandR.mergeHybridSpruce = "engelmann",
+    ## THE one place a leading/mixedwood threshold is written down. Everything reads it through
+    ## mixedwoodProp() / leadingSpeciesProp(); no function carries its own default.
+    LandR.mixedwoodProp = 0.75,
+    ## THE one place the subsample size is written down; see subsetDataSize().
+    LandR.subsetDataSize = 500,
+    LandR.verbose = 1
   )
 }

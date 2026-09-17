@@ -25,40 +25,38 @@ options can be placed in the user's \code{.Rprofile} file so they persist betwee
 Default: \code{TRUE}. If \code{TRUE}, additional code checks are run during function calls;
 see \link{assertions}.
 }
-\item{\code{lccLeadingProportion}}{
-Default: \code{0.75}. The same threshold as \code{vegLeadingProportion} below, for
-\code{\link[=lccMapGenerator]{lccMapGenerator()}}, which works from land-cover legend codes. NTEMS/EOSD
-(Wulder & Nelson 2003) call a stand coniferous or broadleaf at 75\% or more of total
-basal area, and mixed wood below that.
+\item{\code{leadingSpeciesProp}}{
+Default: unset, which means it takes the value of \code{mixedwoodProp}. The share ONE
+species must hold for the stand to be called its own rather than mixed. A user who
+wants "just a majority" can set it to \code{0.51} without moving the mixedwood definition.
+Read with \code{\link[=leadingSpeciesProp]{leadingSpeciesProp()}}; used by \code{\link[=vegTypeMapGenerator]{vegTypeMapGenerator()}} and
+\code{\link[=vegTypeGenerator]{vegTypeGenerator()}} for \code{mixedType} other than 2.
+}
+\item{\code{subsetDataSize}}{
+Default: \code{500}. The maximum number of rows \code{\link[=subsetDT]{subsetDT()}} keeps per group when
+subsampling data for model fitting, and the default of the \code{LandR} modules'
+\code{subsetData*Model} parameters. Read with \code{\link[=subsetDataSize]{subsetDataSize()}}. It was 50 for years, set
+when these fits were expensive; at that size repeated runs of the same simulation gave
+visibly different \code{maxB}.
 }
 \item{\code{mergeHybridSpruce}}{
 Default: \code{"engelmann"}. Which species the hybrid white x Engelmann spruce
 (\code{Pice_eng_gla}) is merged into in the \code{sppEquiv} returned by \code{\link[=speciesInStudyArea]{speciesInStudyArea()}}:
 \code{"engelmann"} (\code{Pice_eng}), \code{"white"} (\code{Pice_gla}), or \code{NA} for no merging.
 }
-\item{\code{vegLeadingProportion}}{
-Default: \code{0.8}. The share of a stand held by one type, above which the stand stops
-being called mixed. Used by \code{\link[=vegTypeMapGenerator]{vegTypeMapGenerator()}}, \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} and
-\code{\link[=plotVTM]{plotVTM()}}.
+\item{\code{mixedwoodProp}}{
+Default: \code{0.75}. The share of a stand held by a GROUP -- all conifers, or all
+broadleaves -- at or above which the stand stops being mixedwood. This is the
+definition the national products use: NTEMS/EOSD (Wulder & Nelson 2003) and the NFI
+photo plot dictionary call a stand coniferous or broadleaf at 75\% or more of total
+basal area (photo plots: total tree volume), mixed wood when neither group reaches it.
+Deciduous conifers count as conifers (\code{Larix} is \code{Type == "Conifer"} in
+\link{sppEquivalencies_CA}). Read with \code{\link[=mixedwoodProp]{mixedwoodProp()}}; used by \code{\link[=vegTypeMapGenerator]{vegTypeMapGenerator()}}
+and \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} with \code{mixedType = 2}, \code{\link[=lccMapGenerator]{lccMapGenerator()}} and \code{\link[=plotVTM]{plotVTM()}}.
 }
 \item{\code{verbose}}{
 Default: \code{1}. The default \code{verbose} argument of functions that report their progress,
 e.g., \code{\link[=updateCohortData]{updateCohortData()}} and \code{\link[=LANDISDisp]{LANDISDisp()}}. Higher numbers give more messages.
-}
-}
-
-One option does not use the \code{LandR.} prefix, because it is shared with the NTEMS-derived
-products the leading-species thresholds come from:
-
-\describe{
-\item{\code{NTEMS.mixedwoodProp}}{
-Default: \code{NULL}, i.e., left unset. Every function that needs a purity threshold reads a
-nested pair of options,
-\verb{getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))},
-so setting \code{NTEMS.mixedwoodProp} moves \code{vegLeadingProportion} and \code{lccLeadingProportion}
-together, while leaving it unset keeps each of them on its own default. Its \code{NULL} default
-here documents the option without setting it: \code{options()} ignores a \code{NULL}, so the
-fallthrough still happens.
 }
 }
 }
