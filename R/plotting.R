@@ -26,7 +26,10 @@ utils::globalVariables(c(
 #'
 #' @author Eliot McIntire
 #' @export
-plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
+plotVTM <- function(speciesStack = NULL, vtm = NULL,
+                    vegLeadingProportion = getOption(
+                      "NTEMS.mixedwoodProp", getOption("LandR.vegLeadingProportion", 0.8)
+                    ),
                     sppEquiv, sppEquivCol, colors, title = "Leading vegetation types") {
   stopifnot(requireNamespace("ggpubr", quietly = TRUE))
 

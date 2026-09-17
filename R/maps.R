@@ -689,7 +689,8 @@ vegTypeMapGenerator.default <- function(
 vegTypeMapGenerator.data.table <- function(
   x,
   pixelGroupMap,
-  vegLeadingProportion = 0.8,
+  vegLeadingProportion = getOption("NTEMS.mixedwoodProp",
+                                   getOption("LandR.vegLeadingProportion", 0.8)),
   mixedType = 2,
   sppEquiv = NULL,
   sppEquivCol,
