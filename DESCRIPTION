@@ -154,6 +154,7 @@ Collate:
     'studyArea.R'
     'terra-raster-utils.R'
     'vignette-artifacts.R'
+    'wetland.R'
     'wildfire.R'
     'zzz.R'
 Roxygen: list(markdown = TRUE)

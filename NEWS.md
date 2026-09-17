@@ -1,5 +1,14 @@
 # LandR (development version)
 
+* new `prepInputs_CWIM()` builds a wetland *site* layer from the Canadian Wetland Inventory Map
+  v3A (10 m, national, public cloud-optimised GeoTIFF), reading only the study window. SCANFI's
+  land cover has no wetland classes, so without it a SCANFI-based map cannot tell treed wetland
+  from upland forest. Bog, fen, marsh and swamp count as wet; shallow water and NoData do not.
+  A target cell is wet when at least `wetThreshold` (0.5) of it is.
+* new `wetlandToLCC()` adds the NTEMS wetland codes to a land-cover map from such a layer: wet
+  and treed (210, 220, 230, and 240) becomes 81, wet otherwise becomes 80; water and existing
+  wetland codes are left alone.
+
 * `prepInputs_NTEMS_LCC_FAO()` and `prepInputs_SCANFI_LCC_FAO()` now decide *forest land* --
   ground that grows trees, whether or not it carries any in the year being prepared -- from
   the new `forestLandFrom` argument, and share one implementation of the rule (#221).
