@@ -17,6 +17,7 @@
 #' @param searchColumn Optionally, provide the name of a column in `df` that results
 #'                must be found in. The return value will still be from `column`
 #'
+#' @seealso [sppEquivalencies_CA] for the `sppEquiv` table.
 #' @export
 #' @rdname equivalentName
 equivalentName <- function(value, df, column, multi = FALSE, searchColumn = NULL) {
@@ -67,6 +68,7 @@ equivalentNameAsList <- function(value, df, multi) {
 #'
 #' @return A `data.table` with potentially all columns in `sppEquivalencies_CA`.
 #'
+#' @seealso [sppEquivalencies_CA] for the `sppEquiv` table.
 #' @export
 sppEquivCheck <- function(sppEquiv, ensureColumns = NULL, sppEquivCol = NULL) {
   sppEquivalencies_CA <- get(data("sppEquivalencies_CA", package = "LandR",

@@ -2370,7 +2370,8 @@ pixelFate <- function(
 #' vegTypeGenerator(x)
 vegTypeGenerator <- function(
   x,
-  vegLeadingProportion = 0.8,
+  vegLeadingProportion = getOption("NTEMS.mixedwoodProp",
+                                   getOption("LandR.vegLeadingProportion", 0.8)),
   mixedType = 2,
   sppEquiv = NULL,
   sppEquivCol,
