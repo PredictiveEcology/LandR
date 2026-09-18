@@ -565,7 +565,8 @@ prepSpeciesLayers_SCANFI <- function(
   ## ?reproducible::postProcess says is the wrong way round when both are present.
   toArgs <- .legacyToTo(
     to = to, cropTo = cropTo, projectTo = projectTo, maskTo = maskTo,
-    rasterToMatch = dots$rasterToMatch, studyArea = dots$studyArea,
+    rasterToMatch = .legacyDot(dots, "rasterToMatch"),
+    studyArea = .legacyDot(dots, "studyArea"),
     useSAcrs = isTRUE(dots$useSAcrs),
     maskWithRTM = if (is.null(dots$maskWithRTM)) TRUE else isTRUE(dots$maskWithRTM)
   )
