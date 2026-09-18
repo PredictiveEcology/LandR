@@ -1,19 +1,3 @@
-# LandR 1.2.0.9027
-
-## Enhancements
-
-* SCANFI download failures now explain themselves (closes #163). SCANFI is distributed
-  through a Google Drive folder shared with collaborators, so a user without access saw only
-  `reproducible`'s generic `Could not access the Google Drive resource ... (404) Not Found`.
-  That reads like a dead link and invites a hunt for a public mirror that does not exist.
-  `prepInputsStandAgeMap()`, `prepRawBiomassMap()`, `loadSCANFISpeciesLayers()`,
-  `convert_SCANFI_LCC_codes()` and `prepInputs_SCANFI_LCC_FAO()` now report it as a
-  permissions problem and name the ways out -- first checking that the mirror is enabled
-  (`LandR.scanfiMirror`), which serves SCANFI v2 with no Google login and is the likeliest
-  fix; then requesting access at <https://opendata.nfis.org/>; supplying your own copy; or
-  `dataSource = "KNN"` / `"NTEMS"` where the function offers them. The underlying error is
-  still shown in full, and failures that are *not* access problems pass through untouched;
-
 # LandR 1.2.0.9026
 
 ## New features
@@ -36,6 +20,18 @@
   `rasterToMatchLarge` prefix-matching `rasterToMatch`.
 
 # LandR (development version)
+
+* SCANFI download failures now explain themselves (closes #163). SCANFI is distributed
+  through a Google Drive folder shared with collaborators, so a user without access saw only
+  `reproducible`'s generic `Could not access the Google Drive resource ... (404) Not Found`.
+  That reads like a dead link and invites a hunt for a public mirror that does not exist.
+  `prepInputsStandAgeMap()`, `prepRawBiomassMap()`, `loadSCANFISpeciesLayers()`,
+  `convert_SCANFI_LCC_codes()` and `prepInputs_SCANFI_LCC_FAO()` now report it as a
+  permissions problem and name the ways out -- first checking that the mirror is enabled
+  (`LandR.scanfiMirror`), which serves SCANFI v2 with no Google login and is the likeliest
+  fix; then requesting access at <https://opendata.nfis.org/>; supplying your own copy; or
+  `dataSource = "KNN"` / `"NTEMS"` where the function offers them. The underlying error is
+  still shown in full, and failures that are *not* access problems pass through untouched;
 
 * **New `prepInputs_SCANFI_structure()`**: fetches SCANFI's canopy height and canopy closure
   layers (V2, 1985-2025 in 5-year steps), the two structural attributes published alongside the
