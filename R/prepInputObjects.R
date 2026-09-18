@@ -501,16 +501,23 @@ prepInputsStandAgeMap <- function(
       #SCANFI V1 has only one dataYear so age is adjusted using NTEMS disturbance layers
       ageURL <- paste0("https://drive.google.com/file/d/1OdZ7Tznk53KceEyt9dFOBOkxDHEX5X0U")
 
-      standAgeMap <- prepInputs(
-        url = ageURL,
-        destinationPath = destinationPath,
-        datatype = datatype,
-        method = method,
-        fun = ageFun,
-        datatype = datatype,
-        to = rasterToMatch,
-        ...
-      ) |> Cache(.functionName = "prepInputs_ageMapFromSCANFI")
+      standAgeMap <- .withSCANFIAccess(
+        prepInputs(
+          url = ageURL,
+          destinationPath = destinationPath,
+          datatype = datatype,
+          method = method,
+          fun = ageFun,
+          datatype = datatype,
+          to = rasterToMatch,
+          ...
+        ) |> Cache(.functionName = "prepInputs_ageMapFromSCANFI"),
+        what = "the SCANFI stand age map",
+        dataYear = dataYear,
+        dataVersion = dataVersion,
+        urlArg = "ageURL",
+        alternatives = c("KNN", "NTEMS")
+      )
 
       if (dataYear != "2020") {
         #use NTEMS to identify disturbances (harvest and fire) that occurred between dataYear and 2020
@@ -605,16 +612,23 @@ prepInputsStandAgeMap <- function(
         stop("SCANFI V2 data is currently available for 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, and 2025 only")
       }
 
-      standAgeMap <- prepInputs(
-        url = ageURL,
-        destinationPath = destinationPath,
-        datatype = datatype,
-        method = method,
-        fun = ageFun,
-        datatype = datatype,
-        to = rasterToMatch,
-        ...
-      ) |> Cache(.functionName = "prepInputs_ageMapFromSCANFI")
+      standAgeMap <- .withSCANFIAccess(
+        prepInputs(
+          url = ageURL,
+          destinationPath = destinationPath,
+          datatype = datatype,
+          method = method,
+          fun = ageFun,
+          datatype = datatype,
+          to = rasterToMatch,
+          ...
+        ) |> Cache(.functionName = "prepInputs_ageMapFromSCANFI"),
+        what = "the SCANFI stand age map",
+        dataYear = dataYear,
+        dataVersion = dataVersion,
+        urlArg = "ageURL",
+        alternatives = c("KNN", "NTEMS")
+      )
 
     }
   }
@@ -835,8 +849,16 @@ prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", dataVers
     Args2$quick <- c("writeTo")
   }
 
-  rawBiomassMap <- do.call(prepInputs, args = Args) |>
-    Cache(quick = Args2$quick, .functionName = "prepInputsRawBiomassMap", omitArgs = Args2$omitArgs)
+  rawBiomassMap <- .withSCANFIAccess(
+    do.call(prepInputs, args = Args) |>
+      Cache(quick = Args2$quick, .functionName = "prepInputsRawBiomassMap", omitArgs = Args2$omitArgs),
+    what = "the SCANFI biomass map",
+    dataYear = dataYear,
+    dataVersion = dataVersion,
+    urlArg = "url",
+    alternatives = c("KNN", "NTEMS"),
+    enabled = identical(dataSource, "SCANFI")
+  )
 
   return(rawBiomassMap)
 }
