@@ -16,10 +16,6 @@ jobs:
     uses: PredictiveEcology/actions/.github/workflows/R-CMD-check.yaml@main
     secrets: inherit
     with:
-      ## BioSIM::getModelOutput is referenced by LandR but not exported by
-      ## RNCan/BioSimClient_R — pre-existing WARNING tracked separately.
-      ## Drop this override once that's resolved.
-      error-on: '"error"'
       ## Take Suggests from DESCRIPTION rather than restating them here. The
       ## hand-maintained copy this replaces drifted: it silently stopped covering
       ## the vignette builder, and every leg failed to re-build the vignette.

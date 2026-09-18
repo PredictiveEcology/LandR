@@ -177,7 +177,8 @@ BioSIM_getMPBSLR <- function(dem, years, SLR = "R", climModel = "GCM4", rcp = "R
     st <- system.time({
       ## TODO: need to split, apply, and recombine when nrow(locations) > 5000
       slr <- lapply(years, function(yr) { ## TODO: use future_lapply?
-        BioSIM::generateWeather(
+        slrYr <- Cache(
+          BioSIM::generateWeather,
           fromYr = yr - 1,
           toYr = yr,
           id = locations$Name,
@@ -188,9 +189,9 @@ BioSIM_getMPBSLR <- function(dem, years, SLR = "R", climModel = "GCM4", rcp = "R
           rep = 1, ## TODO: how many?
           rcp = rcp,
           climModel = climModel
-        ) |>
-          Cache()
-        setDT(slr)
+        )[[mpbSLRmodel]] ## generateWeather() returns a named list, one df per model
+        setDT(slrYr)
+        slrYr
       }) |>
         rbindlist()
     })

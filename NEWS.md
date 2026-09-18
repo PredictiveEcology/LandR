@@ -171,6 +171,10 @@
 
 ## Dependency changes
 
+* **`BioSIM (>= 1.1.0)` is now required** where BioSIM is used: 1.1.0 removed
+  `getModelOutput()` in favour of `generateWeather()`, which takes `modelNames` rather than
+  `modelName` and returns a named list instead of a single `data.frame`.
+
 * **now requires `reproducible (>= 3.1.1.9063)`** following non-backwards-compatible
   changes to the `reproducible` API: `options("reproducible.gdalwarp")` was removed,
   and `reproducible.inputPaths` was renamed to `reproducible.destinationPathShared`
@@ -341,6 +345,12 @@
   test, still skipped on CI, checks the upstream source is reachable;
 
 ## Bug fixes
+
+* `BioSIM_getMPBSLR()` returns data again. Its per-year lambda discarded the `Cache()`d result
+  and then called `setDT()` on an as-yet-unassigned `slr`, so the call errored out before it
+  could build the raster stack. It also never unwrapped the named list that `generateWeather()`
+  returns (one `data.frame` per model) -- the wind functions already do this via
+  `[[windModel]]`.
 
 * `assertPostFireDist()` has a help page again. It is exported, but its `@rdname assertions`
   never reached `man/assertions.Rd`, so `R CMD check` reported it as an undocumented code
