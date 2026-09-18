@@ -24,8 +24,14 @@
     grepl("not found|permission|access denied|forbidden|unauthorized", msg, ignore.case = TRUE)
 }
 
-.scanfiAccessMessage <- function(e, what, dataYear = NULL, dataVersion = NULL,
-                                 urlArg = NULL, alternatives = NULL) {
+.scanfiAccessMessage <- function(
+  e,
+  what,
+  dataYear = NULL,
+  dataVersion = NULL,
+  urlArg = NULL,
+  alternatives = NULL
+) {
   qualifier <- paste(c(dataVersion, dataYear), collapse = " ")
 
   ways <- c(
@@ -37,7 +43,8 @@
     ),
     paste0(
       "or request access to the SCANFI data from the SCANFI team (see ",
-      .scanfiAccessURL, "), then re-authenticate with googledrive::drive_auth()"
+      .scanfiAccessURL,
+      "), then re-authenticate with googledrive::drive_auth()"
     ),
     if (!is.null(urlArg)) {
       paste0("or, if you already have the data, pass it via `", urlArg, "`")
@@ -51,8 +58,10 @@
   )
 
   paste0(
-    "Could not download ", what,
-    if (nzchar(qualifier)) paste0(" (", qualifier, ")") else "", ".\n\n",
+    "Could not download ",
+    what,
+    if (nzchar(qualifier)) paste0(" (", qualifier, ")") else "",
+    ".\n\n",
     "SCANFI is distributed through a restricted Google Drive folder, so this is\n",
     "usually a permissions problem rather than a broken link: the Google account\n",
     "you are authenticated as may not have been granted access.\n\n",
@@ -60,15 +69,16 @@
     paste(
       vapply(
         ways,
-        function(w) paste(strwrap(w, width = 76, initial = "  * ", prefix = "    "),
-                          collapse = "\n"),
+        function(w) {
+          paste(strwrap(w, width = 76, initial = "  * ", prefix = "    "), collapse = "\n")
+        },
         character(1)
       ),
       collapse = "\n"
-    ), "\n\n",
+    ),
+    "\n\n",
     "Original error:\n",
-    paste0("  ", strsplit(paste(conditionMessage(e), collapse = "\n"), "\n")[[1]],
-           collapse = "\n")
+    paste0("  ", strsplit(paste(conditionMessage(e), collapse = "\n"), "\n")[[1]], collapse = "\n")
   )
 }
 
@@ -76,22 +86,23 @@
 ## not a Drive access problem is re-thrown untouched. `enabled` lets functions
 ## that serve several data sources wrap the call in place, without duplicating it
 ## for the SCANFI and non-SCANFI branches.
-.withSCANFIAccess <- function(expr, what, dataYear = NULL, dataVersion = NULL,
-                              urlArg = NULL, alternatives = NULL, enabled = TRUE) {
+.withSCANFIAccess <- function(
+  expr,
+  what,
+  dataYear = NULL,
+  dataVersion = NULL,
+  urlArg = NULL,
+  alternatives = NULL,
+  enabled = TRUE
+) {
   if (!isTRUE(enabled)) {
     return(expr)
   }
 
-  tryCatch(
-    expr,
-    error = function(e) {
-      if (!.isGoogleDriveAccessError(e)) {
-        stop(e)
-      }
-      stop(
-        .scanfiAccessMessage(e, what, dataYear, dataVersion, urlArg, alternatives),
-        call. = FALSE
-      )
+  tryCatch(expr, error = function(e) {
+    if (!.isGoogleDriveAccessError(e)) {
+      stop(e)
     }
-  )
+    stop(.scanfiAccessMessage(e, what, dataYear, dataVersion, urlArg, alternatives), call. = FALSE)
+  })
 }

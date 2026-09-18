@@ -3,7 +3,8 @@ drive_error <- function(status = "Client error: (404) Not Found") {
     "Could not access the Google Drive resource:\n",
     "  https://drive.google.com/file/d/1nXPS3bpFUESYieNfXO25OKlZJEgqtRnD\n",
     "  (open it in a browser to confirm it exists and is shared 'Anyone with the link')\n",
-    "  ", status
+    "  ",
+    status
   ))
 }
 
