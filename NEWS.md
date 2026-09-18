@@ -1,14 +1,3 @@
-# LandR 1.2.0.9028
-
-## Bug fixes
-
-* `prepInputsStandAgeMap()` passed `datatype` to `prepInputs()` twice in both of its SCANFI
-  branches. `datatype` is not a formal of `prepInputs()`, so both copies travelled in `...`
-  and R raised nothing -- but any function further down that chain taking `datatype` as a
-  named argument would have failed with "formal argument \"datatype\" matched by multiple
-  actual arguments", and the duplicate entered the `Cache()` key. The non-SCANFI branch
-  already passed it once.
-
 # LandR 1.2.0.9026
 
 ## New features
@@ -31,6 +20,13 @@
   `rasterToMatchLarge` prefix-matching `rasterToMatch`.
 
 # LandR (development version)
+
+* `prepInputsStandAgeMap()` passed `datatype` to `prepInputs()` twice in both of its SCANFI
+  branches. `datatype` is not a formal of `prepInputs()`, so both copies travelled in `...`
+  and R raised nothing -- but any function further down that chain taking `datatype` as a
+  named argument would have failed with "formal argument \"datatype\" matched by multiple
+  actual arguments", and the duplicate entered the `Cache()` key. The non-SCANFI branch
+  already passed it once.
 
 * **New `prepInputs_SCANFI_structure()`**: fetches SCANFI's canopy height and canopy closure
   layers (V2, 1985-2025 in 5-year steps), the two structural attributes published alongside the
