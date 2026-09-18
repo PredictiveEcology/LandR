@@ -155,7 +155,15 @@ ggplot(binned, aes(x = bin, y = count)) +
 Here it is driven from the precomputed tables --- passing `counts_df` and `stats_df` skips the expensive recomputation --- and from the coarsened display raster, so the whole set renders in seconds.
 
 ```{r maps, results = "hide", message = FALSE, warning = FALSE}
-fig_dir <- file.path(tempdir(), "ecozone-figures")
+## Write the figures where knitr puts its own, rather than under `tempdir()`:
+## pkgdown knits each article in a separate process and then only rewrites
+## absolute `<img src>` paths relative to the site -- it never copies the files
+## -- so a temp path is both unreachable and already deleted by then, and the
+## site build dies with "Failed to realize ... no such file or directory".
+## A path under `fig.path` is carried to the output by every knitr front end:
+## base64-embedded into the self-contained vignette by `R CMD build`, and
+## deployed with the article by pkgdown.
+fig_dir <- paste0(knitr::opts_chunk$get("fig.path"), "ecozones")
 
 plot_raster_stats(
   raster = display,
@@ -179,6 +187,7 @@ plot_raster_stats(
 ```
 
 ```{r show-maps, echo = FALSE, out.width = "100%"}
+## relative paths -- `include_graphics()` resolves them against the document
 knitr::include_graphics(sort(list.files(fig_dir, pattern = "[.]png$", full.names = TRUE)))
 ```
 
