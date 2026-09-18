@@ -329,6 +329,19 @@
 
 ## Bug fixes
 
+* `assertPostFireDist()` has a help page again. It is exported, but its `@rdname assertions`
+  never reached `man/assertions.Rd`, so `R CMD check` reported it as an undocumented code
+  object.
+
+* `?leadingProportions` and `?assertions` resolve again. Both are `@rdname` topics, whose
+  generated `\name{}` is the first function in the block (`mixedwoodProp` and `assert1`
+  respectively), so the seven help pages linking to them pointed at nothing. Both now carry an
+  explicit `@aliases`.
+
+* `.legacyToTo()`'s documentation had silently migrated onto `.legacyDot()`, which was inserted
+  between the roxygen block and the function that block describes. `.legacyDot()` now precedes
+  the block.
+
 * `prepInputsStandAgeMap()` passed `datatype` to `prepInputs()` twice in both of its SCANFI
   branches. `datatype` is not a formal of `prepInputs()`, so both copies travelled in `...`
   and R raised nothing -- but any function further down that chain taking `datatype` as a

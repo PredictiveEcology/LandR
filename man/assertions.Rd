@@ -2,6 +2,7 @@
 % Please edit documentation in R/assertions.R
 \name{assert1}
 \alias{assert1}
+\alias{assertions}
 \alias{assert2}
 \alias{assertSppMaxBMaxANPP}
 \alias{assertUniqueCohortData}
@@ -12,6 +13,7 @@
 \alias{assertPixelCohortData}
 \alias{assertSpeciesPlotLabels}
 \alias{assertFireToleranceDif}
+\alias{assertPostFireDist}
 \alias{assertSpeciesLayers}
 \alias{assertRstLCChange}
 \alias{assertSpeciesEcoregionCohortDataMatch}
@@ -91,6 +93,16 @@ assertSpeciesPlotLabels(
 )
 
 assertFireToleranceDif(
+  burnedPixelCohortData,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertPostFireDist(
+  cohortDataOrig,
+  pixelGroupMapOrig,
+  cohortDataNew,
+  pixelGroupMapNew,
+  postFirePixelCohortData,
   burnedPixelCohortData,
   doAssertion = getOption("LandR.assertions", TRUE)
 )
@@ -213,11 +225,18 @@ was called.}
 
 \item{sppEquiv}{an table with a column containing species names}
 
-\item{burnedPixelCohortData}{An expanded \code{cohortData} \code{data.table} with pixel-level
-cohort information on burnt pixels and the following (optional) columns:
-\code{severity} - fire severity in that pixel calculated based on fire behaviour properties;
-\code{firetolerance} - species-level fire tolerance;
-\code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}.}
+\item{burnedPixelCohortData}{\code{cohortData}-like object containing all dead, surviving and
+new cohorts (i.e. activated by serotiny/resprouting)}
+
+\item{cohortDataOrig}{object used as \code{updateCohortData(cohortData = .)}}
+
+\item{pixelGroupMapOrig}{object used as \code{updateCohortData(pixelGroupMap = .)}}
+
+\item{cohortDataNew}{\code{cohortData} output from \code{updateCohortData}}
+
+\item{pixelGroupMapNew}{\code{pixelGroupMap} output from \code{updateCohortData}}
+
+\item{postFirePixelCohortData}{object used as \code{updateCohortData(newPixelCohortData = .)}}
 
 \item{speciesLayers}{A \code{RasterStack} or \code{RasterLayer} that
 should contain species cover data in the study area}

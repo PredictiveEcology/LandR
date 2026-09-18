@@ -2,6 +2,7 @@
 % Please edit documentation in R/leadingProportions.R
 \name{mixedwoodProp}
 \alias{mixedwoodProp}
+\alias{leadingProportions}
 \alias{leadingSpeciesProp}
 \title{Leading-species and mixedwood proportion thresholds}
 \usage{

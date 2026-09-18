@@ -1,3 +1,10 @@
+## `$` on a list partial-matches, so `dots$studyArea` silently returns a `studyAreaName` that the
+## caller passed through `...`, and the legacy translation below then fires on a character string.
+## Legacy names must therefore be read exactly. An explicitly-NULL entry counts as absent.
+.legacyDot <- function(dots, name) {
+  if (name %in% names(dots)) dots[[name]] else NULL
+}
+
 #' Translate the legacy `rasterToMatch` / `studyArea` pair into the `*to` family
 #'
 #' `rasterToMatch` and `studyArea` are being retired in favour of
@@ -36,13 +43,6 @@
 #'
 #' @keywords internal
 #' @rdname legacyToTo
-## `$` on a list partial-matches, so `dots$studyArea` silently returns a `studyAreaName` that the
-## caller passed through `...`, and the legacy translation below then fires on a character string.
-## Legacy names must therefore be read exactly. An explicitly-NULL entry counts as absent.
-.legacyDot <- function(dots, name) {
-  if (name %in% names(dots)) dots[[name]] else NULL
-}
-
 .legacyToTo <- function(to = NULL, cropTo = NULL, projectTo = NULL, maskTo = NULL,
                         rasterToMatch = NULL, studyArea = NULL,
                         useSAcrs = FALSE, maskWithRTM = TRUE) {
