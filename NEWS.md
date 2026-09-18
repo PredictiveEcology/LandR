@@ -1,3 +1,18 @@
+# LandR 1.2.0.9027
+
+## Bug fixes
+
+* `prepInputs_SCANFI_LCC_FAO()` and `prepInputs_NTEMS_LCC_FAO()` prepare their forest-land
+  inputs -- the FAO forest layer and the land cover of each of `forestLandYears` -- once per R
+  session and target geometry, instead of on every call. `fireSense` calls them once per
+  dataYear on one study area, so the same inputs were prepared five times: in production the FAO
+  layer alone cost ~12 min per call, and the whole forest-land step ~2 h per study area. The
+  inputs are now aligned with the year's land cover but not masked by it (its `NA`s were already
+  excluded when the forest-land codes are applied), so they depend on its geometry and not its
+  values, and results are unchanged. The reuse is an in-session memo, not `Cache()`, so it also
+  works with `reproducible`'s Cache off, as under `spades.useCache = "eventsOnly"`.
+  `prepInputs_FAO_forest()` gains `...`, passed to `prepInputs()`.
+
 # LandR 1.2.0.9026
 
 ## New features

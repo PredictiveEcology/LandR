@@ -10,6 +10,7 @@
   forestLandYears,
   faoYear,
   lccFor,
+  lccSource,
   treedClasses = .treedLCCClasses,
   destinationPath = NULL,
   resampleMethod = "near"
@@ -27,7 +28,10 @@ aligned to it.}
 \item{faoYear}{The year of the FAO layer, when one is used.}
 
 \item{lccFor}{A function of one argument (a year) returning that year's land cover,
-aligned with \code{lcc}. Each source passes its own.}
+aligned with \code{lcc} but not masked by it (\code{maskTo = NA}). Each source passes its own.}
+
+\item{lccSource}{A name for the land-cover source \code{lccFor} reads, e.g. \code{"SCANFI V2"}. It
+keys the reuse of its layers, so it must differ between sources.}
 
 \item{treedClasses}{Passed to \code{\link[=forestLandMask]{forestLandMask()}}.}
 
@@ -40,5 +44,10 @@ A \code{SpatRaster} mask, as \code{\link[=forestLandMask]{forestLandMask()}}.
 }
 \description{
 Build the forest-land mask for one of the land-cover sources
+}
+\details{
+The forest-land inputs depend on the \emph{geometry} of \code{lcc} only, never on its values, so each
+one is prepared once per R session and geometry (see \code{\link[=.forestLandLayer]{.forestLandLayer()}}). A caller that
+prepares several years of one study area, as \code{fireSense} does, pays for them once.
 }
 \keyword{internal}

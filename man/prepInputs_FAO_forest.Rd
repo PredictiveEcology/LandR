@@ -8,7 +8,8 @@ prepInputs_FAO_forest(
   year = 2022,
   to = NULL,
   destinationPath = NULL,
-  method = "near"
+  method = "near",
+  ...
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ prepInputs_FAO_forest(
 \item{destinationPath}{Passed to \code{prepInputs}.}
 
 \item{method}{Resampling method passed to \code{prepInputs}.}
+
+\item{...}{Other arguments passed to \code{prepInputs}, e.g. \code{maskTo = NA} to align without masking.}
 }
 \value{
 a \code{SpatRaster} of FAO forest codes: 0 non-forest, 1 forest, 2 forest land whose

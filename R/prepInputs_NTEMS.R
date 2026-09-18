@@ -108,9 +108,11 @@ prepInputs_NTEMS_LCC_FAO <- function(year = 2010, disturbedCode = 240,
       prepInputs(
         url = paste0("https://opendata.nfis.org/downloads/forest_change/CA_forest_VLCE2_", y, ".zip"),
         targetFile = paste0("CA_forest_VLCE2_", y, ".tif"),
-        method = resampleMethod, destinationPath = dots$destinationPath, to = lcc
+        method = resampleMethod, destinationPath = dots$destinationPath,
+        to = lcc, maskTo = NA ## geometry only: see .forestLandLayer()
       )
     },
+    lccSource = "NTEMS VLCE2",
     destinationPath = dots$destinationPath,
     resampleMethod = resampleMethod
   )

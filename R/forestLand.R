@@ -100,13 +100,14 @@ forestLandMask <- function(lccList = list(), faoRas = NULL,
 #' @param to Passed to `prepInputs`, to align the layer with the land cover.
 #' @param destinationPath Passed to `prepInputs`.
 #' @param method Resampling method passed to `prepInputs`.
+#' @param ... Other arguments passed to `prepInputs`, e.g. `maskTo = NA` to align without masking.
 #'
 #' @return a `SpatRaster` of FAO forest codes: 0 non-forest, 1 forest, 2 forest land whose
 #'   trees were removed by fire or harvest since 1984.
 #'
 #' @export
 prepInputs_FAO_forest <- function(year = 2022, to = NULL, destinationPath = NULL,
-                                  method = "near") {
+                                  method = "near", ...) {
   if (!(year %in% .faoForestYears)) {
     stop("The FAO forest layer is published for ", paste(.faoForestYears, collapse = " and "),
          " only; got ", year, ".")
@@ -115,7 +116,8 @@ prepInputs_FAO_forest <- function(year = 2022, to = NULL, destinationPath = NULL
     url = paste0("https://opendata.nfis.org/downloads/forest_change/CA_FAO_forest_", year, ".zip"),
     method = method,
     destinationPath = destinationPath,
-    to = to
+    to = to,
+    ...
   )
 }
 
@@ -146,16 +148,23 @@ prepInputs_FAO_forest <- function(year = 2022, to = NULL, destinationPath = NULL
 #'   `"both"` or `"lccYears"`.
 #' @param faoYear The year of the FAO layer, when one is used.
 #' @param lccFor A function of one argument (a year) returning that year's land cover,
-#'   aligned with `lcc`. Each source passes its own.
+#'   aligned with `lcc` but not masked by it (`maskTo = NA`). Each source passes its own.
+#' @param lccSource A name for the land-cover source `lccFor` reads, e.g. `"SCANFI V2"`. It
+#'   keys the reuse of its layers, so it must differ between sources.
 #' @param treedClasses Passed to [forestLandMask()].
 #' @param destinationPath Passed to `prepInputs`.
 #' @param resampleMethod Passed to `prepInputs`.
+#'
+#' @details
+#' The forest-land inputs depend on the *geometry* of `lcc` only, never on its values, so each
+#' one is prepared once per R session and geometry (see [.forestLandLayer()]). A caller that
+#' prepares several years of one study area, as `fireSense` does, pays for them once.
 #'
 #' @return A `SpatRaster` mask, as [forestLandMask()].
 #'
 #' @keywords internal
 .forestLandFor <- function(lcc, forestLandFrom = c("both", "fao", "lccYears"),
-                           forestLandYears, faoYear, lccFor,
+                           forestLandYears, faoYear, lccFor, lccSource,
                            treedClasses = .treedLCCClasses,
                            destinationPath = NULL, resampleMethod = "near") {
   forestLandFrom <- match.arg(forestLandFrom)
@@ -163,17 +172,53 @@ prepInputs_FAO_forest <- function(year = 2022, to = NULL, destinationPath = NULL
   lccList <- list()
   if (forestLandFrom %in% c("both", "lccYears")) {
     lccList <- lapply(forestLandYears, function(y) {
-      message("  ... forest land: land cover for ", y)
-      lccFor(y)
+      .forestLandLayer(paste("land cover", lccSource, y, resampleMethod), lcc, function() {
+        message("  ... forest land: land cover for ", y)
+        lccFor(y)
+      })
     })
   }
 
   faoRas <- NULL
   if (forestLandFrom %in% c("both", "fao")) {
-    message("  ... forest land: FAO forest ", faoYear)
-    faoRas <- prepInputs_FAO_forest(year = faoYear, to = lcc,
-                                    destinationPath = destinationPath, method = resampleMethod)
+    faoRas <- .forestLandLayer(paste("FAO forest", faoYear, resampleMethod), lcc, function() {
+      message("  ... forest land: FAO forest ", faoYear)
+      prepInputs_FAO_forest(year = faoYear, to = lcc, maskTo = NA,
+                            destinationPath = destinationPath, method = resampleMethod)
+    })
   }
 
   forestLandMask(lccList = lccList, faoRas = faoRas, treedClasses = treedClasses)
+}
+
+#' Prepare one forest-land input once per R session and target geometry
+#'
+#' The forest-land inputs are aligned with, but not masked by, the land cover of the year
+#' being prepared, so they depend on its geometry (crs, extent, dimensions) and not on its
+#' values; that year's own `NA`s are excluded later, by [.applyForestLand()]. The result is kept
+#' in `.pkgEnv` rather than `Cache()`d because it must also be reused when `reproducible`'s
+#' Cache is off, e.g. under `spades.useCache = "eventsOnly"`.
+#'
+#' @param what A name for the input, including everything but the geometry that it depends on.
+#' @param lcc The land cover it is aligned with.
+#' @param prep A function of no arguments that prepares it.
+#'
+#' @return A `SpatRaster`, backed by a file.
+#'
+#' @keywords internal
+.forestLandLayer <- function(what, lcc, prep) {
+  key <- paste(c("forestLand", what, terra::crs(lcc), as.vector(terra::ext(lcc)), dim(lcc)[1:2]),
+               collapse = "|")
+  ras <- .pkgEnv[[key]]
+  if (!is.null(ras) && all(file.exists(terra::sources(ras)))) {
+    message("  ... forest land: ", what, " already prepared for this geometry; reusing it")
+    return(ras)
+  }
+  ras <- prep()
+  if (any(terra::inMemory(ras))) {
+    ## held for the rest of the session, so hold a file rather than RAM
+    ras <- terra::writeRaster(ras, tempfile(fileext = ".tif"))
+  }
+  .pkgEnv[[key]] <- ras
+  ras
 }
