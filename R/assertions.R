@@ -19,6 +19,7 @@ utils::globalVariables(c(
 #'
 #' @export
 #' @rdname assertions
+#' @aliases assertions
 assert1 <- function(cohortData34to36, cohortData, rmZeroBiomassQuote, classesToReplace = 34:36,
                     doAssertion = getOption("LandR.assertions", TRUE)) {
   if (doAssertion) {

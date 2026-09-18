@@ -38,6 +38,25 @@ ambiguity is the reason for the migration. This function is the single place tha
 it, following the table documented in \code{\link[reproducible:postProcess]{reproducible::postProcess()}}:
 }
 \details{
+\tabular{llll}{
+    \tab \code{rasterToMatch} \tab \code{studyArea} \tab both \cr
+   extent \tab yes \tab yes \tab \code{rasterToMatch} \cr
+   resolution \tab yes \tab no \tab \code{rasterToMatch} \cr
+   projection \tab yes \tab no* \tab \code{rasterToMatch} \cr
+   alignment \tab yes \tab no \tab \code{rasterToMatch} \cr
+   mask \tab no** \tab yes \tab \code{studyArea} \cr
+}
 
+
+Notes: \code{*} overridden by \code{useSAcrs}; \verb{**} masks with \code{rasterToMatch}'s own \code{NA}s if
+\code{maskWithRTM}.
+
+So: a \code{rasterToMatch} on its own defines every geometry property and is simply \code{to}; a
+\code{studyArea} on its own crops and masks but does \strong{not} reproject; and when both are given
+the raster supplies the geometry while the polygon supplies the mask.
+
+An explicitly supplied \verb{*to} argument always wins -- this only fills what the caller left
+\code{NULL} -- so a caller that has already migrated is never overridden by a legacy argument
+arriving through \code{...}.
 }
 \keyword{internal}

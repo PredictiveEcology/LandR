@@ -32,9 +32,9 @@ export(assertCohortDataERG)
 export(assertColumns)
 export(assertERGs)
 export(assertFireToleranceDif)
-export(assertPostFireDist)
 export(assertPixelCohortData)
 export(assertPixelCohortDataValid)
+export(assertPostFireDist)
 export(assertPostPartialDist)
 export(assertRepsAllCohortData)
 export(assertRstLCChange)
@@ -394,6 +394,7 @@ importFrom(utils,
   getFromNamespace,
   head,
   install.packages,
+  removeSource,
   str,
   tail,
   untar

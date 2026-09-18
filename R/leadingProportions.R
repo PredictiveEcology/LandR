@@ -28,6 +28,7 @@
 #'
 #' @export
 #' @rdname leadingProportions
+#' @aliases leadingProportions
 mixedwoodProp <- function() {
   getOption("LandR.mixedwoodProp", LandROptions()[["LandR.mixedwoodProp"]])
 }

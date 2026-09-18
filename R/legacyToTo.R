@@ -1,3 +1,10 @@
+## `$` on a list partial-matches, so `dots$studyArea` silently returns a `studyAreaName` that the
+## caller passed through `...`, and the legacy translation below then fires on a character string.
+## Legacy names must therefore be read exactly. An explicitly-NULL entry counts as absent.
+.legacyDot <- function(dots, name) {
+  if (name %in% names(dots)) dots[[name]] else NULL
+}
+
 #' Translate the legacy `rasterToMatch` / `studyArea` pair into the `*to` family
 #'
 #' `rasterToMatch` and `studyArea` are being retired in favour of
@@ -14,7 +21,8 @@
 #' | alignment  | yes             | no          | `rasterToMatch` |
 #' | mask       | no**            | yes         | `studyArea`     |
 #'
-#' \* overridden by `useSAcrs`. \*\* masks with `rasterToMatch`'s own `NA`s if `maskWithRTM`.
+#' Notes: `*` overridden by `useSAcrs`; `**` masks with `rasterToMatch`'s own `NA`s if
+#' `maskWithRTM`.
 #'
 #' So: a `rasterToMatch` on its own defines every geometry property and is simply `to`; a
 #' `studyArea` on its own crops and masks but does **not** reproject; and when both are given
@@ -36,13 +44,6 @@
 #'
 #' @keywords internal
 #' @rdname legacyToTo
-## `$` on a list partial-matches, so `dots$studyArea` silently returns a `studyAreaName` that the
-## caller passed through `...`, and the legacy translation below then fires on a character string.
-## Legacy names must therefore be read exactly. An explicitly-NULL entry counts as absent.
-.legacyDot <- function(dots, name) {
-  if (name %in% names(dots)) dots[[name]] else NULL
-}
-
 .legacyToTo <- function(to = NULL, cropTo = NULL, projectTo = NULL, maskTo = NULL,
                         rasterToMatch = NULL, studyArea = NULL,
                         useSAcrs = FALSE, maskWithRTM = TRUE) {
