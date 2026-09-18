@@ -145,6 +145,7 @@ Collate:
     'prepEcoregions.R'
     'prepInputObjects.R'
     'prepInputs_NTEMS.R'
+    'prepInputs_SCANFI_structure.R'
     'prepSpeciesLayers.R'
     'RcppExports.R'
     'scanfiMirror.R'
