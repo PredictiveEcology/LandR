@@ -1,3 +1,15 @@
+# LandR 1.2.0.9025
+
+## Bug fixes
+
+* `prepSpeciesLayers_SCANFI()` and `loadSCANFISpeciesLayers()` read their legacy `rasterToMatch` /
+  `studyArea` arguments out of `...` exactly, instead of with `$`. `$` on a list partial-matches, so
+  a `studyAreaName` passed through `...` — as `Biomass_speciesData` does — was returned for
+  `dots$studyArea`. `.legacyToTo()` then took its studyArea-only branch and set `cropTo` and
+  `maskTo` to that character string, so the call died in `postProcessToAssertions()` with
+  "cropTo must be a Raster*, Spat*, sf or Spatial object". The same hazard applied to
+  `rasterToMatchLarge` prefix-matching `rasterToMatch`.
+
 # LandR (development version)
 
 * **Two leading/mixedwood thresholds replace three options.** `LandR.mixedwoodProp` (0.75) is the

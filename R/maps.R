@@ -1502,7 +1502,8 @@ loadSCANFISpeciesLayers <- function(
   ## passed explicitly as a *to argument wins.
   toArgs <- .legacyToTo(
     to = to, cropTo = cropTo, projectTo = projectTo, maskTo = maskTo,
-    rasterToMatch = dots$rasterToMatch, studyArea = dots$studyArea,
+    rasterToMatch = .legacyDot(dots, "rasterToMatch"),
+    studyArea = .legacyDot(dots, "studyArea"),
     useSAcrs = isTRUE(dots$useSAcrs),
     maskWithRTM = if (is.null(dots$maskWithRTM)) TRUE else isTRUE(dots$maskWithRTM)
   )
