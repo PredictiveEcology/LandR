@@ -1,4 +1,191 @@
+# LandR 1.2.0.9027
+
+## Enhancements
+
+* SCANFI download failures now explain themselves (closes #163). SCANFI is distributed
+  through a Google Drive folder shared with collaborators, so a user without access saw only
+  `reproducible`'s generic `Could not access the Google Drive resource ... (404) Not Found`.
+  That reads like a dead link and invites a hunt for a public mirror that does not exist.
+  `prepInputsStandAgeMap()`, `prepRawBiomassMap()`, `loadSCANFISpeciesLayers()`,
+  `convert_SCANFI_LCC_codes()` and `prepInputs_SCANFI_LCC_FAO()` now report it as a
+  permissions problem and name the ways out -- first checking that the mirror is enabled
+  (`LandR.scanfiMirror`), which serves SCANFI v2 with no Google login and is the likeliest
+  fix; then requesting access at <https://opendata.nfis.org/>; supplying your own copy; or
+  `dataSource = "KNN"` / `"NTEMS"` where the function offers them. The underlying error is
+  still shown in full, and failures that are *not* access problems pass through untouched;
+
+# LandR 1.2.0.9026
+
+## New features
+
+* `assertPostFireDist()` ported from the `LIM` branch, where it was the only thing
+  `Biomass_regenerationPM` still needed from `LIM`. The module called it unguarded, so with
+  `reqdPkgs` repointed at `development` the module failed with "could not find function
+  assertPostFireDist". Its only dependency, `addPixels2CohortData()`, is already here.
+
+# LandR 1.2.0.9025
+
+## Bug fixes
+
+* `prepSpeciesLayers_SCANFI()` and `loadSCANFISpeciesLayers()` read their legacy `rasterToMatch` /
+  `studyArea` arguments out of `...` exactly, instead of with `$`. `$` on a list partial-matches, so
+  a `studyAreaName` passed through `...` — as `Biomass_speciesData` does — was returned for
+  `dots$studyArea`. `.legacyToTo()` then took its studyArea-only branch and set `cropTo` and
+  `maskTo` to that character string, so the call died in `postProcessToAssertions()` with
+  "cropTo must be a Raster*, Spat*, sf or Spatial object". The same hazard applied to
+  `rasterToMatchLarge` prefix-matching `rasterToMatch`.
+
 # LandR (development version)
+
+* **New `prepInputs_SCANFI_structure()`**: fetches SCANFI's canopy height and canopy closure
+  layers (V2, 1985-2025 in 5-year steps), the two structural attributes published alongside the
+  biomass layer `prepRawBiomassMap()` already serves. They say how much structure a pixel carries
+  independent of which species carry it, so they can be used as controls when comparing stands:
+  at equal height and closure a biomass difference is composition, not site quality.
+
+* **Two leading/mixedwood thresholds replace three options.** `LandR.mixedwoodProp` (0.75) is the
+  GROUP threshold -- all conifers, or all broadleaves -- and is the definition the national
+  products use (NTEMS/EOSD, NFI photo plots: 75% of total basal area or volume).
+  `LandR.leadingSpeciesProp` is the SINGLE-SPECIES threshold, and takes the mixedwood value unless
+  set, so `options(LandR.leadingSpeciesProp = 0.51)` gives "just a majority" without moving the
+  mixedwood definition. Read them with the new `mixedwoodProp()` and `leadingSpeciesProp()`.
+  `NTEMS.mixedwoodProp`, `LandR.vegLeadingProportion` and `LandR.lccLeadingProportion` are gone.
+  The number itself is written down only in `LandROptions()`; no function carries its own default.
+  **This changes results:** the single-species threshold was 0.8 and is now 0.75, everywhere.
+* **`mixedType = 2` now sums the broadleaf group**, which is what it always claimed to do. It
+  tested each deciduous species separately, so three broadleaf species at 15% each -- 45%
+  broadleaf, mixedwood by the definition -- was called pure conifer. Deciduous conifers stay
+  conifers: `Larix` is `Type == "Conifer"` in `sppEquivalencies_CA`, so tamarack never makes a
+  stand mixedwood. Calling `vegTypeMapGenerator()` or `vegTypeGenerator()` with `mixedType = 2`
+  and a `LandR.leadingSpeciesProp` that differs from `LandR.mixedwoodProp` now warns, because
+  `mixedType = 2` asks the mixedwood question and uses the mixedwood threshold.
+* **`subsetDT()`'s default subsample is 500, was 50** (new `subsetDataSize()`, option
+  `LandR.subsetDataSize`). 50 was chosen when these fits were expensive; it was small enough that
+  repeated runs of the same simulation gave visibly different `maxB` -- a median coefficient of
+  variation of 10% across ecoregion x species, up to 62%, on a 60 km boreal test window. The
+  `LandR` modules take their `subsetData*Model` defaults from `subsetDataSize()`, so the number
+  lives in one place.
+* SCANFI files are now fetched from the PredictiveEcology arbutus mirror by default. LandR
+  addresses SCANFI v2 by Google Drive id, and some of those ids 404 for anonymous users -- the
+  2020 land cover and 2020 stand age among them, which stopped `Biomass_borealDataPrep`'s default
+  SCANFI path. LandR now ships the mirror manifest and, when loaded, sets
+  `options(reproducible.urlRemap = scanfiUrlRemap())` -- only if no remap is set and
+  `LandR.scanfiMirror` is `TRUE` (the default). Species folders are remapped too, so listing them
+  needs no Google login. A remap you set yourself is never replaced; `scanfiUrlRemap()` is
+  exported so it can be combined with one.
+
+* new `prepInputs_CWIM()` builds a wetland *site* layer from the Canadian Wetland Inventory Map
+  v3A (10 m, national, public cloud-optimised GeoTIFF), reading only the study window. SCANFI's
+  land cover has no wetland classes, so without it a SCANFI-based map cannot tell treed wetland
+  from upland forest. Bog, fen, marsh and swamp count as wet; shallow water and NoData do not.
+  A target cell is wet when at least `wetThreshold` (0.5) of it is.
+* new `wetlandToLCC()` adds the NTEMS wetland codes to a land-cover map from such a layer: wet
+  and treed (210, 220, 230, and 240) becomes 81, wet otherwise becomes 80; water and existing
+  wetland codes are left alone.
+
+* `prepInputs_NTEMS_LCC_FAO()` and `prepInputs_SCANFI_LCC_FAO()` now decide *forest land* --
+  ground that grows trees, whether or not it carries any in the year being prepared -- from
+  the new `forestLandFrom` argument, and share one implementation of the rule (#221).
+  Previously both used the 2019 FAO layer's code 2 alone, i.e. "an opening in 2019", so a
+  stand that was open in the year being prepared but had grown back by 2019 was code 1 and
+  was left as shrubland, dropping it from the simulated forest. Now:
+    - `"fao"` uses FAO codes 1 and 2, from `faoYear` (2022 by default, was fixed at 2019);
+    - `"lccYears"` calls a pixel forest land if it is treed in any of `forestLandYears`,
+      which also sees openings whose disturbance predates the 1984 start of the fire and
+      harvest record;
+    - `"both"` (default) takes the union. Each scanned year is one more layer to read.
+  New `forestLandMask()` and `prepInputs_FAO_forest()` are exported. `convertibleClasses`
+  controls which classes may be relabelled; the default, every non-treed class, is
+  unchanged behaviour. The NTEMS year range is now 1984-2022: 2023 was accepted although
+  NFIS publishes no 2023 land cover. The SCANFI path also gains the fast `terra::ifel`
+  implementation, which the NTEMS path already had.
+* new `LandROptions()`, which lists the `LandR` options and their defaults, following
+  `reproducible::reproducibleOptions()` and `SpaDES.core::spadesOptions()`. `?LandROptions`
+  (or `?opts.LandR`) documents each one, and `.onLoad()` now sets the options from it instead
+  of from its own inline list. `NTEMS.mixedwoodProp` is a full member with a `NULL` default,
+  so it is documented without being set and the
+  `getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))`
+  fallthrough still reaches the inner default. The package-level help now points at
+  `LandROptions()` rather than repeating a two-option list that said `LandR.assertions`
+  defaults to `FALSE`, when `.onLoad()` has always set it to `TRUE`.
+
+* `speciesInStudyArea()` also returns `sppEquiv`: the rows of `sppEquivalencies_CA` for the
+  species in the study area, without `_Spp` genus entries, only species with LANDIS traits,
+  and with the hybrid white x Engelmann spruce (`Pice_eng_gla`) merged into Engelmann spruce
+  (`Pice_eng`). This is the table fireSense modules built for themselves. The new argument
+  `mergeHybridSpruce` (default `getOption("LandR.mergeHybridSpruce", "engelmann")`) merges it
+  into white spruce (`"white"`, `Pice_gla`) instead, or leaves it as its own species (`NA`).
+  Only the hybrid being on the raster triggers the merge, and its rows take the target's
+  `LandR`, `LANDIS_traits` and `sppEquivCol` names. Rows are matched on `LandR` whatever
+  naming the raster uses (SCANFI/NFI `PICE_ENG_GLA` or KNN `Pice_Eng_Gla`), so the table has
+  the same rows for any `sppEquivCol`. This merged into `development` at 1.2.0.9020, the
+  version already there, so **1.2.0.9021 is the first version a caller can require** for it:
+  a `reqdPkgs` floor of `>= 1.2.0.9020` is also met by a 1.2.0.9020 from before the merge,
+  which returns no `sppEquiv` and fails at run time instead of at install time.
+* `?sppEquiv` (an alias of `?sppEquivalencies_CA`) now describes the `sppEquiv` table in one
+  place: its naming conventions, how rows and `sppEquivCol` work, the helpers that use it,
+  and which columns `LandR` functions read. The column list now matches the data (30 columns,
+  not 27; `*_forestry` names; `SK_forestry`, `ON_forestry` and `NB_forestry` added), and the
+  `sppEquiv`/`sppEquivCol` argument docs link to it. The documented `SCANFINamesCol` default of
+  `loadSCANFISpeciesLayers()` is corrected to `"SCANFI"`.
+* `speciesInStudyArea()` no longer stops with "object 'bb' not found" when `speciesPresentRas`
+  is supplied, and uses a supplied `url` instead of ignoring it.
+* `speciesTableUpdate()` no longer fails when `sppEquiv` is `NULL`. It built its default from
+  `data.table(utils::data("sppEquivalencies_CA", ...))`, which holds the *name* of the dataset
+  rather than the dataset, so the call died in `data.table` with "Column or expression 1 of
+  'by' ... is type 'list'". It now `get()`s the table, as `prepSpeciesTable()` does.
+* `sppColors()`: the test for whether `sppEquiv` has enough distinct `colorHex` values read
+  `length(unique(sppEquiv[[sppEquivCol]] <= length(unique(sppEquiv$colorHex))))`, which
+  compares species names to a number and takes the length of the result (1 or 2, both
+  truthy), so it always passed. Two species sharing one `colorHex` were both given that
+  colour instead of falling back to the palette. Also `length(newVals == 1)` is now
+  `length(newVals) == 1`.
+* `sppEquivalencies_CA`: the `KNN` column was shifted up by one row across the `Ulmus` block,
+  so *U. pumila* carried `Ulmu_Rub`, *U. rubra* carried `Ulmu_Spp` and *Ulmus* spp. carried
+  `Ulmu_Tho`. `equivalentName("Ulmu_Tho", column = "LandR")` returned the elm genus and
+  `"Ulmu_Rub"` returned Siberian elm. Each name now sits on its own species.
+* `sppEquivalencies_CA`: rock elm (`ULMU_THO`) and pagoda dogwood (`CORN_ALT`) now have the
+  `LandR` names `Ulmu_tho` and `Corn_alt`. Both were blank, and `LandR` is the column rows
+  are keyed on, so neither species could be matched.
+
+* the "leading" threshold is no longer hard-coded in each function. Every site now reads a
+  nested pair of options,
+  `getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))`,
+  where `LandR.vegLeadingProportion` (0.8) serves `vegTypeMapGenerator()`, `vegTypeGenerator()`
+  and `plotVTM()`, and `LandR.lccLeadingProportion` (0.75) serves `lccMapGenerator()`.
+  Setting `NTEMS.mixedwoodProp` moves all of them at once; leaving it unset (the default --
+  it is not set at load) leaves each on the value it has always had, so no existing result
+  changes. The two inner defaults differ by history rather than by concept: both are the same
+  purity threshold on a biomass-like share, and 0.75 is the NTEMS/EOSD value (Wulder & Nelson
+  2003: coniferous or broadleaf at 75% or more of total basal area, mixed wood below that).
+* **`loadSCANFISpeciesLayers()` and `prepSpeciesLayers_SCANFI()` now take the `*to` family
+  (`to`, `cropTo`, `projectTo`, `maskTo`) as formals**, as a first step in retiring
+  `rasterToMatch`/`studyArea`. Both still accept the legacy pair -- it arrives through `...`
+  and is translated by a new internal `.legacyToTo()`, which implements the table documented
+  in `?reproducible::postProcess`: a `rasterToMatch` on its own is `to`; a `studyArea` on its
+  own crops and masks but does not reproject (unless `useSAcrs`); and when both are supplied
+  the raster gives extent, resolution, projection and alignment while the polygon gives the
+  mask. An explicitly passed `*to` argument always wins.
+  **This changes output for callers that supplied both.** The previous shims mapped
+  `to` -> `studyArea` and `projectTo` -> `rasterToMatch`, then called
+  `prepInputs(to = rasterToMatch)`, so the mask was taken from the *raster* rather than from
+  the study area -- the reverse of the documented behaviour. Callers that supplied only one
+  of the two are unaffected.
+  The other `prepSpeciesLayers_*()` functions are unchanged and still take the legacy formals.
+* `prepSpeciesLayers_SCANFI()` passed `projectTo = rasterToMatch` twice to
+  `loadSCANFISpeciesLayers()`. R accepts duplicate names in `...`, so this was silent
+  rather than an error; the duplicate is removed. Its cache entry was also tagged
+  `"KNN"`, which is now `"SCANFI"` -- the tag is what `Cache()` searches on, so SCANFI
+  species layers were indistinguishable from kNN ones in the cache.
+* `sppEquivalencies_CA`: coastal Douglas-fir (`PSEU_MEN_MEN`) now has `FuelClass`
+  "DgFrPoPine", like the other two `Pseu_men` rows. It had "CedrMplOther", so any study
+  area containing Douglas-fir got two fuel classes for `Pseu_men` and
+  `fireSenseUtils::cohortsToFuelClasses()` stopped.
+* `makePickellStack()` no longer leaves `terra::terraOptions(memmax)` and
+  `raster::rasterOptions(maxmemory)` changed after it returns. Both are global,
+  process-wide settings, so a caller that had set its own memory ceiling silently
+  kept LandR's for the rest of the session -- visible in a long-lived worker that
+  set `memmax = 4` and later found it at 1.
 
 ## Breaking changes
 
@@ -53,17 +240,6 @@
 
 ## Enhancements
 
-* SCANFI download failures now explain themselves (closes #163). SCANFI is distributed
-  through a Google Drive folder shared with collaborators, so a user without access saw only
-  `reproducible`'s generic `Could not access the Google Drive resource ... (404) Not Found`.
-  That reads like a dead link and invites a hunt for a public mirror that does not exist.
-  `prepInputsStandAgeMap()`, `prepRawBiomassMap()`, `loadSCANFISpeciesLayers()`,
-  `convert_SCANFI_LCC_codes()` and `prepInputs_SCANFI_LCC_FAO()` now report it as a
-  permissions problem, point at <https://opendata.nfis.org/> to request access, and name the
-  ways out -- supplying your own copy, or `dataSource = "KNN"` / `"NTEMS"` where the function
-  offers them. The underlying error is still shown in full, and failures that are *not* access
-  problems pass through untouched;
-
 * `convertUnwantedLCC()` no longer uses the iterative `spread2()` search, whose run time grew
   with the square of the radius of the largest contiguous block of `classesToReplace`. On
   study areas containing large lakes/burns masked to an irregular boundary that search could
@@ -94,6 +270,16 @@
   often as the previous implementation, broadleaf **0.58×** and mixedwood **0.28×**, moving
   roughly one in fourteen unwanted pixels out of forest altogether. `"nearestWeighted"`
   gives the same determinism without that bias.
+* `loadSCANFISpeciesLayers()` now lists the SCANFI species-layer folder via
+  `reproducible::listGoogleDriveFolder()` instead of `googledrive::drive_ls()`.
+  When a directory-remap manifest is set (`options(reproducible.urlRemap = ...)`,
+  e.g. one built with `buckethost::makeMirrorManifest(directories = TRUE)`), the
+  SCANFI files are fetched from a public mirror with **no Google
+  authentication** — the immediate use case is training/workshops, where
+  participants can pull SCANFI layers without a Google account or `drive_auth()`.
+  Behaviour is unchanged when no manifest is set: it falls back to `drive_ls()`
+  and authenticates as before. (Requires the companion `reproducible` change that
+  adds `listGoogleDriveFolder()` and directory remaps.)
 * `LANDISDisp()` spiral seed dispersal loop ported to C++ via `Rcpp`
   (~3.5–5.7× faster end-to-end depending on input size; ~5× on landscape-scale
   fixtures of 9 M cells). Memory use also drops dramatically: the
@@ -163,6 +349,11 @@
   test, still skipped on CI, checks the upstream source is reachable;
 
 ## Bug fixes
+
+* `prepSpeciesLayers_SCANFI()`: the Google Drive fallback (taken when `RCurl::url.exists()`
+  fails, e.g. during a network blip) referenced `year`, which is not a formal, so it
+  resolved to `data.table::year` and failed with "cannot coerce type 'closure' to
+  vector of type 'character'". It now uses `dataYear`.
 
 * `assertERGs()` now gives an informative error when `ecoregionMap` carries no
   `ecoregionGroup` values (e.g. a GeoTIFF read without its companion `.aux.xml`,

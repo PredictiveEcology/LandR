@@ -265,6 +265,14 @@ CASFRItoSpRasts <- function(
 #' @param dataVersion character. Data version for SCANFI. V2 is default.
 #' @template studyArea
 #' @template rasterToMatch
+#' @param to,cropTo,projectTo,maskTo passed to [reproducible::prepInputs()]; see
+#'   [reproducible::postProcessTo()]. **`prepSpeciesLayers_SCANFI()` only** -- the other
+#'   `prepSpeciesLayers_*()` functions still take `studyArea` and `rasterToMatch` as formals.
+#'   That function accepts the legacy pair through `...` and translates it onto these
+#'   following the table in [reproducible::postProcess()]: a `rasterToMatch` on its own is
+#'   `to`; a `studyArea` on its own crops and masks but does not reproject (unless
+#'   `useSAcrs`); and when both are given, the raster supplies extent, resolution, projection
+#'   and alignment while the polygon supplies the mask. An argument passed explicitly wins.
 #' @template sppEquiv
 #' @template sppEquivCol
 #' @param thresh threshold \% cover used to defined the species as "present" in the study area.
@@ -309,16 +317,15 @@ prepSpeciesLayers_KNN <- function(
   }
 
   shared_drive_url <- NULL
-  if (!RCurl::url.exists(url)) {
-    ## ping website and use gdrive if not available
+  ## A Drive source is used directly; see .isGoogleDriveUrl(). Anything else is
+  ## pinged, and the Drive copy used if it cannot be reached.
+  if (!.isGoogleDriveUrl(url) && !RCurl::url.exists(url)) {
     if (requireNamespace("googledrive", quietly = TRUE)) {
       driveFolder <- paste0("kNNForestAttributes_", year)
       shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
 
-      driveDT <- as.data.table(googledrive::drive_ls(googledrive::as_id(shared_drive_url)))
-      url <- googledrive::with_drive_quiet(
-        googledrive::drive_link(driveDT[name == driveFolder, id])
-      )
+      driveLs <- googledrive::drive_ls(googledrive::as_id(shared_drive_url))
+      url <- .driveFolderLink(driveLs, driveFolder, shared_drive_url)
     }
   }
 
@@ -373,7 +380,6 @@ prepSpeciesLayers_CASFRI <- function(
     method = "bilinear", ## ignore warning re: ngb (#5)
     datatype = "INT4U",
     writeTo = NULL,
-    overwrite = TRUE,
     userTags = c("CASFRIRas", "stable")
   )
 
@@ -433,7 +439,6 @@ prepSpeciesLayers_Pickell <- function(
     method = "bilinear", ## ignore warning re: ngb (#5)
     datatype = "INT2U",
     writeTo = NULL,
-    overwrite = TRUE,
     userTags = c("speciesLayers", "KNN", "Pickell", "stable")
   )
 
@@ -542,8 +547,10 @@ prepSpeciesLayers_SCANFI <- function(
     url = NULL,
     dataYear = 2020,
     dataVersion = "V2",
-    studyArea,
-    rasterToMatch,
+    to = NULL,
+    cropTo = NULL,
+    projectTo = NULL,
+    maskTo = NULL,
     sppEquiv,
     sppEquivCol,
     thresh = 10,
@@ -552,11 +559,21 @@ prepSpeciesLayers_SCANFI <- function(
   stopifnot(requireNamespace("RCurl", quietly = TRUE))
 
   dots <- list(...)
-  if (!is.null(dots$to) && missing(studyArea))
-    studyArea <- dots$to
 
-  if (!is.null(dots$projectTo) && missing(rasterToMatch))
-    rasterToMatch <- dots$projectTo
+  ## `rasterToMatch`/`studyArea` still work, arriving through `...`; see .legacyToTo(). The
+  ## previous shim mapped `projectTo` -> `rasterToMatch` and `to` -> `studyArea`, which
+  ## ?reproducible::postProcess says is the wrong way round when both are present.
+  toArgs <- .legacyToTo(
+    to = to, cropTo = cropTo, projectTo = projectTo, maskTo = maskTo,
+    rasterToMatch = .legacyDot(dots, "rasterToMatch"),
+    studyArea = .legacyDot(dots, "studyArea"),
+    useSAcrs = isTRUE(dots$useSAcrs),
+    maskWithRTM = if (is.null(dots$maskWithRTM)) TRUE else isTRUE(dots$maskWithRTM)
+  )
+  to <- toArgs$to
+  cropTo <- toArgs$cropTo
+  projectTo <- toArgs$projectTo
+  maskTo <- toArgs$maskTo
 
   if (is.null(sppEquiv)) {
     message(
@@ -607,16 +624,15 @@ prepSpeciesLayers_SCANFI <- function(
     }
   }
   shared_drive_url <- NULL
-  if (!RCurl::url.exists(url)) {
-    ## ping website and use gdrive if not available
+  ## A Drive source is used directly; see .isGoogleDriveUrl(). Anything else is
+  ## pinged, and the Drive copy used if it cannot be reached.
+  if (!.isGoogleDriveUrl(url) && !RCurl::url.exists(url)) {
     if (requireNamespace("googledrive", quietly = TRUE)) {
-      driveFolder <- paste0("SCANFIForestAttributes_", year)
+      driveFolder <- paste0("SCANFIForestAttributes_", dataYear)
       shared_drive_url <- "https://drive.google.com/drive/folders/1zLYV-wcDjJfSflH1VkXG6sosqZZF4SYc"
 
-      driveDT <- as.data.table(googledrive::drive_ls(googledrive::as_id(shared_drive_url)))
-      url <- googledrive::with_drive_quiet(
-        googledrive::drive_link(driveDT[name == driveFolder, id])
-      )
+      driveLs <- googledrive::drive_ls(googledrive::as_id(shared_drive_url))
+      url <- .driveFolderLink(driveLs, driveFolder, shared_drive_url)
     }
   }
 
@@ -624,9 +640,10 @@ prepSpeciesLayers_SCANFI <- function(
     dPath = destinationPath,
     SCANFINamesCol = "SCANFI",
     outputPath = outputPath,
-    projectTo = rasterToMatch,
-    to = studyArea,
-    projectTo = rasterToMatch,
+    to = to,
+    cropTo = cropTo,
+    projectTo = projectTo,
+    maskTo = maskTo,
     studyAreaName = dots$studyAreaName,
     sppEquiv = sppEquiv,
     sppEquivCol = sppEquivCol,
@@ -634,7 +651,7 @@ prepSpeciesLayers_SCANFI <- function(
     url = url,
     year = dataYear,
     shared_drive_url = shared_drive_url,
-    userTags = c("speciesLayers", "KNN")
+    userTags = c("speciesLayers", "SCANFI")
   )
 }
 
@@ -886,6 +903,19 @@ makePickellStack <- function(PickellRaster, sppEquiv, sppEquivCol, destinationPa
   spRasts <- list()
   spRas <- PickellRaster
   spRas[] <- NA_integer_
+
+  ## Both of these are global, process-wide settings, so they must not outlive this
+  ## function: a caller that deliberately set its own memory ceiling would silently
+  ## keep ours for the rest of the session. Observed in a long-lived worker that had
+  ## set memmax = 4 and found it at 1 afterwards.
+  origTerraMemmax <- terra::terraOptions(print = FALSE)$memmax
+  on.exit(try(terra::terraOptions(memmax = origTerraMemmax), silent = TRUE), add = TRUE)
+  if (requireNamespace("raster", quietly = TRUE)) {
+    ## capture.output: rasterOptions() prints as a side effect when read
+    invisible(utils::capture.output(
+      origRasterMaxmemory <- raster::rasterOptions(default = FALSE)$maxmemory))
+    on.exit(try(raster::rasterOptions(maxmemory = origRasterMaxmemory), silent = TRUE), add = TRUE)
+  }
 
   rasterOptions(maxmemory = 1e9)
   terraOptions(memmax = 1L)

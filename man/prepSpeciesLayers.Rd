@@ -75,8 +75,10 @@ prepSpeciesLayers_SCANFI(
   url = NULL,
   dataYear = 2020,
   dataVersion = "V2",
-  studyArea,
-  rasterToMatch,
+  to = NULL,
+  cropTo = NULL,
+  projectTo = NULL,
+  maskTo = NULL,
   sppEquiv,
   sppEquivCol,
   thresh = 10,
@@ -119,14 +121,15 @@ passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 raster operations (i.e., the one used throughout the simulation).
 \code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
-\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
-See \code{data("sppEquivalencies_CA", "LandR")}.
+\item{sppEquiv}{table with species name equivalencies between naming conventions
+(see \link{sppEquivalencies_CA}, also \code{?sppEquiv}).
 For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
+If not provided and \code{mixedType == 2}, will attempt to use \code{LandR::sppEquivalencies_CA}.}
 
-\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+\item{sppEquivCol}{the column name to use from \code{sppEquiv} (see \link{sppEquivalencies_CA}).
 For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
+If \code{sppEquiv} is not provided and \code{mixedType == 2}, will use the column of
+\code{LandR::sppEquivalencies_CA} that best matches the species names.}
 
 \item{thresh}{threshold \\% cover used to defined the species as "present" in the study area.
 If at least one pixel has \code{cover >= thresh} , the species is considered "present".
@@ -137,6 +140,15 @@ Otherwise the raster is excluded from the output. Defaults to 10.}
 \item{dataYear}{Year for the data obtained. 2000, 2010, or 2020 (default) possible.}
 
 \item{dataVersion}{character. Data version for SCANFI. V2 is default.}
+
+\item{to, cropTo, projectTo, maskTo}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}; see
+\code{\link[reproducible:postProcessTo]{reproducible::postProcessTo()}}. \strong{\code{prepSpeciesLayers_SCANFI()} only} -- the other
+\verb{prepSpeciesLayers_*()} functions still take \code{studyArea} and \code{rasterToMatch} as formals.
+That function accepts the legacy pair through \code{...} and translates it onto these
+following the table in \code{\link[reproducible:postProcess]{reproducible::postProcess()}}: a \code{rasterToMatch} on its own is
+\code{to}; a \code{studyArea} on its own crops and masks but does not reproject (unless
+\code{useSAcrs}); and when both are given, the raster supplies extent, resolution, projection
+and alignment while the polygon supplies the mask. An argument passed explicitly wins.}
 }
 \value{
 multilayer \code{SpatRaster} ("stack")

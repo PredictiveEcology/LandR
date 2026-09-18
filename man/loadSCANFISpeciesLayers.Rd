@@ -6,8 +6,10 @@
 \usage{
 loadSCANFISpeciesLayers(
   dPath,
-  rasterToMatch = NULL,
-  studyArea = NULL,
+  to = NULL,
+  cropTo = NULL,
+  projectTo = NULL,
+  maskTo = NULL,
   sppEquiv,
   year = 2020,
   dataVersion = "V2",
@@ -21,17 +23,18 @@ loadSCANFISpeciesLayers(
 \arguments{
 \item{dPath}{path to the data directory}
 
-\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).
-\code{rasterToMatch} should correspond to \code{studyArea} if used.}
+\item{to, cropTo, projectTo, maskTo}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}; see
+\code{\link[reproducible:postProcessTo]{reproducible::postProcessTo()}}. The legacy \code{rasterToMatch} and \code{studyArea} are still
+accepted through \code{...} and are translated onto these by \code{.legacyToTo()}, following the
+table in \code{\link[reproducible:postProcess]{reproducible::postProcess()}}: a \code{rasterToMatch} on its own is \code{to}; a
+\code{studyArea} on its own crops and masks but does not reproject (unless \code{useSAcrs}); and
+when both are supplied the raster gives extent, resolution, projection and alignment
+while the polygon gives the mask. An argument passed here explicitly always wins.}
 
-\item{studyArea}{A \code{SpatVector} or \code{sf} polygons object used as the principle study region,
-passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
-
-\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
-See \code{data("sppEquivalencies_CA", "LandR")}.
+\item{sppEquiv}{table with species name equivalencies between naming conventions
+(see \link{sppEquivalencies_CA}, also \code{?sppEquiv}).
 For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
+If not provided and \code{mixedType == 2}, will attempt to use \code{LandR::sppEquivalencies_CA}.}
 
 \item{year}{data year for SCANFI data. 2000, 2010, and 2020 possible for V1.
 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020 (default), 2025 possible for V2.}
@@ -39,11 +42,12 @@ If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEq
 \item{dataVersion}{Character. SCANFI product version for data. Default is currently V2. V1 also available.}
 
 \item{SCANFINamesCol}{character string indicating the column in \code{sppEquiv} containing SCANFI
-species names. Default \code{"NFI"} for when \code{sppEquivalencies_CA} is used.}
+species names. Default \code{"SCANFI"} for when \code{sppEquivalencies_CA} is used.}
 
-\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+\item{sppEquivCol}{the column name to use from \code{sppEquiv} (see \link{sppEquivalencies_CA}).
 For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
+If \code{sppEquiv} is not provided and \code{mixedType == 2}, will use the column of
+\code{LandR::sppEquivalencies_CA} that best matches the species names.}
 
 \item{thresh}{the minimum percent cover a species must have (per pixel)
 to be considered present in the study area.

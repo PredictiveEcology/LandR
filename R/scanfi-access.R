@@ -30,7 +30,13 @@
 
   ways <- c(
     paste0(
-      "request access to the SCANFI data from the SCANFI team (see ",
+      "check that the SCANFI mirror is enabled -- getOption(\"LandR.scanfiMirror\") ",
+      "should be TRUE and getOption(\"reproducible.urlRemap\") non-NULL. It serves ",
+      "SCANFI v2 from the PredictiveEcology object store with no Google login, and ",
+      "is set by LandR on load unless you opted out or already had a remap of your own"
+    ),
+    paste0(
+      "or request access to the SCANFI data from the SCANFI team (see ",
       .scanfiAccessURL, "), then re-authenticate with googledrive::drive_auth()"
     ),
     if (!is.null(urlArg)) {

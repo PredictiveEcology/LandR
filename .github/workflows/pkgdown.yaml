@@ -1,58 +1,41 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+## Thin caller -- the runner, dependency resolution, site build and gh-pages
+## deploy all live in PredictiveEcology/actions. This file says when to run and
+## what this package needs on top of the org defaults.
+##
+## Pinned @main deliberately: tags freeze and rot (v0.1/v0.2 kept the ubuntugis
+## PPA for months after the workflows rejected it). The actions repo gates
+## merges with its own self-test CI.
+##
+## Replaces a 58-line workflow derived from the r-lib/actions example. The
+## reusable workflow already supplies any::pkgdown, local::. and
+## `needs: website`, so only LandR's own extras are named below.
+
+name: pkgdown
+
 on:
   push:
-    branches: [main, master]
+    ## `master` dropped: this repo's default branch is `main` and no `master`
+    ## branch exists, so that trigger could never fire.
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
   release:
     types: [published]
   workflow_dispatch:
 
-name: pkgdown
-
 jobs:
   pkgdown:
-    runs-on: ubuntu-latest
-    # Only restrict concurrency for non-PR jobs
-    concurrency:
-      group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
-    env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: r-lib/actions/setup-pandoc@v2
-
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          extra-repositories: 'https://PredictiveEcology.r-universe.dev/'
-          use-public-rspm: false
-
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: |
-            any::pkgdown
-            any::sf
-            any::XML
-            local::.
-            BioSIM=?ignore
-          needs: website
-
-      - name: Install additional package dependencies
-        run: |
-          pak::pkg_install("remotes")
-          remotes::install_github("RNCan/BioSimClient_R")
-        shell: Rscript {0}
-
-      - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
-        shell: Rscript {0}
-
-      - name: Deploy to GitHub pages 🚀
-        if: github.event_name != 'pull_request'
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          clean: false
-          branch: gh-pages
-          folder: docs
+    uses: PredictiveEcology/actions/.github/workflows/pkgdown.yaml@main
+    with:
+      ## sf and XML are needed to build the vignettes/reference. BioSIM is
+      ## marked `?ignore` so pak does not try to resolve it from a repository --
+      ## it is installed from GitHub in post-install below.
+      extra-packages: |
+        any::sf
+        any::XML
+        BioSIM=?ignore
+      ## BioSimClient_R is GitHub-only, so it cannot come through
+      ## setup-r-dependencies. This is exactly what post-install is for.
+      post-install: |
+        pak::pkg_install("remotes")
+        remotes::install_github("RNCan/BioSimClient_R")

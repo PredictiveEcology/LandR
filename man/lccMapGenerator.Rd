@@ -9,7 +9,7 @@ lccMapGenerator(
   pixelGroupMap,
   lccTable = NULL,
   deciduousCoverDiscount = 0.8418911,
-  vegLeadingProportion = 0.75,
+  vegLeadingProportion = mixedwoodProp(),
   decidousSpp = NULL,
   rstLCC
 )
@@ -32,8 +32,15 @@ E.g., 30\%\% cover of hardwoods might translate to 20\%\% biomass of hardwoods.
 \strong{NB:} the default \code{deciduousCoverDiscount} value was estimated from NWT data in March 2020,
 and may not be useful for other study areas.}
 
-\item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
-threshold a species needs to pass to be considered "leading".}
+\item{vegLeadingProportion}{Numeric between 0-1, the share of a stand above which it stops
+being called mixed. Which share depends on what is being asked, and the two
+questions have their own options (see \link{leadingProportions}):
+with \code{mixedType = 2} it is the whole broadleaf group against the whole conifer
+group, and defaults to \code{mixedwoodProp()} (\code{LandR.mixedwoodProp}, the NTEMS/EOSD
+and NFI value: coniferous or broadleaf at 75\% or more of total basal area,
+mixed wood when neither reaches it); otherwise it is one species' share and
+defaults to \code{leadingSpeciesProp()} (\code{LandR.leadingSpeciesProp}, which takes the
+mixedwood value unless it is set). Deciduous conifers count as conifers.}
 
 \item{decidousSpp}{character vector of deciduous species names. If not supplied, will
 attempt to match deciduous species names in \link{sppEquivalencies_CA} to those in \code{cohortData}.}

@@ -8,8 +8,8 @@ Description: Utilities for 'LandR' suite of landscape simulation models.
 URL: 
     https://landr.predictiveecology.org,
     https://github.com/PredictiveEcology/LandR
-Date: 2026-08-23
-Version: 1.2.0.9010
+Date: 2026-09-18
+Version: 1.2.0.9027
 Authors@R: c(
     person("Eliot J B", "McIntire", email = "eliot.mcintire@nrcan-rncan.gc.ca",
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6914-8316")),
@@ -61,6 +61,7 @@ Suggests:
     bbmle, 
     biomod2 (>= 4.2-2),
     BioSIM (>= 1.1.0),
+    codetools,
     covr,
     curl (>= 6.4.0),
     digest,
@@ -110,10 +111,6 @@ BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
 Collate: 
-    'LANDIS-II-tables.R'
-    'LandR-package.R'
-    'RcppExports.R'
-    'SummarizeCanadianForestRasters.R'
     'assertions.R'
     'biomodWrappers.R'
     'biosim.R'
@@ -122,17 +119,24 @@ Collate:
     'convertUnwantedLCC2.R'
     'dem.R'
     'disturbances.R'
+    'driveFallback.R'
     'ecoregions.R'
     'ecozones.R'
     'fireSeverity.R'
+    'forestLand.R'
     'imports.R'
+    'LANDIS-II-tables.R'
+    'LandR-package.R'
     'lccMapGenerator.R'
+    'leadingProportions.R'
+    'legacyToTo.R'
     'light-shade.R'
     'makeDummyInputs.R'
     'maps.R'
     'maxBestimation.R'
     'misc.R'
     'nullClimate.R'
+    'options.R'
     'overlayLCCs.R'
     'partitionBiomass.R'
     'plot-summaries.R'
@@ -141,8 +145,11 @@ Collate:
     'prepEcoregions.R'
     'prepInputObjects.R'
     'prepInputs_NTEMS.R'
+    'prepInputs_SCANFI_structure.R'
     'prepSpeciesLayers.R'
+    'RcppExports.R'
     'scanfi-access.R'
+    'scanfiMirror.R'
     'seedDispersalLANDIS.R'
     'serotiny-resprouting.R'
     'speciesPresentFromKNN.R'
@@ -150,8 +157,11 @@ Collate:
     'sppEquivalencies_CA.R'
     'sppHarmonize.R'
     'studyArea.R'
+    'subsetDataSize.R'
+    'SummarizeCanadianForestRasters.R'
     'terra-raster-utils.R'
     'vignette-artifacts.R'
+    'wetland.R'
     'wildfire.R'
     'zzz.R'
 Roxygen: list(markdown = TRUE)

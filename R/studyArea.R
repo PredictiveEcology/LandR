@@ -59,8 +59,7 @@ studyAreaEco <- function(studyArea = NULL, destinationPath = tempdir(),
     url = url,
     destinationPath = destinationPath,
     projectTo = studyArea,
-    fun = "sf::st_read",
-    overwrite = TRUE
+    fun = "sf::st_read"
   )
 
   if (!is.null(studyArea)) {

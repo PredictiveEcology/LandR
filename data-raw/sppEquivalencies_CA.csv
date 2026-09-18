@@ -57,7 +57,7 @@ betupapy,BETU.PAP,Betu_pap,Betu_Pap,Betu papy,Betula papyrifera,Pa birch,Paper b
 ,,Cerc_can,,Cerci cana,Cercis canadensis,E redbud,Eastern redbud,Eastern redbud leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Red,,,CERC_CAN,1500,other hardwood code,,,,
 ,,Cham_law,,Cham laws,Chamaecyparis lawsoniana,PO cedar,Port Orford cedar,Port Orford cedar leading,,,FALSE,Conifer,,,CedrMplOther,,,,,,,,CHAM_LAW,1000,generic cham code,,,,
 chamnoot,CHAM.NOO,Cham_noo,Cham_Noo,Cham noot,Chamaecyparis nootkatensis,Yl ced,Yellow cedar,Yellow cedar leading,Also known as yellow cypress,,FALSE,Conifer,yellow cedar,,CedrMplOther,Yc,,,,,,,CHAM_NOO,1001,,11,57,CHAM_NOO,#FFD300
-,,,,,Cornus alternifolia,Pag dgwood,Pagoda dogwood,Pagoda dogwood leading,,,TRUE,Deciduous,pagoda dogwood,,CedrMplOther,,,,,,COA,,CORN_ALT,1500,other hardwood code,,,,
+,,Corn_alt,,,Cornus alternifolia,Pag dgwood,Pagoda dogwood,Pagoda dogwood leading,,,TRUE,Deciduous,pagoda dogwood,,CedrMplOther,,,,,,COA,,CORN_ALT,1500,other hardwood code,,,,
 ,,Corn_nut,,Corn nutt,Cornus nuttallii,Pa dogw,Pacific dogwood,Pacific dogwood leading,Also known as western dogwood,,TRUE,Deciduous,,,CedrMplOther,Gp,,,,,,,CORN_NUT,1500,other hardwood code,,140,,
 ,,Crat_spp,Crat_Spp,Crat spp,Crataegus spp,Hawthorn,Hawthorn,Hawthorn leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Ht,CRA,,CRAT_SP,3910,,,163,,
 fagugran,FAGU.GRA,Fagu_gra,Fagu_Gra,Fagu gran,Fagus grandifolia,Am beech,American beech,American beech leading,,Fagu_Gra,TRUE,Deciduous,beech,,CedrMplOther,,,,,Be,HEG,Be,FAGU_GRA,2000,,,108,FAGU_GRA,
@@ -145,7 +145,7 @@ poputrem,POPU.TRE,Popu_tre,Popu_Tre,Popu trem,Populus tremuloides,Tr aspen,Tremb
 ,,Prun_vir,Prun_Vir,Prun virg,Prunus virginiana,Chk cherry,Chokecherry,Chokecherry leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,C,PRV,PRUVI,PRUN_VIR,2804,,,134,,
 pseumenz,PSEU.MEN,Pseu_men,Pseu_Men,Pseu menz,Pseudotsuga menziesii,Doug-fir,Douglas-fir,Douglas-fir leading,,,FALSE,Conifer,douglas-fir,,DgFrPoPine,Fd,Fd,,,,,,PSEU_MEN,500,,30,41,PSEU_MEN,#720055
 pseumenz,PSEU.MEN,Pseu_men,Pseu_Men_Gla,Pseu meng,Pseudotsuga menziesii var. glauca,Int doug-fir,Interior douglas-fir,Interior douglas-fir leading,,,FALSE,Conifer,douglas-fir,C7,DgFrPoPine,Fdi,,,,,,,PSEU_MEN_GLA,500,,30,41,PSEU_MEN_GLA,#720055
-pseumenz,PSEU.MEN,Pseu_men,Pseu_Men_Men,Pseu menm,Pseudotsuga menziesii var. menziesii,Co doug-fir,Coastal douglas-fir,Coastal douglas-fir leading,,,FALSE,Conifer,douglas-fir,,CedrMplOther,Fdc,,,,,,,PSEU_MEN_MEN,500,,30,41,PSEU_MEN_MEN,#720055
+pseumenz,PSEU.MEN,Pseu_men,Pseu_Men_Men,Pseu menm,Pseudotsuga menziesii var. menziesii,Co doug-fir,Coastal douglas-fir,Coastal douglas-fir leading,,,FALSE,Conifer,douglas-fir,,DgFrPoPine,Fdc,,,,,,,PSEU_MEN_MEN,500,,30,41,PSEU_MEN_MEN,#720055
 ,,Pyru_com,,Pyru comm,Pyrus communis,Pear,Common pear,Common pear leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,,,PYRU_COM,1500,other hardwood code,,,,
 ,,Quer_alb,Quer_Alb,Quer alba,Quercus alba,Wh oak,White oak,White oak leading,,,TRUE,Deciduous,white oak,,CedrMplOther,,,,,Ow,CHB,,QUER_ALB,2101,,,110,,
 ,,Quer_bic,Quer_Bic,Quer bico,Quercus bicolor,Sw Wh oak,Swamp white oak,Swamp white oak leading,swamp white oak hybridizes with bur oak,,TRUE,Deciduous,bur oak,,CedrMplOther,,,,,Osw,CHE,,QUER_BIC,2102,,,111,,
@@ -192,10 +192,10 @@ tsugmert,TSUG.MER,Tsug_mer,Tsug_Mer,Tsug merx,Tsuga mertensiana,Mtn hemlock,Moun
 ,,Tsug_mer,Tsug_Mer_Het,Tsug mert,Tsuga mertensiana x heterophylla,WxMtn hemlock,Western x mountain hemlock,Western x mountain hemlock leading,,,FALSE,Conifer,mountain hemlock,,CedrMplOther,Hxm,,,,,,,,404,,36,40,,#886C00
 ,,Tsug_spp,Tsug_Spp,Tsug spp,Tsuga spp.,Hemlock,Hemlock,Hemlock leading,,Tsug_Spp,FALSE,Conifer,,,CedrMplOther,H,,,,,,,TSUG_SP,400,,,36,,
 ,,Ulmu_ame,Ulmu_Ame,Ulmu amer,Ulmus americana,Am elm,American elm,American elm leading,,,TRUE,Deciduous,white elm,,CedrMplOther,,,WE,EL,Ew,ORA,,ULMU_AME,2201,,37,122,,#766C95
-,,Ulmu_pum,Ulmu_Rub,Ulmu pumi,Ulmus pumila,Sib elm,Siberian elm,Siberian elm leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,,,ULMU_PUM,2200,generic elm code,,,,
-,,Ulmu_rub,Ulmu_Spp,Ulmu rubr,Ulmus rubra,Slip elm,Slippery elm,Slippery elm leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Er,ORR,,ULMU_RUB,2202,,,123,,
-,,Ulmu_spp,Ulmu_Tho,Ulmu spp,Ulmus spp.,Elm,Elm,Elm leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,,E,ULMU_SPP,2200,,,121,,
-,,,,Ulmu thom,Ulmus thomasii,Rock elm,Rock elm,Rock elm leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Eu,ORT,,ULMU_THO,2203,,,124,,
+,,Ulmu_pum,,Ulmu pumi,Ulmus pumila,Sib elm,Siberian elm,Siberian elm leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,,,ULMU_PUM,2200,generic elm code,,,,
+,,Ulmu_rub,Ulmu_Rub,Ulmu rubr,Ulmus rubra,Slip elm,Slippery elm,Slippery elm leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Er,ORR,,ULMU_RUB,2202,,,123,,
+,,Ulmu_spp,Ulmu_Spp,Ulmu spp,Ulmus spp.,Elm,Elm,Elm leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,,E,ULMU_SPP,2200,,,121,,
+,,Ulmu_tho,Ulmu_Tho,Ulmu thom,Ulmus thomasii,Rock elm,Rock elm,Rock elm leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,Eu,ORT,,ULMU_THO,2203,,,124,,
 ,,,Needleleaf_Spp,Soft unkn,,Conif,Coniferous,Coniferous leading,,,FALSE,Conifer,,,CedrMplOther,XC,,,,,,UK,,1100,,,194,,
 ,,,Broadleaf_Spp,Hard unkn,,Decid,Deciduous,Deciduous leading,,,TRUE,Deciduous,,,CedrMplOther,XH,,,,,,UK,,1500,,,195,,
 ,,,,Nonc hard,,Decid,Deciduous,Deciduous leading,,,TRUE,Deciduous,,,CedrMplOther,,,,,,,,,,,,195,,

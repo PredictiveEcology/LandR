@@ -38,7 +38,8 @@ test_that(".withSCANFIAccess explains an access failure and keeps the original e
   expect_match(flat, "Could not download the SCANFI stand age map (V2 2020)", fixed = TRUE)
   expect_match(flat, "permissions problem rather than a broken link", fixed = TRUE)
 
-  ## the three ways out
+  ## the four ways out
+  expect_match(flat, "getOption(\"LandR.scanfiMirror\")", fixed = TRUE)
   expect_match(flat, "https://opendata.nfis.org/", fixed = TRUE)
   expect_match(flat, "googledrive::drive_auth()", fixed = TRUE)
   expect_match(flat, "`ageURL`", fixed = TRUE)
@@ -54,6 +55,8 @@ test_that(".withSCANFIAccess omits the bullets that do not apply", {
     error = function(e) conditionMessage(e)
   )
 
+  ## the mirror and request-access bullets always apply; the other two do not
+  expect_match(err, "LandR.scanfiMirror", fixed = TRUE)
   expect_match(err, "https://opendata.nfis.org/", fixed = TRUE)
   expect_false(grepl("dataSource =", err, fixed = TRUE))
   expect_false(grepl("pass it via", err, fixed = TRUE))

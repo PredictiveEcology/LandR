@@ -26,7 +26,8 @@ utils::globalVariables(c(
 #'
 #' @author Eliot McIntire
 #' @export
-plotVTM <- function(speciesStack = NULL, vtm = NULL, vegLeadingProportion = 0.8,
+plotVTM <- function(speciesStack = NULL, vtm = NULL,
+                    vegLeadingProportion = mixedwoodProp(),
                     sppEquiv, sppEquivCol, colors, title = "Leading vegetation types") {
   stopifnot(requireNamespace("ggpubr", quietly = TRUE))
 
@@ -223,7 +224,7 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette = "Accent")
       nrow(sppEquiv[colorHex == "", ]) == 0 &
         !any(is.na(sppEquiv$colorHex)) &
         c(is.null(newVals) | length(newVals) < 2) &
-        length(unique(sppEquiv[[sppEquivCol]] <= length(unique(sppEquiv$colorHex))))
+        length(unique(sppEquiv[[sppEquivCol]])) <= length(unique(sppEquiv$colorHex))
     ) {
       standardizedColors <- TRUE
     }
@@ -232,7 +233,7 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette = "Accent")
   if (standardizedColors) {
     sppColors <- sppEquiv$colorHex
     names(sppColors) <- sppEquiv[[sppEquivCol]]
-    if (length(newVals == 1)) {
+    if (length(newVals) == 1) {
       mediumGray <- "#AAA7AD"
       names(mediumGray) <- newVals
       sppColors <- c(sppColors, mediumGray)

@@ -276,9 +276,9 @@ speciesTableUpdate <- function(species, speciesTable, sppEquiv = NULL, sppEquivC
   }
 
   if (is.null(sppEquiv)) {
-    sppEquiv <- data.table(
-      utils::data("sppEquivalencies_CA", package = "LandR", envir = environment())
-    )
+    ## `data("x")` returns the *name* of the dataset it loaded, so this must `get()` it;
+    ## wrapping the name in a data.table gave a one-column table of "sppEquivalencies_CA".
+    sppEquiv <- get(utils::data("sppEquivalencies_CA", package = "LandR", envir = environment()))
   }
 
   if (is.null(sppEquivCol)) {

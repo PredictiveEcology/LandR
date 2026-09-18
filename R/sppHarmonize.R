@@ -42,11 +42,10 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
     }
   }
 
-  # Catch both cases of sppEquiv is NULL or is an object with NROW 0 e.g., NULL data.table
+  ## Only a missing table falls back to the full equivalencies. A supplied table with zero
+  ## rows is a statement -- "no tree species here" (e.g. a non-forested study area) -- and
+  ## must not be silently replaced by all 195 species.
   if (is.null(sppEquiv)) {
-    sppEquiv <- data.table()
-  }
-  if (NROW(sppEquiv) == 0) {
     ## note that this step MUST come after the previous
     sppEquiv <- LandR::sppEquivalencies_CA
   }

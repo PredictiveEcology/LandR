@@ -15,10 +15,10 @@ sppHarmonize(
 )
 }
 \arguments{
-\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
-See \code{data("sppEquivalencies_CA", "LandR")}.
+\item{sppEquiv}{table with species name equivalencies between naming conventions
+(see \link{sppEquivalencies_CA}, also \code{?sppEquiv}).
 For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
+If not provided and \code{mixedType == 2}, will attempt to use \code{LandR::sppEquivalencies_CA}.}
 
 \item{sppNameVector}{A character vector of species to use. These species must all
 be from one naming convention, i.e., from one column in the \code{sppEquiv}.}
@@ -36,8 +36,15 @@ when a mixed forest type is supported  (see \code{vegLeadingProportion}
 parameter in \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} for details on mixed
 forest types).}
 
-\item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
-threshold a species needs to pass to be considered "leading".}
+\item{vegLeadingProportion}{Numeric between 0-1, the share of a stand above which it stops
+being called mixed. Which share depends on what is being asked, and the two
+questions have their own options (see \link{leadingProportions}):
+with \code{mixedType = 2} it is the whole broadleaf group against the whole conifer
+group, and defaults to \code{mixedwoodProp()} (\code{LandR.mixedwoodProp}, the NTEMS/EOSD
+and NFI value: coniferous or broadleaf at 75\% or more of total basal area,
+mixed wood when neither reaches it); otherwise it is one species' share and
+defaults to \code{leadingSpeciesProp()} (\code{LandR.leadingSpeciesProp}, which takes the
+mixedwood value unless it is set). Deciduous conifers count as conifers.}
 
 \item{studyArea}{A \code{SpatVector} or \code{sf} polygons object used as the principle study region,
 passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
