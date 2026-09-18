@@ -501,9 +501,11 @@ prepInputs_SCANFI_LCC_FAO <- function(
       src <- .scanfiLCCFAOSource(y, dataVersion)
       prepInputs(
         url = src$url, targetFile = src$targetFile,
-        method = resampleMethod, destinationPath = dots$destinationPath, to = lcc
+        method = resampleMethod, destinationPath = dots$destinationPath,
+        to = lcc, maskTo = NA ## aligned, not masked: see .forestLandFor()
       )
     },
+    lccSource = paste("SCANFI", dataVersion),
     destinationPath = dots$destinationPath,
     resampleMethod = resampleMethod
   )

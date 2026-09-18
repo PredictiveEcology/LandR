@@ -1,5 +1,18 @@
 # LandR (development version)
 
+* **Forest-land inputs are prepared once per study area.** `prepInputs_SCANFI_LCC_FAO()` and
+  `prepInputs_NTEMS_LCC_FAO()` prepare their forest-land inputs -- the FAO forest layer and the
+  land cover of each of `forestLandYears` -- once per target geometry, instead of on every call. `fireSense` calls them once per dataYear on one study area, so
+  the same inputs were prepared five times: in production the FAO layer alone cost ~12 min per call,
+  and the whole forest-land step ~2 h per study area. Each input is now `Cache()`d with
+  `useCache = "always"` (new in `reproducible` 3.2.1.9037), so it is reused even with Cache off, as
+  under `spades.useCache = "eventsOnly"`, and inside a `Cache()` that is off. The key is the land
+  cover's geometry (crs, extent, dimensions), not its values, which differ by year; so the inputs
+  are aligned with it but no longer masked by it (its `NA`s were already excluded when the
+  forest-land codes are applied), and results are unchanged. There is no switch: to recompute,
+  delete the `forestLand_FAO` / `forestLand_landCover` cache entries. `prepInputs_FAO_forest()`
+  gains `...`, passed to `prepInputs()`. Needs `reproducible (>= 3.2.1.9037)`.
+
 * **New `prepInputs_SCANFI_structure()`**: fetches SCANFI's canopy height and canopy closure
   layers (V2, 1985-2025 in 5-year steps), the two structural attributes published alongside the
   biomass layer `prepRawBiomassMap()` already serves. They say how much structure a pixel carries

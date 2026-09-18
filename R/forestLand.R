@@ -100,13 +100,14 @@ forestLandMask <- function(lccList = list(), faoRas = NULL,
 #' @param to Passed to `prepInputs`, to align the layer with the land cover.
 #' @param destinationPath Passed to `prepInputs`.
 #' @param method Resampling method passed to `prepInputs`.
+#' @param ... Other arguments passed to `prepInputs`, e.g. `maskTo = NA` to align without masking.
 #'
 #' @return a `SpatRaster` of FAO forest codes: 0 non-forest, 1 forest, 2 forest land whose
 #'   trees were removed by fire or harvest since 1984.
 #'
 #' @export
 prepInputs_FAO_forest <- function(year = 2022, to = NULL, destinationPath = NULL,
-                                  method = "near") {
+                                  method = "near", ...) {
   if (!(year %in% .faoForestYears)) {
     stop("The FAO forest layer is published for ", paste(.faoForestYears, collapse = " and "),
          " only; got ", year, ".")
@@ -115,7 +116,8 @@ prepInputs_FAO_forest <- function(year = 2022, to = NULL, destinationPath = NULL
     url = paste0("https://opendata.nfis.org/downloads/forest_change/CA_FAO_forest_", year, ".zip"),
     method = method,
     destinationPath = destinationPath,
-    to = to
+    to = to,
+    ...
   )
 }
 
@@ -146,33 +148,51 @@ prepInputs_FAO_forest <- function(year = 2022, to = NULL, destinationPath = NULL
 #'   `"both"` or `"lccYears"`.
 #' @param faoYear The year of the FAO layer, when one is used.
 #' @param lccFor A function of one argument (a year) returning that year's land cover,
-#'   aligned with `lcc`. Each source passes its own.
+#'   aligned with `lcc` but not masked by it (`maskTo = NA`). Each source passes its own.
+#' @param lccSource A name for the land-cover source `lccFor` reads, e.g. `"SCANFI V2"`. It is
+#'   part of the cache key of each year's layer, so it must differ between sources.
 #' @param treedClasses Passed to [forestLandMask()].
 #' @param destinationPath Passed to `prepInputs`.
 #' @param resampleMethod Passed to `prepInputs`.
+#'
+#' @details
+#' Each forest-land input is `Cache()`d with `useCache = "always"`, so a caller that prepares
+#' several years of one study area, as `fireSense` does, prepares each input once; `"always"`
+#' holds even when Cache is otherwise off, e.g. under `spades.useCache = "eventsOnly"`, and when
+#' the call is nested in a `Cache()` that is. The inputs are aligned with `lcc` but not masked by
+#' it, so they depend on its geometry and not its values; the key is that geometry (crs, extent,
+#' dimensions), never `lcc` itself. `lcc`'s own `NA`s are excluded by [.applyForestLand()].
+#' There is no switch; delete the entries (`reproducible::clearCache()`) to recompute.
 #'
 #' @return A `SpatRaster` mask, as [forestLandMask()].
 #'
 #' @keywords internal
 .forestLandFor <- function(lcc, forestLandFrom = c("both", "fao", "lccYears"),
-                           forestLandYears, faoYear, lccFor,
+                           forestLandYears, faoYear, lccFor, lccSource,
                            treedClasses = .treedLCCClasses,
                            destinationPath = NULL, resampleMethod = "near") {
   forestLandFrom <- match.arg(forestLandFrom)
+  ## the key: `lcc`'s geometry, never its values, which differ between years
+  geometry <- list(crs = terra::crs(lcc), ext = as.vector(terra::ext(lcc)), dim = dim(lcc)[1:2])
 
   lccList <- list()
   if (forestLandFrom %in% c("both", "lccYears")) {
     lccList <- lapply(forestLandYears, function(y) {
       message("  ... forest land: land cover for ", y)
-      lccFor(y)
+      Cache(lccFor(y), useCache = "always", .functionName = "forestLand_landCover",
+            .cacheExtra = list(geometry, lccSource, resampleMethod))
     })
   }
 
   faoRas <- NULL
   if (forestLandFrom %in% c("both", "fao")) {
     message("  ... forest land: FAO forest ", faoYear)
-    faoRas <- prepInputs_FAO_forest(year = faoYear, to = lcc,
-                                    destinationPath = destinationPath, method = resampleMethod)
+    faoRas <- Cache(
+      prepInputs_FAO_forest(year = faoYear, to = lcc, maskTo = NA,
+                            destinationPath = destinationPath, method = resampleMethod),
+      useCache = "always", omitArgs = "to", .functionName = "forestLand_FAO",
+      .cacheExtra = geometry
+    )
   }
 
   forestLandMask(lccList = lccList, faoRas = faoRas, treedClasses = treedClasses)
