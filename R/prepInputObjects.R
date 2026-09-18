@@ -508,7 +508,6 @@ prepInputsStandAgeMap <- function(
           datatype = datatype,
           method = method,
           fun = ageFun,
-          datatype = datatype,
           to = rasterToMatch,
           ...
         ) |> Cache(.functionName = "prepInputs_ageMapFromSCANFI"),
@@ -619,7 +618,6 @@ prepInputsStandAgeMap <- function(
           datatype = datatype,
           method = method,
           fun = ageFun,
-          datatype = datatype,
           to = rasterToMatch,
           ...
         ) |> Cache(.functionName = "prepInputs_ageMapFromSCANFI"),

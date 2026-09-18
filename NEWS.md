@@ -329,6 +329,13 @@
 
 ## Bug fixes
 
+* `prepInputsStandAgeMap()` passed `datatype` to `prepInputs()` twice in both of its SCANFI
+  branches. `datatype` is not a formal of `prepInputs()`, so both copies travelled in `...`
+  and R raised nothing -- but any function further down that chain taking `datatype` as a
+  named argument would have failed with "formal argument \"datatype\" matched by multiple
+  actual arguments", and the duplicate entered the `Cache()` key. The non-SCANFI branch
+  already passed it once.
+
 * `prepSpeciesLayers_SCANFI()` and `loadSCANFISpeciesLayers()` read their legacy `rasterToMatch` /
   `studyArea` arguments out of `...` exactly, instead of with `$`. `$` on a list partial-matches, so
   a `studyAreaName` passed through `...` — as `Biomass_speciesData` does — was returned for
