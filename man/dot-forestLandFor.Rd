@@ -10,6 +10,7 @@
   forestLandYears,
   faoYear,
   lccFor,
+  lccSource,
   treedClasses = .treedLCCClasses,
   destinationPath = NULL,
   resampleMethod = "near"
@@ -27,7 +28,10 @@ aligned to it.}
 \item{faoYear}{The year of the FAO layer, when one is used.}
 
 \item{lccFor}{A function of one argument (a year) returning that year's land cover,
-aligned with \code{lcc}. Each source passes its own.}
+aligned with \code{lcc} but not masked by it (\code{maskTo = NA}). Each source passes its own.}
+
+\item{lccSource}{A name for the land-cover source \code{lccFor} reads, e.g. \code{"SCANFI V2"}. It is
+part of the cache key of each year's layer, so it must differ between sources.}
 
 \item{treedClasses}{Passed to \code{\link[=forestLandMask]{forestLandMask()}}.}
 
@@ -40,5 +44,14 @@ A \code{SpatRaster} mask, as \code{\link[=forestLandMask]{forestLandMask()}}.
 }
 \description{
 Build the forest-land mask for one of the land-cover sources
+}
+\details{
+Each forest-land input is \code{Cache()}d with \code{useCache = "always"}, so a caller that prepares
+several years of one study area, as \code{fireSense} does, prepares each input once; \code{"always"}
+holds even when Cache is otherwise off, e.g. under \code{spades.useCache = "eventsOnly"}, and when
+the call is nested in a \code{Cache()} that is. The inputs are aligned with \code{lcc} but not masked by
+it, so they depend on its geometry and not its values; the key is that geometry (crs, extent,
+dimensions), never \code{lcc} itself. \code{lcc}'s own \code{NA}s are excluded by \code{\link[=.applyForestLand]{.applyForestLand()}}.
+There is no switch; delete the entries (\code{reproducible::clearCache()}) to recompute.
 }
 \keyword{internal}
