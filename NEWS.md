@@ -1,24 +1,3 @@
-# LandR 1.2.0.9026
-
-## New features
-
-* `assertPostFireDist()` ported from the `LIM` branch, where it was the only thing
-  `Biomass_regenerationPM` still needed from `LIM`. The module called it unguarded, so with
-  `reqdPkgs` repointed at `development` the module failed with "could not find function
-  assertPostFireDist". Its only dependency, `addPixels2CohortData()`, is already here.
-
-# LandR 1.2.0.9025
-
-## Bug fixes
-
-* `prepSpeciesLayers_SCANFI()` and `loadSCANFISpeciesLayers()` read their legacy `rasterToMatch` /
-  `studyArea` arguments out of `...` exactly, instead of with `$`. `$` on a list partial-matches, so
-  a `studyAreaName` passed through `...` — as `Biomass_speciesData` does — was returned for
-  `dots$studyArea`. `.legacyToTo()` then took its studyArea-only branch and set `cropTo` and
-  `maskTo` to that character string, so the call died in `postProcessToAssertions()` with
-  "cropTo must be a Raster*, Spat*, sf or Spatial object". The same hazard applied to
-  `rasterToMatchLarge` prefix-matching `rasterToMatch`.
-
 # LandR (development version)
 
 * **New `prepInputs_SCANFI_structure()`**: fetches SCANFI's canopy height and canopy closure
@@ -194,6 +173,10 @@
 
 ## New features
 
+* `assertPostFireDist()` ported from the `LIM` branch, where it was the only thing
+  `Biomass_regenerationPM` still needed from `LIM`. The module called it unguarded, so with
+  `reqdPkgs` repointed at `development` the module failed with "could not find function
+  assertPostFireDist". Its only dependency, `addPixels2CohortData()`, is already here.
 * add functions to visualize vegetation type transitions;
 * new function `cohortDefinitionCols()` to ensure consistent cohort definitions;
 * new function `lccMapGenerator()` to calculate landcover classes from `cohortData` and `pixelGroupMap`;
@@ -223,6 +206,18 @@
   multi-hour regeneration of a table that is still valid;
 
 ## Enhancements
+
+* SCANFI download failures now explain themselves (closes #163). SCANFI is distributed
+  through a Google Drive folder shared with collaborators, so a user without access saw only
+  `reproducible`'s generic `Could not access the Google Drive resource ... (404) Not Found`.
+  That reads like a dead link and invites a hunt for a public mirror that does not exist.
+  `prepInputsStandAgeMap()`, `prepRawBiomassMap()`, `loadSCANFISpeciesLayers()`,
+  `convert_SCANFI_LCC_codes()` and `prepInputs_SCANFI_LCC_FAO()` now report it as a
+  permissions problem and name the ways out -- first checking that the mirror is enabled
+  (`LandR.scanfiMirror`), which serves SCANFI v2 with no Google login and is the likeliest
+  fix; then requesting access at <https://opendata.nfis.org/>; supplying your own copy; or
+  `dataSource = "KNN"` / `"NTEMS"` where the function offers them. The underlying error is
+  still shown in full, and failures that are *not* access problems pass through untouched;
 
 * `convertUnwantedLCC()` no longer uses the iterative `spread2()` search, whose run time grew
   with the square of the radius of the largest contiguous block of `classesToReplace`. On
@@ -340,6 +335,14 @@
   named argument would have failed with "formal argument \"datatype\" matched by multiple
   actual arguments", and the duplicate entered the `Cache()` key. The non-SCANFI branch
   already passed it once.
+
+* `prepSpeciesLayers_SCANFI()` and `loadSCANFISpeciesLayers()` read their legacy `rasterToMatch` /
+  `studyArea` arguments out of `...` exactly, instead of with `$`. `$` on a list partial-matches, so
+  a `studyAreaName` passed through `...` — as `Biomass_speciesData` does — was returned for
+  `dots$studyArea`. `.legacyToTo()` then took its studyArea-only branch and set `cropTo` and
+  `maskTo` to that character string, so the call died in `postProcessToAssertions()` with
+  "cropTo must be a Raster*, Spat*, sf or Spatial object". The same hazard applied to
+  `rasterToMatchLarge` prefix-matching `rasterToMatch`.
 
 * `prepSpeciesLayers_SCANFI()`: the Google Drive fallback (taken when `RCurl::url.exists()`
   fails, e.g. during a network blip) referenced `year`, which is not a formal, so it

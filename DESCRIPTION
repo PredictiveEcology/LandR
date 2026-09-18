@@ -148,6 +148,7 @@ Collate:
     'prepInputs_SCANFI_structure.R'
     'prepSpeciesLayers.R'
     'RcppExports.R'
+    'scanfi-access.R'
     'scanfiMirror.R'
     'seedDispersalLANDIS.R'
     'serotiny-resprouting.R'
