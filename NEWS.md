@@ -1,5 +1,11 @@
 # LandR (development version)
 
+* **New `prepInputs_SCANFI_structure()`**: fetches SCANFI's canopy height and canopy closure
+  layers (V2, 1985-2025 in 5-year steps), the two structural attributes published alongside the
+  biomass layer `prepRawBiomassMap()` already serves. They say how much structure a pixel carries
+  independent of which species carry it, so they can be used as controls when comparing stands:
+  at equal height and closure a biomass difference is composition, not site quality.
+
 * **Two leading/mixedwood thresholds replace three options.** `LandR.mixedwoodProp` (0.75) is the
   GROUP threshold -- all conifers, or all broadleaves -- and is the definition the national
   products use (NTEMS/EOSD, NFI photo plots: 75% of total basal area or volume).
