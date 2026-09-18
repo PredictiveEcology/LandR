@@ -21,13 +21,6 @@
 
 # LandR (development version)
 
-* `prepInputsStandAgeMap()` passed `datatype` to `prepInputs()` twice in both of its SCANFI
-  branches. `datatype` is not a formal of `prepInputs()`, so both copies travelled in `...`
-  and R raised nothing -- but any function further down that chain taking `datatype` as a
-  named argument would have failed with "formal argument \"datatype\" matched by multiple
-  actual arguments", and the duplicate entered the `Cache()` key. The non-SCANFI branch
-  already passed it once.
-
 * **New `prepInputs_SCANFI_structure()`**: fetches SCANFI's canopy height and canopy closure
   layers (V2, 1985-2025 in 5-year steps), the two structural attributes published alongside the
   biomass layer `prepRawBiomassMap()` already serves. They say how much structure a pixel carries
@@ -340,6 +333,13 @@
   test, still skipped on CI, checks the upstream source is reachable;
 
 ## Bug fixes
+
+* `prepInputsStandAgeMap()` passed `datatype` to `prepInputs()` twice in both of its SCANFI
+  branches. `datatype` is not a formal of `prepInputs()`, so both copies travelled in `...`
+  and R raised nothing -- but any function further down that chain taking `datatype` as a
+  named argument would have failed with "formal argument \"datatype\" matched by multiple
+  actual arguments", and the duplicate entered the `Cache()` key. The non-SCANFI branch
+  already passed it once.
 
 * `prepSpeciesLayers_SCANFI()`: the Google Drive fallback (taken when `RCurl::url.exists()`
   fails, e.g. during a network blip) referenced `year`, which is not a formal, so it
