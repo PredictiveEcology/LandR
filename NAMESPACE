@@ -394,6 +394,7 @@ importFrom(utils,
   getFromNamespace,
   head,
   install.packages,
+  removeSource,
   str,
   tail,
   untar

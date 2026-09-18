@@ -21,7 +21,8 @@
 #' | alignment  | yes             | no          | `rasterToMatch` |
 #' | mask       | no**            | yes         | `studyArea`     |
 #'
-#' \* overridden by `useSAcrs`. \*\* masks with `rasterToMatch`'s own `NA`s if `maskWithRTM`.
+#' Notes: `*` overridden by `useSAcrs`; `**` masks with `rasterToMatch`'s own `NA`s if
+#' `maskWithRTM`.
 #'
 #' So: a `rasterToMatch` on its own defines every geometry property and is simply `to`; a
 #' `studyArea` on its own crops and masks but does **not** reproject; and when both are given
