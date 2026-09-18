@@ -1,3 +1,12 @@
+# LandR 1.2.0.9026
+
+## New features
+
+* `assertPostFireDist()` ported from the `LIM` branch, where it was the only thing
+  `Biomass_regenerationPM` still needed from `LIM`. The module called it unguarded, so with
+  `reqdPkgs` repointed at `development` the module failed with "could not find function
+  assertPostFireDist". Its only dependency, `addPixels2CohortData()`, is already here.
+
 # LandR 1.2.0.9025
 
 ## Bug fixes
