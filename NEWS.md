@@ -346,6 +346,11 @@
 
 ## Bug fixes
 
+* Help pages no longer show stray backslashes where an asterisk was intended. `?BioSIM_getMPBSLR`
+  rendered the geometric product as `(S\*L\*R)`, and the `initialB` formula in
+  `?Disturbances` / `?updateCohortData` rendered as `maxANPP \* exp(...)`. The escapes are
+  correct for markdown but roxygen passes `\*` through to Rd, where it is not a macro.
+
 * `BioSIM_getMPBSLR()` returns data again. Its per-year lambda discarded the `Cache()`d result
   and then called `setDT()` on an as-yet-unassigned `slr`, so the call errored out before it
   could build the raster stack. It also never unwrapped the named list that `generateWeather()`

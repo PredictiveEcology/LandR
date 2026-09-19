@@ -70,7 +70,7 @@ In LANDIS-II, this is called "Succession Timestep".}
 If \code{NULL} or \code{NA}, initial cohort biomass is calculated as in LANDIS-II Biomass Succession
 Extension v3.2.1 (Scheller & Miranda, 2015):
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{initialB = asInteger(pmin(maxANPP, asInteger(pmax(1, maxANPP \\* exp(-1.6 \\* sumB / maxB_eco)))))
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{initialB = asInteger(pmin(maxANPP, asInteger(pmax(1, maxANPP * exp(-1.6 * sumB / maxB_eco)))))
 }\if{html}{\out{</div>}}
 
 where \code{maxANPP} and \code{maxB_eco} are the maximum ANPP and B parameters of the species
