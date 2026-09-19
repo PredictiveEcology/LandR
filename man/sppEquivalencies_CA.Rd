@@ -3,51 +3,165 @@
 \docType{data}
 \name{sppEquivalencies_CA}
 \alias{sppEquivalencies_CA}
-\title{Table of species name equivalencies for Canadian trees}
+\alias{sppEquiv}
+\title{Species equivalencies table (\code{sppEquiv}) and \code{sppEquivalencies_CA}}
 \format{
-A \code{data.frame} with 271 rows and 10 variables:
+A \code{data.table} with 204 rows and 30 columns (all \code{character} unless stated):
 \describe{
-\item{LANDIS_test}{species names from LANDIS-II test parameter table}
-\item{LANDIS_traits}{species names from LANDIS-II traits parameter table}
-\item{LandR}{species names from LandR modules}
-\item{KNN}{species names from kNN datasets}
-\item{CASFRI}{species names from CASFRI database}
-\item{Latin_full}{accepted species latin names as in \url{http://theplantlist.org}}
-\item{EN_generic_short}{Short version of species' common names in English}
-\item{EN_generic_full}{Full species common names in English}
-\item{Leading}{Simple common English names used for leading species}
-\item{Notes}{additional notes and information}
-\item{Boreal}{Species present in the Boreal forests of Canada}
-\item{Type}{Whether the species is a deciduous or conifer species}
-\item{PSP}{species name from the module ianmseddy/PSP_Clean}
-\item{BC_Forestry}{the species code adopted by the Government of British Columbia}
-\item{FuelClass}{The fuel class used by the module PredictiveEcology/fireSense}#'
+\item{LANDIS_test}{species names from the LANDIS-II test parameter table;
+source: \url{https://raw.githubusercontent.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/species.txt}}
+\item{LANDIS_traits}{species names from the LANDIS-II traits parameter table;
+source: \url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}}
+\item{LandR}{species names used by \code{LandR}; the common key for matching rows}
+\item{KNN}{species names from the CFS kNN species layers; source:
+\url{https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/}}
+\item{CASFRI}{species names from the Common Attribute Schema for Forest Resource
+Inventories (CASFRI); source: \url{https://github.com/CASFRI/CASFRI}}
+\item{Latin_full}{full Latin names, following The Plant List}
+\item{EN_generic_short}{short English common names, used as plot labels}
+\item{EN_generic_full}{full English common names}
+\item{Leading}{English common names followed by \code{" leading"}, used as leading-species labels}
+\item{Notes}{additional notes}
+\item{Boreal}{\code{KNN}-style names for a default set of 39 species (42 rows), mostly
+from the boreal forest; the default \code{sppEquivCol} of \code{\link[=sppHarmonize]{sppHarmonize()}} and
+\code{\link[=loadkNNSpeciesLayers]{loadkNNSpeciesLayers()}}}
+\item{Broadleaf}{\code{logical}: whether the species is a broadleaf}
+\item{Type}{\code{"Deciduous"} or \code{"Conifer"}}
+\item{PSP}{species names used by the \code{ianmseddy/PSP_Clean} module}
+\item{ApproxFBP}{approximate Canadian Forest Fire Behaviour Prediction (FBP) System fuel
+type (\code{"C2"}, \code{"C3"}, \code{"C5"} or \code{"C7"}), for 7 pine, spruce and Douglas-fir rows}
+\item{FuelClass}{fuel class used by \code{PredictiveEcology/fireSense} modules; one of
+\code{"BlkSprc"}, \code{"CedrMplOther"}, \code{"DgFrPoPine"}, \code{"LdgJkPine"}, \code{"PopBrch"},
+\code{"RdWhPine"} or \code{"SprcFrLrch"}}
+\item{BC_forestry}{species codes used by the Government of British Columbia}
+\item{AB_forestry}{species codes used by the Government of Alberta}
+\item{SK_forestry}{species codes used by the Government of Saskatchewan}
+\item{MB_forestry}{species codes used by the Government of Manitoba}
+\item{ON_forestry}{species codes used by the Government of Ontario}
+\item{QCPSP}{species codes used in Québec permanent sample plot (PSP) data}
+\item{NB_forestry}{species codes used by the Government of New Brunswick}
+\item{NFI}{species codes used by the National Forest Inventory}
+\item{CanfiCode}{\code{integer}: species codes used by Canada's Forest Inventory (CanFI)}
+\item{CanfiNote}{notes on \code{CanfiCode}, e.g., generic genus codes}
+\item{NTEMS_Species_Code}{\code{integer}: species codes in the National Terrestrial Ecosystem
+Monitoring System (NTEMS) dominant species layer}
+\item{CBM_speciesID}{\code{integer}: species IDs used by the CFS Carbon Budget Model (CBM)}
+\item{SCANFI}{species names used by the Spatialized Canadian National Forest Inventory
+(SCANFI) species layers}
+\item{colorHex}{hexadecimal colour codes for plotting, used by \code{\link[=sppColors]{sppColors()}}}
 }
+}
+\source{
+\code{data-raw/sppEquivalencies_CA.csv}, built by \code{data-raw/sppEquivalencies_CA.R}
+in the package source.
 }
 \usage{
 sppEquivalencies_CA
 }
 \description{
-A table containing the different species names used across different sources (e.g., LANDIS-II
-test parameter files and trait tables, the LandR standard, kNN species biomass layers, etc.).
-Each column refers to a different source or species naming approach.
-Presently only containing Canadian native tree species, with name equivalencies coming from:
-\itemize{
-\item LANDIS-II test parameter tables (column \code{LANDIStest_names};
-source: \url{https://raw.githubusercontent.com/LANDIS-II-Foundation/Extensions-Succession/master/biomass-succession-archive/trunk/tests/v6.0-2.0/species.txt});
-\item LANDIS-II Canada-wide trait table (column \code{LANDIStraits_names};
-source: \url{https://raw.githubusercontent.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv});
-\item LandR family of SpaDES modules (column \code{LandR_names};
-\item CFS kNN species biomass layers (column \code{KNN_names};
-source: \url{http://tree.pfc.forestry.ca/kNN-Species.tar});
-\item Canadian Common Attribute Schema for Forest Resource Inventories (column \code{CASFRI_names};
-source \url{http://www.borealbirds.ca/files/CAS_Document_Final_Mar_2010_ALL_APPENDICES.pdf}).
-}
-}
-\details{
-Remaining columns have been filled with some other useful ways to name species (e.g., for plotting).
+\code{sppEquiv} is the species name equivalencies table that \code{LandR} functions and
+\code{LandR} \code{SpaDES} modules (e.g., \code{Biomass_borealDataPrep}, \code{Biomass_core}) use to
+translate species names between data sources and naming conventions (e.g., kNN, SCANFI
+and NTEMS species layers, LANDIS-II trait tables, CASFRI, common names).
+Each row is one taxon (a species, variety, hybrid or genus); each column is one
+naming convention or attribute.
 
-This table is currently used as the default equivalencies table in LandR SpaDES modules,
-but can also serve as a template to customize species names equivalencies by the user.
+\code{sppEquivalencies_CA} is the default \code{sppEquiv} shipped with \code{LandR}, covering Canadian
+tree species. It is used whenever a function's \code{sppEquiv} argument is not supplied, and
+is the template for building a custom \code{sppEquiv}: a \code{data.table} with the same column
+names (e.g., a subset of its rows) will work.
+}
+\section{Naming conventions}{
+
+The same species (balsam fir) in each species name column:\tabular{lll}{
+   Column \tab Format \tab Example \cr
+   \code{LandR} \tab \code{Genu_spe} \tab \code{Abie_bal} \cr
+   \code{KNN}, \code{Boreal} \tab \code{Genu_Spe} \tab \code{Abie_Bal} \cr
+   \code{NFI}, \code{SCANFI} \tab \code{GENU_SPE} \tab \code{ABIE_BAL} \cr
+   \code{LANDIS_traits} \tab \code{GENU.SPE} \tab \code{ABIE.BAL} \cr
+   \code{LANDIS_test} \tab \code{genuspec} \tab \code{abiebals} \cr
+   \code{CASFRI} \tab \verb{Genu spec} \tab \verb{Abie bals} \cr
+   \code{EN_generic_short} \tab short common name \tab \verb{Bal fir} \cr
+   \code{Leading} \tab common name + \code{" leading"} \tab \verb{Balsam fir leading} \cr
+}
+
+
+Varieties and hybrids add a third part (e.g., \code{Pice_eng_gla}, \code{PINU_CON_LAT}).
+Genus-level entries use \code{spp} (e.g., \code{LandR} \code{Pice_spp}, \code{KNN} \code{Pice_Spp}, \code{NFI} \code{PICE_SP}).
+}
+
+\section{Structure of the table}{
+
+\itemize{
+\item A blank string (\code{""}) means the source has no equivalent for that taxon.
+Most columns are blank for most rows: only 115 rows have a \code{KNN} name, 37 a \code{SCANFI}
+name, 40 a \code{LANDIS_traits} name, and 42 a \code{Boreal} name.
+\item Several rows can share one name in a column. Varieties map onto their species (e.g.,
+the three \emph{Pseudotsuga menziesii} rows all have \code{LandR} \code{Pseu_men}), and \code{Boreal}
+\code{Pinu_Con} covers both lodgepole pine varieties. Choosing such a column as
+\code{sppEquivCol} therefore merges those taxa into one species.
+\item \code{sppEquivCol} (in modules, usually \code{P(sim)$sppEquivCol}) names the column whose names
+are the species used in the simulation. Rows with a blank or \code{NA} in that column are
+not simulated. \code{\link[=sppHarmonize]{sppHarmonize()}} defaults it to \code{"Boreal"} when it cannot be determined
+from \code{sppNameVector}.
+\item To simulate a different set of species, or to merge species, subset the rows of
+\code{sppEquivalencies_CA}, or edit (or add) a naming column, and pass the result as
+\code{sppEquiv} with that column as \code{sppEquivCol}.
+}
+}
+
+\section{Helpers}{
+
+\itemize{
+\item \code{\link[=equivalentName]{equivalentName()}}: translate names from one column to another; it finds the column
+the input names come from. \code{\link[=equivalentNameColumn]{equivalentNameColumn()}} returns that column's name.
+\item \code{\link[=sppEquivCheck]{sppEquivCheck()}}: turn a character vector of names into a one-column \code{sppEquiv}, and
+if it lacks any \code{ensureColumns}, join it with \code{sppEquivalencies_CA} to get all columns.
+\item \code{\link[=sppHarmonize]{sppHarmonize()}}: make \code{sppEquiv}, \code{sppEquivCol}, \code{sppNameVector} and \code{sppColorVect}
+consistent with each other, subsetting \code{sppEquiv} to the species being simulated.
+\item \code{\link[=speciesInStudyArea]{speciesInStudyArea()}}: the species present in a study area, and the rows of
+\code{sppEquivalencies_CA} for them (element \code{sppEquiv}); see also the option
+\code{LandR.mergeHybridSpruce} in \code{\link[=LandROptions]{LandROptions()}}.
+\item \code{\link[=sppColors]{sppColors()}}: a named colour vector for the species in \code{sppEquivCol}, using \code{colorHex}
+when every row has one.
+\item \code{\link[=assertSppVectors]{assertSppVectors()}}, \code{\link[=assertSpeciesPlotLabels]{assertSpeciesPlotLabels()}}: check \code{sppEquiv} against
+\code{sppNameVector} and \code{sppColorVect}, and that species plot labels are unique.
+}
+}
+
+\section{Columns used by \code{LandR} functions}{
+
+\itemize{
+\item \code{LandR}: \code{\link[=speciesInStudyArea]{speciesInStudyArea()}} matches rows on it; default \code{sppEquivCol} of
+\code{\link[=prepSpeciesTable]{prepSpeciesTable()}}.
+\item \code{LANDIS_traits}: \code{\link[=prepSpeciesTable]{prepSpeciesTable()}}, \code{\link[=speciesTableUpdate]{speciesTableUpdate()}} and
+\code{\link[=speciesInStudyArea]{speciesInStudyArea()}}, to find species traits.
+\item \code{KNN}: \code{\link[=loadkNNSpeciesLayers]{loadkNNSpeciesLayers()}} (argument \code{knnNamesCol}).
+\item \code{SCANFI}: \code{\link[=loadSCANFISpeciesLayers]{loadSCANFISpeciesLayers()}} (argument \code{SCANFINamesCol}).
+\item \code{NTEMS_Species_Code}: \code{\link[=prepInputs_NTEMS_DominantSpecies]{prepInputs_NTEMS_DominantSpecies()}} and \code{\link[=speciesInStudyArea]{speciesInStudyArea()}}.
+\item \code{CASFRI}: \code{\link[=loadCASFRI]{loadCASFRI()}}.
+\item \code{EN_generic_short}, \code{Leading}: plot labels; see \code{\link[=assertSpeciesPlotLabels]{assertSpeciesPlotLabels()}}.
+\item \code{Type}, \code{Broadleaf}: conifer vs. deciduous, e.g., in \code{\link[=vegTypeMapGenerator]{vegTypeMapGenerator()}} with
+\code{mixedType = 2}, and in \code{\link[=partitionBiomass]{partitionBiomass()}}.
+\item \code{colorHex}: \code{\link[=sppColors]{sppColors()}}.
+\item \code{FuelClass}: fuel classes in \code{fireSense} modules.
+}
+}
+
+\examples{
+library(data.table)
+sppEquiv <- LandR::sppEquivalencies_CA
+
+## translate names between conventions
+equivalentName(c("Abie_Bal", "Pice_Mar"), sppEquiv, column = "LandR")
+equivalentName(c("Abie_Bal", "Pice_Mar"), sppEquiv, column = "LANDIS_traits")
+equivalentNameColumn(c("ABIE_BAL", "PICE_MAR"), sppEquiv)
+
+## a custom sppEquiv with three species, using the "Boreal" names
+mySppEquiv <- sppEquiv[Boreal \%in\% c("Abie_Bal", "Pice_Gla", "Popu_Tre")]
+sppColors(mySppEquiv, sppEquivCol = "Boreal", newVals = "Mixed")
+
+## expand a vector of names into a full sppEquiv
+sppEquivCheck(c("Abie_bal", "Pice_gla"), sppEquivCol = "LandR", ensureColumns = "KNN")
 }
 \keyword{datasets}

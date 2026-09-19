@@ -40,14 +40,16 @@ utils::globalVariables(c(
   isRaster <- sapply(rasList, function(ras) is(ras, "Raster"))
   isSpatRas <- sapply(rasList, function(ras) is(ras, "SpatRaster"))
   if (all(isRaster)) {
-    return(raster::stack(rasList))
+    out <- raster::stack(rasList)
+    names(out) <- names(rasList)
+  } else if (all(isSpatRas)) {
+    out <- rast(rasList)
+    names(out) <- names(rasList)
   } else {
-    if (all(isSpatRas)) {
-      return(rast(rasList))
-    } else {
-      stop("List entries should all be RasterLayer or SpatRaster")
-    }
+    stop("List entries should all be RasterLayer or SpatRaster")
   }
+
+  return(out)
 }
 
 #' Project raster extent
@@ -91,9 +93,11 @@ utils::globalVariables(c(
   dots <- list(...) # need to pass the ...
 
   ## subset spatial and non-spatial arguments
-  spatialDots <- vapply(dots, FUN = inherits,
-                        what = c("Raster", "SpatRaster", "Spatial", "sf", "SpatVector"),
-                        FUN.VALUE = logical(1))
+  spatialDots <- vapply(dots,
+    FUN = inherits,
+    what = c("Raster", "SpatRaster", "Spatial", "sf", "SpatVector"),
+    FUN.VALUE = logical(1)
+  )
 
   objs <- append(list(x), dots[spatialDots])
 
@@ -158,14 +162,18 @@ utils::globalVariables(c(
           out <- ext(x) == ext(objs[[i]])
 
           if (isFALSE(out) && isTRUE(otherArgs$stopOnError)) {
-            stop(".compareRas fail: ", format(mc[[i + 1]]), " and ",
-                 format(mc[["x"]]), " have different extents.")
+            stop(
+              ".compareRas fail: ", format(mc[[i + 1]]), " and ",
+              format(mc[["x"]]), " have different extents."
+            )
           }
         }
       }
       if (!isTRUE(out)) {
-        message("compareGeom/.compareRas fail: ", format(mc[[i + 1]]),
-                " is not same as ", format(mc[["x"]]))
+        message(
+          "compareGeom/.compareRas fail: ", format(mc[[i + 1]]),
+          " is not same as ", format(mc[["x"]])
+        )
         return(out)
       }
     }
@@ -186,22 +194,6 @@ utils::globalVariables(c(
   st_crs(x) == st_crs(y)
 }
 
-#' Wrapper to read a raster using a specific package function
-#'
-#' Evaluates the function given by the option `reproducible.rasterRead`.
-#' E.g., `terra::rast` or `raster::raster`.
-#'
-#' TODO: Move to `reproducible`
-#'
-#' @param ... passed to [terra::rast()] or [raster::raster()]
-#'
-#' @return a raster of the type returned by the function
-#'
-#' @export
-rasterRead <- function(...) {
-  eval(parse(text = getOption("reproducible.rasterRead")))(...)
-}
-
 #' Helpers for transition to `terra`
 #'
 #' These all create a single function that can be used for either `Raster` or `SpatRaster` objects.
@@ -213,11 +205,11 @@ rasterRead <- function(...) {
 #' @rdname rasterTerraHelpers
 asInt <- function(ras) {
   if (!isInt(ras)) {
-    if (inherits(ras, "SpatRaster"))
+    if (inherits(ras, "SpatRaster")) {
       ras <- as.int(ras)
-    else
+    } else {
       ras[] <- as.integer(ras)
-
+    }
   }
   ras
 }
@@ -227,10 +219,11 @@ asInt <- function(ras) {
 #' @return
 #' `isInt` returns a logical as per `is.integer`.
 isInt <- function(ras) {
-  if (inherits(ras, "SpatRaster"))
+  if (inherits(ras, "SpatRaster")) {
     is.int(ras)
-  else
+  } else {
     is.integer(values(ras))
+  }
 }
 
 #' @param ras a `Raster`, or `SpatRaster` object
@@ -352,7 +345,6 @@ genericExtract <- function(x, y, field = NULL, ...) {
 #'
 #' @export
 plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
-
   if (inherits(x, c("Raster", "SpatRaster"))) {
     plotRaster <- TRUE
   } else if (inherits(x, c("SpatVector", "sf"))) {
@@ -381,8 +373,10 @@ plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
     }
     maxpixels <- ncell(x)
     if (maxpixels > 1e6) {
-      message("Raster to plot has >1e6 pixels. ",
-              "'maxpixels' set to 1e6 to avoid overly long plotting times.")
+      message(
+        "Raster to plot has >1e6 pixels. ",
+        "'maxpixels' set to 1e6 to avoid overly long plotting times."
+      )
       maxpixels <- 1e6
     }
     plot1 <- rasterVis::gplot(x, maxpixels = maxpixels)
@@ -404,13 +398,13 @@ plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
     }
     plot1 <- plot1 + coord_equal() +
       theme_classic()
-
   } else {
     if (!requireNamespace("rlang", quietly = TRUE)) {
       stop("Please install 'rlang'")
     }
     ## theme needs to come before fill scale because it overrides it in geom_sf
-    plot1 <- ggplot() + theme_classic()
+    plot1 <- ggplot() +
+      theme_classic()
 
     if (is.null(field)) {
       plot1 <- plot1 +
@@ -421,7 +415,7 @@ plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
       if (inherits(x[[field]], c("character", "factor"))) {
         plot1 <- plot1 +
           scale_fill_viridis_d(option = "cividis", na.value = "grey", limits = limits)
-      }  else {
+      } else {
         plot1 <- plot1 +
           scale_fill_viridis_c(option = "cividis", na.value = "grey", limits = limits)
       }
@@ -432,13 +426,15 @@ plotSpatial <- function(x, plotTitle, limits = NULL, field = NULL) {
 
   if (plotRaster) {
     if (nlyr(x) > 1) {
-      plot1 <- plot1 + facet_wrap(~ variable)
+      plot1 <- plot1 + facet_wrap(~variable)
       plotTitle <- paste0(plotTitle, " -- ", paste(names(x), collapse = " and "))
     }
   }
 
   plot1 <- plot1 +
-    labs(title = plotTitle, x = "Longitude", y = "Latitude",
-         fill = "")
+    labs(
+      title = plotTitle, x = "Longitude", y = "Latitude",
+      fill = ""
+    )
   plot1
 }

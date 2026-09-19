@@ -7,18 +7,15 @@
 \title{\code{LandR} package}
 \description{
 Utilities for 'LandR' suite of landscape simulation models.
-These models simulate forest vegetation dynamics based on LANDIS-II, and
-incorporate fire and insect disturbance, as well as other important ecological
-processes. Models are implemented as 'SpaDES' modules.
+These models simulate forest vegetation dynamics based on LANDIS-II, and incorporate
+fire and insect disturbance, as well as other important ecological processes.
+Models are implemented as 'SpaDES' modules.
 }
 \section{Package options}{
 
 
-\code{LandR} packages use the following \code{\link[=options]{options()}} to configure behaviour:
-\itemize{
-\item \code{LandR.assertions}: If \code{TRUE}, additional code checks are run during function calls.
-Default \code{FALSE}.
-}
+\code{LandR} packages use \code{\link[=options]{options()}} to configure behaviour.
+See \code{\link[=LandROptions]{LandROptions()}} for the options and their defaults.
 }
 
 \seealso{
@@ -35,6 +32,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Eliot J B McIntire \email{eliot.mcintire@nrcan-rncan.gc.ca} (\href{https://orcid.org/0000-0002-6914-8316}{ORCID})
   \item Alex M Chubaty \email{achubaty@for-cast.ca} (\href{https://orcid.org/0000-0001-7146-8135}{ORCID})
   \item Ceres Barros \email{ceres.barros@ubc.ca} (\href{https://orcid.org/0000-0003-4036-977X}{ORCID})
   \item Ian M S Eddy \email{ian.eddy@nrcan-rncan.gc.ca} (\href{https://orcid.org/0000-0001-7397-2116}{ORCID})

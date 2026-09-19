@@ -2,6 +2,7 @@
 % Please edit documentation in R/disturbances.R
 \name{FireDisturbance}
 \alias{FireDisturbance}
+\alias{Disturbances}
 \alias{FireDisturbancePM}
 \alias{PeatlandThermokarst}
 \title{Disturbance functions}
@@ -29,7 +30,7 @@ FireDisturbance(
 FireDisturbancePM(
   cohortData = copy(sim$cohortData),
   cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
-  colsForPixelGroups = LandR::columnsForPixelGroups,
+  colsForPixelGroups = LandR::columnsForPixelGroups(),
   calibrate = FALSE,
   LANDISPM = TRUE,
   postFireRegenSummary = copy(sim$postFireRegenSummary),
@@ -62,7 +63,7 @@ PeatlandThermokarst(
   rasterToMatch = sim$rasterToMatch,
   species = copy(sim$species),
   speciesEcoregion = copy(sim$speciesEcoregion),
-  cohortDefinitionCols = c("pixelGroup", "speciesCode", "age"),
+  cohortDefinitionCols = LandR::cohortDefinitionCols(),
   initialB = 10L,
   inactivePixelIndex = sim$inactivePixelIndex,
   currentTime = NULL,
@@ -73,7 +74,8 @@ PeatlandThermokarst(
 \item{cohortData}{A \code{data.table} with columns: \code{pixelGroup}, \code{ecoregionGroup},
 \code{speciesCode}, and optionally \code{age}, \code{B}, \code{mortality}, \code{aNPPAct}, and \code{sumB}.}
 
-\item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
+\item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts
+(default: \code{c("pixelGroup", "speciesCode", "age")}).}
 
 \item{calibrate}{logical. Determines whether to output \code{postFirePixelCohortData}.
 Defaults to FALSE}
@@ -101,8 +103,9 @@ number that corresponds exactly to \code{pixelGroup} column in \code{cohortData}
 
 \item{currentTime}{numeric. Current simulation time step (as in \code{time(sim)})}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
 \item{species}{a \code{data.table} with species traits such as longevity, shade tolerance, etc.
 Must have column \code{speciesCode}, with species names/IDs. The following is a
@@ -154,7 +157,7 @@ May contain columns \code{inflationFactor}  (used to adjust \code{maxB}) and \co
 If \code{NULL} or \code{NA}, initial cohort biomass is calculated as in LANDIS-II Biomass Succession
 Extension v3.2.1 (Scheller & Miranda, 2015):
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{initialB = asInteger(pmin(maxANPP, asInteger(pmax(1, maxANPP \\* exp(-1.6 \\* sumB / maxB_eco)))))
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{initialB = asInteger(pmin(maxANPP, asInteger(pmax(1, maxANPP * exp(-1.6 * sumB / maxB_eco)))))
 }\if{html}{\out{</div>}}
 
 where \code{maxANPP} and \code{maxB_eco} are the maximum ANPP and B parameters of the species
@@ -170,8 +173,9 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 
 \item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
 
-\item{colsForPixelGroups}{character. \code{cohortData} columns used to find identical pixels in terms of
-cohort composition, and group them into \code{pixelGroups}.}
+\item{colsForPixelGroups}{character. \code{cohortData} columns used to find identical pixels in terms
+of cohort composition, and group them into \code{pixelGroups}
+(default: \code{c("ecoregionGroup", "speciesCode", "age", "B")}).}
 
 \item{LANDISPM}{logical. Should partial mortality be calculated as in LANDIS-II Dynamic Fire System v3.0.
 Must be \code{TRUE} for the time being.}

@@ -13,7 +13,8 @@ overlayLCCs(
   remapTable = NULL,
   classesToReplace,
   availableERC_by_Sp,
-  forestEquivalencies = NULL
+  forestEquivalencies = NULL,
+  method = c("nearestWeighted", "nearestRandom")
 )
 }
 \arguments{
@@ -60,6 +61,12 @@ If \code{NULL}, this function will derive this table automatically from the
 other arguments. Otherwise, the user must provide a \code{data.frame} with
 \code{length(LCCs) + 1} columns, and \code{2 ^ length(LCCs)} rows.
 Currently not used.}
+
+\item{method}{Character; where the draw among an unwanted pixel's available land-cover
+classes comes from. Both options weight the classes by their abundance in the pixel's
+neighbourhood and differ only in reproducibility: \code{"nearestWeighted"} (default) keys
+the draw on the pixel's ground position, so it is deterministic and seed-free, while
+\code{"nearestRandom"} draws from the RNG and so varies with \code{set.seed()}. See Details.}
 }
 \description{
 Overlay different LCC data sources

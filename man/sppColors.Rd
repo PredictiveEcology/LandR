@@ -2,19 +2,21 @@
 % Please edit documentation in R/plotting.R
 \name{sppColors}
 \alias{sppColors}
+\alias{sppColours}
 \title{Create species colour vector from a \code{sppEquiv} table}
 \usage{
-sppColors(sppEquiv, sppEquivCol, newVals = NULL, palette)
+sppColors(sppEquiv, sppEquivCol, newVals = NULL, palette = "Accent")
 }
 \arguments{
-\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
-See \code{data("sppEquivalencies_CA", "LandR")}.
+\item{sppEquiv}{table with species name equivalencies between naming conventions
+(see \link{sppEquivalencies_CA}, also \code{?sppEquiv}).
 For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
+If not provided and \code{mixedType == 2}, will attempt to use \code{LandR::sppEquivalencies_CA}.}
 
-\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+\item{sppEquivCol}{the column name to use from \code{sppEquiv} (see \link{sppEquivalencies_CA}).
 For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
+If \code{sppEquiv} is not provided and \code{mixedType == 2}, will use the column of
+\code{LandR::sppEquivalencies_CA} that best matches the species names.}
 
 \item{newVals}{An optional character vector of extra names to use, e.g., "Mixed".}
 

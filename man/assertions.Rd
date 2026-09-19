@@ -2,15 +2,18 @@
 % Please edit documentation in R/assertions.R
 \name{assert1}
 \alias{assert1}
+\alias{assertions}
 \alias{assert2}
 \alias{assertSppMaxBMaxANPP}
 \alias{assertUniqueCohortData}
 \alias{assertERGs}
 \alias{assertColumns}
 \alias{assertCohortData}
+\alias{assertCohortDataERG}
 \alias{assertPixelCohortData}
 \alias{assertSpeciesPlotLabels}
 \alias{assertFireToleranceDif}
+\alias{assertPostFireDist}
 \alias{assertSpeciesLayers}
 \alias{assertRstLCChange}
 \alias{assertSpeciesEcoregionCohortDataMatch}
@@ -69,7 +72,12 @@ assertCohortData(
   message = "",
   doAssertion = getOption("LandR.assertions", TRUE),
   verbose = getOption("LandR.verbose", TRUE),
-  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode")
+  cohortDefinitionCols = LandR::cohortDefinitionCols()
+)
+
+assertCohortDataERG(
+  cohortData,
+  doAssertion = getOption("LandR.assertions", TRUE)
 )
 
 assertPixelCohortData(
@@ -85,6 +93,16 @@ assertSpeciesPlotLabels(
 )
 
 assertFireToleranceDif(
+  burnedPixelCohortData,
+  doAssertion = getOption("LandR.assertions", TRUE)
+)
+
+assertPostFireDist(
+  cohortDataOrig,
+  pixelGroupMapOrig,
+  cohortDataNew,
+  pixelGroupMapNew,
+  postFirePixelCohortData,
   burnedPixelCohortData,
   doAssertion = getOption("LandR.assertions", TRUE)
 )
@@ -198,7 +216,8 @@ was called.}
 
 \item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
 
-\item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
+\item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts
+(default: \code{c("pixelGroup", "speciesCode", "age")}).}
 
 \item{pixelCohortData}{The full \code{cohortData} \code{data.table}}
 
@@ -206,11 +225,18 @@ was called.}
 
 \item{sppEquiv}{an table with a column containing species names}
 
-\item{burnedPixelCohortData}{An expanded \code{cohortData} \code{data.table} with pixel-level
-cohort information on burnt pixels and the following (optional) columns:
-\code{severity} - fire severity in that pixel calculated based on fire behaviour properties;
-\code{firetolerance} - species-level fire tolerance;
-\code{severityToleranceDif} - the difference between \code{severity} and \code{firetolerance}.}
+\item{burnedPixelCohortData}{\code{cohortData}-like object containing all dead, surviving and
+new cohorts (i.e. activated by serotiny/resprouting)}
+
+\item{cohortDataOrig}{object used as \code{updateCohortData(cohortData = .)}}
+
+\item{pixelGroupMapOrig}{object used as \code{updateCohortData(pixelGroupMap = .)}}
+
+\item{cohortDataNew}{\code{cohortData} output from \code{updateCohortData}}
+
+\item{pixelGroupMapNew}{\code{pixelGroupMap} output from \code{updateCohortData}}
+
+\item{postFirePixelCohortData}{object used as \code{updateCohortData(newPixelCohortData = .)}}
 
 \item{speciesLayers}{A \code{RasterStack} or \code{RasterLayer} that
 should contain species cover data in the study area}
@@ -221,8 +247,9 @@ Defaults to 1.}
 
 \item{rstLCChange}{a raster layer indicating pixels were land-use change occurred as 1s}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
 \item{standCohortData}{A \code{data.table} with simulated and observed stand data for validation}
 

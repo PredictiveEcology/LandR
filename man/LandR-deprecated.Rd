@@ -2,6 +2,7 @@
 % Please edit documentation in R/maps.R, R/prepSpeciesLayers.R
 \name{makeVegTypeMap}
 \alias{makeVegTypeMap}
+\alias{LandR-deprecated}
 \alias{loadkNNSpeciesLayersValidation}
 \alias{prepSpeciesLayers_KNN2011}
 \title{Make a vegetation type map from a stack of species abundances}
@@ -36,8 +37,15 @@ prepSpeciesLayers_KNN2011(
 \item{speciesStack}{A \code{RasterStack} of species abundances.
 This must be one \code{RasterLayer} per species.}
 
-\item{vegLeadingProportion}{Numeric between 0-1, determining the relative biomass
-threshold a species needs to pass to be considered "leading".}
+\item{vegLeadingProportion}{Numeric between 0-1, the share of a stand above which it stops
+being called mixed. Which share depends on what is being asked, and the two
+questions have their own options (see \link{leadingProportions}):
+with \code{mixedType = 2} it is the whole broadleaf group against the whole conifer
+group, and defaults to \code{mixedwoodProp()} (\code{LandR.mixedwoodProp}, the NTEMS/EOSD
+and NFI value: coniferous or broadleaf at 75\% or more of total basal area,
+mixed wood when neither reaches it); otherwise it is one species' share and
+defaults to \code{leadingSpeciesProp()} (\code{LandR.leadingSpeciesProp}, which takes the
+mixedwood value unless it is set). Deciduous conifers count as conifers.}
 
 \item{mixed}{Deprecated. See \code{mixedType} argument to \link{vegTypeMapGenerator}.}
 
@@ -46,24 +54,26 @@ and \code{\link[=equivalentName]{equivalentName()}}.}
 
 \item{dPath}{path to the data directory}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
-\item{studyArea}{A \verb{SpatialPolygons*} object used as the principle study region,
+\item{studyArea}{A \code{SpatVector} or \code{sf} polygons object used as the principle study region,
 passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}.}
 
-\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
-See \code{data("sppEquivalencies_CA", "LandR")}.
+\item{sppEquiv}{table with species name equivalencies between naming conventions
+(see \link{sppEquivalencies_CA}, also \code{?sppEquiv}).
 For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
+If not provided and \code{mixedType == 2}, will attempt to use \code{LandR::sppEquivalencies_CA}.}
 
 \item{knnNamesCol}{character string indicating the column in \code{sppEquiv}
 containing kNN species names.
 Default \code{"KNN"} for when \code{sppEquivalencies_CA} is used.}
 
-\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+\item{sppEquivCol}{the column name to use from \code{sppEquiv} (see \link{sppEquivalencies_CA}).
 For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
+If \code{sppEquiv} is not provided and \code{mixedType == 2}, will use the column of
+\code{LandR::sppEquivalencies_CA} that best matches the species names.}
 
 \item{thresh}{the minimum number of pixels where the species must have
 \code{biomass > 0} to be considered present in the study area.

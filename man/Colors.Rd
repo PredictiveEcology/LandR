@@ -2,6 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{Colors}
 \alias{Colors}
+\alias{Colours}
 \title{Helper for setting Raster or \code{SpatRaster} colors}
 \usage{
 Colors(ras, cols, n = NULL)
@@ -9,11 +10,12 @@ Colors(ras, cols, n = NULL)
 \arguments{
 \item{ras}{A \verb{Raster*} or \code{SpatRaster} class object.}
 
-\item{cols}{a character vector of colours. See examples. Can also be a \code{data.frame},
-see \code{terra::coltab}}
+\item{cols}{a character vector of colours. See examples.
+Can also be a \code{data.frame}, see \link[terra:coltab]{terra::coltab}.}
 
-\item{n}{A numeric scalar giving the number of colours to create. Passed to
-\verb{quickPlot::setColors(ras, n = n) <- }. If missing, then \code{n} will be \code{length(cols)}}
+\item{n}{A numeric scalar giving the number of colours to create.
+Passed to \verb{quickPlot::setColors(ras, n = n) <- }.
+If missing, then \code{n} will be \code{length(cols)}.}
 }
 \description{
 This is a wrapper to help with migration to \pkg{terra}.

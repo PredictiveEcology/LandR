@@ -13,7 +13,7 @@ updateCohortData(
   speciesEcoregion,
   treedFirePixelTableSinceLastDisp = NULL,
   successionTimestep,
-  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+  cohortDefinitionCols = LandR::cohortDefinitionCols(),
   initialB = 10,
   verbose = getOption("LandR.verbose", TRUE),
   doAssertion = getOption("LandR.assertions", TRUE)
@@ -24,7 +24,7 @@ updateCohortData(
   cohortData,
   pixelGroupMap,
   currentTime,
-  cohortDefinitionCols = c("pixelGroup", "speciesCode", "age"),
+  cohortDefinitionCols = LandR::cohortDefinitionCols(),
   speciesEcoregion,
   successionTimestep,
   initialB = 10
@@ -63,13 +63,14 @@ to ensure that everything matches correctly.}
 \item{successionTimestep}{The time between successive seed dispersal events.
 In LANDIS-II, this is called "Succession Timestep".}
 
-\item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
+\item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts
+(default: \code{c("pixelGroup", "speciesCode", "age")}).}
 
 \item{initialB}{the initial biomass of new cohorts. Defaults to 10.
 If \code{NULL} or \code{NA}, initial cohort biomass is calculated as in LANDIS-II Biomass Succession
 Extension v3.2.1 (Scheller & Miranda, 2015):
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{initialB = asInteger(pmin(maxANPP, asInteger(pmax(1, maxANPP \\* exp(-1.6 \\* sumB / maxB_eco)))))
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{initialB = asInteger(pmin(maxANPP, asInteger(pmax(1, maxANPP * exp(-1.6 * sumB / maxB_eco)))))
 }\if{html}{\out{</div>}}
 
 where \code{maxANPP} and \code{maxB_eco} are the maximum ANPP and B parameters of the species
@@ -105,6 +106,7 @@ Does the following:
 \item assign the new \code{pixelGroup} to the pixels that have new cohort;
 \item update the \code{pixelGroup} map.
 }
+
 Note that if \code{newPixelCohortData} is generated after a disturbance
 it must contain a \code{type} column indicating the origin of the cohorts
 (e.g. "survivor", "serotiny", "resprouting"). "Survivor" cohorts will

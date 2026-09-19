@@ -2,6 +2,7 @@
 % Please edit documentation in R/LANDIS-II-tables.R
 \name{getSpeciesTable}
 \alias{getSpeciesTable}
+\alias{speciesTable}
 \alias{prepSpeciesTable}
 \title{Download and prepare a species traits table for use with \code{Biomass_core} module}
 \usage{
@@ -17,7 +18,7 @@ prepSpeciesTable(
 }
 \arguments{
 \item{url}{If NULL (the default), uses one from D. Cyr's LANDIS-II files:
-\url{https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/master/speciesTraits.csv}).}
+\url{https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/blob/master/speciesTraits.csv}).}
 
 \item{dPath}{The destination path.}
 
@@ -39,14 +40,15 @@ for further detail.
 
 \item{speciesLayers}{Deprecated.}
 
-\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
-See \code{data("sppEquivalencies_CA", "LandR")}.
+\item{sppEquiv}{table with species name equivalencies between naming conventions
+(see \link{sppEquivalencies_CA}, also \code{?sppEquiv}).
 For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
+If not provided and \code{mixedType == 2}, will attempt to use \code{LandR::sppEquivalencies_CA}.}
 
-\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+\item{sppEquivCol}{the column name to use from \code{sppEquiv} (see \link{sppEquivalencies_CA}).
 For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
+If \code{sppEquiv} is not provided and \code{mixedType == 2}, will use the column of
+\code{LandR::sppEquivalencies_CA} that best matches the species names.}
 
 \item{areas}{A character vector of areas to use. Can be one or more of
 \code{c("Acadian", "AM", "NorthShore", "BP", "BSE", "BSW", "LSJ", "MC", "PM", "WestON")}.

@@ -45,8 +45,10 @@ biomodModelingWrapper <- function(sp, responseVar, responseVarData,
                                   ), ...) {
   if (requireNamespace("biomod2", quietly = TRUE)) {
     if (is.null(bm.options)) {
-      bm.options <- biomod2::BIOMOD_ModelingOptions(GLM = list(type = "simple"),
-                                                    GAM = list(k = 2))
+      bm.options <- biomod2::BIOMOD_ModelingOptions(
+        GLM = list(type = "simple"),
+        GAM = list(k = 2)
+      )
     }
     ## Checks ------------------
     if (is(responseVar, "list") && is.null(names(responseVar))) {
@@ -95,8 +97,10 @@ biomodModelingWrapper <- function(sp, responseVar, responseVarData,
 
     notFound <- predictorVars[!c("x", "y", predictorVars) %in% colnames(predictorVarsData)]
     if (length(notFound)) {
-      stop("The following predictors were not found in 'predictorVarsData': ",
-           paste(notFound, collapse = ", "))
+      stop(
+        "The following predictors were not found in 'predictorVarsData': ",
+        paste(notFound, collapse = ", ")
+      )
     }
 
     ## create outputs dir
@@ -119,22 +123,30 @@ biomodModelingWrapper <- function(sp, responseVar, responseVarData,
     predictorVarsData <- predictorVarsData[complete.cases(predictorVarsData)]
 
     allData <- merge(responseVarData, predictorVarsData,
-                     on = c("pixelIndex", "x", "y"), all = TRUE)
+      on = c("pixelIndex", "x", "y"), all = TRUE
+    )
     allData <- allData[complete.cases(allData)]
 
     ## BIOMOD operations -----------------------------------------
-    bm.format <- biomod2::BIOMOD_FormatingData(resp.var = as.data.frame(allData[, ..responseVar]),
-                                               resp.xy = as.data.frame(allData[, .(x, y)]),
-                                               expl.var = as.data.frame(allData[, ..predictorVars]),
-                                               resp.name = sp,
-                                               dir.name = dir.name)
-    BIOMOD_ModelingArgs <- append(list(bm.format = bm.format,
-                                       do.full.models	= FALSE),
-                                  BIOMOD_ModelingArgs)
+    bm.format <- biomod2::BIOMOD_FormatingData(
+      resp.var = as.data.frame(allData[, ..responseVar]),
+      resp.xy = as.data.frame(allData[, .(x, y)]),
+      expl.var = as.data.frame(allData[, ..predictorVars]),
+      resp.name = sp,
+      dir.name = dir.name
+    )
+    BIOMOD_ModelingArgs <- append(
+      list(
+        bm.format = bm.format,
+        do.full.models = FALSE
+      ),
+      BIOMOD_ModelingArgs
+    )
 
     bm.mod <- Cache(.BIOMOD_ModelingRetry,
-                    BIOMOD_ModelingArgs = BIOMOD_ModelingArgs,
-                    ...)
+      BIOMOD_ModelingArgs = BIOMOD_ModelingArgs,
+      ...
+    )
 
     return(bm.mod)
   } else {
@@ -143,24 +155,27 @@ biomodModelingWrapper <- function(sp, responseVar, responseVarData,
 }
 
 .BIOMOD_ModelingRetry <- function(BIOMOD_ModelingArgs) {
-  i <- 1   ## try 5 times if models fail
+  i <- 1 ## try 5 times if models fail
   while (i < 6) {
-    bm.mod <- do.call(what = biomod2::BIOMOD_Modeling,
-                      args = BIOMOD_ModelingArgs)
+    bm.mod <- do.call(
+      what = biomod2::BIOMOD_Modeling,
+      args = BIOMOD_ModelingArgs
+    )
     if (all(bm.mod@models.failed == "none")) {
       break()
     } else {
       i <- i + 1
-      message(blue("Some SEP models failed, retrying... attempt", i))
+      message(cli::col_blue("Some SEP models failed, retrying... attempt", i))
     }
   }
   if (i == 6 && !all(bm.mod@models.failed == "none")) {
     sp <- sub("SEP_model_", "", BIOMOD_ModelingArgs$modeling.id)
-    warning(red("Some/all SEP models could not be computed for", sp,
-                "\nConsider rerunning '.BIOMOD_ModelingRetry', simplifying the models,",
-                "or choosing another algorithm.\nTo clear cached results and run again try:\n",
-                paste0("clearCache(..., userTags = c('.BIOMOD_ModelingRetry', '", sp, "'))")))
-
+    warning(cli::col_red(
+      "Some/all SEP models could not be computed for", sp,
+      "\nConsider rerunning '.BIOMOD_ModelingRetry', simplifying the models,",
+      "or choosing another algorithm.\nTo clear cached results and run again try:\n",
+      paste0("clearCache(..., userTags = c('.BIOMOD_ModelingRetry', '", sp, "'))")
+    ))
   }
   bm.mod
 }
@@ -176,22 +191,23 @@ biomodEnsembleWrapper <- function(bm.mod, metric.select.thresh = NULL, ...) {
   if (requireNamespace("biomod2", quietly = TRUE)) {
     # ## provide thresholds
     metric.select <- unique(bm.mod@models.evaluation@val$metric.eval)
-    metric.evalEnsemble <- metric.select   ## use same metrics to evaluate ensemble
+    metric.evalEnsemble <- metric.select ## use same metrics to evaluate ensemble
 
     ## exclude metrics wihout defined thresholds.
     ## e.g. RMSE can't be used, since it can't be used with a minimum (but a maximum)
     metric.select[!metric.select %in% c("TSS", "ROC", "R2")] <- NULL
 
     bm.em <- Cache(biomod2::BIOMOD_EnsembleModeling,
-                   bm.mod = bm.mod,
-                   models.chosen = 'all',
-                   em.by = 'all',
-                   metric.select = metric.select,
-                   metric.select.thresh = metric.select.thresh,
-                   metric.eval = metric.evalEnsemble,
-                   prob.mean = FALSE,
-                   prob.mean.weight = TRUE,
-                   ...)
+      bm.mod = bm.mod,
+      models.chosen = "all",
+      em.by = "all",
+      metric.select = metric.select,
+      metric.select.thresh = metric.select.thresh,
+      metric.eval = metric.evalEnsemble,
+      prob.mean = FALSE,
+      prob.mean.weight = TRUE,
+      ...
+    )
 
     return(bm.em)
   } else {
@@ -231,16 +247,17 @@ biomodProjWrapper <- function(bm.mod, proj.name = "testProj", new.env = NULL, ne
     new.env <- new.env[, bm.mod@expl.var.names]
 
     bm.proj <- Cache(biomod2::BIOMOD_Projection,
-                     bm.mod = bm.mod,
-                     new.env = new.env,
-                     new.env.xy = new.env.xy,
-                     proj.name = proj.name,
-                     models.chosen = "all",
-                     compress = FALSE,
-                     build.clamping.mask = FALSE,
-                     output.format = ".RData",
-                     do.stack = TRUE,
-                     ...)
+      bm.mod = bm.mod,
+      new.env = new.env,
+      new.env.xy = new.env.xy,
+      proj.name = proj.name,
+      models.chosen = "all",
+      compress = FALSE,
+      build.clamping.mask = FALSE,
+      output.format = ".RData",
+      do.stack = TRUE,
+      ...
+    )
 
     return(bm.proj)
   } else {
@@ -277,15 +294,16 @@ biomodEnsembleFrcstWrapper <- function(bm.em, bm.proj = NULL, proj.name = NULL, 
       new.env.xy <- as.data.frame(new.env.xy)
     }
     bm.em.proj <- Cache(biomod2::BIOMOD_EnsembleForecasting,
-                        bm.em = bm.em,
-                        bm.proj = bm.proj,
-                        proj.name = proj.name,
-                        new.env = new.env,
-                        new.env.xy = new.env.xy,
-                        models.chosen = "all",
-                        compress = "zip",
-                        keep.in.memory = keep.in.memory,
-                        ...)
+      bm.em = bm.em,
+      bm.proj = bm.proj,
+      proj.name = proj.name,
+      new.env = new.env,
+      new.env.xy = new.env.xy,
+      models.chosen = "all",
+      compress = "zip",
+      keep.in.memory = keep.in.memory,
+      ...
+    )
 
     return(bm.em.proj)
   } else {
@@ -313,8 +331,10 @@ biomodEnsembleFrcstWrapper <- function(bm.em, bm.proj = NULL, proj.name = NULL, 
 biomodEnsembleProjMaps <- function(bm.em.proj, predModel, rasTemplate, origCRS) {
   if (requireNamespace("biomod2", quietly = TRUE)) {
     if (!predModel %in% bm.em.proj@models.projected) {
-      stop("Can't find model ", predModel,
-           ".\n  Choose one of '", paste(bm.em.proj@models.projected, collapse = "', '"), "'.")
+      stop(
+        "Can't find model ", predModel,
+        ".\n  Choose one of '", paste(bm.em.proj@models.projected, collapse = "', '"), "'."
+      )
     }
 
     if (!is(rasTemplate, "SpatRaster")) {
@@ -341,8 +361,10 @@ biomodEnsembleProjMaps <- function(bm.em.proj, predModel, rasTemplate, origCRS) 
     }
 
     if (any(duplicated(predDT$ID))) {
-      stop("There seem to be several SEP predictions for the same cell.\n",
-           "Try passing 'predModel'.")
+      stop(
+        "There seem to be several SEP predictions for the same cell.\n",
+        "Try passing 'predModel'."
+      )
     }
 
     predDT <- predDT[predDataCoords, on = "ID", nomatch = NA]
@@ -353,7 +375,9 @@ biomodEnsembleProjMaps <- function(bm.em.proj, predModel, rasTemplate, origCRS) 
 
     return(rasTemplate)
   } else {
-    stop("Package biomod2 not installed. Install using:",
-         " `remotes::install_github('CeresBarros/biomod2@dev_currentCeres')`.")
+    stop(
+      "Package biomod2 not installed. Install using:",
+      " `remotes::install_github('CeresBarros/biomod2@dev_currentCeres')`."
+    )
   }
 }

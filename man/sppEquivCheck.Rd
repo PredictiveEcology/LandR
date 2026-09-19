@@ -28,3 +28,6 @@ This will expand a \code{sppEquiv} object that is only a vector or only a one-co
 \code{data.table} into a many column \code{data.table}, if the columns that are present do not
 contain \code{ensureColumns}.
 }
+\seealso{
+\link{sppEquivalencies_CA} for the \code{sppEquiv} table.
+}

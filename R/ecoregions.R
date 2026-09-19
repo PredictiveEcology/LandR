@@ -1,5 +1,6 @@
 utils::globalVariables(c(
-  "active", "ecoregion", "ecoregion_lcc", "ecoregionGroup", "ID", "landcover", "mapcode"
+  "active", "ecoregion", "ecoregion_lcc", "ecoregionGroup",
+  "ecoregionName", "ID", "landcover", "mapcode"
 ))
 
 #' Make `ecoregionMap` and `ecoregion` table
@@ -13,6 +14,11 @@ utils::globalVariables(c(
 #'
 #' @param ecoregionName the name describing the type of ecoregions in first map
 #' (e.g. `"ecoDistrict"`) if passing a polygon file.
+#' @param ecoregionTable A data.table that has 2 columns, `ecoregionName` (a factor)
+#'   and `ID` a factor of `paddedFloatToChar(1:length(unique(ecoregionName)),
+#'                         padL = max(nchar(length(unique(ecoregionName)))))`. This
+#'   represents all the possible values that are available; this will be joined
+#'   to `ecoregionMaps[[1]]` values
 #'
 #' @template rasterToMatch
 #'
@@ -21,51 +27,75 @@ utils::globalVariables(c(
 #' its information per `pixelID`
 #'
 #' @export
-ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch) {
+ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch,
+                              ecoregionTable) {
   .requireNamespace("fasterize", stopOnFALSE = TRUE)
 
-  # change the coordinate reference for all spatialpolygons
+  ## change the coordinate reference for all spatialpolygons
   message("ecoregionProducer 1: ", Sys.time())
-  #ecoregionMapInStudy <- intersect(ecoregionMapFull, fixErrors(aggregate(studyArea)))
+  # ecoregionMapInStudy <- intersect(ecoregionMapFull, fixErrors(aggregate(studyArea)))
 
-  # Alternative
+  ## alternative
   rstEcoregion <- list()
   rtmNAs <- is.na(as.vector(rasterToMatch[])) | as.vector(rasterToMatch[]) == 0
   for (erm in seq(ecoregionMaps)) {
     if (!inherits(ecoregionMaps[[erm]], c("Raster", "SpatRaster"))) {
       message("ecoregionProducer fastRasterize: ", Sys.time())
       rstEcoregion[[erm]] <- fasterize::fasterize(sf::st_as_sf(ecoregionMaps[[erm]]),
-                                                  raster(rasterToMatch),
-                                                  field = ecoregionName)
+        raster(rasterToMatch),
+        field = ecoregionName
+      )
     } else {
       rstEcoregion[[erm]] <- ecoregionMaps[[erm]]
     }
     rstEcoregion[[erm]][rtmNAs] <- NA
   }
-  rstEcoregionNAs <- do.call(`|`, lapply(rstEcoregion, function(x) is.na(as.vector(x[])) | as.vector(x[]) == 0))
+  rstEcoregionNAs <- do.call(`|`, lapply(rstEcoregion, function(x) {
+    is.na(as.vector(x[])) | as.vector(x[]) == 0
+  }))
   NAs <- rtmNAs | rstEcoregionNAs
-  a <- lapply(rstEcoregion, function(x) as.vector(x[])[!NAs])
+  # The next line fails when there are missing levels of the first one,
+  #   if they don't have all the digits of the whole, i.e.,
+  #   rstEcoregion[[1]] in one case has only levels 1:9
+  #   but the ecoregionTable has 1:11, so the join outside this function
+  #   fails
+  # a <- lapply(rstEcoregion, function(x) as.vector(x[])[!NAs])
+  # b[, (names(b)) := lapply(.SD, function(x) paddedFloatToChar(x, max(nchar(x), na.rm = TRUE)))]
+  # New Jan 2, 2026 by Eliot
+  a <- lapply(rstEcoregion, function(x) {
+    if (is.factor(x)) raster::factorValues(x, values(x, mat = FALSE)[!NAs])
+    else as.vector(x[])[!NAs]
+    })
   b <- as.data.table(a)
-  b[, (names(b)) := lapply(.SD, function(x) paddedFloatToChar(x, max(nchar(x), na.rm = TRUE)))]
+  b <- ecoregionTable[b, on = "ecoregionName"] # join that gets all the correct values
+  set(b, NULL, "ecoregionName", NULL)
+  set(b, NULL, "ID", as.character(b[["ID"]]))
+  for (cn in colnames(b)) {
+    if (data.table::uniqueN(nchar(b[[cn]])) != 1) {
+      set(b, NULL, cn, paddedFloatToChar(b[[cn]], max(nchar(b[[cn]]), na.rm = TRUE)))
+    }
+  }
 
-  # Take the first 2 columns, whatever their names, in case they are given something
+  ## take the first 2 columns, whatever their names, in case they are given something
   ecoregionValues <- factor(paste(b[[1]], b[[2]], sep = "_"))
 
   rstEcoregion <- rasterRead(rstEcoregion[[1]])
   ecoregionFactorLevels <- levels(ecoregionValues)
 
   rstEcoregion[!NAs] <- as.integer(ecoregionValues)
-  levs <- data.frame(ID = seq(ecoregionFactorLevels),
-                                     mapcode = seq(ecoregionFactorLevels),
-                                     ecoregion = gsub("_.*", "", ecoregionFactorLevels),
-                                     landcover = gsub(".*_", "", ecoregionFactorLevels),
-                                     ecoregion_lcc = ecoregionFactorLevels,
-                                     stringsAsFactors = TRUE)
+  levs <- data.frame(
+    ID = seq(ecoregionFactorLevels),
+    mapcode = seq(ecoregionFactorLevels),
+    ecoregion = gsub("_.*", "", ecoregionFactorLevels),
+    landcover = gsub(".*_", "", ecoregionFactorLevels),
+    ecoregion_lcc = ecoregionFactorLevels,
+    stringsAsFactors = TRUE
+  )
   levels(rstEcoregion) <- levs
 
   ecoregionTable <- as.data.table(levs)
   message("ecoregionProducer mapvalues: ", Sys.time())
-  ecoregionTable <- ecoregionTable[,.(active = "yes", mapcode, ecoregion, landcover, ecoregion_lcc)]
+  ecoregionTable <- ecoregionTable[, .(active = "yes", mapcode, ecoregion, landcover, ecoregion_lcc)]
 
   return(list(ecoregionMap = rstEcoregion, ecoregion = ecoregionTable))
 }
@@ -110,67 +140,87 @@ makeEcoregionDT <- function(pixelCohortData, speciesEcoregion) {
 #'
 #' @export
 makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
-  pixelData <- unique(pixelCohortData, by = "pixelIndex")
-  pixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))] # resorts them in order
 
-  ecoregionMap <-  rasterRead(ecoregionFiles$ecoregionMap)
+  truePixelData <- as.data.table(ecoregionFiles$ecoregionMap, cells = TRUE)
+  setnames(truePixelData, old = "cell", new = "pixelIndex")
+  truePixelData[, mapcode := as.integer(mapcode)] #for join
+  truePixelData <- truePixelData[ecoregionFiles$ecoregion, on = c("mapcode")]
+  #keep only ecoregions for which we have data
+  #but keep all observations of that ecoregion, regardless of whether it is currently filled
+  truePixelData <- truePixelData[ecoregionGroup %in% pixelCohortData$ecoregionGroup]
+  truePixelData[, ecoregionGroup := factor(as.character(ecoregionGroup))]
 
-  ## suppress this message call no non-missing arguments to min; returning Inf min(x@data@values, na.rm = TRUE)
-  suppressWarnings(ecoregionMap[pixelData$pixelIndex] <- as.integer(pixelData$ecoregionGroup))
-  levels(ecoregionMap) <- data.frame(
-    ID = seq(levels(pixelData$ecoregionGroup)),
-    ecoregion = gsub("_.*", "", levels(pixelData$ecoregionGroup)),
-    ecoregionGroup = levels(pixelData$ecoregionGroup),
-    stringsAsFactors = TRUE
-  )
+  ecoregionMap <- rasterRead(ecoregionFiles$ecoregionMap)
+
+  ## suppress this message call no non-missing arguments to min;
+  ## returning Inf min(x@data@values, na.rm = TRUE)
+  suppressWarnings(ecoregionMap[truePixelData$pixelIndex] <- as.integer(truePixelData$ecoregionGroup))
+
+  factorDT <- unique(truePixelData[, .(ecoregionGroup, landcover, ecoregionName)])
+  factorDT[, ID := seq(levels(ecoregionGroup))]
+  factorDT[, ecoregion := gsub("_.*", "", ecoregionGroup)]
+  setcolorder(factorDT, c("ID", "ecoregionGroup", "ecoregionName", "ecoregion", "landcover"))
+
+  levels(ecoregionMap) <- factorDT
+
   return(ecoregionMap)
 }
 
 #' Create Stacks of the `speciesEcoregion` content
 #'
-#' This will output a list of `RasterStack` objects. Each `RasterStack` show raster maps
-#' of one of the columns listed in `columns` and each `RasterLayer` will be one species.
+#' Each `RasterStack` show raster maps of one of the columns listed in `columns`
+#' and each `RasterLayer` will be one species.
 #'
 #' @template ecoregionMap
+#'
 #' @template speciesEcoregion
-#' @param columns The columns to use in the `speciesEcoregion` data.table.
-#'   Default is `c("establishprob", "maxB", "maxANPP")`
+#'
+#' @param columns The columns to use in the `speciesEcoregion` table.
+#'                Default is `c("establishprob", "maxB", "maxANPP")`
+#'
+#' @returns list of `RasterStack` or `SpatRaster` objects
+#'
 speciesEcoregionStack <- function(ecoregionMap, speciesEcoregion,
                                   columns = c("establishprob", "maxB", "maxANPP")) {
-  # stack of SEP
+  ## stack of SEP
   # Require(c("data.table", "PredictiveEcology/pemisc", "raster"))
   # bm2011 <- biomassMaps2011
   # speciesEcoregion <- bm2011$speciesEcoregion
   orig <- data.table::setDTthreads(2)
   on.exit(data.table::setDTthreads(orig), add = TRUE)
-  whNonNAs <- which(!is.na(ecoregionMap[]))
+  # whNonNAs <- which(!is.na(ecoregionMap[]))
+  whNonNAs <- which(!is.na(values(mat = FALSE, ecoregionMap))) # faster than previous line
   fv <- factorValues2(ecoregionMap,
-                      ecoregionMap[][whNonNAs],
-                      att = "ecoregionGroup")
+    ecoregionMap[][whNonNAs],
+    att = "ecoregionGroup"
+  )
   fvdt <- data.table(ecoregionGroup = as.character(fv), pixelID = whNonNAs)
   se2 <- fvdt[speciesEcoregion, on = "ecoregionGroup", allow.cartesian = TRUE]
   seList <- split(se2, by = "speciesCode")
   rasTemplate <- rasterRead(ecoregionMap)
   names(columns) <- columns
   spp <- names(seList)
-  stks <- lapply(columns, dtList = seList, rasTemplate = rasTemplate, spp = spp,
-                 function(column, dtList, rasTemplate, spp = spp) {
-    createStack(dtList = dtList, rasTemplate = rasTemplate, column = column, spp = spp)
-  })
+  stks <- lapply(columns,
+    dtList = seList, rasTemplate = rasTemplate, spp = spp,
+    function(column, dtList, rasTemplate, spp = spp) {
+      createStack(dtList = dtList, rasTemplate = rasTemplate, column = column, spp = spp)
+    }
+  )
 }
 
 createStack <- function(dtList, rasTemplate, column = "estblishprob", spp) {
   i <- 0
-  # mclapply(mc.cores = length(dtList),
   outList <- lapply(
-    dtList, rasTemplate = rasTemplate, column = column, spp = spp,
-    function(dt, rasTemplate, column, spp) {
-      i <<- i + 1
-      print(paste(column, " ", spp[i]))
-      rasTemplate[dt$pixelID] <- dt[[column]]
-      print("... Done!")
-      rasTemplate
-    })
+    dtList,
+    rasTemplate = rasTemplate, column = column, spp = spp,
+      FUN = function(dt, rasTemplate, column, spp) {
+        i <<- i + 1
+        print(paste(column, " ", spp[i]))
+        rasTemplate[dt$pixelID] <- dt[[column]]
+        print("... Done!")
+        rasTemplate
+      }
+  )
 
   .stack(outList)
 }

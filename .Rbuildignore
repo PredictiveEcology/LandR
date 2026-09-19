@@ -11,3 +11,8 @@
 ^LICENSE$
 ^man-roxygen$
 ^\.secret$
+^[.]?air[.]toml$
+^\.vscode$
+^\.dev_landisdisp$
+^benchmarks$
+CONTRIBUTING\.md

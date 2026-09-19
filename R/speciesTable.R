@@ -10,8 +10,9 @@ updateSpeciesTable <- function(speciesTable, params) {
   ## checks:
   traits <- names(params)
   missingTraits <- traits[!traits %in% names(speciesTable)]
-  if (length(missingTraits))
+  if (length(missingTraits)) {
     stop("The traits: ", paste(missingTraits, collapse = ", "), "\ndo not exist in `speciesTable`")
+  }
 
   for (trt in traits) {
     subParams <- params[[trt]]
@@ -20,8 +21,10 @@ updateSpeciesTable <- function(speciesTable, params) {
     spp <- names(subParams)
     missingSpp <- spp[!spp %in% speciesTable$species]
     if (length(missingSpp)) {
-      stop("The species: ", paste(missingSpp, collapse = ", "),
-           "\ndo not exist in `speciesTable$species`")
+      stop(
+        "The species: ", paste(missingSpp, collapse = ", "),
+        "\ndo not exist in `speciesTable$species`"
+      )
     }
 
     ## this is sub ideal to convert classes, but the only solution I found.
@@ -29,8 +32,9 @@ updateSpeciesTable <- function(speciesTable, params) {
     ## only as.numeric(...) worked
     if (class(unlist(subParams)) != class(speciesTable[[trt]])) {
       asFUN <- get(paste0("as.", class(unlist(subParams))))
-      if (!is.function(asFUN))
+      if (!is.function(asFUN)) {
         stop("Can't find an `as.` method to convert class to '", class(unlist(subParams)), "'")
+      }
 
       speciesTable <- speciesTable[, (trt) := lapply(.SD, asFUN), .SDcols = trt]
     }

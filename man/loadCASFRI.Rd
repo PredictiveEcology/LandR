@@ -14,26 +14,27 @@ loadCASFRI(
 )
 }
 \arguments{
-\item{CASFRIRas}{TODO: description needed}
+\item{CASFRIRas}{\code{RasterLayer} object}
 
-\item{attrFile}{TODO: description needed}
+\item{attrFile}{character string specifying a CASFRI attribute filename}
 
-\item{headerFile}{TODO: description needed}
+\item{headerFile}{character string specifying a CASFRI header filename}
 
-\item{sppEquiv}{table with species name equivalencies between the kNN and final naming formats.
-See \code{data("sppEquivalencies_CA", "LandR")}.
+\item{sppEquiv}{table with species name equivalencies between naming conventions
+(see \link{sppEquivalencies_CA}, also \code{?sppEquiv}).
 For functions that have \code{mixedType}, this only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use \code{data("sppEquivalencies_CA", "LandR")}.}
+If not provided and \code{mixedType == 2}, will attempt to use \code{LandR::sppEquivalencies_CA}.}
 
-\item{sppEquivCol}{the column name to use from \code{sppEquiv}.
+\item{sppEquivCol}{the column name to use from \code{sppEquiv} (see \link{sppEquivalencies_CA}).
 For functions that have \code{mixedType}, only necessary if \code{mixedType == 2}.
-If not provided and \code{mixedType == 2}, will attempt to use "Boreal".}
+If \code{sppEquiv} is not provided and \code{mixedType == 2}, will use the column of
+\code{LandR::sppEquivalencies_CA} that best matches the species names.}
 
 \item{type}{Character string. Either \code{"cover"} or \code{"age"}.}
 }
 \value{
-TODO: description needed
+list with named elements: \code{CASFRIattrLong} and \code{CASFRIdt} (both data.tables)
 }
 \description{
-TODO: description needed
+Loads CASFRIv4 data specifically supplied for the LandWeb project
 }

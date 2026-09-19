@@ -14,7 +14,7 @@ BioSIM_getMPBSLR(dem, years, SLR = "R", climModel = "GCM4", rcp = "RCP45")
 \item{SLR}{character. Specifies which climate suitability index to extract.
 Currently, one of \code{"S"}, \code{"L"}, \code{"R"}, or \code{"G"},
 corresponding to Safranyik-P3P4, Logan-2b, Régnière Cold Tolerance Survival, or
-their Geometric product (S\*L\*R), respectively.}
+their Geometric product (\code{S*L*R}), respectively.}
 
 \item{climModel}{climate model to use. one of \code{"GCM4"} or \code{"RCM4"}.}
 

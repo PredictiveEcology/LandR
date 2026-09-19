@@ -3,7 +3,7 @@
 #' Extension v3.2.1 (Scheller & Miranda, 2015):
 #'
 #' ```r
-#' initialB = asInteger(pmin(maxANPP, asInteger(pmax(1, maxANPP \* exp(-1.6 \* sumB / maxB_eco)))))
+#' initialB = asInteger(pmin(maxANPP, asInteger(pmax(1, maxANPP * exp(-1.6 * sumB / maxB_eco)))))
 #' ```
 #'
 #' where `maxANPP` and `maxB_eco` are the maximum ANPP and B parameters of the species

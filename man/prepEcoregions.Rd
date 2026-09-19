@@ -22,7 +22,9 @@ representing ecoregions}
 
 \item{ecoregionLayerField}{optional. The field in \code{ecoregionLayer} that represents ecoregions.}
 
-\item{rasterToMatchLarge}{the \code{rasterToMatchLarge} object from \code{sim}}
+\item{rasterToMatchLarge}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatchLarge} should correspond to \code{studyAreaLarge} if used.}
 
 \item{rstLCCAdj}{\code{RasterLayer} representing land cover adjusted for non-forest classes}
 

@@ -9,8 +9,9 @@ getWildfire_NFI(dPath, rasterToMatch, url = NULL)
 \arguments{
 \item{dPath}{destination path for archive}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
 \item{url}{location from which to download the wildfire raster layer(s)}
 }

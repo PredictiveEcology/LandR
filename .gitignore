@@ -32,3 +32,9 @@ rsconnect/
 inputs/
 J4RTmpFile
 .secret
+
+# LANDISDisp dev test artifacts
+.dev_landisdisp/devtools_test*.log
+tests/testthat/Rplot*.png
+.claude
+Rplots.pdf

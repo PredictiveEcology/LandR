@@ -9,8 +9,9 @@ prepInputsFireYear(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950)
 \arguments{
 \item{...}{Additional arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
 \item{fireField}{field used to rasterize fire polys}
 
@@ -23,31 +24,40 @@ a \code{SpatRaster} layer of fire perimeters with fire year values.
 Create a raster of fire perimeters
 }
 \examples{
-library(SpaDES.tools)
-library(terra)
-library(reproducible)
+\dontshow{if (!isTRUE(as.logical(Sys.getenv("CI")))) withAutoprint(\{ # examplesIf}
+## NOTE: runs locally, skipped on CI -- downloads NFDB_poly.zip from
+## cwfis.cfs.nrcan.gc.ca (same predicate as testthat::skip_on_ci())
+withr::local_options(list(
+  reproducible.useTerra = TRUE,
+  reproducible.rasterRead = "terra::rast"
+))
 
-options("reproducible.useTerra" = TRUE, "reproducible.rasterRead" = "terra::rast")
-
-targetCRS <- crs(randomStudyArea())
-randomPoly <- randomStudyArea(
-  center = vect(cbind(-115, 50), crs = targetCRS),
-  size = 1e+7,
+randomPoly <- LandR::randomStudyArea(
+  size = 1e+8, seed = 5
 )
-buffExt <- buffer(randomPoly, 1e+3) |> ext()
-ras2match <- rast(res = 10, ext = ext(randomPoly), crs = crs(randomPoly))
-ras2match <- rasterize(randomPoly, ras2match)
+
+ras2match <- terra::rast(
+  randomPoly,
+  vals = 1,
+  res = 100,
+)
+ras2match <- terra::mask(ras2match, randomPoly)
 
 firePerimeters <- prepInputsFireYear(
-  url = paste0("https://cwfis.cfs.nrcan.gc.ca/downloads",
-               "/nfdb/fire_poly/current_version/NFDB_poly.zip"),
-  destinationPath = tempdir(),
+  url = paste0(
+    "https://cwfis.cfs.nrcan.gc.ca/downloads/",
+    "nfdb/fire_poly/current_version/NFDB_poly.zip"
+  ),
+  destinationPath = file.path(tempdir(), "ex_prepInputsFireYear"),
   rasterToMatch = ras2match,
-  earliestYear = 1930
+  earliestYear = 1950
 )
 
 if (interactive()) {
-  plot(firePerimeters)
-  plot(randomPoly, add = TRUE)
+  terra::plot(firePerimeters)
+  terra::plot(randomPoly, add = TRUE)
 }
+
+withr::deferred_run()
+\dontshow{\}) # examplesIf}
 }

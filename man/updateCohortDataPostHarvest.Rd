@@ -15,7 +15,7 @@ updateCohortDataPostHarvest(
   provenanceTable,
   trackPlanting = FALSE,
   initialB = 10,
-  cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
+  cohortDefinitionCols = LandR::cohortDefinitionCols(),
   verbose = getOption("LandR.verbose", TRUE),
   doAssertion = getOption("LandR.assertions", TRUE)
 )
@@ -61,7 +61,8 @@ in column 'planted'}
 
 \item{initialB}{the initial biomass of new cohorts. Defaults to ten, even if NA/NULL is passed.}
 
-\item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts}
+\item{cohortDefinitionCols}{the columns in \code{cohortData} that define unique cohorts
+(default: \code{c("pixelGroup", "speciesCode", "age")}).}
 
 \item{verbose}{Controls message output. Defaults to \code{getOption("LandR.verbose")}}
 

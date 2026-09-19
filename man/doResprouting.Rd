@@ -31,7 +31,8 @@ activated and in how many pixels, for each year. Only necessary if \code{calibra
 
 \item{serotinyPixel}{a vector of pixels where serotiny was activated;}
 
-\item{treedFirePixelTableSinceLastDisp}{a vector of pixels that burnt and were forested in the previous time step.}
+\item{treedFirePixelTableSinceLastDisp}{a vector of pixels that burnt and were forested
+in the previous time step.}
 
 \item{currentTime}{integer. The current simulation time obtained with \code{time(sim)}}
 

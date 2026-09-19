@@ -12,7 +12,8 @@ convertUnwantedLCC(
   ecoregionGroupVec,
   speciesEcoregion,
   pixelClassesToReplace,
-  doAssertion = getOption("LandR.assertions", TRUE)
+  doAssertion = getOption("LandR.assertions", TRUE),
+  method = c("nearestWeighted", "nearestRandom")
 )
 }
 \arguments{
@@ -50,26 +51,73 @@ the user to only replace some of the pixels with a given class.}
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
+
+\item{method}{Character; where the draw among an unwanted pixel's available land-cover
+classes comes from. Both options weight the classes by their abundance in the pixel's
+neighbourhood and differ only in reproducibility: \code{"nearestWeighted"} (default) keys
+the draw on the pixel's ground position, so it is deterministic and seed-free, while
+\code{"nearestRandom"} draws from the RNG and so varies with \code{set.seed()}. See Details.}
 }
 \value{
-A \code{data.table} with two columns, \code{pixelIndex} and \code{ecoregionGroup}.
+A \code{data.table} with three columns, \code{newPossLCC}, \code{pixelIndex} and \code{ecoregionGroup}.
 This represents the new codes to used in the \code{pixelIndex} locations.
 These should have no values overlapping with \code{classesToReplace}.
+\code{newPossLCC} is the assigned land-cover class itself, i.e. \code{ecoregionGroup} without
+its ecoregion prefix; it is \code{NA} for pixels that could not be assigned.
 }
 \description{
-This will search around the pixels on \code{rstLCC} that have
-\code{classesToReplace}, and search in iteratively increasing
-radii outwards for other Land Cover Classes than the those indicated in
-\code{classesToReplace}. This will constrain
-It will then take the cohorts that were in pixels with \code{classesToReplace}
-and assign them new values in the output object. This function will
-also check that it must be an \code{ecoregionCode} that already exists in
-\code{cohortData}, i.e., not create new \code{ecoregionCode} values. See Details.
+This searches around the pixels on \code{rstLCC} that have \code{classesToReplace} for the
+nearest neighbouring Land Cover Class other than those indicated in
+\code{classesToReplace}, and assigns the cohorts in those pixels the corresponding new
+\code{ecoregionCode}. Replacement codes must already exist in \code{availableERC_by_Sp},
+i.e., no new \code{ecoregionCode} values are created. See Details.
 }
 \details{
 This function is designed to be used in highly constrained situations, where it is not
 just replacing a Land Cover Class by a neighbouring Land Cover Class. But it can
 be used for the simpler cases of simply replacing a Land Cover Class.
+
+Each pixel whose value is in \code{classesToReplace} is assigned an available
+\code{initialEcoregionCode} taken from its neighbourhood. For each candidate land-cover
+class present in \code{rstLCC}, the distance from every pixel to the nearest cell of that
+class is computed with a single vectorized \code{\link[terra:distance]{terra::distance()}} call, and each unwanted
+pixel keeps only those classes whose implied \code{initialEcoregionCode} is available for
+that pixel's ecoregion (and all of its \code{speciesCode}s). One of the surviving classes is
+then drawn with probability proportional to how many cells of that class fall inside
+the pixel's neighbourhood -- the smallest window reaching that pixel's nearest
+available class. \code{method} decides only where the draw comes from:
+\itemize{
+\item \code{"nearestWeighted"} (default) derives it from the pixel's own ground position, so the
+result is deterministic: it needs no \code{set.seed()}, is stable under \code{\link[reproducible:Cache]{reproducible::Cache()}}
+(which does not key on RNG state), and, because the key is the cell \emph{centre} rather than
+the cell \emph{index}, a grid-aligned crop reproduces its parent raster cell for cell --
+so a small development subset agrees with the full run. Reprojecting or changing
+resolution changes the pixels, and so changes the result.
+\item \code{"nearestRandom"} draws from the RNG instead, so it varies with \code{set.seed()}. Use it
+when replicates should differ; note that \code{Cache()} will replay a single draw unless
+the seed is part of the cache key.
+}
+
+Both are \code{O(nClasses)} distance transforms, independent of the geometry of the
+\code{classesToReplace} blobs. They replace an earlier iterative \code{spread2()}-based search
+whose run time grew with the square of the radius of the largest contiguous block of
+\code{classesToReplace}, which could take hours -- or never finish -- on large study areas
+with big lakes or burns, or an irregular masked boundary.
+
+The abundance weighting restores the behaviour of that former search, which sampled
+among all valid cells within the radius at which it first found one and so favoured
+classes in proportion to their local abundance. The window is rectangular, matching the
+Chebyshev neighbourhood of \code{spread2(directions = 8)}. What it does \emph{not} reproduce is
+that implementation's exact output: the radius here comes from a Euclidean distance
+transform rather than from counting spread iterations, and the draws differ. Runs prior
+to LandR 1.2.0.9004 cannot be reproduced bit-for-bit by any current \code{method}.
+
+LandR 1.2.0.9004's deterministic nearest-class rule, which broke ties to the lowest
+land-cover class, has been removed. Ties are common -- 35-41\% of unwanted pixels on real
+landscapes -- so always taking the lowest code biased the result toward low-numbered
+classes, which in the Canada LCC coding means toward sparse, non-forest cover: it
+assigned shrubs 1.69x as often as the previous implementation, and broadleaf 0.58x and
+mixedwood 0.28x as often.
 }
 \author{
 Eliot McIntire

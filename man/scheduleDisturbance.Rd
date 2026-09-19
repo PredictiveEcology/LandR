@@ -19,6 +19,6 @@ Test whether disturbance should be scheduled
 }
 \examples{
 \dontrun{
-  doEvent <- scheduleDisturbance(sim$rstCurrentBurn, time(sim), disturbanceType = "Burn")
+doEvent <- scheduleDisturbance(sim$rstCurrentBurn, time(sim), disturbanceType = "Burn")
 }
 }

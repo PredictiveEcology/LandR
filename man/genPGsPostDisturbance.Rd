@@ -9,7 +9,7 @@ genPGsPostDisturbance(
   pixelGroupMap,
   disturbedPixelTable,
   disturbedPixelCohortData,
-  colsForPixelGroups = LandR::columnsForPixelGroups,
+  colsForPixelGroups = LandR::columnsForPixelGroups(),
   doAssertion = getOption("LandR.assertions", TRUE)
 )
 }
@@ -26,8 +26,9 @@ and surviving, but \emph{NOT} regenerating cohorts (cohorts for whom regeneratio
 or resprouting was successfully activated), in \emph{disturbed pixels only}. Dead cohorts should
 age B == 0, surviving cohorts B > 0.}
 
-\item{colsForPixelGroups}{character. \code{cohortData} columns used to find identical pixels in terms of
-cohort composition, and group them into \code{pixelGroups}.}
+\item{colsForPixelGroups}{character. \code{cohortData} columns used to find identical pixels in terms
+of cohort composition, and group them into \code{pixelGroups}
+(default: \code{c("ecoregionGroup", "speciesCode", "age", "B")}).}
 
 \item{doAssertion}{A logical indicating whether some internal tests should be run to
 ensure the function is running correctly.

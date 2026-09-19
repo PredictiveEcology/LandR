@@ -27,8 +27,9 @@ its information per \code{pixelID.} See \code{ecoregionProducer}.}
 \item{biomassMap}{raster of total stand biomass in t/ha. Biomass units are
 converted to g/m^2.}
 
-\item{rasterToMatch}{A \code{RasterLayer} objects to use as the template for all subsequent
-raster operations (i.e., the one used throughout the simulation).}
+\item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
+raster operations (i.e., the one used throughout the simulation).
+\code{rasterToMatch} should correspond to \code{studyArea} if used.}
 
 \item{rstLCC}{raster of land-cover class, e.g., LCC2005}
 

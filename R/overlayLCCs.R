@@ -48,31 +48,47 @@ utils::globalVariables(c(
 #'   `length(LCCs) + 1` columns, and `2 ^ length(LCCs)` rows.
 #'   Currently not used.
 #'
+#' @inheritParams convertUnwantedLCC
+#'
 #' @author Eliot McIntire and Alex Chubaty
 #' @export
-overlayLCCs <- function(LCCs, forestedList, outputLayer,
-                        NAcondition, NNcondition, remapTable = NULL,
-                        classesToReplace, availableERC_by_Sp,
-                        forestEquivalencies = NULL) {
+overlayLCCs <- function(
+  LCCs,
+  forestedList,
+  outputLayer,
+  NAcondition,
+  NNcondition,
+  remapTable = NULL,
+  classesToReplace,
+  availableERC_by_Sp,
+  forestEquivalencies = NULL,
+  method = c("nearestWeighted", "nearestRandom")
+) {
+  method <- match.arg(method)
   forestedListFail <- FALSE
   if (is.null(names(forestedList))) forestedListFail <- TRUE
-  if (!identical(sort(names(forestedList)), sort(names(LCCs))))
+  if (!identical(sort(names(forestedList)), sort(names(LCCs)))) {
     forestedListFail <- TRUE
+  }
 
-  if (isTRUE(forestedListFail))
+  if (isTRUE(forestedListFail)) {
     stop("forestedList must use the same names as LCCs")
+  }
 
   # make sure they are in same order
   theOrder <- match(names(forestedList), names(LCCs))
-  if (!identical(theOrder, seq_along(forestedList)))
+  if (!identical(theOrder, seq_along(forestedList))) {
     forestedList <- forestedList[theOrder]
+  }
 
   fn <- eval(parse(text = getOption("reproducible.rasterRead"))) ## see LandR#99
   if (!is(LCCs, "RasterStack") && !identical(fn, terra::rast)) {
     if (!requireNamespace("raster", quietly = TRUE)) {
-      stop("raster pkg is not installed; ",
-           "either set options('reproducible.rasterRead' = 'terra::rast'), ",
-           "or install.packages('raster').")
+      stop(
+        "raster pkg is not installed; ",
+        "either set options('reproducible.rasterRead' = 'terra::rast'), ",
+        "or install.packages('raster')."
+      )
     }
     fn <- raster::stack
   }
@@ -114,21 +130,26 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
         dt1 <- dt[NNcondition == TRUE, c("initialEcoregionCode", "pixelIndex")]
         if (any(classesToReplace %in% dt1$initialEcoregionCode)) {
           ## It's possible that there are no pixels with classesToReplace that fulfill the NNcondition
-          a <- convertUnwantedLCC(classesToReplace = classesToReplace,
-                                  rstLCC = LCCs[[outputLayer]],
-                                  theUnwantedPixels = dt1$pixelIndex,
-                                  availableERC_by_Sp = na.omit(dt)[, c("initialEcoregionCode", "pixelIndex")])
+          a <- convertUnwantedLCC(
+            classesToReplace = classesToReplace,
+            rstLCC = LCCs[[outputLayer]],
+            theUnwantedPixels = dt1$pixelIndex,
+            availableERC_by_Sp = na.omit(dt)[, c("initialEcoregionCode", "pixelIndex")],
+            method = method
+          )
           dt <- a[dt, on = "pixelIndex"]
           dt[!is.na(ecoregionGroup), ecoregionCode := ecoregionGroup]
           dt[, ecoregionGroup := NULL]
         }
       }
     } else {
-      if (is.data.frame(remapTable))
+      if (is.data.frame(remapTable)) {
         remapTable <- as.data.table(remapTable)
+      }
 
-      if (!all(names(LCCs) %in% colnames(remapTable)))
+      if (!all(names(LCCs) %in% colnames(remapTable))) {
         stop("All LCC names must be columns in remapTable")
+      }
 
       namesLCCs <- names(LCCs)
       names(namesLCCs) <- namesLCCs
@@ -140,17 +161,20 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
       setkeyv(dt, names(LCCs))
       setkeyv(remapTable, names(LCCs))
       dt2 <- merge(dt, remapTable, all.x = TRUE) ## TODO: use 'dt' instead of 'dt2'
-      dt2[, ':='(initialEcoregionCode = newLCC, ecoregionCode = newLCC)]
+      dt2[, ":="(initialEcoregionCode = newLCC, ecoregionCode = newLCC)]
       dt2[, newLCC := NULL]
 
       dt1 <- dt2[initialEcoregionCode %in% classesToReplace, c("initialEcoregionCode", "pixelIndex")]
 
       ## It's possible that there are no pixels with classesToReplace
       if (any(classesToReplace %in% dt1$initialEcoregionCode)) {
-        a <- convertUnwantedLCC(classesToReplace = classesToReplace,
-                                rstLCC = LCCs[[outputLayer]],
-                                #theUnwantedPixels = dt1$pixelIndex,
-                                availableERC_by_Sp = na.omit(dt2)[, c("initialEcoregionCode", "pixelIndex")])
+        a <- convertUnwantedLCC(
+          classesToReplace = classesToReplace,
+          rstLCC = LCCs[[outputLayer]],
+          # theUnwantedPixels = dt1$pixelIndex,
+          availableERC_by_Sp = na.omit(dt2)[, c("initialEcoregionCode", "pixelIndex")],
+          method = method
+        )
         dt <- a[dt, on = "pixelIndex"]
         dt[!is.na(ecoregionGroup), ecoregionCode := ecoregionGroup]
         dt[, ecoregionGroup := NULL]
@@ -162,8 +186,9 @@ overlayLCCs <- function(LCCs, forestedList, outputLayer,
     # replace all values in the raster
     LCCs[[outputLayer]][] <- dt$ecoregionCode
   }
-  if (is(LCCs[[outputLayer]], "SpatRaster"))
+  if (is(LCCs[[outputLayer]], "SpatRaster")) {
     LCCs[[outputLayer]] <- as.int(LCCs[[outputLayer]])
+  }
 
   return(LCCs[[outputLayer]])
 }
