@@ -10,6 +10,7 @@ utils::globalVariables(c())
 #'
 #' @export
 #' @rdname dummy-inputs
+#' @aliases dummy-inputs dummyInputs
 makeDummyEcoregionMap <- function(rasterToMatch) {
   ecoregionMap <- randomPolygons(
     ras = rasterToMatch,

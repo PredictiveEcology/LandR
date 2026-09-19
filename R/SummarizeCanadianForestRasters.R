@@ -128,6 +128,7 @@ prep_polygons <- function(raster, polygons, polygon_id = NULL, filter_ids = NULL
 #'
 #' @export
 #' @rdname raster_stats
+#' @aliases raster_stats
 calc_raster_counts <- function(raster, polygons = NULL, polygon_id = NULL, filter_ids = NULL) {
   stopifnot(
     requireNamespace("dplyr", quietly = TRUE),

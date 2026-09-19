@@ -67,6 +67,7 @@ utils::globalVariables(c(
 #'
 #' @export
 #' @rdname Disturbances
+#' @aliases Disturbances
 FireDisturbance <- function(cohortData = copy(sim$cohortData), cohortDefinitionCols = c("pixelGroup", "age", "speciesCode"),
                             calibrate = FALSE, postFireRegenSummary = copy(sim$postFireRegenSummary),
                             treedFirePixelTableSinceLastDisp = sim$treedFirePixelTableSinceLastDisp,

@@ -2,6 +2,8 @@
 % Please edit documentation in R/plot-transitions.R
 \name{vtm2conifdecid}
 \alias{vtm2conifdecid}
+\alias{vegetation-transitions}
+\alias{vegetationTransitions}
 \alias{vegTransitions}
 \alias{plotVegTransitions}
 \title{Create a summaries of vegetation type transitions}

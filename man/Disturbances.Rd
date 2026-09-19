@@ -2,6 +2,7 @@
 % Please edit documentation in R/disturbances.R
 \name{FireDisturbance}
 \alias{FireDisturbance}
+\alias{Disturbances}
 \alias{FireDisturbancePM}
 \alias{PeatlandThermokarst}
 \title{Disturbance functions}

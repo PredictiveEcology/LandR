@@ -2,6 +2,7 @@
 % Please edit documentation in R/prepSpeciesLayers.R
 \name{prepSpeciesLayers_KNN}
 \alias{prepSpeciesLayers_KNN}
+\alias{prepSpeciesLayers}
 \alias{prepSpeciesLayers_CASFRI}
 \alias{prepSpeciesLayers_Pickell}
 \alias{prepSpeciesLayers_ForestInventory}

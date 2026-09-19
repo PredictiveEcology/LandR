@@ -562,6 +562,7 @@ speciesEcoregionLatestYear <- function(speciesEcoregion, currentTime) {
 #'
 #' @export
 #' @rdname uniqueDefinitions
+#' @aliases uniqueDefinitions
 uniqueCohortDefinition <- c("pixelGroup", "speciesCode", "age", "B")
 
 #' @export

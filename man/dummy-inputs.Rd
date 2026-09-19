@@ -2,6 +2,8 @@
 % Please edit documentation in R/makeDummyInputs.R
 \name{makeDummyEcoregionMap}
 \alias{makeDummyEcoregionMap}
+\alias{dummy-inputs}
+\alias{dummyInputs}
 \alias{makeDummyRawBiomassMap}
 \alias{makeDummyStandAgeMap}
 \alias{makeDummyRstLCC}

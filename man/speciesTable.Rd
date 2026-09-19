@@ -2,6 +2,7 @@
 % Please edit documentation in R/LANDIS-II-tables.R
 \name{getSpeciesTable}
 \alias{getSpeciesTable}
+\alias{speciesTable}
 \alias{prepSpeciesTable}
 \title{Download and prepare a species traits table for use with \code{Biomass_core} module}
 \usage{

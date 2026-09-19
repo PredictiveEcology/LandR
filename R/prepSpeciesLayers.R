@@ -284,6 +284,7 @@ CASFRItoSpRasts <- function(
 #'
 #' @export
 #' @rdname prepSpeciesLayers
+#' @aliases prepSpeciesLayers
 prepSpeciesLayers_KNN <- function(
     destinationPath,
     outputPath,

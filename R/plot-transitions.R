@@ -17,6 +17,7 @@ utils::globalVariables(c(
 #'
 #' @export
 #' @rdname vegetation-transitions
+#' @aliases vegetation-transitions vegetationTransitions
 vtm2conifdecid <- function(vtm, sppEquiv = NULL, sppEquivCol = "LandR", zones) {
   if (is.null(sppEquiv)) {
     sppEquiv <- get(

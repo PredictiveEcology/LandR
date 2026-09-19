@@ -2,6 +2,7 @@
 % Please edit documentation in R/SummarizeCanadianForestRasters.R
 \name{calc_raster_counts}
 \alias{calc_raster_counts}
+\alias{raster_stats}
 \alias{calc_raster_stats}
 \alias{plot_raster_stats}
 \title{Raster summary statistics and maps by polygon}
