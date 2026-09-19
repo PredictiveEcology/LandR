@@ -346,6 +346,18 @@
 
 ## Bug fixes
 
+* `?speciesTable`, `?Disturbances`, `?prepSpeciesLayers`, `?raster_stats`, `?uniqueDefinitions`,
+  `?vegetationTransitions`, `?dummyInputs` and `help("LandR-deprecated")` resolve again. With
+  `@rdname`, roxygen takes `\name{}` from the first function in the block, so the topic a reader
+  would type was not an alias of anything -- the same defect that made `[leadingProportions]` a
+  dead link. The two hyphenated group topics also gained camelCase aliases, since `?dummy-inputs`
+  parses as a subtraction and needs backticks.
+
+* Help pages no longer show stray backslashes where an asterisk was intended. `?BioSIM_getMPBSLR`
+  rendered the geometric product as `(S\*L\*R)`, and the `initialB` formula in
+  `?Disturbances` / `?updateCohortData` rendered as `maxANPP \* exp(...)`. The escapes are
+  correct for markdown but roxygen passes `\*` through to Rd, where it is not a macro.
+
 * `BioSIM_getMPBSLR()` returns data again. Its per-year lambda discarded the `Cache()`d result
   and then called `setDT()` on an as-yet-unassigned `slr`, so the call errored out before it
   could build the raster stack. It also never unwrapped the named list that `generateWeather()`

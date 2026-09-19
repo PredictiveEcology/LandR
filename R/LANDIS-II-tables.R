@@ -52,6 +52,7 @@ landisIIrepo <- paste0(
 #'
 #' @export
 #' @rdname speciesTable
+#' @aliases speciesTable
 #' @seealso [assertSpeciesTableRaw()]
 getSpeciesTable <- function(url = NULL, dPath = tempdir(), cacheTags = NULL) {
   if (is.null(url)) {

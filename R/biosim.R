@@ -150,7 +150,7 @@ BioSIM_getWindMonthly <- function(dem, years, months, climModel = "GCM4", rcp = 
 #' @param SLR character. Specifies which climate suitability index to extract.
 #'            Currently, one of `"S"`, `"L"`, `"R"`, or `"G"`,
 #'            corresponding to Safranyik-P3P4, Logan-2b, Régnière Cold Tolerance Survival, or
-#'            their Geometric product (S\*L\*R), respectively.
+#'            their Geometric product (`S*L*R`), respectively.
 #' @param climModel climate model to use. one of `"GCM4"` or `"RCM4"`.
 #' @param rcp RCP scenario to use. one of `"RCP45"` or `"RCP85"`.
 #'

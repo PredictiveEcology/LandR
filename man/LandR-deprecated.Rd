@@ -2,6 +2,7 @@
 % Please edit documentation in R/maps.R, R/prepSpeciesLayers.R
 \name{makeVegTypeMap}
 \alias{makeVegTypeMap}
+\alias{LandR-deprecated}
 \alias{loadkNNSpeciesLayersValidation}
 \alias{prepSpeciesLayers_KNN2011}
 \title{Make a vegetation type map from a stack of species abundances}

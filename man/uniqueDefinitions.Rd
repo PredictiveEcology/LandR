@@ -2,6 +2,7 @@
 % Please edit documentation in R/cohorts.R
 \name{uniqueCohortDefinition}
 \alias{uniqueCohortDefinition}
+\alias{uniqueDefinitions}
 \alias{uniqueSpeciesEcoregionDefinition}
 \title{The columns in a \code{cohortData} that define "unique"}
 \usage{

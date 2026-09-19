@@ -2,6 +2,7 @@
 % Please edit documentation in R/disturbances.R
 \name{FireDisturbance}
 \alias{FireDisturbance}
+\alias{Disturbances}
 \alias{FireDisturbancePM}
 \alias{PeatlandThermokarst}
 \title{Disturbance functions}
@@ -156,7 +157,7 @@ May contain columns \code{inflationFactor}  (used to adjust \code{maxB}) and \co
 If \code{NULL} or \code{NA}, initial cohort biomass is calculated as in LANDIS-II Biomass Succession
 Extension v3.2.1 (Scheller & Miranda, 2015):
 
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{initialB = asInteger(pmin(maxANPP, asInteger(pmax(1, maxANPP \\* exp(-1.6 \\* sumB / maxB_eco)))))
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{initialB = asInteger(pmin(maxANPP, asInteger(pmax(1, maxANPP * exp(-1.6 * sumB / maxB_eco)))))
 }\if{html}{\out{</div>}}
 
 where \code{maxANPP} and \code{maxB_eco} are the maximum ANPP and B parameters of the species

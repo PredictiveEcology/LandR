@@ -585,6 +585,7 @@ standAgeMapGenerator <- function(
 #'
 #' @export
 #' @rdname LandR-deprecated
+#' @aliases LandR-deprecated
 makeVegTypeMap <- function(speciesStack, vegLeadingProportion, mixed, ...) {
   .Deprecated("vegTypeMapGenerator")
 
