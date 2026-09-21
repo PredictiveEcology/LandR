@@ -24,6 +24,34 @@ testthat::test_that("adjustAgeToLongevity works", {
   expect_error(adjustAgeToLongevity(cd, traits, 0.5))
 })
 
+testthat::test_that("adjustAgeToLongevity preserves the class of speciesCode", {
+  ## `pixelCohortData` carries speciesCode as a FACTOR -- that is what
+  ## makeAndCleanInitialCohortData() produces, via melt()'s variable column. The
+  ## longevity table, though, is typically built from a character species column
+  ## (e.g. `species[, .(speciesCode = species, longevity)]`). The join below is
+  ## `pixelCohortData[maxAges, on = "speciesCode"]`, and data.table takes the join
+  ## column from `i`, so a character `maxAges` silently replaced the factor.
+  ##
+  ## Downstream that matters: Biomass_core asserts speciesCode = "factor" on
+  ## cohortData, so the coercion surfaced only much later, as a failed assertion.
+  cdF <- data.table(speciesCode = factor(c("A", "A", "A", "B", "B")),
+                    age = c(10, 200, 300, 200, 100))
+  traitsChr <- data.table(speciesCode = c("A", "B"), longevity = c(200, 250))
+
+  outF <- suppressMessages(adjustAgeToLongevity(cdF, traitsChr, 0.9))
+  expect_s3_class(outF$speciesCode, "factor")
+  expect_identical(levels(outF$speciesCode), levels(cdF$speciesCode))
+
+  ## ... and a character input must stay character (no gratuitous promotion)
+  cdC <- data.table(speciesCode = c("A", "A", "A", "B", "B"),
+                    age = c(10, 200, 300, 200, 100))
+  outC <- suppressMessages(adjustAgeToLongevity(cdC, traitsChr, 0.9))
+  expect_type(outC$speciesCode, "character")
+
+  ## the ages themselves must be unaffected by the class of the join column
+  expect_equal(outF$age, outC$age)
+})
+
 
 ## shared fixture: an unwanted blob straddling a 210 | 220 boundary, with scattered 230
 cuFixture <- function(n = 30L, res = 100) {
