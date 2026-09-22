@@ -1,5 +1,16 @@
 # LandR (development version)
 
+* `adjustAgeToLongevity()` no longer changes the class of `speciesCode`. It joins
+  `pixelCohortData[maxAges, on = "speciesCode"]`, and `data.table` takes the join column from `i`,
+  so a `longevity` table built from a character species column -- the usual case, e.g.
+  `species[, .(speciesCode = species, longevity)]` -- silently replaced a factor
+  `pixelCohortData$speciesCode` with character. The input's class and levels are now restored.
+  This surfaced far downstream: `Biomass_core` asserts `speciesCode = "factor"` on `cohortData`,
+  and `Biomass_borealDataPrep` used to mask it by rebuilding `pixelCohortData` (whose `melt()`
+  re-created the factor) right afterwards. Once that rebuild was removed upstream, any caller
+  using `adjustAgeAndLongevity = TRUE` got a failed assertion instead. The existing tests only
+  ever passed character `speciesCode`, so neither class was pinned; both are now.
+
 * **Forest-land inputs are prepared once per study area.** `prepInputs_SCANFI_LCC_FAO()` and
   `prepInputs_NTEMS_LCC_FAO()` prepare their forest-land inputs -- the FAO forest layer and the
   land cover of each of `forestLandYears` -- once per target geometry, instead of on every call. `fireSense` calls them once per dataYear on one study area, so

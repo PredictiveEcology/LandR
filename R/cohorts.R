@@ -2604,6 +2604,16 @@ adjustAgeToLongevity <- function(pixelCohortData, longevity, adjustmentFactor) {
   maxAges <- longevity[, .(speciesCode, maxAge = round(longevity * adjustmentFactor))]
   ## Correct the age for cohorts that exceed that limit
   correctedPixelCohortData <- pixelCohortData[maxAges, on = .(speciesCode)]
+  ## `X[i]` takes the join column from `i`, so a character `longevity$speciesCode` -- which is
+  ## what a caller building the table from a character species column supplies -- silently
+  ## replaced a factor `pixelCohortData$speciesCode`. Restore the input's class and levels:
+  ## callers downstream (e.g. Biomass_core) assert that cohortData$speciesCode is a factor.
+  if (is.factor(pixelCohortData[["speciesCode"]]) &&
+      !is.factor(correctedPixelCohortData[["speciesCode"]])) {
+    set(correctedPixelCohortData, NULL, "speciesCode",
+        factor(as.character(correctedPixelCohortData[["speciesCode"]]),
+               levels = levels(pixelCohortData[["speciesCode"]])))
+  }
   ## Identify species for which some cohorts exceed longevity*adjustmentFactor
   speciesToCorrect <- unique(as.character(correctedPixelCohortData[age > maxAge, speciesCode]))
   for (sp in speciesToCorrect) {
