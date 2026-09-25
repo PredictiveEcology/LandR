@@ -1,5 +1,13 @@
 # LandR (development version)
 
+* `makeEcoregionMap()` now reads `ecoregionMap`'s raw cell values as mapcodes instead of
+  `as.data.table(ecoregionMap, cells = TRUE)`, which returns the labels of the SpatRaster's
+  ACTIVE category. `ecoregionMap`'s raw cell values are already the mapcodes, but terra changes
+  which category is active whenever the raster goes through a file round trip (`writeRaster()`
+  then `rast()`, as `Cache()` and `terraOptions(todisk = TRUE)` both do), so the join no longer
+  reliably picked "mapcode". Pixels ended up joined to the wrong ecoregion, or the function
+  errored outright.
+
 * `adjustAgeToLongevity()` no longer changes the class of `speciesCode`. It joins
   `pixelCohortData[maxAges, on = "speciesCode"]`, and `data.table` takes the join column from `i`,
   so a `longevity` table built from a character species column -- the usual case, e.g.

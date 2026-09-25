@@ -141,9 +141,16 @@ makeEcoregionDT <- function(pixelCohortData, speciesEcoregion) {
 #' @export
 makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
 
-  truePixelData <- as.data.table(ecoregionFiles$ecoregionMap, cells = TRUE)
-  setnames(truePixelData, old = "cell", new = "pixelIndex")
-  truePixelData[, mapcode := as.integer(mapcode)] #for join
+  ## Read raw cell values directly instead of as.data.table(<SpatRaster>), which returns the
+  ## labels of the ACTIVE category. terra changes which category is active on a file round
+  ## trip (writeRaster() then rast(), as done by Cache() and terraOptions(todisk = TRUE)), so
+  ## the active category is not reliably "mapcode". ecoregionMap's raw cell values are
+  ## themselves the mapcodes (see ecoregionProducer()).
+  truePixelData <- data.table(
+    pixelIndex = seq_len(ncell(ecoregionFiles$ecoregionMap)),
+    mapcode = as.integer(values(ecoregionFiles$ecoregionMap, mat = FALSE))
+  )
+  truePixelData <- truePixelData[!is.na(mapcode)]
   truePixelData <- truePixelData[ecoregionFiles$ecoregion, on = c("mapcode")]
   #keep only ecoregions for which we have data
   #but keep all observations of that ecoregion, regardless of whether it is currently filled
