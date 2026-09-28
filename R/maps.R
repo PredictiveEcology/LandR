@@ -390,9 +390,13 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", writeTo = 
 #' [.applyForestLand()] which pixels are relabelled.
 #'
 #' @param year data year for SCANFI landcover data. `r .scanfi_v1_years` possible for V1.
-#'    `r .scanfi_v2_years` possible for V2.
+#'    `r .scanfi_v2_years` possible for V2. `r min(.scanfi_v3_years)`-`r max(.scanfi_v3_years)`
+#'    (every year) possible for V3.
 #' @param dataVersion Character. SCANFI product version for data. Default is currently "V2".
-#'    "V1" also available.
+#'    "V1" also available. "V3" reads land cover directly from NRCan's https COG server and
+#'    applies [scanfiV3ToCanadaLCC]; use it for non-forest land cover only -- species,
+#'    biomass and age layers are still V2 (`loadSCANFISpeciesLayers()`,
+#'    `prepInputs_SCANFI_structure()`).
 #' @param disturbedCode value assigned to pixels that are forest land but not treed in `year`
 #' @param resampleMethod method used when resampling LCC layers to match `rasterToMatch`
 #' @param forestLandFrom how forest land is decided: `"fao"` (the FAO forest layer),
@@ -428,6 +432,10 @@ prepInputs_SCANFI_LCC_FAO <- function(
     if (!(year %in% .scanfi_v2_years)) {
       stop("SCANFI V2 Landcover does not exist for this year")
     }
+  } else if (dataVersion == "V3") {
+    if (!(year %in% .scanfi_v3_years)) {
+      stop("SCANFI V3 Landcover does not exist for this year")
+    }
   }
   newFilename <- NULL
   writeToFN <- NULL
@@ -450,31 +458,50 @@ prepInputs_SCANFI_LCC_FAO <- function(
     opts <- options(reproducible.gdalwarp = FALSE)
     on.exit(options(opts), add = TRUE)
   }
-  ## Data codes:
   ## SCANFI v2 land cover in Canada LCC class codes (the codes convert_SCANFI_LCC_codes() produces):
   ## 20 = water; 30 = rock/exposed (SCANFI's single class for rock, rubble and barren land -- the NTEMS
   ## codes 31 snow_ice, 32 rock_rubble and 33 exposed_barren_land do not occur); 40 = bryoids;
   ## 50 = shrubs; 100 = herbs; 210 = coniferous; 220 = broadleaf; 230 = mixedwood.
   ## SCANFI has no wetland classes: 80/81 are added later from the wetland inventory (wetlandToLCC()).
   ## Below, forest land that is not treed in `year` is recoded to `disturbedCode` (default 240).
-  lccSource <- .scanfiLCCFAOSource(year, dataVersion)
+  ## SCANFI v3 (see scanfiV3ToCanadaLCC) is not pre-converted on Drive; it is read as a study-area
+  ## window straight off the https COG (see .readSCANFIv3()) and recoded with the v3 crosswalk.
+  if (dataVersion == "V3") {
+    to <- if (!is.null(dots$to)) dots$to else dots$rasterToMatch
+    lcc <- Cache(
+      .readSCANFIv3(year, to = to, method = resampleMethod),
+      useCache = "always",
+      .functionName = "prepInputs_SCANFI_v3_LCC",
+      .cacheExtra = list(
+        year = year,
+        to = if (!is.null(to)) {
+          list(crs = terra::crs(to), ext = as.vector(terra::ext(to)), dim = dim(to)[1:2])
+        } else {
+          NULL
+        }
+      )
+    )
+    lcc <- .applySCANFIv3Crosswalk(lcc)
+  } else {
+    lccSource <- .scanfiLCCFAOSource(year, dataVersion)
 
-  ## fix dots
-  dots$url <- lccSource$url
-  dots$targetFile <- lccSource$targetFile
-  dots$method <- resampleMethod
-  dots$writeTo <- newFilename
-  # digs <- .robustDigest(dots)
-  lcc <- .withSCANFIAccess(
-    do.call(prepInputs, dots),
-    what = "the SCANFI land cover map",
-    dataYear = year,
-    dataVersion = dataVersion,
-    urlArg = "url"
-  ) # |>
-  #  Cache(.functionName = paste0("prepInputs_NTEMS_LCC_FAO_", year),
-  #        omitArgs = c("targetFile", "writeTo"),
-  #        .cacheExtra = digs)
+    ## fix dots
+    dots$url <- lccSource$url
+    dots$targetFile <- lccSource$targetFile
+    dots$method <- resampleMethod
+    dots$writeTo <- newFilename
+    # digs <- .robustDigest(dots)
+    lcc <- .withSCANFIAccess(
+      do.call(prepInputs, dots),
+      what = "the SCANFI land cover map",
+      dataYear = year,
+      dataVersion = dataVersion,
+      urlArg = "url"
+    ) # |>
+    #  Cache(.functionName = paste0("prepInputs_NTEMS_LCC_FAO_", year),
+    #        omitArgs = c("targetFile", "writeTo"),
+    #        .cacheExtra = digs)
+  }
 
   dots$writeTo <- writeToFN
 
@@ -492,7 +519,13 @@ prepInputs_SCANFI_LCC_FAO <- function(
   ## do not pass dots, or the filename is passed and is overwritten
   if (is.null(forestLandYears)) {
     forestLandYears <- .defaultForestLandYears(
-      if (dataVersion == "V1") .scanfi_v1_years else .scanfi_v2_years
+      if (dataVersion == "V1") {
+        .scanfi_v1_years
+      } else if (dataVersion == "V3") {
+        .scanfi_v3_years
+      } else {
+        .scanfi_v2_years
+      }
     )
   }
   forestLand <- .forestLandFor(
@@ -501,12 +534,16 @@ prepInputs_SCANFI_LCC_FAO <- function(
     forestLandYears = setdiff(forestLandYears, year), ## `year` itself adds nothing
     faoYear = faoYear,
     lccFor = function(y) {
-      src <- .scanfiLCCFAOSource(y, dataVersion)
-      prepInputs(
-        url = src$url, targetFile = src$targetFile,
-        method = resampleMethod, destinationPath = dots$destinationPath,
-        to = lcc, maskTo = NA ## aligned, not masked: see .forestLandFor()
-      )
+      if (dataVersion == "V3") {
+        .applySCANFIv3Crosswalk(.readSCANFIv3(y, to = lcc, method = resampleMethod))
+      } else {
+        src <- .scanfiLCCFAOSource(y, dataVersion)
+        prepInputs(
+          url = src$url, targetFile = src$targetFile,
+          method = resampleMethod, destinationPath = dots$destinationPath,
+          to = lcc, maskTo = NA ## aligned, not masked: see .forestLandFor()
+        )
+      }
     },
     lccSource = paste("SCANFI", dataVersion),
     destinationPath = dots$destinationPath,
