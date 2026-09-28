@@ -110,9 +110,9 @@
 ## ---------------------------------------------------------------------------
 ## Messaging for SCANFI v3 access failures
 ##
-## V3 is served directly over https (no Google Drive layer), so a failure here is
-## usually the server's User-Agent block or a network hiccup, not a permissions
-## problem, and the guidance differs from .withSCANFIAccess() above.
+## V3 is served directly by NRCan (no Google Drive layer), so a failure here is
+## usually a network hiccup or an outage, not a permissions problem, and the
+## guidance differs from .withSCANFIAccess() above.
 ## ---------------------------------------------------------------------------
 
 ## Where else to get v3 if the https server is unreachable.
@@ -139,12 +139,10 @@
     what,
     if (nzchar(qualifier)) paste0(" (", qualifier, ")") else "",
     ".\n\n",
-    "SCANFI v3 is served directly over https as one large Cloud-Optimized GeoTIFF per\n",
-    "year. The server returns 403 to requests without a browser-like User-Agent (this is\n",
-    "set internally, so a persistent failure here is more likely a rate limit or outage),\n",
-    "and it can be slow or unreachable under load.\n\n",
+    "SCANFI v3 is read from NRCan's server (ftp.maps.canada.ca) as one large\n",
+    "Cloud-Optimized GeoTIFF per year; the server can be slow or unreachable under load.\n\n",
     "To resolve it:\n",
-    "  * retry later, the server rate-limits repeated requests\n",
+    "  * retry later\n",
     "  * or fetch the year's file from the FTP mirror instead: ", .scanfiV3FTPURL, "\n\n",
     "Original error:\n",
     paste0("  ", strsplit(paste(conditionMessage(e), collapse = "\n"), "\n")[[1]], collapse = "\n")

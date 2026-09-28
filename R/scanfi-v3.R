@@ -2,24 +2,19 @@
 ## SCANFI v3 land cover
 ##
 ## Unlike V1/V2, which are distributed pre-converted to Canada LCC codes through
-## Google Drive, V3 is published directly over https as one Cloud-Optimized GeoTIFF
-## per year, with its own 20-class legend. This file reads a study-area window of
-## that COG via GDAL's /vsicurl driver (so the ~3.4 GB national file is never
-## downloaded whole) and applies the crosswalk to Canada LCC codes on the fly.
+## Google Drive, V3 is published by NRCan as one Cloud-Optimized GeoTIFF per year,
+## with its own 20-class legend. prepInputs_SCANFI_LCC_FAO() reads it with prepInputs()
+## like V1/V2 (prepInputs() reads only the study-area window of a COG), and this file
+## holds its URL and the crosswalk to Canada LCC codes.
 ## ---------------------------------------------------------------------------
 
 ## SCANFI v3 publishes one landcover layer per year, 1985-2025
 .scanfi_v3_years <- 1985:2025
 
-## The COGs are read from ftp.maps.canada.ca over https (the host LandR uses for other NRCan
+## The COGs come from ftp.maps.canada.ca over https (the host LandR uses for other NRCan
 ## layers), which serves byte ranges to any client. The other NRCan endpoint,
 ## download-telecharger.services.geo.ca, needs a browser-like User-Agent and returned 403 to
-## every request once many workers read from it at once (2026-09-28). The User-Agent is still
-## set on the GDAL config before every read; it does no harm on the mirror.
-.scanfiV3UserAgent <- paste0(
-  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 ",
-  "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
-)
+## every request once many workers read from it at once (2026-09-28).
 
 #' Crosswalk from SCANFI v3 land-cover codes to Canada LCC codes
 #'
@@ -91,56 +86,4 @@ scanfiV3ToCanadaLCC <- data.frame(
     datatype = "INT1U",
     NAflag = 255
   )
-}
-
-#' Read one year of SCANFI v3 land cover, windowed to a study area
-#'
-#' Reads the national COG through GDAL's `/vsicurl` driver, so only the blocks
-#' overlapping the study area are fetched -- the ~3.4 GB national file is never downloaded whole.
-#' The study area is given the same way as to [reproducible::postProcessTo()] (and so to
-#' `prepInputs()` for SCANFI V1/V2): `to`, `cropTo`, `maskTo`, `projectTo`. At least one is
-#' required. The result is always a new raster (in memory or a temporary file), never one that
-#' still points at the remote file.
-#'
-#' @param year A year SCANFI v3 publishes.
-#' @param to,cropTo,maskTo,projectTo The study area, as in [reproducible::postProcessTo()].
-#' @param method Resampling method, as in [reproducible::postProcessTo()].
-#' @param what Passed to `.withSCANFIv3Access()`, for its error message.
-#' @param url The file to read; defaults to that year's NRCan COG. An `http(s)` URL is read
-#'   through `/vsicurl`; anything else is read as a local file (used by the tests).
-#'
-#' @return A `SpatRaster` of raw SCANFI v3 codes for the study area.
-#'
-#' @keywords internal
-.readSCANFIv3 <- function(year, to = NULL, cropTo = NULL, maskTo = NULL, projectTo = NULL,
-                          method = "near", what = "the SCANFI v3 land cover map",
-                          url = .scanfiV3Url(year)) {
-  studyArea <- list(to = to, cropTo = cropTo, maskTo = maskTo, projectTo = projectTo)
-  studyArea <- studyArea[!vapply(studyArea, is.null, logical(1))]
-  if (!length(studyArea)) {
-    stop("SCANFI V3 is read as a study-area window: pass `to`, `cropTo`, `maskTo` or `projectTo` ",
-         "(or `rasterToMatch` to prepInputs_SCANFI_LCC_FAO()).")
-  }
-  src <- if (grepl("^https?://", url)) paste0("/vsicurl/", url) else url
-
-  oldUA <- Sys.getenv("GDAL_HTTP_USERAGENT", unset = NA)
-  Sys.setenv(GDAL_HTTP_USERAGENT = .scanfiV3UserAgent)
-  on.exit({
-    if (is.na(oldUA)) {
-      Sys.unsetenv("GDAL_HTTP_USERAGENT")
-    } else {
-      Sys.setenv(GDAL_HTTP_USERAGENT = oldUA)
-    }
-  }, add = TRUE)
-
-  .withSCANFIv3Access({
-    r <- terra::rast(src)
-    r <- do.call(reproducible::postProcessTo, c(list(from = r, method = method), studyArea))
-    ## A window that needed no change can come back still pointing at the source file; Cache()
-    ## would then store (and mangle) the remote path instead of the data.
-    if (any(terra::sources(r) %in% src)) {
-      r <- terra::writeRaster(r, tempfile(fileext = ".tif"), datatype = "INT1U", NAflag = 255)
-    }
-    r
-  }, what = what, dataYear = year)
 }

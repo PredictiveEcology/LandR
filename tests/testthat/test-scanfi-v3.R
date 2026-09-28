@@ -89,7 +89,7 @@ test_that(".withSCANFIv3Access explains an access failure and keeps the original
   flat <- gsub("[[:space:]]+", " ", err)
 
   expect_match(flat, "Could not download the SCANFI v3 land cover map (V3 2020)", fixed = TRUE)
-  expect_match(flat, "User-Agent", fixed = TRUE)
+  expect_match(flat, "ftp.maps.canada.ca", fixed = TRUE)
   expect_match(flat, "ftp://ftp.maps.canada.ca", fixed = TRUE)
   expect_match(flat, "HTTP response code said 403", fixed = TRUE)
 })
@@ -124,34 +124,19 @@ test_that("prepInputs_SCANFI_LCC_FAO(dataVersion = 'V3') reads a windowed study 
   expect_true(all(terra::values(out) %in% c(scanfiV3ToCanadaLCC$lcc, 240, NA)))
 })
 
-test_that(".readSCANFIv3() windows to cropTo/maskTo and never returns the source file", {
-  ## makeFireSenseLCC() passes the study area as cropTo + maskTo. The first V3 version only looked at
-  ## `to`, so it returned the whole national COG, still pointing at /vsicurl/https://..., and Cache()
-  ## then failed on the mangled path ("/vsicurl/https:/..."). A local file stands in for the COG.
-  src <- tempfile(fileext = ".tif")
-  national <- terra::rast(nrows = 100, ncols = 100, xmin = 0, xmax = 3000, ymin = 0, ymax = 3000,
-                          crs = "EPSG:3979", vals = rep(c(9L, 11L, 6L, 2L), length.out = 1e4))
-  terra::writeRaster(national, src, datatype = "INT1U")
-  cropTo <- terra::rast(xmin = 600, xmax = 1500, ymin = 600, ymax = 1500, resolution = 30,
-                        crs = "EPSG:3979")
-  maskTo <- terra::as.polygons(terra::ext(700, 1400, 700, 1400), crs = "EPSG:3979")
-
-  r <- .readSCANFIv3(2020, cropTo = cropTo, maskTo = maskTo, url = src)
-  expect_false(any(terra::sources(r) %in% src))
-  expect_lte(terra::ncell(r), terra::ncell(cropTo))
-  e <- as.vector(terra::ext(r))
-  expect_gte(e[["xmin"]], 600); expect_lte(e[["xmax"]], 1500)
-  expect_true(all(is.na(terra::extract(r, cbind(650, 650))[[1]])))  # outside maskTo
+test_that(".scanfiLCCFAOSource() gives V3's NRCan COG for the year", {
+  src <- LandR:::.scanfiLCCFAOSource(2025, "V3")
+  expect_identical(src$url, LandR:::.scanfiV3Url(2025))
+  expect_identical(src$targetFile, "cog_SCANFI_landcover_2025_v3_20260528.tif")
 })
 
-test_that(".readSCANFIv3() refuses to read without a study area", {
-  expect_error(.readSCANFIv3(2020, url = tempfile(fileext = ".tif")), "study-area window")
-})
-
-test_that("prepInputs_SCANFI_LCC_FAO(dataVersion = 'V3') passes cropTo and maskTo to the reader", {
+test_that("prepInputs_SCANFI_LCC_FAO(dataVersion = 'V3') reads through prepInputs with the study area", {
+  ## The first V3 version bypassed prepInputs() with its own reader that only honoured `to`;
+  ## makeFireSenseLCC() passes cropTo + maskTo, so every FireSense run failed. V3 must take
+  ## the same prepInputs() path, and arguments, as V1/V2.
   withr::local_options(reproducible.cachePath = withr::local_tempdir(), reproducible.useCache = FALSE)
   got <- NULL
-  local_mocked_bindings(.readSCANFIv3 = function(year, ...) {
+  local_mocked_bindings(prepInputs = function(...) {
     got <<- list(...)
     stop("stop after capture")
   })
@@ -160,5 +145,19 @@ test_that("prepInputs_SCANFI_LCC_FAO(dataVersion = 'V3') passes cropTo and maskT
   expect_error(prepInputs_SCANFI_LCC_FAO(year = 2020, dataVersion = "V3", cropTo = cropTo,
                                          maskTo = maskTo, destinationPath = withr::local_tempdir()),
                "stop after capture")
+  expect_identical(got$url, LandR:::.scanfiV3Url(2020))
   expect_true(all(c("cropTo", "maskTo") %in% names(got)))
+})
+
+test_that("prepInputs_SCANFI_LCC_FAO(dataVersion = 'V3') recodes what prepInputs returns", {
+  withr::local_options(reproducible.cachePath = withr::local_tempdir(), reproducible.useCache = FALSE)
+  v3 <- terra::rast(nrows = 2, ncols = 3, xmin = 0, xmax = 90, ymin = 0, ymax = 60,
+                    crs = "EPSG:3979", vals = c(1L, 2L, 4L, 8L, 9L, 17L))
+  local_mocked_bindings(
+    prepInputs = function(...) v3,
+    .forestLandFor = function(lcc, ...) terra::setValues(lcc, 0L) ## no forest land
+  )
+  out <- prepInputs_SCANFI_LCC_FAO(year = 2020, dataVersion = "V3", cropTo = v3,
+                                   destinationPath = withr::local_tempdir())
+  expect_identical(as.vector(terra::values(out, mat = FALSE)), c(20, 30, 60, 50, 220, 0))
 })
