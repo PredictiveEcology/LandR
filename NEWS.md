@@ -1,5 +1,14 @@
 # LandR (development version)
 
+* `prepInputs_SCANFI_LCC_FAO()` gains `dataVersion = "V3"`, reading SCANFI v3's annual land
+  cover directly from NRCan's https Cloud-Optimized GeoTIFF server, windowed to the study
+  area via GDAL's `/vsicurl` driver rather than downloading the ~3.4 GB national file. The
+  new exported table `scanfiV3ToCanadaLCC` gives the crosswalk from v3's 20 land-cover codes
+  to the Canada LCC codes used elsewhere; burn scars (v3 code 4) have no Canada LCC
+  equivalent and keep a new code, 60, which the existing forest-land rule still relabels to
+  `disturbedCode` on forest land. V3 covers non-forest land cover only -- species, biomass
+  and age layers are unaffected and still come from V2.
+
 * `makeEcoregionMap()` now reads `ecoregionMap`'s raw cell values as mapcodes instead of
   `as.data.table(ecoregionMap, cells = TRUE)`, which returns the labels of the SpatRaster's
   ACTIVE category. `ecoregionMap`'s raw cell values are already the mapcodes, but terra changes
