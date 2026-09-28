@@ -1220,6 +1220,25 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
   return(cohortData)
 }
 
+#' Default model for imputing missing stand ages
+#'
+#' The model used by `makeAndCleanInitialCohortData()` (and, by default, by
+#' `Biomass_borealDataPrep`'s `imputeBadAgeModel` parameter) to impute the age of stands
+#' with missing or unreliable age data. The response is `log(age)`, not `age`, so a
+#' prediction can never come back negative -- an imputed age of 0 with positive biomass,
+#' which `CBMutils::cumPoolsCreateAGB()` rejects, is not reachable from a log-scale model.
+#' This is the only place the formula is written; `Biomass_borealDataPrep` uses it as its
+#' parameter default rather than duplicating it.
+#'
+#' @return A quoted `lme4::lmer()` call.
+#'
+#' @export
+imputeBadAgeModelDefault <- function() {
+  quote(lme4::lmer(
+    log(age) ~ log(totalBiomass) * cover * speciesCode + (log(totalBiomass) | initialEcoregionCode)
+  ))
+}
+
 #' Generate initial `cohortData` table
 #'
 #' Takes a single `data.table` input, which has the following columns in addition to
@@ -1267,9 +1286,7 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
 makeAndCleanInitialCohortData <- function(
   inputDataTable,
   sppColumns,
-  imputeBadAgeModel = quote(lme4::lmer(
-    age ~ B * speciesCode + cover * speciesCode + (1 | initialEcoregionCode)
-  )),
+  imputeBadAgeModel = imputeBadAgeModelDefault(),
   minCoverThreshold,
   doAssertion = getOption("LandR.assertions", TRUE),
   doSubset = TRUE
@@ -1430,12 +1447,20 @@ makeAndCleanInitialCohortData <- function(
       }
 
       ## allow.new.levels = TRUE because some groups will have only NA for age for all species
-      cohortDataMissingAge[,
-        imputedAge := pmax(
-          0L,
-          asInteger(predict(outAge$mod, newdata = cohortDataMissingAge, allow.new.levels = TRUE))
-        )
-      ]
+      predAge <- predict(outAge$mod, newdata = cohortDataMissingAge, allow.new.levels = TRUE)
+
+      ## a model fitted on log(age) (e.g. imputeBadAgeModelDefault()) predicts on the log
+      ## scale, so it must be back-transformed before the pmax(0L, ...) floor below; a model
+      ## fitted directly on age needs no such transform.
+      isLogAgeModel <- tryCatch(
+        identical(imputeBadAgeModel[[2]][[2]], quote(log(age))),
+        error = function(e) FALSE
+      )
+      if (isTRUE(isLogAgeModel)) {
+        predAge <- exp(predAge)
+      }
+
+      cohortDataMissingAge[, imputedAge := pmax(0L, asInteger(predAge))]
 
       cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
         cohortData,

@@ -1,5 +1,13 @@
 # LandR (development version)
 
+* New `imputeBadAgeModelDefault()` supplies `makeAndCleanInitialCohortData()`'s default
+  age-imputation model, and is now the default value of its `imputeBadAgeModel` argument. The
+  model's response is `log(age)`, not `age`, so an imputed age can no longer come back negative
+  and get clamped to 0 for a stand with positive biomass -- the cause of the age-0-with-biomass
+  cohorts `CBMutils::cumPoolsCreateAGB()` rejects (PredictiveEcology/Biomass_borealDataPrep#131).
+  `Biomass_borealDataPrep`'s `imputeBadAgeModel` parameter now defaults to this function instead
+  of duplicating the formula.
+
 * `makeEcoregionMap()` now reads `ecoregionMap`'s raw cell values as mapcodes instead of
   `as.data.table(ecoregionMap, cells = TRUE)`, which returns the labels of the SpatRaster's
   ACTIVE category. `ecoregionMap`'s raw cell values are already the mapcodes, but terra changes
