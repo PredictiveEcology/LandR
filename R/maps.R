@@ -358,6 +358,10 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", writeTo = 
 #'
 #' @keywords internal
 .scanfiLCCFAOSource <- function(year, dataVersion = "V2") {
+  if (dataVersion == "V3") {
+    url <- .scanfiV3Url(year)
+    return(list(url = url, targetFile = basename(url)))
+  }
   ids <- if (dataVersion == "V1") {
     c("2000" = "1zqzTSDk9mtyRhcQuMsRMK2WDwkuk24kt",
       "2010" = "1q1LOewgbanVUAySCyJqjc8VcSl4958TP",
@@ -464,30 +468,23 @@ prepInputs_SCANFI_LCC_FAO <- function(
   ## 50 = shrubs; 100 = herbs; 210 = coniferous; 220 = broadleaf; 230 = mixedwood.
   ## SCANFI has no wetland classes: 80/81 are added later from the wetland inventory (wetlandToLCC()).
   ## Below, forest land that is not treed in `year` is recoded to `disturbedCode` (default 240).
-  ## SCANFI v3 (see scanfiV3ToCanadaLCC) is not pre-converted on Drive; it is read as a study-area
-  ## window straight off the https COG (see .readSCANFIv3()) and recoded with the v3 crosswalk.
-  if (dataVersion == "V3") {
-    ## the same study-area arguments prepInputs() takes for V1/V2 (makeFireSenseLCC() passes
-    ## cropTo and maskTo; others pass to or rasterToMatch)
-    studyArea <- dots[intersect(names(dots), c("to", "cropTo", "maskTo", "projectTo"))]
-    if (is.null(studyArea$to) && !is.null(dots$rasterToMatch)) studyArea$to <- dots$rasterToMatch
-    lcc <- Cache(
-      do.call(.readSCANFIv3, c(list(year = year, method = resampleMethod), studyArea)),
-      useCache = "always",
-      .functionName = "prepInputs_SCANFI_v3_LCC",
-      .cacheExtra = list(year = year, studyArea = reproducible::.robustDigest(studyArea))
-    )
-    lcc <- .applySCANFIv3Crosswalk(lcc)
-  } else {
-    lccSource <- .scanfiLCCFAOSource(year, dataVersion)
+  ## SCANFI v3 (see scanfiV3ToCanadaLCC) is published as one Cloud-Optimized GeoTIFF per year in
+  ## its own 20-class legend. prepInputs() reads just the study-area window of it (its COG path,
+  ## see reproducible::prepInputsCOG()), and the v3 codes are then recoded to Canada LCC codes.
+  lccSource <- .scanfiLCCFAOSource(year, dataVersion)
 
-    ## fix dots
-    dots$url <- lccSource$url
-    dots$targetFile <- lccSource$targetFile
-    dots$method <- resampleMethod
-    dots$writeTo <- newFilename
-    # digs <- .robustDigest(dots)
-    lcc <- .withSCANFIAccess(
+  ## fix dots
+  dots$url <- lccSource$url
+  dots$targetFile <- lccSource$targetFile
+  dots$method <- resampleMethod
+  dots$writeTo <- newFilename
+  # digs <- .robustDigest(dots)
+  lcc <- if (dataVersion == "V3") {
+    .withSCANFIv3Access(do.call(prepInputs, dots), what = "the SCANFI land cover map",
+                        dataYear = year) |>
+      .applySCANFIv3Crosswalk()
+  } else {
+    .withSCANFIAccess(
       do.call(prepInputs, dots),
       what = "the SCANFI land cover map",
       dataYear = year,
@@ -530,16 +527,13 @@ prepInputs_SCANFI_LCC_FAO <- function(
     forestLandYears = setdiff(forestLandYears, year), ## `year` itself adds nothing
     faoYear = faoYear,
     lccFor = function(y) {
-      if (dataVersion == "V3") {
-        .applySCANFIv3Crosswalk(.readSCANFIv3(y, to = lcc, method = resampleMethod))
-      } else {
-        src <- .scanfiLCCFAOSource(y, dataVersion)
-        prepInputs(
-          url = src$url, targetFile = src$targetFile,
-          method = resampleMethod, destinationPath = dots$destinationPath,
-          to = lcc, maskTo = NA ## aligned, not masked: see .forestLandFor()
-        )
-      }
+      src <- .scanfiLCCFAOSource(y, dataVersion)
+      out <- prepInputs(
+        url = src$url, targetFile = src$targetFile,
+        method = resampleMethod, destinationPath = dots$destinationPath,
+        to = lcc, maskTo = NA ## aligned, not masked: see .forestLandFor()
+      )
+      if (dataVersion == "V3") .applySCANFIv3Crosswalk(out) else out
     },
     lccSource = paste("SCANFI", dataVersion),
     destinationPath = dots$destinationPath,
