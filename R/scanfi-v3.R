@@ -90,23 +90,35 @@ scanfiV3ToCanadaLCC <- data.frame(
   )
 }
 
-#' Read one year of SCANFI v3 land cover, windowed to a template
+#' Read one year of SCANFI v3 land cover, windowed to a study area
 #'
 #' Reads the national COG through GDAL's `/vsicurl` driver, so only the blocks
-#' overlapping `to` are fetched -- the ~3.4 GB national file is never downloaded whole.
+#' overlapping the study area are fetched -- the ~3.4 GB national file is never downloaded whole.
+#' The study area is given the same way as to [reproducible::postProcessTo()] (and so to
+#' `prepInputs()` for SCANFI V1/V2): `to`, `cropTo`, `maskTo`, `projectTo`. At least one is
+#' required. The result is always a new raster (in memory or a temporary file), never one that
+#' still points at the remote file.
 #'
 #' @param year A year SCANFI v3 publishes.
-#' @param to Optional `SpatRaster` to align and crop to (passed to `terra::project`'s
-#'   `y`). `NULL` reads the full national extent, which is rarely wanted.
-#' @param method Resampling method passed to `terra::project`.
+#' @param to,cropTo,maskTo,projectTo The study area, as in [reproducible::postProcessTo()].
+#' @param method Resampling method, as in [reproducible::postProcessTo()].
 #' @param what Passed to `.withSCANFIv3Access()`, for its error message.
+#' @param url The file to read; defaults to that year's NRCan COG. An `http(s)` URL is read
+#'   through `/vsicurl`; anything else is read as a local file (used by the tests).
 #'
-#' @return A `SpatRaster` of raw SCANFI v3 codes, aligned to `to` if supplied.
+#' @return A `SpatRaster` of raw SCANFI v3 codes for the study area.
 #'
 #' @keywords internal
-.readSCANFIv3 <- function(year, to = NULL, method = "near",
-                          what = "the SCANFI v3 land cover map") {
-  url <- .scanfiV3Url(year)
+.readSCANFIv3 <- function(year, to = NULL, cropTo = NULL, maskTo = NULL, projectTo = NULL,
+                          method = "near", what = "the SCANFI v3 land cover map",
+                          url = .scanfiV3Url(year)) {
+  studyArea <- list(to = to, cropTo = cropTo, maskTo = maskTo, projectTo = projectTo)
+  studyArea <- studyArea[!vapply(studyArea, is.null, logical(1))]
+  if (!length(studyArea)) {
+    stop("SCANFI V3 is read as a study-area window: pass `to`, `cropTo`, `maskTo` or `projectTo` ",
+         "(or `rasterToMatch` to prepInputs_SCANFI_LCC_FAO()).")
+  }
+  src <- if (grepl("^https?://", url)) paste0("/vsicurl/", url) else url
 
   oldUA <- Sys.getenv("GDAL_HTTP_USERAGENT", unset = NA)
   Sys.setenv(GDAL_HTTP_USERAGENT = .scanfiV3UserAgent)
@@ -119,9 +131,12 @@ scanfiV3ToCanadaLCC <- data.frame(
   }, add = TRUE)
 
   .withSCANFIv3Access({
-    r <- terra::rast(paste0("/vsicurl/", url))
-    if (!is.null(to)) {
-      r <- terra::project(r, to, method = method)
+    r <- terra::rast(src)
+    r <- do.call(reproducible::postProcessTo, c(list(from = r, method = method), studyArea))
+    ## A window that needed no change can come back still pointing at the source file; Cache()
+    ## would then store (and mangle) the remote path instead of the data.
+    if (any(terra::sources(r) %in% src)) {
+      r <- terra::writeRaster(r, tempfile(fileext = ".tif"), datatype = "INT1U", NAflag = 255)
     }
     r
   }, what = what, dataYear = year)
