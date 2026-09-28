@@ -451,9 +451,12 @@ prepInputs_SCANFI_LCC_FAO <- function(
     on.exit(options(opts), add = TRUE)
   }
   ## Data codes:
-  ## 0 = no change; 20 = water; 31 = snow_ice; 32 = rock_rubble; 33 = exposed_barren_land;
-  ## 40 = bryoids; 50 = shrubs; 80 = wetland; 81 = wetland-treed; 100 = herbs; 210 = coniferous;
-  ## 220 = broadleaf; 230 = mixedwood
+  ## SCANFI v2 land cover in Canada LCC class codes (the codes convert_SCANFI_LCC_codes() produces):
+  ## 20 = water; 30 = rock/exposed (SCANFI's single class for rock, rubble and barren land -- the NTEMS
+  ## codes 31 snow_ice, 32 rock_rubble and 33 exposed_barren_land do not occur); 40 = bryoids;
+  ## 50 = shrubs; 100 = herbs; 210 = coniferous; 220 = broadleaf; 230 = mixedwood.
+  ## SCANFI has no wetland classes: 80/81 are added later from the wetland inventory (wetlandToLCC()).
+  ## Below, forest land that is not treed in `year` is recoded to `disturbedCode` (default 240).
   lccSource <- .scanfiLCCFAOSource(year, dataVersion)
 
   ## fix dots
