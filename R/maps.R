@@ -458,13 +458,15 @@ prepInputs_SCANFI_LCC_FAO <- function(
     opts <- options(reproducible.gdalwarp = FALSE)
     on.exit(options(opts), add = TRUE)
   }
-  ## Data codes:
-  ## 0 = no change; 20 = water; 31 = snow_ice; 32 = rock_rubble; 33 = exposed_barren_land;
-  ## 40 = bryoids; 50 = shrubs; 80 = wetland; 81 = wetland-treed; 100 = herbs; 210 = coniferous;
-  ## 220 = broadleaf; 230 = mixedwood
+  ## SCANFI v2 land cover in Canada LCC class codes (the codes convert_SCANFI_LCC_codes() produces):
+  ## 20 = water; 30 = rock/exposed (SCANFI's single class for rock, rubble and barren land -- the NTEMS
+  ## codes 31 snow_ice, 32 rock_rubble and 33 exposed_barren_land do not occur); 40 = bryoids;
+  ## 50 = shrubs; 100 = herbs; 210 = coniferous; 220 = broadleaf; 230 = mixedwood.
+  ## SCANFI has no wetland classes: 80/81 are added later from the wetland inventory (wetlandToLCC()).
+  ## Below, forest land that is not treed in `year` is recoded to `disturbedCode` (default 240).
+  ## SCANFI v3 (see scanfiV3ToCanadaLCC) is not pre-converted on Drive; it is read as a study-area
+  ## window straight off the https COG (see .readSCANFIv3()) and recoded with the v3 crosswalk.
   if (dataVersion == "V3") {
-    ## V3 has no pre-converted Drive layer; read the study-area window straight off the
-    ## https COG (see .readSCANFIv3()) and recode it with the v3 crosswalk.
     to <- if (!is.null(dots$to)) dots$to else dots$rasterToMatch
     lcc <- Cache(
       .readSCANFIv3(year, to = to, method = resampleMethod),
