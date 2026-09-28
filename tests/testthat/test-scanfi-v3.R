@@ -54,7 +54,7 @@ test_that(".scanfiV3Url() builds the year's COG url and rejects years v3 doesn't
   expect_identical(
     LandR:::.scanfiV3Url(2020),
     paste0(
-      "https://download-telecharger.services.geo.ca/pub/nrcan_rncan/Forests_Foret/",
+      "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
       "SCANFI/v3/cog_SCANFI_landcover_2020_v3_20260528.tif"
     )
   )

@@ -11,8 +11,11 @@
 ## SCANFI v3 publishes one landcover layer per year, 1985-2025
 .scanfi_v3_years <- 1985:2025
 
-## The v3 COG server (an S3-backed https endpoint) returns 403 to requests without a
-## browser-like User-Agent; this is set on the GDAL config before every read.
+## The COGs are read from ftp.maps.canada.ca over https (the host LandR uses for other NRCan
+## layers), which serves byte ranges to any client. The other NRCan endpoint,
+## download-telecharger.services.geo.ca, needs a browser-like User-Agent and returned 403 to
+## every request once many workers read from it at once (2026-09-28). The User-Agent is still
+## set on the GDAL config before every read; it does no harm on the mirror.
 .scanfiV3UserAgent <- paste0(
   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 ",
   "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
@@ -68,7 +71,7 @@ scanfiV3ToCanadaLCC <- data.frame(
     stop("SCANFI V3 Landcover does not exist for this year")
   }
   paste0(
-    "https://download-telecharger.services.geo.ca/pub/nrcan_rncan/Forests_Foret/",
+    "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
     "SCANFI/v3/cog_SCANFI_landcover_", year, "_v3_20260528.tif"
   )
 }
