@@ -2,30 +2,40 @@
 % Please edit documentation in R/scanfi-v3.R
 \name{.readSCANFIv3}
 \alias{.readSCANFIv3}
-\title{Read one year of SCANFI v3 land cover, windowed to a template}
+\title{Read one year of SCANFI v3 land cover, windowed to a study area}
 \usage{
 .readSCANFIv3(
   year,
   to = NULL,
+  cropTo = NULL,
+  maskTo = NULL,
+  projectTo = NULL,
   method = "near",
-  what = "the SCANFI v3 land cover map"
+  what = "the SCANFI v3 land cover map",
+  url = .scanfiV3Url(year)
 )
 }
 \arguments{
 \item{year}{A year SCANFI v3 publishes.}
 
-\item{to}{Optional \code{SpatRaster} to align and crop to (passed to \code{terra::project}'s
-\code{y}). \code{NULL} reads the full national extent, which is rarely wanted.}
+\item{to, cropTo, maskTo, projectTo}{The study area, as in \code{\link[reproducible:postProcessTo]{reproducible::postProcessTo()}}.}
 
-\item{method}{Resampling method passed to \code{terra::project}.}
+\item{method}{Resampling method, as in \code{\link[reproducible:postProcessTo]{reproducible::postProcessTo()}}.}
 
 \item{what}{Passed to \code{.withSCANFIv3Access()}, for its error message.}
+
+\item{url}{The file to read; defaults to that year's NRCan COG. An \code{http(s)} URL is read
+through \verb{/vsicurl}; anything else is read as a local file (used by the tests).}
 }
 \value{
-A \code{SpatRaster} of raw SCANFI v3 codes, aligned to \code{to} if supplied.
+A \code{SpatRaster} of raw SCANFI v3 codes for the study area.
 }
 \description{
 Reads the national COG through GDAL's \verb{/vsicurl} driver, so only the blocks
-overlapping \code{to} are fetched -- the ~3.4 GB national file is never downloaded whole.
+overlapping the study area are fetched -- the ~3.4 GB national file is never downloaded whole.
+The study area is given the same way as to \code{\link[reproducible:postProcessTo]{reproducible::postProcessTo()}} (and so to
+\code{prepInputs()} for SCANFI V1/V2): \code{to}, \code{cropTo}, \code{maskTo}, \code{projectTo}. At least one is
+required. The result is always a new raster (in memory or a temporary file), never one that
+still points at the remote file.
 }
 \keyword{internal}

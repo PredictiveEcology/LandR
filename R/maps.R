@@ -467,19 +467,15 @@ prepInputs_SCANFI_LCC_FAO <- function(
   ## SCANFI v3 (see scanfiV3ToCanadaLCC) is not pre-converted on Drive; it is read as a study-area
   ## window straight off the https COG (see .readSCANFIv3()) and recoded with the v3 crosswalk.
   if (dataVersion == "V3") {
-    to <- if (!is.null(dots$to)) dots$to else dots$rasterToMatch
+    ## the same study-area arguments prepInputs() takes for V1/V2 (makeFireSenseLCC() passes
+    ## cropTo and maskTo; others pass to or rasterToMatch)
+    studyArea <- dots[intersect(names(dots), c("to", "cropTo", "maskTo", "projectTo"))]
+    if (is.null(studyArea$to) && !is.null(dots$rasterToMatch)) studyArea$to <- dots$rasterToMatch
     lcc <- Cache(
-      .readSCANFIv3(year, to = to, method = resampleMethod),
+      do.call(.readSCANFIv3, c(list(year = year, method = resampleMethod), studyArea)),
       useCache = "always",
       .functionName = "prepInputs_SCANFI_v3_LCC",
-      .cacheExtra = list(
-        year = year,
-        to = if (!is.null(to)) {
-          list(crs = terra::crs(to), ext = as.vector(terra::ext(to)), dim = dim(to)[1:2])
-        } else {
-          NULL
-        }
-      )
+      .cacheExtra = list(year = year, studyArea = reproducible::.robustDigest(studyArea))
     )
     lcc <- .applySCANFIv3Crosswalk(lcc)
   } else {
