@@ -549,14 +549,19 @@ standAgeMapGenerator <- function(
   weight = "biomass",
   doAssertion = getOption("LandR.assertions", FALSE)
 ) {
+  ## aggregate into a new table: `:=` would add a column to the caller's cohortData
   if (identical(tolower(weight), "biomass")) {
-    cohortData[, weightedAge := floor(sum(age * B) / sum(B) / 10) * 10, .(pixelGroup)]
+    cohortDataReduced <- cohortData[,
+      list(weightedAge = floor(sum(age * B) / sum(B) / 10) * 10),
+      by = "pixelGroup"
+    ]
   } else {
     ## unweighted max age
-    cohortData[, weightedAge := floor(max(age) / 10) * 10, .(pixelGroup)]
+    cohortDataReduced <- cohortData[,
+      list(weightedAge = floor(max(age) / 10) * 10),
+      by = "pixelGroup"
+    ]
   }
-  cohortDataReduced <- cohortData[, c("pixelGroup", "weightedAge")]
-  cohortDataReduced <- unique(cohortDataReduced)
 
   names(pixelGroupMap) <- "pixelGroup"
   standAgeMap <- rasterizeReduced(

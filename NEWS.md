@@ -1,5 +1,11 @@
 # LandR (development version)
 
+* `standAgeMapGenerator()` no longer modifies the caller's `cohortData`. It computed the stand
+  age with `cohortData[, weightedAge := ...]`, which adds the column to the caller's table by
+  reference, so e.g. `NRV_summary` left a `weightedAge` column in the simulation's `cohortData`.
+  It now aggregates into a new table; the returned map is unchanged. `vegTypeMapGenerator()`
+  already worked on a copy; tests now pin both.
+
 * `makeEcoregionMap()` now reads `ecoregionMap`'s raw cell values as mapcodes instead of
   `as.data.table(ecoregionMap, cells = TRUE)`, which returns the labels of the SpatRaster's
   ACTIVE category. `ecoregionMap`'s raw cell values are already the mapcodes, but terra changes
