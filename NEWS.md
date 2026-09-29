@@ -6,7 +6,12 @@
   and get clamped to 0 for a stand with positive biomass -- the cause of the age-0-with-biomass
   cohorts `CBMutils::cumPoolsCreateAGB()` rejects (PredictiveEcology/Biomass_borealDataPrep#131).
   `Biomass_borealDataPrep`'s `imputeBadAgeModel` parameter now defaults to this function instead
-  of duplicating the formula.
+  of duplicating the formula. The predictors change too, not only the scale: LandR's old default
+  was `age ~ B * speciesCode + cover * speciesCode + (1 | initialEcoregionCode)`; the new one is
+  `log(age) ~ log(totalBiomass) * cover * speciesCode + (log(totalBiomass) | initialEcoregionCode)`,
+  the predictors `Biomass_borealDataPrep` already used. Callers that relied on LandR's default
+  get both changes. Predictions are back-transformed with `exp()`, which gives the median
+  (geometric-mean) age for given predictors, not the mean.
   
 * `standAgeMapGenerator()` no longer modifies the caller's `cohortData`. It computed the stand
   age with `cohortData[, weightedAge := ...]`, which adds the column to the caller's table by

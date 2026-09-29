@@ -1230,6 +1230,16 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
 #' This is the only place the formula is written; `Biomass_borealDataPrep` uses it as its
 #' parameter default rather than duplicating it.
 #'
+#' @details
+#' The model is `log(age) ~ log(totalBiomass) * cover * speciesCode +
+#' (log(totalBiomass) | initialEcoregionCode)`. `makeAndCleanInitialCohortData()` recognizes a
+#' `log(age)` response and back-transforms predictions with `exp()`. That gives the median
+#' (geometric-mean) age for given predictors, not the mean: with residual variance
+#' \eqn{\sigma^2} on the log scale, the mean is larger by a factor of about
+#' \eqn{e^{\sigma^2/2}}. Imputed ages are therefore somewhat younger, on average, than
+#' observed ages of stands with the same biomass, cover and species; keep this in mind when
+#' comparing imputed and observed age distributions.
+#'
 #' @return A quoted `lme4::lmer()` call.
 #'
 #' @export
@@ -1457,6 +1467,10 @@ makeAndCleanInitialCohortData <- function(
         error = function(e) FALSE
       )
       if (isTRUE(isLogAgeModel)) {
+        ## exp() of a log-scale prediction is the median (geometric-mean) age, not the mean,
+        ## which is larger by about exp(sigma^2 / 2) (sigma^2: residual variance on the log
+        ## scale). No bias correction is applied: imputed ages are a typical age, and a
+        ## correction would push young stands older. See ?imputeBadAgeModelDefault.
         predAge <- exp(predAge)
       }
 
