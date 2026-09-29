@@ -1,5 +1,11 @@
 # LandR (development version)
 
+* `prepInputs_SCANFI_LCC_FAO()` and `prepInputs_NTEMS_LCC_FAO()` no longer relabel water (20),
+  snow/ice (31) or 0 (no data; SCANFI v3 cropland, urban and road) as disturbed forest (240) where
+  the record says forest land. A treed year elsewhere in the record, or an FAO forest code, does
+  not make a lake, a glacier, a town or a road into forest without trees; such pixels had become
+  flammable forest in fire models. Rock and barren land are still relabelled, since a severe fire
+  can expose them.
 * New `imputeBadAgeModelDefault()` supplies `makeAndCleanInitialCohortData()`'s default
   age-imputation model, and is now the default value of its `imputeBadAgeModel` argument. The
   model's response is `log(age)`, not `age`, so an imputed age can no longer come back negative

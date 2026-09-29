@@ -1,17 +1,6 @@
-## fireSense calls prepInputs_SCANFI_LCC_FAO() once per dataYear on one study area. The
-## forest-land inputs -- the FAO layer and each forestLandYears land cover -- are the same for
-## every one of those calls, so they must be prepared once, not once per dataYear. In production
-## each FAO preparation cost ~12 min, five times per study area. It must hold with reproducible's
-## Cache on and off: SpaDES.core's `spades.useCache = "eventsOnly"` sets
-## options(reproducible.useCache = FALSE) for the run, and fireSense_dataPrepFit wraps each
-## dataYear's call in its own Cache(userTags = c("makeFireSenseLCC", dy)), which is then FALSE
-## and, being the outer call, would override an inner useCache = TRUE.
-##
-## No network: `prepInputs` is replaced by one that counts its calls and postProcesses a small
-## local file with the real reproducible::postProcessTo().
+# Extracted from test-forestLandOnce.R:121
 
-## Land-cover and FAO values on the 4 x 2 target window (row-major).
-##   cell:     1    2    3    4    5    6    7    8
+# prequel ----------------------------------------------------------------------
 .flBase <- c( 50, 100,  20, 210,  33,  50,  50,  50)
 .flFAO  <- c(  2,   1,   0,   1,   0,   1,   1,   0)
 .flYear <- function(y) {
@@ -21,9 +10,6 @@
   if (y == 2015) v[c(6, 8)] <- c(220, 210)
   v
 }
-
-## Sources are larger than the target, so the crop is real; the target cells are the middle
-## 4 x 2 block of a 6 x 4 grid.
 .flWriteSource <- function(vals, dir, name) {
   r <- terra::rast(nrows = 4, ncols = 6, xmin = 0, xmax = 6000, ymin = 0, ymax = 4000,
                    crs = "EPSG:3978", vals = 50)
@@ -34,11 +20,6 @@
   terra::writeRaster(r, f, overwrite = TRUE)
   f
 }
-
-## mode: "optionTRUE"  -- Cache on, each dataYear's call inside the module's per-year Cache()
-##       "optionFALSE" -- Cache off (eventsOnly), called directly
-##       "nestedFALSE" -- Cache off, inside the module's per-year Cache() with userTags, which is
-##                        how fireSense_dataPrepFit.R runs it under eventsOnly
 .flRunDataYears <- function(dataYears, mode) {
   withr::local_package("terra")
   srcDir <- withr::local_tempdir("flSrc_")
@@ -91,23 +72,17 @@
   list(values = outs, counts = unlist(as.list(counts)))
 }
 
-test_that("forest-land inputs are prepared once across dataYears, whatever the Cache setting", {
-  skip_if_not_installed("withr")
-  dataYears <- c(1990, 2015, 2020)
-  forestLandYears <- LandR:::.defaultForestLandYears(LandR:::.scanfi_v2_years)
-  expect_equal(forestLandYears, c(1985, 1995, 2005, 2015, 2025))
-
-  ## Hand-derived from the rule, identical to what the code produced before the reuse:
-  ## forest land = FAO 1|2, or treed in a forestLandYear other than the dataYear itself.
-  ## Cell 3, the lake edge treed in 1985, is forest land but stays water (20): water is never
-  ## relabelled as disturbed forest.
-  expected <- list(
-    "1990" = c(240,  NA, 20, 210, 33, 240, NA, 240),
-    "2015" = c(240, 240, 20, 210, 33, 220, NA, 210),
-    "2020" = c(240, 240, 20, 210, 33, 240, NA, 240)
+# test -------------------------------------------------------------------------
+skip_if_not_installed("withr")
+dataYears <- c(1990, 2015, 2020)
+forestLandYears <- LandR:::.defaultForestLandYears(LandR:::.scanfi_v2_years)
+expect_equal(forestLandYears, c(1985, 1995, 2005, 2015, 2025))
+expected <- list(
+    "1990" = c(240,  NA, 240, 210, 33, 240, NA, 240),
+    "2015" = c(240, 240, 240, 210, 33, 220, NA, 210),
+    "2020" = c(240, 240, 240, 210, 33, 240, NA, 240)
   )
-
-  for (mode in c("optionTRUE", "optionFALSE", "nestedFALSE")) {
+for (mode in c("optionTRUE", "optionFALSE", "nestedFALSE")) {
     res <- .flRunDataYears(dataYears, mode = mode)
     info <- mode
 
@@ -122,4 +97,3 @@ test_that("forest-land inputs are prepared once across dataYears, whatever the C
 
     expect_equal(res$values, expected, info = info)
   }
-})
