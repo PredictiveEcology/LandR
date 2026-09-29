@@ -1,5 +1,12 @@
 # LandR (development version)
 
+* `makeAndCleanInitialCohortData()` now reads the age model's variables from its formula
+  (`all.vars()`) and, before fitting, drops rows with a zero in any of them, response included;
+  it reports them with a message instead of a warning. It used `pemisc::termsInData()`, which
+  drops the first token of the formula text as the response, so which zeros were dropped
+  depended on how the response was written: with a `log(age)` response it dropped `log` and kept
+  `age` only by accident. LandR no longer imports `termsInData()`.
+
 * New `imputeBadAgeModelDefault()` supplies `makeAndCleanInitialCohortData()`'s default
   age-imputation model, and is now the default value of its `imputeBadAgeModel` argument. The
   model's response is `log(age)`, not `age`, so an imputed age can no longer come back negative

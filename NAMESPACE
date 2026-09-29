@@ -252,10 +252,7 @@ importFrom(lme4,
   lmer
 )
 importFrom(parallel,mclapply)
-importFrom(pemisc,
-  factorValues2,
-  termsInData
-)
+importFrom(pemisc,factorValues2)
 importFrom(quickPlot,
   "setColors<-",
   Plot,
