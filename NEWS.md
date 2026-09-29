@@ -1,5 +1,12 @@
 # LandR (development version)
 
+* `prepInputs_SCANFI_LCC_FAO()` and `prepInputs_NTEMS_LCC_FAO()` no longer relabel water (20),
+  snow/ice (31) or 0 (no data; SCANFI v3 cropland, urban and road) as disturbed forest (240) where
+  the record says forest land. A treed year elsewhere in the record, or an FAO forest code, does
+  not make a lake, a glacier, a town or a road into forest without trees; such pixels had become
+  flammable forest in fire models. Rock and barren land are still relabelled, since a severe fire
+  can expose them.
+
 * `makeEcoregionMap()` now reads `ecoregionMap`'s raw cell values as mapcodes instead of
   `as.data.table(ecoregionMap, cells = TRUE)`, which returns the labels of the SpatRaster's
   ACTIVE category. `ecoregionMap`'s raw cell values are already the mapcodes, but terra changes
