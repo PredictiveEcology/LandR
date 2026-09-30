@@ -10,6 +10,9 @@
   goldens were regenerated (success counts moved by about -0.6% to +5% on the test fixtures, about
   +0.5% on the largest).
 
+* The C++/R parity tests looked for `spiralLoopCpp` in the global environment, so they silently
+  skipped under parallel testthat. They now look in the LandR namespace.
+
 * `LANDISDisp()` gains `pgv`, an optional integer vector of pixelGroup IDs per cell of
   `pixelGroupMap`. When supplied the raster values are not read (about 1 s on a 9M-cell map).
   When `NULL` the values are read once as integer, rather than as doubles and converted again in
