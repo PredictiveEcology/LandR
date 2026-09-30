@@ -27,3 +27,11 @@ test_that("macdiag: spiralLoopCpp inputs and trace", {
   lines <- c(lines, sprintf("nOut=%d", NROW(out)), "trace:", head(grep("^\\[cpp\\]", trace, value = TRUE), 120))
   fail(paste(lines, collapse = "\n"))
 })
+
+test_that("macdiag: R reference trace", {
+  fix <- makeLANDISDispFixture(size = "tiny", fixtureSeed = 11L, successionTimestep = 1L)
+  trace <- utils::capture.output(out <- runLANDISDispOnFixture(fix, runSeed = 42L, verbose = 2, useCpp = FALSE))
+  st <- grep("curDist", trace, value = TRUE)
+  fail(paste(c(sprintf("RDIAG platform=%s nOut=%d nTrace=%d", R.version$platform, NROW(out), length(st)),
+               paste("RDIAG", head(st, 150))), collapse = "\n"))
+})
