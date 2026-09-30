@@ -306,3 +306,56 @@ testthat::test_that("statsModel fits when a response-side column is constant", {
   expect_true(is.list(out))
   expect_s3_class(out$mod, "glm")
 })
+
+## the expression `.initiateNewCohorts()` used before it was replaced by a join
+oldAdjustNewERG <- function(cohortData) {
+  cohortData[,
+    ecoregionGroup := unique(.SD[new == FALSE, ecoregionGroup]),
+    by = "pixelGroup",
+    .SDcols = c("new", "ecoregionGroup")
+  ]
+}
+
+testthat::test_that(".adjustNewCohortsERG matches the per-pixelGroup expression it replaced", {
+  lev <- c("eco1", "eco2", "eco3", "eco4")
+  ## pg 1: old + new, new differs; pg 2: only new; pg 3: only old (2 rows);
+  ## pg 4: old + new, new differs, several rows; pg 5: old + new that already agree
+  cd <- data.table(
+    pixelGroup = c(1L, 1L, 2L, 3L, 3L, 4L, 4L, 4L, 5L, 5L),
+    ecoregionGroup = factor(c("eco1", "eco2", "eco3", "eco4", "eco4", "eco1", "eco1", "eco3",
+                              "eco2", "eco2"), levels = lev),
+    speciesCode = factor(c("A", "B", "A", "A", "B", "A", "B", "C", "A", "B")),
+    B = 1:10,
+    new = c(FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE)
+  )
+  setkey(cd, pixelGroup)
+  expected <- copy(cd)
+  oldAdjustNewERG(expected)
+  got <- copy(cd)
+  LandR:::.adjustNewCohortsERG(got)
+
+  expect_identical(got, expected)
+  expect_identical(levels(got$ecoregionGroup), lev)
+  expect_identical(data.table::key(got), "pixelGroup")
+  expect_identical(names(got), names(cd))
+  expect_identical(
+    as.character(got$ecoregionGroup),
+    c("eco1", "eco1", "eco3", "eco4", "eco4", "eco1", "eco1", "eco1", "eco2", "eco2")
+  )
+  expect_null(data.table::indices(got)) ## no auto-index left on `new`
+})
+
+testthat::test_that(".adjustNewCohortsERG stops when existing cohorts of a pixelGroup disagree", {
+  cd <- data.table(
+    pixelGroup = c(1L, 1L, 1L, 2L, 2L, 3L),
+    ecoregionGroup = factor(c("eco1", "eco2", "eco1", "eco1", "eco1", "eco2")),
+    new = c(FALSE, FALSE, TRUE, FALSE, TRUE, FALSE)
+  )
+  expect_error(LandR:::.adjustNewCohortsERG(cd), "1 pixelGroup")
+  cd2 <- data.table(
+    pixelGroup = c(1L, 1L, 2L, 2L),
+    ecoregionGroup = factor(c("eco1", "eco2", "eco1", "eco2")),
+    new = FALSE
+  )
+  expect_error(LandR:::.adjustNewCohortsERG(cd2), "2 pixelGroups")
+})
