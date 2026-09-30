@@ -361,11 +361,7 @@ updateCohortData <- function(
   ) {
     message("Found pixelGroup with multiple ecoregionGroups when initiating cohorts.")
     message("Adjusting new ecoregionGroups to match those of existing pixelGroups.")
-    cohortData[,
-      ecoregionGroup := unique(.SD[new == FALSE, ecoregionGroup]),
-      by = "pixelGroup",
-      .SDcols = c("new", "ecoregionGroup")
-    ] ## TODO: very slow!!
+    .adjustNewCohortsERG(cohortData)
   }
   set(cohortData, NULL, "new", NULL)
   set(newPixelCohortData, NULL, "new", NULL)
@@ -376,6 +372,37 @@ updateCohortData <- function(
   assertCohortDataERG(cohortData)
 
   return(cohortData)
+}
+
+#' Give new cohorts the `ecoregionGroup` of their pixelGroup's existing cohorts
+#'
+#' Updates `cohortData$ecoregionGroup` by reference, in one join rather than one
+#' `[.data.table` call per pixelGroup. pixelGroups without existing cohorts
+#' (`new == FALSE`) keep their own `ecoregionGroup`.
+#'
+#' @param cohortData a `data.table` with `pixelGroup`, `ecoregionGroup` and a logical `new`.
+#'
+#' @return `cohortData`, invisibly, modified by reference.
+#'
+#' @keywords internal
+#' @noRd
+.adjustNewCohortsERG <- function(cohortData) {
+  ## which() rather than `new == FALSE`: the latter would add an auto-index to cohortData
+  oldERG <- unique(
+    cohortData[which(!cohortData$new), c("pixelGroup", "ecoregionGroup")],
+    by = c("pixelGroup", "ecoregionGroup")
+  )
+  dup <- duplicated(oldERG$pixelGroup)
+  if (any(dup)) {
+    nPG <- length(unique(oldERG$pixelGroup[dup]))
+    stop(
+      nPG, " pixelGroup", if (nPG > 1L) "s have" else " has",
+      " existing cohorts with more than one ecoregionGroup; ",
+      "cohortData should have one ecoregionGroup per pixelGroup"
+    )
+  }
+  cohortData[oldERG, ecoregionGroup := i.ecoregionGroup, on = "pixelGroup"]
+  invisible(cohortData)
 }
 
 #' Remove missing cohorts from `cohortData` based on `pixelGroupMap`
