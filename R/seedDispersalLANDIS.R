@@ -691,6 +691,10 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     #   row/col combinations that are "off" raster. cellFromRowCol does this
     #   internally and is fast
     newPixelIndex <- as.integer(cellFromRowCol(row = row, col = col, object = pixelGroupMap))
+    ## Receivers that already succeeded have row NA. terra casts NA to int in C++,
+    ## which is undefined: x86 gives an off-raster cell (NA), but arm64 (macOS)
+    ## gives row 1, so finished receivers found "sources" there and shifted the RNG stream.
+    newPixelIndex[is.na(row)] <- NA_integer_
 
     # lookup on src rasters
     if (newActiveIndex) {

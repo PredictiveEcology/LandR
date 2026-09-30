@@ -13,6 +13,11 @@
 * The C++/R parity tests looked for `spiralLoopCpp` in the global environment, so they silently
   skipped under parallel testthat. They now look in the LandR namespace.
 
+* The R reference of `LANDISDisp()` (`useCpp = FALSE`) gave different results on macOS (arm64).
+  Receivers that had already succeeded have row `NA`, and `terra::cellFromRowCol()` turns an `NA`
+  row into row 1 there (an undefined C++ cast), so they kept finding sources and consumed extra draws.
+  Their cell is now set to `NA` directly. Linux and Windows results are unchanged.
+
 * `LANDISDisp()` gains `pgv`, an optional integer vector of pixelGroup IDs per cell of
   `pixelGroupMap`. When supplied the raster values are not read (about 1 s on a 9M-cell map).
   When `NULL` the values are read once as integer, rather than as doubles and converted again in
