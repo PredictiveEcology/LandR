@@ -1,5 +1,12 @@
 # LandR (development version)
 
+* `LANDISDisp()`'s C++ spiral scan can use OpenMP threads: `options(LandR.LANDISDisp.threads = n)`
+  (default `1`). Only the search for receivers with a source at each spiral offset is
+  parallel, with a static schedule and per-thread buffers joined in thread order; the uniform
+  draws stay serial on the main thread, so output is bit-identical for any thread count and to
+  `useCpp = FALSE`. `src/Makevars` and `src/Makevars.win` add `$(SHLIB_OPENMP_CXXFLAGS)`; without
+  OpenMP the package builds and runs serially.
+
 * `LANDISDisp()` (R reference and C++ spiral loop) no longer skips a draw because it exceeds the
   largest ward probability of the species that hit on the previous spiral step
   (`lastWardMaxProb`). That screen used only the species that had a source on the previous step, so

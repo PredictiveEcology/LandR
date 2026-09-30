@@ -106,6 +106,11 @@ landscape-scale inputs (and uses dramatically less memory by replacing the
 per-cell-by-species source matrix with a per-\code{pixelGroup} species bitmask).
 To fall back to the R reference (e.g., for debugging), pass
 \code{useCpp = FALSE} or set \code{options(LandR.LANDISDisp.useCpp = FALSE)}.
+
+The scan for receivers that have a source at each spiral offset can use several
+OpenMP threads: set \code{options(LandR.LANDISDisp.threads = n)} (default \code{1}).
+Random draws stay on the main thread in the same order, so the output is identical
+for any number of threads. Without OpenMP support the option has no effect.
 }
 \examples{
 if (require("googledrive")) {

@@ -34,6 +34,11 @@ utils::globalVariables(c(
 #' To fall back to the R reference (e.g., for debugging), pass
 #' `useCpp = FALSE` or set `options(LandR.LANDISDisp.useCpp = FALSE)`.
 #'
+#' The scan for receivers that have a source at each spiral offset can use several
+#' OpenMP threads: set `options(LandR.LANDISDisp.threads = n)` (default `1`).
+#' Random draws stay on the main thread in the same order, so the output is identical
+#' for any number of threads. Without OpenMP support the option has no effect.
+#'
 #' @param dtSrc data.table
 #'
 #' @param dtRcv data.table
@@ -940,7 +945,8 @@ spiralSeedDispersalCpp <- function(speciesTable, pixelGroupMap, dtRcvLong,
     successionTimestep  = as.integer(successionTimestep),
     verbose             = as.integer(verbose),
     wardAlreadyExp      = TRUE,
-    debug               = isTRUE(getOption("LandR.LANDISDisp.debug", FALSE))
+    debug               = isTRUE(getOption("LandR.LANDISDisp.debug", FALSE)),
+    nThreads            = as.integer(getOption("LandR.LANDISDisp.threads", 1L))
   )
 
   whSuccess <- which(res$Success)
