@@ -1,5 +1,10 @@
 # LandR (development version)
 
+* `.initiateNewCohorts()` now gives new cohorts their pixelGroup's existing `ecoregionGroup` with one
+  update join instead of a `[.data.table` call per pixelGroup, which took ~357 s per call on ~500k
+  pixelGroups. On 2 M synthetic pixelGroups: 563 s before, 0.6 s now, identical output. It now stops
+  if the existing cohorts of a pixelGroup carry more than one `ecoregionGroup`.
+
 * `standAgeMapGenerator()` no longer modifies the caller's `cohortData`. It computed the stand
   age with `cohortData[, weightedAge := ...]`, which adds the column to the caller's table by
   reference, so e.g. `NRV_summary` left a `weightedAge` column in the simulation's `cohortData`.
