@@ -1,5 +1,20 @@
 # LandR (development version)
 
+* `LANDISDisp()` (R reference and C++ spiral loop) no longer skips a draw because it exceeds the
+  largest ward probability of the species that hit on the previous spiral step
+  (`lastWardMaxProb`). That screen used only the species that had a source on the previous step, so
+  after a step where only a short-distance species found a source, a long-distance species whose
+  draw fell between the two probabilities was wrongly discarded. Each receiver with a source at a
+  step now compares its own draw with its own species' ward probability. The number and order of
+  uniform draws is unchanged, and R and C++ stay bit-identical. Results change: the seed-locked
+  goldens were regenerated (success counts moved by about -0.6% to +5% on the test fixtures, about
+  +0.5% on the largest).
+
+* `LANDISDisp()` gains `pgv`, an optional integer vector of pixelGroup IDs per cell of
+  `pixelGroupMap`. When supplied the raster values are not read (about 1 s on a 9M-cell map).
+  When `NULL` the values are read once as integer, rather than as doubles and converted again in
+  `spiralSeedDispersalCpp()`. Output is unchanged.
+
 * `standAgeMapGenerator()` no longer modifies the caller's `cohortData`. It computed the stand
   age with `cohortData[, weightedAge := ...]`, which adds the column to the caller's table by
   reference, so e.g. `NRV_summary` left a `weightedAge` column in the simulation's `cohortData`.

@@ -16,6 +16,7 @@ LANDISDisp(
   successionTimestep,
   verbose = getOption("LandR.verbose", TRUE),
   useCpp = getOption("LandR.LANDISDisp.useCpp", TRUE),
+  pgv = NULL,
   ...
 )
 }
@@ -61,6 +62,12 @@ In LANDIS-II, this is called "Succession Timestep".}
 inner loop runs in C++ via \pkg{Rcpp}. If \code{FALSE}, the R reference
 implementation is used instead. Output is bit-identical between the two
 under a fixed seed. Defaults to \code{getOption("LandR.LANDISDisp.useCpp", TRUE)}.}
+
+\item{pgv}{Optional integer vector of pixelGroup IDs, one per cell of \code{pixelGroupMap}
+(\code{length(pgv) == ncell(pixelGroupMap)}), \code{NA} for cells that can neither source nor
+receive. When supplied, the raster values are not read (reading a 9M-cell map costs
+over a second per call); \code{pixelGroupMap} is still used for its dimensions and
+resolution. When \code{NULL} (the default), the values are read from \code{pixelGroupMap}.}
 
 \item{...}{Additional parameters. Currently none.}
 }

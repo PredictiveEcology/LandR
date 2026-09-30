@@ -61,6 +61,12 @@ utils::globalVariables(c(
 #'   implementation is used instead. Output is bit-identical between the two
 #'   under a fixed seed. Defaults to `getOption("LandR.LANDISDisp.useCpp", TRUE)`.
 #'
+#' @param pgv Optional integer vector of pixelGroup IDs, one per cell of `pixelGroupMap`
+#'   (`length(pgv) == ncell(pixelGroupMap)`), `NA` for cells that can neither source nor
+#'   receive. When supplied, the raster values are not read (reading a 9M-cell map costs
+#'   over a second per call); `pixelGroupMap` is still used for its dimensions and
+#'   resolution. When `NULL` (the default), the values are read from `pixelGroupMap`.
+#'
 #' @param ...   Additional parameters. Currently none.
 #'
 #' @return A numeric vector of raster pixel indices, in the same resolution and extent as
@@ -172,7 +178,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                        dispersalFn = Ward, b = 0.01, k = 0.95, plot.it = FALSE,
                        successionTimestep,
                        verbose = getOption("LandR.verbose", TRUE),
-                       useCpp = getOption("LandR.LANDISDisp.useCpp", TRUE), ...) {
+                       useCpp = getOption("LandR.LANDISDisp.useCpp", TRUE), pgv = NULL, ...) {
   if ((NROW(dtSrc) > 0) && (NROW(dtRcv) > 0)) {
     ####### Assertions #############
     if (!((is.numeric(dtSrc$speciesCode) && is.numeric(dtRcv$speciesCode) && is.numeric(speciesTable$speciesCode)) ||
@@ -239,7 +245,18 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
 
     # Cell-to-pixelGroup vector. Used by both Cpp (via the per-pg bitmask in
     # spiralLoopCpp) and R (via srcPixelMatrix). Pull once.
-    pgv <- as.vector(pixelGroupMap[])
+    if (is.null(pgv)) {
+      pgv <- if (inherits(pixelGroupMap, "SpatRaster")) {
+        as.integer(terra::values(pixelGroupMap, mat = FALSE))
+      } else {
+        as.integer(pixelGroupMap[]) # e.g., a RasterLayer
+      }
+    } else {
+      if (length(pgv) != ncell(pixelGroupMap)) {
+        stop("length(pgv) must equal ncell(pixelGroupMap)")
+      }
+      if (!is.integer(pgv)) pgv <- as.integer(pgv)
+    }
 
     # srcPixelMatrix is only needed by the R reference (spiralSeedDispersalR).
     # It dominates wall time at landscape scale (9M-cell maps spend >50% of
@@ -603,7 +620,6 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   activeSpecies <- speciesTable[, c("seeddistance_max", "seeddistance_eff", "speciesCode", "seeddistance_maxMinCellSize")]
   overallMaxDist <- max(speciesTable[["seeddistance_max"]])
   cantDoShortcutYet <- TRUE
-  lastWardMaxProb <- 1
 
   nrowSrcPixelMatrix <- NROW(srcPixelMatrix)
   # dim(srcPixelMatrix) <- NULL # make a single vector -- a bit faster
@@ -709,66 +725,59 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     if (sumHasSp) {
       ran <- runifC(sumHasSp)
 
-      whRanLTprevMaxProb <- which(ran <= lastWardMaxProb)
+      whHasSp <- which(!hasSpNot)
+      if (i == 1) { # self pixels are 100%
+        oo <- seq.int(length(ran))
+      } else {
+        # each draw is compared with its own species' ward probability
+        wardRes <- wardProbActual[activeSpeciesCode[whHasSp]]
+        oo <- which(ran < wardRes)
+      }
+      numSuccesses <- length(oo)
+      if (verbose >= 2) {
+        print(paste0(
+          i, "; curDist: ", round(curDist, 0), "; NumSuccesses: ",
+          numSuccesses, "; NumRows: ", NROW(na.omit(activeFullIndex)),
+          "; NumSp: ", length(unique(speciesCode[activeFullIndex]))
+        ))
+      }
+      notActiveSubIndex <- whHasSp[oo]
+      if (length(notActiveSubIndex)) {
+        notActiveFullIndex <- activeFullIndex[notActiveSubIndex]
 
-      if (length(whRanLTprevMaxProb)) {
-        whHasSp <- which(!hasSpNot)
-        if (i == 1) { # self pixels are 100%
-          oo <- seq.int(length(ran))
+        # This next block does 1 of 2 things: either resize the vectors
+        #    (rowOrig, colOrig, speciesCode, activeFullIndex), or just set the
+        #    values that are not active to NA. Apparently, setting NA is quite a
+        #    bit faster, up to a point. So, only resize objects every once in a while
+        cumSuccesses <- cumSuccesses + numSuccesses
+        if (cumSuccesses > 2000) {
+          cumSuccesses <- 0
+          # if (i %% modulo == 0) {
+          elapsedTime <- Sys.time() - startTime
+          ss <- seq(activeFullIndex)
+          ss <- ss[-notActiveSubIndex]
+          activeFullIndexNAs <- is.na(activeFullIndex)
+          ss <- ss[!activeFullIndexNAs[-notActiveSubIndex]]
+          activeFullIndex <- activeFullIndex[ss]
+          rowOrig <- rowOrig[ss]
+          colOrig <- colOrig[ss]
+          speciesCode <- speciesCode[ss]
         } else {
-          wardRes <- wardProbActual[activeSpeciesCode[whHasSp][whRanLTprevMaxProb]]
-          lastWardMaxProb <- min(1, max(wardRes))
-          oo <- ran[whRanLTprevMaxProb] < wardRes
-          oo <- whRanLTprevMaxProb[oo]
+          # Don't need to do colOrig or speciesCode as these are automatically NAs
+          #   downstream because rowOrig is NA -- cuts off 10% of computation time
+          activeFullIndex[notActiveSubIndex] <- NA
+          rowOrig[notActiveSubIndex] <- NA
         }
-        numSuccesses <- length(oo)
-        if (verbose >= 2) {
-          print(paste0(
-            i, "; curDist: ", round(curDist, 0), "; NumSuccesses: ",
-            numSuccesses, "; NumRows: ", NROW(na.omit(activeFullIndex)),
-            "; NumSp: ", length(unique(speciesCode[activeFullIndex]))
-          ))
-        }
-        notActiveSubIndex <- whHasSp[oo]
-        if (length(notActiveSubIndex)) {
-          notActiveFullIndex <- activeFullIndex[notActiveSubIndex]
 
-          # This next block does 1 of 2 things: either resize the vectors
-          #    (rowOrig, colOrig, speciesCode, activeFullIndex), or just set the
-          #    values that are not active to NA. Apparently, setting NA is quite a
-          #    bit faster, up to a point. So, only resize objects every once in a while
-          cumSuccesses <- cumSuccesses + numSuccesses
-          if (cumSuccesses > 2000) {
-            cumSuccesses <- 0
-            # if (i %% modulo == 0) {
-            elapsedTime <- Sys.time() - startTime
-            ss <- seq(activeFullIndex)
-            ss <- ss[-notActiveSubIndex]
-            activeFullIndexNAs <- is.na(activeFullIndex)
-            ss <- ss[!activeFullIndexNAs[-notActiveSubIndex]]
-            activeFullIndex <- activeFullIndex[ss]
-            rowOrig <- rowOrig[ss]
-            colOrig <- colOrig[ss]
-            speciesCode <- speciesCode[ss]
-          } else {
-            # Don't need to do colOrig or speciesCode as these are automatically NAs
-            #   downstream because rowOrig is NA -- cuts off 10% of computation time
-            activeFullIndex[notActiveSubIndex] <- NA
-            rowOrig[notActiveSubIndex] <- NA
-          }
+        newActiveIndex <- TRUE
 
-          newActiveIndex <- TRUE
-
-          set(rcvFull, notActiveFullIndex, "Success", TRUE)
-          if (verbose >= 1) {
-            set(rcvFull, notActiveFullIndex, "DistOfSuccess", curDist)
-            set(rcvFull, notActiveFullIndex, "ReasonForStop", "SuccessFullSeedRcvd")
-          }
-        } else {
-          notActiveSubIndex <- integer()
-          newActiveIndex <- FALSE
+        set(rcvFull, notActiveFullIndex, "Success", TRUE)
+        if (verbose >= 1) {
+          set(rcvFull, notActiveFullIndex, "DistOfSuccess", curDist)
+          set(rcvFull, notActiveFullIndex, "ReasonForStop", "SuccessFullSeedRcvd")
         }
       } else {
+        notActiveSubIndex <- integer()
         newActiveIndex <- FALSE
       }
     }
@@ -920,7 +929,7 @@ spiralSeedDispersalCpp <- function(speciesTable, pixelGroupMap, dtRcvLong,
     spiralCurDist       = curDists,
     pgmRows             = nrow(pixelGroupMap),
     pgmCols             = ncol(pixelGroupMap),
-    pgv                 = as.integer(pgv),
+    pgv                 = pgv,
     srcPg               = as.integer(dtSrc[["pixelGroup"]]),
     srcSpeciesCode      = as.integer(dtSrc[["speciesCode"]]),
     numSp               = as.integer(numSp),
