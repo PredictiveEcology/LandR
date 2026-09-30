@@ -47,3 +47,38 @@ test_that("makeEcoregionMap() recovers the correct ecoregionGroup after a raster
 
   expect_identical(actualGroup, expectedGroup)
 })
+
+## ecoregionProducer() used raster::factorValues(), which on a SpatRaster returns only the ACTIVE
+## category. A file round trip makes the first text column active, so a category table with a text
+## column ahead of `ecoregionName` returned the wrong labels and the join on "ecoregionName" failed.
+test_that("ecoregionProducer() reads ecoregionName by cell value, whatever the active category", {
+  skip_if_not_installed("fasterize")
+  r <- terra::rast(nrows = 6, ncols = 6, xmin = 0, xmax = 6, ymin = 0, ymax = 6, crs = "EPSG:3978")
+  ids <- rep(1:3, length.out = terra::ncell(r))
+  lcc <- terra::rast(r, vals = rep(c(210L, 220L), length.out = terra::ncell(r)))
+  rtm <- terra::rast(r, vals = 1L)
+  ecoregionTable <- data.table::data.table(
+    ID = factor(c("1", "2", "3")),
+    ecoregionName = factor(c("138", "139", "140"))
+  )
+
+  ## as prepEcoregions() builds it: ecoregionName is the only label column
+  base <- terra::rast(r, vals = ids)
+  levels(base) <- data.frame(ID = 1:3, ecoregionName = c("138", "139", "140"))
+
+  ## another text column ahead of ecoregionName, then a file round trip
+  multi <- terra::rast(r, vals = ids)
+  levels(multi) <- data.frame(ID = 1:3, code = c("a", "b", "c"), ecoregionName = c("138", "139", "140"))
+  f <- tempfile(fileext = ".tif")
+  terra::writeRaster(multi, f)
+  multi <- terra::rast(f)
+  ## premise: ecoregionName is not the active category
+  expect_false(identical(names(terra::cats(multi)[[1]])[terra::activeCat(multi) + 1L], "ecoregionName"))
+
+  expected <- ecoregionProducer(list(base, lcc), rasterToMatch = rtm, ecoregionTable = ecoregionTable)
+  got <- ecoregionProducer(list(multi, lcc), rasterToMatch = rtm, ecoregionTable = ecoregionTable)
+
+  expect_identical(terra::values(got$ecoregionMap, mat = FALSE), terra::values(expected$ecoregionMap, mat = FALSE))
+  expect_identical(got$ecoregion, expected$ecoregion)
+  expect_identical(as.character(got$ecoregion$ecoregion_lcc), c("1_210", "1_220", "2_210", "2_220", "3_210", "3_220"))
+})

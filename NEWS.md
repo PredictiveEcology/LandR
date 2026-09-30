@@ -1,5 +1,13 @@
 # LandR (development version)
 
+* `ecoregionProducer()` now reads a categorical ecoregion raster's labels by raw cell value, from
+  its `ecoregionName` column when present. It used `raster::factorValues()`, which on a SpatRaster
+  returns only the ACTIVE category; terra makes the first text column active after a file round
+  trip, so a category table with another text column ahead of `ecoregionName` returned the wrong
+  labels and the join on `"ecoregionName"` failed. Rasters built by `prepEcoregions()` have
+  `ecoregionName` as their only label column and give the same result as before. This also
+  removes `ecoregionProducer()`'s use of raster.
+
 * `standAgeMapGenerator()` passed `mapCode = "pixelGroup"` to `rasterizeReduced()`, whose argument is `mapcode`; the misspelt name was silently dropped into `...` and it worked only because the raster had been renamed `"pixelGroup"` on the line before. It now passes `mapcode`. Output is unchanged.
 * `.initiateNewCohorts()` now gives new cohorts their pixelGroup's existing `ecoregionGroup` with one
   update join instead of a `[.data.table` call per pixelGroup, which took ~357 s per call on ~500k

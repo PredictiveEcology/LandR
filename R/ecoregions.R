@@ -3,6 +3,21 @@ utils::globalVariables(c(
   "ecoregionName", "ID", "landcover", "mapcode"
 ))
 
+## Labels of a categorical SpatRaster's cells, looked up by raw cell value (the category ID).
+## `raster::factorValues()` returned only the ACTIVE category on a SpatRaster, and terra changes
+## which category is active on a file round trip (the first text column becomes active), so a
+## raster whose category table has another text column ahead of `ecoregionName` came back with
+## the wrong column and `ecoregionProducer()`'s join on "ecoregionName" failed. The
+## `ecoregionName` column is used when present; otherwise the active category, as before.
+## Returns a one-column data.frame named after the column used.
+.categoryLabels <- function(x, v) {
+  tb <- terra::cats(x)[[1]]
+  col <- if ("ecoregionName" %in% names(tb)) "ecoregionName" else names(tb)[terra::activeCat(x) + 1L]
+  out <- tb[match(v, tb[[1]]), col, drop = FALSE]
+  rownames(out) <- NULL
+  out
+}
+
 #' Make `ecoregionMap` and `ecoregion` table
 #'
 #' This function combines an ecoregion map and a land cover map (e.g. ecodistricts and LCC)
@@ -63,7 +78,7 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch
   # b[, (names(b)) := lapply(.SD, function(x) paddedFloatToChar(x, max(nchar(x), na.rm = TRUE)))]
   # New Jan 2, 2026 by Eliot
   a <- lapply(rstEcoregion, function(x) {
-    if (is.factor(x)) raster::factorValues(x, values(x, mat = FALSE)[!NAs])
+    if (is.factor(x)) .categoryLabels(x, values(x, mat = FALSE)[!NAs])
     else as.vector(x[])[!NAs]
     })
   b <- as.data.table(a)
