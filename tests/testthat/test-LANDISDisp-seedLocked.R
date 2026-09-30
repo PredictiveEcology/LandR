@@ -110,7 +110,7 @@ test_that("Rcpp and R implementations produce bit-identical output", {
   ## bare-source workflow without sourceCpp). Detection: useCpp path will
   ## error if spiralLoopCpp doesn't exist.
   haveCpp <- tryCatch(
-    is.function(get("spiralLoopCpp", envir = globalenv(), inherits = TRUE)),
+    is.function(get("spiralLoopCpp", envir = asNamespace("LandR"), inherits = FALSE)),
     error = function(e) FALSE
   )
   if (!haveCpp) skip("spiralLoopCpp not available (compiled library not loaded)")

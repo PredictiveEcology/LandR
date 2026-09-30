@@ -13,7 +13,7 @@
 
 skip_if_no_cpp <- function() {
   haveCpp <- tryCatch(
-    is.function(get("spiralLoopCpp", envir = globalenv(), inherits = TRUE)),
+    is.function(get("spiralLoopCpp", envir = asNamespace("LandR"), inherits = FALSE)),
     error = function(e) FALSE
   )
   if (!haveCpp) skip("spiralLoopCpp not available (compiled library not loaded)")

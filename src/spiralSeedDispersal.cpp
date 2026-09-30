@@ -26,8 +26,36 @@
 
 #include <Rcpp.h>
 #include <cstdint>
+#include <vector>
 
 using namespace Rcpp;
+
+// Cells whose pixelGroup is in `pgs`: the same as `which(pgv %in% pgs)` without
+// allocating a logical vector the length of the raster (36 MB on a 9M-cell map).
+// [[Rcpp::export]]
+IntegerVector cellsInPgsCpp(IntegerVector pgv, IntegerVector pgs) {
+  int lo = NA_INTEGER, hi = NA_INTEGER;
+  bool pgsHasNA = false;
+  for (int i = 0; i < pgs.size(); ++i) {
+    const int pg = pgs[i];
+    if (pg == NA_INTEGER) { pgsHasNA = true; continue; }
+    if (lo == NA_INTEGER || pg < lo) lo = pg;
+    if (hi == NA_INTEGER || pg > hi) hi = pg;
+  }
+  std::vector<char> inPgs((lo == NA_INTEGER) ? 0 : (size_t) ((long long) hi - lo + 1), 0);
+  for (int i = 0; i < pgs.size(); ++i) {
+    if (pgs[i] != NA_INTEGER) inPgs[(size_t) ((long long) pgs[i] - lo)] = 1;
+  }
+  std::vector<int> cells;
+  const int ncell = pgv.size();
+  for (int c = 0; c < ncell; ++c) {
+    const int pg = pgv[c];
+    const bool hit = (pg == NA_INTEGER) ? pgsHasNA :
+      (pg >= lo && pg <= hi && inPgs[(size_t) ((long long) pg - lo)]);
+    if (hit) cells.push_back(c + 1);
+  }
+  return wrap(cells);
+}
 
 // Inputs (built in the R wrapper):
 //
@@ -90,19 +118,15 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
 
   const int numRcv = pixelIndex_in.size();
   const int numSpiral = spiralRow.size();
-  const int ncell = pgv.size();
 
   if (numSp > 64) {
     stop("spiralLoopCpp: numSp must be <= 64 (bitmask width). Got %d.", numSp);
   }
 
-  // Build per-pixelGroup species bitmask. maxPg is the largest pg encountered
-  // in pgv (or in srcPg if larger, defensively).
+  // Build per-pixelGroup species bitmask. maxPg is the largest source pg; a cell
+  // whose pg is larger has no source (the spiral loop skips it), so pgv is not
+  // scanned.
   int maxPg = 0;
-  for (int c = 0; c < ncell; ++c) {
-    const int pg = pgv[c];
-    if (pg != NA_INTEGER && pg > maxPg) maxPg = pg;
-  }
   const int nSrcRows = srcPg.size();
   for (int s = 0; s < nSrcRows; ++s) {
     const int pg = srcPg[s];
@@ -161,7 +185,6 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
   double prevCurDist = spiralCurDist[0];
   bool   newCurDist = true;
   int    uniqueDistCounter = 0;
-  double lastWardMaxProb = 1.0;
 
   // Number of currently-live receivers (for early termination)
   int numLive = numRcv;
@@ -275,8 +298,8 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
       continue;
     }
     if (debug) {
-      Rprintf("[cpp] i=%d curDist=%.10f n=%d lastMax=%.17f udc=%d\n",
-              i + 1, curDist, sumHasSp, lastWardMaxProb, uniqueDistCounter);
+      Rprintf("[cpp] i=%d curDist=%.10f n=%d udc=%d\n",
+              i + 1, curDist, sumHasSp, uniqueDistCounter);
     }
 
     // Draw sumHasSp uniforms — same count, same order as runifC(sumHasSp)
@@ -288,24 +311,10 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
       ran[k] = ::unif_rand();
     }
 
-    // whRanLTprevMaxProb <- which(ran <= lastWardMaxProb)
-    // (early-out optimisation from the R version)
-    // First check if anything passes the screen.
-    bool anyPass = false;
-    for (int k = 0; k < sumHasSp; ++k) {
-      if (ran[k] <= lastWardMaxProb) { anyPass = true; break; }
-    }
-    if (!anyPass) {
-      // No draw could possibly succeed under any current ward prob.
-      if (numLive == 0) break;
-      continue;
-    }
-
     // Decide successes. Two paths in R:
     //   if (i == 1) oo <- seq.int(length(ran))   # all hasSpRows succeed
     //   else        oo <- ran[whRan...] < wardRes per species
     // The R code unconditionally consumes `sumHasSp` draws; we already did.
-    double newMax = 0.0;
     bool   anySuccess = false;
     if (i == 0) {
       // Self pixel: every receiver with a source on its own pixel succeeds
@@ -318,15 +327,11 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
         --numLive;
         anySuccess = true;
       }
-      lastWardMaxProb = 1.0; // first iteration, anything possible later
     } else {
       for (int k = 0; k < sumHasSp; ++k) {
-        if (ran[k] > lastWardMaxProb) continue;
         const int j  = hasSpRows[k];
         const int sp = spAct[j];
-        const double w = wardForRow[sp];
-        if (w > newMax) newMax = w;
-        if (ran[k] < w) {
+        if (ran[k] < wardForRow[sp]) {
           const int rcvRow = fullIdx[j];
           Success[rcvRow] = true;
           if (verbose >= 1) DistOfSuccess[rcvRow] = curDist;
@@ -335,12 +340,6 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
           anySuccess = true;
         }
       }
-      // Update lastWardMaxProb to min(1, max(wardRes)) across the surviving
-      // receivers from this iteration's pre-screened set, mirroring R.
-      // R only updates lastWardMaxProb when length(whRanLTprevMaxProb) > 0,
-      // which we already established with anyPass.
-      if (newMax > 1.0) newMax = 1.0;
-      lastWardMaxProb = newMax;
     }
 
     // If any receivers were marked dropped this step (success path), compact
