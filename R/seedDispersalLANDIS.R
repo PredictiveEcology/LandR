@@ -38,6 +38,14 @@ utils::globalVariables(c(
 #' OpenMP threads: set `options(LandR.LANDISDisp.threads = n)` (default `1`).
 #' Random draws stay on the main thread in the same order, so the output is identical
 #' for any number of threads. Without OpenMP support the option has no effect.
+#' Two cautions when setting it above `1`. First, every R process that calls
+#' `LANDISDisp()` starts its own threads, so with several parallel workers keep
+#' workers x threads at or below the free cores, or leave the option at `1`.
+#' Second, GCC's OpenMP runtime is not fork-safe: a process that has already run
+#' OpenMP threads and then forks (e.g., `parallel::mclapply()` or a fork cluster)
+#' can hang when the child uses OpenMP. Set the option inside each worker after it
+#' starts, or only in single-process runs. With the default `1` no OpenMP threads
+#' are started, so neither applies.
 #'
 #' @param dtSrc data.table
 #'
