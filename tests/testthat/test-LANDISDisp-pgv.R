@@ -26,3 +26,13 @@ test_that("LANDISDisp errors when pgv has the wrong length", {
     "ncell"
   )
 })
+
+test_that("cellsInPgsCpp() matches which(pgv %in% pgs), including NA and negative IDs", {
+  cellsInPgsCpp <- get("cellsInPgsCpp", envir = asNamespace("LandR"), inherits = FALSE)
+  set.seed(1)
+  for (i in 1:50) {
+    pgv <- sample(c(-3:12, NA), sample(0:50, 1), TRUE)
+    pgs <- sample(c(-5:15, NA), sample(0:6, 1), TRUE)
+    expect_identical(cellsInPgsCpp(pgv, pgs), which(pgv %in% pgs))
+  }
+})

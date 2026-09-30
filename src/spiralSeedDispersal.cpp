@@ -26,8 +26,36 @@
 
 #include <Rcpp.h>
 #include <cstdint>
+#include <vector>
 
 using namespace Rcpp;
+
+// Cells whose pixelGroup is in `pgs`: the same as `which(pgv %in% pgs)` without
+// allocating a logical vector the length of the raster (36 MB on a 9M-cell map).
+// [[Rcpp::export]]
+IntegerVector cellsInPgsCpp(IntegerVector pgv, IntegerVector pgs) {
+  int lo = NA_INTEGER, hi = NA_INTEGER;
+  bool pgsHasNA = false;
+  for (int i = 0; i < pgs.size(); ++i) {
+    const int pg = pgs[i];
+    if (pg == NA_INTEGER) { pgsHasNA = true; continue; }
+    if (lo == NA_INTEGER || pg < lo) lo = pg;
+    if (hi == NA_INTEGER || pg > hi) hi = pg;
+  }
+  std::vector<char> inPgs((lo == NA_INTEGER) ? 0 : (size_t) ((long long) hi - lo + 1), 0);
+  for (int i = 0; i < pgs.size(); ++i) {
+    if (pgs[i] != NA_INTEGER) inPgs[(size_t) ((long long) pgs[i] - lo)] = 1;
+  }
+  std::vector<int> cells;
+  const int ncell = pgv.size();
+  for (int c = 0; c < ncell; ++c) {
+    const int pg = pgv[c];
+    const bool hit = (pg == NA_INTEGER) ? pgsHasNA :
+      (pg >= lo && pg <= hi && inPgs[(size_t) ((long long) pg - lo)]);
+    if (hit) cells.push_back(c + 1);
+  }
+  return wrap(cells);
+}
 
 // Inputs (built in the R wrapper):
 //
@@ -90,19 +118,15 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
 
   const int numRcv = pixelIndex_in.size();
   const int numSpiral = spiralRow.size();
-  const int ncell = pgv.size();
 
   if (numSp > 64) {
     stop("spiralLoopCpp: numSp must be <= 64 (bitmask width). Got %d.", numSp);
   }
 
-  // Build per-pixelGroup species bitmask. maxPg is the largest pg encountered
-  // in pgv (or in srcPg if larger, defensively).
+  // Build per-pixelGroup species bitmask. maxPg is the largest source pg; a cell
+  // whose pg is larger has no source (the spiral loop skips it), so pgv is not
+  // scanned.
   int maxPg = 0;
-  for (int c = 0; c < ncell; ++c) {
-    const int pg = pgv[c];
-    if (pg != NA_INTEGER && pg > maxPg) maxPg = pg;
-  }
   const int nSrcRows = srcPg.size();
   for (int s = 0; s < nSrcRows; ++s) {
     const int pg = srcPg[s];

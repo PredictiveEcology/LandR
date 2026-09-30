@@ -17,6 +17,9 @@
   `pixelGroupMap`. When supplied the raster values are not read (about 1 s on a 9M-cell map).
   When `NULL` the values are read once as integer, rather than as doubles and converted again in
   `spiralSeedDispersalCpp()`. Output is unchanged.
+  The R-side preparation is also cheaper (no re-sort of the receiver table, cell numbers to
+  row/column by integer arithmetic, `spiralLoopCpp()` no longer scans every cell for the largest
+  pixelGroup, receiver cells found without a raster-length logical vector). Output is unchanged.
 
 * `standAgeMapGenerator()` no longer modifies the caller's `cohortData`. It computed the stand
   age with `cohortData[, weightedAge := ...]`, which adds the column to the caller's table by

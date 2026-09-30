@@ -221,15 +221,9 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         )
       }
       origLevels <- levels(dtSrc$speciesCode)
-      dtSrc[, speciesCode2 := as.integer(speciesCode)]
-      dtRcv[, speciesCode2 := as.integer(speciesCode)]
-      speciesTable[, speciesCode2 := as.integer(speciesCode)]
-      set(dtSrc, NULL, "speciesCode", NULL)
-      set(dtRcv, NULL, "speciesCode", NULL)
-      set(speciesTable, NULL, "speciesCode", NULL)
-      setnames(dtSrc, "speciesCode2", "speciesCode")
-      setnames(dtRcv, "speciesCode2", "speciesCode")
-      setnames(speciesTable, "speciesCode2", "speciesCode")
+      set(dtSrc, NULL, "speciesCode", as.integer(dtSrc[["speciesCode"]]))
+      set(dtRcv, NULL, "speciesCode", as.integer(dtRcv[["speciesCode"]]))
+      set(speciesTable, NULL, "speciesCode", as.integer(speciesTable[["speciesCode"]]))
       if (!"species" %in% colnames(speciesTable)) {
         set(speciesTable, NULL, "species", paste0("Spp_", speciesTable[["speciesCode"]]))
       }
@@ -304,18 +298,14 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     }
 
     #  Remove any species in dtRcv that are not available in dtSrc
-    dtRcvNew <- dtRcv[unique(dtSrc[, "speciesCode"], by = "speciesCode"),
-      on = "speciesCode",
-      nomatch = NULL
-    ]
-    cellsCanRcv <- which(pgv %in% dtRcvNew$pixelGroup)
-    rcvSpeciesCodes <- sort(unique(dtRcvNew$speciesCode))
+    ## dtRcv was sorted by speciesCode above, so dtRcvSmall is too.
+    dtRcvSmall <- dtRcv[dtRcv[["speciesCode"]] %in% dtSrc[["speciesCode"]], c("pixelGroup", "speciesCode")]
+    cellsCanRcv <- cellsInPgsCpp(pgv, as.integer(dtRcvSmall[["pixelGroup"]]))
     dtRcvLong <- data.table(pixelGroup = pgv[cellsCanRcv], pixelIndex = cellsCanRcv)
-    dtRcvSmall <- dtRcvNew[, c("pixelGroup", "speciesCode")]
-    dtSrcUniqueSP <- unique(dtSrc[, "speciesCode"], by = "speciesCode")
-    dtRcvSmall1 <- dtRcvSmall[dtSrcUniqueSP, on = "speciesCode", nomatch = NULL]
-    dtRcvLong <- dtRcvLong[dtRcvSmall, on = "pixelGroup", allow.cartesian = TRUE, nomatch = NULL]
-    setorderv(dtRcvLong, c("pixelIndex", "speciesCode"))
+    ## Joining the small table onto the cells (not the reverse) keeps the rows in
+    ## pixelIndex, speciesCode order, so no sort is needed.
+    dtRcvLong <- dtRcvSmall[dtRcvLong, on = "pixelGroup", allow.cartesian = TRUE, nomatch = NULL]
+    setcolorder(dtRcvLong, c("pixelGroup", "pixelIndex", "speciesCode"))
     if (NROW(dtRcvLong)) {
       # There can be a case where a pixelGroup exists on map, with a species that is in Rcv but not in Src
       if (anyNA(dtRcvLong[["pixelIndex"]])) {
@@ -351,9 +341,11 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         )
       }
       if (exists("origLevels", inherits = FALSE)) {
-        dtRcvLong[, speciesCode := factor(origLevels[speciesCode], levels = origLevels)]
         if (origClassWasNumeric) {
-          set(dtRcvLong, NULL, "speciesCode", as.integer(as.character(dtRcvLong[["speciesCode"]])))
+          set(dtRcvLong, NULL, "speciesCode", as.integer(origLevels[dtRcvLong[["speciesCode"]]]))
+        } else {
+          set(dtRcvLong, NULL, "speciesCode",
+              factor(origLevels[dtRcvLong[["speciesCode"]]], levels = origLevels))
         }
       }
     }
@@ -896,14 +888,22 @@ spiralSeedDispersalCpp <- function(speciesTable, pixelGroupMap, dtRcvLong,
   wardProbByDist <- matrix(distsBySpCode[["wardProb"]],
                            nrow = numUniqueDists, ncol = numSp, byrow = TRUE)
 
+  ## Receivers ordered by species, then pixelIndex (the stable sort keeps dtRcvLong's
+  ## pixelIndex order within a species); a species not in speciesTable has no receivers.
   rcvFull <- dtRcvLong[, c("pixelIndex", "speciesCode")]
-  rcvFull <- rcvFull[speciesTable[, c("seeddistance_max", "speciesCode")],
-                     on = "speciesCode", nomatch = NULL]
+  setorderv(rcvFull, "speciesCode")
+  spRow <- match(rcvFull[["speciesCode"]], speciesTable[["speciesCode"]])
+  if (anyNA(spRow)) {
+    rcvFull <- rcvFull[!is.na(spRow)]
+    spRow <- spRow[!is.na(spRow)]
+  }
+  set(rcvFull, NULL, "seeddistance_max", speciesTable[["seeddistance_max"]][spRow])
 
-  rc1 <- rowColFromCell(pixelGroupMap, rcvFull[["pixelIndex"]])
-  colnames(rc1) <- c("row", "col")
-  rowOrig <- as.integer(rc1[, "row"])
-  colOrig <- as.integer(rc1[, "col"])
+  ## terra's cell numbering is row-major, 1-based
+  pgmCols <- as.integer(ncol(pixelGroupMap))
+  cell0 <- rcvFull[["pixelIndex"]] - 1L
+  rowOrig <- cell0 %/% pgmCols + 1L
+  colOrig <- cell0 - (rowOrig - 1L) * pgmCols + 1L
 
   curDists <- drop(spiral[, 3]) * cellSize
   spiralRow <- as.integer(spiral[, "row"])
