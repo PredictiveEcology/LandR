@@ -106,6 +106,19 @@ landscape-scale inputs (and uses dramatically less memory by replacing the
 per-cell-by-species source matrix with a per-\code{pixelGroup} species bitmask).
 To fall back to the R reference (e.g., for debugging), pass
 \code{useCpp = FALSE} or set \code{options(LandR.LANDISDisp.useCpp = FALSE)}.
+
+The scan for receivers that have a source at each spiral offset can use several
+OpenMP threads: set \code{options(LandR.LANDISDisp.threads = n)} (default \code{1}).
+Random draws stay on the main thread in the same order, so the output is identical
+for any number of threads. Without OpenMP support the option has no effect.
+Two cautions when setting it above \code{1}. First, every R process that calls
+\code{LANDISDisp()} starts its own threads, so with several parallel workers keep
+workers x threads at or below the free cores, or leave the option at \code{1}.
+Second, GCC's OpenMP runtime is not fork-safe: a process that has already run
+OpenMP threads and then forks (e.g., \code{parallel::mclapply()} or a fork cluster)
+can hang when the child uses OpenMP. Set the option inside each worker after it
+starts, or only in single-process runs. With the default \code{1} no OpenMP threads
+are started, so neither applies.
 }
 \examples{
 if (require("googledrive")) {

@@ -30,6 +30,12 @@
 
 * `assertCohortDataERG()` no longer calls `browser()` before its `stop()`, so a failed assertion
   stops instead of pausing an interactive session in the debugger.
+* `LANDISDisp()`'s C++ spiral scan can use OpenMP threads: `options(LandR.LANDISDisp.threads = n)`
+  (default `1`). Only the search for receivers with a source at each spiral offset is
+  parallel, with a static schedule and per-thread buffers joined in thread order; the uniform
+  draws stay serial on the main thread, so output is bit-identical for any thread count and to
+  `useCpp = FALSE`. `src/Makevars` and `src/Makevars.win` add `$(SHLIB_OPENMP_CXXFLAGS)`; without
+  OpenMP the package builds and runs serially.
 
 * `LANDISDisp()` (R reference and C++ spiral loop) no longer skips a draw because it exceeds the
   largest ward probability of the species that hit on the previous spiral step
