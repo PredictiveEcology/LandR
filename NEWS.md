@@ -1,5 +1,6 @@
 # LandR (development version)
 
+* `standAgeMapGenerator()` passed `mapCode = "pixelGroup"` to `rasterizeReduced()`, whose argument is `mapcode`; the misspelt name was silently dropped into `...` and it worked only because the raster had been renamed `"pixelGroup"` on the line before. It now passes `mapcode`. Output is unchanged.
 * `.initiateNewCohorts()` now gives new cohorts their pixelGroup's existing `ecoregionGroup` with one
   update join instead of a `[.data.table` call per pixelGroup, which took ~357 s per call on ~500k
   pixelGroups. On 2 M synthetic pixelGroups: 563 s before, 0.6 s now, identical output. It now stops
