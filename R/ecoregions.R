@@ -3,17 +3,29 @@ utils::globalVariables(c(
   "ecoregionName", "ID", "landcover", "mapcode"
 ))
 
-## Labels of a categorical SpatRaster's cells, looked up by raw cell value (the category ID).
-## `raster::factorValues()` returned only the ACTIVE category on a SpatRaster, and terra changes
-## which category is active on a file round trip (the first text column becomes active), so a
-## raster whose category table has another text column ahead of `ecoregionName` came back with
-## the wrong column and `ecoregionProducer()`'s join on "ecoregionName" failed. The
-## `ecoregionName` column is used when present; otherwise the active category, as before.
-## Returns a one-column data.frame named after the column used.
-.categoryLabels <- function(x, v) {
-  tb <- terra::cats(x)[[1]]
-  col <- if ("ecoregionName" %in% names(tb)) "ecoregionName" else names(tb)[terra::activeCat(x) + 1L]
-  out <- tb[match(v, tb[[1]]), col, drop = FALSE]
+## Category table of a categorical raster, from terra or raster.
+.categoryTable <- function(x) {
+  if (inherits(x, "Raster")) raster::levels(x)[[1]] else terra::cats(x)[[1]]
+}
+
+## The label column of a categorical raster's category table: `ecoregionName` when present;
+## otherwise the active category for terra, and the first label column for raster (which has no
+## active category).
+.labelColumn <- function(x, tb) {
+  if ("ecoregionName" %in% names(tb)[-1]) return("ecoregionName")
+  if (inherits(x, "Raster")) names(tb)[2] else names(tb)[terra::activeCat(x) + 1L]
+}
+
+## Labels of a categorical raster's cells (terra or raster), looked up by raw cell value (the
+## category ID) for the cells in `keep`. `raster::factorValues()` returned only the ACTIVE category
+## on a SpatRaster, and terra changes which category is active on a file round trip (the first text
+## column becomes active), so a category table with another text column ahead of `ecoregionName`
+## came back with the wrong labels and `ecoregionProducer()`'s join on "ecoregionName" failed.
+## Returns a one-column data.frame named after the label column.
+.categoryLabels <- function(x, keep) {
+  v <- if (inherits(x, "Raster")) raster::getValues(x)[keep] else terra::values(x, mat = FALSE)[keep]
+  tb <- .categoryTable(x)
+  out <- tb[match(v, tb[[1]]), .labelColumn(x, tb), drop = FALSE]
   rownames(out) <- NULL
   out
 }
@@ -78,7 +90,7 @@ ecoregionProducer <- function(ecoregionMaps, ecoregionName = NULL, rasterToMatch
   # b[, (names(b)) := lapply(.SD, function(x) paddedFloatToChar(x, max(nchar(x), na.rm = TRUE)))]
   # New Jan 2, 2026 by Eliot
   a <- lapply(rstEcoregion, function(x) {
-    if (is.factor(x)) .categoryLabels(x, values(x, mat = FALSE)[!NAs])
+    if (is.factor(x)) .categoryLabels(x, !NAs)
     else as.vector(x[])[!NAs]
     })
   b <- as.data.table(a)

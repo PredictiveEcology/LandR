@@ -62,22 +62,21 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
       ecoregionTable[, ID := as.factor(paddedFloatToChar(ID, max(nchar(ID))))]
     }
   } else {
-    if (inherits(ecoregionRst, "RasterLayer")) {
-      if (!length(ecoregionRst@data@attributes) == 0) {
-        # Not sure this is what you intended. The is_empty was making the attribute table return empty
-        appendEcoregionFactor <- TRUE
-        ecoregionTable <- as.data.table(ecoregionRst@data@attributes[[1]])
-        ecoregionTable[, ID := as.factor(paddedFloatToChar(ID, max(nchar(ID))))]
-      }
-    } else if (inherits(ecoregionRst, "SpatRaster")) {
-      if (!is.null(levels(ecoregionRst))) {
-        appendEcoregionFactor <- TRUE
-        ecoregionTable <- as.data.table(levels(ecoregionRst))
-        setnames(ecoregionTable, c("ID", "ecoregionName"))
-        ecoregionTable[, ID := as.factor(ID)]
-      }
-    } else {
+    if (!inherits(ecoregionRst, c("RasterLayer", "SpatRaster"))) {
       stop("problem with ecoregionRst -- it is not a RasterLayer or a SpatRaster")
+    }
+    ## A supplied categorical raster, from terra or raster, is normalized the same way: the
+    ## raster's category table and `ecoregionTable` both become (ID, ecoregionName), with IDs
+    ## padded as in the polygon branch above. ecoregionProducer() reads the labels from the
+    ## raster's `ecoregionName` and joins them to `ecoregionTable` on that name, so the two must
+    ## agree; the branches used to differ (the SpatRaster one renamed only the table and did not
+    ## pad its IDs; the RasterLayer one renamed nothing).
+    ecoregionCats <- .ecoregionCategories(ecoregionRst)
+    if (!is.null(ecoregionCats)) {
+      appendEcoregionFactor <- TRUE
+      levels(ecoregionRst) <- if (inherits(ecoregionRst, "Raster")) list(ecoregionCats) else ecoregionCats
+      ecoregionTable <- as.data.table(ecoregionCats)
+      ecoregionTable[, ID := as.factor(paddedFloatToChar(ID, max(nchar(ID))))]
     }
   }
 
@@ -117,4 +116,16 @@ prepEcoregions <- function(ecoregionRst = NULL, ecoregionLayer, ecoregionLayerFi
   }
 
   return(ecoregionFiles)
+}
+
+## (ID, ecoregionName) for a categorical ecoregion raster from terra or raster, taking the label
+## column `.labelColumn()` picks; NULL when the raster is not categorical. (A non-categorical
+## SpatRaster still has non-NULL `levels()`, so that test is not used.)
+.ecoregionCategories <- function(r) {
+  isCat <- if (inherits(r, "Raster")) raster::is.factor(r) else isTRUE(terra::is.factor(r)[1])
+  if (!isCat) {
+    return(NULL)
+  }
+  tb <- .categoryTable(r)
+  data.frame(ID = tb[[1]], ecoregionName = as.character(tb[[.labelColumn(r, tb)]]), stringsAsFactors = FALSE)
 }

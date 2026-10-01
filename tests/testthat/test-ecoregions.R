@@ -82,3 +82,48 @@ test_that("ecoregionProducer() reads ecoregionName by cell value, whatever the a
   expect_identical(got$ecoregion, expected$ecoregion)
   expect_identical(as.character(got$ecoregion$ecoregion_lcc), c("1_210", "1_220", "2_210", "2_220", "3_210", "3_220"))
 })
+
+## prepEcoregions() must normalize a supplied categorical ecoregion raster the same way for terra
+## and raster: the raster's category table and ecoregionTable both (ID, ecoregionName), padded IDs.
+## The SpatRaster branch used to rename only the table (and not pad IDs), and the RasterLayer branch
+## renamed nothing, so a label column not literally named ecoregionName failed the join in
+## ecoregionProducer(). 12 ecoregions, so ID padding ("01" vs "1") matters.
+test_that("prepEcoregions() gives the same result for terra and raster categorical inputs", {
+  withr::local_options(list(reproducible.useCache = FALSE, reproducible.cachePath = withr::local_tempdir()))
+  nEco <- 12L
+  r <- terra::rast(nrows = 12, ncols = 12, xmin = 0, xmax = 12, ymin = 0, ymax = 12, crs = "EPSG:3978")
+  ids <- rep(seq_len(nEco), length.out = terra::ncell(r))
+  names_ <- as.character(130 + seq_len(nEco))
+  lcc <- terra::rast(r, vals = rep(c(210L, 220L, 230L), length.out = terra::ncell(r)))
+  rtm <- terra::rast(r, vals = 1L)
+
+  mk <- function(df) {
+    x <- terra::rast(r, vals = ids)
+    levels(x) <- df
+    x
+  }
+  ## as prepEcoregions() builds it from polygons: ecoregionName is the only label column
+  base <- mk(data.frame(ID = seq_len(nEco), ecoregionName = names_))
+  ## label column named something else (SpatRaster)
+  spat <- mk(data.frame(ID = seq_len(nEco), ECOREGION = names_))
+  ## several label columns; the active one holds the ecoregion labels
+  multi <- mk(data.frame(ID = seq_len(nEco), code = letters[seq_len(nEco)], ECOREGION = names_))
+  terra::activeCat(multi) <- "ECOREGION"
+  ## the same raster as a RasterLayer (raster has no active category: first label column)
+  rl <- raster::raster(spat)
+
+  run <- function(eco, lccIn = lcc, rtmIn = rtm) {
+    out <- prepEcoregions(ecoregionRst = eco, ecoregionLayer = NULL, rasterToMatchLarge = rtmIn,
+                          rstLCCAdj = lccIn, pixelsToRm = NULL, cacheTags = "test")
+    m <- out$ecoregionMap
+    if (inherits(m, "Raster")) m <- terra::rast(m) ## rast() on a SpatRaster would drop its values
+    list(map = terra::values(m, mat = FALSE), table = out$ecoregion)
+  }
+  expected <- run(base)
+  expect_false(anyNA(expected$map)) ## the comparison below is of real values
+  expect_identical(run(spat), expected)
+  expect_identical(run(multi), expected)
+  expect_identical(run(rl, raster::raster(lcc), raster::raster(rtm)), expected)
+  ## the padded IDs joined: every ecoregion present, none dropped by the final na.omit()
+  expect_setequal(as.character(expected$table$ecoregionName), names_)
+})

@@ -6,7 +6,18 @@
   trip, so a category table with another text column ahead of `ecoregionName` returned the wrong
   labels and the join on `"ecoregionName"` failed. Rasters built by `prepEcoregions()` have
   `ecoregionName` as their only label column and give the same result as before. This also
-  removes `ecoregionProducer()`'s use of raster.
+  removes `ecoregionProducer()`'s use of `raster::factorValues()`.
+
+* `prepEcoregions()` now treats a supplied categorical `ecoregionRst` the same way whether it is a
+  terra `SpatRaster` or a raster `RasterLayer`: the raster's category table and `ecoregionTable`
+  both become `(ID, ecoregionName)`, the label column being `ecoregionName` if present and
+  otherwise terra's active category or raster's first label column, with IDs zero-padded as for
+  polygon input. The SpatRaster branch renamed only the table (and stopped on a category table with
+  more than one label column), so a label column with any other name reached
+  `ecoregionProducer()`'s join without an `ecoregionName` column; its IDs were not padded, so with
+  10 or more ecoregions they no longer matched; and a non-categorical SpatRaster was treated as
+  categorical, because its `levels()` is never `NULL`. The RasterLayer branch kept the attribute
+  table's own column names.
 
 * `standAgeMapGenerator()` passed `mapCode = "pixelGroup"` to `rasterizeReduced()`, whose argument is `mapcode`; the misspelt name was silently dropped into `...` and it worked only because the raster had been renamed `"pixelGroup"` on the line before. It now passes `mapcode`. Output is unchanged.
 * `.initiateNewCohorts()` now gives new cohorts their pixelGroup's existing `ecoregionGroup` with one
