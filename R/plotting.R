@@ -4,8 +4,8 @@ utils::globalVariables(c(
 
 #' Summary plots of leading vegetation types
 #'
-#' Create raster of leading vegetation types and `Plot` a bar chart summary
-#' and a vegetation type map. NOTE: plot order will follow `colors` order.
+#' Create raster of leading vegetation types, and build a bar chart summary beside
+#' a vegetation type map. NOTE: plot order will follow `colors` order.
 #'
 #' @param speciesStack A `SpatRaster`, `RasterStack` or `RasterBrick`
 #'   of percent-cover-by-species layers.
@@ -24,13 +24,14 @@ utils::globalVariables(c(
 #'
 #' @param title The title to use for the generated plots.
 #'
+#' @return A `patchwork` object (a `ggplot`) with the two panels side by side. Draw it with
+#'   `print()`, save it with `ggplot2::ggsave()`, or pass it to `SpaDES.core::Plots()`.
+#'
 #' @author Eliot McIntire
 #' @export
 plotVTM <- function(speciesStack = NULL, vtm = NULL,
                     vegLeadingProportion = mixedwoodProp(),
                     sppEquiv, sppEquivCol, colors, title = "Leading vegetation types") {
-  stopifnot(requireNamespace("ggpubr", quietly = TRUE))
-
   if (is(speciesStack, "RasterBrick")) {
     speciesStack <- raster::stack(speciesStack)
   }
@@ -123,9 +124,10 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL,
     theme(
       legend.text = element_text(size = 6),
       legend.title = element_blank(),
-      axis.text = element_text(size = 6)
-    ) +
-    ggtitle(title)
+      axis.text = element_text(size = 6),
+      ## species names are long; level, they overprint each other
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    )
 
   ## plot initial types raster
   levels(vtm) <- facLevels
@@ -148,10 +150,30 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL,
       legend.text = element_text(size = 6),
       legend.title = element_blank(),
       axis.text = element_text(size = 6)
-    ) +
-    ggtitle(title)
+    )
 
-  ggpubr::ggarrange(initialLeadingPlot, vtmPlot)
+  patchwork::wrap_plots(initialLeadingPlot, vtmPlot) +
+    patchwork::plot_annotation(title = title)
+}
+
+## Set a RasterLayer's colour table as `quickPlot::setColors<-` did (LandR#140 drops quickPlot):
+## an RColorBrewer palette name is expanded, then `cols` is interpolated to `n` colours. For a
+## categorical RasterLayer with integer values, `n` is the number of categories; one with
+## non-integer values is left unchanged.
+.setRasterColors <- function(ras, cols, n = length(cols)) {
+  if (raster::is.factor(ras)) {
+    v <- stats::na.omit(raster::getValues(ras))
+    if (any(v != as.integer(v))) {
+      return(ras)
+    }
+    n <- NROW(raster::levels(ras)[[1]])
+  }
+  info <- RColorBrewer::brewer.pal.info
+  if (isTRUE(cols[1] %in% rownames(info))) {
+    cols <- RColorBrewer::brewer.pal(min(n, info[cols[1], "maxcolors"]), cols[1])
+  }
+  raster::colortable(ras) <- grDevices::colorRampPalette(cols, alpha = TRUE)(n)
+  ras
 }
 
 #' Helper for setting Raster or `SpatRaster` colors
@@ -165,7 +187,8 @@ plotVTM <- function(speciesStack = NULL, vtm = NULL,
 #'   Can also be a `data.frame`, see [terra::coltab].
 #'
 #' @param n A numeric scalar giving the number of colours to create.
-#'   Passed to `quickPlot::setColors(ras, n = n) <- `.
+#'   For a `RasterLayer`, the number of colours the colour table is interpolated to
+#'   (for a categorical `RasterLayer`, the number of categories).
 #'   If missing, then `n` will be `length(cols)`.
 #'
 #' @examples
@@ -196,7 +219,7 @@ Colors <- function(ras, cols, n = NULL) {
     if (is.null(n)) {
       n <- length(cols)
     }
-    setColors(ras, n = n) <- cols
+    ras <- .setRasterColors(ras, cols, n = n)
   }
 
   ras
@@ -262,8 +285,6 @@ sppColors <- function(sppEquiv, sppEquivCol, newVals = NULL, palette = "Accent")
 }
 
 plotFunction <- function(ras, studyArea, limits = NULL) {
-  .requireNamespace("ggpubr", stopOnFALSE = TRUE)
-
   if (is.null(limits)) {
     limits <- range(as.vector(ras[]), na.rm = TRUE)
   }
@@ -277,7 +298,8 @@ plotFunction <- function(ras, studyArea, limits = NULL) {
       location = "tr",
       which_north = "true"
     ) +
-    ggpubr::theme_pubr(legend = "bottom") +
+    theme_classic() +
+    theme(legend.position = "bottom") +
     theme(plot.margin = unit(c(0, 0, 0, 0), units = "mm")) +
     scale_fill_distiller(
       palette = "Greys",

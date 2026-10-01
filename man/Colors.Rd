@@ -14,7 +14,8 @@ Colors(ras, cols, n = NULL)
 Can also be a \code{data.frame}, see \link[terra:coltab]{terra::coltab}.}
 
 \item{n}{A numeric scalar giving the number of colours to create.
-Passed to \verb{quickPlot::setColors(ras, n = n) <- }.
+For a \code{RasterLayer}, the number of colours the colour table is interpolated to
+(for a categorical \code{RasterLayer}, the number of categories).
 If missing, then \code{n} will be \code{length(cols)}.}
 }
 \description{
