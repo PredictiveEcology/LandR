@@ -1,5 +1,6 @@
 # LandR (development version)
 
+* `standAgeMapGenerator()` passed `mapCode = "pixelGroup"` to `rasterizeReduced()`, whose argument is `mapcode`; the misspelt name was silently dropped into `...` and it worked only because the raster had been renamed `"pixelGroup"` on the line before. It now passes `mapcode`. Output is unchanged.
 * `prepInputs_SCANFI_LCC_FAO()` and `prepInputs_NTEMS_LCC_FAO()` no longer relabel water (20),
   snow/ice (31) or 0 (no data; SCANFI v3 cropland, urban and road) as disturbed forest (240) where
   the record says forest land. A treed year elsewhere in the record, or an FAO forest code, does

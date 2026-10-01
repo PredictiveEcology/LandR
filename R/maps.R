@@ -595,7 +595,7 @@ standAgeMapGenerator <- function(
     cohortDataReduced,
     pixelGroupMap,
     "weightedAge",
-    mapCode = "pixelGroup"
+    mapcode = "pixelGroup"
   )
 
   return(standAgeMap)
