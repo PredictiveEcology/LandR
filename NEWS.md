@@ -57,6 +57,13 @@
   row/column by integer arithmetic, `spiralLoopCpp()` no longer scans every cell for the largest
   pixelGroup, receiver cells found without a raster-length logical vector). Output is unchanged.
 
+  of duplicating the formula. The predictors change too, not only the scale: LandR's old default
+  was `age ~ B * speciesCode + cover * speciesCode + (1 | initialEcoregionCode)`; the new one is
+  `log(age) ~ log(totalBiomass) * cover * speciesCode + (log(totalBiomass) | initialEcoregionCode)`,
+  the predictors `Biomass_borealDataPrep` already used. Callers that relied on LandR's default
+  get both changes. Predictions are back-transformed with `exp()`, which gives the median
+  (geometric-mean) age for given predictors, not the mean.
+  
 * `standAgeMapGenerator()` no longer modifies the caller's `cohortData`. It computed the stand
   age with `cohortData[, weightedAge := ...]`, which adds the column to the caller's table by
   reference, so e.g. `NRV_summary` left a `weightedAge` column in the simulation's `cohortData`.
