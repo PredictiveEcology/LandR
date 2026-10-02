@@ -34,7 +34,6 @@
 #' @importFrom MuMIn r.squaredGLMM
 #' @importFrom parallel mclapply
 #' @importFrom pemisc factorValues2
-#' @importFrom quickPlot layerNames numLayers Plot setColors setColors<-
 #' @importFrom raster calc deratify dropLayer extension levels NAvalue<- projectExtent
 #' @importFrom raster raster rasterOptions ratify reclassify stack unstack
 #' @importFrom RColorBrewer brewer.pal brewer.pal.info

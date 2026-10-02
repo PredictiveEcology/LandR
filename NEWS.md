@@ -7,6 +7,25 @@
   depended on how the response was written: with a `log(age)` response it dropped `log` and kept
   `age` only by accident. LandR no longer imports `termsInData()`.
 
+* `ecoregionProducer()` now reads a categorical ecoregion raster's labels by raw cell value, from
+  its `ecoregionName` column when present. It used `raster::factorValues()`, which on a SpatRaster
+  returns only the ACTIVE category; terra makes the first text column active after a file round
+  trip, so a category table with another text column ahead of `ecoregionName` returned the wrong
+  labels and the join on `"ecoregionName"` failed. Rasters built by `prepEcoregions()` have
+  `ecoregionName` as their only label column and give the same result as before. This also
+  removes `ecoregionProducer()`'s use of `raster::factorValues()`.
+
+* `prepEcoregions()` now treats a supplied categorical `ecoregionRst` the same way whether it is a
+  terra `SpatRaster` or a raster `RasterLayer`: the raster's category table and `ecoregionTable`
+  both become `(ID, ecoregionName)`, the label column being `ecoregionName` if present and
+  otherwise terra's active category or raster's first label column, with IDs zero-padded as for
+  polygon input. The SpatRaster branch renamed only the table (and stopped on a category table with
+  more than one label column), so a label column with any other name reached
+  `ecoregionProducer()`'s join without an `ecoregionName` column; its IDs were not padded, so with
+  10 or more ecoregions they no longer matched; and a non-categorical SpatRaster was treated as
+  categorical, because its `levels()` is never `NULL`. The RasterLayer branch kept the attribute
+  table's own column names.
+
 * New `imputeBadAgeModelDefault()` supplies `makeAndCleanInitialCohortData()`'s default
   age-imputation model, and is now the default value of its `imputeBadAgeModel` argument. The
   model's response is `log(age)`, not `age`, so an imputed age can no longer come back negative
@@ -19,7 +38,16 @@
   the predictors `Biomass_borealDataPrep` already used. Callers that relied on LandR's default
   get both changes. Predictions are back-transformed with `exp()`, which gives the median
   (geometric-mean) age for given predictors, not the mean.
-  
+
+* LandR no longer depends on quickPlot or ggpubr (#140, #174). `plotVTM()` combines its bar chart
+  and map with patchwork instead of `ggpubr::ggarrange()`, under one shared title, with the bar
+  chart's species labels angled so they no longer overprint; it returns a `patchwork` object, which
+  `print()`, `ggplot2::ggsave()` and `SpaDES.core::Plots()` accept as before. The colour tables
+  that `Colors()`, `defineFlammable()` and `vegTypeMapGenerator()` set on `RasterLayer`s are
+  computed exactly as `quickPlot::setColors<-` did, now in LandR. The internal `plotFunction()`
+  uses `theme_classic()` instead of `ggpubr::theme_pubr()`. Tests and the `LANDISDisp()` example
+  plot with `terra::plot()`.
+
 * `standAgeMapGenerator()` passed `mapCode = "pixelGroup"` to `rasterizeReduced()`, whose argument is `mapcode`; the misspelt name was silently dropped into `...` and it worked only because the raster had been renamed `"pixelGroup"` on the line before. It now passes `mapcode`. Output is unchanged.
 * `.initiateNewCohorts()` now gives new cohorts their pixelGroup's existing `ecoregionGroup` with one
   update join instead of a `[.data.table` call per pixelGroup, which took ~357 s per call on ~500k
