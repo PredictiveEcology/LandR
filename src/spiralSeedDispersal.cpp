@@ -26,8 +26,39 @@
 
 #include <Rcpp.h>
 #include <cstdint>
+#include <vector>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 using namespace Rcpp;
+
+// Cells whose pixelGroup is in `pgs`: the same as `which(pgv %in% pgs)` without
+// allocating a logical vector the length of the raster (36 MB on a 9M-cell map).
+// [[Rcpp::export]]
+IntegerVector cellsInPgsCpp(IntegerVector pgv, IntegerVector pgs) {
+  int lo = NA_INTEGER, hi = NA_INTEGER;
+  bool pgsHasNA = false;
+  for (int i = 0; i < pgs.size(); ++i) {
+    const int pg = pgs[i];
+    if (pg == NA_INTEGER) { pgsHasNA = true; continue; }
+    if (lo == NA_INTEGER || pg < lo) lo = pg;
+    if (hi == NA_INTEGER || pg > hi) hi = pg;
+  }
+  std::vector<char> inPgs((lo == NA_INTEGER) ? 0 : (size_t) ((long long) hi - lo + 1), 0);
+  for (int i = 0; i < pgs.size(); ++i) {
+    if (pgs[i] != NA_INTEGER) inPgs[(size_t) ((long long) pgs[i] - lo)] = 1;
+  }
+  std::vector<int> cells;
+  const int ncell = pgv.size();
+  for (int c = 0; c < ncell; ++c) {
+    const int pg = pgv[c];
+    const bool hit = (pg == NA_INTEGER) ? pgsHasNA :
+      (pg >= lo && pg <= hi && inPgs[(size_t) ((long long) pg - lo)]);
+    if (hit) cells.push_back(c + 1);
+  }
+  return wrap(cells);
+}
 
 // Inputs (built in the R wrapper):
 //
@@ -64,6 +95,20 @@ using namespace Rcpp;
 //   Success        : LogicalVector length numRcv
 //   DistOfSuccess  : NumericVector length numRcv (NA_real_ if no success)
 
+// TRUE if the package was compiled with OpenMP.
+// [[Rcpp::export]]
+bool landisDispHasOpenMP() {
+#ifdef _OPENMP
+  return true;
+#else
+  return false;
+#endif
+}
+
+// Steps with fewer active receivers than this are scanned serially: opening a
+// parallel region costs more than it saves.
+static const size_t kOmpMinActive = 20000;
+
 // [[Rcpp::export]]
 List spiralLoopCpp(IntegerVector pixelIndex_in,
                    IntegerVector speciesCode_in,
@@ -86,23 +131,20 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
                    int successionTimestep,
                    int verbose,
                    bool wardAlreadyExp,
-                   bool debug = false) {
+                   bool debug = false,
+                   int nThreads = 1) {
 
   const int numRcv = pixelIndex_in.size();
   const int numSpiral = spiralRow.size();
-  const int ncell = pgv.size();
 
   if (numSp > 64) {
     stop("spiralLoopCpp: numSp must be <= 64 (bitmask width). Got %d.", numSp);
   }
 
-  // Build per-pixelGroup species bitmask. maxPg is the largest pg encountered
-  // in pgv (or in srcPg if larger, defensively).
+  // Build per-pixelGroup species bitmask. maxPg is the largest source pg; a cell
+  // whose pg is larger has no source (the spiral loop skips it), so pgv is not
+  // scanned.
   int maxPg = 0;
-  for (int c = 0; c < ncell; ++c) {
-    const int pg = pgv[c];
-    if (pg != NA_INTEGER && pg > maxPg) maxPg = pg;
-  }
   const int nSrcRows = srcPg.size();
   for (int s = 0; s < nSrcRows; ++s) {
     const int pg = srcPg[s];
@@ -161,10 +203,27 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
   double prevCurDist = spiralCurDist[0];
   bool   newCurDist = true;
   int    uniqueDistCounter = 0;
-  double lastWardMaxProb = 1.0;
 
   // Number of currently-live receivers (for early termination)
   int numLive = numRcv;
+
+  if (nThreads < 1) nThreads = 1;
+#ifdef _OPENMP
+  const int maxThreads = omp_get_max_threads();
+  if (nThreads > maxThreads) nThreads = maxThreads;
+#else
+  nThreads = 1;
+#endif
+  // One hit buffer per thread; concatenated in thread order so hasSpRows has
+  // the same order as the serial scan.
+  std::vector< std::vector<int> > threadHits(nThreads);
+
+  // Raw pointers: no R API is touched inside the parallel scan.
+  const int* pgvP = pgv.begin();
+  const std::uint64_t* maskP = srcPgBitmask.data();
+  const int* rowActP = rowAct.data();
+  const int* colActP = colAct.data();
+  const int* spActP  = spAct.data();
 
   GetRNGstate();
 
@@ -248,26 +307,44 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
     // — important for RNG-stream parity with the R reference.
     hasSpRows.clear();
 
-    for (size_t idx = 0; idx < active.size(); ++idx) {
-      const int j = active[idx];
-      const int sp = spAct[j];
-
-      const int newRow = rowAct[j] + sRow;
-      const int newCol = colAct[j] + sCol;
-      if (newRow < 1 || newRow > pgmRows ||
-          newCol < 1 || newCol > pgmCols) {
-        continue; // out of bounds → no source
-      }
-      // Cell index using terra's row-major numbering, 0-based
-      const int cell0 = (newRow - 1) * pgmCols + (newCol - 1);
-      const int pg = pgv[cell0];
-      if (pg == NA_INTEGER) continue;          // masked cell
-      if (pg < 0 || pg > maxPg) continue;      // pg outside dtSrc range
-      const std::uint64_t mask = srcPgBitmask[(size_t) pg];
-      if (((mask >> (sp - 1)) & 1ULL) == 0ULL) continue;
-
-      hasSpRows.push_back(j);
+    // The scan uses no RNG. Above the size threshold it runs in a parallel
+    // region with a static schedule (contiguous chunks in thread order).
+    const int nAct = (int) active.size();
+    const int* activeP = active.data();
+    // Scan one receiver; append to `out` if it has a source at this offset.
+#define LANDIS_SCAN(IDX, OUT)                                                 \
+    {                                                                         \
+      const int j = activeP[IDX];                                             \
+      const int newRow = rowActP[j] + sRow;                                   \
+      const int newCol = colActP[j] + sCol;                                   \
+      if (newRow >= 1 && newRow <= pgmRows && newCol >= 1 && newCol <= pgmCols) { \
+        const int pg = pgvP[(newRow - 1) * pgmCols + (newCol - 1)];           \
+        if (pg != NA_INTEGER && pg >= 0 && pg <= maxPg &&                     \
+            ((maskP[(size_t) pg] >> (spActP[j] - 1)) & 1ULL) != 0ULL) {       \
+          (OUT).push_back(j);                                                 \
+        }                                                                     \
+      }                                                                       \
     }
+
+    hasSpRows.clear();
+#ifdef _OPENMP
+    if (nThreads > 1 && active.size() >= kOmpMinActive) {
+      for (int t = 0; t < nThreads; ++t) threadHits[t].clear();
+#pragma omp parallel num_threads(nThreads)
+      {
+        std::vector<int>& mine = threadHits[omp_get_thread_num()];
+#pragma omp for schedule(static)
+        for (int idx = 0; idx < nAct; ++idx) LANDIS_SCAN(idx, mine)
+      }
+      for (int t = 0; t < nThreads; ++t) {
+        hasSpRows.insert(hasSpRows.end(), threadHits[t].begin(), threadHits[t].end());
+      }
+    } else
+#endif
+    {
+      for (int idx = 0; idx < nAct; ++idx) LANDIS_SCAN(idx, hasSpRows)
+    }
+#undef LANDIS_SCAN
 
     const int sumHasSp = (int) hasSpRows.size();
     if (sumHasSp == 0) {
@@ -275,8 +352,8 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
       continue;
     }
     if (debug) {
-      Rprintf("[cpp] i=%d curDist=%.10f n=%d lastMax=%.17f udc=%d\n",
-              i + 1, curDist, sumHasSp, lastWardMaxProb, uniqueDistCounter);
+      Rprintf("[cpp] i=%d curDist=%.10f n=%d udc=%d\n",
+              i + 1, curDist, sumHasSp, uniqueDistCounter);
     }
 
     // Draw sumHasSp uniforms — same count, same order as runifC(sumHasSp)
@@ -288,24 +365,10 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
       ran[k] = ::unif_rand();
     }
 
-    // whRanLTprevMaxProb <- which(ran <= lastWardMaxProb)
-    // (early-out optimisation from the R version)
-    // First check if anything passes the screen.
-    bool anyPass = false;
-    for (int k = 0; k < sumHasSp; ++k) {
-      if (ran[k] <= lastWardMaxProb) { anyPass = true; break; }
-    }
-    if (!anyPass) {
-      // No draw could possibly succeed under any current ward prob.
-      if (numLive == 0) break;
-      continue;
-    }
-
     // Decide successes. Two paths in R:
     //   if (i == 1) oo <- seq.int(length(ran))   # all hasSpRows succeed
     //   else        oo <- ran[whRan...] < wardRes per species
     // The R code unconditionally consumes `sumHasSp` draws; we already did.
-    double newMax = 0.0;
     bool   anySuccess = false;
     if (i == 0) {
       // Self pixel: every receiver with a source on its own pixel succeeds
@@ -318,15 +381,11 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
         --numLive;
         anySuccess = true;
       }
-      lastWardMaxProb = 1.0; // first iteration, anything possible later
     } else {
       for (int k = 0; k < sumHasSp; ++k) {
-        if (ran[k] > lastWardMaxProb) continue;
         const int j  = hasSpRows[k];
         const int sp = spAct[j];
-        const double w = wardForRow[sp];
-        if (w > newMax) newMax = w;
-        if (ran[k] < w) {
+        if (ran[k] < wardForRow[sp]) {
           const int rcvRow = fullIdx[j];
           Success[rcvRow] = true;
           if (verbose >= 1) DistOfSuccess[rcvRow] = curDist;
@@ -335,12 +394,6 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
           anySuccess = true;
         }
       }
-      // Update lastWardMaxProb to min(1, max(wardRes)) across the surviving
-      // receivers from this iteration's pre-screened set, mirroring R.
-      // R only updates lastWardMaxProb when length(whRanLTprevMaxProb) > 0,
-      // which we already established with anyPass.
-      if (newMax > 1.0) newMax = 1.0;
-      lastWardMaxProb = newMax;
     }
 
     // If any receivers were marked dropped this step (success path), compact
