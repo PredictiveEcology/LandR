@@ -61,6 +61,12 @@ utils::globalVariables(c(
 #'   implementation is used instead. Output is bit-identical between the two
 #'   under a fixed seed. Defaults to `getOption("LandR.LANDISDisp.useCpp", TRUE)`.
 #'
+#' @param pgv Optional integer vector of pixelGroup IDs, one per cell of `pixelGroupMap`
+#'   (`length(pgv) == ncell(pixelGroupMap)`), `NA` for cells that can neither source nor
+#'   receive. When supplied, the raster values are not read (reading a 9M-cell map costs
+#'   over a second per call); `pixelGroupMap` is still used for its dimensions and
+#'   resolution. When `NULL` (the default), the values are read from `pixelGroupMap`.
+#'
 #' @param ...   Additional parameters. Currently none.
 #'
 #' @return A numeric vector of raster pixel indices, in the same resolution and extent as
@@ -170,7 +176,7 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
                        dispersalFn = Ward, b = 0.01, k = 0.95, plot.it = FALSE,
                        successionTimestep,
                        verbose = getOption("LandR.verbose", TRUE),
-                       useCpp = getOption("LandR.LANDISDisp.useCpp", TRUE), ...) {
+                       useCpp = getOption("LandR.LANDISDisp.useCpp", TRUE), pgv = NULL, ...) {
   if ((NROW(dtSrc) > 0) && (NROW(dtRcv) > 0)) {
     ####### Assertions #############
     if (!((is.numeric(dtSrc$speciesCode) && is.numeric(dtRcv$speciesCode) && is.numeric(speciesTable$speciesCode)) ||
@@ -213,15 +219,9 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         )
       }
       origLevels <- levels(dtSrc$speciesCode)
-      dtSrc[, speciesCode2 := as.integer(speciesCode)]
-      dtRcv[, speciesCode2 := as.integer(speciesCode)]
-      speciesTable[, speciesCode2 := as.integer(speciesCode)]
-      set(dtSrc, NULL, "speciesCode", NULL)
-      set(dtRcv, NULL, "speciesCode", NULL)
-      set(speciesTable, NULL, "speciesCode", NULL)
-      setnames(dtSrc, "speciesCode2", "speciesCode")
-      setnames(dtRcv, "speciesCode2", "speciesCode")
-      setnames(speciesTable, "speciesCode2", "speciesCode")
+      set(dtSrc, NULL, "speciesCode", as.integer(dtSrc[["speciesCode"]]))
+      set(dtRcv, NULL, "speciesCode", as.integer(dtRcv[["speciesCode"]]))
+      set(speciesTable, NULL, "speciesCode", as.integer(speciesTable[["speciesCode"]]))
       if (!"species" %in% colnames(speciesTable)) {
         set(speciesTable, NULL, "species", paste0("Spp_", speciesTable[["speciesCode"]]))
       }
@@ -237,7 +237,18 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
 
     # Cell-to-pixelGroup vector. Used by both Cpp (via the per-pg bitmask in
     # spiralLoopCpp) and R (via srcPixelMatrix). Pull once.
-    pgv <- as.vector(pixelGroupMap[])
+    if (is.null(pgv)) {
+      pgv <- if (inherits(pixelGroupMap, "SpatRaster")) {
+        as.integer(terra::values(pixelGroupMap, mat = FALSE))
+      } else {
+        as.integer(pixelGroupMap[]) # e.g., a RasterLayer
+      }
+    } else {
+      if (length(pgv) != ncell(pixelGroupMap)) {
+        stop("length(pgv) must equal ncell(pixelGroupMap)")
+      }
+      if (!is.integer(pgv)) pgv <- as.integer(pgv)
+    }
 
     # srcPixelMatrix is only needed by the R reference (spiralSeedDispersalR).
     # It dominates wall time at landscape scale (9M-cell maps spend >50% of
@@ -285,18 +296,14 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
     }
 
     #  Remove any species in dtRcv that are not available in dtSrc
-    dtRcvNew <- dtRcv[unique(dtSrc[, "speciesCode"], by = "speciesCode"),
-      on = "speciesCode",
-      nomatch = NULL
-    ]
-    cellsCanRcv <- which(pgv %in% dtRcvNew$pixelGroup)
-    rcvSpeciesCodes <- sort(unique(dtRcvNew$speciesCode))
+    ## dtRcv was sorted by speciesCode above, so dtRcvSmall is too.
+    dtRcvSmall <- dtRcv[dtRcv[["speciesCode"]] %in% dtSrc[["speciesCode"]], c("pixelGroup", "speciesCode")]
+    cellsCanRcv <- cellsInPgsCpp(pgv, as.integer(dtRcvSmall[["pixelGroup"]]))
     dtRcvLong <- data.table(pixelGroup = pgv[cellsCanRcv], pixelIndex = cellsCanRcv)
-    dtRcvSmall <- dtRcvNew[, c("pixelGroup", "speciesCode")]
-    dtSrcUniqueSP <- unique(dtSrc[, "speciesCode"], by = "speciesCode")
-    dtRcvSmall1 <- dtRcvSmall[dtSrcUniqueSP, on = "speciesCode", nomatch = NULL]
-    dtRcvLong <- dtRcvLong[dtRcvSmall, on = "pixelGroup", allow.cartesian = TRUE, nomatch = NULL]
-    setorderv(dtRcvLong, c("pixelIndex", "speciesCode"))
+    ## Joining the small table onto the cells (not the reverse) keeps the rows in
+    ## pixelIndex, speciesCode order, so no sort is needed.
+    dtRcvLong <- dtRcvSmall[dtRcvLong, on = "pixelGroup", allow.cartesian = TRUE, nomatch = NULL]
+    setcolorder(dtRcvLong, c("pixelGroup", "pixelIndex", "speciesCode"))
     if (NROW(dtRcvLong)) {
       # There can be a case where a pixelGroup exists on map, with a species that is in Rcv but not in Src
       if (anyNA(dtRcvLong[["pixelIndex"]])) {
@@ -332,9 +339,11 @@ LANDISDisp <- function(dtSrc, dtRcv, pixelGroupMap, speciesTable,
         )
       }
       if (exists("origLevels", inherits = FALSE)) {
-        dtRcvLong[, speciesCode := factor(origLevels[speciesCode], levels = origLevels)]
         if (origClassWasNumeric) {
-          set(dtRcvLong, NULL, "speciesCode", as.integer(as.character(dtRcvLong[["speciesCode"]])))
+          set(dtRcvLong, NULL, "speciesCode", as.integer(origLevels[dtRcvLong[["speciesCode"]]]))
+        } else {
+          set(dtRcvLong, NULL, "speciesCode",
+              factor(origLevels[dtRcvLong[["speciesCode"]]], levels = origLevels))
         }
       }
     }
@@ -601,7 +610,6 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
   activeSpecies <- speciesTable[, c("seeddistance_max", "seeddistance_eff", "speciesCode", "seeddistance_maxMinCellSize")]
   overallMaxDist <- max(speciesTable[["seeddistance_max"]])
   cantDoShortcutYet <- TRUE
-  lastWardMaxProb <- 1
 
   nrowSrcPixelMatrix <- NROW(srcPixelMatrix)
   # dim(srcPixelMatrix) <- NULL # make a single vector -- a bit faster
@@ -681,6 +689,10 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     #   row/col combinations that are "off" raster. cellFromRowCol does this
     #   internally and is fast
     newPixelIndex <- as.integer(cellFromRowCol(row = row, col = col, object = pixelGroupMap))
+    ## Receivers that already succeeded have row NA. terra casts NA to int in C++,
+    ## which is undefined: x86 gives an off-raster cell (NA), but arm64 (macOS)
+    ## gives row 1, so finished receivers found "sources" there and shifted the RNG stream.
+    newPixelIndex[is.na(row)] <- NA_integer_
 
     # lookup on src rasters
     if (newActiveIndex) {
@@ -707,66 +719,59 @@ spiralSeedDispersalR <- function(speciesTable, pixelGroupMap, dtRcvLong,
     if (sumHasSp) {
       ran <- runifC(sumHasSp)
 
-      whRanLTprevMaxProb <- which(ran <= lastWardMaxProb)
+      whHasSp <- which(!hasSpNot)
+      if (i == 1) { # self pixels are 100%
+        oo <- seq.int(length(ran))
+      } else {
+        # each draw is compared with its own species' ward probability
+        wardRes <- wardProbActual[activeSpeciesCode[whHasSp]]
+        oo <- which(ran < wardRes)
+      }
+      numSuccesses <- length(oo)
+      if (verbose >= 2) {
+        print(paste0(
+          i, "; curDist: ", round(curDist, 0), "; NumSuccesses: ",
+          numSuccesses, "; NumRows: ", NROW(na.omit(activeFullIndex)),
+          "; NumSp: ", length(unique(speciesCode[activeFullIndex]))
+        ))
+      }
+      notActiveSubIndex <- whHasSp[oo]
+      if (length(notActiveSubIndex)) {
+        notActiveFullIndex <- activeFullIndex[notActiveSubIndex]
 
-      if (length(whRanLTprevMaxProb)) {
-        whHasSp <- which(!hasSpNot)
-        if (i == 1) { # self pixels are 100%
-          oo <- seq.int(length(ran))
+        # This next block does 1 of 2 things: either resize the vectors
+        #    (rowOrig, colOrig, speciesCode, activeFullIndex), or just set the
+        #    values that are not active to NA. Apparently, setting NA is quite a
+        #    bit faster, up to a point. So, only resize objects every once in a while
+        cumSuccesses <- cumSuccesses + numSuccesses
+        if (cumSuccesses > 2000) {
+          cumSuccesses <- 0
+          # if (i %% modulo == 0) {
+          elapsedTime <- Sys.time() - startTime
+          ss <- seq(activeFullIndex)
+          ss <- ss[-notActiveSubIndex]
+          activeFullIndexNAs <- is.na(activeFullIndex)
+          ss <- ss[!activeFullIndexNAs[-notActiveSubIndex]]
+          activeFullIndex <- activeFullIndex[ss]
+          rowOrig <- rowOrig[ss]
+          colOrig <- colOrig[ss]
+          speciesCode <- speciesCode[ss]
         } else {
-          wardRes <- wardProbActual[activeSpeciesCode[whHasSp][whRanLTprevMaxProb]]
-          lastWardMaxProb <- min(1, max(wardRes))
-          oo <- ran[whRanLTprevMaxProb] < wardRes
-          oo <- whRanLTprevMaxProb[oo]
+          # Don't need to do colOrig or speciesCode as these are automatically NAs
+          #   downstream because rowOrig is NA -- cuts off 10% of computation time
+          activeFullIndex[notActiveSubIndex] <- NA
+          rowOrig[notActiveSubIndex] <- NA
         }
-        numSuccesses <- length(oo)
-        if (verbose >= 2) {
-          print(paste0(
-            i, "; curDist: ", round(curDist, 0), "; NumSuccesses: ",
-            numSuccesses, "; NumRows: ", NROW(na.omit(activeFullIndex)),
-            "; NumSp: ", length(unique(speciesCode[activeFullIndex]))
-          ))
-        }
-        notActiveSubIndex <- whHasSp[oo]
-        if (length(notActiveSubIndex)) {
-          notActiveFullIndex <- activeFullIndex[notActiveSubIndex]
 
-          # This next block does 1 of 2 things: either resize the vectors
-          #    (rowOrig, colOrig, speciesCode, activeFullIndex), or just set the
-          #    values that are not active to NA. Apparently, setting NA is quite a
-          #    bit faster, up to a point. So, only resize objects every once in a while
-          cumSuccesses <- cumSuccesses + numSuccesses
-          if (cumSuccesses > 2000) {
-            cumSuccesses <- 0
-            # if (i %% modulo == 0) {
-            elapsedTime <- Sys.time() - startTime
-            ss <- seq(activeFullIndex)
-            ss <- ss[-notActiveSubIndex]
-            activeFullIndexNAs <- is.na(activeFullIndex)
-            ss <- ss[!activeFullIndexNAs[-notActiveSubIndex]]
-            activeFullIndex <- activeFullIndex[ss]
-            rowOrig <- rowOrig[ss]
-            colOrig <- colOrig[ss]
-            speciesCode <- speciesCode[ss]
-          } else {
-            # Don't need to do colOrig or speciesCode as these are automatically NAs
-            #   downstream because rowOrig is NA -- cuts off 10% of computation time
-            activeFullIndex[notActiveSubIndex] <- NA
-            rowOrig[notActiveSubIndex] <- NA
-          }
+        newActiveIndex <- TRUE
 
-          newActiveIndex <- TRUE
-
-          set(rcvFull, notActiveFullIndex, "Success", TRUE)
-          if (verbose >= 1) {
-            set(rcvFull, notActiveFullIndex, "DistOfSuccess", curDist)
-            set(rcvFull, notActiveFullIndex, "ReasonForStop", "SuccessFullSeedRcvd")
-          }
-        } else {
-          notActiveSubIndex <- integer()
-          newActiveIndex <- FALSE
+        set(rcvFull, notActiveFullIndex, "Success", TRUE)
+        if (verbose >= 1) {
+          set(rcvFull, notActiveFullIndex, "DistOfSuccess", curDist)
+          set(rcvFull, notActiveFullIndex, "ReasonForStop", "SuccessFullSeedRcvd")
         }
       } else {
+        notActiveSubIndex <- integer()
         newActiveIndex <- FALSE
       }
     }
@@ -885,14 +890,22 @@ spiralSeedDispersalCpp <- function(speciesTable, pixelGroupMap, dtRcvLong,
   wardProbByDist <- matrix(distsBySpCode[["wardProb"]],
                            nrow = numUniqueDists, ncol = numSp, byrow = TRUE)
 
+  ## Receivers ordered by species, then pixelIndex (the stable sort keeps dtRcvLong's
+  ## pixelIndex order within a species); a species not in speciesTable has no receivers.
   rcvFull <- dtRcvLong[, c("pixelIndex", "speciesCode")]
-  rcvFull <- rcvFull[speciesTable[, c("seeddistance_max", "speciesCode")],
-                     on = "speciesCode", nomatch = NULL]
+  setorderv(rcvFull, "speciesCode")
+  spRow <- match(rcvFull[["speciesCode"]], speciesTable[["speciesCode"]])
+  if (anyNA(spRow)) {
+    rcvFull <- rcvFull[!is.na(spRow)]
+    spRow <- spRow[!is.na(spRow)]
+  }
+  set(rcvFull, NULL, "seeddistance_max", speciesTable[["seeddistance_max"]][spRow])
 
-  rc1 <- rowColFromCell(pixelGroupMap, rcvFull[["pixelIndex"]])
-  colnames(rc1) <- c("row", "col")
-  rowOrig <- as.integer(rc1[, "row"])
-  colOrig <- as.integer(rc1[, "col"])
+  ## terra's cell numbering is row-major, 1-based
+  pgmCols <- as.integer(ncol(pixelGroupMap))
+  cell0 <- rcvFull[["pixelIndex"]] - 1L
+  rowOrig <- cell0 %/% pgmCols + 1L
+  colOrig <- cell0 - (rowOrig - 1L) * pgmCols + 1L
 
   curDists <- drop(spiral[, 3]) * cellSize
   spiralRow <- as.integer(spiral[, "row"])
@@ -918,7 +931,7 @@ spiralSeedDispersalCpp <- function(speciesTable, pixelGroupMap, dtRcvLong,
     spiralCurDist       = curDists,
     pgmRows             = nrow(pixelGroupMap),
     pgmCols             = ncol(pixelGroupMap),
-    pgv                 = as.integer(pgv),
+    pgv                 = pgv,
     srcPg               = as.integer(dtSrc[["pixelGroup"]]),
     srcSpeciesCode      = as.integer(dtSrc[["speciesCode"]]),
     numSp               = as.integer(numSp),
