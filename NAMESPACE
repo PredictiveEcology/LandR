@@ -256,13 +256,6 @@ importFrom(pemisc,
   factorValues2,
   termsInData
 )
-importFrom(quickPlot,
-  "setColors<-",
-  Plot,
-  layerNames,
-  numLayers,
-  setColors
-)
 importFrom(raster,
   "NAvalue<-",
   calc,

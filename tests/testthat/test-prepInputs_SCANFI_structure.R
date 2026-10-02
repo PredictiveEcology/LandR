@@ -35,8 +35,8 @@ test_that("prepInputs_SCANFI_structure downloads height and closure", {
     reproducible.rasterRead = "terra::rast",
     reproducible.useTerra = TRUE
   ))
-  sa <- LandR::randomStudyArea(size = 1e8, seed = 5)
-  rtm <- terra::mask(terra::rast(terra::vect(sa), res = 250, vals = 1), terra::vect(sa))
+  sa <- LandR::randomStudyArea(size = 1e8, seed = 5) ## already a SpatVector; terra has no vect() for one
+  rtm <- terra::mask(terra::rast(sa, res = 250, vals = 1), sa)
 
   h <- prepInputs_SCANFI_structure("height", year = 2020, to = rtm)
   expect_s4_class(h, "SpatRaster")
