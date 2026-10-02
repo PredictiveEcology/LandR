@@ -1,5 +1,24 @@
 # LandR (development version)
 
+* `ecoregionProducer()` now reads a categorical ecoregion raster's labels by raw cell value, from
+  its `ecoregionName` column when present. It used `raster::factorValues()`, which on a SpatRaster
+  returns only the ACTIVE category; terra makes the first text column active after a file round
+  trip, so a category table with another text column ahead of `ecoregionName` returned the wrong
+  labels and the join on `"ecoregionName"` failed. Rasters built by `prepEcoregions()` have
+  `ecoregionName` as their only label column and give the same result as before. This also
+  removes `ecoregionProducer()`'s use of `raster::factorValues()`.
+
+* `prepEcoregions()` now treats a supplied categorical `ecoregionRst` the same way whether it is a
+  terra `SpatRaster` or a raster `RasterLayer`: the raster's category table and `ecoregionTable`
+  both become `(ID, ecoregionName)`, the label column being `ecoregionName` if present and
+  otherwise terra's active category or raster's first label column, with IDs zero-padded as for
+  polygon input. The SpatRaster branch renamed only the table (and stopped on a category table with
+  more than one label column), so a label column with any other name reached
+  `ecoregionProducer()`'s join without an `ecoregionName` column; its IDs were not padded, so with
+  10 or more ecoregions they no longer matched; and a non-categorical SpatRaster was treated as
+  categorical, because its `levels()` is never `NULL`. The RasterLayer branch kept the attribute
+  table's own column names.
+
 * New `imputeBadAgeModelDefault()` supplies `makeAndCleanInitialCohortData()`'s default
   age-imputation model, and is now the default value of its `imputeBadAgeModel` argument. The
   model's response is `log(age)`, not `age`, so an imputed age can no longer come back negative
