@@ -1,5 +1,18 @@
 # LandR (development version)
 
+* New `imputeBadAgeModelDefault()` supplies `makeAndCleanInitialCohortData()`'s default
+  age-imputation model, and is now the default value of its `imputeBadAgeModel` argument. The
+  model's response is `log(age)`, not `age`, so an imputed age can no longer come back negative
+  and get clamped to 0 for a stand with positive biomass -- the cause of the age-0-with-biomass
+  cohorts `CBMutils::cumPoolsCreateAGB()` rejects (PredictiveEcology/Biomass_borealDataPrep#131).
+  `Biomass_borealDataPrep`'s `imputeBadAgeModel` parameter now defaults to this function instead
+  of duplicating the formula. The predictors change too, not only the scale: LandR's old default
+  was `age ~ B * speciesCode + cover * speciesCode + (1 | initialEcoregionCode)`; the new one is
+  `log(age) ~ log(totalBiomass) * cover * speciesCode + (log(totalBiomass) | initialEcoregionCode)`,
+  the predictors `Biomass_borealDataPrep` already used. Callers that relied on LandR's default
+  get both changes. Predictions are back-transformed with `exp()`, which gives the median
+  (geometric-mean) age for given predictors, not the mean.
+
 * LandR no longer depends on quickPlot or ggpubr (#140, #174). `plotVTM()` combines its bar chart
   and map with patchwork instead of `ggpubr::ggarrange()`, under one shared title, with the bar
   chart's species labels angled so they no longer overprint; it returns a `patchwork` object, which

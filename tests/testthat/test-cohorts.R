@@ -307,6 +307,92 @@ testthat::test_that("statsModel fits when a response-side column is constant", {
   expect_s3_class(out$mod, "glm")
 })
 
+testthat::test_that("imputeBadAgeModelDefault() imputes on the log(age) scale", {
+  ## The whole point of this model is that a prediction can never come back negative.
+  ## That only holds if the response really is log(age), not age.
+  expect_identical(imputeBadAgeModelDefault()[[2]][[2]], quote(log(age)))
+})
+
+## Biomass_borealDataPrep#131: makeAndCleanInitialCohortData() imputed NEGATIVE ages for
+## young, high-cover, low-biomass stands (predict.merMod() on a Gaussian `age ~ ...` model
+## extrapolated below 0), which pmax(0L, ...) then clamped to age == 0 while biomass/cover
+## stayed positive -- a combination CBMutils::cumPoolsCreateAGB() rejects. This is exactly
+## the formula Biomass_borealDataPrep used as its `imputeBadAgeModel` default before this fix.
+testthat::test_that("age imputation never produces age == 0 with positive biomass/cover (#131)", {
+  withr::local_package("data.table")
+  withr::local_options(list(reproducible.useCache = FALSE))
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("MuMIn")
+
+  set.seed(42)
+  ecoregions <- c("01_NA", "02_NA")
+
+  ## "known-age" cohorts used to fit the imputation model: two species per pixel, cover
+  ## split between them, age rising with log(totalBiomass) and falling with cover share.
+  nFit <- 300L
+  p <- runif(nFit, 0.15, 0.85) # Pice_mar's share of total cover
+  totalBiomassFit <- runif(nFit, 50, 500)
+  ageFit <- as.integer(pmax(5, round(
+    20 + 18 * log(totalBiomassFit) - 0.4 * (p * 100) + rnorm(nFit, 0, 5)
+  )))
+  fit <- data.table(
+    pixelIndex = seq_len(nFit),
+    age = ageFit,
+    logAge = log(pmax(0.3, ageFit)),
+    initialEcoregionCode = factor(sample(ecoregions, nFit, replace = TRUE)),
+    totalBiomass = totalBiomassFit,
+    lcc = 210L,
+    cover.Pice_mar = round(p * 100),
+    cover.Pinu_ban = round((1 - p) * 100)
+  )
+
+  ## young stands needing imputation: high cover, very low biomass, age unknown (NA)
+  nYoung <- 80L
+  pY <- runif(nYoung, 0.15, 0.85)
+  young <- data.table(
+    pixelIndex = seq(nFit + 1L, nFit + nYoung),
+    age = NA_integer_,
+    logAge = NA_real_,
+    initialEcoregionCode = factor(sample(ecoregions, nYoung, replace = TRUE)),
+    totalBiomass = runif(nYoung, 0.1, 2),
+    lcc = 210L,
+    cover.Pice_mar = round(pY * 100),
+    cover.Pinu_ban = round((1 - pY) * 100)
+  )
+
+  allDat <- rbind(fit, young)
+  sppCols <- c("cover.Pice_mar", "cover.Pinu_ban")
+
+  ## the pre-fix Biomass_borealDataPrep default: Gaussian on raw age
+  oldAgeModel <- quote(lme4::lmer(
+    age ~ log(totalBiomass) * cover * speciesCode + (log(totalBiomass) | initialEcoregionCode)
+  ))
+
+  outOld <- suppressWarnings(suppressMessages(makeAndCleanInitialCohortData(
+    inputDataTable = data.table::copy(allDat),
+    sppColumns = sppCols,
+    imputeBadAgeModel = oldAgeModel,
+    minCoverThreshold = 5,
+    doAssertion = TRUE,
+    doSubset = FALSE
+  )))
+  badOld <- outOld[pixelIndex > nFit & age == 0L & (totalBiomass > 0 | cover > 0)]
+  ## documents the defect: the old formula really does clamp some imputed ages to 0
+  expect_gt(nrow(badOld), 0L)
+
+  outNew <- suppressWarnings(suppressMessages(makeAndCleanInitialCohortData(
+    inputDataTable = data.table::copy(allDat),
+    sppColumns = sppCols,
+    imputeBadAgeModel = imputeBadAgeModelDefault(),
+    minCoverThreshold = 5,
+    doAssertion = TRUE,
+    doSubset = FALSE
+  )))
+  badNew <- outNew[pixelIndex > nFit & age == 0L & (totalBiomass > 0 | cover > 0)]
+  expect_equal(nrow(badNew), 0L)
+  expect_true(all(outNew[pixelIndex > nFit]$age >= 1L))
+})
+
 ## the expression `.initiateNewCohorts()` used before it was replaced by a join
 oldAdjustNewERG <- function(cohortData) {
   cohortData[,
