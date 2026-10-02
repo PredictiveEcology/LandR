@@ -46,9 +46,13 @@ NOTE: plot order will follow this order.}
 
 \item{title}{The title to use for the generated plots.}
 }
+\value{
+A \code{patchwork} object (a \code{ggplot}) with the two panels side by side. Draw it with
+\code{print()}, save it with \code{ggplot2::ggsave()}, or pass it to \code{SpaDES.core::Plots()}.
+}
 \description{
-Create raster of leading vegetation types and \code{Plot} a bar chart summary
-and a vegetation type map. NOTE: plot order will follow \code{colors} order.
+Create raster of leading vegetation types, and build a bar chart summary beside
+a vegetation type map. NOTE: plot order will follow \code{colors} order.
 }
 \author{
 Eliot McIntire
