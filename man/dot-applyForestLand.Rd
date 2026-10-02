@@ -10,7 +10,8 @@
   treedClasses = .treedLCCClasses,
   convertibleClasses = NULL,
   disturbedCode = 240L,
-  filename = NULL
+  filename = NULL,
+  keepClasses = .neverForestLandClasses
 )
 }
 \arguments{
@@ -21,12 +22,15 @@
 \item{treedClasses}{The classes that are already treed, and so never relabelled.}
 
 \item{convertibleClasses}{The classes that may become \code{disturbedCode}, or \code{NULL}
-(default) for every class that is not in \code{treedClasses}. \code{NA} pixels are never
-relabelled.}
+(default) for every class that is not in \code{treedClasses} or \code{keepClasses}. \code{NA} pixels
+are never relabelled.}
 
 \item{disturbedCode}{The class given to forest land that is not treed in this year.}
 
 \item{filename}{Optional file to write to.}
+
+\item{keepClasses}{Classes never relabelled when \code{convertibleClasses} is \code{NULL}: water,
+snow/ice and 0 (no data; SCANFI v3 cropland, urban, road).}
 }
 \value{
 A \code{SpatRaster} like \code{lcc}, with \code{disturbedCode} where it applies.
@@ -35,8 +39,9 @@ A \code{SpatRaster} like \code{lcc}, with \code{disturbedCode} where it applies.
 Every non-treed class is eligible by default, exposed barren land and rock included: a
 pixel is only relabelled where the evidence says it is forest land, and a rock or barren
 pixel that the record shows as treed in other years is exposed by something temporary,
-such as a severe fire. Water and snow/ice are in that set too, so a pixel that was treed
-in an early year and is a reservoir later will be called forest land; pass
-\code{convertibleClasses} to narrow the set if that matters for a given study area.
+such as a severe fire. Water, snow/ice and code 0 (no data; in SCANFI v3 also cropland,
+urban and road) are never relabelled (\code{keepClasses}): a treed year elsewhere in the record,
+or an FAO forest code, does not make a lake, a glacier, a town or a road into forest
+without trees. Pass \code{convertibleClasses} to narrow the set further for a given study area.
 }
 \keyword{internal}

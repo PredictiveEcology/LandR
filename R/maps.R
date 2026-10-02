@@ -403,7 +403,7 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", writeTo = 
 #'   decade plus the most recent. Each year is one more layer to read.
 #' @param faoYear the year of the FAO forest layer: `r .faoForestYears`.
 #' @param convertibleClasses the classes that may become `disturbedCode`; `NULL` (default)
-#'   means every class that is not treed. See [.applyForestLand()].
+#'   means every class that is not treed, except water, snow/ice and 0. See [.applyForestLand()].
 #' @param ... passed to `prepInputs`
 #'
 #' @return a `SpatRaster` with corrected forest pixels
