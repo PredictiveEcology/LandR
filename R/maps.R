@@ -118,7 +118,7 @@ defineFlammable <- function(
   if (is(rstFlammable, "SpatRaster")) {
     coltab(rstFlammable, layer = 1) <- cols
   } else {
-    setColors(rstFlammable, n = 2) <- cols
+    rstFlammable <- .setRasterColors(rstFlammable, cols, n = 2)
   }
 
   if (!is.null(mask)) {
@@ -711,7 +711,7 @@ vegTypeMapGenerator.default <- function(
         ## This check turns stack to binary: 1 if < vegLeadingProportion; 0 if more than.
         ## Then, sum should be numLayers of all are below vegLeadingProportion
         whMixed <- which(
-          sum(speciesStack < (100 * vegLeadingProportion))[] == numLayers(speciesStack)
+          sum(speciesStack < (100 * vegLeadingProportion))[] == terra::nlyr(speciesStack)
         )
         MixedRas <- speciesStack[[1]]
         MixedRas[!is.na(as.vector(speciesStack[[1]][]))] <- 0
@@ -1004,7 +1004,7 @@ vegTypeMapGenerator.data.table <- function(
       stringsAsFactors = FALSE
     )
     if (is(vegTypeMap, "RasterLayer")) {
-      setColors(vegTypeMap, n = length(colors)) <- levels(vegTypeMap)[[1]][, "colors"]
+      vegTypeMap <- .setRasterColors(vegTypeMap, levels(vegTypeMap)[[1]][, "colors"], n = length(colors))
     } else {
       temp <- levels(vegTypeMap)[[1]]
       rasColors <- data.table(col = colors, values = names(colors))

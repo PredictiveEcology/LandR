@@ -253,17 +253,7 @@ importFrom(lme4,
   lmer
 )
 importFrom(parallel,mclapply)
-importFrom(pemisc,
-  factorValues2,
-  termsInData
-)
-importFrom(quickPlot,
-  "setColors<-",
-  Plot,
-  layerNames,
-  numLayers,
-  setColors
-)
+importFrom(pemisc,factorValues2)
 importFrom(raster,
   "NAvalue<-",
   calc,

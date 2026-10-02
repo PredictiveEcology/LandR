@@ -1276,6 +1276,29 @@ imputeBadAgeModelDefault <- function() {
   ))
 }
 
+#' Variables a quoted model call uses, found in its formula
+#'
+#' Reads the formula argument of a quoted model call (e.g. `imputeBadAgeModelDefault()`) with
+#' [all.vars()], so variables inside transformations such as `log(age)` are found and the
+#' response is included.
+#'
+#' @param model A quoted model call whose arguments include a formula.
+#' @param cols Optional character vector; if given, only variables in `cols` are returned.
+#'
+#' @return Character vector of variable names.
+#'
+#' @noRd
+modelFormulaVars <- function(model, cols = NULL) {
+  args <- as.list(model)[-1]
+  fml <- Find(function(a) is.call(a) && identical(a[[1]], as.name("~")), args)
+  if (is.null(fml)) {
+    stop("could not find a formula among the arguments of the model call")
+  }
+  vars <- all.vars(fml)
+  if (!is.null(cols)) vars <- vars[vars %in% cols]
+  vars
+}
+
 #' Generate initial `cohortData` table
 #'
 #' Takes a single `data.table` input, which has the following columns in addition to
@@ -1404,24 +1427,22 @@ makeAndCleanInitialCohortData <- function(
         initialEcoregionCode,
         cover
       )]
-      zeros <- sapply(cohortDataMissingAgeUnique, function(x) sum(x == 0))
-      if (sum(zeros, na.rm = TRUE)) {
-        hasZeros <- zeros[zeros > 0]
+      ## Drop rows with a zero in any variable the model uses, response included: a zero cannot
+      ## enter a log-scale term (log(0) is -Inf; the default model logs age and totalBiomass),
+      ## and a cohort with zero cover or biomass says nothing about stand age.
+      modelVars <- modelFormulaVars(imputeBadAgeModel, colnames(cohortDataMissingAgeUnique))
+      nZeros <- vapply(modelVars, function(v) {
+        sum(cohortDataMissingAgeUnique[[v]] %in% 0)
+      }, integer(1))
+      if (any(nZeros > 0L)) {
+        hasZeros <- nZeros[nZeros > 0L]
         message(
-          " ",
-          paste(names(hasZeros), collapse = ", "),
-          " had ",
-          paste(hasZeros, collapse = ", "),
-          " zeros, respectively"
+          "  -- Age imputation: dropping rows with 0 in a model variable before fitting (",
+          paste0(names(hasZeros), ": ", hasZeros, collapse = ", "),
+          ")"
         )
-        warning(" These are being removed from the dataset. If this is not desired; please fix.")
-        # terms <- strsplit(gsub(" ", "", as.character(imputeBadAgeModel)), split = "[[:punct:]]+")[[2]][-1] # remove response
-        # terms <- unique(terms)
-        # terms <- terms[terms %in% colnames(cohortDataMissingAgeUnique)]
-        terms <- termsInData(imputeBadAgeModel, cohortDataMissingAgeUnique)
-        lapply(terms, function(x) {
-          cohortDataMissingAgeUnique <<- cohortDataMissingAgeUnique[get(x) != 0]
-        })
+        keep <- Reduce(`&`, lapply(modelVars, function(v) !(cohortDataMissingAgeUnique[[v]] %in% 0)))
+        cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[keep]
       }
       cohortDataMissingAgeUnique <- subsetDT(
         cohortDataMissingAgeUnique,

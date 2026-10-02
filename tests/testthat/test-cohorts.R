@@ -393,6 +393,88 @@ testthat::test_that("age imputation never produces age == 0 with positive biomas
   expect_true(all(outNew[pixelIndex > nFit]$age >= 1L))
 })
 
+testthat::test_that("modelFormulaVars() reads variables from the model's formula", {
+  expect_identical(
+    modelFormulaVars(imputeBadAgeModelDefault()),
+    c("age", "totalBiomass", "cover", "speciesCode", "initialEcoregionCode")
+  )
+  ## a named formula argument, and a response that is not transformed
+  expect_identical(
+    modelFormulaVars(quote(lme4::lmer(formula = age ~ B + (1 | g), REML = FALSE))),
+    c("age", "B", "g")
+  )
+  ## only variables present in the data
+  expect_identical(
+    modelFormulaVars(imputeBadAgeModelDefault(), cols = c("age", "cover", "other")),
+    c("age", "cover")
+  )
+  expect_error(modelFormulaVars(quote(lme4::lmer(data = x))), "could not find a formula")
+})
+
+testthat::test_that("age-model fitting drops rows with a zero in any model variable, with a message", {
+  withr::local_package("data.table")
+  withr::local_options(list(reproducible.useCache = FALSE))
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("MuMIn")
+
+  set.seed(7)
+  ecoregions <- c("01_NA", "02_NA")
+  nFit <- 200L
+  p <- runif(nFit, 0.15, 0.85)
+  totalBiomassFit <- runif(nFit, 50, 500)
+  ageFit <- as.integer(pmax(5, round(20 + 18 * log(totalBiomassFit) + rnorm(nFit, 0, 5))))
+  ageFit[1:10] <- 0L # known-age stands with age 0: log(age) cannot take them
+  fit <- data.table(
+    pixelIndex = seq_len(nFit),
+    age = ageFit,
+    logAge = log(pmax(0.3, ageFit)),
+    initialEcoregionCode = factor(sample(ecoregions, nFit, replace = TRUE)),
+    totalBiomass = totalBiomassFit,
+    lcc = 210L,
+    cover.Pice_mar = round(p * 100),
+    cover.Pinu_ban = round((1 - p) * 100)
+  )
+  nMiss <- 40L
+  pM <- runif(nMiss, 0.15, 0.85)
+  miss <- data.table(
+    pixelIndex = seq(nFit + 1L, nFit + nMiss),
+    age = NA_integer_,
+    logAge = NA_real_,
+    initialEcoregionCode = factor(sample(ecoregions, nMiss, replace = TRUE)),
+    totalBiomass = runif(nMiss, 50, 500),
+    lcc = 210L,
+    cover.Pice_mar = round(pM * 100),
+    cover.Pinu_ban = round((1 - pM) * 100)
+  )
+
+  msgs <- character()
+  warns <- character()
+  out <- withCallingHandlers(
+    makeAndCleanInitialCohortData(
+      inputDataTable = rbind(fit, miss),
+      sppColumns = c("cover.Pice_mar", "cover.Pinu_ban"),
+      imputeBadAgeModel = imputeBadAgeModelDefault(),
+      minCoverThreshold = 5,
+      doAssertion = TRUE,
+      doSubset = FALSE
+    ),
+    message = function(m) {
+      msgs <<- c(msgs, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    },
+    warning = function(w) {
+      warns <<- c(warns, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  expect_true(any(grepl("dropping rows with 0 in a model variable", msgs)))
+  expect_false(any(grepl("being removed", warns)))
+  imputed <- out[pixelIndex > nFit]$age
+  expect_true(all(is.finite(imputed)))
+  expect_true(all(imputed >= 1L))
+})
+
 ## the expression `.initiateNewCohorts()` used before it was replaced by a join
 oldAdjustNewERG <- function(cohortData) {
   cohortData[,
