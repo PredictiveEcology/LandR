@@ -2,14 +2,15 @@
 % Please edit documentation in R/cohorts.R
 \name{.createCohortData}
 \alias{.createCohortData}
-\title{Generate template \code{cohortData} table}
+\title{Internal function used by \code{\link[=makeAndCleanInitialCohortData]{makeAndCleanInitialCohortData()}}.}
 \usage{
 .createCohortData(
   inputDataTable,
   sppColumns,
   minCoverThreshold = 5,
   doAssertion = getOption("LandR.assertions", TRUE),
-  rescale = TRUE
+  rescale = TRUE,
+  minSpeciesEcoregionShare = 0
 )
 }
 \arguments{
@@ -27,6 +28,8 @@ Default: \code{getOption("LandR.assertions", TRUE)}.}
 
 \item{rescale}{Logical. If \code{TRUE}, the default, cover for each species will be rescaled
 so all cover in \code{pixelGroup} or pixel sums to 100.}
+
+\item{minSpeciesEcoregionShare}{See \code{\link[=makeAndCleanInitialCohortData]{makeAndCleanInitialCohortData()}}.}
 }
 \value{
 \code{cohortData} (\code{data.table}) with attribute \code{"imputedPixID"}
