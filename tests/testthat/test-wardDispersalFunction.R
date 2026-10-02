@@ -10,7 +10,6 @@ test_that("test Ward dispersal seeding algorithm", {
   }
 
   withr::local_package("data.table")
-  withr::local_package("quickPlot")
   withr::local_package("SpaDES.tools")
 
   # keep this here for interactive testing with a larger raster
@@ -136,10 +135,9 @@ test_that("test Ward dispersal seeding algorithm", {
     bigDispersers <- species$speciesCode[which(species$SeedMaxDist == 5000 & species$SeedEffDist == 1000)]
     lapply(spsOut, function(x) table(x[]))
     if (interactive()) {
-      dev()
-      clearPlot()
-      Plot(reducedPixelGroupMap, Sum_of_species, new = TRUE)
-      Plot(spsOut, legendRange = 1:3)
+      terra::plot(reducedPixelGroupMap)
+      terra::plot(Sum_of_species)
+      terra::plot(terra::rast(spsOut))
     }
     # i <<- i + 1;
 
@@ -230,7 +228,6 @@ test_that("test large files", {
   }
 
   withr::local_package("reproducible")
-  withr::local_package("quickPlot")
 
   url1 <- "https://drive.google.com/file/d/1MHA3LeBuPJXRPkPDp33M6iJmNpw7ePZI"
   dtSrc <- prepInputs(
@@ -338,7 +335,6 @@ test_that("test large files", {
   ), by = "speciesCode"]
 
   setnames(out, old = c("speciesCode", "species"), new = c("speciesNum", "speciesCode"))
-  clearPlot()
   spMap <- list()
   spMap$pixelGroupMap <- pixelGroupMap
   for (sppp in unique(out$speciesCode)) {
@@ -371,9 +367,8 @@ test_that("test large files", {
   }
 
   if (FALSE) { # (interactive()) {
-    clearPlot()
     sp <- spMap[-1]
-    Plot(sp, cols = "Set2")
+    terra::plot(terra::rast(sp))
   }
 
   rrDidntExist <- if (!exists("rr")) TRUE else FALSE
