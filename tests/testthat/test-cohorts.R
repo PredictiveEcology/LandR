@@ -306,3 +306,224 @@ testthat::test_that("statsModel fits when a response-side column is constant", {
   expect_true(is.list(out))
   expect_s3_class(out$mod, "glm")
 })
+
+testthat::test_that("imputeBadAgeModelDefault() imputes on the log(age) scale", {
+  ## The whole point of this model is that a prediction can never come back negative.
+  ## That only holds if the response really is log(age), not age.
+  expect_identical(imputeBadAgeModelDefault()[[2]][[2]], quote(log(age)))
+})
+
+## Biomass_borealDataPrep#131: makeAndCleanInitialCohortData() imputed NEGATIVE ages for
+## young, high-cover, low-biomass stands (predict.merMod() on a Gaussian `age ~ ...` model
+## extrapolated below 0), which pmax(0L, ...) then clamped to age == 0 while biomass/cover
+## stayed positive -- a combination CBMutils::cumPoolsCreateAGB() rejects. This is exactly
+## the formula Biomass_borealDataPrep used as its `imputeBadAgeModel` default before this fix.
+testthat::test_that("age imputation never produces age == 0 with positive biomass/cover (#131)", {
+  withr::local_package("data.table")
+  withr::local_options(list(reproducible.useCache = FALSE))
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("MuMIn")
+
+  set.seed(42)
+  ecoregions <- c("01_NA", "02_NA")
+
+  ## "known-age" cohorts used to fit the imputation model: two species per pixel, cover
+  ## split between them, age rising with log(totalBiomass) and falling with cover share.
+  nFit <- 300L
+  p <- runif(nFit, 0.15, 0.85) # Pice_mar's share of total cover
+  totalBiomassFit <- runif(nFit, 50, 500)
+  ageFit <- as.integer(pmax(5, round(
+    20 + 18 * log(totalBiomassFit) - 0.4 * (p * 100) + rnorm(nFit, 0, 5)
+  )))
+  fit <- data.table(
+    pixelIndex = seq_len(nFit),
+    age = ageFit,
+    logAge = log(pmax(0.3, ageFit)),
+    initialEcoregionCode = factor(sample(ecoregions, nFit, replace = TRUE)),
+    totalBiomass = totalBiomassFit,
+    lcc = 210L,
+    cover.Pice_mar = round(p * 100),
+    cover.Pinu_ban = round((1 - p) * 100)
+  )
+
+  ## young stands needing imputation: high cover, very low biomass, age unknown (NA)
+  nYoung <- 80L
+  pY <- runif(nYoung, 0.15, 0.85)
+  young <- data.table(
+    pixelIndex = seq(nFit + 1L, nFit + nYoung),
+    age = NA_integer_,
+    logAge = NA_real_,
+    initialEcoregionCode = factor(sample(ecoregions, nYoung, replace = TRUE)),
+    totalBiomass = runif(nYoung, 0.1, 2),
+    lcc = 210L,
+    cover.Pice_mar = round(pY * 100),
+    cover.Pinu_ban = round((1 - pY) * 100)
+  )
+
+  allDat <- rbind(fit, young)
+  sppCols <- c("cover.Pice_mar", "cover.Pinu_ban")
+
+  ## the pre-fix Biomass_borealDataPrep default: Gaussian on raw age
+  oldAgeModel <- quote(lme4::lmer(
+    age ~ log(totalBiomass) * cover * speciesCode + (log(totalBiomass) | initialEcoregionCode)
+  ))
+
+  outOld <- suppressWarnings(suppressMessages(makeAndCleanInitialCohortData(
+    inputDataTable = data.table::copy(allDat),
+    sppColumns = sppCols,
+    imputeBadAgeModel = oldAgeModel,
+    minCoverThreshold = 5,
+    doAssertion = TRUE,
+    doSubset = FALSE
+  )))
+  badOld <- outOld[pixelIndex > nFit & age == 0L & (totalBiomass > 0 | cover > 0)]
+  ## documents the defect: the old formula really does clamp some imputed ages to 0
+  expect_gt(nrow(badOld), 0L)
+
+  outNew <- suppressWarnings(suppressMessages(makeAndCleanInitialCohortData(
+    inputDataTable = data.table::copy(allDat),
+    sppColumns = sppCols,
+    imputeBadAgeModel = imputeBadAgeModelDefault(),
+    minCoverThreshold = 5,
+    doAssertion = TRUE,
+    doSubset = FALSE
+  )))
+  badNew <- outNew[pixelIndex > nFit & age == 0L & (totalBiomass > 0 | cover > 0)]
+  expect_equal(nrow(badNew), 0L)
+  expect_true(all(outNew[pixelIndex > nFit]$age >= 1L))
+})
+
+testthat::test_that("modelFormulaVars() reads variables from the model's formula", {
+  expect_identical(
+    modelFormulaVars(imputeBadAgeModelDefault()),
+    c("age", "totalBiomass", "cover", "speciesCode", "initialEcoregionCode")
+  )
+  ## a named formula argument, and a response that is not transformed
+  expect_identical(
+    modelFormulaVars(quote(lme4::lmer(formula = age ~ B + (1 | g), REML = FALSE))),
+    c("age", "B", "g")
+  )
+  ## only variables present in the data
+  expect_identical(
+    modelFormulaVars(imputeBadAgeModelDefault(), cols = c("age", "cover", "other")),
+    c("age", "cover")
+  )
+  expect_error(modelFormulaVars(quote(lme4::lmer(data = x))), "could not find a formula")
+})
+
+testthat::test_that("age-model fitting drops rows with a zero in any model variable, with a message", {
+  withr::local_package("data.table")
+  withr::local_options(list(reproducible.useCache = FALSE))
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("MuMIn")
+
+  set.seed(7)
+  ecoregions <- c("01_NA", "02_NA")
+  nFit <- 200L
+  p <- runif(nFit, 0.15, 0.85)
+  totalBiomassFit <- runif(nFit, 50, 500)
+  ageFit <- as.integer(pmax(5, round(20 + 18 * log(totalBiomassFit) + rnorm(nFit, 0, 5))))
+  ageFit[1:10] <- 0L # known-age stands with age 0: log(age) cannot take them
+  fit <- data.table(
+    pixelIndex = seq_len(nFit),
+    age = ageFit,
+    logAge = log(pmax(0.3, ageFit)),
+    initialEcoregionCode = factor(sample(ecoregions, nFit, replace = TRUE)),
+    totalBiomass = totalBiomassFit,
+    lcc = 210L,
+    cover.Pice_mar = round(p * 100),
+    cover.Pinu_ban = round((1 - p) * 100)
+  )
+  nMiss <- 40L
+  pM <- runif(nMiss, 0.15, 0.85)
+  miss <- data.table(
+    pixelIndex = seq(nFit + 1L, nFit + nMiss),
+    age = NA_integer_,
+    logAge = NA_real_,
+    initialEcoregionCode = factor(sample(ecoregions, nMiss, replace = TRUE)),
+    totalBiomass = runif(nMiss, 50, 500),
+    lcc = 210L,
+    cover.Pice_mar = round(pM * 100),
+    cover.Pinu_ban = round((1 - pM) * 100)
+  )
+
+  msgs <- character()
+  warns <- character()
+  out <- withCallingHandlers(
+    makeAndCleanInitialCohortData(
+      inputDataTable = rbind(fit, miss),
+      sppColumns = c("cover.Pice_mar", "cover.Pinu_ban"),
+      imputeBadAgeModel = imputeBadAgeModelDefault(),
+      minCoverThreshold = 5,
+      doAssertion = TRUE,
+      doSubset = FALSE
+    ),
+    message = function(m) {
+      msgs <<- c(msgs, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    },
+    warning = function(w) {
+      warns <<- c(warns, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  expect_true(any(grepl("dropping rows with 0 in a model variable", msgs)))
+  expect_false(any(grepl("being removed", warns)))
+  imputed <- out[pixelIndex > nFit]$age
+  expect_true(all(is.finite(imputed)))
+  expect_true(all(imputed >= 1L))
+})
+
+## the expression `.initiateNewCohorts()` used before it was replaced by a join
+oldAdjustNewERG <- function(cohortData) {
+  cohortData[,
+    ecoregionGroup := unique(.SD[new == FALSE, ecoregionGroup]),
+    by = "pixelGroup",
+    .SDcols = c("new", "ecoregionGroup")
+  ]
+}
+
+testthat::test_that(".adjustNewCohortsERG matches the per-pixelGroup expression it replaced", {
+  lev <- c("eco1", "eco2", "eco3", "eco4")
+  ## pg 1: old + new, new differs; pg 2: only new; pg 3: only old (2 rows);
+  ## pg 4: old + new, new differs, several rows; pg 5: old + new that already agree
+  cd <- data.table(
+    pixelGroup = c(1L, 1L, 2L, 3L, 3L, 4L, 4L, 4L, 5L, 5L),
+    ecoregionGroup = factor(c("eco1", "eco2", "eco3", "eco4", "eco4", "eco1", "eco1", "eco3",
+                              "eco2", "eco2"), levels = lev),
+    speciesCode = factor(c("A", "B", "A", "A", "B", "A", "B", "C", "A", "B")),
+    B = 1:10,
+    new = c(FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE)
+  )
+  setkey(cd, pixelGroup)
+  expected <- copy(cd)
+  oldAdjustNewERG(expected)
+  got <- copy(cd)
+  LandR:::.adjustNewCohortsERG(got)
+
+  expect_identical(got, expected)
+  expect_identical(levels(got$ecoregionGroup), lev)
+  expect_identical(data.table::key(got), "pixelGroup")
+  expect_identical(names(got), names(cd))
+  expect_identical(
+    as.character(got$ecoregionGroup),
+    c("eco1", "eco1", "eco3", "eco4", "eco4", "eco1", "eco1", "eco1", "eco2", "eco2")
+  )
+  expect_null(data.table::indices(got)) ## no auto-index left on `new`
+})
+
+testthat::test_that(".adjustNewCohortsERG stops when existing cohorts of a pixelGroup disagree", {
+  cd <- data.table(
+    pixelGroup = c(1L, 1L, 1L, 2L, 2L, 3L),
+    ecoregionGroup = factor(c("eco1", "eco2", "eco1", "eco1", "eco1", "eco2")),
+    new = c(FALSE, FALSE, TRUE, FALSE, TRUE, FALSE)
+  )
+  expect_error(LandR:::.adjustNewCohortsERG(cd), "1 pixelGroup")
+  cd2 <- data.table(
+    pixelGroup = c(1L, 1L, 2L, 2L),
+    ecoregionGroup = factor(c("eco1", "eco2", "eco1", "eco2")),
+    new = FALSE
+  )
+  expect_error(LandR:::.adjustNewCohortsERG(cd2), "2 pixelGroups")
+})
