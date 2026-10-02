@@ -19,6 +19,28 @@
   categorical, because its `levels()` is never `NULL`. The RasterLayer branch kept the attribute
   table's own column names.
 
+* New `imputeBadAgeModelDefault()` supplies `makeAndCleanInitialCohortData()`'s default
+  age-imputation model, and is now the default value of its `imputeBadAgeModel` argument. The
+  model's response is `log(age)`, not `age`, so an imputed age can no longer come back negative
+  and get clamped to 0 for a stand with positive biomass -- the cause of the age-0-with-biomass
+  cohorts `CBMutils::cumPoolsCreateAGB()` rejects (PredictiveEcology/Biomass_borealDataPrep#131).
+  `Biomass_borealDataPrep`'s `imputeBadAgeModel` parameter now defaults to this function instead
+  of duplicating the formula. The predictors change too, not only the scale: LandR's old default
+  was `age ~ B * speciesCode + cover * speciesCode + (1 | initialEcoregionCode)`; the new one is
+  `log(age) ~ log(totalBiomass) * cover * speciesCode + (log(totalBiomass) | initialEcoregionCode)`,
+  the predictors `Biomass_borealDataPrep` already used. Callers that relied on LandR's default
+  get both changes. Predictions are back-transformed with `exp()`, which gives the median
+  (geometric-mean) age for given predictors, not the mean.
+
+* LandR no longer depends on quickPlot or ggpubr (#140, #174). `plotVTM()` combines its bar chart
+  and map with patchwork instead of `ggpubr::ggarrange()`, under one shared title, with the bar
+  chart's species labels angled so they no longer overprint; it returns a `patchwork` object, which
+  `print()`, `ggplot2::ggsave()` and `SpaDES.core::Plots()` accept as before. The colour tables
+  that `Colors()`, `defineFlammable()` and `vegTypeMapGenerator()` set on `RasterLayer`s are
+  computed exactly as `quickPlot::setColors<-` did, now in LandR. The internal `plotFunction()`
+  uses `theme_classic()` instead of `ggpubr::theme_pubr()`. Tests and the `LANDISDisp()` example
+  plot with `terra::plot()`.
+
 * `standAgeMapGenerator()` passed `mapCode = "pixelGroup"` to `rasterizeReduced()`, whose argument is `mapcode`; the misspelt name was silently dropped into `...` and it worked only because the raster had been renamed `"pixelGroup"` on the line before. It now passes `mapcode`. Output is unchanged.
 * `.initiateNewCohorts()` now gives new cohorts their pixelGroup's existing `ecoregionGroup` with one
   update join instead of a `[.data.table` call per pixelGroup, which took ~357 s per call on ~500k

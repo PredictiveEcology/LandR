@@ -82,6 +82,7 @@ export(generatePixelGroups)
 export(genericExtract)
 export(getSpeciesTable)
 export(getWildfire_NFI)
+export(imputeBadAgeModelDefault)
 export(installBioSIM)
 export(isInt)
 export(lccMapGenerator)
@@ -254,13 +255,6 @@ importFrom(parallel,mclapply)
 importFrom(pemisc,
   factorValues2,
   termsInData
-)
-importFrom(quickPlot,
-  "setColors<-",
-  Plot,
-  layerNames,
-  numLayers,
-  setColors
 )
 importFrom(raster,
   "NAvalue<-",
