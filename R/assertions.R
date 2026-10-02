@@ -356,7 +356,6 @@ assertCohortDataERG <- function(cohortData, doAssertion = getOption("LandR.asser
   if (isTRUE(doAssertion)) {
     if (NROW(unique(cohortData, by = c("ecoregionGroup", "pixelGroup"))) !=
       NROW(unique(cohortData$pixelGroup))) {
-      browser()
       stop("there should only be one ecoregionGroup per pixelGroup in cohortData")
     }
   }

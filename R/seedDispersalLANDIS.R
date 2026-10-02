@@ -131,8 +131,6 @@ utils::globalVariables(c(
 #'
 #'   ## Plot the maps
 #'   if (interactive()) {
-#'     library(quickPlot)
-#'     clearPlot()
 #'     spMap <- list()
 #'     spMap$pixelGroupMap <- pixelGroupMap
 #'     for (sppp in unique(output$speciesCode)) {
@@ -164,7 +162,7 @@ utils::globalVariables(c(
 #'         )
 #'       )
 #'     }
-#'     Plot(spMap, cols = "Set2")
+#'     terra::plot(terra::rast(spMap))
 #'
 #'     # A summary
 #'     rr <- apply(rast(spMap)[[-1]][] + 1, 2, tabulate)

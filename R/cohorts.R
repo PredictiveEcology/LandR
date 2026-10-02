@@ -361,11 +361,7 @@ updateCohortData <- function(
   ) {
     message("Found pixelGroup with multiple ecoregionGroups when initiating cohorts.")
     message("Adjusting new ecoregionGroups to match those of existing pixelGroups.")
-    cohortData[,
-      ecoregionGroup := unique(.SD[new == FALSE, ecoregionGroup]),
-      by = "pixelGroup",
-      .SDcols = c("new", "ecoregionGroup")
-    ] ## TODO: very slow!!
+    .adjustNewCohortsERG(cohortData)
   }
   set(cohortData, NULL, "new", NULL)
   set(newPixelCohortData, NULL, "new", NULL)
@@ -376,6 +372,37 @@ updateCohortData <- function(
   assertCohortDataERG(cohortData)
 
   return(cohortData)
+}
+
+#' Give new cohorts the `ecoregionGroup` of their pixelGroup's existing cohorts
+#'
+#' Updates `cohortData$ecoregionGroup` by reference, in one join rather than one
+#' `[.data.table` call per pixelGroup. pixelGroups without existing cohorts
+#' (`new == FALSE`) keep their own `ecoregionGroup`.
+#'
+#' @param cohortData a `data.table` with `pixelGroup`, `ecoregionGroup` and a logical `new`.
+#'
+#' @return `cohortData`, invisibly, modified by reference.
+#'
+#' @keywords internal
+#' @noRd
+.adjustNewCohortsERG <- function(cohortData) {
+  ## which() rather than `new == FALSE`: the latter would add an auto-index to cohortData
+  oldERG <- unique(
+    cohortData[which(!cohortData$new), c("pixelGroup", "ecoregionGroup")],
+    by = c("pixelGroup", "ecoregionGroup")
+  )
+  dup <- duplicated(oldERG$pixelGroup)
+  if (any(dup)) {
+    nPG <- length(unique(oldERG$pixelGroup[dup]))
+    stop(
+      nPG, " pixelGroup", if (nPG > 1L) "s have" else " has",
+      " existing cohorts with more than one ecoregionGroup; ",
+      "cohortData should have one ecoregionGroup per pixelGroup"
+    )
+  }
+  cohortData[oldERG, ecoregionGroup := i.ecoregionGroup, on = "pixelGroup"]
+  invisible(cohortData)
 }
 
 #' Remove missing cohorts from `cohortData` based on `pixelGroupMap`
@@ -1220,6 +1247,58 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
   return(cohortData)
 }
 
+#' Default model for imputing missing stand ages
+#'
+#' The model used by `makeAndCleanInitialCohortData()` (and, by default, by
+#' `Biomass_borealDataPrep`'s `imputeBadAgeModel` parameter) to impute the age of stands
+#' with missing or unreliable age data. The response is `log(age)`, not `age`, so a
+#' prediction can never come back negative -- an imputed age of 0 with positive biomass,
+#' which `CBMutils::cumPoolsCreateAGB()` rejects, is not reachable from a log-scale model.
+#' This is the only place the formula is written; `Biomass_borealDataPrep` uses it as its
+#' parameter default rather than duplicating it.
+#'
+#' @details
+#' The model is `log(age) ~ log(totalBiomass) * cover * speciesCode +
+#' (log(totalBiomass) | initialEcoregionCode)`. `makeAndCleanInitialCohortData()` recognizes a
+#' `log(age)` response and back-transforms predictions with `exp()`. That gives the median
+#' (geometric-mean) age for given predictors, not the mean: with residual variance
+#' \eqn{\sigma^2} on the log scale, the mean is larger by a factor of about
+#' \eqn{e^{\sigma^2/2}}. Imputed ages are therefore somewhat younger, on average, than
+#' observed ages of stands with the same biomass, cover and species; keep this in mind when
+#' comparing imputed and observed age distributions.
+#'
+#' @return A quoted `lme4::lmer()` call.
+#'
+#' @export
+imputeBadAgeModelDefault <- function() {
+  quote(lme4::lmer(
+    log(age) ~ log(totalBiomass) * cover * speciesCode + (log(totalBiomass) | initialEcoregionCode)
+  ))
+}
+
+#' Variables a quoted model call uses, found in its formula
+#'
+#' Reads the formula argument of a quoted model call (e.g. `imputeBadAgeModelDefault()`) with
+#' [all.vars()], so variables inside transformations such as `log(age)` are found and the
+#' response is included.
+#'
+#' @param model A quoted model call whose arguments include a formula.
+#' @param cols Optional character vector; if given, only variables in `cols` are returned.
+#'
+#' @return Character vector of variable names.
+#'
+#' @noRd
+modelFormulaVars <- function(model, cols = NULL) {
+  args <- as.list(model)[-1]
+  fml <- Find(function(a) is.call(a) && identical(a[[1]], as.name("~")), args)
+  if (is.null(fml)) {
+    stop("could not find a formula among the arguments of the model call")
+  }
+  vars <- all.vars(fml)
+  if (!is.null(cols)) vars <- vars[vars %in% cols]
+  vars
+}
+
 #' Generate initial `cohortData` table
 #'
 #' Takes a single `data.table` input, which has the following columns in addition to
@@ -1267,9 +1346,7 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
 makeAndCleanInitialCohortData <- function(
   inputDataTable,
   sppColumns,
-  imputeBadAgeModel = quote(lme4::lmer(
-    age ~ B * speciesCode + cover * speciesCode + (1 | initialEcoregionCode)
-  )),
+  imputeBadAgeModel = imputeBadAgeModelDefault(),
   minCoverThreshold,
   doAssertion = getOption("LandR.assertions", TRUE),
   doSubset = TRUE
@@ -1350,24 +1427,22 @@ makeAndCleanInitialCohortData <- function(
         initialEcoregionCode,
         cover
       )]
-      zeros <- sapply(cohortDataMissingAgeUnique, function(x) sum(x == 0))
-      if (sum(zeros, na.rm = TRUE)) {
-        hasZeros <- zeros[zeros > 0]
+      ## Drop rows with a zero in any variable the model uses, response included: a zero cannot
+      ## enter a log-scale term (log(0) is -Inf; the default model logs age and totalBiomass),
+      ## and a cohort with zero cover or biomass says nothing about stand age.
+      modelVars <- modelFormulaVars(imputeBadAgeModel, colnames(cohortDataMissingAgeUnique))
+      nZeros <- vapply(modelVars, function(v) {
+        sum(cohortDataMissingAgeUnique[[v]] %in% 0)
+      }, integer(1))
+      if (any(nZeros > 0L)) {
+        hasZeros <- nZeros[nZeros > 0L]
         message(
-          " ",
-          paste(names(hasZeros), collapse = ", "),
-          " had ",
-          paste(hasZeros, collapse = ", "),
-          " zeros, respectively"
+          "  -- Age imputation: dropping rows with 0 in a model variable before fitting (",
+          paste0(names(hasZeros), ": ", hasZeros, collapse = ", "),
+          ")"
         )
-        warning(" These are being removed from the dataset. If this is not desired; please fix.")
-        # terms <- strsplit(gsub(" ", "", as.character(imputeBadAgeModel)), split = "[[:punct:]]+")[[2]][-1] # remove response
-        # terms <- unique(terms)
-        # terms <- terms[terms %in% colnames(cohortDataMissingAgeUnique)]
-        terms <- termsInData(imputeBadAgeModel, cohortDataMissingAgeUnique)
-        lapply(terms, function(x) {
-          cohortDataMissingAgeUnique <<- cohortDataMissingAgeUnique[get(x) != 0]
-        })
+        keep <- Reduce(`&`, lapply(modelVars, function(v) !(cohortDataMissingAgeUnique[[v]] %in% 0)))
+        cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[keep]
       }
       cohortDataMissingAgeUnique <- subsetDT(
         cohortDataMissingAgeUnique,
@@ -1430,12 +1505,24 @@ makeAndCleanInitialCohortData <- function(
       }
 
       ## allow.new.levels = TRUE because some groups will have only NA for age for all species
-      cohortDataMissingAge[,
-        imputedAge := pmax(
-          0L,
-          asInteger(predict(outAge$mod, newdata = cohortDataMissingAge, allow.new.levels = TRUE))
-        )
-      ]
+      predAge <- predict(outAge$mod, newdata = cohortDataMissingAge, allow.new.levels = TRUE)
+
+      ## a model fitted on log(age) (e.g. imputeBadAgeModelDefault()) predicts on the log
+      ## scale, so it must be back-transformed before the pmax(0L, ...) floor below; a model
+      ## fitted directly on age needs no such transform.
+      isLogAgeModel <- tryCatch(
+        identical(imputeBadAgeModel[[2]][[2]], quote(log(age))),
+        error = function(e) FALSE
+      )
+      if (isTRUE(isLogAgeModel)) {
+        ## exp() of a log-scale prediction is the median (geometric-mean) age, not the mean,
+        ## which is larger by about exp(sigma^2 / 2) (sigma^2: residual variance on the log
+        ## scale). No bias correction is applied: imputed ages are a typical age, and a
+        ## correction would push young stands older. See ?imputeBadAgeModelDefault.
+        predAge <- exp(predAge)
+      }
+
+      cohortDataMissingAge[, imputedAge := pmax(0L, asInteger(predAge))]
 
       cohortData <- cohortDataMissingAge[, .(pixelIndex, imputedAge, speciesCode)][
         cohortData,
