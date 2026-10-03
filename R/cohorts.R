@@ -1075,6 +1075,40 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
 
 #' Generate template `cohortData` table
 #'
+#' Remove species that are rare in an ecoregion
+#'
+#' A species is kept in an ecoregion only if it is in at least `minShare` of the ecoregion's
+#' pixels. The ecoregion is `initialEcoregionCode` without its land-cover suffix
+#' (`"<ecoregion>_<lcc>"`).
+#'
+#' @param cohortData A `data.table` with `pixelIndex`, `speciesCode` and `initialEcoregionCode`,
+#'   one row per pixel and species present.
+#' @param minShare Minimum share (0-1). 0 returns `cohortData` unchanged.
+#'
+#' @return `cohortData` without the rows of species below `minShare` in their ecoregion.
+#'
+#' @keywords internal
+dropUnsupportedSpecies <- function(cohortData, minShare = 0) {
+  if (!isTRUE(minShare > 0)) return(cohortData)
+  if (!"initialEcoregionCode" %in% names(cohortData))
+    stop("minSpeciesEcoregionShare needs initialEcoregionCode in inputDataTable")
+  eco <- sub("_[^_]*$", "", as.character(cohortData$initialEcoregionCode))
+  nPix <- data.table(eco = eco, pixelIndex = cohortData$pixelIndex)[, list(nPix = data.table::uniqueN(pixelIndex)), by = "eco"]
+  share <- data.table(eco = eco, speciesCode = cohortData$speciesCode)[, list(n = .N), by = c("eco", "speciesCode")]
+  share <- nPix[share, on = "eco"][, share := n / nPix]
+  drop <- share[share < minShare]
+  if (NROW(drop)) {
+    message(cli::col_green(
+      "  -- Removing species from ecoregions where they are in < ", minShare * 100, "% of pixels (",
+      sum(drop$n), " cohorts): ",
+      paste(drop[, list(e = paste(eco, collapse = ", ")), by = "speciesCode"][, paste0(speciesCode, " [", e, "]")],
+            collapse = "; ")))
+    keep <- !paste(eco, cohortData$speciesCode) %in% paste(drop$eco, drop$speciesCode)
+    cohortData <- cohortData[keep]
+  }
+  cohortData
+}
+
 #' Internal function used by [makeAndCleanInitialCohortData()].
 #'
 #' @param inputDataTable A `data.table` with columns described above.
@@ -1090,6 +1124,8 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
 #' @param rescale Logical. If `TRUE`, the default, cover for each species will be rescaled
 #'   so all cover in `pixelGroup` or pixel sums to 100.
 #'
+#' @param minSpeciesEcoregionShare See [makeAndCleanInitialCohortData()].
+#'
 #' @return `cohortData` (`data.table`) with attribute `"imputedPixID"`
 #'
 #' @keywords internal
@@ -1098,7 +1134,8 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
   sppColumns,
   minCoverThreshold = 5,
   doAssertion = getOption("LandR.assertions", TRUE),
-  rescale = TRUE
+  rescale = TRUE,
+  minSpeciesEcoregionShare = 0
 ) {
   newCoverColNames <- gsub("cover\\.", "", sppColumns)
   setnames(inputDataTable, old = sppColumns, new = newCoverColNames)
@@ -1173,6 +1210,8 @@ nonForestedPixels <- function(speciesLayers, omitNonTreedPixels, forestedLCCClas
   message(cli::col_green("     --> resulting in", length(whCoverGTMinCover), "cohorts)"))
   cohortData <- cohortData[whCoverGTMinCover]
   message(cli::col_green("     --> resulting in", length(unique(cohortData$pixelIndex)), "pixels)"))
+
+  cohortData <- dropUnsupportedSpecies(cohortData, minSpeciesEcoregionShare)
 
   cohortData[, coverOrig := cover]
   if (isTRUE(doAssertion)) {
@@ -1338,6 +1377,13 @@ modelFormulaVars <- function(model, cols = NULL) {
 #'
 #' @param doSubset Turns on/off subsetting. Defaults to `TRUE`.
 #'
+#' @param minSpeciesEcoregionShare Minimum share (0-1) of an ecoregion's pixels in which a species
+#'   must have cover above `minCoverThreshold` to be kept in that ecoregion. Below it, the
+#'   species' cohorts are removed from every pixel of the ecoregion (their cover goes to the other
+#'   species when cover is rescaled), so the species is also absent when `establishprob`, `maxB`
+#'   and `maxANPP` are estimated there. The ecoregion is `initialEcoregionCode` without its land-cover
+#'   suffix. Default 0: no species is removed.
+#'
 #' @return a `cohortData` `data.table` with attribute `"imputedPixID"`
 #'     (a vector of pixel IDs that suffered imputation).
 #'
@@ -1349,7 +1395,8 @@ makeAndCleanInitialCohortData <- function(
   imputeBadAgeModel = imputeBadAgeModelDefault(),
   minCoverThreshold,
   doAssertion = getOption("LandR.assertions", TRUE),
-  doSubset = TRUE
+  doSubset = TRUE,
+  minSpeciesEcoregionShare = 0
 ) {
   ## Create groupings
   if (doAssertion) {
@@ -1390,7 +1437,8 @@ makeAndCleanInitialCohortData <- function(
     # pixelGroupBiomassClass = pixelGroupBiomassClass,
     minCoverThreshold = minCoverThreshold,
     sppColumns = sppColumns,
-    doAssertion = doAssertion
+    doAssertion = doAssertion,
+    minSpeciesEcoregionShare = minSpeciesEcoregionShare
   )
   assertCohortDataAttr(cohortData, doAssertion = doAssertion)
   imputedPixID <- attr(cohortData, "imputedPixID")
