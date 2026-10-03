@@ -8,6 +8,13 @@
   flammable forest in fire models. Rock and barren land are still relabelled, since a severe fire
   can expose them.
 * `makeAndCleanInitialCohortData()` has a new argument, `minSpeciesEcoregionShare` (default 0, off). A species found in fewer than that share of an ecoregion's pixels is removed from every pixel of the ecoregion before cover is rescaled, so its cover goes to the other species and it is also absent when `establishprob`, `maxB` and `maxANPP` are estimated there. In BC ELFs with BEC zones, western redcedar is in up to 6.7% of mountain hemlock (MH) zone pixels and up to 2.2% of ESSF pixels, where it is not expected to persist; `Biomass_borealDataPrep` uses 0.07.
+* `LANDISDisp()`'s C++ spiral scan can use OpenMP threads: `options(LandR.LANDISDisp.threads = n)`
+  (default `1`). Only the search for receivers with a source at each spiral offset is
+  parallel, with a static schedule and per-thread buffers joined in thread order; the uniform
+  draws stay serial on the main thread, so output is bit-identical for any thread count and to
+  `useCpp = FALSE`. `src/Makevars` and `src/Makevars.win` add `$(SHLIB_OPENMP_CXXFLAGS)`; without
+  OpenMP the package builds and runs serially.
+
 * `LANDISDisp()` (R reference and C++ spiral loop) no longer skips a draw because it exceeds the
   largest ward probability of the species that hit on the previous spiral step
   (`lastWardMaxProb`). That screen used only the species that had a source on the previous step, so
