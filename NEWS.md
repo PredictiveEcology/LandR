@@ -8,8 +8,30 @@
   flammable forest in fire models. Rock and barren land are still relabelled, since a severe fire
   can expose them.
 * `makeAndCleanInitialCohortData()` has a new argument, `minSpeciesEcoregionShare` (default 0, off). A species found in fewer than that share of an ecoregion's pixels is removed from every pixel of the ecoregion before cover is rescaled, so its cover goes to the other species and it is also absent when `establishprob`, `maxB` and `maxANPP` are estimated there. In BC ELFs with BEC zones, western redcedar is in up to 6.7% of mountain hemlock (MH) zone pixels and up to 2.2% of ESSF pixels, where it is not expected to persist; `Biomass_borealDataPrep` uses 0.07.
+* `LANDISDisp()` (R reference and C++ spiral loop) no longer skips a draw because it exceeds the
+  largest ward probability of the species that hit on the previous spiral step
+  (`lastWardMaxProb`). That screen used only the species that had a source on the previous step, so
+  after a step where only a short-distance species found a source, a long-distance species whose
+  draw fell between the two probabilities was wrongly discarded. Each receiver with a source at a
+  step now compares its own draw with its own species' ward probability. The number and order of
+  uniform draws is unchanged, and R and C++ stay bit-identical. Results change: the seed-locked
+  goldens were regenerated (success counts moved by about -0.6% to +5% on the test fixtures, about
+  +0.5% on the largest).
 
 * `prepInputs_NTEMS_LCC_FAO()`'s error for a missing crop target no longer suggests `terraOptions(memfrac = 0)`, which makes terra much slower; it suggests `todisk = TRUE` only.
+
+* The R reference of `LANDISDisp()` (`useCpp = FALSE`) gave different results on macOS (arm64).
+  Receivers that had already succeeded have row `NA`, and `terra::cellFromRowCol()` turns an `NA`
+  row into row 1 there (an undefined C++ cast), so they kept finding sources and consumed extra draws.
+  Their cell is now set to `NA` directly. Linux and Windows results are unchanged.
+
+* `LANDISDisp()` gains `pgv`, an optional integer vector of pixelGroup IDs per cell of
+  `pixelGroupMap`. When supplied the raster values are not read (about 1 s on a 9M-cell map).
+  When `NULL` the values are read once as integer, rather than as doubles and converted again in
+  `spiralSeedDispersalCpp()`. Output is unchanged.
+  The R-side preparation is also cheaper (no re-sort of the receiver table, cell numbers to
+  row/column by integer arithmetic, `spiralLoopCpp()` no longer scans every cell for the largest
+  pixelGroup, receiver cells found without a raster-length logical vector). Output is unchanged.
 
 * `makeAndCleanInitialCohortData()` now reads the age model's variables from its formula
   (`all.vars()`) and, before fitting, drops rows with a zero in any of them, response included;
