@@ -1,5 +1,7 @@
 # LandR (development version)
 
+* `makeAndCleanInitialCohortData()` has a new argument, `minSpeciesEcoregionShare` (default 0, off). A species found in fewer than that share of an ecoregion's pixels is removed from every pixel of the ecoregion before cover is rescaled, so its cover goes to the other species and it is also absent when `establishprob`, `maxB` and `maxANPP` are estimated there. In BC ELFs with BEC zones, western redcedar is in up to 6.7% of mountain hemlock (MH) zone pixels and up to 2.2% of ESSF pixels, where it is not expected to persist; `Biomass_borealDataPrep` uses 0.07.
+
 * `prepInputs_NTEMS_LCC_FAO()`'s error for a missing crop target no longer suggests `terraOptions(memfrac = 0)`, which makes terra much slower; it suggests `todisk = TRUE` only.
 
 * `makeAndCleanInitialCohortData()` now reads the age model's variables from its formula
