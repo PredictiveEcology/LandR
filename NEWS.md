@@ -7,7 +7,7 @@
   off because `targets` is its only cache. A new option, `LandR.forestLandUseCache`, keeps the
   old behaviour when set to `"always"`, so a caller that prepares several years of one study
   area under `spades.useCache = "eventsOnly"`, as `fireSense` does, still prepares each input
-  once.
+  once (#269).
 
 * `makeEcoregionMap()` now gives `ecoregionMap`'s category table the same IDs as its cell
   values. The cells hold each `ecoregionGroup`'s factor level index (alphabetical order), but
