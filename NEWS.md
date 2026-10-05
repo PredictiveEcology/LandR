@@ -1,5 +1,14 @@
 # LandR (development version)
 
+* `prepInputs_SCANFI_LCC_FAO()` and `prepInputs_NTEMS_LCC_FAO()` now cache their forest-land
+  inputs -- the FAO forest layer and the `forestLandYears` land covers -- as
+  `options("reproducible.useCache")` says, like any other `Cache()` call. Since #241 they were
+  cached with `useCache = "always"`, which overrode a pipeline that turns `reproducible`'s Cache
+  off because `targets` is its only cache. A new option, `LandR.forestLandUseCache`, keeps the
+  old behaviour when set to `"always"`, so a caller that prepares several years of one study
+  area under `spades.useCache = "eventsOnly"`, as `fireSense` does, still prepares each input
+  once.
+
 * `makeEcoregionMap()` now gives `ecoregionMap`'s category table the same IDs as its cell
   values. The cells hold each `ecoregionGroup`'s factor level index (alphabetical order), but
   the table numbered its rows in the order the groups first appear in
