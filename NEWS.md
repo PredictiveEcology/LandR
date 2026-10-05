@@ -5,9 +5,15 @@
   the table numbered its rows in the order the groups first appear in
   `ecoregionFiles$ecoregion`, which for polygon input `prepEcoregions()` takes from the
   polygons. So any reader that matches cell values to the table's `ID`, as
-  `pemisc::factorValues2()` does, got another group's label. In `Biomass_core` this gave seeding
-  the wrong group's `establishprob`, and wherever the label was wrong `siteShade` found no match
-  and was set to 0. `assertERGs()` did not catch it because the set of labels was unchanged.
+  `pemisc::factorValues2()` does, got another group's label. In `Biomass_core`, seeding used the
+  wrong group's `establishprob`, and seedlings that established in a pixel with no cohorts were
+  stored with the wrong `ecoregionGroup`. Post-fire regeneration keeps a burned pixel's
+  `ecoregionGroup`, so the label stayed with the pixel, and its cohorts grew with the wrong
+  group's `maxB` and `maxANPP` for the rest of the run. In two 1000-year replicates of one study
+  area, cohorts with another group's label held 71-74% of the biomass at year 700 and 76-78% at
+  year 1000. With `seedingAlgorithm = "universalDispersal"`, the `siteShade` join also found no
+  match wherever the label was wrong, which set shade to 0; `"wardDispersal"` joins `siteShade`
+  on `pixelGroup` only. `assertERGs()` did not catch it because the set of labels was unchanged.
   Cell values are unchanged. The bug came in with `ff24bcf8` (January 2026; development versions
   only). An `ecoregionGroup` with more than one `landcover` or `ecoregionName` is now an
   explicit error instead of a `data.table` length error.
