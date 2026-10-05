@@ -1,5 +1,6 @@
 # LandR (development version)
 
+* `prepInputsFireYear()` now returns `rasterToMatch`'s grid exactly. Given a `studyArea` polygon, it cropped the fire raster to the polygon's bounding box, so `prepInputsStandAgeMap()`/`replaceAgeInFires()` failed with "[`[<-`] lengths of cells and values do not match" wherever the grid reached past that box. A `studyArea` (or `maskTo`, `to`) now only masks.
 * `loadSCANFISpeciesLayers()` (and so `prepSpeciesLayers_SCANFI()`) now includes `to`, `cropTo`, `projectTo` and `maskTo` in its cache key. It was keyed only on file names, so changing the target grid or study area while keeping `studyAreaName` returned the earlier, differently-gridded layers from the cache.
 
 * `makeAndCleanInitialCohortData()` has a new argument, `minSpeciesEcoregionShare` (default 0, off). A species found in fewer than that share of an ecoregion's pixels is removed from every pixel of the ecoregion before cover is rescaled, so its cover goes to the other species and it is also absent when `establishprob`, `maxB` and `maxANPP` are estimated there. In BC ELFs with BEC zones, western redcedar is in up to 6.7% of mountain hemlock (MH) zone pixels and up to 2.2% of ESSF pixels, where it is not expected to persist; `Biomass_borealDataPrep` uses 0.07.
