@@ -1,5 +1,17 @@
 # LandR (development version)
 
+* `makeEcoregionMap()` now gives `ecoregionMap`'s category table the same IDs as its cell
+  values. The cells hold each `ecoregionGroup`'s factor level index (alphabetical order), but
+  the table numbered its rows in the order the groups first appear in
+  `ecoregionFiles$ecoregion`, which for polygon input `prepEcoregions()` takes from the
+  polygons. So any reader that matches cell values to the table's `ID`, as
+  `pemisc::factorValues2()` does, got another group's label. In `Biomass_core` this gave seeding
+  the wrong group's `establishprob`, and wherever the label was wrong `siteShade` found no match
+  and was set to 0. `assertERGs()` did not catch it because the set of labels was unchanged.
+  Cell values are unchanged. The bug came in with `ff24bcf8` (January 2026; development versions
+  only). An `ecoregionGroup` with more than one `landcover` or `ecoregionName` is now an
+  explicit error instead of a `data.table` length error.
+
 * `loadSCANFISpeciesLayers()` (and so `prepSpeciesLayers_SCANFI()`) now includes `to`, `cropTo`, `projectTo` and `maskTo` in its cache key. It was keyed only on file names, so changing the target grid or study area while keeping `studyAreaName` returned the earlier, differently-gridded layers from the cache.
 
 * `makeAndCleanInitialCohortData()` has a new argument, `minSpeciesEcoregionShare` (default 0, off). A species found in fewer than that share of an ecoregion's pixels is removed from every pixel of the ecoregion before cover is rescaled, so its cover goes to the other species and it is also absent when `establishprob`, `maxB` and `maxANPP` are estimated there. In BC ELFs with BEC zones, western redcedar is in up to 6.7% of mountain hemlock (MH) zone pixels and up to 2.2% of ESSF pixels, where it is not expected to persist; `Biomass_borealDataPrep` uses 0.07.
