@@ -61,6 +61,15 @@ test_that(".applyForestLand(): barren and rock are eligible when the record says
   expect_identical(as.vector(terra::values(out)), c(240, 50, 20, 210, 240, 240))
 })
 
+test_that(".applyForestLand(): water, snow/ice and 0 stay themselves on forest land", {
+  ## a treed year in the record (or an FAO forest code) does not make a lake, a glacier, or a
+  ## town/road/field (SCANFI v3 cropland, urban and road are 0) into forest without trees;
+  ## rock and barren land still become the disturbed code (see the test above)
+  mask <- forestLandMask(faoRas = lccRas(rep(1, 6)))
+  out <- .applyForestLand(lccRas(c(20, 31, 0, 30, 33, 50)), mask, disturbedCode = 240)
+  expect_identical(as.vector(terra::values(out)), c(20, 31, 0, 240, 240, 240))
+})
+
 test_that(".applyForestLand(): treed pixels keep their class, and NAs stay unset", {
   mask <- forestLandMask(faoRas = lccRas(rep(1, 6)))
   out <- .applyForestLand(lccRas(c(210, 220, 230, 81, 50, NA)), mask, disturbedCode = 240)
