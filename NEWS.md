@@ -1,5 +1,7 @@
 # LandR (development version)
 
+* `LANDISDisp()` has a new argument, `pgv`: the `pixelGroupMap` values as a vector. A caller that already has them (e.g. with burned pixels set to `NA`) can pass them instead of masking a copy of the raster that `LANDISDisp()` then reads again (#255).
+
 * `LANDISDisp()` (R reference and C++ spiral loop) no longer skips a draw because it exceeds the
   largest ward probability of the species that hit on the previous spiral step
   (`lastWardMaxProb`). That screen used only the species that had a source on the previous step, so
