@@ -923,8 +923,16 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
     postProcessArgs$maskTo <- rasterToMatch
   }
   postProcessArgs$projectTo <- rasterToMatch
+  ## crop to the grid, not to a polygon's bounding box (studyArea/to/maskTo then only mask):
+  ## callers such as replaceAgeInFires() index rasters on rasterToMatch with the result.
+  ## The legacy `studyArea` crops to itself even when cropTo is given, so it is passed as maskTo.
+  if (!is.null(postProcessArgs$studyArea)) {
+    if (is.null(postProcessArgs$maskTo)) postProcessArgs$maskTo <- postProcessArgs$studyArea
+    postProcessArgs$studyArea <- NULL
+  }
+  postProcessArgs$cropTo <- rasterToMatch
 
-  preProcessArgs <- dots[!names(dots) %in% names(postProcessArgs)]
+  preProcessArgs <- dots[!names(dots) %in% c(names(postProcessArgs), "studyArea")]
   ## you can crop without worrying about geometry
   preProcessArgs$cropTo <- rasterToMatch
 
