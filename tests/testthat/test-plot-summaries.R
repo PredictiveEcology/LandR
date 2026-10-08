@@ -31,8 +31,12 @@ test_that("plotLeadingSpecies() saves the figure to figurePath", {
   figDir <- file.path(withr::local_tempdir(), "figs")
   out <- suppressMessages(do.call(plotLeadingSpecies, c(args, figurePath = figDir)))
 
-  expect_identical(out[[2]], file.path(figDir, "leadingChange_test_CanESM5_SSP370.png"))
   expect_identical(file.exists(out), c(TRUE, TRUE))
+  ## checkPath() normalizes the directory (`/private/var` on macOS, `/` on Windows)
+  expect_identical(
+    normalizePath(out[[2]], winslash = "/"),
+    normalizePath(file.path(figDir, "leadingChange_test_CanESM5_SSP370.png"), winslash = "/")
+  )
   expect_false(dir.exists(file.path(args$outputDir, "figures")))
 })
 
@@ -57,9 +61,10 @@ test_that("plotLeadingSpecies() saves the figure under outputDir by default", {
   args <- local_leadingSpeciesRun()
   out <- suppressMessages(do.call(plotLeadingSpecies, args))
 
-  expect_identical(
-    out[[2]],
-    file.path(args$outputDir, "figures", "leadingChange_test_CanESM5_SSP370.png")
-  )
   expect_identical(file.exists(out), c(TRUE, TRUE))
+  expect_identical(
+    normalizePath(out[[2]], winslash = "/"),
+    normalizePath(file.path(args$outputDir, "figures", "leadingChange_test_CanESM5_SSP370.png"),
+                  winslash = "/")
+  )
 })
