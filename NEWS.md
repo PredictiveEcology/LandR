@@ -3,12 +3,6 @@
 * `LANDISDisp()` has a new argument, `pgv`: the `pixelGroupMap` values as a vector. A caller that already has them (e.g. with burned pixels set to `NA`) can pass them instead of masking a copy of the raster that `LANDISDisp()` then reads again (#255).
 
 * `standAgeMapGenerator()` passed `mapCode = "pixelGroup"` to `rasterizeReduced()`, whose argument is `mapcode`; the misspelt name was silently dropped into `...` and it worked only because the raster had been renamed `"pixelGroup"` on the line before. It now passes `mapcode`. Output is unchanged.
-* `prepInputs_SCANFI_LCC_FAO()` and `prepInputs_NTEMS_LCC_FAO()` no longer relabel water (20),
-  snow/ice (31) or 0 (no data; SCANFI v3 cropland, urban and road) as disturbed forest (240) where
-  the record says forest land. A treed year elsewhere in the record, or an FAO forest code, does
-  not make a lake, a glacier, a town or a road into forest without trees; such pixels had become
-  flammable forest in fire models. Rock and barren land are still relabelled, since a severe fire
-  can expose them.
 * `makeAndCleanInitialCohortData()` has a new argument, `minSpeciesEcoregionShare` (default 0, off). A species found in fewer than that share of an ecoregion's pixels is removed from every pixel of the ecoregion before cover is rescaled, so its cover goes to the other species and it is also absent when `establishprob`, `maxB` and `maxANPP` are estimated there. In BC ELFs with BEC zones, western redcedar is in up to 6.7% of mountain hemlock (MH) zone pixels and up to 2.2% of ESSF pixels, where it is not expected to persist; `Biomass_borealDataPrep` uses 0.07.
 * `LANDISDisp()`'s C++ spiral scan can use OpenMP threads: `options(LandR.LANDISDisp.threads = n)`
   (default `1`). Only the search for receivers with a source at each spiral offset is
@@ -82,6 +76,20 @@
 
 * `prepInputs_NTEMS_LCC_FAO()`'s error for a missing crop target no longer suggests `terraOptions(memfrac = 0)`, which makes terra much slower; it suggests `todisk = TRUE` only.
 
+* `prepInputs_SCANFI_LCC_FAO()` gains `dataVersion = "V3"`, SCANFI v3's annual (1985-2025) land
+  cover, read with `prepInputs()` from NRCan's Cloud-Optimized GeoTIFFs on ftp.maps.canada.ca, the
+  same way as V1/V2. The new exported table `scanfiV3ToCanadaLCC` recodes v3's 20 land-cover codes
+  to the Canada LCC codes used elsewhere; burn scars (v3 code 4) have no Canada LCC equivalent and
+  keep a new code, 60, which the existing forest-land rule still relabels to `disturbedCode` on
+  forest land. V3 covers non-forest land cover only -- species, biomass and age layers are
+  unaffected and still come from V2.
+
+* `prepInputs_SCANFI_LCC_FAO()` and `prepInputs_NTEMS_LCC_FAO()` no longer relabel water (20),
+  snow/ice (31) or 0 (no data; SCANFI v3 cropland, urban and road) as disturbed forest (240) where
+  the record says forest land. A treed year elsewhere in the record, or an FAO forest code, does
+  not make a lake, a glacier, a town or a road into forest without trees; such pixels had become
+  flammable forest in fire models. Rock and barren land are still relabelled, since a severe fire
+  can expose them.
 
 * `makeAndCleanInitialCohortData()` now reads the age model's variables from its formula
   (`all.vars()`) and, before fitting, drops rows with a zero in any of them, response included;
