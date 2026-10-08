@@ -1,5 +1,7 @@
 # LandR (development version)
 
+* `LANDISDisp()` has a new argument, `pgv`: the `pixelGroupMap` values as a vector. A caller that already has them (e.g. with burned pixels set to `NA`) can pass them instead of masking a copy of the raster that `LANDISDisp()` then reads again (#255).
+
 * `standAgeMapGenerator()` passed `mapCode = "pixelGroup"` to `rasterizeReduced()`, whose argument is `mapcode`; the misspelt name was silently dropped into `...` and it worked only because the raster had been renamed `"pixelGroup"` on the line before. It now passes `mapcode`. Output is unchanged.
 * `prepInputs_SCANFI_LCC_FAO()` and `prepInputs_NTEMS_LCC_FAO()` no longer relabel water (20),
   snow/ice (31) or 0 (no data; SCANFI v3 cropland, urban and road) as disturbed forest (240) where
@@ -39,6 +41,47 @@
   The R-side preparation is also cheaper (no re-sort of the receiver table, cell numbers to
   row/column by integer arithmetic, `spiralLoopCpp()` no longer scans every cell for the largest
   pixelGroup, receiver cells found without a raster-length logical vector). Output is unchanged.
+* `plotLeadingSpecies()` gains a `figurePath` argument, the directory its `.png` is saved to,
+  so a module can pass `SpaDES.core::figurePath(sim)`. The default, `figures/` under `outputDir`,
+  is where the figure was saved before.
+
+* `plotLeadingSpecies()` writes the leading-change map as one layer, named `leadingChange`. It held one
+  identical layer per species, named after the species, so the figure showed that many identical panels.
+
+* `prepInputs_SCANFI_LCC_FAO()` and `prepInputs_NTEMS_LCC_FAO()` now cache their forest-land
+  inputs -- the FAO forest layer and the `forestLandYears` land covers -- as
+  `options("reproducible.useCache")` says, like any other `Cache()` call. Since #241 they were
+  cached with `useCache = "always"`, which overrode a pipeline that turns `reproducible`'s Cache
+  off because `targets` is its only cache. A new option, `LandR.forestLandUseCache`, keeps the
+  old behaviour when set to `"always"`, so a caller that prepares several years of one study
+  area under `spades.useCache = "eventsOnly"`, as `fireSense` does, still prepares each input
+  once (#269).
+
+* `makeEcoregionMap()` now gives `ecoregionMap`'s category table the same IDs as its cell
+  values. The cells hold each `ecoregionGroup`'s factor level index (alphabetical order), but
+  the table numbered its rows in the order the groups first appear in
+  `ecoregionFiles$ecoregion`, which for polygon input `prepEcoregions()` takes from the
+  polygons. So any reader that matches cell values to the table's `ID`, as
+  `pemisc::factorValues2()` does, got another group's label. In `Biomass_core`, seeding used the
+  wrong group's `establishprob`, and seedlings that established in a pixel with no cohorts were
+  stored with the wrong `ecoregionGroup`. Post-fire regeneration keeps a burned pixel's
+  `ecoregionGroup`, so the label stayed with the pixel, and its cohorts grew with the wrong
+  group's `maxB` and `maxANPP` for the rest of the run. In two 1000-year replicates of one study
+  area, cohorts with another group's label held 71-74% of the biomass at year 700 and 76-78% at
+  year 1000. With `seedingAlgorithm = "universalDispersal"`, the `siteShade` join also found no
+  match wherever the label was wrong, which set shade to 0; `"wardDispersal"` joins `siteShade`
+  on `pixelGroup` only. `assertERGs()` did not catch it because the set of labels was unchanged.
+  Cell values are unchanged. The bug came in with `ff24bcf8` (January 2026; development versions
+  only). An `ecoregionGroup` with more than one `landcover` or `ecoregionName` is now an
+  explicit error instead of a `data.table` length error.
+
+* `prepInputsFireYear()` now returns `rasterToMatch`'s grid exactly. Given a `studyArea` polygon, it cropped the fire raster to the polygon's bounding box, so `prepInputsStandAgeMap()`/`replaceAgeInFires()` failed with "[`[<-`] lengths of cells and values do not match" wherever the grid reached past that box. A `studyArea` (or `maskTo`, `to`) now only masks.
+* `loadSCANFISpeciesLayers()` (and so `prepSpeciesLayers_SCANFI()`) now includes `to`, `cropTo`, `projectTo` and `maskTo` in its cache key. It was keyed only on file names, so changing the target grid or study area while keeping `studyAreaName` returned the earlier, differently-gridded layers from the cache.
+
+* `makeAndCleanInitialCohortData()` has a new argument, `minSpeciesEcoregionShare` (default 0, off). A species found in fewer than that share of an ecoregion's pixels is removed from every pixel of the ecoregion before cover is rescaled, so its cover goes to the other species and it is also absent when `establishprob`, `maxB` and `maxANPP` are estimated there. In BC ELFs with BEC zones, western redcedar is in up to 6.7% of mountain hemlock (MH) zone pixels and up to 2.2% of ESSF pixels, where it is not expected to persist; `Biomass_borealDataPrep` uses 0.07.
+
+* `prepInputs_NTEMS_LCC_FAO()`'s error for a missing crop target no longer suggests `terraOptions(memfrac = 0)`, which makes terra much slower; it suggests `todisk = TRUE` only.
+
 
 * `makeAndCleanInitialCohortData()` now reads the age model's variables from its formula
   (`all.vars()`) and, before fitting, drops rows with a zero in any of them, response included;
