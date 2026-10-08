@@ -20,13 +20,17 @@
 #' @param leadingPercentage TODO
 #' @param treeType TODO
 #' @template rasterToMatch
+#' @param figurePath Directory to which the `.png` figure is saved.
+#'   Defaults to `figures/` under `outputDir`; a SpaDES module would pass
+#'   `SpaDES.core::figurePath(sim)`.
 #'
 #' @return list of filepaths corresponding to the images and/or objects written to disk
 #'
 #' @export
 plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, outputDir, treeSpecies,
                                defineLeading = .defineLeading, leadingPercentage = 0.8,
-                               treeType = NULL, rasterToMatch) {
+                               treeType = NULL, rasterToMatch,
+                               figurePath = file.path(outputDir, "figures")) {
   if (requireNamespace("qs2", quietly = TRUE)) {
     if (is.null(treeType)) {
       treeType <- data.frame(
@@ -128,7 +132,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
     )
     writeRaster(meanLeadingChange, filename = f_meanLeadingChange, overwrite = TRUE)
 
-    f_meanLeadingChange_gg <- file.path(outputDir, "figures") |>
+    f_meanLeadingChange_gg <- figurePath |>
       reproducible::checkPath(create = TRUE) |>
       file.path(paste0("leadingChange_", studyAreaName, "_", climateScenario, ".png"))
 

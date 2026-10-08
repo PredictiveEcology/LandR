@@ -1,5 +1,9 @@
 # LandR (development version)
 
+* `plotLeadingSpecies()` gains a `figurePath` argument, the directory its `.png` is saved to,
+  so a module can pass `SpaDES.core::figurePath(sim)`. The default, `figures/` under `outputDir`,
+  is where the figure was saved before.
+
 * `prepInputs_SCANFI_LCC_FAO()` and `prepInputs_NTEMS_LCC_FAO()` now cache their forest-land
   inputs -- the FAO forest layer and the `forestLandYears` land covers -- as
   `options("reproducible.useCache")` says, like any other `Cache()` call. Since #241 they were
