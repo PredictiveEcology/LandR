@@ -10,7 +10,8 @@ makeAndCleanInitialCohortData(
   imputeBadAgeModel = imputeBadAgeModelDefault(),
   minCoverThreshold,
   doAssertion = getOption("LandR.assertions", TRUE),
-  doSubset = TRUE
+  doSubset = TRUE,
+  minSpeciesEcoregionShare = 0
 )
 }
 \arguments{
@@ -31,6 +32,13 @@ ensure the function is running correctly.
 Default: \code{getOption("LandR.assertions", TRUE)}.}
 
 \item{doSubset}{Turns on/off subsetting. Defaults to \code{TRUE}.}
+
+\item{minSpeciesEcoregionShare}{Minimum share (0-1) of an ecoregion's pixels in which a species
+must have cover above \code{minCoverThreshold} to be kept in that ecoregion. Below it, the
+species' cohorts are removed from every pixel of the ecoregion (their cover goes to the other
+species when cover is rescaled), so the species is also absent when \code{establishprob}, \code{maxB}
+and \code{maxANPP} are estimated there. The ecoregion is \code{initialEcoregionCode} without its land-cover
+suffix. Default 0: no species is removed.}
 }
 \value{
 a \code{cohortData} \code{data.table} with attribute \code{"imputedPixID"}

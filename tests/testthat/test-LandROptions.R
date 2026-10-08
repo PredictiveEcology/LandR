@@ -17,3 +17,17 @@ test_that("LandR.leadingSpeciesProp is a member of LandROptions() but stays unse
   expect_null(opts[["LandR.leadingSpeciesProp"]])
   expect_false("LandR.leadingSpeciesProp" %in% names(options()))
 })
+
+test_that("LandR.forestLandUseCache is a member of LandROptions() but stays unset", {
+  ## Unset, the forest-land inputs follow reproducible.useCache, like any other Cache() call.
+  opts <- LandROptions()
+
+  expect_true("LandR.forestLandUseCache" %in% names(opts))
+  expect_null(opts[["LandR.forestLandUseCache"]])
+  expect_false("LandR.forestLandUseCache" %in% names(options()))
+
+  withr::local_options(LandR.forestLandUseCache = NULL, reproducible.useCache = FALSE)
+  expect_identical(LandR:::.forestLandUseCache(), FALSE)
+  withr::local_options(LandR.forestLandUseCache = "always")
+  expect_identical(LandR:::.forestLandUseCache(), "always")
+})
