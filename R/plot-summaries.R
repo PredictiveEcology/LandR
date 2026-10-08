@@ -96,7 +96,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
         biomassDT <- merge(biomassDT, treeType[, c("leading", "newClass")])
         allPixels <- data.table(pixelID = 1:ncell(biomassStack))
         biomassDTfilled <- merge(allPixels, biomassDT, all.x = TRUE, by = "pixelID")
-        leadingSpeciesRaster <- rasterRead(biomassStack)
+        leadingSpeciesRaster <- rasterRead(biomassStack[[1]]) ## one layer, not one per species
         leadingSpeciesRaster[] <- biomassDTfilled[["newClass"]]
 
         leadingSpeciesRaster
@@ -126,6 +126,7 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
       meanLeadingChange <- allReps[[1]]
     }
     meanLeadingChange <- mask(crop(meanLeadingChange, rasterToMatch), rasterToMatch)
+    names(meanLeadingChange) <- "leadingChange"
 
     f_meanLeadingChange <- file.path(
       outputDir, paste0("leadingChange_", studyAreaName, "_", climateScenario, ".tif")

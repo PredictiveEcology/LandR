@@ -4,6 +4,9 @@
   so a module can pass `SpaDES.core::figurePath(sim)`. The default, `figures/` under `outputDir`,
   is where the figure was saved before.
 
+* `plotLeadingSpecies()` writes the leading-change map as one layer, named `leadingChange`. It held one
+  identical layer per species, named after the species, so the figure showed that many identical panels.
+
 * `prepInputs_SCANFI_LCC_FAO()` and `prepInputs_NTEMS_LCC_FAO()` now cache their forest-land
   inputs -- the FAO forest layer and the `forestLandYears` land covers -- as
   `options("reproducible.useCache")` says, like any other `Cache()` call. Since #241 they were

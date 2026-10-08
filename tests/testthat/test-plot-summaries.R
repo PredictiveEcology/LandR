@@ -36,6 +36,19 @@ test_that("plotLeadingSpecies() saves the figure to figurePath", {
   expect_false(dir.exists(file.path(args$outputDir, "figures")))
 })
 
+test_that("plotLeadingSpecies() writes one leading-change layer, not one per species", {
+  skip_if_not_installed("qs2")
+  skip_if_not_installed("tidyterra")
+  withr::local_options(mc.cores = 1L)
+
+  args <- local_leadingSpeciesRun()
+  out <- suppressMessages(do.call(plotLeadingSpecies, args))
+
+  leadingChange <- terra::rast(out[[1]])
+  expect_identical(names(leadingChange), "leadingChange")
+  expect_identical(as.vector(terra::values(leadingChange)), c(1, 1, 1, 1))
+})
+
 test_that("plotLeadingSpecies() saves the figure under outputDir by default", {
   skip_if_not_installed("qs2")
   skip_if_not_installed("tidyterra")
