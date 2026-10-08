@@ -25,6 +25,15 @@ options can be placed in the user's \code{.Rprofile} file so they persist betwee
 Default: \code{TRUE}. If \code{TRUE}, additional code checks are run during function calls;
 see \link{assertions}.
 }
+\item{\code{forestLandUseCache}}{
+Default: unset, which means the forest-land inputs of \code{\link[=prepInputs_SCANFI_LCC_FAO]{prepInputs_SCANFI_LCC_FAO()}}
+and \code{\link[=prepInputs_NTEMS_LCC_FAO]{prepInputs_NTEMS_LCC_FAO()}} -- the FAO forest layer and each \code{forestLandYears}
+land cover -- are cached as \code{options("reproducible.useCache")} says, like any other
+\code{Cache()} call. Set it to \code{"always"} to cache them even when that option is \code{FALSE},
+so a caller that prepares several years of one study area prepares each input once:
+\code{fireSense} runs under \code{spades.useCache = "eventsOnly"}, which sets
+\code{reproducible.useCache = FALSE}. Any other value is passed to \code{Cache(useCache = )}.
+}
 \item{\code{leadingSpeciesProp}}{
 Default: unset, which means it takes the value of \code{mixedwoodProp}. The share ONE
 species must hold for the stand to be called its own rather than mixed. A user who
