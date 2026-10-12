@@ -1,5 +1,7 @@
 # LandR (development version)
 
+* `modifySpeciesAndSpeciesEcoregionTable()` no longer adds an all-NA row to `speciesEcoregion` for a species that is in `speciesTable` but has no `speciesEcoregion` row (its join is now an inner join). The row had `year = NA`, which `Biomass_core`'s `Init` happened to filter out until PredictiveEcology/Biomass_core#124; results are unchanged.
+
 * `LANDISDisp()` has a new argument, `pgv`: the `pixelGroupMap` values as a vector. A caller that already has them (e.g. with burned pixels set to `NA`) can pass them instead of masking a copy of the raster that `LANDISDisp()` then reads again (#255).
 
 * `LANDISDisp()` (R reference and C++ spiral loop) no longer skips a draw because it exceeds the
