@@ -48,12 +48,21 @@ fastOpsPixelGroupMap <- function() {
   r
 }
 
-## the seed after each call is part of the result: the calls must leave the RNG as they found it
+## the seed after each call is part of the result: the calls must leave the RNG as they found it.
+## The RNG kinds are pinned because R's defaults differ between versions (R-devel 2026-10), and
+## .Random.seed and sample() depend on them
+fastOpsSetSeed <- function(seed, envir = parent.frame()) {
+  old <- RNGkind()
+  withr::defer(suppressWarnings(RNGkind(old[1], old[2], old[3])), envir = envir)
+  suppressWarnings(set.seed(seed, kind = "Mersenne-Twister", normal.kind = "Inversion",
+                            sample.kind = "Rejection"))
+}
+
 fastOpsLeading <- function() {
   sppEquiv <- fastOpsSppEquiv()
   cd <- fastOpsCohorts()
   seeded <- function(expr) {
-    set.seed(1)
+    fastOpsSetSeed(1)
     out <- suppressMessages(expr)
     list(out = out, seed = .Random.seed)
   }
@@ -138,7 +147,7 @@ fastOpsRegen <- function() {
       new <- rbind(new, data.table::data.table(pixelIndex = 1L, speciesCode = i$spp[3],
                                                 ecoregionGroup = i$ecos[1]))
     }
-    set.seed(1)
+    fastOpsSetSeed(1)
     out <- suppressMessages(updateCohortData(
       new, i$cohortData, i$pixelGroupMap, currentTime = 7, speciesEcoregion = i$speciesEcoregion,
       successionTimestep = 10, initialB = initialB, verbose = 0, doAssertion = TRUE
