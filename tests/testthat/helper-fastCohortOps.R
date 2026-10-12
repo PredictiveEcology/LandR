@@ -50,12 +50,20 @@ fastOpsPixelGroupMap <- function() {
 
 ## the seed after each call is part of the result: the calls must leave the RNG as they found it.
 ## The RNG kinds are pinned because R's defaults differ between versions (R-devel 2026-10), and
-## .Random.seed and sample() depend on them
+## sample() depends on them. Only the state is kept: R-devel also codes .Random.seed[1] differently
 fastOpsSetSeed <- function(seed, envir = parent.frame()) {
   old <- RNGkind()
   withr::defer(suppressWarnings(RNGkind(old[1], old[2], old[3])), envir = envir)
   suppressWarnings(set.seed(seed, kind = "Mersenne-Twister", normal.kind = "Inversion",
                             sample.kind = "Rejection"))
+}
+
+## Where long double is plain double (e.g. macOS arm64), base::sum() lands on the other side of the
+## mixedwood threshold for pixelGroups 8 and 13, so the original code itself decides them
+## differently there and the fixtures, made on x86_64, do not apply
+skipIfNoLongDouble <- function() {
+  testthat::skip_if(.Machine$sizeof.longdouble <= 8L,
+                    "long double is double here: exact-threshold fixtures were made with extended precision")
 }
 
 fastOpsLeading <- function() {
@@ -64,7 +72,7 @@ fastOpsLeading <- function() {
   seeded <- function(expr) {
     fastOpsSetSeed(1)
     out <- suppressMessages(expr)
-    list(out = out, seed = .Random.seed)
+    list(out = out, seed = .Random.seed[-1])
   }
   vtg <- function(x, ..., mixedType = 2) {
     seeded(vegTypeGenerator(x, mixedType = mixedType, sppEquiv = sppEquiv, sppEquivCol = "LandR",
@@ -153,7 +161,7 @@ fastOpsRegen <- function() {
       successionTimestep = 10, initialB = initialB, verbose = 0, doAssertion = TRUE
     ))
     list(cohortData = out$cohortData, pixelGroupMap = terra::values(out$pixelGroupMap, mat = FALSE),
-         seed = .Random.seed)
+         seed = .Random.seed[-1])
   }
   ## .initiateNewCohorts() itself, with new cohorts in existing pixelGroups (1 is the pixelGroup
   ## whose first row is young); its sumB column is dropped by updateCohortData(), so is not compared

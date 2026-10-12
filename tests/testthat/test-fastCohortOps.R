@@ -6,6 +6,7 @@ expected <- readRDS(test_path("fixtures", "fastCohortOps-expected.rds"))
 got <- fastCohortOpsRun()
 
 test_that("vegTypeGenerator() and vegTypeMapGenerator() give what they gave before (with the RNG state)", {
+  skipIfNoLongDouble()
   for (nm in names(expected$leading)) {
     expect_identical(got$leading[[nm]], expected$leading[[nm]], label = nm)
   }
@@ -40,6 +41,7 @@ test_that("leadingByPixelGroup() is the same as the original algorithm, per pixe
 })
 
 test_that("a mixedwood decided at the threshold by two or more deciduous species is not decided by summing order", {
+  skipIfNoLongDouble()
   ## pixelGroups 8, 9 and 13: the deciduous proportions add up to the threshold in base::sum() (what
   ## .isMixedwood() uses), but a sum in double precision lands on the other side of it
   b <- function(pg, spp) fastOpsCohorts()[pixelGroup == pg & speciesCode %in% spp]$B
