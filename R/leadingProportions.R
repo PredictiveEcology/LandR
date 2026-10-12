@@ -166,8 +166,12 @@ leadingByPixelGroup <- function(
   if (!is.factor(sc) || !is.numeric(pg) || anyNA(sc) || anyNA(pg) || anyNA(x[["B"]])) return(FALSE)
   if (length(pg) && (min(pg) < 1 || max(pg) * nlevels(sc) >= .Machine$integer.max)) return(FALSE)
   if (is.double(pg) && any(pg != trunc(pg))) return(FALSE)
-  sppEq <- unique(data.table(speciesCode = sppEquiv[[sppEquivCol]], Type = sppEquiv[["Type"]]))
-  !anyDuplicated(sppEq$speciesCode)
+  !anyDuplicated(.sppEquivTypes(sppEquiv, sppEquivCol)$speciesCode)
+}
+
+## one row per (species, Type) of sppEquiv
+.sppEquivTypes <- function(sppEquiv, sppEquivCol) {
+  unique(data.table(speciesCode = sppEquiv[[sppEquivCol]], Type = sppEquiv[["Type"]]))
 }
 
 ## The algorithm the vegTypeGenerator and vegTypeMapGenerator.data.table used to carry one copy each of.
@@ -307,7 +311,7 @@ leadingByPixelGroup <- function(
   setnames(d, "pixelGroup", pixelGroupColName)
   setorderv(d, c(pixelGroupColName, "speciesCode"))
 
-  sppEq <- unique(data.table(speciesCode = sppEquiv[[sppEquivCol]], Type = sppEquiv[["Type"]]))
+  sppEq <- .sppEquivTypes(sppEquiv, sppEquivCol)
   set(d, NULL, "Type", sppEq$Type[match(d$speciesCode, sppEq$speciesCode)])
 
   ## broadleaf proportion per pixelGroup. A single deciduous species: its proportion (the grouped
