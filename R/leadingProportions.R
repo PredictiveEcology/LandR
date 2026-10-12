@@ -297,7 +297,7 @@ leadingByPixelGroup <- function(
   ## species-within-pixelGroup sums: one integer key, one grouped pass
   d <- data.table(k = (pg - 1L) * nSp + as.integer(sc), B = x[["B"]])[,
     list(speciesGroupB = sum(B, na.rm = TRUE)),
-    by = k
+    by = "k"
   ]
   set(d, NULL, "pixelGroup", (d$k - 1L) %/% nSp + 1L)
   ## character, as the merge() on sppEquiv's character speciesCode leaves it in the slow
