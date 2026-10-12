@@ -777,163 +777,15 @@ vegTypeMapGenerator.data.table <- function(
     }
   }
 
-  pgdAndSc <- c(pixelGroupColName, "speciesCode")
-  pgdAndScAndLeading <- c(pgdAndSc, leadingBasedOn)
-  totalOfLeadingBasedOn <- paste0("total", leadingBasedOn)
-  speciesOfLeadingBasedOn <- paste0("speciesGroup", leadingBasedOn)
-
-  ## 1. Find length of each pixelGroup -- don't include pixelGroups in "by" that have only 1 cohort: N = 1
-  cohortData1 <- copy(x)
-  systimePre1 <- Sys.time()
-  pixelGroupData1 <- cohortData1[, list(N = .N), by = pixelGroupColName]
-
-  ## Calculate speciesProportion from cover or B
-  pixelGroupData1 <- cohortData1[, ..pgdAndScAndLeading][pixelGroupData1, on = pixelGroupColName]
-  set(pixelGroupData1, NULL, totalOfLeadingBasedOn, pixelGroupData1[[leadingBasedOn]])
-
-  if (identical(leadingBasedOn, "cover")) {
-    pixelGroupData1[
-      N != 1,
-      (totalOfLeadingBasedOn) := sum(cover, na.rm = TRUE),
-      by = pixelGroupColName
-    ]
-    pixelGroupData1 <- pixelGroupData1[,
-      list(sum(cover, na.rm = TRUE), totalcover[1]),
-      by = pgdAndSc
-    ]
-  } else {
-    pixelGroupData1[N != 1, (totalOfLeadingBasedOn) := sum(B, na.rm = TRUE), by = pixelGroupColName]
-    pixelGroupData1 <- pixelGroupData1[, list(sum(B, na.rm = TRUE), totalB[1]), by = pgdAndSc]
-  }
-  setnames(
-    pixelGroupData1,
-    old = c("V1", "V2"),
-    new = c(speciesOfLeadingBasedOn, totalOfLeadingBasedOn)
+  pixelGroupData3 <- leadingByPixelGroup(
+    x,
+    vegLeadingProportion = vegLeadingProportion,
+    mixedType = mixedType,
+    sppEquiv = sppEquiv,
+    sppEquivCol = sppEquivCol,
+    pixelGroupColName = pixelGroupColName,
+    leadingBasedOn = leadingBasedOn
   )
-
-  set(
-    pixelGroupData1,
-    NULL,
-    "speciesProportion",
-    pixelGroupData1[[speciesOfLeadingBasedOn]] / pixelGroupData1[[totalOfLeadingBasedOn]]
-  )
-  systimePost1 <- Sys.time()
-
-  setorderv(pixelGroupData1, pixelGroupColName)
-
-  x <- cohortData1
-  pixelGroupData <- pixelGroupData1
-  rm(pixelGroupData1)
-
-  ## Determine "mixed" -----------------------------------
-  if (FALSE) {
-    ## old algorithm; keep this code as reference -- it's simpler to follow
-    b1 <- Sys.time()
-    pixelGroupData4 <- x[, list(totalB = sum(B, na.rm = TRUE), speciesCode, B), by = pixelGroup]
-    pixelGroupData4 <- pixelGroupData4[,
-      .(speciesGroupB = sum(B, na.rm = TRUE), totalB = totalB[1]),
-      by = pgdAndSc
-    ]
-    set(
-      pixelGroupData4,
-      NULL,
-      "speciesProportion",
-      pixelGroupData4$speciesGroupB / pixelGroupData4$totalB
-    )
-    pixelGroupData4[, speciesProportion := speciesGroupB / totalB]
-    b2 <- Sys.time()
-    message(b2 - b1)
-    all.equal(
-      pixelGroupData4[, .(pixelGroup, speciesCode, totalB)],
-      pixelGroupData[, .(pixelGroup, speciesCode, totalB)]
-    )
-  }
-
-  if (mixedType == 0) {
-    ## 1. sort on pixelGroup and speciesProportion, reverse so 1st row of each pixelGroup is the largest
-    ## 2. Keep only first row in each pixelGroup
-    pixelGroupData3 <- pixelGroupData[, list(
-      speciesCode,
-      get(pixelGroupColName),
-      speciesProportion
-    )]
-    setnames(pixelGroupData3, "V2", pixelGroupColName)
-    setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
-    set(pixelGroupData3, NULL, "speciesProportion", NULL)
-    pixelGroupData3 <- pixelGroupData3[, .SD[1], by = pixelGroupColName]
-    setnames(pixelGroupData3, "speciesCode", "leading")
-  } else if (mixedType == 1) {
-    ## create "mixed" class #    -- Eliot May 28, 2019 -- faster than previous below
-    ## 1. anything with >= vegLeadingProportion is "pure"
-    ## 2. sort on pixelGroup and speciesProportion, reverse so that 1st row of each pixelGroup is the largest
-    ## 3. Keep only first row in each pixelGroup
-    ## 4. change column names and convert pure to mixed ==> mixed <- !pure
-    pixelGroupData3 <- pixelGroupData[, list(
-      pure = speciesProportion >= vegLeadingProportion,
-      speciesCode,
-      get(pixelGroupColName),
-      speciesProportion
-    )]
-    setnames(pixelGroupData3, "V3", pixelGroupColName)
-    setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
-    set(pixelGroupData3, NULL, "speciesProportion", NULL)
-    pixelGroupData3 <- pixelGroupData3[, .SD[1], by = pixelGroupColName]
-    pixelGroupData3[pure == FALSE, speciesCode := "Mixed"]
-    setnames(pixelGroupData3, "speciesCode", "leading")
-    pixelGroupData3[, pure := !pure]
-    setnames(pixelGroupData3, "pure", "mixed")
-
-    ## Old algorithm for above, this is ~43 times slower
-    # a2 <- Sys.time()
-    # pixelGroupData2 <- pixelGroupData[, list(mixed = all(speciesProportion < vegLeadingProportion),
-    #                                          leading = speciesCode[which.max(speciesProportion)]),
-    #                                   by = pixelGroupColName]
-    # pixelGroupData2[mixed == TRUE, leading := "Mixed"]
-    # b2 <- Sys.time()
-  } else if (mixedType == 2) {
-    if (!sppEquivCol %in% colnames(sppEquiv)) {
-      stop(sppEquivCol, " is not in sppEquiv. Please pass an existing sppEquivCol")
-    }
-
-    sppEq <- data.table(sppEquiv[[sppEquivCol]], sppEquiv[["Type"]])
-
-    names(sppEq) <- c("speciesCode", "Type")
-    setkey(pixelGroupData, speciesCode)
-
-    ## don't need all columns now
-    colsToDelete <- c("rasterToMatch", leadingBasedOn, totalOfLeadingBasedOn)
-    colsToDelete <- colsToDelete[colsToDelete %in% colnames(pixelGroupData)]
-    set(pixelGroupData, NULL, colsToDelete, NULL)
-    pixelGroupData3 <- merge(pixelGroupData, sppEq[!duplicated(sppEq)], all.x = TRUE)
-    setkeyv(pixelGroupData, pgdAndSc)
-
-    setkeyv(pixelGroupData3, pgdAndSc)
-    pixelGroupData3[, mixed := FALSE]
-
-    pixelGroupColNameChar <- paste0(pixelGroupColName, "Char")
-    set(
-      pixelGroupData3,
-      NULL,
-      pixelGroupColNameChar,
-      as.character(pixelGroupData3[[pixelGroupColName]])
-    )
-    pixelGroupData3[,
-      mixed := .isMixedwood(speciesProportion, Type, vegLeadingProportion),
-      by = pixelGroupColNameChar
-    ]
-    # pixelGroupData3[eval(mixedType2Condition), mixed := TRUE, by = pixelGroupColName]
-    # pixelGroupData3[, mixed := any(mixed), by = pixelGroupColName]
-
-    setorderv(pixelGroupData3, cols = c(pixelGroupColName, "speciesProportion"), order = -1L)
-    set(pixelGroupData3, NULL, "speciesProportion", NULL)
-    set(pixelGroupData3, NULL, "Type", NULL)
-    set(pixelGroupData3, NULL, pixelGroupColNameChar, NULL)
-
-    pixelGroupData3 <- pixelGroupData3[, .SD[1], by = pixelGroupColName] ## sp. w/ highest prop. per pixelGroup
-    pixelGroupData3[mixed == TRUE, speciesCode := "Mixed"]
-    setnames(pixelGroupData3, "speciesCode", "leading")
-    set(pixelGroupData3, NULL, "leading", factor(pixelGroupData3[["leading"]]))
-  }
 
   if ("pixelIndex" %in% colnames(pixelGroupData3)) {
     # (!any(duplicated(pixelGroupData3[[pixelGroupColName]]))) {
@@ -1004,7 +856,21 @@ vegTypeMapGenerator.data.table <- function(
 
     leadingTest <- factorValues2(vegTypeMap, vegTypeMap[][ids], att = 2)
     names(pgs) <- leadingTest
-    pgTest <- pixelGroupData[get(pixelGroupColName) %in% pgs]
+    ## the species proportions of the sampled pixelGroups, derived again from the cohorts
+    pixelGroupColNameChar <- paste0(pixelGroupColName, "Char")
+    speciesOfLeadingBasedOn <- paste0("speciesGroup", leadingBasedOn)
+    pgTest <- x[
+      get(pixelGroupColName) %in% pgs,
+      list(speciesGroup = sum(get(leadingBasedOn), na.rm = TRUE)),
+      by = c(pixelGroupColName, "speciesCode")
+    ]
+    ## which.max() below takes the first of a tie: mixedType 2 sorts species within a pixelGroup
+    setorderv(pgTest, c(pixelGroupColName, if (mixedType == 2) "speciesCode"))
+    setnames(pgTest, "speciesGroup", speciesOfLeadingBasedOn)
+    pgTest[,
+      speciesProportion := get(speciesOfLeadingBasedOn) / sum(get(speciesOfLeadingBasedOn)),
+      by = pixelGroupColName
+    ]
     whNA <- unique(unlist(sapply(pgTest, function(xx) which(is.na(xx)))))
     whNAPG <- pgTest[whNA][[pixelGroupColName]]
     pgs <- pgs[!pgs %in% whNAPG]
@@ -1027,7 +893,6 @@ vegTypeMapGenerator.data.table <- function(
       ]
       out <- pgTest2[mixed == TRUE, leading := "Mixed"]
     } else if (mixedType == 2) {
-      # pixelGroupColNameChar <- paste0(pixelGroupColName, "Char")
       set(pgTest, NULL, pixelGroupColNameChar, as.character(pgTest[[pixelGroupColName]]))
 
       pgTest2 <- pgTest[,
