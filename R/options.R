@@ -13,6 +13,15 @@
 #'     Default: `TRUE`. If `TRUE`, additional code checks are run during function calls;
 #'     see [assertions].
 #'   }
+#'   \item{`forestLandUseCache`}{
+#'     Default: unset, which means the forest-land inputs of [prepInputs_SCANFI_LCC_FAO()]
+#'     and [prepInputs_NTEMS_LCC_FAO()] -- the FAO forest layer and each `forestLandYears`
+#'     land cover -- are cached as `options("reproducible.useCache")` says, like any other
+#'     `Cache()` call. Set it to `"always"` to cache them even when that option is `FALSE`,
+#'     so a caller that prepares several years of one study area prepares each input once:
+#'     `fireSense` runs under `spades.useCache = "eventsOnly"`, which sets
+#'     `reproducible.useCache = FALSE`. Any other value is passed to `Cache(useCache = )`.
+#'   }
 #'   \item{`leadingSpeciesProp`}{
 #'     Default: unset, which means it takes the value of `mixedwoodProp`. The share ONE
 #'     species must hold for the stand to be called its own rather than mixed. A user who
@@ -63,6 +72,8 @@
 LandROptions <- function() {
   list(
     LandR.assertions = TRUE,
+    ## NULL: the forest-land inputs follow reproducible.useCache; see .forestLandUseCache()
+    LandR.forestLandUseCache = NULL,
     ## A NULL default documents the option without setting it: `options()` ignores a NULL, so
     ## leadingSpeciesProp() still falls through to LandR.mixedwoodProp. Setting it here would
     ## fix it at load, and moving LandR.mixedwoodProp afterwards would no longer move it.

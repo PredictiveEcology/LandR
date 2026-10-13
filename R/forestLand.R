@@ -156,13 +156,16 @@ prepInputs_FAO_forest <- function(year = 2022, to = NULL, destinationPath = NULL
 #' @param resampleMethod Passed to `prepInputs`.
 #'
 #' @details
-#' Each forest-land input is `Cache()`d with `useCache = "always"`, so a caller that prepares
-#' several years of one study area, as `fireSense` does, prepares each input once; `"always"`
-#' holds even when Cache is otherwise off, e.g. under `spades.useCache = "eventsOnly"`, and when
-#' the call is nested in a `Cache()` that is. The inputs are aligned with `lcc` but not masked by
-#' it, so they depend on its geometry and not its values; the key is that geometry (crs, extent,
-#' dimensions), never `lcc` itself. `lcc`'s own `NA`s are excluded by [.applyForestLand()].
-#' There is no switch; delete the entries (`reproducible::clearCache()`) to recompute.
+#' Each forest-land input is `Cache()`d with `useCache = getOption("LandR.forestLandUseCache")`,
+#' or, when that option is unset (the default), as `options("reproducible.useCache")` says, like
+#' any other `Cache()` call. A pipeline that turns `reproducible`'s Cache off, e.g. because
+#' `targets` is its only cache, then caches nothing here. Set the option to `"always"` so a caller
+#' that prepares several years of one study area, as `fireSense` does, prepares each input once;
+#' `"always"` holds even when Cache is otherwise off, e.g. under `spades.useCache = "eventsOnly"`,
+#' and when the call is nested in a `Cache()` that is. The inputs are aligned with `lcc` but not
+#' masked by it, so they depend on its geometry and not its values; the key is that geometry (crs,
+#' extent, dimensions), never `lcc` itself. `lcc`'s own `NA`s are excluded by [.applyForestLand()].
+#' Delete the entries (`reproducible::clearCache()`) to recompute.
 #'
 #' @return A `SpatRaster` mask, as [forestLandMask()].
 #'
@@ -179,7 +182,7 @@ prepInputs_FAO_forest <- function(year = 2022, to = NULL, destinationPath = NULL
   if (forestLandFrom %in% c("both", "lccYears")) {
     lccList <- lapply(forestLandYears, function(y) {
       message("  ... forest land: land cover for ", y)
-      Cache(lccFor(y), useCache = "always", .functionName = "forestLand_landCover",
+      Cache(lccFor(y), useCache = .forestLandUseCache(), .functionName = "forestLand_landCover",
             .cacheExtra = list(geometry, lccSource, resampleMethod))
     })
   }
@@ -190,10 +193,16 @@ prepInputs_FAO_forest <- function(year = 2022, to = NULL, destinationPath = NULL
     faoRas <- Cache(
       prepInputs_FAO_forest(year = faoYear, to = lcc, maskTo = NA,
                             destinationPath = destinationPath, method = resampleMethod),
-      useCache = "always", omitArgs = "to", .functionName = "forestLand_FAO",
+      useCache = .forestLandUseCache(), omitArgs = "to", .functionName = "forestLand_FAO",
       .cacheExtra = geometry
     )
   }
 
   forestLandMask(lccList = lccList, faoRas = faoRas, treedClasses = treedClasses)
+}
+
+## The `useCache` of the forest-land inputs' `Cache()` calls: `LandR.forestLandUseCache` when it
+## is set, else `reproducible.useCache`, which is what `Cache()` itself would use.
+.forestLandUseCache <- function() {
+  getOption("LandR.forestLandUseCache", getOption("reproducible.useCache", TRUE))
 }

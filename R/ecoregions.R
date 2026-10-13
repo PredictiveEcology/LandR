@@ -190,8 +190,17 @@ makeEcoregionMap <- function(ecoregionFiles, pixelCohortData) {
   ## returning Inf min(x@data@values, na.rm = TRUE)
   suppressWarnings(ecoregionMap[truePixelData$pixelIndex] <- as.integer(truePixelData$ecoregionGroup))
 
+  ## The category IDs must be the cell values just written (each group's factor level index), not
+  ## the row numbers of unique(), which follow the order the groups first appear in
+  ## ecoregionFiles$ecoregion. One row per group, or an ID would have two labels.
   factorDT <- unique(truePixelData[, .(ecoregionGroup, landcover, ecoregionName)])
-  factorDT[, ID := seq(levels(ecoregionGroup))]
+  dupGroups <- unique(factorDT$ecoregionGroup[duplicated(factorDT$ecoregionGroup)])
+  if (length(dupGroups)) {
+    stop("makeEcoregionMap(): these ecoregionGroups have more than one landcover or ",
+         "ecoregionName in ecoregionFiles$ecoregion: ", paste(dupGroups, collapse = ", "))
+  }
+  factorDT[, ID := as.integer(ecoregionGroup)]
+  setorderv(factorDT, "ID")
   factorDT[, ecoregion := gsub("_.*", "", ecoregionGroup)]
   setcolorder(factorDT, c("ID", "ecoregionGroup", "ecoregionName", "ecoregion", "landcover"))
 

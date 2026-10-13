@@ -48,6 +48,66 @@ test_that("makeEcoregionMap() recovers the correct ecoregionGroup after a raster
   expect_identical(actualGroup, expectedGroup)
 })
 
+## makeEcoregionMap() writes each pixel's ecoregionGroup as its factor level index (alphabetical
+## order), so the category table's IDs must be those same indices. It numbered the table's rows
+## instead, in the order the groups first appear in `ecoregionFiles$ecoregion`. prepEcoregions()
+## takes that order from the ecoregion polygons (e.g. "02_*" rows before "01_*"), so a reader that
+## matches cell values to `ID`, as pemisc::factorValues2() does, got another group's labels. The
+## test above lists its groups alphabetically, so the two orders agree there.
+test_that("makeEcoregionMap() category IDs match the cell values when groups are not alphabetical", {
+  ## ecoregionProducer() numbers mapcodes by ecoregion_lcc, alphabetically
+  groups <- c("01_210", "01_220", "02_210", "02_220", "03_210", "03_220")
+  ecoNames <- c("01" = "138", "02" = "139", "03" = "140")
+  ## rows in the order prepEcoregions() leaves them: ecoregion 02, then 03, then 01
+  ord <- c(3:6, 1:2)
+  eco <- substr(groups[ord], 1, 2)
+  ecoregionTable <- data.table::data.table(
+    active = "yes",
+    mapcode = ord,
+    ecoregion = factor(eco),
+    landcover = factor(substr(groups[ord], 4, 6)),
+    ecoregionGroup = factor(groups[ord]),
+    ecoregionName = factor(unname(ecoNames[eco]))
+  )
+
+  r <- terra::rast(nrows = 6, ncols = 6, xmin = 0, xmax = 6, ymin = 0, ymax = 6, crs = "EPSG:3978")
+  origRaw <- rep(seq_along(groups), length.out = terra::ncell(r))
+  terra::values(r) <- origRaw
+  ecoregionFiles <- list(ecoregionMap = r, ecoregion = ecoregionTable)
+  ## a group with no cohorts is dropped, so the cell values are not the mapcodes either
+  pixelCohortData <- data.table::data.table(ecoregionGroup = factor(setdiff(groups, "02_220")))
+
+  result <- makeEcoregionMap(ecoregionFiles, pixelCohortData)
+
+  vals <- terra::values(result, mat = FALSE)
+  expected <- groups[origRaw]
+  expected[expected == "02_220"] <- NA
+  expect_identical(as.character(pemisc::factorValues2(result, vals, att = "ecoregionGroup")), expected)
+  expect_identical(as.character(pemisc::factorValues2(result, vals, att = "ecoregionName")),
+                   unname(ecoNames[substr(expected, 1, 2)]))
+
+  cats1 <- terra::cats(result)[[1]]
+  expect_setequal(cats1$ID, unique(na.omit(vals)))
+  expect_identical(anyDuplicated(cats1$ID), 0L)
+})
+
+test_that("makeEcoregionMap() stops when an ecoregionGroup has two ecoregionNames", {
+  ecoregionTable <- data.table::data.table(
+    active = "yes",
+    mapcode = 1:3,
+    ecoregion = factor(c("01", "01", "02")),
+    landcover = factor(c("210", "210", "210")),
+    ecoregionGroup = factor(c("01_210", "01_210", "02_210")),
+    ecoregionName = factor(c("138", "139", "140"))
+  )
+  r <- terra::rast(nrows = 3, ncols = 3, xmin = 0, xmax = 3, ymin = 0, ymax = 3, crs = "EPSG:3978")
+  terra::values(r) <- rep(1:3, length.out = terra::ncell(r))
+  ecoregionFiles <- list(ecoregionMap = r, ecoregion = ecoregionTable)
+  pixelCohortData <- data.table::data.table(ecoregionGroup = factor(c("01_210", "02_210")))
+
+  expect_error(makeEcoregionMap(ecoregionFiles, pixelCohortData), "more than one.*01_210")
+})
+
 ## ecoregionProducer() used raster::factorValues(), which on a SpatRaster returns only the ACTIVE
 ## category. A file round trip makes the first text column active, so a category table with a text
 ## column ahead of `ecoregionName` returned the wrong labels and the join on "ecoregionName" failed.

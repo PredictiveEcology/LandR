@@ -46,12 +46,15 @@ A \code{SpatRaster} mask, as \code{\link[=forestLandMask]{forestLandMask()}}.
 Build the forest-land mask for one of the land-cover sources
 }
 \details{
-Each forest-land input is \code{Cache()}d with \code{useCache = "always"}, so a caller that prepares
-several years of one study area, as \code{fireSense} does, prepares each input once; \code{"always"}
-holds even when Cache is otherwise off, e.g. under \code{spades.useCache = "eventsOnly"}, and when
-the call is nested in a \code{Cache()} that is. The inputs are aligned with \code{lcc} but not masked by
-it, so they depend on its geometry and not its values; the key is that geometry (crs, extent,
-dimensions), never \code{lcc} itself. \code{lcc}'s own \code{NA}s are excluded by \code{\link[=.applyForestLand]{.applyForestLand()}}.
-There is no switch; delete the entries (\code{reproducible::clearCache()}) to recompute.
+Each forest-land input is \code{Cache()}d with \code{useCache = getOption("LandR.forestLandUseCache")},
+or, when that option is unset (the default), as \code{options("reproducible.useCache")} says, like
+any other \code{Cache()} call. A pipeline that turns \code{reproducible}'s Cache off, e.g. because
+\code{targets} is its only cache, then caches nothing here. Set the option to \code{"always"} so a caller
+that prepares several years of one study area, as \code{fireSense} does, prepares each input once;
+\code{"always"} holds even when Cache is otherwise off, e.g. under \code{spades.useCache = "eventsOnly"},
+and when the call is nested in a \code{Cache()} that is. The inputs are aligned with \code{lcc} but not
+masked by it, so they depend on its geometry and not its values; the key is that geometry (crs,
+extent, dimensions), never \code{lcc} itself. \code{lcc}'s own \code{NA}s are excluded by \code{\link[=.applyForestLand]{.applyForestLand()}}.
+Delete the entries (\code{reproducible::clearCache()}) to recompute.
 }
 \keyword{internal}

@@ -14,7 +14,8 @@ plotLeadingSpecies(
   defineLeading = .defineLeading,
   leadingPercentage = 0.8,
   treeType = NULL,
-  rasterToMatch
+  rasterToMatch,
+  figurePath = file.path(outputDir, "figures")
 )
 }
 \arguments{
@@ -43,6 +44,10 @@ to take advantage of parallel processing.}
 \item{rasterToMatch}{A \code{SpatRaster} object to use as the template for all subsequent
 raster operations (i.e., the one used throughout the simulation).
 \code{rasterToMatch} should correspond to \code{studyArea} if used.}
+
+\item{figurePath}{Directory to which the \code{.png} figure is saved.
+Defaults to \verb{figures/} under \code{outputDir}; a SpaDES module would pass
+\code{SpaDES.core::figurePath(sim)}.}
 }
 \value{
 list of file names corresponding to the figures and/or objects written to disk

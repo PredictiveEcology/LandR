@@ -1755,7 +1755,8 @@ modifySpeciesAndSpeciesEcoregionTable <- function(speciesEcoregion, speciesTable
 
   message("modifying speciesEcoregion table based on newly estimated traits")
 
-  newSpeciesEcoregion <- speciesEcoregion[speciesTable, on = c("speciesCode" = "species")]
+  ## inner join: a species with no speciesEcoregion row must not gain an all-NA row (Biomass_core#124)
+  newSpeciesEcoregion <- speciesEcoregion[speciesTable, on = c("speciesCode" = "species"), nomatch = NULL]
   newSpeciesEcoregion[!is.na(inflationFactor), maxB := asInteger(maxB * inflationFactor)]
 
   newSpeciesEcoregion[, maxANPP := asInteger(maxB * mANPPproportion / 100)]

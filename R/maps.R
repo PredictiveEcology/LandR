@@ -1785,7 +1785,11 @@ loadSCANFISpeciesLayers <- function(
       url = URLs,
       outFile = file.path(oPath, postProcessedFilenamesWithStudyAreaName)
     ) |>
-      Cache(.functionName = "prepInputs_speciesLayers"),
+      Cache(
+        .functionName = "prepInputs_speciesLayers",
+        ## the closure above captures these, so Cache() does not see them otherwise
+        .cacheExtra = list(to = to, cropTo = cropTo, projectTo = projectTo, maskTo = maskTo)
+      ),
     what = "the SCANFI species layers",
     dataYear = year,
     dataVersion = dataVersion,
