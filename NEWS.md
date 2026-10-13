@@ -7,7 +7,6 @@
   `useCpp = FALSE`. `src/Makevars` and `src/Makevars.win` add `$(SHLIB_OPENMP_CXXFLAGS)`; without
   OpenMP the package builds and runs serially.
 
-
 * New `leadingByPixelGroup()`: the leading species (or "Mixed") of each `pixelGroup`, one row per `pixelGroup`. `vegTypeGenerator()` and `vegTypeMapGenerator()` now use it, in place of the two copies of the same code they carried, and it sums the species within `pixelGroup`s in one pass instead of a 10M-row join (about 3 times faster at 10M cohorts). Results are identical, including the order of the levels and the `Mixed` decision at the threshold; the original algorithm is still used for `mixedType` 0 and 1, `cover`, a character `speciesCode` and `NA` in `B`.
 
 * `updateCohortData()` is faster after fire: `.initiateNewCohorts()` no longer sums the B of older cohorts when `initialB` is given (the result was discarded) and no longer recalculates `sumB` (which `updateCohortData()` drops), `calcSeverityB()` sums pre-fire B only for the burned `pixelGroup`s, and `rmMissingCohorts()` copies `cohortData` only when it removes something. Results are identical. The `initialB = NA` calculation is unchanged, including that a new cohort's older B is counted as 0 when the first row of its `pixelGroup` is younger than `successionTimestep`, which is a separate issue.
