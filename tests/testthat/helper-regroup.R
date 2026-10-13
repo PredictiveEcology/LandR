@@ -80,7 +80,7 @@ regroupUpdate <- function(seed, withType = TRUE, withTable = FALSE, B = FALSE) {
     doAssertion = TRUE
   ))
   list(cohortData = out$cohortData, pixelGroupMap = terra::values(out$pixelGroupMap, mat = FALSE),
-       seed = .Random.seed[-1])
+       seed = fastOpsSeed())
 }
 
 regroupSiteShade <- function() {
