@@ -36,7 +36,12 @@ calcSeverityB <- function(cohortData, burnedPixelCohortData) {
     unique()
 
   ## sum initial B to stand level and add to severityData - this expands cohortData's B to pixels.
-  severityData <- cohortData[, list(prefireB = sum(B)), by = pixelGroup][severityData, on = "pixelGroup"]
+  ## only the burned pixelGroups need their pre-fire B
+  burnedPG <- unique(severityData$pixelGroup)
+  severityData <- cohortData[pixelGroup %in% burnedPG, list(prefireB = sum(B)), by = pixelGroup][
+    severityData,
+    on = "pixelGroup"
+  ]
 
   ## calculate severity in terms of absolute biomass lost
   severityData[, severityB := prefireB - postfireB]
