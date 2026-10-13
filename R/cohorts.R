@@ -1,13 +1,13 @@
 utils::globalVariables(c(
-  ".", "..cols", "..colsToSubset", ".I", ":=", "..groupVar",
+  ".", "..cols", "..colsToSubset", "..columnsForPG", "..newCols", ".I", ":=", "..groupVar",
   "age", "age2", "allValid", "aNPPAct", "cover", "coverOrig", "cumCells", "drawTarget",
-  "dist", "distCells", "ecoregion", "ecoregionGroup",
+  "dist", "distCells", "ecoregion", "ecoregionGroup", "firstPixel",
   "hasBadAge", "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
   "lcc", "maxAge", "maxANPP", "maxB", "maxB_eco", "mortality", "nCells", "new", "newPossLCC",
   "noPixels",
   "oldSumB", "ord", "outBiomass", "oldEcoregionGroup", "selfLcc",
-  "pixelGroup2", "pixelIndex", "pixels", "planted", "Provenance", "possERC",
-  "speciesposition", "speciesGroup", "speciesInt", "state", "sumB",
+  "newPG", "pixelGroup2", "pixelIndex", "pixels", "planted", "Provenance", "possERC",
+  "speciesposition", "speciesGroup", "speciesInt", "state", "str", "sumB",
   "temppixelGroup", "toDelete", "totalBiomass", "totalBiomass2", "totalCover",
   "uniqueCombo", "uniqueComboByRow", "uniqueComboByPixelIndex", "V1", "valid", "year"
 ))
@@ -76,7 +76,8 @@ updateCohortData <- function(
     )
     pixelGroupMap[emptyPix] <- 0L
   }
-  relevantPixels <- pixelGroupMap[][newPixelCohortData$pixelIndex]
+  pgv <- pixelGroupMap[]
+  relevantPixels <- pgv[newPixelCohortData$pixelIndex]
   zeroOnPixelGroupMap <- relevantPixels == 0
 
   if (!"age" %in% colnames(newPixelCohortData)) {
@@ -115,51 +116,19 @@ updateCohortData <- function(
       ))
     }
 
-    pixelIndex <- which(pixelGroupMap[] %in% cohortData$pixelGroup)
-
-    ## remove unnecessary columns before making cohortDataLong
+    ## remove unnecessary columns before regrouping
     suppressWarnings(set(cohortData, j = "prevMortality", value = NULL))
     suppressWarnings(set(newPixelCohortData, j = "year", value = NULL))
 
-    cohortDataPixelIndex <- data.table(
-      pixelIndex = pixelIndex,
-      pixelGroup = pixelGroupMap[][pixelIndex]
-    )
-    cdLong <- cohortDataPixelIndex[cohortData, on = "pixelGroup", allow.cartesian = TRUE]
     if (!is.null(newPixelCohortData$type)) {
       ## survivor cohorts are assumed to be in cohort data already.
       newPixelCohortData <- newPixelCohortData[type != "survivor"]
     }
-    cohorts <- rbindlist(list(cdLong, newPixelCohortData), use.names = TRUE, fill = TRUE)
 
-    columnsForPG <- LandR::columnsForPixelGroups()
-    cd <- cohorts[, c("pixelIndex", columnsForPG), with = FALSE]
-    cohorts[, pixelGroup := generatePixelGroups(cd, maxPixelGroup = 0L, columns = columnsForPG)]
-
-    ## Bring to pixelGroup level -- this will squash the data.table
-    if (is.null(cohorts[["sumB"]])) {
-      cohorts[, sumB := sum(B, na.rm = TRUE), by = pixelGroup]
-    }
-    ## Old way that does not preserve additional 'unknown' columns in cohortData
-    # allCohortData <- cohorts[ , .(ecoregionGroup = ecoregionGroup[1],
-    #                               mortality = mortality[1],
-    #                               aNPPAct = aNPPAct[1],
-    #                               sumB = sumB[1]),
-    #                           by = uniqueCohortDefinition]
-
-    ## newer way that will potentially conflict with LandR.CS due to differing aNPP
-    colsToSubset <- setdiff(colnames(cohortData), c("pixelIndex"))
-    allCohortData <- cohorts[
-      !duplicated(cohorts[, .(pixelGroup, speciesCode, ecoregionGroup, age)]),
-      ..colsToSubset
-    ]
-
-    theNewOnes <- is.na(allCohortData$B)
-    cohortData <- allCohortData[!theNewOnes]
-    newPixelCohortData <- allCohortData[theNewOnes]
-
-    ## Remove the duplicated pixels within pixelGroup (i.e., 2+ species in the same pixel)
-    pixelsToChange <- unique(cohorts[, c("pixelIndex", "pixelGroup")], by = c("pixelIndex"))
+    regrouped <- .regroupCohorts(cohortData, newPixelCohortData, pgv)
+    cohortData <- regrouped$cohortData
+    newPixelCohortData <- regrouped$newPixelCohortData
+    pixelsToChange <- regrouped$pixelsToChange
   }
 
   ## update pixelGroupMap
@@ -229,6 +198,93 @@ updateCohortData <- function(
   }
 
   return(list(cohortData = outs$cohortData, pixelGroupMap = outs$pixelGroupMap))
+}
+
+#' Re-group all pixels, given new cohorts, at the `pixelGroup` level
+#'
+#' The wholesale re-grouping of [updateCohortData()]: every treed pixel gets the `pixelGroup` of
+#' its community (all its cohorts, old and new), numbered by the sorted community strings, as
+#' [generatePixelGroups()] numbers them. Where that would first expand `cohortData` to one row per
+#' pixel and cohort, this builds the string of each existing `pixelGroup` once and gives each pixel
+#' the string of its `pixelGroup`, followed by the string of its new cohorts. The `pixelGroup`
+#' numbers, the rows that are kept and their order are those of the expanded version.
+#'
+#' @param cohortData `cohortData` with the cohorts of the current `pixelGroup`s.
+#' @param newPixelCohortData New cohorts (no survivors), with `pixelIndex`.
+#' @param pgv The `pixelGroupMap` values, as a vector.
+#'
+#' @return A list with the new `cohortData` (the existing cohorts, one row per new `pixelGroup`
+#'   and cohort), `newPixelCohortData` (the new cohorts, one row per new `pixelGroup`, species,
+#'   ecoregion and age), and `pixelsToChange` (`pixelIndex` and the new `pixelGroup`).
+#'
+#' @keywords internal
+#' @noRd
+.regroupCohorts <- function(cohortData, newPixelCohortData, pgv) {
+  columnsForPG <- LandR::columnsForPixelGroups()
+
+  ## one string per cohort, as generatePixelGroups() makes them; made on old and new cohorts
+  ## together so that they are coerced to common types as when they are bound
+  newCols <- intersect(columnsForPG, colnames(newPixelCohortData))
+  cohortStr <- do.call(
+    paste,
+    as.list(rbindlist(
+      list(cohortData[, ..columnsForPG], newPixelCohortData[, ..newCols]),
+      use.names = TRUE, fill = TRUE
+    )[, ..columnsForPG])
+  )
+  nOld <- nrow(cohortData)
+  isOld <- seq_len(nOld)
+
+  ## one string per existing pixelGroup (its cohorts in table order), then per treed pixel
+  groupStr <- data.table(pixelGroup = cohortData$pixelGroup, str = cohortStr[isOld])[,
+    list(str = paste(str, collapse = "__")),
+    by = "pixelGroup"
+  ]
+  pixelIndex <- which(pgv %in% cohortData$pixelGroup)
+  pixelStr <- groupStr$str[match(pgv[pixelIndex], groupStr$pixelGroup)]
+
+  ## the new cohorts follow the cohorts of their pixel, in table order
+  newByPixel <- data.table(
+    pixelIndex = newPixelCohortData$pixelIndex,
+    str = cohortStr[nOld + seq_len(nrow(newPixelCohortData))]
+  )[, list(str = paste(str, collapse = "__")), by = "pixelIndex"]
+  inOldPixel <- match(newByPixel$pixelIndex, pixelIndex)
+  hasOld <- !is.na(inOldPixel)
+  pixelStr[inOldPixel[hasOld]] <- paste(
+    pixelStr[inOldPixel[hasOld]], newByPixel$str[hasOld], sep = "__"
+  )
+  allPixels <- c(pixelIndex, newByPixel$pixelIndex[!hasOld])
+  newPG <- as.integer(factor(c(pixelStr, newByPixel$str[!hasOld])))
+
+  ## Each cohortData row is expanded to the pixels of its pixelGroup, in ascending pixelIndex; the
+  ## first row of each (pixelGroup, speciesCode, ecoregionGroup, age) is kept. That is the first
+  ## cohortData row of an old pixelGroup holding a pixel of the new pixelGroup, with the old
+  ## pixelGroups taken in order of their first such pixel.
+  pgMap <- data.table(
+    pixelGroup = pgv[pixelIndex], newPG = newPG[seq_along(pixelIndex)], pixelIndex = pixelIndex
+  )[, list(firstPixel = min(pixelIndex)), by = c("pixelGroup", "newPG")]
+  setorderv(pgMap, c("pixelGroup", "firstPixel"))
+  oldCohorts <- pgMap[, c("pixelGroup", "newPG")][cohortData, on = "pixelGroup", allow.cartesian = TRUE]
+  set(oldCohorts, NULL, "pixelGroup", oldCohorts$newPG)
+  set(oldCohorts, NULL, "newPG", NULL)
+
+  newCohorts <- copy(newPixelCohortData)
+  set(newCohorts, NULL, "pixelGroup", newPG[match(newCohorts$pixelIndex, allPixels)])
+
+  cohorts <- rbindlist(list(oldCohorts, newCohorts), use.names = TRUE, fill = TRUE)
+  colsToSubset <- setdiff(colnames(cohortData), c("pixelIndex"))
+  ## newer way that will potentially conflict with LandR.CS due to differing aNPP
+  allCohortData <- cohorts[
+    !duplicated(cohorts[, .(pixelGroup, speciesCode, ecoregionGroup, age)]),
+    ..colsToSubset
+  ]
+
+  theNewOnes <- is.na(allCohortData$B)
+  list(
+    cohortData = allCohortData[!theNewOnes],
+    newPixelCohortData = allCohortData[theNewOnes],
+    pixelsToChange = data.table(pixelIndex = allPixels, pixelGroup = newPG)
+  )
 }
 
 #' Initiate new cohorts
@@ -429,24 +485,20 @@ rmMissingCohorts <- function(
   cohortDefinitionCols = LandR::cohortDefinitionCols(),
   doAssertion = getOption("LandR.assertions", TRUE)
 ) {
-  pgmValues <- data.table(
-    pixelGroup = as.vector(pixelGroupMap[]),
-    pixelIndex = seq(ncell(pixelGroupMap))
-  )
-
-  pgmVals <- pgmValues[!is.na(pixelGroup), ] ## na.omit() doesn't omit NaN, which terra returns
-  pgmVals <- pgmVals[pixelGroup > 0]
-  whPgsStillInCDGoneFromPGM <- !cohortData$pixelGroup %in% pgmVals$pixelGroup
-  whPgsStillInPGMGoneFromCD <- !pgmVals$pixelGroup %in% cohortData$pixelGroup
-  pgsStillInPGMGoneFromCD <- pgmVals[whPgsStillInPGMGoneFromCD, ]
+  pgv <- as.vector(pixelGroupMap[])
+  onMap <- !is.na(pgv) & pgv > 0 ## NaN, which terra returns for NA, is also dropped
+  pgsOnMap <- unique(pgv[onMap])
 
   ## REMOVE lines in cohortData that are no longer in the pixelGroupMap (no copy if there are none)
+  whPgsStillInCDGoneFromPGM <- !cohortData$pixelGroup %in% pgsOnMap
   if (any(whPgsStillInCDGoneFromPGM)) {
-    pgsStillInCDGoneFromPGM <- cohortData[whPgsStillInCDGoneFromPGM, ]
-    cohortData <- cohortData[!pixelGroup %in% pgsStillInCDGoneFromPGM$pixelGroup]
+    cohortData <- cohortData[!whPgsStillInCDGoneFromPGM]
   }
   ## REMOVE pixels in pixelGroupMap that are no longer in the cohortData
-  pixelGroupMap[pgsStillInPGMGoneFromCD$pixelIndex] <- NA
+  whPgsStillInPGMGoneFromCD <- onMap & !pgv %in% cohortData$pixelGroup
+  if (any(whPgsStillInPGMGoneFromCD)) {
+    pixelGroupMap[which(whPgsStillInPGMGoneFromCD)] <- NA
+  }
 
   assertCohortData(
     cohortData,
