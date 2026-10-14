@@ -9,7 +9,7 @@ test_that("the SCANFI remap sends the 404ing Drive ids to arbutus", {
 
   lcc2020 <- remap("https://drive.google.com/file/d/1EGp7LUA7cXMR6KpXDmu617xsjwGM6aIx",
                    filename = NA_character_)
-  expect_match(lcc2020, "^https://object-arbutus\\.cloud\\.computecanada\\.ca/")
+  expect_match(lcc2020, "^https://object-arbutus\\.alliancecan\\.ca/")
   expect_match(lcc2020, "CanadaLCCclassCodes_2020_v2_20260119\\.tif$")
 
   age2020 <- remap("https://drive.google.com/file/d/1nXPS3bpFUESYieNfXO25OKlZJEgqtRnD",

@@ -349,6 +349,19 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", writeTo = 
   return(scanfi_lcc_corrected)
 }
 
+## The Google Drive folder of SCANFI V1 species layers for one year (V1 is not on the mirror).
+.scanfiV1SpeciesFolder <- function(year) {
+  folders <- c(
+    "2000" = "1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp",
+    "2010" = "1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE",
+    "2020" = "1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ"
+  )
+  if (!(as.character(year) %in% names(folders))) {
+    stop("SCANFI V1 data is currently available for 2000, 2010, and 2020 only")
+  }
+  paste0("https://drive.google.com/drive/folders/", folders[[as.character(year)]])
+}
+
 #' Where one year of SCANFI land cover, in Canada LCC class codes, comes from
 #'
 #' @param year A year the given `dataVersion` publishes.
@@ -362,28 +375,14 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", writeTo = 
     url <- .scanfiV3Url(year)
     return(list(url = url, targetFile = basename(url)))
   }
-  ids <- if (dataVersion == "V1") {
-    c("2000" = "1zqzTSDk9mtyRhcQuMsRMK2WDwkuk24kt",
-      "2010" = "1q1LOewgbanVUAySCyJqjc8VcSl4958TP",
-      "2020" = "1ZwEspwpcpZwIYvYEnYmd7Ux44goNvDB2")
-  } else {
-    c("1985" = "1iAEEpkVofQBggIJaxwXKcKADU3zka7Wh",
-      "1990" = "1LK5b2E1y31bwIqWYD53X9ZOt4mWvS_TB",
-      "1995" = "15pvm2h9X6dreC9rKuC3oxr4c3hHsYRkI",
-      "2000" = "1ykRG7u__DuMKI_DUGEJs6mXVul8YmRD_",
-      "2005" = "1eKNGWrwGEFRFOK2TLVXldfd8hB3OsbSG",
-      "2010" = "1cbKlKlXtjMRVg3_9xjlEWosU0fmLJxXt",
-      "2015" = "1olWPzlM2SfMC8Fq_uXslJfYIINAd4wGP",
-      "2020" = "1EGp7LUA7cXMR6KpXDmu617xsjwGM6aIx",
-      "2025" = "1eb1zEWC3VRycA_aRzTB2ODhWDLZis-YG")
+  if (dataVersion == "V2") {
+    return(.scanfiV2Source("lcc", year))
   }
-  id <- ids[[as.character(year)]]
-  targetFile <- if (dataVersion == "V1") {
-    paste0("SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_", year, "_v1_1.tif")
-  } else {
-    paste0("SCANFI_att_nfiLandcover_CanadaLCCclassCodes_", year, "_v2_20260119.tif")
-  }
-  list(url = paste0("https://drive.google.com/file/d/", id), targetFile = targetFile)
+  ids <- c("2000" = "1zqzTSDk9mtyRhcQuMsRMK2WDwkuk24kt",
+           "2010" = "1q1LOewgbanVUAySCyJqjc8VcSl4958TP",
+           "2020" = "1ZwEspwpcpZwIYvYEnYmd7Ux44goNvDB2")
+  list(url = paste0("https://drive.google.com/file/d/", ids[[as.character(year)]]),
+       targetFile = paste0("SCANFI_att_nfiLandCover_CanadaLCCclassCodes_S_", year, "_v1_1.tif"))
 }
 
 #' Obtain an LCC layer for a given year from SCANFI, with forest matching the FAO definition
@@ -1465,59 +1464,31 @@ loadSCANFISpeciesLayers <- function(
     cachePath <- getOption("reproducible.cachePath")
   }
 
-  if (is.null(url)) {
-    if (dataVersion == "V1") {
-      if (!(year %in% .scanfi_v1_years)) {
-        stop("SCANFI V1 species do not exist for this year")
-      }
-
-      if (year == 2000) {
-        url <- "https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp"
-      } else if (year == 2010) {
-        url <- "https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE"
-      } else if (year == 2020) {
-        url <- "https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ"
-      }
-    } else if (dataVersion == "V2") {
-      if (!(year %in% .scanfi_v2_years)) {
-        stop("SCANFI V2 species does not exist for this year")
-      }
-
-      if (year == 1985) {
-        url <- paste0("https://drive.google.com/file/d/1zXkDkGIJaRB2Cwd7Ld2R7FFswRIDmAj4")
-      } else if (year == 1990) {
-        url <- paste0("https://drive.google.com/file/d/1GbKOGxxLG-pF-jjBjuJC6IuWIU3aVBo2")
-      } else if (year == 1995) {
-        url <- paste0("https://drive.google.com/file/d/1KfAxjccHE51pOmi0OMYqwyRkIhJH7knn")
-      } else if (year == 2000) {
-        url <- paste0("https://drive.google.com/file/d/19sddeWJCJq9uMkDjmtNtXKjOQEDeFKBl")
-      } else if (year == 2005) {
-        url <- paste0("https://drive.google.com/file/d/10Aw9PX_FEEhYHNTraKAb6l9DnaIom2qk")
-      } else if (year == 2010) {
-        url <- paste0("https://drive.google.com/file/d/1fjoiYf0lhkZF3SgDMGPuYB1J4sUmU_Vo")
-      } else if (year == 2015) {
-        url <- paste0("https://drive.google.com/file/d/1FcXFIfscxkO7o5WRTINDZfFnu102IMls")
-      } else if (year == 2020) {
-        url <- paste0("https://drive.google.com/file/d/15T4HIFeqzwp0TuOuxmYoexuXdLFnCZBi")
-      } else if (year == 2025) {
-        url <- paste0("https://drive.google.com/file/d/1jS2sscKe_tcw4qDC-9297_jrulFduyKg")
-      }
+  if (dataVersion == "V2" && is.null(url)) {
+    if (!(year %in% .scanfi_v2_years)) {
+      stop("SCANFI V2 species does not exist for this year")
     }
-  }
+    ## the mirror's own file list: no Google Drive folder to list
+    driveFiles <- .scanfiV2SpeciesFiles(year)
+  } else {
+    if (is.null(url) && dataVersion == "V1") {
+      url <- .scanfiV1SpeciesFolder(year)
+    }
 
-  ## List the folder via reproducible's remap-aware helper: when a directory
-  ## remap manifest is set (reproducible.urlRemap), the files are enumerated from
-  ## a public mirror with NO Google authentication; otherwise it falls back to
-  ## googledrive::drive_ls(). The returned `url` column is the mirror URL when
-  ## remapped, else the Drive file URL -- used directly below instead of building
-  ## one from the Drive id (the mirror listing carries no Drive id).
-  driveFiles <- .withSCANFIAccess(
-    reproducible::listGoogleDriveFolder(url),
-    what = "the SCANFI species layers",
-    dataYear = year,
-    dataVersion = dataVersion,
-    urlArg = "url"
-  )
+    ## List the folder via reproducible's remap-aware helper: when a directory
+    ## remap manifest is set (reproducible.urlRemap), the files are enumerated from
+    ## a public mirror with NO Google authentication; otherwise it falls back to
+    ## googledrive::drive_ls(). The returned `url` column is the mirror URL when
+    ## remapped, else the Drive file URL -- used directly below instead of building
+    ## one from the Drive id (the mirror listing carries no Drive id).
+    driveFiles <- .withSCANFIAccess(
+      reproducible::listGoogleDriveFolder(url),
+      what = "the SCANFI species layers",
+      dataYear = year,
+      dataVersion = dataVersion,
+      urlArg = "url"
+    )
+  }
   driveFiles <- driveFiles[grepl("SCANFI_sps", name)] ## selecting just species layers
   driveFiles <- driveFiles[grep("tif.", name, invert = TRUE)] ## removing .ovr and .aux files
   if (dataVersion == "V2") {
