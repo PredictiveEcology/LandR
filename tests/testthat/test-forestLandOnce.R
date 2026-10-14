@@ -97,11 +97,13 @@
 
 ## Hand-derived from the rule, identical to what the code produced before the reuse:
 ## forest land = FAO 1|2, or treed in a forestLandYear other than the dataYear itself.
+## Cell 3, the lake edge treed in 1985, is forest land but stays water (20): water is never
+## relabelled as disturbed forest.
 .flDataYears <- c(1990, 2015, 2020)
 .flExpected <- list(
-  "1990" = c(240,  NA, 240, 210, 33, 240, NA, 240),
-  "2015" = c(240, 240, 240, 210, 33, 220, NA, 210),
-  "2020" = c(240, 240, 240, 210, 33, 240, NA, 240)
+  "1990" = c(240,  NA, 20, 210, 33, 240, NA, 240),
+  "2015" = c(240, 240, 20, 210, 33, 220, NA, 210),
+  "2020" = c(240, 240, 20, 210, 33, 240, NA, 240)
 )
 
 test_that("forestLandUseCache 'always': inputs are prepared once, whatever the Cache setting", {

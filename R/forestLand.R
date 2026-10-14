@@ -5,6 +5,12 @@
 ## product, which has no wetland classes at all, so the same vector serves both sources.
 .treedLCCClasses <- c(81L, 210L, 220L, 230L)
 
+## Land-cover classes that are never relabelled as disturbed forest, even on forest land: water (20),
+## snow/ice (31), and 0 (no data; in SCANFI v3 also cropland, urban and road, see scanfiV3ToCanadaLCC).
+## A treed year in the record does not make a lake, a glacier, a town or a road into forest without
+## trees. Rock and barren land (30, 32, 33) stay eligible: a severe fire can expose them.
+.neverForestLandClasses <- c(0L, 20L, 31L)
+
 #' Is a pixel forest land?
 #'
 #' Forest land is a land *use*: ground that grows trees, including ground that has none
@@ -53,16 +59,19 @@ forestLandMask <- function(lccList = list(), faoRas = NULL,
 #' Every non-treed class is eligible by default, exposed barren land and rock included: a
 #' pixel is only relabelled where the evidence says it is forest land, and a rock or barren
 #' pixel that the record shows as treed in other years is exposed by something temporary,
-#' such as a severe fire. Water and snow/ice are in that set too, so a pixel that was treed
-#' in an early year and is a reservoir later will be called forest land; pass
-#' `convertibleClasses` to narrow the set if that matters for a given study area.
+#' such as a severe fire. Water, snow/ice and code 0 (no data; in SCANFI v3 also cropland,
+#' urban and road) are never relabelled (`keepClasses`): a treed year elsewhere in the record,
+#' or an FAO forest code, does not make a lake, a glacier, a town or a road into forest
+#' without trees. Pass `convertibleClasses` to narrow the set further for a given study area.
 #'
 #' @param lcc A land-cover `SpatRaster` for the year being prepared.
 #' @param forestLand A mask from [forestLandMask()], aligned with `lcc`.
 #' @param treedClasses The classes that are already treed, and so never relabelled.
 #' @param convertibleClasses The classes that may become `disturbedCode`, or `NULL`
-#'   (default) for every class that is not in `treedClasses`. `NA` pixels are never
-#'   relabelled.
+#'   (default) for every class that is not in `treedClasses` or `keepClasses`. `NA` pixels
+#'   are never relabelled.
+#' @param keepClasses Classes never relabelled when `convertibleClasses` is `NULL`: water,
+#'   snow/ice and 0 (no data; SCANFI v3 cropland, urban, road).
 #' @param disturbedCode The class given to forest land that is not treed in this year.
 #' @param filename Optional file to write to.
 #'
@@ -71,9 +80,9 @@ forestLandMask <- function(lccList = list(), faoRas = NULL,
 #' @keywords internal
 .applyForestLand <- function(lcc, forestLand, treedClasses = .treedLCCClasses,
                              convertibleClasses = NULL, disturbedCode = 240L,
-                             filename = NULL) {
+                             filename = NULL, keepClasses = .neverForestLandClasses) {
   isConvertible <- if (is.null(convertibleClasses)) {
-    (!.naTo0(terra::`%in%`(lcc, treedClasses))) & !is.na(lcc)
+    (!.naTo0(terra::`%in%`(lcc, c(treedClasses, keepClasses)))) & !is.na(lcc)
   } else {
     .naTo0(terra::`%in%`(lcc, convertibleClasses))
   }

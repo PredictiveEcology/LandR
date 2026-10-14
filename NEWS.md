@@ -75,6 +75,21 @@
 
 * `prepInputs_NTEMS_LCC_FAO()`'s error for a missing crop target no longer suggests `terraOptions(memfrac = 0)`, which makes terra much slower; it suggests `todisk = TRUE` only.
 
+* `prepInputs_SCANFI_LCC_FAO()` gains `dataVersion = "V3"`, SCANFI v3's annual (1985-2025) land
+  cover, read with `prepInputs()` from NRCan's Cloud-Optimized GeoTIFFs on ftp.maps.canada.ca, the
+  same way as V1/V2. The new exported table `scanfiV3ToCanadaLCC` recodes v3's 20 land-cover codes
+  to the Canada LCC codes used elsewhere; burn scars (v3 code 4) have no Canada LCC equivalent and
+  keep a new code, 60, which the existing forest-land rule still relabels to `disturbedCode` on
+  forest land. V3 covers non-forest land cover only -- species, biomass and age layers are
+  unaffected and still come from V2.
+
+* `prepInputs_SCANFI_LCC_FAO()` and `prepInputs_NTEMS_LCC_FAO()` no longer relabel water (20),
+  snow/ice (31) or 0 (no data; SCANFI v3 cropland, urban and road) as disturbed forest (240) where
+  the record says forest land. A treed year elsewhere in the record, or an FAO forest code, does
+  not make a lake, a glacier, a town or a road into forest without trees; such pixels had become
+  flammable forest in fire models. Rock and barren land are still relabelled, since a severe fire
+  can expose them.
+
 * `makeAndCleanInitialCohortData()` now reads the age model's variables from its formula
   (`all.vars()`) and, before fitting, drops rows with a zero in any of them, response included;
   it reports them with a message instead of a warning. It used `pemisc::termsInData()`, which
