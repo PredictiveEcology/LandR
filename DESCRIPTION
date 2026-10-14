@@ -108,7 +108,7 @@ License: GPL-3
 BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
-Collate: 
+Collate:
     'assertions.R'
     'biomodWrappers.R'
     'biosim.R'
@@ -147,6 +147,7 @@ Collate:
     'prepSpeciesLayers.R'
     'RcppExports.R'
     'scanfi-access.R'
+    'scanfi-v3.R'
     'scanfiMirror.R'
     'seedDispersalLANDIS.R'
     'serotiny-resprouting.R'

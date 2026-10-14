@@ -106,3 +106,60 @@
     stop(.scanfiAccessMessage(e, what, dataYear, dataVersion, urlArg, alternatives), call. = FALSE)
   })
 }
+
+## ---------------------------------------------------------------------------
+## Messaging for SCANFI v3 access failures
+##
+## V3 is served directly by NRCan (no Google Drive layer), so a failure here is
+## usually a network hiccup or an outage, not a permissions problem, and the
+## guidance differs from .withSCANFIAccess() above.
+## ---------------------------------------------------------------------------
+
+## Where else to get v3 if the https server is unreachable.
+.scanfiV3FTPURL <- "ftp://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/SCANFI/v3/"
+
+## Does this error look like the v3 https server refusing or dropping us? A bare status
+## code is enough here because this is only ever applied to a known SCANFI v3 fetch.
+.isSCANFIv3AccessError <- function(e) {
+  msg <- paste(conditionMessage(e), collapse = "\n")
+
+  grepl("(^|[^0-9])(403|404)([^0-9]|$)", msg) ||
+    grepl(
+      "forbidden|could not open|cannot open|curl error|timed? ?out|connection",
+      msg,
+      ignore.case = TRUE
+    )
+}
+
+.scanfiV3AccessMessage <- function(e, what, dataYear = NULL) {
+  qualifier <- paste(c("V3", dataYear), collapse = " ")
+
+  paste0(
+    "Could not download ",
+    what,
+    if (nzchar(qualifier)) paste0(" (", qualifier, ")") else "",
+    ".\n\n",
+    "SCANFI v3 is read from NRCan's server (ftp.maps.canada.ca) as one large\n",
+    "Cloud-Optimized GeoTIFF per year; the server can be slow or unreachable under load.\n\n",
+    "To resolve it:\n",
+    "  * retry later\n",
+    "  * or fetch the year's file from the FTP mirror instead: ", .scanfiV3FTPURL, "\n\n",
+    "Original error:\n",
+    paste0("  ", strsplit(paste(conditionMessage(e), collapse = "\n"), "\n")[[1]], collapse = "\n")
+  )
+}
+
+## Wrap a SCANFI v3 read so an access failure explains itself. Anything else is
+## re-thrown untouched.
+.withSCANFIv3Access <- function(expr, what, dataYear = NULL, enabled = TRUE) {
+  if (!isTRUE(enabled)) {
+    return(expr)
+  }
+
+  tryCatch(expr, error = function(e) {
+    if (!.isSCANFIv3AccessError(e)) {
+      stop(e)
+    }
+    stop(.scanfiV3AccessMessage(e, what, dataYear), call. = FALSE)
+  })
+}

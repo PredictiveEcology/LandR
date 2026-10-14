@@ -18,10 +18,14 @@ prepInputs_SCANFI_LCC_FAO(
 }
 \arguments{
 \item{year}{data year for SCANFI landcover data. 2000, 2010, 2020 possible for V1.
-1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025 possible for V2.}
+1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025 possible for V2. 1985-2025
+(every year) possible for V3.}
 
 \item{dataVersion}{Character. SCANFI product version for data. Default is currently "V2".
-"V1" also available.}
+"V1" also available. "V3" reads land cover directly from NRCan's https COG server and
+applies \link{scanfiV3ToCanadaLCC}; use it for non-forest land cover only -- species,
+biomass and age layers are still V2 (\code{loadSCANFISpeciesLayers()},
+\code{prepInputs_SCANFI_structure()}).}
 
 \item{disturbedCode}{value assigned to pixels that are forest land but not treed in \code{year}}
 
