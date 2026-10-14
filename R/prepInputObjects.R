@@ -499,7 +499,9 @@ prepInputsStandAgeMap <- function(
   if (dataSource == "SCANFI") {
     if (dataVersion == "V1") {
       #SCANFI V1 has only one dataYear so age is adjusted using NTEMS disturbance layers
-      ageURL <- paste0("https://drive.google.com/file/d/1OdZ7Tznk53KceEyt9dFOBOkxDHEX5X0U")
+      if (is.null(ageURL)) {
+        ageURL <- paste0("https://drive.google.com/file/d/1OdZ7Tznk53KceEyt9dFOBOkxDHEX5X0U")
+      }
 
       standAgeMap <- .withSCANFIAccess(
         prepInputs(
@@ -515,6 +517,7 @@ prepInputsStandAgeMap <- function(
         dataYear = dataYear,
         dataVersion = dataVersion,
         urlArg = "ageURL",
+        url = ageURL,
         alternatives = c("KNN", "NTEMS")
       )
 
@@ -589,7 +592,9 @@ prepInputsStandAgeMap <- function(
       #if baseYear is 2020, proceed with 2020 standAgeMap
     }
     if (dataVersion == "V2") {
-      ageURL <- .scanfiV2Source("age", dataYear)$url
+      if (is.null(ageURL)) {
+        ageURL <- .scanfiV2Source("age", dataYear)$url
+      }
 
       standAgeMap <- .withSCANFIAccess(
         prepInputs(
@@ -605,6 +610,7 @@ prepInputsStandAgeMap <- function(
         dataYear = dataYear,
         dataVersion = dataVersion,
         urlArg = "ageURL",
+        url = ageURL,
         alternatives = c("KNN", "NTEMS")
       )
 
@@ -814,6 +820,7 @@ prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", dataVers
     dataYear = dataYear,
     dataVersion = dataVersion,
     urlArg = "url",
+    url = Args$url,
     alternatives = c("KNN", "NTEMS"),
     enabled = identical(dataSource, "SCANFI")
   )

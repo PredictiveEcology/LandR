@@ -28,6 +28,12 @@ scanfiUrlRemap <- function() {
   reproducible::makeUrlRemap(manifest)
 }
 
+## Every url of the manifest starts with this.
+.arbutusPrefix <- "https://object-arbutus.alliancecan.ca/"
+.isArbutusUrl <- function(url) {
+  length(url) > 0 && all(startsWith(as.character(url), .arbutusPrefix))
+}
+
 ## The one table of SCANFI v2 files on the arbutus mirror: filename, key, url, Drive id, type.
 .scanfiManifest <- function() {
   f <- system.file("extdata", "arbutus_manifest_SCANFI_v2.csv", package = "LandR")
@@ -43,6 +49,7 @@ scanfiUrlRemap <- function() {
   biomass = "att_biomass",
   height = "att_height",
   closure = "att_closure",
+  lccRaw = "att_nfiLandcover", ## the 1-8 codes that convert_SCANFI_LCC_codes() recodes
   lcc = "att_nfiLandcover_CanadaLCCclassCodes"
 )
 

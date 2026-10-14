@@ -269,38 +269,9 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", writeTo = 
       lccTF <- paste0("SCANFI_att_nfiLandCover_S_", year, "_v1_1.tif")
     }
   } else if (dataVersion == "V2") {
-    if (!(year %in% .scanfi_v2_years)) {
-      stop("SCANFI V2 Landcover does not exist for this year")
-    }
-
-    if (year == 1985) {
-      lccURL <- paste0("https://drive.google.com/file/d/18HtwafwJN3_SyH2Kbq7dNL_vBmfCgMOv")
-      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
-    } else if (year == 1990) {
-      lccURL <- paste0("https://drive.google.com/file/d/11QpGMnH1Wxcy34jqiiriQgGDEgGicdkd")
-      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
-    } else if (year == 1995) {
-      lccURL <- paste0("https://drive.google.com/file/d/1GijrLGkMwnbBA5Y6gfto5CxgeNOrBbjU")
-      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
-    } else if (year == 2000) {
-      lccURL <- paste0("https://drive.google.com/file/d/142PscihDjTAoRIgSVG3n70CzLI3KC1KS")
-      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
-    } else if (year == 2005) {
-      lccURL <- paste0("https://drive.google.com/file/d/1i1353LETOoRLjOo4d875U-AquLe7MVFn")
-      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
-    } else if (year == 2010) {
-      lccURL <- paste0("https://drive.google.com/file/d/1ssvHvgPWd8hEBZz2ZPh0F67asz2VopVC")
-      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
-    } else if (year == 2015) {
-      lccURL <- paste0("https://drive.google.com/file/d/1Fn7NjV51Dlm9btZRtnhMZ7u4eC9weQLa")
-      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
-    } else if (year == 2020) {
-      lccURL <- paste0("https://drive.google.com/file/d/1LVQEXGZvQD0Z62CZdJ7FrA1RJw6e4VIX")
-      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
-    } else if (year == 2025) {
-      lccURL <- paste0("https://drive.google.com/file/d/1cw7yMTGX-t4B4OMhKpdHbYnj2Vjvnvpz")
-      lccTF <- paste0("SCANFI_att_nfiLandcover_", year, "_v2_20260119.tif")
-    }
+    lccSrc <- .scanfiV2Source("lccRaw", year)
+    lccURL <- lccSrc$url
+    lccTF <- lccSrc$targetFile
   }
 
   dots <- list(...)
@@ -312,7 +283,8 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", writeTo = 
     what = "the SCANFI land cover map",
     dataYear = year,
     dataVersion = dataVersion,
-    urlArg = "url"
+    urlArg = "url",
+    url = lccURL
   )
 
   ## Bryoids, herbs, rock/exposed, shrubs, broadleaf, conifer, mixedwood, water
@@ -488,7 +460,8 @@ prepInputs_SCANFI_LCC_FAO <- function(
       what = "the SCANFI land cover map",
       dataYear = year,
       dataVersion = dataVersion,
-      urlArg = "url"
+      urlArg = "url",
+      url = dots$url
     ) # |>
     #  Cache(.functionName = paste0("prepInputs_NTEMS_LCC_FAO_", year),
     #        omitArgs = c("targetFile", "writeTo"),
@@ -1656,7 +1629,8 @@ loadSCANFISpeciesLayers <- function(
     what = "the SCANFI species layers",
     dataYear = year,
     dataVersion = dataVersion,
-    urlArg = "url"
+    urlArg = "url",
+    url = URLs
   )
 
   # if (is.null(studyArea) && is.null(rasterToMatch)) {

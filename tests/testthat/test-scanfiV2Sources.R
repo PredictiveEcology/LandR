@@ -67,3 +67,44 @@ test_that("an arbutus url answers a HEAD request", {
   resp <- httr2::req_perform(httr2::req_method(httr2::request(url), "HEAD"))
   expect_equal(httr2::resp_status(resp), 200L)
 })
+
+test_that("a supplied ageURL reaches prepInputs for SCANFI V1 and V2", {
+  cacheDir <- withr::local_tempdir()
+  withr::local_options(reproducible.cachePath = cacheDir, reproducible.useMemoise = FALSE)
+  seen <- character()
+  testthat::local_mocked_bindings(
+    prepInputs = function(..., url = NULL) {
+      seen <<- c(seen, url)
+      terra::rast(nrows = 2, ncols = 2, vals = 50)
+    }
+  )
+  dPath <- withr::local_tempdir()
+  mine <- c(V1 = "https://example.invalid/my_age_v1.tif", V2 = "https://example.invalid/my_age_v2.tif")
+  for (v in c("V1", "V2")) {
+    suppressMessages(prepInputsStandAgeMap(dataSource = "SCANFI", dataYear = 2020, dataVersion = v,
+                                           ageURL = mine[[v]], destinationPath = dPath, fireURL = NA))
+  }
+  expect_equal(seen, unname(mine))
+})
+
+test_that("access errors name the Arbutus mirror for V2 defaults and Google Drive otherwise", {
+  drive <- simpleError("Client error: (404) Not Found")
+  msg <- function(url) {
+    err <- tryCatch(
+      LandR:::.withSCANFIAccess(stop(drive), what = "the SCANFI stand age map", dataYear = 2020,
+                                dataVersion = "V2", urlArg = "ageURL", url = url),
+      error = function(e) conditionMessage(e)
+    )
+    gsub("[[:space:]]+", " ", err)
+  }
+  mirror <- msg(LandR:::.scanfiV2Source("age", 2020)$url)
+  expect_match(mirror, "Arbutus mirror", fixed = TRUE)
+  expect_false(grepl("restricted Google Drive folder", mirror, fixed = TRUE))
+  expect_false(grepl("drive_auth", mirror, fixed = TRUE))
+
+  for (u in list("https://drive.google.com/file/d/abc", NULL)) {
+    other <- msg(u)
+    expect_match(other, "restricted Google Drive folder", fixed = TRUE)
+    expect_false(grepl("Arbutus mirror", other, fixed = TRUE))
+  }
+})
