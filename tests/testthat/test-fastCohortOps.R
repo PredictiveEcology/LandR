@@ -92,7 +92,7 @@ test_that("the speed-ups leave the RNG state alone", {
   burned <- data.table(pixelIndex = 5L, pixelGroup = 2L)
   post <- i$cohortData[burned, on = "pixelGroup", allow.cartesian = TRUE][, B := 0L]
   set.seed(123)
-  seed <- .Random.seed
+  seed <- get(".Random.seed", envir = globalenv())
   suppressMessages({
     leadingByPixelGroup(fastOpsCohorts(), 0.75, 2, fastOpsSppEquiv(), "LandR")
     vegTypeGenerator(fastOpsCohorts(), 0.75, sppEquiv = fastOpsSppEquiv(), sppEquivCol = "LandR",
@@ -102,7 +102,7 @@ test_that("the speed-ups leave the RNG state alone", {
     calcSeverityB(i$cohortData, post)
     rmMissingCohorts(i$cohortData, i$pixelGroupMap, doAssertion = FALSE)
   })
-  expect_identical(.Random.seed, seed)
+  expect_identical(get(".Random.seed", envir = globalenv()), seed)
 })
 
 test_that(".initiateNewCohorts() computes the B of the older cohorts only when initialB is NA or NULL", {
