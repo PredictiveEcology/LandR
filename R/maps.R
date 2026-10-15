@@ -312,7 +312,8 @@ convert_SCANFI_LCC_codes <- function(year = 2000, dataVersion = "V2", writeTo = 
     what = "the SCANFI land cover map",
     dataYear = year,
     dataVersion = dataVersion,
-    urlArg = "url"
+    urlArg = "url",
+    url = lccURL
   )
 
   ## Bryoids, herbs, rock/exposed, shrubs, broadleaf, conifer, mixedwood, water
@@ -489,7 +490,8 @@ prepInputs_SCANFI_LCC_FAO <- function(
       what = "the SCANFI land cover map",
       dataYear = year,
       dataVersion = dataVersion,
-      urlArg = "url"
+      urlArg = "url",
+      url = dots$url
     ) # |>
     #  Cache(.functionName = paste0("prepInputs_NTEMS_LCC_FAO_", year),
     #        omitArgs = c("targetFile", "writeTo"),
@@ -1516,7 +1518,8 @@ loadSCANFISpeciesLayers <- function(
     what = "the SCANFI species layers",
     dataYear = year,
     dataVersion = dataVersion,
-    urlArg = "url"
+    urlArg = "url",
+    url = url
   )
   driveFiles <- driveFiles[grepl("SCANFI_sps", name)] ## selecting just species layers
   driveFiles <- driveFiles[grep("tif.", name, invert = TRUE)] ## removing .ovr and .aux files
@@ -1685,7 +1688,8 @@ loadSCANFISpeciesLayers <- function(
     what = "the SCANFI species layers",
     dataYear = year,
     dataVersion = dataVersion,
-    urlArg = "url"
+    urlArg = "url",
+    url = URLs
   )
 
   # if (is.null(studyArea) && is.null(rasterToMatch)) {

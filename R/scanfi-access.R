@@ -30,18 +30,22 @@
   dataYear = NULL,
   dataVersion = NULL,
   urlArg = NULL,
-  alternatives = NULL
+  alternatives = NULL,
+  url = NULL
 ) {
   qualifier <- paste(c(dataVersion, dataYear), collapse = " ")
 
+  fromMirror <- .remapsToMirror(url, dataVersion)
+
   ways <- c(
-    paste0(
+    if (fromMirror) "retry later; the mirror can be slow or briefly unreachable",
+    if (!fromMirror) paste0(
       "check that the SCANFI mirror is enabled -- getOption(\"LandR.scanfiMirror\") ",
       "should be TRUE and getOption(\"reproducible.urlRemap\") non-NULL. It serves ",
       "SCANFI v2 from the PredictiveEcology object store with no Google login, and ",
-      "is set by LandR on load unless you opted out or already had a remap of your own"
+      "is used by LandR unless you opted out or have a remap of your own"
     ),
-    paste0(
+    if (!fromMirror) paste0(
       "or request access to the SCANFI data from the SCANFI team (see ",
       .scanfiAccessURL,
       "), then re-authenticate with googledrive::drive_auth()"
@@ -62,9 +66,19 @@
     what,
     if (nzchar(qualifier)) paste0(" (", qualifier, ")") else "",
     ".\n\n",
-    "SCANFI is distributed through a restricted Google Drive folder, so this is\n",
-    "usually a permissions problem rather than a broken link: the Google account\n",
-    "you are authenticated as may not have been granted access.\n\n",
+    if (fromMirror) {
+      paste0(
+        "SCANFI V2 is downloaded from the PredictiveEcology Arbutus mirror (LandR\n",
+        "remaps its Google Drive ids to it), so this is usually a network problem or\n",
+        "the mirror being unreachable, not a permissions problem.\n\n"
+      )
+    } else {
+      paste0(
+        "SCANFI is distributed through a restricted Google Drive folder, so this is\n",
+        "usually a permissions problem rather than a broken link: the Google account\n",
+        "you are authenticated as may not have been granted access.\n\n"
+      )
+    },
     "To resolve it:\n",
     paste(
       vapply(
@@ -93,17 +107,17 @@
   dataVersion = NULL,
   urlArg = NULL,
   alternatives = NULL,
+  url = NULL,
   enabled = TRUE
 ) {
   if (!isTRUE(enabled)) {
     return(expr)
   }
-
-  tryCatch(expr, error = function(e) {
+  tryCatch(.withScanfiRemap(expr), error = function(e) {
     if (!.isGoogleDriveAccessError(e)) {
       stop(e)
     }
-    stop(.scanfiAccessMessage(e, what, dataYear, dataVersion, urlArg, alternatives), call. = FALSE)
+    stop(.scanfiAccessMessage(e, what, dataYear, dataVersion, urlArg, alternatives, url), call. = FALSE)
   })
 }
 
