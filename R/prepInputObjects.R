@@ -413,7 +413,7 @@ makePixelGroupMap <- function(pixelCohortData, rasterToMatch) {
 #' @param firePerimeters fire raster layer fire year values.
 #' @param fireURL url to download fire polygons used to update age map. If NULL or NA age
 #'   imputation is bypassed. Requires passing `rasterToMatch`. Only used if `firePerimeters`
-#'   is missing.
+#'   is missing. Fires after `dataYear` are ignored (see `latestYear` in [prepInputsFireYear()]).
 #' @param fireFun passed to [reproducible::prepInputs()] of fire data. Only used if `firePerimeters`
 #'   is missing.
 #' @param fireField field used to rasterize fire polys. Only used if `firePerimeters`
@@ -696,7 +696,8 @@ prepInputsStandAgeMap <- function(
         fun = fireFun,
         fireField = fireField,
         destinationPath = destinationPath,
-        rasterToMatch = rasterToMatch
+        rasterToMatch = rasterToMatch,
+        latestYear = as.numeric(dataYear)
       )
     } else {
       message(
@@ -867,6 +868,10 @@ prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", dataVers
 #' @template rasterToMatch
 #' @param fireField field used to rasterize fire polys
 #' @param earliestYear the earliest fire date to allow
+#' @param latestYear the latest fire date to allow. Fires after this year are dropped before
+#'   rasterizing, so each pixel holds its latest fire year at or before `latestYear` (a pixel
+#'   burned in 1980 and 2015 holds 1980 for `latestYear = 1990`). Default `Inf`: no limit, each
+#'   pixel holds its most recent fire.
 #'
 #' @return a `SpatRaster` layer of fire perimeters with fire year values.
 #'
@@ -908,7 +913,8 @@ prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", dataVers
 #'
 #' withr::deferred_run()
 #'
-prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950) {
+prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950,
+                              latestYear = Inf) {
   dots <- list(...)
   fun <- if (is.null(dots$fun)) "terra::vect" else dots$fun
   dots$fun <- NULL # need to do this or else it will pass double to the prepInputs
@@ -964,6 +970,12 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
 
   ## the reason this isn't combined into one function is due to geometry issues in NFDB
   allFires <- allFires[terra::is.valid(allFires), ] ## drop invalid geometries
+
+  ## rasterize(fun = max) keeps only the latest fire per pixel, which would hide an earlier fire
+  ## from a caller whose data year is before it: drop the later fires first.
+  if (is.finite(latestYear)) {
+    allFires <- allFires[as.data.frame(allFires)[[fireField]] <= latestYear, ]
+  }
 
   ## If no valid polygons, return empty raster
   if (nrow(allFires) == 0) {
