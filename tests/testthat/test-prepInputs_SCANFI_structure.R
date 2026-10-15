@@ -9,12 +9,15 @@ test_that("prepInputs_SCANFI_structure rejects years and versions it cannot serv
   expect_error(prepInputs_SCANFI_structure("biomass", year = 2020), "'arg' should be one of")
 })
 
-test_that("prepInputs_SCANFI_structure has an arbutus url for every V2 year of both attributes", {
-  for (att in c("height", "closure")) {
-    urls <- vapply(LandR:::.scanfi_v2_years, function(y) LandR:::.scanfiV2Source(att, y)$url, character(1))
-    expect_match(urls, "^https://object-arbutus[.]alliancecan[.]ca/")
-    expect_equal(anyDuplicated(urls), 0L) ## a copy-paste between years would serve the wrong layer
+test_that("prepInputs_SCANFI_structure has an id for every V2 year of both attributes", {
+  ids <- LandR:::.scanfiStructureIds
+  expect_setequal(names(ids), c("height", "closure"))
+  for (att in names(ids)) {
+    expect_setequal(names(ids[[att]]), as.character(LandR:::.scanfi_v2_years))
+    expect_true(all(nzchar(ids[[att]])))
   }
+  ## ids must be distinct: a copy-paste between years would silently serve the wrong layer
+  expect_equal(anyDuplicated(unlist(ids, use.names = FALSE)), 0L)
 })
 
 test_that("prepInputs_SCANFI_structure downloads height and closure", {

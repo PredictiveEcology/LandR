@@ -8,9 +8,10 @@
 #' Drive id -- or a SCANFI species *folder* -- is fetched from the mirror instead, with no
 #' Google login and no change at any call site.
 #'
-#' LandR sets `options(reproducible.urlRemap = scanfiUrlRemap())` when it is loaded, but only
-#' if no remap is set already and `getOption("LandR.scanfiMirror", TRUE)` is `TRUE`. A remap
-#' of your own is never replaced; if you use one, include these rows in it (the manifest is
+#' LandR applies this remap itself, only for the duration of each SCANFI download and only if
+#' `getOption("reproducible.urlRemap")` is `NULL` and `getOption("LandR.scanfiMirror", TRUE)` is
+#' `TRUE`. The global option is never changed. A remap of your own always wins; if you use one,
+#' include these rows in it (the manifest is
 #' `system.file("extdata", "arbutus_manifest_SCANFI_v2.csv", package = "LandR")`).
 #'
 #' @return A remap function for `reproducible.urlRemap`, or `NULL` if this `reproducible` has
@@ -21,86 +22,42 @@ scanfiUrlRemap <- function() {
   if (!"makeUrlRemap" %in% getNamespaceExports("reproducible")) {
     return(NULL)
   }
-  manifest <- tryCatch(.scanfiManifest(), error = function(e) NULL)
+  manifest <- .scanfiManifest()
   if (is.null(manifest)) {
     return(NULL)
   }
   reproducible::makeUrlRemap(manifest)
 }
 
-## Every url of the manifest starts with this.
-.arbutusPrefix <- "https://object-arbutus.alliancecan.ca/"
-.isArbutusUrl <- function(url) {
-  length(url) > 0 && all(startsWith(as.character(url), .arbutusPrefix))
-}
-
-## The one table of SCANFI v2 files on the arbutus mirror: filename, key, url, Drive id, type.
+## The manifest of SCANFI v2 files on the mirror (NULL if it is not installed).
 .scanfiManifest <- function() {
   f <- system.file("extdata", "arbutus_manifest_SCANFI_v2.csv", package = "LandR")
   if (!nzchar(f)) {
-    stop("the SCANFI v2 manifest is not installed with LandR")
+    return(NULL)
   }
   utils::read.csv(f, stringsAsFactors = FALSE)
 }
 
-## File-name stem of each national SCANFI v2 layer: SCANFI_<stem>_<year>_v2_<date>.tif
-.scanfiV2Layers <- c(
-  age = "age_median",
-  biomass = "att_biomass",
-  height = "att_height",
-  closure = "att_closure",
-  lccRaw = "att_nfiLandcover", ## the 1-8 codes that convert_SCANFI_LCC_codes() recodes
-  lcc = "att_nfiLandcover_CanadaLCCclassCodes"
-)
-
-## Rows of the manifest that are files of one SCANFI v2 `year`, with names matching `pattern`.
-.scanfiV2Rows <- function(year, pattern) {
-  year <- as.character(as.integer(year))
-  if (!(year %in% .scanfi_v2_years)) {
-    stop("SCANFI V2 data is currently available for ",
-         paste(.scanfi_v2_years, collapse = ", "), " only")
+## Evaluate `expr` with the effective SCANFI remap as `reproducible.urlRemap`, for the duration of
+## the call only: LandR never sets the option globally, and a remap of the user's always wins.
+.withScanfiRemap <- function(expr) {
+  if (is.null(getOption("reproducible.urlRemap")) && isTRUE(getOption("LandR.scanfiMirror", TRUE))) {
+    remap <- scanfiUrlRemap()
+    if (!is.null(remap)) {
+      old <- options(reproducible.urlRemap = remap)
+      on.exit(options(old), add = TRUE)
+    }
   }
-  m <- .scanfiManifest()
-  m <- m[m$type == "file" & startsWith(m$key, paste0("SCANFI_v2/", year, "/")) &
-           grepl(pattern, m$filename), , drop = FALSE]
-  if (!nrow(m)) {
-    stop("no SCANFI V2 file matching '", pattern, "' for ", year, " in the arbutus manifest")
-  }
-  m
+  expr
 }
 
-#' Where one national SCANFI v2 layer of one year comes from
-#'
-#' @param layer one of `names(.scanfiV2Layers)`.
-#' @param year a year in `.scanfi_v2_years`.
-#'
-#' @return A list with the arbutus `url` and the `targetFile` name.
-#'
-#' @keywords internal
-.scanfiV2Source <- function(layer, year) {
-  layer <- match.arg(layer, names(.scanfiV2Layers))
-  m <- .scanfiV2Rows(year, paste0("^SCANFI_", .scanfiV2Layers[[layer]], "_[0-9]{4}_v2_[0-9]+[.]tif$"))
-  list(url = m$url, targetFile = m$filename)
-}
-
-## The species-layer files (name, url) of one SCANFI v2 year on the mirror.
-.scanfiV2SpeciesFiles <- function(year) {
-  m <- .scanfiV2Rows(year, "^SCANFI_sps")
-  data.table::data.table(name = m$filename, url = m$url)
-}
-
-## Called from .onLoad(): install the SCANFI mirror unless the user opted out or has a remap.
-.setScanfiMirror <- function() {
-  if (!isTRUE(getOption("LandR.scanfiMirror", TRUE))) {
-    return(invisible(FALSE))
+## Will LandR's own remap send these SCANFI V2 `url`s (Drive ids or folders) to the mirror?
+.remapsToMirror <- function(url, dataVersion) {
+  if (!identical(dataVersion, "V2") || !is.null(getOption("reproducible.urlRemap")) ||
+      !isTRUE(getOption("LandR.scanfiMirror", TRUE)) || !length(url)) {
+    return(FALSE)
   }
-  if (!is.null(getOption("reproducible.urlRemap"))) {
-    return(invisible(FALSE))
-  }
-  remap <- tryCatch(scanfiUrlRemap(), error = function(e) NULL)
-  if (is.null(remap)) {
-    return(invisible(FALSE))
-  }
-  options(reproducible.urlRemap = remap)
-  invisible(TRUE)
+  known <- c(.scanfiManifest()$id, names(attr(scanfiUrlRemap(), "byDir")))
+  all(sub(".*/", "", as.character(url)) %in% known |
+        startsWith(as.character(url), "https://object-arbutus."))
 }

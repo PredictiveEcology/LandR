@@ -64,9 +64,10 @@ Deciduous conifers count as conifers (\code{Larix} is \code{Type == "Conifer"} i
 and \code{\link[=vegTypeGenerator]{vegTypeGenerator()}} with \code{mixedType = 2}, \code{\link[=lccMapGenerator]{lccMapGenerator()}} and \code{\link[=plotVTM]{plotVTM()}}.
 }
 \item{\code{scanfiMirror}}{
-Default: \code{TRUE}. When \code{LandR} is loaded and no \code{reproducible.urlRemap} is set, fetch
-SCANFI from the PredictiveEcology arbutus mirror instead of Google Drive, so the ids
-that 404 for anonymous users resolve and no login is needed; see \code{\link[=scanfiUrlRemap]{scanfiUrlRemap()}}.
+Default: \code{TRUE}. When no \code{reproducible.urlRemap} is set, LandR fetches SCANFI from the
+PredictiveEcology arbutus mirror instead of Google Drive for the length of each SCANFI
+download, so the ids that 404 for anonymous users resolve and no login is needed; see
+\code{\link[=scanfiUrlRemap]{scanfiUrlRemap()}}.
 }
 \item{\code{verbose}}{
 Default: \code{1}. The default \code{verbose} argument of functions that report their progress,

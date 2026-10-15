@@ -30,7 +30,7 @@ Also available:
 If the following arguments are not provided, the following values will be used:
 \itemize{
 \item{\code{url}: by default, the 2020 SCANFI stand biomass map is downloaded from
-the PredictiveEcology arbutus mirror }
+a private google drive }
 \item{\code{useSAcrs} and \code{projectTo}: \code{FALSE} and \code{NA}}
 \item{\code{method}: \code{"bilinear"}}
 \item{\code{datatype}: \code{"INT2U"}}

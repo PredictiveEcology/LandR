@@ -1,9 +1,7 @@
 ## ---------------------------------------------------------------------------
 ## Messaging for users without SCANFI access
 ##
-## SCANFI V2 is fetched from the PredictiveEcology arbutus mirror by default; a failure there
-## is a network or mirror problem. The rest of this section is for the Google Drive copies
-## (V1, and a Drive url you supplied). SCANFI is distributed through a Google Drive folder shared with collaborators
+## SCANFI is distributed through a Google Drive folder shared with collaborators
 ## rather than published openly. A user who has not been granted access gets only
 ## reproducible's generic failure -- "Could not access the Google Drive resource
 ## ... Client error: (404) Not Found" -- which reads like a dead link and invites
@@ -36,16 +34,16 @@
   url = NULL
 ) {
   qualifier <- paste(c(dataVersion, dataYear), collapse = " ")
-  fromMirror <- .isArbutusUrl(url)
+
+  fromMirror <- .remapsToMirror(url, dataVersion)
 
   ways <- c(
     if (fromMirror) "retry later; the mirror can be slow or briefly unreachable",
-    if (fromMirror) paste0("or open ", url[[1]], " in a browser to check that it is reachable"),
     if (!fromMirror) paste0(
       "check that the SCANFI mirror is enabled -- getOption(\"LandR.scanfiMirror\") ",
       "should be TRUE and getOption(\"reproducible.urlRemap\") non-NULL. It serves ",
       "SCANFI v2 from the PredictiveEcology object store with no Google login, and ",
-      "is set by LandR on load unless you opted out or already had a remap of your own"
+      "is used by LandR unless you opted out or have a remap of your own"
     ),
     if (!fromMirror) paste0(
       "or request access to the SCANFI data from the SCANFI team (see ",
@@ -70,8 +68,9 @@
     ".\n\n",
     if (fromMirror) {
       paste0(
-        "SCANFI V2 is downloaded from the PredictiveEcology Arbutus mirror, so this is\n",
-        "usually a network problem or the mirror being unreachable, not a permissions problem.\n\n"
+        "SCANFI V2 is downloaded from the PredictiveEcology Arbutus mirror (LandR\n",
+        "remaps its Google Drive ids to it), so this is usually a network problem or\n",
+        "the mirror being unreachable, not a permissions problem.\n\n"
       )
     } else {
       paste0(
@@ -114,8 +113,7 @@
   if (!isTRUE(enabled)) {
     return(expr)
   }
-
-  tryCatch(expr, error = function(e) {
+  tryCatch(.withScanfiRemap(expr), error = function(e) {
     if (!.isGoogleDriveAccessError(e)) {
       stop(e)
     }

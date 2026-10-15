@@ -33,7 +33,7 @@ test_that("loadSCANFISpeciesLayers does not reuse a cache entry across different
   load <- function(cropTo) {
     LandR::loadSCANFISpeciesLayers(
       dPath = dPath, cropTo = cropTo, sppEquiv = sppEquiv, studyAreaName = "x",
-      cachePath = cacheDir, url = "https://drive.google.com/drive/folders/fake"
+      cachePath = cacheDir
     )
   }
 

@@ -320,7 +320,7 @@ prepSpeciesLayers_KNN <- function(
   shared_drive_url <- NULL
   ## A Drive source is used directly; see .isGoogleDriveUrl(). Anything else is
   ## pinged, and the Drive copy used if it cannot be reached.
-  if (!is.null(url) && !.isGoogleDriveUrl(url) && !RCurl::url.exists(url)) {
+  if (!.isGoogleDriveUrl(url) && !RCurl::url.exists(url)) {
     if (requireNamespace("googledrive", quietly = TRUE)) {
       driveFolder <- paste0("kNNForestAttributes_", year)
       shared_drive_url <- "https://drive.google.com/drive/folders/0AJE09VklbHOuUk9PVA"
@@ -589,14 +589,45 @@ prepSpeciesLayers_SCANFI <- function(
   #   year <- dataYear
   # }
 
-  ## V2 with no `url`: loadSCANFISpeciesLayers() takes the file list from the arbutus mirror
-  if (is.null(url) && dataVersion == "V1") {
-    url <- .scanfiV1SpeciesFolder(dataYear)
+  if (is.null(url)) {
+    if (dataVersion == "V1") {
+      if (dataYear == 2000) {
+        url <- paste0("https://drive.google.com/drive/folders/1DPaaZBm74tXJ8ojzkYbDBgMcnz-REpOp")
+      } else if (dataYear == 2010) {
+        url <- paste0("https://drive.google.com/drive/folders/1tRfHa99laVQ_3aoSrcCAgT5CojUVt2HE")
+      } else if (dataYear == 2020) {
+        url <- paste0("https://drive.google.com/drive/folders/1zuHRIDWIzKyWcvcgG-p3bXA0Rek3xmaQ")
+      } else {
+        stop("SCANFI V1 data is currently available for 2000, 2010, and 2020 only")
+      }
+    } else if (dataVersion == "V2") {
+      if (dataYear == "1985") {
+        url <- paste0("https://drive.google.com/file/d/1zXkDkGIJaRB2Cwd7Ld2R7FFswRIDmAj4")
+      } else if (dataYear == "1990") {
+        url <- paste0("https://drive.google.com/file/d/1GbKOGxxLG-pF-jjBjuJC6IuWIU3aVBo2")
+      } else if (dataYear == "1995") {
+        url <- paste0("https://drive.google.com/file/d/1KfAxjccHE51pOmi0OMYqwyRkIhJH7knn")
+      } else if (dataYear == "2000") {
+        url <- paste0("https://drive.google.com/file/d/19sddeWJCJq9uMkDjmtNtXKjOQEDeFKBl")
+      } else if (dataYear == "2005") {
+        url <- paste0("https://drive.google.com/file/d/10Aw9PX_FEEhYHNTraKAb6l9DnaIom2qk")
+      } else if (dataYear == "2010") {
+        url <- paste0("https://drive.google.com/file/d/1fjoiYf0lhkZF3SgDMGPuYB1J4sUmU_Vo")
+      } else if (dataYear == "2015") {
+        url <- paste0("https://drive.google.com/file/d/1FcXFIfscxkO7o5WRTINDZfFnu102IMls")
+      } else if (dataYear == "2020") {
+        url <- paste0("https://drive.google.com/file/d/15T4HIFeqzwp0TuOuxmYoexuXdLFnCZBi")
+      } else if (dataYear == "2025") {
+        url <- paste0("https://drive.google.com/file/d/1jS2sscKe_tcw4qDC-9297_jrulFduyKg")
+      } else {
+        stop("SCANFI V2 data is currently available for 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, and 2025 only")
+      }
+    }
   }
   shared_drive_url <- NULL
   ## A Drive source is used directly; see .isGoogleDriveUrl(). Anything else is
   ## pinged, and the Drive copy used if it cannot be reached.
-  if (!is.null(url) && !.isGoogleDriveUrl(url) && !RCurl::url.exists(url)) {
+  if (!.isGoogleDriveUrl(url) && !RCurl::url.exists(url)) {
     if (requireNamespace("googledrive", quietly = TRUE)) {
       driveFolder <- paste0("SCANFIForestAttributes_", dataYear)
       shared_drive_url <- "https://drive.google.com/drive/folders/1zLYV-wcDjJfSflH1VkXG6sosqZZF4SYc"

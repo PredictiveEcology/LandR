@@ -593,7 +593,27 @@ prepInputsStandAgeMap <- function(
     }
     if (dataVersion == "V2") {
       if (is.null(ageURL)) {
-        ageURL <- .scanfiV2Source("age", dataYear)$url
+        if (dataYear == "1985") {
+          ageURL <- paste0("https://drive.google.com/file/d/1KoGbzQZB-wR8LkngAKTZGShDR0ILBK5r")
+        } else if (dataYear == "1990") {
+          ageURL <- paste0("https://drive.google.com/file/d/1083izY1R-uBRdnnJL6KTYTPg3RFKCU6V")
+        } else if (dataYear == "1995") {
+          ageURL <- paste0("https://drive.google.com/file/d/12aqGD4YQKrZXUrzSPIOz2DcVY00mQZAT")
+        } else if (dataYear == "2000") {
+          ageURL <- paste0("https://drive.google.com/file/d/1v-9sx1a_-WqKfuULT80QZ1b0CAI8lLGV")
+        } else if (dataYear == "2005") {
+          ageURL <- paste0("https://drive.google.com/file/d/1HSWZ7aHW9GxfYTI3aAZRz5i2rD9-pymq")
+        } else if (dataYear == "2010") {
+          ageURL <- paste0("https://drive.google.com/file/d/1PIC0pvDUZFx7DfauJvB2WsJjgBgkCaXb")
+        } else if (dataYear == "2015") {
+          ageURL <- paste0("https://drive.google.com/file/d/1_ZGdjepqS3tGHKykAG5SCecic4Qn-Nx-")
+        } else if (dataYear == "2020") {
+          ageURL <- paste0("https://drive.google.com/file/d/1nXPS3bpFUESYieNfXO25OKlZJEgqtRnD")
+        } else if (dataYear == "2025") {
+          ageURL <- paste0("https://drive.google.com/file/d/1mM2z-_sjt9HGv1JQIt2VZkhW_HrldhgT")
+        } else {
+          stop("SCANFI V2 data is currently available for 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, and 2025 only")
+        }
       }
 
       standAgeMap <- .withSCANFIAccess(
@@ -727,7 +747,7 @@ prepInputsStandAgeMap <- function(
 #' If the following arguments are not provided, the following values will be used:
 #'   \itemize{
 #'     \item{`url`: by default, the 2020 SCANFI stand biomass map is downloaded from
-#'       the PredictiveEcology arbutus mirror }
+#'       a private google drive }
 #'     \item{`useSAcrs` and `projectTo`: `FALSE` and `NA`}
 #'     \item{`method`: `"bilinear"`}
 #'     \item{`datatype`: `"INT2U"`}
@@ -781,7 +801,27 @@ prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", dataVers
           stop("SCANFI V1 data is currently available for 2000, 2010, and 2020 only")
         }
       } else if (dataVersion == "V2") {
-        Args$url <- .scanfiV2Source("biomass", dataYear)$url
+        if (dataYear == "1985") {
+          Args$url <- paste0("https://drive.google.com/file/d/1rSbEs9PpjS5D5n4R2QL0UYVP1xGepRg5")
+        } else if (dataYear == "1990") {
+          Args$url <- paste0("https://drive.google.com/file/d/15psX9X_ElAxg3oZqfp9QOpy1b_i8OO-4")
+        } else if (dataYear == "1995") {
+          Args$url <- paste0("https://drive.google.com/file/d/1KdR4k9Bb95-Y2pFCTBCkuC9yIepE8bK6")
+        } else if (dataYear == "2000") {
+          Args$url <- paste0("https://drive.google.com/file/d/1GJMLSZweBW3dngDf3RRs4lTX-eMMr7_6")
+        } else if (dataYear == "2005") {
+          Args$url <- paste0("https://drive.google.com/file/d/1NxgZXKPiFTWRTHo7b40jCJqLvvvMp1tY")
+        } else if (dataYear == "2010") {
+          Args$url <- paste0("https://drive.google.com/file/d/1HFbXmH6o_2zXezEC6wQKRlPWcwjWl-VX")
+        } else if (dataYear == "2015") {
+          Args$url <- paste0("https://drive.google.com/file/d/1aYzXALVkOvW18CgRXBnmhqdvWtqOo-7Q")
+        } else if (dataYear == "2020") {
+          Args$url <- paste0("https://drive.google.com/file/d/13-atqi_7ogRPIFxOoJZoUDYdQCJ5-a_u")
+        } else if (dataYear == "2025") {
+          Args$url <- paste0("https://drive.google.com/file/d/12MFxY0F9go8zDXNpNsx8UvQUo4cnTdE0")
+        } else {
+          stop("SCANFI V2 data is currently available for 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, and 2025 only")
+        }
       }
     }
   }

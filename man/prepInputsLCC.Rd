@@ -33,8 +33,7 @@ and \link[reproducible:prepInputs]{reproducible::prepInputs}}
 \item{...}{Arguments passed to \code{terra::mask} (for \code{maskTo}), \code{terra::project} (for \code{projectTo})
 or \code{terra::writeRaster} (for \code{writeTo}) and not used for \code{cropTo}, as well \code{postProcess}'s
 \code{rasterToMatch} and \code{studyArea} arguments (see below). Commonly used arguments might be
-\code{method}, \code{touches}, \code{datatype}, and \code{gdal} (GDAL creation options for the written file,
-e.g. \code{c("INTERLEAVE=BAND", "TILED=YES")}; \code{NUM_THREADS=1} is added unless supplied). If \code{filename} is passed, it will be ignored; use
+\code{method}, \code{touches}, and \code{datatype}. If \code{filename} is passed, it will be ignored; use
 \verb{writeTo = }.}
 }
 \description{
