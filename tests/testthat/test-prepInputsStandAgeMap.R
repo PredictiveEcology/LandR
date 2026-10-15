@@ -38,3 +38,27 @@ testthat::test_that("prepInputsStandAgeMap works", {
 
 
 })
+
+## Offline: the data year limits the fires used to correct stand age. A pixel burned in 1980 and
+## 2015 holds 2015 in the unlimited fire raster, so for dataYear 2011 it kept its satellite age.
+test_that("prepInputsStandAgeMap uses the latest fire at or before dataYear", {
+  skip_if_not_installed("terra")
+  crs <- "EPSG:3978"
+  rtm <- terra::rast(terra::ext(0, 2400, 0, 2400), resolution = 240, crs = crs, vals = 1)
+  src <- withr::local_tempdir("ageSrc_")
+  terra::writeRaster(terra::rast(rtm, vals = 80L), file.path(src, "age.tif"), datatype = "INT2U")
+  square <- "POLYGON ((600 600, 1200 600, 1200 1200, 600 1200, 600 600))"
+  fires <- terra::vect(c(square, square), crs = crs)
+  fires$YEAR <- c(1980, 2015)
+  terra::writeVector(fires, file.path(src, "fires.shp"))
+  zipped <- withr::with_dir(src, utils::zip("fires.zip", list.files(src, "^fires\\."), flags = "-q"))
+  skip_if_not(identical(zipped, 0L), "no zip utility")
+
+  out <- suppressWarnings(suppressMessages(
+    prepInputsStandAgeMap(dataSource = "KNN", dataYear = 2011, rasterToMatch = rtm,
+                          ageURL = paste0("file://", file.path(src, "age.tif")),
+                          fireURL = paste0("file://", file.path(src, "fires.zip")),
+                          destinationPath = withr::local_tempdir("dest_"),
+                          maskWithRTM = FALSE, useCache = FALSE)))
+  expect_equal(out[terra::cellFromXY(rtm, cbind(900, 900))][[1]], 31L) # 2011 - 1980
+})
