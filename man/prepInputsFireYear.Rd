@@ -4,7 +4,13 @@
 \alias{prepInputsFireYear}
 \title{Create a raster of fire perimeters}
 \usage{
-prepInputsFireYear(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950)
+prepInputsFireYear(
+  ...,
+  rasterToMatch,
+  fireField = "YEAR",
+  earliestYear = 1950,
+  latestYear = Inf
+)
 }
 \arguments{
 \item{...}{Additional arguments passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}}}
@@ -16,6 +22,11 @@ raster operations (i.e., the one used throughout the simulation).
 \item{fireField}{field used to rasterize fire polys}
 
 \item{earliestYear}{the earliest fire date to allow}
+
+\item{latestYear}{the latest fire date to allow. Fires after this year are dropped before
+rasterizing, so each pixel holds its latest fire year at or before \code{latestYear} (a pixel
+burned in 1980 and 2015 holds 1980 for \code{latestYear = 1990}). Default \code{Inf}: no limit, each
+pixel holds its most recent fire.}
 }
 \value{
 a \code{SpatRaster} layer of fire perimeters with fire year values.

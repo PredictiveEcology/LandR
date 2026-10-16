@@ -72,7 +72,7 @@ or 1985-2025 (5 year intervals) for SCANFI V2.}
 
 \item{fireURL}{url to download fire polygons used to update age map. If NULL or NA age
 imputation is bypassed. Requires passing \code{rasterToMatch}. Only used if \code{firePerimeters}
-is missing.}
+is missing. Fires after \code{dataYear} are ignored (see \code{latestYear} in \code{\link[=prepInputsFireYear]{prepInputsFireYear()}}).}
 
 \item{fireFun}{passed to \code{\link[reproducible:prepInputs]{reproducible::prepInputs()}} of fire data. Only used if \code{firePerimeters}
 is missing.}
