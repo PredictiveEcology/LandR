@@ -52,9 +52,10 @@
 #'     and [vegTypeGenerator()] with `mixedType = 2`, [lccMapGenerator()] and [plotVTM()].
 #'   }
 #'   \item{`scanfiMirror`}{
-#'     Default: `TRUE`. When `LandR` is loaded and no `reproducible.urlRemap` is set, fetch
-#'     SCANFI from the PredictiveEcology arbutus mirror instead of Google Drive, so the ids
-#'     that 404 for anonymous users resolve and no login is needed; see [scanfiUrlRemap()].
+#'     Default: `TRUE`. When no `reproducible.urlRemap` is set, LandR fetches SCANFI from the
+#'     PredictiveEcology arbutus mirror instead of Google Drive for the length of each SCANFI
+#'     download, so the ids that 404 for anonymous users resolve and no login is needed; see
+#'     [scanfiUrlRemap()].
 #'   }
 #'   \item{`verbose`}{
 #'     Default: `1`. The default `verbose` argument of functions that report their progress,

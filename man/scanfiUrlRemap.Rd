@@ -20,8 +20,9 @@ Drive id -- or a SCANFI species \emph{folder} -- is fetched from the mirror inst
 Google login and no change at any call site.
 }
 \details{
-LandR sets \code{options(reproducible.urlRemap = scanfiUrlRemap())} when it is loaded, but only
-if no remap is set already and \code{getOption("LandR.scanfiMirror", TRUE)} is \code{TRUE}. A remap
-of your own is never replaced; if you use one, include these rows in it (the manifest is
+LandR applies this remap itself, only for the duration of each SCANFI download and only if
+\code{getOption("reproducible.urlRemap")} is \code{NULL} and \code{getOption("LandR.scanfiMirror", TRUE)} is
+\code{TRUE}. The global option is never changed. A remap of your own always wins; if you use one,
+include these rows in it (the manifest is
 \code{system.file("extdata", "arbutus_manifest_SCANFI_v2.csv", package = "LandR")}).
 }

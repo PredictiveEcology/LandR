@@ -5,7 +5,6 @@
 
   toset <- !(names(opts.LandR) %in% names(opts))
   if (any(toset)) options(opts.LandR[toset])
-  .setScanfiMirror()
 
   invisible()
 }
