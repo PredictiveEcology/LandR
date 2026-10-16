@@ -7,6 +7,10 @@
   `useCpp = FALSE`. `src/Makevars` and `src/Makevars.win` add `$(SHLIB_OPENMP_CXXFLAGS)`; without
   OpenMP the package builds and runs serially.
 
+* `prepInputsFireYear()` has a new argument `latestYear` (default `Inf`, no change for existing calls) that drops fires after that year before rasterizing. A pixel that burned twice holds only its most recent fire, so for an earlier data year `replaceAgeInFires()` skipped it (the later fire was after `startTime`) and the pixel kept its satellite age. `prepInputsStandAgeMap()` now passes `dataYear` when it builds the fire raster, so a pixel burned in 1980 and 2015 gets the age since 1980 for `dataYear` 1990. A `firePerimeters` raster supplied by the caller is used as given.
+
+* `updateCohortData()` is faster when it re-groups all pixels (after seed dispersal): it builds the community string of each `pixelGroup` once and gives each pixel its group's string, instead of expanding `cohortData` to one row per pixel and cohort (20M rows at 10M cohorts) and pasting a string for each. The `pixelGroup` numbers, the rows kept and their order, the columns and the RNG state are those of the expanded version (a dispersal event took 46 s instead of 37 s with 10.6M cohorts and 1.3M treed pixels, and 18.5 s instead of 8.7 s with 0.4M cohorts and 1.3M treed pixels, with about 2 GB less peak memory in both). `calcSiteShade()` computes its two sums per `pixelGroup` in one pass and the shade cut once per ecoregion and `bAM` instead of once per `pixelGroup` (the first cohort of a `pixelGroup` is still the one read, as before), and `rmMissingCohorts()` works on the map values as a vector instead of building a table with a row per cell. Results are identical.
+
 * New `leadingByPixelGroup()`: the leading species (or "Mixed") of each `pixelGroup`, one row per `pixelGroup`. `vegTypeGenerator()` and `vegTypeMapGenerator()` now use it, in place of the two copies of the same code they carried, and it sums the species within `pixelGroup`s in one pass instead of a 10M-row join (about 3 times faster at 10M cohorts). Results are identical, including the order of the levels and the `Mixed` decision at the threshold; the original algorithm is still used for `mixedType` 0 and 1, `cover`, a character `speciesCode` and `NA` in `B`.
 
 * `updateCohortData()` is faster after fire: `.initiateNewCohorts()` no longer sums the B of older cohorts when `initialB` is given (the result was discarded) and no longer recalculates `sumB` (which `updateCohortData()` drops), `calcSeverityB()` sums pre-fire B only for the burned `pixelGroup`s, and `rmMissingCohorts()` copies `cohortData` only when it removes something. Results are identical. The `initialB = NA` calculation is unchanged, including that a new cohort's older B is counted as 0 when the first row of its `pixelGroup` is younger than `successionTimestep`, which is a separate issue.
@@ -79,6 +83,21 @@
 * `makeAndCleanInitialCohortData()` has a new argument, `minSpeciesEcoregionShare` (default 0, off). A species found in fewer than that share of an ecoregion's pixels is removed from every pixel of the ecoregion before cover is rescaled, so its cover goes to the other species and it is also absent when `establishprob`, `maxB` and `maxANPP` are estimated there. In BC ELFs with BEC zones, western redcedar is in up to 6.7% of mountain hemlock (MH) zone pixels and up to 2.2% of ESSF pixels, where it is not expected to persist; `Biomass_borealDataPrep` uses 0.07.
 
 * `prepInputs_NTEMS_LCC_FAO()`'s error for a missing crop target no longer suggests `terraOptions(memfrac = 0)`, which makes terra much slower; it suggests `todisk = TRUE` only.
+
+* `prepInputs_SCANFI_LCC_FAO()` gains `dataVersion = "V3"`, SCANFI v3's annual (1985-2025) land
+  cover, read with `prepInputs()` from NRCan's Cloud-Optimized GeoTIFFs on ftp.maps.canada.ca, the
+  same way as V1/V2. The new exported table `scanfiV3ToCanadaLCC` recodes v3's 20 land-cover codes
+  to the Canada LCC codes used elsewhere; burn scars (v3 code 4) have no Canada LCC equivalent and
+  keep a new code, 60, which the existing forest-land rule still relabels to `disturbedCode` on
+  forest land. V3 covers non-forest land cover only -- species, biomass and age layers are
+  unaffected and still come from V2.
+
+* `prepInputs_SCANFI_LCC_FAO()` and `prepInputs_NTEMS_LCC_FAO()` no longer relabel water (20),
+  snow/ice (31) or 0 (no data; SCANFI v3 cropland, urban and road) as disturbed forest (240) where
+  the record says forest land. A treed year elsewhere in the record, or an FAO forest code, does
+  not make a lake, a glacier, a town or a road into forest without trees; such pixels had become
+  flammable forest in fire models. Rock and barren land are still relabelled, since a severe fire
+  can expose them.
 
 * `makeAndCleanInitialCohortData()` now reads the age model's variables from its formula
   (`all.vars()`) and, before fitting, drops rows with a zero in any of them, response included;

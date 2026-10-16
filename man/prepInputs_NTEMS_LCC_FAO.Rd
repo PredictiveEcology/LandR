@@ -33,7 +33,7 @@ decade plus the most recent. Each year is one more layer to read.}
 \item{faoYear}{the year of the FAO forest layer: 2019, 2022.}
 
 \item{convertibleClasses}{the classes that may become \code{disturbedCode}; \code{NULL} (default)
-means every class that is not treed. See \code{\link[=.applyForestLand]{.applyForestLand()}}.}
+means every class that is not treed, except water, snow/ice and 0. See \code{\link[=.applyForestLand]{.applyForestLand()}}.}
 
 \item{...}{passed to \code{prepInputs}}
 }

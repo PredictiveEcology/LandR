@@ -58,6 +58,10 @@ fastOpsSetSeed <- function(seed, envir = parent.frame()) {
                             sample.kind = "Rejection"))
 }
 
+## The RNG state without its first element. .Random.seed lives in the global environment, and under
+## devtools::test() the helpers' environment does not see it by name, so it is read from there
+fastOpsSeed <- function() get(".Random.seed", envir = globalenv())[-1]
+
 ## Where long double is plain double (e.g. macOS arm64), base::sum() lands on the other side of the
 ## mixedwood threshold for pixelGroups 8 and 13, so the original code itself decides them
 ## differently there and the fixtures, made on x86_64, do not apply
@@ -72,7 +76,7 @@ fastOpsLeading <- function() {
   seeded <- function(expr) {
     fastOpsSetSeed(1)
     out <- suppressMessages(expr)
-    list(out = out, seed = .Random.seed[-1])
+    list(out = out, seed = fastOpsSeed())
   }
   vtg <- function(x, ..., mixedType = 2) {
     seeded(vegTypeGenerator(x, mixedType = mixedType, sppEquiv = sppEquiv, sppEquivCol = "LandR",
@@ -161,7 +165,7 @@ fastOpsRegen <- function() {
       successionTimestep = 10, initialB = initialB, verbose = 0, doAssertion = TRUE
     ))
     list(cohortData = out$cohortData, pixelGroupMap = terra::values(out$pixelGroupMap, mat = FALSE),
-         seed = .Random.seed[-1])
+         seed = fastOpsSeed())
   }
   ## .initiateNewCohorts() itself, with new cohorts in existing pixelGroups (1 is the pixelGroup
   ## whose first row is young); its sumB column is dropped by updateCohortData(), so is not compared
