@@ -37,10 +37,10 @@ test_that(".withSCANFIAccess explains an access failure and keeps the original e
   flat <- gsub("[[:space:]]+", " ", err)
 
   expect_match(flat, "Could not download the SCANFI stand age map (V2 2020)", fixed = TRUE)
-  expect_match(flat, "permissions problem rather than a broken link", fixed = TRUE)
+  expect_match(flat, "from Google Drive", fixed = TRUE)
+  expect_match(flat, "not a broken link", fixed = TRUE)
 
-  ## the four ways out
-  expect_match(flat, "getOption(\"LandR.scanfiMirror\")", fixed = TRUE)
+  ## the ways out
   expect_match(flat, "https://opendata.nfis.org/", fixed = TRUE)
   expect_match(flat, "googledrive::drive_auth()", fixed = TRUE)
   expect_match(flat, "`ageURL`", fixed = TRUE)
@@ -56,8 +56,8 @@ test_that(".withSCANFIAccess omits the bullets that do not apply", {
     error = function(e) conditionMessage(e)
   )
 
-  ## the mirror and request-access bullets always apply; the other two do not
-  expect_match(err, "LandR.scanfiMirror", fixed = TRUE)
+  ## the request-access bullet always applies; the mirror bullet only to V2, the other two not here
+  expect_false(grepl("LandR.scanfiMirror", err, fixed = TRUE))
   expect_match(err, "https://opendata.nfis.org/", fixed = TRUE)
   expect_false(grepl("dataSource =", err, fixed = TRUE))
   expect_false(grepl("pass it via", err, fixed = TRUE))
@@ -85,4 +85,21 @@ test_that(".withSCANFIAccess is transparent when it succeeds or is disabled", {
     "Could not access the Google Drive resource"
   )
   expect_identical(LandR:::.withSCANFIAccess(7L, what = "x", enabled = FALSE), 7L)
+})
+
+test_that(".withSCANFIAccess names the mirror setting that applies to a V2 Drive failure", {
+  msg <- function() tryCatch(
+    LandR:::.withSCANFIAccess(stop(drive_error()), what = "x", dataYear = 2020, dataVersion = "V2"),
+    error = function(e) gsub("[[:space:]]+", " ", conditionMessage(e))
+  )
+  withr::local_options(list(reproducible.urlRemap = NULL, LandR.scanfiMirror = TRUE))
+  expect_false(grepl("urlRemap|scanfiMirror", msg()))   # the mirror was on; nothing to change
+
+  withr::local_options(list(LandR.scanfiMirror = FALSE))
+  expect_match(msg(), "options(LandR.scanfiMirror = TRUE)", fixed = TRUE)
+
+  ## a remap of the user's own: say to check it covers the file, not to turn LandR's on
+  withr::local_options(list(reproducible.urlRemap = function(url, filename) NULL, LandR.scanfiMirror = TRUE))
+  expect_match(msg(), "check that your reproducible.urlRemap covers this file", fixed = TRUE)
+  expect_match(msg(), "from Google Drive", fixed = TRUE)
 })

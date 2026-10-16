@@ -103,28 +103,29 @@ test_that("a supplied ageURL reaches prepInputs for SCANFI V1 and V2", {
   expect_equal(seen, unname(mine))
 })
 
-test_that("access errors name the Arbutus mirror for remapped V2 ids, Google Drive otherwise", {
+test_that("access errors name the mirror when it failed, Google Drive when Drive did", {
   skip_if_not("makeUrlRemap" %in% getNamespaceExports("reproducible"))
   withr::local_options(list(reproducible.urlRemap = NULL, LandR.scanfiMirror = TRUE))
-  drive <- simpleError("Client error: (404) Not Found")
-  msg <- function(url, version = "V2") {
-    err <- tryCatch(
-      LandR:::.withSCANFIAccess(stop(drive), what = "the SCANFI stand age map", dataYear = 2020,
+  msg <- function(url, version = "V2", err = "Client error: (404) Not Found") {
+    out <- tryCatch(
+      LandR:::.withSCANFIAccess(stop(simpleError(err)), what = "the SCANFI stand age map", dataYear = 2020,
                                 dataVersion = version, urlArg = "ageURL", url = url),
       error = function(e) conditionMessage(e)
     )
-    gsub("[[:space:]]+", " ", err)
+    gsub("[[:space:]]+", " ", out)
   }
   v2id <- "https://drive.google.com/file/d/1nXPS3bpFUESYieNfXO25OKlZJEgqtRnD" ## 2020 age
   mirror <- msg(v2id)
-  expect_match(mirror, "Arbutus mirror", fixed = TRUE)
-  expect_false(grepl("restricted Google Drive folder", mirror, fixed = TRUE))
+  expect_match(mirror, "from the SCANFI mirror", fixed = TRUE)
+  expect_false(grepl("Google Drive", mirror, fixed = TRUE))
   expect_false(grepl("drive_auth", mirror, fixed = TRUE))
 
-  for (other in list(msg(v2id, "V1"), msg("https://drive.google.com/file/d/abc"))) {
-    expect_match(other, "restricted Google Drive folder", fixed = TRUE)
-    expect_false(grepl("Arbutus mirror", other, fixed = TRUE))
+  for (other in list(msg(v2id, "V1"), msg("https://drive.google.com/file/d/abc"),
+                     ## the mirror was meant to apply, but the error says Drive refused
+                     msg(v2id, err = paste0("Could not access the Google Drive resource:\n  ", v2id)))) {
+    expect_match(other, "from Google Drive", fixed = TRUE)
+    expect_false(grepl("SCANFI mirror.", other, fixed = TRUE))
   }
   withr::local_options(list(reproducible.urlRemap = function(url, filename) NULL))
-  expect_match(msg(v2id), "restricted Google Drive folder", fixed = TRUE)
+  expect_match(msg(v2id), "from Google Drive", fixed = TRUE)
 })

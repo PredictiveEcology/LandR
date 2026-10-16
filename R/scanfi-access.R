@@ -5,8 +5,8 @@
 ## rather than published openly. A user who has not been granted access gets only
 ## reproducible's generic failure -- "Could not access the Google Drive resource
 ## ... Client error: (404) Not Found" -- which reads like a dead link and invites
-## a hunt for a mirror that does not exist. It is a permissions problem, so say
-## so, and name the ways out.
+## a hunt for a broken link. It is a permissions problem, so say so, and name the
+## ways out. SCANFI v2 is also on a public mirror; a failure there is a network problem.
 ## ---------------------------------------------------------------------------
 
 ## Official SCANFI distribution point; where to ask for access.
@@ -34,65 +34,45 @@
   url = NULL
 ) {
   qualifier <- paste(c(dataVersion, dataYear), collapse = " ")
+  original <- paste(conditionMessage(e), collapse = "\n")
 
-  fromMirror <- .remapsToMirror(url, dataVersion)
+  ## the error says which server refused: Drive, whatever remap was meant to apply, or the mirror
+  fromDrive <- grepl("drive.google.com|google drive", original, ignore.case = TRUE)
+  fromMirror <- !fromDrive && .remapsToMirror(url, dataVersion)
 
-  ways <- c(
-    if (fromMirror) "retry later; the mirror can be slow or briefly unreachable",
-    if (!fromMirror) paste0(
-      "check that the SCANFI mirror is enabled -- getOption(\"LandR.scanfiMirror\") ",
-      "should be TRUE and getOption(\"reproducible.urlRemap\") non-NULL. It serves ",
-      "SCANFI v2 from the PredictiveEcology object store with no Google login, and ",
-      "is used by LandR unless you opted out or have a remap of your own"
-    ),
-    if (!fromMirror) paste0(
-      "or request access to the SCANFI data from the SCANFI team (see ",
-      .scanfiAccessURL,
-      "), then re-authenticate with googledrive::drive_auth()"
-    ),
-    if (!is.null(urlArg)) {
-      paste0("or, if you already have the data, pass it via `", urlArg, "`")
-    },
-    if (length(alternatives)) {
+  mirrorWay <- if (identical(dataVersion, "V2")) {
+    if (!is.null(getOption("reproducible.urlRemap"))) {
       paste0(
-        "or use a different data source: ",
-        paste0('dataSource = "', alternatives, '"', collapse = " or ")
+        "check that your reproducible.urlRemap covers this file; LandR's list of mirrored ",
+        "SCANFI files is system.file(\"extdata\", \"arbutus_manifest_SCANFI_v2.csv\", package = \"LandR\")"
       )
+    } else if (!isTRUE(getOption("LandR.scanfiMirror", TRUE))) {
+      "set options(LandR.scanfiMirror = TRUE) to use the public SCANFI mirror"
     }
-  )
+  }
+  ways <- if (!fromMirror) {
+    c(
+      mirrorWay,
+      paste0("request access at ", .scanfiAccessURL, ", then run googledrive::drive_auth()"),
+      if (!is.null(urlArg)) paste0("pass your own copy with `", urlArg, "`"),
+      if (length(alternatives)) paste0("use ", paste0('dataSource = "', alternatives, '"', collapse = " or "))
+    )
+  }
 
   paste0(
-    "Could not download ",
-    what,
-    if (nzchar(qualifier)) paste0(" (", qualifier, ")") else "",
-    ".\n\n",
+    "Could not download ", what,
+    if (nzchar(qualifier)) paste0(" (", qualifier, ")"),
     if (fromMirror) {
-      paste0(
-        "SCANFI V2 is downloaded from the PredictiveEcology Arbutus mirror (LandR\n",
-        "remaps its Google Drive ids to it), so this is usually a network problem or\n",
-        "the mirror being unreachable, not a permissions problem.\n\n"
-      )
+      " from the SCANFI mirror. This is usually a network problem; retry later."
     } else {
       paste0(
-        "SCANFI is distributed through a restricted Google Drive folder, so this is\n",
-        "usually a permissions problem rather than a broken link: the Google account\n",
-        "you are authenticated as may not have been granted access.\n\n"
+        " from Google Drive. SCANFI's Drive folder is not public, so this usually means ",
+        "your Google account has no access, not a broken link."
       )
     },
-    "To resolve it:\n",
-    paste(
-      vapply(
-        ways,
-        function(w) {
-          paste(strwrap(w, width = 76, initial = "  * ", prefix = "    "), collapse = "\n")
-        },
-        character(1)
-      ),
-      collapse = "\n"
-    ),
-    "\n\n",
-    "Original error:\n",
-    paste0("  ", strsplit(paste(conditionMessage(e), collapse = "\n"), "\n")[[1]], collapse = "\n")
+    if (length(ways)) paste0("\nTo get it:\n", paste0("  * ", ways, collapse = "\n")),
+    "\nOriginal error:\n",
+    paste0("  ", strsplit(original, "\n")[[1]], collapse = "\n")
   )
 }
 
