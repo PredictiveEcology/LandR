@@ -27,6 +27,9 @@
 #include <Rcpp.h>
 #include <cstdint>
 #include <vector>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 using namespace Rcpp;
 
@@ -92,6 +95,20 @@ IntegerVector cellsInPgsCpp(IntegerVector pgv, IntegerVector pgs) {
 //   Success        : LogicalVector length numRcv
 //   DistOfSuccess  : NumericVector length numRcv (NA_real_ if no success)
 
+// TRUE if the package was compiled with OpenMP.
+// [[Rcpp::export]]
+bool landisDispHasOpenMP() {
+#ifdef _OPENMP
+  return true;
+#else
+  return false;
+#endif
+}
+
+// Steps with fewer active receivers than this are scanned serially: opening a
+// parallel region costs more than it saves.
+static const size_t kOmpMinActive = 20000;
+
 // [[Rcpp::export]]
 List spiralLoopCpp(IntegerVector pixelIndex_in,
                    IntegerVector speciesCode_in,
@@ -114,7 +131,8 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
                    int successionTimestep,
                    int verbose,
                    bool wardAlreadyExp,
-                   bool debug = false) {
+                   bool debug = false,
+                   int nThreads = 1) {
 
   const int numRcv = pixelIndex_in.size();
   const int numSpiral = spiralRow.size();
@@ -188,6 +206,24 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
 
   // Number of currently-live receivers (for early termination)
   int numLive = numRcv;
+
+  if (nThreads < 1) nThreads = 1;
+#ifdef _OPENMP
+  const int maxThreads = omp_get_max_threads();
+  if (nThreads > maxThreads) nThreads = maxThreads;
+#else
+  nThreads = 1;
+#endif
+  // One hit buffer per thread; concatenated in thread order so hasSpRows has
+  // the same order as the serial scan.
+  std::vector< std::vector<int> > threadHits(nThreads);
+
+  // Raw pointers: no R API is touched inside the parallel scan.
+  const int* pgvP = pgv.begin();
+  const std::uint64_t* maskP = srcPgBitmask.data();
+  const int* rowActP = rowAct.data();
+  const int* colActP = colAct.data();
+  const int* spActP  = spAct.data();
 
   GetRNGstate();
 
@@ -271,26 +307,44 @@ List spiralLoopCpp(IntegerVector pixelIndex_in,
     // — important for RNG-stream parity with the R reference.
     hasSpRows.clear();
 
-    for (size_t idx = 0; idx < active.size(); ++idx) {
-      const int j = active[idx];
-      const int sp = spAct[j];
-
-      const int newRow = rowAct[j] + sRow;
-      const int newCol = colAct[j] + sCol;
-      if (newRow < 1 || newRow > pgmRows ||
-          newCol < 1 || newCol > pgmCols) {
-        continue; // out of bounds → no source
-      }
-      // Cell index using terra's row-major numbering, 0-based
-      const int cell0 = (newRow - 1) * pgmCols + (newCol - 1);
-      const int pg = pgv[cell0];
-      if (pg == NA_INTEGER) continue;          // masked cell
-      if (pg < 0 || pg > maxPg) continue;      // pg outside dtSrc range
-      const std::uint64_t mask = srcPgBitmask[(size_t) pg];
-      if (((mask >> (sp - 1)) & 1ULL) == 0ULL) continue;
-
-      hasSpRows.push_back(j);
+    // The scan uses no RNG. Above the size threshold it runs in a parallel
+    // region with a static schedule (contiguous chunks in thread order).
+    const int nAct = (int) active.size();
+    const int* activeP = active.data();
+    // Scan one receiver; append to `out` if it has a source at this offset.
+#define LANDIS_SCAN(IDX, OUT)                                                 \
+    {                                                                         \
+      const int j = activeP[IDX];                                             \
+      const int newRow = rowActP[j] + sRow;                                   \
+      const int newCol = colActP[j] + sCol;                                   \
+      if (newRow >= 1 && newRow <= pgmRows && newCol >= 1 && newCol <= pgmCols) { \
+        const int pg = pgvP[(newRow - 1) * pgmCols + (newCol - 1)];           \
+        if (pg != NA_INTEGER && pg >= 0 && pg <= maxPg &&                     \
+            ((maskP[(size_t) pg] >> (spActP[j] - 1)) & 1ULL) != 0ULL) {       \
+          (OUT).push_back(j);                                                 \
+        }                                                                     \
+      }                                                                       \
     }
+
+    hasSpRows.clear();
+#ifdef _OPENMP
+    if (nThreads > 1 && active.size() >= kOmpMinActive) {
+      for (int t = 0; t < nThreads; ++t) threadHits[t].clear();
+#pragma omp parallel num_threads(nThreads)
+      {
+        std::vector<int>& mine = threadHits[omp_get_thread_num()];
+#pragma omp for schedule(static)
+        for (int idx = 0; idx < nAct; ++idx) LANDIS_SCAN(idx, mine)
+      }
+      for (int t = 0; t < nThreads; ++t) {
+        hasSpRows.insert(hasSpRows.end(), threadHits[t].begin(), threadHits[t].end());
+      }
+    } else
+#endif
+    {
+      for (int idx = 0; idx < nAct; ++idx) LANDIS_SCAN(idx, hasSpRows)
+    }
+#undef LANDIS_SCAN
 
     const int sumHasSp = (int) hasSpRows.size();
     if (sumHasSp == 0) {

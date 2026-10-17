@@ -1,5 +1,12 @@
 # LandR (development version)
 
+* `LANDISDisp()`'s C++ spiral scan can use OpenMP threads: `options(LandR.LANDISDisp.threads = n)`
+  (default `1`). Only the search for receivers with a source at each spiral offset is
+  parallel, with a static schedule and per-thread buffers joined in thread order; the uniform
+  draws stay serial on the main thread, so output is bit-identical for any thread count and to
+  `useCpp = FALSE`. `src/Makevars` and `src/Makevars.win` add `$(SHLIB_OPENMP_CXXFLAGS)`; without
+  OpenMP the package builds and runs serially.
+
 * `prepInputsFireYear()` has a new argument `latestYear` (default `Inf`, no change for existing calls) that drops fires after that year before rasterizing. A pixel that burned twice holds only its most recent fire, so for an earlier data year `replaceAgeInFires()` skipped it (the later fire was after `startTime`) and the pixel kept its satellite age. `prepInputsStandAgeMap()` now passes `dataYear` when it builds the fire raster, so a pixel burned in 1980 and 2015 gets the age since 1980 for `dataYear` 1990. A `firePerimeters` raster supplied by the caller is used as given.
 
 * `updateCohortData()` is faster when it re-groups all pixels (after seed dispersal): it builds the community string of each `pixelGroup` once and gives each pixel its group's string, instead of expanding `cohortData` to one row per pixel and cohort (20M rows at 10M cohorts) and pasting a string for each. The `pixelGroup` numbers, the rows kept and their order, the columns and the RNG state are those of the expanded version (a dispersal event took 46 s instead of 37 s with 10.6M cohorts and 1.3M treed pixels, and 18.5 s instead of 8.7 s with 0.4M cohorts and 1.3M treed pixels, with about 2 GB less peak memory in both). `calcSiteShade()` computes its two sums per `pixelGroup` in one pass and the shade cut once per ecoregion and `bAM` instead of once per `pixelGroup` (the first cohort of a `pixelGroup` is still the one read, as before), and `rmMissingCohorts()` works on the map values as a vector instead of building a table with a row per cell. Results are identical.
