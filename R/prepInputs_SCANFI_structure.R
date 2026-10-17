@@ -62,8 +62,10 @@ prepInputs_SCANFI_structure <- function(attribute = c("height", "closure"), year
   if (is.null(Args$overwrite)) Args$overwrite <- TRUE
   if (is.null(Args$method)) Args$method <- "bilinear"
 
-  do.call(prepInputs, args = Args) |>
-    Cache(quick = "writeTo",
-          .functionName = paste0("prepInputs_SCANFI_", attribute),
-          omitArgs = c("destinationPath", "targetFile", "stable"))
+  .withScanfiRemap(
+    do.call(prepInputs, args = Args) |>
+      Cache(quick = "writeTo",
+            .functionName = paste0("prepInputs_SCANFI_", attribute),
+            omitArgs = c("destinationPath", "targetFile", "stable"))
+  )
 }

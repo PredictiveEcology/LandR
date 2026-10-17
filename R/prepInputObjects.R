@@ -499,7 +499,9 @@ prepInputsStandAgeMap <- function(
   if (dataSource == "SCANFI") {
     if (dataVersion == "V1") {
       #SCANFI V1 has only one dataYear so age is adjusted using NTEMS disturbance layers
-      ageURL <- paste0("https://drive.google.com/file/d/1OdZ7Tznk53KceEyt9dFOBOkxDHEX5X0U")
+      if (is.null(ageURL)) {
+        ageURL <- paste0("https://drive.google.com/file/d/1OdZ7Tznk53KceEyt9dFOBOkxDHEX5X0U")
+      }
 
       standAgeMap <- .withSCANFIAccess(
         prepInputs(
@@ -515,6 +517,7 @@ prepInputsStandAgeMap <- function(
         dataYear = dataYear,
         dataVersion = dataVersion,
         urlArg = "ageURL",
+        url = ageURL,
         alternatives = c("KNN", "NTEMS")
       )
 
@@ -589,26 +592,28 @@ prepInputsStandAgeMap <- function(
       #if baseYear is 2020, proceed with 2020 standAgeMap
     }
     if (dataVersion == "V2") {
-      if (dataYear == "1985") {
-        ageURL <- paste0("https://drive.google.com/file/d/1KoGbzQZB-wR8LkngAKTZGShDR0ILBK5r")
-      } else if (dataYear == "1990") {
-        ageURL <- paste0("https://drive.google.com/file/d/1083izY1R-uBRdnnJL6KTYTPg3RFKCU6V")
-      } else if (dataYear == "1995") {
-        ageURL <- paste0("https://drive.google.com/file/d/12aqGD4YQKrZXUrzSPIOz2DcVY00mQZAT")
-      } else if (dataYear == "2000") {
-        ageURL <- paste0("https://drive.google.com/file/d/1v-9sx1a_-WqKfuULT80QZ1b0CAI8lLGV")
-      } else if (dataYear == "2005") {
-        ageURL <- paste0("https://drive.google.com/file/d/1HSWZ7aHW9GxfYTI3aAZRz5i2rD9-pymq")
-      } else if (dataYear == "2010") {
-        ageURL <- paste0("https://drive.google.com/file/d/1PIC0pvDUZFx7DfauJvB2WsJjgBgkCaXb")
-      } else if (dataYear == "2015") {
-        ageURL <- paste0("https://drive.google.com/file/d/1_ZGdjepqS3tGHKykAG5SCecic4Qn-Nx-")
-      } else if (dataYear == "2020") {
-        ageURL <- paste0("https://drive.google.com/file/d/1nXPS3bpFUESYieNfXO25OKlZJEgqtRnD")
-      } else if (dataYear == "2025") {
-        ageURL <- paste0("https://drive.google.com/file/d/1mM2z-_sjt9HGv1JQIt2VZkhW_HrldhgT")
-      } else {
-        stop("SCANFI V2 data is currently available for 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, and 2025 only")
+      if (is.null(ageURL)) {
+        if (dataYear == "1985") {
+          ageURL <- paste0("https://drive.google.com/file/d/1KoGbzQZB-wR8LkngAKTZGShDR0ILBK5r")
+        } else if (dataYear == "1990") {
+          ageURL <- paste0("https://drive.google.com/file/d/1083izY1R-uBRdnnJL6KTYTPg3RFKCU6V")
+        } else if (dataYear == "1995") {
+          ageURL <- paste0("https://drive.google.com/file/d/12aqGD4YQKrZXUrzSPIOz2DcVY00mQZAT")
+        } else if (dataYear == "2000") {
+          ageURL <- paste0("https://drive.google.com/file/d/1v-9sx1a_-WqKfuULT80QZ1b0CAI8lLGV")
+        } else if (dataYear == "2005") {
+          ageURL <- paste0("https://drive.google.com/file/d/1HSWZ7aHW9GxfYTI3aAZRz5i2rD9-pymq")
+        } else if (dataYear == "2010") {
+          ageURL <- paste0("https://drive.google.com/file/d/1PIC0pvDUZFx7DfauJvB2WsJjgBgkCaXb")
+        } else if (dataYear == "2015") {
+          ageURL <- paste0("https://drive.google.com/file/d/1_ZGdjepqS3tGHKykAG5SCecic4Qn-Nx-")
+        } else if (dataYear == "2020") {
+          ageURL <- paste0("https://drive.google.com/file/d/1nXPS3bpFUESYieNfXO25OKlZJEgqtRnD")
+        } else if (dataYear == "2025") {
+          ageURL <- paste0("https://drive.google.com/file/d/1mM2z-_sjt9HGv1JQIt2VZkhW_HrldhgT")
+        } else {
+          stop("SCANFI V2 data is currently available for 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, and 2025 only")
+        }
       }
 
       standAgeMap <- .withSCANFIAccess(
@@ -625,6 +630,7 @@ prepInputsStandAgeMap <- function(
         dataYear = dataYear,
         dataVersion = dataVersion,
         urlArg = "ageURL",
+        url = ageURL,
         alternatives = c("KNN", "NTEMS")
       )
 
@@ -855,6 +861,7 @@ prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", dataVers
     dataYear = dataYear,
     dataVersion = dataVersion,
     urlArg = "url",
+    url = Args$url,
     alternatives = c("KNN", "NTEMS"),
     enabled = identical(dataSource, "SCANFI")
   )
