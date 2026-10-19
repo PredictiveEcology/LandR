@@ -530,10 +530,19 @@ prepInputs_SCANFI_LCC_FAO <- function(
     faoYear = faoYear,
     lccFor = function(y) {
       src <- .scanfiLCCFAOSource(y, dataVersion)
-      out <- prepInputs(
-        url = src$url, targetFile = src$targetFile,
-        method = resampleMethod, destinationPath = dots$destinationPath,
-        to = lcc, maskTo = NA ## aligned, not masked: see .forestLandFor()
+      ## through .withSCANFIAccess(), like the `year` land cover above: LandR's SCANFI remap is
+      ## applied per download, so a read outside it would ask Google Drive for the restricted file
+      out <- .withSCANFIAccess(
+        prepInputs(
+          url = src$url, targetFile = src$targetFile,
+          method = resampleMethod, destinationPath = dots$destinationPath,
+          to = lcc, maskTo = NA ## aligned, not masked: see .forestLandFor()
+        ),
+        what = "the SCANFI land cover map used for forest land",
+        dataYear = y,
+        dataVersion = dataVersion,
+        url = src$url,
+        enabled = dataVersion != "V3"
       )
       if (dataVersion == "V3") .applySCANFIv3Crosswalk(out) else out
     },
