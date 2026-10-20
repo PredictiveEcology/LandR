@@ -12,8 +12,10 @@
 #' (wetland) and 81 (treed wetland). This builds that site layer from the Canadian Wetland
 #' Inventory Map v3A (CWIM3A; Mahdianpari et al. 2021): 10 m, national, 2016-2020 imagery.
 #'
-#' Only the study window is read: the source is a cloud-optimised GeoTIFF, so `terra` fetches
-#' the tiles it needs rather than the national raster.
+#' A URL is downloaded once, with [reproducible::preProcess()], into `destinationPath` (and
+#' the shared data folder, `getOption("reproducible.destinationPathShared")`, if one is set),
+#' and the local copy is read from then on, so a machine without internet (an HPC compute
+#' node) can build the layer once the file is there.
 #'
 #' CWIM3A codes are 1 Bog, 2 Fen, 3 Marsh, 4 Swamp, 5 Shallow water; 15 is NoData, and CWIM3A
 #' maps nothing but those five classes, so NoData means "not wetland". Shallow water is not
@@ -27,11 +29,13 @@
 #'
 #' @param to A `SpatRaster` giving the grid to return, and the study window. Its `NA` cells
 #'   are `NA` in the result.
-#' @param url The CWIM3A source. A URL is read through GDAL's `/vsicurl/`; a local path is
-#'   read directly (useful for a pre-cut regional copy).
+#' @param url The CWIM3A source. A URL is downloaded once into `destinationPath`; a local
+#'   path is read directly (useful for a pre-cut regional copy).
 #' @param wetClasses CWIM3A codes counted as wet. Default: Bog, Fen, Marsh, Swamp.
 #' @param wetThreshold Minimum wet fraction of a target cell for it to be wet.
 #' @param writeTo Optional file to write the result to.
+#' @param destinationPath Where a `url` is downloaded to; passed to [reproducible::preProcess()].
+#'   `NULL` means `getOption("reproducible.destinationPath")`.
 #'
 #' @return A single-layer `SpatRaster` on `to`'s grid, named `"wetland"`: `1` wet, `0` not wet.
 #'
@@ -42,7 +46,7 @@
 #' @seealso [wetlandToLCC()]
 #' @export
 prepInputs_CWIM <- function(to, url = .cwimURL, wetClasses = 1:4, wetThreshold = 0.5,
-                            writeTo = NULL) {
+                            writeTo = NULL, destinationPath = NULL) {
   if (!inherits(to, "SpatRaster")) {
     stop("`to` must be a SpatRaster: it defines the grid the wetland layer is returned on")
   }
@@ -51,17 +55,7 @@ prepInputs_CWIM <- function(to, url = .cwimURL, wetClasses = 1:4, wetThreshold =
 
   src <- url
   if (grepl("^https?://", url)) {
-    src <- paste0("/vsicurl/", url)
-    ## Without these GDAL lists the whole S3 "directory" before opening one file.
-    old <- Sys.getenv(c("GDAL_DISABLE_READDIR_ON_OPEN", "CPL_VSIL_CURL_ALLOWED_EXTENSIONS"),
-                      unset = NA)
-    Sys.setenv(GDAL_DISABLE_READDIR_ON_OPEN = "EMPTY_DIR",
-               CPL_VSIL_CURL_ALLOWED_EXTENSIONS = ".tif")
-    on.exit({
-      for (nm in names(old)) {
-        if (is.na(old[[nm]])) Sys.unsetenv(nm) else do.call(Sys.setenv, as.list(old[nm]))
-      }
-    }, add = TRUE)
+    src <- preProcess(url = url, destinationPath = destinationPath)$targetFilePath
   }
   cw <- terra::rast(src)
 
