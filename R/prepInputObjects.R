@@ -879,6 +879,11 @@ prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", dataVers
 #'   rasterizing, so each pixel holds its latest fire year at or before `latestYear` (a pixel
 #'   burned in 1980 and 2015 holds 1980 for `latestYear = 1990`). Default `Inf`: no limit, each
 #'   pixel holds its most recent fire.
+#' @param urlPre1972 URL of an archive of fires before 1972 to read as well. Since its 2025
+#'   release the Canadian National Fire Database (NFDB) ships those fires in a separate archive,
+#'   `NFDB_poly_pre1972.zip`, beside `NFDB_poly.zip`. The default uses that archive when `url` is
+#'   CWFIS's current-version `NFDB_poly.zip` and `earliestYear` is before 1972, and `NULL`
+#'   otherwise. `NULL` reads `url` only.
 #'
 #' @return a `SpatRaster` layer of fire perimeters with fire year values.
 #'
@@ -921,7 +926,8 @@ prepRawBiomassMap <- function(dataSource = "SCANFI", dataYear = "2020", dataVers
 #' withr::deferred_run()
 #'
 prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestYear = 1950,
-                              latestYear = Inf) {
+                              latestYear = Inf,
+                              urlPre1972 = .nfdbPre1972URL(list(...)$url, earliestYear)) {
   dots <- list(...)
   fun <- if (is.null(dots$fun)) "terra::vect" else dots$fun
   dots$fun <- NULL # need to do this or else it will pass double to the prepInputs
@@ -953,6 +959,18 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
   files <- do.call(preProcess, append(list(fun = fun), preProcessArgs))
   files2 <- files$checkSums[result %in% "OK"]$actualFile
   shpFiles <- grep(files2, pattern = ".shp$", value = TRUE)
+
+  ## Since the 2025 NFDB release the fires before 1972 are in a separate archive beside
+  ## NFDB_poly.zip; without it a raster from the current version silently starts in 1972.
+  if (length(urlPre1972)) {
+    message("Also reading the fires before 1972 from ", urlPre1972)
+    preProcessArgsPre <- preProcessArgs
+    preProcessArgsPre[c("targetFile", "archive", "alsoExtract")] <- NULL
+    preProcessArgsPre$url <- urlPre1972
+    filesPre <- do.call(preProcess, append(list(fun = fun), preProcessArgsPre))
+    filesPre2 <- filesPre$checkSums[result %in% "OK"]$actualFile
+    shpFiles <- unique(c(shpFiles, grep(filesPre2, pattern = ".shp$", value = TRUE)))
+  }
 
   preProcessArgs2 <- preProcessArgs
   preProcessArgs2$url <- NULL
@@ -1033,6 +1051,18 @@ prepInputsFireYear <- function(..., rasterToMatch, fireField = "YEAR", earliestY
   fireRas <- do.call(postProcess, append(list(x = fireRas), postProcessArgs))
 
   return(fireRas)
+}
+
+## The CWFIS archive of fires before 1972 that sits beside `url`, when `url` is the current-version
+## NFDB_poly.zip and `earliestYear` asks for those years; NULL otherwise.
+.nfdbPre1972URL <- function(url, earliestYear) {
+  if (length(url) != 1L || is.na(url) || !isTRUE(earliestYear < 1972)) {
+    return(NULL)
+  }
+  if (!grepl("fire_poly/current_version/NFDB_poly\\.zip$", url)) {
+    return(NULL)
+  }
+  sub("NFDB_poly\\.zip$", "NFDB_poly_pre1972.zip", url)
 }
 
 #' Replace stand age with time since last fire
