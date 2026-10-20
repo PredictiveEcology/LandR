@@ -33,7 +33,8 @@ pixel holds its most recent fire.}
 release the Canadian National Fire Database (NFDB) ships those fires in a separate archive,
 \code{NFDB_poly_pre1972.zip}, beside \code{NFDB_poly.zip}. The default uses that archive when \code{url} is
 CWFIS's current-version \code{NFDB_poly.zip} and \code{earliestYear} is before 1972, and \code{NULL}
-otherwise. \code{NULL} reads \code{url} only.}
+otherwise. It is read only when the records from \code{url} hold no fire before 1972, as a
+local copy of an older release under the same URL does. \code{NULL} reads \code{url} only.}
 }
 \value{
 a \code{SpatRaster} layer of fire perimeters with fire year values.
