@@ -109,6 +109,10 @@ BugReports: https://github.com/PredictiveEcology/LandR/issues
 ByteCompile: yes
 LazyData: true
 Collate:
+    'LANDIS-II-tables.R'
+    'LandR-package.R'
+    'RcppExports.R'
+    'SummarizeCanadianForestRasters.R'
     'assertions.R'
     'biomodWrappers.R'
     'biosim.R'
@@ -123,8 +127,6 @@ Collate:
     'fireSeverity.R'
     'forestLand.R'
     'imports.R'
-    'LANDIS-II-tables.R'
-    'LandR-package.R'
     'lccMapGenerator.R'
     'leadingProportions.R'
     'legacyToTo.R'
@@ -145,7 +147,6 @@ Collate:
     'prepInputs_NTEMS.R'
     'prepInputs_SCANFI_structure.R'
     'prepSpeciesLayers.R'
-    'RcppExports.R'
     'scanfi-access.R'
     'scanfi-v3.R'
     'scanfiMirror.R'
@@ -157,7 +158,6 @@ Collate:
     'sppHarmonize.R'
     'studyArea.R'
     'subsetDataSize.R'
-    'SummarizeCanadianForestRasters.R'
     'terra-raster-utils.R'
     'vignette-artifacts.R'
     'wetland.R'
@@ -167,4 +167,4 @@ Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3
 Config/testthat/parallel: true
 Config/testthat/start-first: prep*
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1
