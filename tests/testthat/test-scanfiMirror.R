@@ -85,6 +85,34 @@ test_that("SCANFI downloads run under the default remap, and leave no global opt
   expect_null(getOption("reproducible.urlRemap"))
 })
 
+test_that("the forest-land land cover reads run under the default remap too", {
+  ## prepInputs_SCANFI_LCC_FAO() reads the land cover of each forest-land year besides `year`'s
+  ## own. Those reads sat outside the per-download remap, so they went to Google Drive.
+  skip_if_not("makeUrlRemap" %in% getNamespaceExports("reproducible"))
+  withr::local_options(list(reproducible.urlRemap = NULL, LandR.scanfiMirror = TRUE,
+                            LandR.forestLandUseCache = NULL, reproducible.useCache = FALSE,
+                            reproducible.cachePath = withr::local_tempdir(),
+                            reproducible.useMemoise = FALSE))
+  lcc <- terra::rast(nrows = 2, ncols = 2, xmin = 0, xmax = 2000, ymin = 0, ymax = 2000,
+                     crs = "EPSG:3978", vals = c(210, 50, 20, 210))
+  remapped <- character()
+  testthat::local_mocked_bindings(
+    prepInputs = function(url = NULL, ...) {
+      if (is.function(getOption("reproducible.urlRemap"))) remapped <<- c(remapped, url)
+      lcc
+    }
+  )
+  suppressMessages(prepInputs_SCANFI_LCC_FAO(year = 2020, dataVersion = "V2",
+                                             forestLandFrom = "lccYears",
+                                             destinationPath = withr::local_tempdir()))
+  forestLandYears <- setdiff(.defaultForestLandYears(.scanfi_v2_years), 2020)
+  expect_length(forestLandYears, 5)
+  for (y in forestLandYears) {
+    expect_true(.scanfiLCCFAOSource(y, "V2")$url %in% remapped, info = paste("year", y))
+  }
+  expect_null(getOption("reproducible.urlRemap"))
+})
+
 test_that("a supplied ageURL reaches prepInputs for SCANFI V1 and V2", {
   withr::local_options(reproducible.cachePath = withr::local_tempdir(), reproducible.useMemoise = FALSE)
   seen <- character()

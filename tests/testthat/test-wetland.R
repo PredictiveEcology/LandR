@@ -108,3 +108,54 @@ test_that("prepInputs_CWIM keeps `to`'s NA cells NA and projects across CRSs", {
 test_that("prepInputs_CWIM wants a raster grid", {
   expect_error(prepInputs_CWIM(to = "not a raster", url = "x.tif"), "must be a SpatRaster")
 })
+
+## The national CWIM3A (5.4 GB) was read over the network through GDAL's /vsicurl/ on every
+## call, so a machine without internet (an HPC compute node) could not build the wetland layer
+## even after an earlier run had fetched it. It is now downloaded once with preProcess() and the
+## local copy is read. Neither test touches the network: a dead proxy fails every request at once.
+
+cwimTarget <- function() {
+  to <- rast(nrows = 2, ncols = 4, xmin = 0, xmax = 960, ymin = 0, ymax = 480, crs = "EPSG:3979")
+  values(to) <- 1
+  to
+}
+cwimURL <- "https://example.invalid/store/cwim.tif"
+offline <- function(env = parent.frame()) {
+  withr::local_envvar(http_proxy = "http://127.0.0.1:9", https_proxy = "http://127.0.0.1:9",
+                      .local_envir = env)
+}
+
+test_that("prepInputs_CWIM fetches a URL with preProcess into destinationPath and reads the copy", {
+  withr::local_package("terra")
+  offline()
+  withr::local_options(reproducible.verbose = 0)
+  f <- makeCwim(0.75)
+  dPath <- withr::local_tempdir()
+  seen <- NULL
+  testthat::local_mocked_bindings(preProcess = function(url = NULL, destinationPath = NULL, ...) {
+    seen <<- list(url = url, destinationPath = destinationPath)
+    dest <- file.path(destinationPath, basename(url))
+    file.copy(f, dest)
+    list(targetFilePath = dest, destinationPath = destinationPath)
+  })
+  out <- prepInputs_CWIM(cwimTarget(), url = cwimURL, destinationPath = dPath)
+  expect_identical(seen, list(url = cwimURL, destinationPath = dPath))
+  expect_identical(as.vector(values(out)),
+                   as.vector(values(prepInputs_CWIM(cwimTarget(), url = f))))
+})
+
+test_that("prepInputs_CWIM reads a copy already in the shared data folder without internet", {
+  withr::local_package("terra")
+  offline()
+  shared <- withr::local_tempdir()
+  withr::local_options(reproducible.verbose = 0, reproducible.destinationPathShared = shared)
+  ## what an earlier run with internet leaves behind: the file and its checksum
+  file.copy(makeCwim(0.75), file.path(shared, basename(cwimURL)))
+  reproducible::Checksums(shared, write = TRUE, files = basename(cwimURL))
+
+  dPath <- withr::local_tempdir()
+  out <- prepInputs_CWIM(cwimTarget(), url = cwimURL, destinationPath = dPath)
+  expect_identical(as.vector(values(out)), rep(c(1, 0, 0, 1), 2))
+  ## linked beside the project's other inputs, as preProcess does for every shared file
+  expect_true(file.exists(file.path(dPath, basename(cwimURL))))
+})

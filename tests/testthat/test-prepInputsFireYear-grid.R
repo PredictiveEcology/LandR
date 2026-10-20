@@ -65,3 +65,77 @@ test_that("prepInputsFireYear(latestYear) keeps the latest fire at or before tha
   ## no fires at all before the limit gives an empty raster, not an error
   expect_true(all(is.na(terra::values(makeFires(latestYear = 1960)))))
 })
+
+## Since its 2025 release the NFDB ships the fires before 1972 in NFDB_poly_pre1972.zip beside
+## NFDB_poly.zip. Reading only NFDB_poly.zip silently dropped 1950-1971 even with earliestYear = 1950.
+test_that("prepInputsFireYear also reads the NFDB archive of fires before 1972", {
+  skip_if_not_installed("terra")
+  crs <- "EPSG:3978"
+  rtm <- terra::rast(terra::ext(0, 2400, 0, 2400), resolution = 240, crs = crs, vals = 1)
+  ## a local copy of the CWFIS layout: .../fire_poly/current_version/{NFDB_poly,NFDB_poly_pre1972}.zip
+  src <- file.path(withr::local_tempdir("nfdbSrc_"), "fire_poly", "current_version")
+  dir.create(src, recursive = TRUE)
+  zipFires <- function(polys, years, name) {
+    v <- terra::vect(polys, crs = crs)
+    v$YEAR <- years
+    terra::writeVector(v, file.path(src, paste0(name, ".shp")))
+    withr::with_dir(src, utils::zip(paste0(name, ".zip"), list.files(src, paste0("^", name, "\\.")),
+                                    flags = "-q"))
+  }
+  zipped <- c(
+    zipFires(c("POLYGON ((600 600, 1200 600, 1200 1200, 600 1200, 600 600))",
+               "POLYGON ((1300 1300, 1800 1300, 1800 1800, 1300 1800, 1300 1300))"),
+             c(1985, 2010), "NFDB_poly"),
+    zipFires(c("POLYGON ((1300 300, 1800 300, 1800 800, 1300 800, 1300 300))",
+               "POLYGON ((300 1500, 800 1500, 800 2000, 300 2000, 300 1500))"),
+             c(1960, -9999), "NFDB_poly_pre1972")
+  )
+  skip_if_not(all(zipped == 0L), "no zip utility")
+  url <- paste0("file://", file.path(src, "NFDB_poly.zip"))
+  makeFires <- function(...) {
+    suppressWarnings(suppressMessages(
+      prepInputsFireYear(rasterToMatch = rtm, destinationPath = withr::local_tempdir("nfdbDest_"),
+                         fireField = "YEAR", url = url, useCache = FALSE, ...)))
+  }
+  years <- function(r) sort(stats::na.omit(unique(terra::values(r, mat = FALSE))))
+
+  expect_equal(years(makeFires()), c(1960, 1985, 2010))
+  expect_equal(years(makeFires(urlPre1972 = NULL)), c(1985, 2010))
+  expect_equal(years(makeFires(earliestYear = 1972)), c(1985, 2010))
+
+  expect_equal(.nfdbPre1972URL(url, 1950), paste0("file://", file.path(src, "NFDB_poly_pre1972.zip")))
+  expect_null(.nfdbPre1972URL("https://example.org/fires/NFDB_poly_20210707.zip", 1950))
+  expect_null(.nfdbPre1972URL(url, 1972))
+  expect_null(.nfdbPre1972URL(NULL, 1950))
+})
+
+## A local copy of an older NFDB release kept under the current-version URL (one never refreshed) already
+## holds the fires before 1972: the pre-1972 archive must not be added to it.
+test_that("prepInputsFireYear skips the pre-1972 archive when the records already reach before 1972", {
+  skip_if_not_installed("terra")
+  crs <- "EPSG:3978"
+  rtm <- terra::rast(terra::ext(0, 2400, 0, 2400), resolution = 240, crs = crs, vals = 1)
+  src <- file.path(withr::local_tempdir("nfdbOld_"), "fire_poly", "current_version")
+  dir.create(src, recursive = TRUE)
+  zipFires <- function(polys, years, name) {
+    v <- terra::vect(polys, crs = crs)
+    v$YEAR <- years
+    terra::writeVector(v, file.path(src, paste0(name, ".shp")))
+    withr::with_dir(src, utils::zip(paste0(name, ".zip"), list.files(src, paste0("^", name, "\\.")),
+                                    flags = "-q"))
+  }
+  zipped <- c(
+    ## the older release: one archive holding 1960 and 1985
+    zipFires(c("POLYGON ((600 600, 1200 600, 1200 1200, 600 1200, 600 600))",
+               "POLYGON ((1300 1300, 1800 1300, 1800 1800, 1300 1800, 1300 1300))"),
+             c(1960, 1985), "NFDB_poly"),
+    ## a 1955 fire elsewhere, only in the separate pre-1972 archive
+    zipFires("POLYGON ((1300 300, 1800 300, 1800 800, 1300 800, 1300 300))", 1955, "NFDB_poly_pre1972")
+  )
+  skip_if_not(all(zipped == 0L), "no zip utility")
+  fires <- suppressWarnings(suppressMessages(
+    prepInputsFireYear(rasterToMatch = rtm, destinationPath = withr::local_tempdir("nfdbOldDest_"),
+                       fireField = "YEAR", url = paste0("file://", file.path(src, "NFDB_poly.zip")),
+                       useCache = FALSE)))
+  expect_equal(sort(stats::na.omit(unique(terra::values(fires, mat = FALSE)))), c(1960, 1985))
+})

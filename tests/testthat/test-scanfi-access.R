@@ -103,3 +103,50 @@ test_that(".withSCANFIAccess names the mirror setting that applies to a V2 Drive
   expect_match(msg(), "check that your reproducible.urlRemap covers this file", fixed = TRUE)
   expect_match(msg(), "from Google Drive", fixed = TRUE)
 })
+
+## No internet: the server cannot be reached. reproducible wraps a Drive failure the same way
+## whether Drive refused the file or the network was down, so the two must be told apart.
+connection_error <- function() simpleError(paste0(
+  "Could not access the Google Drive resource:\n",
+  "  https://drive.google.com/file/d/1nXPS3bpFUESYieNfXO25OKlZJEgqtRnD\n",
+  "  (open it in a browser to confirm it exists and is shared 'Anyone with the link')\n",
+  "  Couldn't connect to server [www.googleapis.com]"
+))
+
+test_that(".withSCANFIAccess says there is no connection when the server cannot be reached", {
+  msg <- function(e) tryCatch(
+    LandR:::.withSCANFIAccess(stop(e), what = "the SCANFI stand age map", dataYear = 2020,
+                              dataVersion = "V2", urlArg = "ageURL"),
+    error = function(e) gsub("[[:space:]]+", " ", conditionMessage(e))
+  )
+  flat <- msg(connection_error())
+  expect_match(flat, "Could not download the SCANFI stand age map (V2 2020)", fixed = TRUE)
+  expect_match(flat, "no internet connection", fixed = TRUE)
+  expect_false(grepl("no access|not a broken link|drive_auth|request access", flat))
+  expect_match(flat, "`ageURL`", fixed = TRUE)
+  expect_match(flat, "Couldn't connect to server", fixed = TRUE)
+
+  ## the mirror's own download error, with no Drive wrapper, is the same situation
+  flat <- msg(simpleError(paste0(
+    "Failed to perform HTTP request.\nCaused by error in `curl::curl_fetch_disk()`:\n",
+    "! Couldn't connect to server [object-arbutus.alliancecan.ca]"
+  )))
+  expect_match(flat, "no internet connection", fixed = TRUE)
+  expect_false(grepl("retry later", flat, fixed = TRUE))
+})
+
+test_that("each access hint fits its source: Drive gets drive_auth(), NFIS gets a download", {
+  err <- tryCatch(
+    LandR:::.withSCANFIAccess(stop(drive_error()), what = "the SCANFI stand age map",
+                              dataVersion = "V2", urlArg = "ageURL"),
+    error = function(e) conditionMessage(e)
+  )
+  ways <- grep("^\\s*\\* ", strsplit(err, "\n")[[1]], value = TRUE)
+  nfis <- grep("opendata.nfis.org", ways, value = TRUE, fixed = TRUE)
+  expect_length(nfis, 1)
+  expect_false(grepl("drive_auth|request access", nfis))
+  expect_match(nfis, "`ageURL`", fixed = TRUE)
+  drive <- grep("drive_auth()", ways, value = TRUE, fixed = TRUE)
+  expect_length(drive, 1)
+  expect_false(grepl("opendata.nfis.org", drive, fixed = TRUE))
+})

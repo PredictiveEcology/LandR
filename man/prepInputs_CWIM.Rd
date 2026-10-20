@@ -9,21 +9,25 @@ prepInputs_CWIM(
   url = .cwimURL,
   wetClasses = 1:4,
   wetThreshold = 0.5,
-  writeTo = NULL
+  writeTo = NULL,
+  destinationPath = NULL
 )
 }
 \arguments{
 \item{to}{A \code{SpatRaster} giving the grid to return, and the study window. Its \code{NA} cells
 are \code{NA} in the result.}
 
-\item{url}{The CWIM3A source. A URL is read through GDAL's \verb{/vsicurl/}; a local path is
-read directly (useful for a pre-cut regional copy).}
+\item{url}{The CWIM3A source. A URL is downloaded once into \code{destinationPath}; a local
+path is read directly (useful for a pre-cut regional copy).}
 
 \item{wetClasses}{CWIM3A codes counted as wet. Default: Bog, Fen, Marsh, Swamp.}
 
 \item{wetThreshold}{Minimum wet fraction of a target cell for it to be wet.}
 
 \item{writeTo}{Optional file to write the result to.}
+
+\item{destinationPath}{Where a \code{url} is downloaded to; passed to \code{\link[reproducible:preProcess]{reproducible::preProcess()}}.
+\code{NULL} means \code{getOption("reproducible.destinationPath")}.}
 }
 \value{
 A single-layer \code{SpatRaster} on \code{to}'s grid, named \code{"wetland"}: \code{1} wet, \code{0} not wet.
@@ -35,8 +39,10 @@ which forest stands on wet ground -- the distinction NTEMS draws with classes 80
 Inventory Map v3A (CWIM3A; Mahdianpari et al. 2021): 10 m, national, 2016-2020 imagery.
 }
 \details{
-Only the study window is read: the source is a cloud-optimised GeoTIFF, so \code{terra} fetches
-the tiles it needs rather than the national raster.
+A URL is downloaded once, with \code{\link[reproducible:preProcess]{reproducible::preProcess()}}, into \code{destinationPath} (and
+the shared data folder, \code{getOption("reproducible.destinationPathShared")}, if one is set),
+and the local copy is read from then on, so a machine without internet (an HPC compute
+node) can build the layer once the file is there.
 
 CWIM3A codes are 1 Bog, 2 Fen, 3 Marsh, 4 Swamp, 5 Shallow water; 15 is NoData, and CWIM3A
 maps nothing but those five classes, so NoData means "not wetland". Shallow water is not

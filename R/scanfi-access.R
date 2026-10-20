@@ -7,9 +7,12 @@
 ## ... Client error: (404) Not Found" -- which reads like a dead link and invites
 ## a hunt for a broken link. It is a permissions problem, so say so, and name the
 ## ways out. SCANFI v2 is also on a public mirror; a failure there is a network problem.
+## With no internet at all (an HPC compute node) Drive and the mirror fail the same
+## way, and reproducible wraps the Drive one in the same "Could not access" text, so
+## that case is told apart first: a local copy fixes it, access does not.
 ## ---------------------------------------------------------------------------
 
-## Official SCANFI distribution point; where to ask for access.
+## Official SCANFI distribution point; where to download the files yourself.
 .scanfiAccessURL <- "https://opendata.nfis.org/"
 
 ## Does this error look like Google Drive refusing us a file? Matches both the
@@ -31,7 +34,8 @@
   dataVersion = NULL,
   urlArg = NULL,
   alternatives = NULL,
-  url = NULL
+  url = NULL,
+  offline = FALSE
 ) {
   qualifier <- paste(c(dataVersion, dataYear), collapse = " ")
   original <- paste(conditionMessage(e), collapse = "\n")
@@ -39,6 +43,7 @@
   ## the error says which server refused: Drive, whatever remap was meant to apply, or the mirror
   fromDrive <- grepl("drive.google.com|google drive", original, ignore.case = TRUE)
   fromMirror <- !fromDrive && .remapsToMirror(url, dataVersion)
+  ownCopy <- if (!is.null(urlArg)) paste0("pass your own copy with `", urlArg, "`")
 
   mirrorWay <- if (identical(dataVersion, "V2")) {
     if (!is.null(getOption("reproducible.urlRemap"))) {
@@ -50,11 +55,19 @@
       "set options(LandR.scanfiMirror = TRUE) to use the public SCANFI mirror"
     }
   }
-  ways <- if (!fromMirror) {
+  ways <- if (offline) {
+    c(
+      paste0("run once with internet: the file is then kept in destinationPath (and in ",
+             "getOption(\"reproducible.destinationPathShared\") if set) and read from there"),
+      ownCopy
+    )
+  } else if (!fromMirror) {
     c(
       mirrorWay,
-      paste0("request access at ", .scanfiAccessURL, ", then run googledrive::drive_auth()"),
-      if (!is.null(urlArg)) paste0("pass your own copy with `", urlArg, "`"),
+      paste0("ask for access to the SCANFI Google Drive folder, then run ",
+             "googledrive::drive_auth() with that account"),
+      paste0("download it from ", .scanfiAccessURL,
+             if (!is.null(urlArg)) paste0(" and pass it with `", urlArg, "`")),
       if (length(alternatives)) paste0("use ", paste0('dataSource = "', alternatives, '"', collapse = " or "))
     )
   }
@@ -62,7 +75,9 @@
   paste0(
     "Could not download ", what,
     if (nzchar(qualifier)) paste0(" (", qualifier, ")"),
-    if (fromMirror) {
+    if (offline) {
+      ": no internet connection, so the server could not be reached."
+    } else if (fromMirror) {
       " from the SCANFI mirror. This is usually a network problem; retry later."
     } else {
       paste0(
@@ -77,9 +92,9 @@
 }
 
 ## Wrap a SCANFI download so an access failure explains itself. Anything that is
-## not a Drive access problem is re-thrown untouched. `enabled` lets functions
-## that serve several data sources wrap the call in place, without duplicating it
-## for the SCANFI and non-SCANFI branches.
+## neither a connection failure nor a Drive access problem is re-thrown untouched.
+## `enabled` lets functions that serve several data sources wrap the call in place,
+## without duplicating it for the SCANFI and non-SCANFI branches.
 .withSCANFIAccess <- function(
   expr,
   what,
@@ -94,10 +109,12 @@
     return(expr)
   }
   tryCatch(.withScanfiRemap(expr), error = function(e) {
-    if (!.isGoogleDriveAccessError(e)) {
+    offline <- reproducible::isConnectionError(e)
+    if (!offline && !.isGoogleDriveAccessError(e)) {
       stop(e)
     }
-    stop(.scanfiAccessMessage(e, what, dataYear, dataVersion, urlArg, alternatives, url), call. = FALSE)
+    stop(.scanfiAccessMessage(e, what, dataYear, dataVersion, urlArg, alternatives, url, offline),
+         call. = FALSE)
   })
 }
 

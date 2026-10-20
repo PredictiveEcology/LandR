@@ -9,7 +9,8 @@ prepInputsFireYear(
   rasterToMatch,
   fireField = "YEAR",
   earliestYear = 1950,
-  latestYear = Inf
+  latestYear = Inf,
+  urlPre1972 = .nfdbPre1972URL(list(...)$url, earliestYear)
 )
 }
 \arguments{
@@ -27,6 +28,13 @@ raster operations (i.e., the one used throughout the simulation).
 rasterizing, so each pixel holds its latest fire year at or before \code{latestYear} (a pixel
 burned in 1980 and 2015 holds 1980 for \code{latestYear = 1990}). Default \code{Inf}: no limit, each
 pixel holds its most recent fire.}
+
+\item{urlPre1972}{URL of an archive of fires before 1972 to read as well. Since its 2025
+release the Canadian National Fire Database (NFDB) ships those fires in a separate archive,
+\code{NFDB_poly_pre1972.zip}, beside \code{NFDB_poly.zip}. The default uses that archive when \code{url} is
+CWFIS's current-version \code{NFDB_poly.zip} and \code{earliestYear} is before 1972, and \code{NULL}
+otherwise. It is read only when the records from \code{url} hold no fire before 1972, as a
+local copy of an older release under the same URL does. \code{NULL} reads \code{url} only.}
 }
 \value{
 a \code{SpatRaster} layer of fire perimeters with fire year values.
