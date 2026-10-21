@@ -1,5 +1,7 @@
 # LandR (development version)
 
+* The SCANFI v3 download message says when there is no internet connection (`reproducible::isConnectionError()`), and that the year's file must already be local (run once on a machine with internet, or fetch it from the FTP mirror there), instead of saying the server can be slow under load and to retry later, which on a compute node without internet never helps. Any other failure keeps the retry message.
+
 * `overlayLCCs()` with a `remapTable` now returns the remapped land cover. It computed each pixel's remapped class but wrote out the original one, so only the pixels re-imputed through `classesToReplace` changed: a pixel the table made `NA` (non-vegetated) kept its original class. In LandWeb, where a current-condition layer marks water and barren land non-vegetated, 15,161 forest pixels of one study area stayed forest on land that layer calls water or barren. The re-imputed pixels also take their new class from the remapped land cover now, so a pixel the table made non-vegetated no longer counts as a neighbour.
 
 * `overlayLCCs()` with a `remapTable` now re-imputes every pixel the table sends to a class in `classesToReplace`, including a pixel with no class in one of the input layers. Such pixels kept the placeholder class, and when every pixel to re-impute was one of them `overlayLCCs()` stopped with a `data.table` join error (#283).

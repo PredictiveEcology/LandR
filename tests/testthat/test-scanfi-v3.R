@@ -94,6 +94,29 @@ test_that(".withSCANFIv3Access explains an access failure and keeps the original
   expect_match(flat, "HTTP response code said 403", fixed = TRUE)
 })
 
+test_that(".withSCANFIv3Access says there is no connection when the server cannot be reached", {
+  msg <- function(e) tryCatch(
+    LandR:::.withSCANFIv3Access(stop(e), what = "the SCANFI v3 land cover map", dataYear = 2020),
+    error = function(e) gsub("[[:space:]]+", " ", conditionMessage(e))
+  )
+
+  ## no internet: retrying never helps, so say so and point to a local copy
+  for (original in c("curl error: Could not resolve host: ftp.maps.canada.ca",
+                     "Failed to connect to ftp.maps.canada.ca port 443: Connection refused")) {
+    flat <- msg(simpleError(original))
+    expect_match(flat, "Could not download the SCANFI v3 land cover map (V3 2020)", fixed = TRUE)
+    expect_match(flat, "no internet connection", fixed = TRUE)
+    expect_match(flat, "machine with internet", fixed = TRUE)
+    expect_false(grepl("retry later|under load", flat))
+    expect_match(flat, original, fixed = TRUE)
+  }
+
+  ## the server refusing us is a different situation and keeps the retry advice
+  flat <- msg(simpleError("HTTP response code said 403"))
+  expect_match(flat, "retry later", fixed = TRUE)
+  expect_false(grepl("no internet connection", flat, fixed = TRUE))
+})
+
 test_that(".withSCANFIv3Access leaves unrelated errors alone", {
   err <- tryCatch(
     LandR:::.withSCANFIv3Access(stop("something else broke"), what = "the SCANFI v3 land cover map"),
