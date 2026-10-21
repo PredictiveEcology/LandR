@@ -54,3 +54,40 @@ test_that("overlayLCCs() keeps the non-vegetated pixels beside a re-imputed one"
   )
   expect_equal(terra::values(out, mat = FALSE), c(NA, 220L, NA, NA, 220L))
 })
+
+## a pixel with no LCC class that CC calls forest (1) is re-imputed from its neighbours
+remapNA <- function(lccClasses, ccClasses) {
+  remap <- remapRow(lccClasses, ccClasses)
+  remap[is.na(LCC) & CC %in% 1L, newLCC := 99L]
+  remap[]
+}
+
+test_that("overlayLCCs() re-imputes pixels the remap sends from NA to a class to replace", {
+  withr::local_options(reproducible.rasterRead = "terra::rast")
+  lcc <- lccRow(c(210L, NA, 210L))
+  cc <- lccRow(c(1L, 1L, 1L))
+  out <- overlayLCCs(
+    list(CC = cc, LCC = lcc),
+    forestedList = list(CC = 1L, LCC = 210L),
+    outputLayer = "LCC",
+    remapTable = remapNA(210L, 1L),
+    classesToReplace = 99L,
+    availableERC_by_Sp = NULL
+  )
+  expect_equal(terra::values(out, mat = FALSE), c(210L, 210L, 210L))
+})
+
+test_that("overlayLCCs() re-imputes pixels sent to a class to replace with and without an LCC class", {
+  withr::local_options(reproducible.rasterRead = "terra::rast")
+  lcc <- lccRow(c(210L, NA, 210L, 210L))
+  cc <- lccRow(c(1L, 1L, 17L, 1L))
+  out <- overlayLCCs(
+    list(CC = cc, LCC = lcc),
+    forestedList = list(CC = 1L, LCC = 210L),
+    outputLayer = "LCC",
+    remapTable = remapNA(210L, c(1L, 17L)),
+    classesToReplace = 99L,
+    availableERC_by_Sp = NULL
+  )
+  expect_equal(terra::values(out, mat = FALSE), c(210L, 210L, 210L, 210L))
+})

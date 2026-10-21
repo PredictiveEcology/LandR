@@ -178,7 +178,9 @@ overlayLCCs <- function(
         a <- convertUnwantedLCC(
           classesToReplace = classesToReplace,
           rstLCC = remapped,
-          availableERC_by_Sp = na.omit(dt)[, c("initialEcoregionCode", "pixelIndex")],
+          ## NA in the remapped class only: a pixel the remap gives a class to replace is
+          ## re-imputed even where an input layer had no class
+          availableERC_by_Sp = na.omit(dt[, c("initialEcoregionCode", "pixelIndex")]),
           method = method
         )
         dt <- a[dt, on = "pixelIndex"]
