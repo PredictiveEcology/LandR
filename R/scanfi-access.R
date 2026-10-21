@@ -142,35 +142,53 @@
     )
 }
 
-.scanfiV3AccessMessage <- function(e, what, dataYear = NULL) {
+.scanfiV3AccessMessage <- function(e, what, dataYear = NULL, offline = FALSE) {
   qualifier <- paste(c("V3", dataYear), collapse = " ")
+  ftpWay <- paste0("fetch the year's file from the FTP mirror ", .scanfiV3FTPURL)
+
+  if (offline) {
+    reason <- paste0(
+      ": no internet connection, so NRCan's server (ftp.maps.canada.ca) could not be reached.\n\n",
+      "SCANFI v3 is read from that server as one large Cloud-Optimized GeoTIFF per year, so\n",
+      "on this machine the year's file must already be local."
+    )
+    ways <- c("run once on a machine with internet, so the file is downloaded",
+              paste0("or ", ftpWay, " on a machine with internet"))
+  } else {
+    reason <- paste0(
+      ".\n\n",
+      "SCANFI v3 is read from NRCan's server (ftp.maps.canada.ca) as one large\n",
+      "Cloud-Optimized GeoTIFF per year; the server can be slow or unreachable under load."
+    )
+    ways <- c("retry later", paste0("or ", ftpWay, " instead"))
+  }
 
   paste0(
     "Could not download ",
     what,
     if (nzchar(qualifier)) paste0(" (", qualifier, ")") else "",
-    ".\n\n",
-    "SCANFI v3 is read from NRCan's server (ftp.maps.canada.ca) as one large\n",
-    "Cloud-Optimized GeoTIFF per year; the server can be slow or unreachable under load.\n\n",
+    reason, "\n\n",
     "To resolve it:\n",
-    "  * retry later\n",
-    "  * or fetch the year's file from the FTP mirror instead: ", .scanfiV3FTPURL, "\n\n",
+    paste0("  * ", ways, "\n", collapse = ""),
+    "\n",
     "Original error:\n",
     paste0("  ", strsplit(paste(conditionMessage(e), collapse = "\n"), "\n")[[1]], collapse = "\n")
   )
 }
 
-## Wrap a SCANFI v3 read so an access failure explains itself. Anything else is
-## re-thrown untouched.
+## Wrap a SCANFI v3 read so an access failure explains itself. With no internet
+## (reproducible::isConnectionError()) retrying never helps, so the message says the
+## file must already be local instead. Anything else is re-thrown untouched.
 .withSCANFIv3Access <- function(expr, what, dataYear = NULL, enabled = TRUE) {
   if (!isTRUE(enabled)) {
     return(expr)
   }
 
   tryCatch(expr, error = function(e) {
-    if (!.isSCANFIv3AccessError(e)) {
+    offline <- reproducible::isConnectionError(e)
+    if (!offline && !.isSCANFIv3AccessError(e)) {
       stop(e)
     }
-    stop(.scanfiV3AccessMessage(e, what, dataYear), call. = FALSE)
+    stop(.scanfiV3AccessMessage(e, what, dataYear, offline), call. = FALSE)
   })
 }

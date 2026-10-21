@@ -160,19 +160,27 @@ overlayLCCs <- function(
 
       setkeyv(dt, names(LCCs))
       setkeyv(remapTable, names(LCCs))
-      dt2 <- merge(dt, remapTable, all.x = TRUE) ## TODO: use 'dt' instead of 'dt2'
-      dt2[, ":="(initialEcoregionCode = newLCC, ecoregionCode = newLCC)]
-      dt2[, newLCC := NULL]
+      ## every pixel takes its remapped class, NA (non-vegetated) included; the output used to keep
+      ## the original classes, so only the pixels re-imputed below took the remap into account
+      dt <- merge(dt, remapTable, all.x = TRUE)
+      dt[, ":="(initialEcoregionCode = newLCC, ecoregionCode = newLCC)]
+      dt[, newLCC := NULL]
+      setkey(dt, pixelIndex)
 
-      dt1 <- dt2[initialEcoregionCode %in% classesToReplace, c("initialEcoregionCode", "pixelIndex")]
+      dt1 <- dt[initialEcoregionCode %in% classesToReplace, c("initialEcoregionCode", "pixelIndex")]
 
       ## It's possible that there are no pixels with classesToReplace
       if (any(classesToReplace %in% dt1$initialEcoregionCode)) {
+        ## neighbours come from the remapped land cover, so a pixel the remap made non-vegetated
+        ## does not count towards the class a re-imputed pixel takes
+        remapped <- LCCs[[outputLayer]]
+        remapped[] <- dt$ecoregionCode
         a <- convertUnwantedLCC(
           classesToReplace = classesToReplace,
-          rstLCC = LCCs[[outputLayer]],
-          # theUnwantedPixels = dt1$pixelIndex,
-          availableERC_by_Sp = na.omit(dt2)[, c("initialEcoregionCode", "pixelIndex")],
+          rstLCC = remapped,
+          ## NA in the remapped class only: a pixel the remap gives a class to replace is
+          ## re-imputed even where an input layer had no class
+          availableERC_by_Sp = na.omit(dt[, c("initialEcoregionCode", "pixelIndex")]),
           method = method
         )
         dt <- a[dt, on = "pixelIndex"]
