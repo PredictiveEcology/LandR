@@ -1,10 +1,10 @@
 utils::globalVariables(c(
   ".", "..cols", "..colsToSubset", "..columnsForPG", "..newCols", ".I", ":=", "..groupVar",
   "age", "age2", "allValid", "aNPPAct", "cover", "coverOrig", "cumCells", "drawTarget",
-  "dist", "distCells", "ecoregion", "ecoregionGroup", "firstPixel",
+  "dist", "distCells", "e", "ecoregion", "ecoregionGroup", "firstPixel", "i.ecoregionGroup",
   "hasBadAge", "imputedAge", "initialEcoregion", "initialEcoregionCode", "initialPixels",
   "lcc", "maxAge", "maxANPP", "maxB", "maxB_eco", "mortality", "nCells", "new", "newPossLCC",
-  "noPixels",
+  "n", "noPixels",
   "oldSumB", "ord", "outBiomass", "oldEcoregionGroup", "selfLcc",
   "newPG", "pixelGroup2", "pixelIndex", "pixels", "planted", "Provenance", "possERC",
   "speciesposition", "speciesGroup", "speciesInt", "state", "str", "sumB",
