@@ -1,9 +1,9 @@
 # Thin caller — shared logic lives in PredictiveEcology/actions (reusable workflow).
 on:
   push:
-    branches: [main, development]
+    branches: [main, development, modsForFireSense]
   pull_request:
-    branches: [main, development]
+    branches: [main, development, modsForFireSense]
 
 name: test-coverage
 
