@@ -134,9 +134,11 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
     sppColorVect <- sppColors(sppEquiv, sppEquivCol, newVals = "Mixed", palette = "Accent")
     message("No 'sppColorVect' provided; will make one with Glasbey or Accent palette")
   } else {
+    ## several names in sppNameVector can be one species in sppEquivCol (merged species), so
+    ## count the species they become, not the names
     if (any(grepl("Mixed", names(sppColorVect)))) {
       if (length(sppColorVect) != (length(unique(sppEquiv[[sppEquivCol]])) + 1) ||
-        length(sppColorVect) != (length(sppNameVector) + 1)) {
+        length(sppColorVect) != (length(unique(sppNameVectorInSppEquivCol)) + 1)) {
         stop(
           "Length of 'sppColorVect' differs from number species in final 'sppEquiv'.",
           " Check species provided in 'sppColorVect', 'sppNameVector' and/or ",
@@ -145,7 +147,7 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
       }
     } else {
       if (length(sppColorVect) != length(unique(sppEquiv[[sppEquivCol]])) ||
-        length(sppColorVect) != length(sppNameVector)) {
+        length(sppColorVect) != length(unique(sppNameVectorInSppEquivCol))) {
         stop(
           "Length of 'sppColorVect' differs from number species in final 'sppEquiv'.",
           " Check species provided in 'sppColorVect', 'sppNameVector' and/or ",
