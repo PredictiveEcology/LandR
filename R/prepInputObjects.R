@@ -333,15 +333,11 @@ makeMinRelativeB <- function(pixelCohortData) {
   ## D. Cyr's values result in too many cohorts in more moisture-limited forests of Western Canada.
   ## https://github.com/dcyr/LANDIS-II_IA_generalUseFiles/blob/master/LandisInputs/BSW/biomass-succession-main-inputs_BSW_Baseline.txt
   ##
-  ## Adjusted values for western forests:
+  ## Adjusted values for western forests are in minRelativeBDefaults()
+  ## (D. Cyr's X1-X5 were 0.2, 0.4, 0.5, 0.7, 0.9).
   minRelativeB <- data.frame(
     ecoregionGroup = as.factor(levels(pixelData$ecoregionGroup)),
     minRelativeBDefaults()
-    # X1 = 0.15, ## 0.2
-    # X2 = 0.25, ## 0.4
-    # X3 = 0.50, ## 0.5
-    # X4 = 0.75, ## 0.7
-    # X5 = 0.85  ## 0.9
   )
 
   return(minRelativeB)
@@ -733,9 +729,9 @@ prepInputsStandAgeMap <- function(
 #'
 #'
 #' @param dataSource Character. One of KNN, NTEMS, or SCANFI.
-#'   Defaults to KNN for `dataYear` 2001.
+#'   Defaults to SCANFI (V2) for `dataYear` 2020.
 #'   Also available:
-#'   - KNN for `dataYear` 2011;
+#'   - KNN for `dataYear` 2001 or 2011;
 #'   - NTEMS for `dataYear` 2015;
 #'   - SCANFI for `dataYear` 2000, 2010, or 2020.
 #'

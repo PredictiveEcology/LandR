@@ -240,7 +240,9 @@
   `options(reproducible.urlRemap = scanfiUrlRemap())` -- only if no remap is set and
   `LandR.scanfiMirror` is `TRUE` (the default). Species folders are remapped too, so listing them
   needs no Google login. A remap you set yourself is never replaced; `scanfiUrlRemap()` is
-  exported so it can be combined with one.
+  exported so it can be combined with one. (Later changed: LandR no longer sets
+  `reproducible.urlRemap` when it loads; the remap applies only during each SCANFI download.
+  See the `.onLoad()` / `reproducible.urlRemap` entry above.)
 
 * new `prepInputs_CWIM()` builds a wetland *site* layer from the Canadian Wetland Inventory Map
   v3A (10 m, national, public cloud-optimised GeoTIFF), reading only the study window. SCANFI's
@@ -275,7 +277,9 @@
   `getOption("NTEMS.mixedwoodProp", getOption("LandR.<which>LeadingProportion", <default>))`
   fallthrough still reaches the inner default. The package-level help now points at
   `LandROptions()` rather than repeating a two-option list that said `LandR.assertions`
-  defaults to `FALSE`, when `.onLoad()` has always set it to `TRUE`.
+  defaults to `FALSE`, when `.onLoad()` has always set it to `TRUE`. (Later changed:
+  `NTEMS.mixedwoodProp` and the `LandR.*LeadingProportion` options were removed; see "Two
+  leading/mixedwood thresholds replace three options" above.)
 
 * `speciesInStudyArea()` also returns `sppEquiv`: the rows of `sppEquivalencies_CA` for the
   species in the study area, without `_Spp` genus entries, only species with LANDIS traits,
@@ -326,6 +330,9 @@
   changes. The two inner defaults differ by history rather than by concept: both are the same
   purity threshold on a biomass-like share, and 0.75 is the NTEMS/EOSD value (Wulder & Nelson
   2003: coniferous or broadleaf at 75% or more of total basal area, mixed wood below that).
+  (Later replaced: these options are gone, and `LandR.mixedwoodProp` and
+  `LandR.leadingSpeciesProp` set the thresholds; see "Two leading/mixedwood thresholds replace
+  three options" above.)
 * **`loadSCANFISpeciesLayers()` and `prepSpeciesLayers_SCANFI()` now take the `*to` family
   (`to`, `cropTo`, `projectTo`, `maskTo`) as formals**, as a first step in retiring
   `rasterToMatch`/`studyArea`. Both still accept the legacy pair -- it arrives through `...`

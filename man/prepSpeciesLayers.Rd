@@ -162,7 +162,8 @@ Download and prepare species layers for a given study area, from one of several 
 \item \code{\link[=prepSpeciesLayers_KNN]{prepSpeciesLayers_KNN()}} uses the layers from Beaudoin \emph{et al.} (2014, 2017);
 \item \code{\link[=prepSpeciesLayers_MBFRI]{prepSpeciesLayers_MBFRI()}} uses data derived from Manitoba Forest Resource Inventories;
 \item \code{\link[=prepSpeciesLayers_NTEMS]{prepSpeciesLayers_NTEMS()}} uses the National Terrestrial Ecosystem Monitoring System for
-Canada (NTEMS) tree species data described in Hermosilla \emph{et al.} (2024);
+Canada (NTEMS) tree species data described in Hermosilla \emph{et al.} (2024)
+(not yet implemented);
 \item \code{\link[=prepSpeciesLayers_ONFRI]{prepSpeciesLayers_ONFRI()}} uses data derived from Ontario Forest Resource Inventories;
 \item \code{\link[=prepSpeciesLayers_Pickell]{prepSpeciesLayers_Pickell()}} uses data prepared for Western Canada by Pickell & Coops (2016)
 as part of the LandWeb project;

@@ -13,10 +13,10 @@ prepRawBiomassMap(
 }
 \arguments{
 \item{dataSource}{Character. One of KNN, NTEMS, or SCANFI.
-Defaults to KNN for \code{dataYear} 2001.
+Defaults to SCANFI (V2) for \code{dataYear} 2020.
 Also available:
 \itemize{
-\item KNN for \code{dataYear} 2011;
+\item KNN for \code{dataYear} 2001 or 2011;
 \item NTEMS for \code{dataYear} 2015;
 \item SCANFI for \code{dataYear} 2000, 2010, or 2020.
 }}
