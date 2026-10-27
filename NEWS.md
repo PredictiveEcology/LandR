@@ -7,6 +7,8 @@
   draws stay serial on the main thread, so output is bit-identical for any thread count and to
   `useCpp = FALSE`. `src/Makevars` and `src/Makevars.win` add `$(SHLIB_OPENMP_CXXFLAGS)`; without
   OpenMP the package builds and runs serially.
+* `sppHarmonize()` now accepts its own output when several names in `sppNameVector` are one species in `sppEquivCol` (e.g. `PSEU_MEN` and `PSEU_MEN_GLA` are both `Pseu_men`). It compared the number of colours with the number of names, not species, so the second module to call it (Biomass_borealDataPrep after Biomass_speciesData) stopped with "Length of 'sppColorVect' differs" whenever species merged, as in southern-interior BC study areas with no `sppEquiv` supplied.
+
 * The SCANFI v3 download message says when there is no internet connection (`reproducible::isConnectionError()`), and that the year's file must already be local (run once on a machine with internet, or fetch it from the FTP mirror there), instead of saying the server can be slow under load and to retry later, which on a compute node without internet never helps. Any other failure keeps the retry message.
 
 * `overlayLCCs()` with a `remapTable` now returns the remapped land cover. It computed each pixel's remapped class but wrote out the original one, so only the pixels re-imputed through `classesToReplace` changed: a pixel the table made `NA` (non-vegetated) kept its original class. In LandWeb, where a current-condition layer marks water and barren land non-vegetated, 15,161 forest pixels of one study area stayed forest on land that layer calls water or barren. The re-imputed pixels also take their new class from the remapped land cover now, so a pixel the table made non-vegetated no longer counts as a neighbour.
