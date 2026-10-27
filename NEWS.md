@@ -363,6 +363,8 @@
 
 ## Dependency changes
 
+* LandR now needs R >= 4.4 (was 4.3), the oldest R version its checks run on.
+
 * **`BioSIM (>= 1.1.0)` is now required** where BioSIM is used: 1.1.0 removed
   `getModelOutput()` in favour of `generateWeather()`, which takes `modelNames` rather than
   `modelName` and returns a named list instead of a single `data.frame`.
