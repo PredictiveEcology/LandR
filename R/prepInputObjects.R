@@ -143,7 +143,7 @@ makePixelTable <- function(
     message("Setting pixels to NA where there is NA in 'ecoregionMap'")
   }
 
-  message(cli::col_blue("rm NAs, leaving", cli::col_magenta(NROW(pixelTable)), "pixels with data"))
+  message(cli::col_blue("rm NAs, leaving ", cli::col_magenta(NROW(pixelTable)), " pixels with data"))
   message(cli::col_blue(
     "This is the summary of the input data for age, ecoregionGroup, biomass, speciesLayers:"
   ))

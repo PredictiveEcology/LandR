@@ -675,7 +675,7 @@ describeCohortData <- function(cohortData) {
   out <- list()
   if (val %in% colnames(cohortData)) {
     pixelsNA <- NROW(cohortData[is.na(get(val)), unique("pixelIndex"), with = FALSE])
-    message(cli::col_magenta("Pixels with missing", val, ":", format(pixelsNA, big.mark = ",")))
+    message(cli::col_magenta("Pixels with missing ", val, ": ", format(pixelsNA, big.mark = ",")))
     pixelsZero <- NROW(cohortData[, all(get(val) == 0), by = "pixelIndex"][get("V1") == TRUE])
     message(cli::col_magenta("Pixels with all(", val, " == 0): ", format(pixelsZero, big.mark = ",")))
     pixelsBiomassNonZero <- NROW(cohortData[, any(get(val) > 0), by = "pixelIndex"][
@@ -1204,26 +1204,26 @@ dropUnsupportedSpecies <- function(cohortData, minShare = 0) {
   inputDataTable[, totalCover := rowSums(.SD), .SDcols = newCoverColNames]
   whEnoughCover <- inputDataTable$totalCover > minCoverThreshold
   message(cli::col_green(
-    "  -- Removing all pixels with totalCover <= minCoverThreshold (affects",
+    "  -- Removing all pixels with totalCover <= minCoverThreshold (affects ",
     sum(!whEnoughCover),
-    "of",
+    " of ",
     NROW(inputDataTable),
-    "pixels)"
+    " pixels)"
   ))
-  message(cli::col_green("     --> resulting in", sum(whEnoughCover), "pixels)"))
+  message(cli::col_green("     --> resulting in ", sum(whEnoughCover), " pixels"))
   inputDataTable <- inputDataTable[whEnoughCover]
 
   whAgeEqZero <- which(inputDataTable$age == 0)
 
   if (!is.null(inputDataTable[["totalBiomass"]])) {
     message(cli::col_green(
-      "  -- Setting TotalBiomass in pixel to 0 where age == 0 (affects",
+      "  -- Setting TotalBiomass in pixel to 0 where age == 0 (affects ",
       length(whAgeEqZero),
-      "of",
+      " of ",
       NROW(inputDataTable),
-      "pixels)"
+      " pixels)"
     ))
-    message(cli::col_green("     --> keeping ", NROW(inputDataTable), "pixels)"))
+    message(cli::col_green("     --> keeping ", NROW(inputDataTable), " pixels"))
     ## correct B in a separate column to keep track of imputed pixels, then replace column
     inputDataTable[, `:=`(totalBiomass2 = totalBiomass)]
     inputDataTable[whAgeEqZero, `:=`(totalBiomass2 = 0)]
@@ -1233,13 +1233,13 @@ dropUnsupportedSpecies <- function(cohortData, minShare = 0) {
 
     whTotalBEqZero <- which(inputDataTable$totalBiomass == 0)
     message(cli::col_green(
-      "  -- Setting age in pixel to 0 where totalBiomass == 0 (affects",
+      "  -- Setting age in pixel to 0 where totalBiomass == 0 (affects ",
       length(whTotalBEqZero),
-      "of",
+      " of ",
       NROW(inputDataTable),
-      "pixels)"
+      " pixels)"
     ))
-    message(cli::col_green("     --> keeping ", NROW(inputDataTable), "pixels)"))
+    message(cli::col_green("     --> keeping ", NROW(inputDataTable), " pixels"))
     ## correct age in a separate column to keep track of imputed pixels, then replace column
     inputDataTable[, `:=`(age2 = age)]
     inputDataTable[whTotalBEqZero, `:=`(age2 = 0)]
@@ -1258,15 +1258,15 @@ dropUnsupportedSpecies <- function(cohortData, minShare = 0) {
   ## Remove all cover <= minCoverThreshold
   whCoverGTMinCover <- which(cohortData$cover > minCoverThreshold)
   message(cli::col_green(
-    "  -- Removing all cohorts with cover <= minCoverThreshold (affects",
+    "  -- Removing all cohorts with cover <= minCoverThreshold (affects ",
     NROW(cohortData) - length(whCoverGTMinCover),
-    "of",
+    " of ",
     NROW(cohortData),
-    "cohorts"
+    " cohorts)"
   ))
-  message(cli::col_green("     --> resulting in", length(whCoverGTMinCover), "cohorts)"))
+  message(cli::col_green("     --> resulting in ", length(whCoverGTMinCover), " cohorts"))
   cohortData <- cohortData[whCoverGTMinCover]
-  message(cli::col_green("     --> resulting in", length(unique(cohortData$pixelIndex)), "pixels)"))
+  message(cli::col_green("     --> resulting in ", length(unique(cohortData$pixelIndex)), " pixels"))
 
   cohortData <- dropUnsupportedSpecies(cohortData, minSpeciesEcoregionShare)
 
@@ -1554,7 +1554,7 @@ makeAndCleanInitialCohortData <- function(
         by = c("initialEcoregionCode", "speciesCode"),
         doSubset = doSubset
       )
-      message(cli::col_blue("Impute missing age values: started", Sys.time()))
+      message(cli::col_blue("Impute missing age values: started ", Sys.time()))
 
       ## The fitting data MUST be part of the cache key. With `omitArgs = ".specialData"`
       ## the key was only the formula -- identical for every study area -- plus the
@@ -1575,7 +1575,7 @@ makeAndCleanInitialCohortData <- function(
         ))),
         .specialData = cohortDataMissingAgeUnique
       )
-      message(cli::col_blue("                           completed", Sys.time()))
+      message(cli::col_blue("                           completed ", Sys.time()))
 
       # paste with capture.output keeps table structure intact
       messageDF(outAge$rsq, 3, "blue")
@@ -1873,7 +1873,7 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
         cli::col_blue(". "),
         cli::col_blue(
           "Formula changed to\n",
-          cli::col_magenta(paste0(format(modelFn2, appendLF = FALSE), collapse = ""))
+          cli::col_magenta(paste(trimws(deparse(modelFn2)), collapse = " "))
         )
       )
     }
@@ -2130,14 +2130,14 @@ makeCohortDataFiles <- function(
 
   lostPixels <- setdiff(pixelCohortData$pixelIndex, pixelCohortData2$pixelIndex)
   message(cli::col_green(
-    "     affected",
+    "     affected ",
     length(whBEqZeroAgeGT0),
-    "cohorts, in",
+    " cohorts, in ",
     length(lostPixels),
-    "pixels;"
+    " pixels;"
   ))
   lenUniquePix <- length(unique(pixelCohortData2$pixelIndex))
-  message(cli::col_green("     leaving", lenUniquePix, "pixels"))
+  message(cli::col_green("     leaving ", lenUniquePix, " pixels"))
   pixelFateDT <- pixelFate(
     pixelFateDT,
     fate = "rm pixels with Biomass == 0, after updating young cohort B",

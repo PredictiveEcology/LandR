@@ -165,14 +165,14 @@ biomodModelingWrapper <- function(sp, responseVar, responseVarData,
       break()
     } else {
       i <- i + 1
-      message(cli::col_blue("Some SEP models failed, retrying... attempt", i))
+      message(cli::col_blue("Some SEP models failed, retrying... attempt ", i))
     }
   }
   if (i == 6 && !all(bm.mod@models.failed == "none")) {
     sp <- sub("SEP_model_", "", BIOMOD_ModelingArgs$modeling.id)
     warning(cli::col_red(
-      "Some/all SEP models could not be computed for", sp,
-      "\nConsider rerunning '.BIOMOD_ModelingRetry', simplifying the models,",
+      "Some/all SEP models could not be computed for ", sp,
+      "\nConsider rerunning '.BIOMOD_ModelingRetry', simplifying the models, ",
       "or choosing another algorithm.\nTo clear cached results and run again try:\n",
       paste0("clearCache(..., userTags = c('.BIOMOD_ModelingRetry', '", sp, "'))")
     ))
