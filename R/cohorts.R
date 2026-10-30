@@ -1210,7 +1210,7 @@ dropUnsupportedSpecies <- function(cohortData, minShare = 0) {
     NROW(inputDataTable),
     " pixels)"
   ))
-  message(cli::col_green("     --> resulting in ", sum(whEnoughCover), " pixels)"))
+  message(cli::col_green("     --> resulting in ", sum(whEnoughCover), " pixels"))
   inputDataTable <- inputDataTable[whEnoughCover]
 
   whAgeEqZero <- which(inputDataTable$age == 0)
@@ -1223,7 +1223,7 @@ dropUnsupportedSpecies <- function(cohortData, minShare = 0) {
       NROW(inputDataTable),
       " pixels)"
     ))
-    message(cli::col_green("     --> keeping ", NROW(inputDataTable), " pixels)"))
+    message(cli::col_green("     --> keeping ", NROW(inputDataTable), " pixels"))
     ## correct B in a separate column to keep track of imputed pixels, then replace column
     inputDataTable[, `:=`(totalBiomass2 = totalBiomass)]
     inputDataTable[whAgeEqZero, `:=`(totalBiomass2 = 0)]
@@ -1239,7 +1239,7 @@ dropUnsupportedSpecies <- function(cohortData, minShare = 0) {
       NROW(inputDataTable),
       " pixels)"
     ))
-    message(cli::col_green("     --> keeping ", NROW(inputDataTable), " pixels)"))
+    message(cli::col_green("     --> keeping ", NROW(inputDataTable), " pixels"))
     ## correct age in a separate column to keep track of imputed pixels, then replace column
     inputDataTable[, `:=`(age2 = age)]
     inputDataTable[whTotalBEqZero, `:=`(age2 = 0)]
@@ -1262,11 +1262,11 @@ dropUnsupportedSpecies <- function(cohortData, minShare = 0) {
     NROW(cohortData) - length(whCoverGTMinCover),
     " of ",
     NROW(cohortData),
-    " cohorts"
+    " cohorts)"
   ))
-  message(cli::col_green("     --> resulting in ", length(whCoverGTMinCover), " cohorts)"))
+  message(cli::col_green("     --> resulting in ", length(whCoverGTMinCover), " cohorts"))
   cohortData <- cohortData[whCoverGTMinCover]
-  message(cli::col_green("     --> resulting in ", length(unique(cohortData$pixelIndex)), " pixels)"))
+  message(cli::col_green("     --> resulting in ", length(unique(cohortData$pixelIndex)), " pixels"))
 
   cohortData <- dropUnsupportedSpecies(cohortData, minSpeciesEcoregionShare)
 

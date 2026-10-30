@@ -1,6 +1,6 @@
 # LandR (development version)
 
-* `makeAndCleanInitialCohortData()` message about removing cohorts with `B = 0` and `age > 0` now has spaces around its counts (it printed "affected4875cohorts, in1831pixels" and "leaving2938309pixels"). So do the same kind of run-together messages and warnings in `makeAndCleanInitialCohortData()`, `.BIOMOD_ModelingRetry()`, `sppHarmonize()`, `prepInputObjects()` and the `maxB` estimation functions.
+* `makeAndCleanInitialCohortData()` message about removing cohorts with `B = 0` and `age > 0` now has spaces around its counts (it printed "affected4875cohorts, in1831pixels" and "leaving2938309pixels"). So do the same kind of run-together messages and warnings in `makeAndCleanInitialCohortData()`, `.BIOMOD_ModelingRetry()`, `sppHarmonize()`, `prepInputObjects()` and the `maxB` estimation functions. The "(affects … cohorts" message now closes its parenthesis, and the "--> resulting in" and "--> keeping" lines no longer end in a stray one.
 
 * `sppHarmonize()` now accepts its own output when several names in `sppNameVector` are one species in `sppEquivCol` (e.g. `PSEU_MEN` and `PSEU_MEN_GLA` are both `Pseu_men`). It compared the number of colours with the number of names, not species, so the second module to call it (Biomass_borealDataPrep after Biomass_speciesData) stopped with "Length of 'sppColorVect' differs" whenever species merged, as in southern-interior BC study areas with no `sppEquiv` supplied.
 
