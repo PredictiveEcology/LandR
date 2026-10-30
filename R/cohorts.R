@@ -1400,20 +1400,24 @@ modelFormulaVars <- function(model, cols = NULL) {
 #' For each species in `needPairs` that has no usable known-age cohort in any of its own
 #' `needPairs` groups, and for each of those groups, finds the nearest group (centroid distance on
 #' `rasterToMatch`) where the species has usable known-age cohorts, preferring groups with the same
-#' land-cover suffix of `initialEcoregionCode`. Usable: `age` not `NA`, and no zero in `modelVars`,
+#' land-cover suffix of `initialEcoregionCode`; a group whose suffix is in `sameLandCoverOnly` only
+#' borrows from groups with that same suffix. Usable: `age` not `NA`, and no zero in `modelVars`,
 #' as for the age model's fitting data. Species with no usable known-age cohort anywhere get no donor.
 #'
 #' @param needPairs `data.table` of `initialEcoregionCode` x `speciesCode` pairs that need ages.
 #' @param cohortData `data.table` with `pixelIndex`, `initialEcoregionCode`, `speciesCode`, `age`
 #'   and `modelVars`.
 #' @param modelVars Columns of `cohortData` the age model uses.
+#' @param sameLandCoverOnly Land-cover suffixes (e.g. `"240"`, recent burn) whose groups never borrow
+#'   from another land cover.
 #' @param rasterToMatch `SpatRaster` of `pixelIndex`, or `NULL` for every candidate of the preferred
 #'   kind.
 #'
 #' @return `data.table` of the donor pairs (`initialEcoregionCode`, `speciesCode`), possibly empty.
 #'
 #' @noRd
-.ageDonorPairs <- function(needPairs, cohortData, modelVars, rasterToMatch = NULL) {
+.ageDonorPairs <- function(needPairs, cohortData, modelVars, rasterToMatch = NULL,
+                           sameLandCoverOnly = character()) {
   keyCols <- c("initialEcoregionCode", "speciesCode")
   usable <- !is.na(cohortData$age) &
     Reduce(`&`, lapply(modelVars, function(v) !(cohortData[[v]] %in% 0)), TRUE)
@@ -1439,7 +1443,8 @@ modelFormulaVars <- function(model, cols = NULL) {
     target <- as.character(orphans$initialEcoregionCode[i])
     cand <- knownPairs[speciesCode == orphans$speciesCode[i]]
     same <- lccOf(cand$initialEcoregionCode) == lccOf(target)
-    if (any(same)) cand <- cand[same]
+    if (any(same) || lccOf(target) %in% sameLandCoverOnly) cand <- cand[same]
+    if (!NROW(cand)) return(NULL)
     if (!is.null(cent) && NROW(cand) > 1L) {
       ct <- cent[eco == target]
       cc <- cent[match(as.character(cand$initialEcoregionCode), cent$eco)]
@@ -1448,10 +1453,12 @@ modelFormulaVars <- function(model, cols = NULL) {
     cand
   })
   donors <- unique(rbindlist(donors))
+  if (!NROW(donors)) return(needPairs[0])
   warning(
     "Age model: no known-age cohort where these species need ages; borrowing known ages from ",
     if (is.null(rasterToMatch)) "all ecoregion groups (no rasterToMatch)" else "the nearest ecoregion group",
-    " with the same land cover, else of any land cover:\n  ",
+    " with the same land cover, else of any land cover (never for ",
+    paste(sameLandCoverOnly, collapse = ", "), "):\n  ",
     paste0(orphans$speciesCode, " in ", orphans$initialEcoregionCode, collapse = ", "),
     "\n  from: ", paste0(donors$speciesCode, " in ", donors$initialEcoregionCode, collapse = ", "),
     call. = FALSE
@@ -1512,6 +1519,11 @@ modelFormulaVars <- function(model, cols = NULL) {
 #'   `initialEcoregionCode`, or, if no such group has them, from the nearest group of any land cover.
 #'   Without `rasterToMatch`, every such group of the preferred kind is used.
 #'
+#' @param ageDonorSameLandCover Land-cover suffixes of `initialEcoregionCode` whose groups only borrow
+#'   ages from groups with the same suffix (see `rasterToMatch`). Default `"240"`, the disturbed (recent
+#'   burn) class, whose ages must not come from other land covers. If no such group has the species,
+#'   it still stops.
+#'
 #' @return a `cohortData` `data.table` with attribute `"imputedPixID"`
 #'     (a vector of pixel IDs that suffered imputation).
 #'
@@ -1525,7 +1537,8 @@ makeAndCleanInitialCohortData <- function(
   doAssertion = getOption("LandR.assertions", TRUE),
   doSubset = TRUE,
   minSpeciesEcoregionShare = 0,
-  rasterToMatch = NULL
+  rasterToMatch = NULL,
+  ageDonorSameLandCover = "240"
 ) {
   ## Create groupings
   if (doAssertion) {
@@ -1598,7 +1611,8 @@ makeAndCleanInitialCohortData <- function(
           needPairs = cohortDataMissingAgeUnique,
           cohortData = cohortData,
           modelVars = modelFormulaVars(imputeBadAgeModel, colnames(cohortData)),
-          rasterToMatch = rasterToMatch
+          rasterToMatch = rasterToMatch,
+          sameLandCoverOnly = ageDonorSameLandCover
         )
       )
       cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[

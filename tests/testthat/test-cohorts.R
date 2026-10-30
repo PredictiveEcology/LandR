@@ -552,6 +552,10 @@ testthat::test_that(".ageDonorPairs borrows from the nearest group with the same
   expect_identical(key(out), c("S D_240", "T B_210", "W G_240"))
   expect_warning(LandR:::.ageDonorPairs(need, cd, vars, ras), "borrowing known ages")
 
+  ## 240 is recent burn: T would otherwise borrow from B_210, but there is no 240 donor, so none.
+  out240 <- suppressWarnings(LandR:::.ageDonorPairs(need, cd, vars, ras, sameLandCoverOnly = "240"))
+  expect_identical(key(out240), c("S D_240", "W G_240"))
+
   outNoRas <- suppressWarnings(LandR:::.ageDonorPairs(need, cd, vars))
   expect_identical(key(outNoRas), c("S C_240", "S D_240", "T B_210", "T E_220", "W G_240"))
 
@@ -559,7 +563,8 @@ testthat::test_that(".ageDonorPairs borrows from the nearest group with the same
 })
 
 ## ELF 4.2.1, 2000: one Abie_las cohort without an age, alone in its ecoregion group (38_240), while
-## Abie_las had known ages only in 38_210. The species never entered the age model and
+## Abie_las had known ages only in other groups. 240 is recent burn, so it borrows from a 240 group
+## (39_240), not from the nearer 38_210. The species never entered the age model and
 ## makeAndCleanInitialCohortData() stopped with "no coefficient for species 'Abie_las'".
 testthat::test_that("makeAndCleanInitialCohortData imputes a species with known ages only in another group", {
   withr::local_package("data.table")
@@ -571,11 +576,11 @@ testthat::test_that("makeAndCleanInitialCohortData imputes a species with known 
   n <- 240L
   nOther <- 10L # other species' cohorts without ages, which do have known ages in their groups
   ras <- terra::rast(nrows = 1, ncols = n + 1L + nOther, xmin = 0, xmax = n + 1 + nOther, ymin = 0, ymax = 1)
-  eco <- rep(c("38_210", "38_240", "39_220"), length.out = n)
+  eco <- rep(c("38_210", "38_240", "39_220", "39_240"), length.out = n)
   p <- runif(n, 0.15, 0.85)
   totalBiomass <- runif(n, 50, 500)
   age <- as.integer(round(20 + 18 * log(totalBiomass) + rnorm(n, 0, 5)))
-  abie <- ifelse(eco == "38_210", round(p * 50), 0)
+  abie <- ifelse(eco %in% c("38_210", "39_240"), round(p * 50), 0)
   dt <- data.table(
     pixelIndex = seq_len(n),
     age = age,
@@ -616,7 +621,7 @@ testthat::test_that("makeAndCleanInitialCohortData imputes a species with known 
       invokeRestart("muffleWarning")
     }
   )
-  expect_true(any(grepl("Abie_las in 38_240\n  from: Abie_las in 38_210", warns, fixed = TRUE)))
+  expect_true(any(grepl("Abie_las in 38_240\n  from: Abie_las in 39_240", warns, fixed = TRUE)))
   imputed <- out[pixelIndex == n + 1L & speciesCode == "Abie_las"]$age
   expect_length(imputed, 1L)
   expect_true(is.finite(imputed) && imputed >= 1L)
