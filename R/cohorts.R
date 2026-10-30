@@ -1873,7 +1873,7 @@ statsModel <- function(modelFn, uniqueEcoregionGroups, sumResponse, .specialData
         cli::col_blue(". "),
         cli::col_blue(
           "Formula changed to\n",
-          cli::col_magenta(paste0(format(modelFn2, appendLF = FALSE), collapse = ""))
+          cli::col_magenta(paste(trimws(deparse(modelFn2)), collapse = " "))
         )
       )
     }
