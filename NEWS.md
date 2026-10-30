@@ -2,6 +2,13 @@
 
 * `makeAndCleanInitialCohortData()` no longer stops when a species needs imputed ages only in ecoregion groups where it has no known-age cohort. Such a species never entered the age model, so the prediction had no coefficient for it: on fireSense ELF 4.2.1 (2000) a single `Abie_las` cohort without an age, alone in ecoregion group `38_240`, stopped the whole run, although `Abie_las` had known ages in `38_210`. Its known-age cohorts are now borrowed from the nearest ecoregion group with the same land-cover suffix, else from the nearest group of any land cover, with a warning naming both. Distance is between group centroids on the new optional argument `rasterToMatch`; without it, every such group is used. Study areas where every species needing ages has a known-age cohort in one of those groups get the same model as before. A species with no known age anywhere in the study area still stops.
 
+* LandR now supplies the SCANFI v2 remap itself, as `getOption("reproducible.urlRemap", <LandR's default>)` applied only for the length of each SCANFI download, instead of setting the global option when it loads (`.onLoad()` no longer touches `reproducible.urlRemap`, so other packages are unaffected). A `reproducible.urlRemap` you set always wins, and `options(LandR.scanfiMirror = FALSE)` turns the default off. The shipped manifest `inst/extdata/arbutus_manifest_SCANFI_v2.csv` now points at `object-arbutus.alliancecan.ca`; the old `object-arbutus.cloud.computecanada.ca` host returns `NoSuchBucket` for every SCANFI path. `prepInputsStandAgeMap()` now uses a supplied `ageURL` for SCANFI (it was always overwritten), and the SCANFI download errors are shorter and say which server refused the file: the mirror (usually a network problem) or Google Drive (usually no access). For a V2 Drive failure they point to the setting that applies: your own `reproducible.urlRemap`, or `LandR.scanfiMirror` if it is off.
+* `LANDISDisp()`'s C++ spiral scan can use OpenMP threads: `options(LandR.LANDISDisp.threads = n)`
+  (default `1`). Only the search for receivers with a source at each spiral offset is
+  parallel, with a static schedule and per-thread buffers joined in thread order; the uniform
+  draws stay serial on the main thread, so output is bit-identical for any thread count and to
+  `useCpp = FALSE`. `src/Makevars` and `src/Makevars.win` add `$(SHLIB_OPENMP_CXXFLAGS)`; without
+  OpenMP the package builds and runs serially.
 * `sppHarmonize()` now accepts its own output when several names in `sppNameVector` are one species in `sppEquivCol` (e.g. `PSEU_MEN` and `PSEU_MEN_GLA` are both `Pseu_men`). It compared the number of colours with the number of names, not species, so the second module to call it (Biomass_borealDataPrep after Biomass_speciesData) stopped with "Length of 'sppColorVect' differs" whenever species merged, as in southern-interior BC study areas with no `sppEquiv` supplied.
 
 * The SCANFI v3 download message says when there is no internet connection (`reproducible::isConnectionError()`), and that the year's file must already be local (run once on a machine with internet, or fetch it from the FTP mirror there), instead of saying the server can be slow under load and to retry later, which on a compute node without internet never helps. Any other failure keeps the retry message.
@@ -31,6 +38,15 @@
 
 * `LANDISDisp()` has a new argument, `pgv`: the `pixelGroupMap` values as a vector. A caller that already has them (e.g. with burned pixels set to `NA`) can pass them instead of masking a copy of the raster that `LANDISDisp()` then reads again (#255).
 
+* `standAgeMapGenerator()` passed `mapCode = "pixelGroup"` to `rasterizeReduced()`, whose argument is `mapcode`; the misspelt name was silently dropped into `...` and it worked only because the raster had been renamed `"pixelGroup"` on the line before. It now passes `mapcode`. Output is unchanged.
+* `makeAndCleanInitialCohortData()` has a new argument, `minSpeciesEcoregionShare` (default 0, off). A species found in fewer than that share of an ecoregion's pixels is removed from every pixel of the ecoregion before cover is rescaled, so its cover goes to the other species and it is also absent when `establishprob`, `maxB` and `maxANPP` are estimated there. In BC ELFs with BEC zones, western redcedar is in up to 6.7% of mountain hemlock (MH) zone pixels and up to 2.2% of ESSF pixels, where it is not expected to persist; `Biomass_borealDataPrep` uses 0.07.
+* `LANDISDisp()`'s C++ spiral scan can use OpenMP threads: `options(LandR.LANDISDisp.threads = n)`
+  (default `1`). Only the search for receivers with a source at each spiral offset is
+  parallel, with a static schedule and per-thread buffers joined in thread order; the uniform
+  draws stay serial on the main thread, so output is bit-identical for any thread count and to
+  `useCpp = FALSE`. `src/Makevars` and `src/Makevars.win` add `$(SHLIB_OPENMP_CXXFLAGS)`; without
+  OpenMP the package builds and runs serially.
+
 * `LANDISDisp()` (R reference and C++ spiral loop) no longer skips a draw because it exceeds the
   largest ward probability of the species that hit on the previous spiral step
   (`lastWardMaxProb`). That screen used only the species that had a source on the previous step, so
@@ -41,8 +57,7 @@
   goldens were regenerated (success counts moved by about -0.6% to +5% on the test fixtures, about
   +0.5% on the largest).
 
-* The C++/R parity tests looked for `spiralLoopCpp` in the global environment, so they silently
-  skipped under parallel testthat. They now look in the LandR namespace.
+* `prepInputs_NTEMS_LCC_FAO()`'s error for a missing crop target no longer suggests `terraOptions(memfrac = 0)`, which makes terra much slower; it suggests `todisk = TRUE` only.
 
 * The R reference of `LANDISDisp()` (`useCpp = FALSE`) gave different results on macOS (arm64).
   Receivers that had already succeeded have row `NA`, and `terra::cellFromRowCol()` turns an `NA`
@@ -144,6 +159,16 @@
   and get clamped to 0 for a stand with positive biomass -- the cause of the age-0-with-biomass
   cohorts `CBMutils::cumPoolsCreateAGB()` rejects (PredictiveEcology/Biomass_borealDataPrep#131).
   `Biomass_borealDataPrep`'s `imputeBadAgeModel` parameter now defaults to this function instead
+  of duplicating the formula.
+
+* `prepInputs_SCANFI_LCC_FAO()` gains `dataVersion = "V3"`, SCANFI v3's annual (1985-2025) land
+  cover, read with `prepInputs()` from NRCan's Cloud-Optimized GeoTIFFs on ftp.maps.canada.ca, the
+  same way as V1/V2. The new exported table `scanfiV3ToCanadaLCC` recodes v3's 20 land-cover codes
+  to the Canada LCC codes used elsewhere; burn scars (v3 code 4) have no Canada LCC equivalent and
+  keep a new code, 60, which the existing forest-land rule still relabels to `disturbedCode` on
+  forest land. V3 covers non-forest land cover only -- species, biomass and age layers are
+  unaffected and still come from V2.
+
   of duplicating the formula. The predictors change too, not only the scale: LandR's old default
   was `age ~ B * speciesCode + cover * speciesCode + (1 | initialEcoregionCode)`; the new one is
   `log(age) ~ log(totalBiomass) * cover * speciesCode + (log(totalBiomass) | initialEcoregionCode)`,
@@ -168,7 +193,46 @@
 
 * `assertCohortDataERG()` no longer calls `browser()` before its `stop()`, so a failed assertion
   stops instead of pausing an interactive session in the debugger.
+* `LANDISDisp()`'s C++ spiral scan can use OpenMP threads: `options(LandR.LANDISDisp.threads = n)`
+  (default `1`). Only the search for receivers with a source at each spiral offset is
+  parallel, with a static schedule and per-thread buffers joined in thread order; the uniform
+  draws stay serial on the main thread, so output is bit-identical for any thread count and to
+  `useCpp = FALSE`. `src/Makevars` and `src/Makevars.win` add `$(SHLIB_OPENMP_CXXFLAGS)`; without
+  OpenMP the package builds and runs serially.
 
+* `LANDISDisp()` (R reference and C++ spiral loop) no longer skips a draw because it exceeds the
+  largest ward probability of the species that hit on the previous spiral step
+  (`lastWardMaxProb`). That screen used only the species that had a source on the previous step, so
+  after a step where only a short-distance species found a source, a long-distance species whose
+  draw fell between the two probabilities was wrongly discarded. Each receiver with a source at a
+  step now compares its own draw with its own species' ward probability. The number and order of
+  uniform draws is unchanged, and R and C++ stay bit-identical. Results change: the seed-locked
+  goldens were regenerated (success counts moved by about -0.6% to +5% on the test fixtures, about
+  +0.5% on the largest).
+
+* The C++/R parity tests looked for `spiralLoopCpp` in the global environment, so they silently
+  skipped under parallel testthat. They now look in the LandR namespace.
+
+* The R reference of `LANDISDisp()` (`useCpp = FALSE`) gave different results on macOS (arm64).
+  Receivers that had already succeeded have row `NA`, and `terra::cellFromRowCol()` turns an `NA`
+  row into row 1 there (an undefined C++ cast), so they kept finding sources and consumed extra draws.
+  Their cell is now set to `NA` directly. Linux and Windows results are unchanged.
+
+* `LANDISDisp()` gains `pgv`, an optional integer vector of pixelGroup IDs per cell of
+  `pixelGroupMap`. When supplied the raster values are not read (about 1 s on a 9M-cell map).
+  When `NULL` the values are read once as integer, rather than as doubles and converted again in
+  `spiralSeedDispersalCpp()`. Output is unchanged.
+  The R-side preparation is also cheaper (no re-sort of the receiver table, cell numbers to
+  row/column by integer arithmetic, `spiralLoopCpp()` no longer scans every cell for the largest
+  pixelGroup, receiver cells found without a raster-length logical vector). Output is unchanged.
+
+  of duplicating the formula. The predictors change too, not only the scale: LandR's old default
+  was `age ~ B * speciesCode + cover * speciesCode + (1 | initialEcoregionCode)`; the new one is
+  `log(age) ~ log(totalBiomass) * cover * speciesCode + (log(totalBiomass) | initialEcoregionCode)`,
+  the predictors `Biomass_borealDataPrep` already used. Callers that relied on LandR's default
+  get both changes. Predictions are back-transformed with `exp()`, which gives the median
+  (geometric-mean) age for given predictors, not the mean.
+  
 * `standAgeMapGenerator()` no longer modifies the caller's `cohortData`. It computed the stand
   age with `cohortData[, weightedAge := ...]`, which adds the column to the caller's table by
   reference, so e.g. `NRV_summary` left a `weightedAge` column in the simulation's `cohortData`.
