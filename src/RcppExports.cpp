@@ -36,9 +36,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// landisDispHasOpenMP
+bool landisDispHasOpenMP();
+RcppExport SEXP _LandR_landisDispHasOpenMP() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(landisDispHasOpenMP());
+    return rcpp_result_gen;
+END_RCPP
+}
 // spiralLoopCpp
-List spiralLoopCpp(IntegerVector pixelIndex_in, IntegerVector speciesCode_in, IntegerVector rowOrig_in, IntegerVector colOrig_in, IntegerVector seeddist_max_perRow, IntegerVector spiralRow, IntegerVector spiralCol, NumericVector spiralCurDist, int pgmRows, int pgmCols, IntegerVector pgv, IntegerVector srcPg, IntegerVector srcSpeciesCode, int numSp, NumericMatrix wardProbByDist, NumericVector activeSpMaxDist, NumericVector activeSpMax, double cellSize, int successionTimestep, int verbose, bool wardAlreadyExp, bool debug);
-RcppExport SEXP _LandR_spiralLoopCpp(SEXP pixelIndex_inSEXP, SEXP speciesCode_inSEXP, SEXP rowOrig_inSEXP, SEXP colOrig_inSEXP, SEXP seeddist_max_perRowSEXP, SEXP spiralRowSEXP, SEXP spiralColSEXP, SEXP spiralCurDistSEXP, SEXP pgmRowsSEXP, SEXP pgmColsSEXP, SEXP pgvSEXP, SEXP srcPgSEXP, SEXP srcSpeciesCodeSEXP, SEXP numSpSEXP, SEXP wardProbByDistSEXP, SEXP activeSpMaxDistSEXP, SEXP activeSpMaxSEXP, SEXP cellSizeSEXP, SEXP successionTimestepSEXP, SEXP verboseSEXP, SEXP wardAlreadyExpSEXP, SEXP debugSEXP) {
+List spiralLoopCpp(IntegerVector pixelIndex_in, IntegerVector speciesCode_in, IntegerVector rowOrig_in, IntegerVector colOrig_in, IntegerVector seeddist_max_perRow, IntegerVector spiralRow, IntegerVector spiralCol, NumericVector spiralCurDist, int pgmRows, int pgmCols, IntegerVector pgv, IntegerVector srcPg, IntegerVector srcSpeciesCode, int numSp, NumericMatrix wardProbByDist, NumericVector activeSpMaxDist, NumericVector activeSpMax, double cellSize, int successionTimestep, int verbose, bool wardAlreadyExp, bool debug, int nThreads);
+RcppExport SEXP _LandR_spiralLoopCpp(SEXP pixelIndex_inSEXP, SEXP speciesCode_inSEXP, SEXP rowOrig_inSEXP, SEXP colOrig_inSEXP, SEXP seeddist_max_perRowSEXP, SEXP spiralRowSEXP, SEXP spiralColSEXP, SEXP spiralCurDistSEXP, SEXP pgmRowsSEXP, SEXP pgmColsSEXP, SEXP pgvSEXP, SEXP srcPgSEXP, SEXP srcSpeciesCodeSEXP, SEXP numSpSEXP, SEXP wardProbByDistSEXP, SEXP activeSpMaxDistSEXP, SEXP activeSpMaxSEXP, SEXP cellSizeSEXP, SEXP successionTimestepSEXP, SEXP verboseSEXP, SEXP wardAlreadyExpSEXP, SEXP debugSEXP, SEXP nThreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -64,7 +74,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< bool >::type wardAlreadyExp(wardAlreadyExpSEXP);
     Rcpp::traits::input_parameter< bool >::type debug(debugSEXP);
-    rcpp_result_gen = Rcpp::wrap(spiralLoopCpp(pixelIndex_in, speciesCode_in, rowOrig_in, colOrig_in, seeddist_max_perRow, spiralRow, spiralCol, spiralCurDist, pgmRows, pgmCols, pgv, srcPg, srcSpeciesCode, numSp, wardProbByDist, activeSpMaxDist, activeSpMax, cellSize, successionTimestep, verbose, wardAlreadyExp, debug));
+    Rcpp::traits::input_parameter< int >::type nThreads(nThreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(spiralLoopCpp(pixelIndex_in, speciesCode_in, rowOrig_in, colOrig_in, seeddist_max_perRow, spiralRow, spiralCol, spiralCurDist, pgmRows, pgmCols, pgv, srcPg, srcSpeciesCode, numSp, wardProbByDist, activeSpMaxDist, activeSpMax, cellSize, successionTimestep, verbose, wardAlreadyExp, debug, nThreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -89,7 +100,8 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_LandR_pixelUnifCpp", (DL_FUNC) &_LandR_pixelUnifCpp, 4},
     {"_LandR_cellsInPgsCpp", (DL_FUNC) &_LandR_cellsInPgsCpp, 2},
-    {"_LandR_spiralLoopCpp", (DL_FUNC) &_LandR_spiralLoopCpp, 22},
+    {"_LandR_landisDispHasOpenMP", (DL_FUNC) &_LandR_landisDispHasOpenMP, 0},
+    {"_LandR_spiralLoopCpp", (DL_FUNC) &_LandR_spiralLoopCpp, 23},
     {"_LandR_windowCountsByClassCpp", (DL_FUNC) &_LandR_windowCountsByClassCpp, 7},
     {NULL, NULL, 0}
 };
