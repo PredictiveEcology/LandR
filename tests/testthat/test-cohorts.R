@@ -633,3 +633,49 @@ testthat::test_that("makeAndCleanInitialCohortData imputes a species with known 
   expect_true(is.finite(imputed) && imputed >= 1L)
   expect_true(all(is.finite(out[pixelIndex > n]$age)))
 })
+
+testthat::test_that("makeAndCleanInitialCohortData leaves ages NA, with a warning, for a species with no known age anywhere", {
+  withr::local_package("data.table")
+  withr::local_options(list(reproducible.useCache = FALSE))
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("MuMIn")
+
+  set.seed(12)
+  n <- 120L
+  p <- runif(n, 0.15, 0.85)
+  totalBiomass <- runif(n, 50, 500)
+  age <- as.integer(round(20 + 18 * log(totalBiomass) + rnorm(n, 0, 5)))
+  dt <- data.table(
+    pixelIndex = seq_len(n), age = age, logAge = log(age),
+    initialEcoregionCode = factor(rep(c("38_210", "38_240"), length.out = n)),
+    totalBiomass = totalBiomass, lcc = 210L,
+    cover.Abie_las = 0, cover.Pice_mar = round(p * 100), cover.Pinu_ban = round((1 - p) * 100)
+  )
+  bad <- data.table(
+    pixelIndex = n + 1L, age = NA_integer_, logAge = NA_real_,
+    initialEcoregionCode = factor("38_240"), totalBiomass = 200, lcc = 210L,
+    cover.Abie_las = 100, cover.Pice_mar = 0, cover.Pinu_ban = 0
+  )
+  pO <- runif(10, 0.15, 0.85)
+  other <- data.table(
+    pixelIndex = n + 1L + seq_along(pO), age = NA_integer_, logAge = NA_real_,
+    initialEcoregionCode = factor(rep(c("38_210", "38_240"), length.out = 10)),
+    totalBiomass = runif(10, 50, 500), lcc = 210L,
+    cover.Abie_las = 0, cover.Pice_mar = round(pO * 100), cover.Pinu_ban = round((1 - pO) * 100)
+  )
+  warns <- character()
+  out <- withCallingHandlers(
+    suppressMessages(makeAndCleanInitialCohortData(
+      inputDataTable = rbind(dt, bad, other),
+      sppColumns = c("cover.Abie_las", "cover.Pice_mar", "cover.Pinu_ban"),
+      imputeBadAgeModel = imputeBadAgeModelDefault(),
+      minCoverThreshold = 5, doAssertion = FALSE, doSubset = FALSE
+    )),
+    warning = function(w) {
+      warns <<- c(warns, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_true(any(grepl("missing ages stay NA", warns, fixed = TRUE)))
+  expect_true(is.na(out[pixelIndex == n + 1L & speciesCode == "Abie_las"]$age))
+})

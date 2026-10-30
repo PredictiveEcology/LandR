@@ -1395,6 +1395,12 @@ modelFormulaVars <- function(model, cols = NULL) {
   vars
 }
 
+## Rows with a known age and no zero in a variable the age model uses, as in its fitting data.
+.usableAge <- function(cohortData, modelVars) {
+  !is.na(cohortData$age) &
+    Reduce(`&`, lapply(modelVars, function(v) !(cohortData[[v]] %in% 0)), TRUE)
+}
+
 #' Ecoregion groups that lend known-age cohorts to the age model
 #'
 #' For each species in `needPairs` that has no usable known-age cohort in any of its own
@@ -1425,8 +1431,7 @@ modelFormulaVars <- function(model, cols = NULL) {
 .ageDonorPairs <- function(needPairs, cohortData, modelVars, rasterToMatch = NULL,
                            sameLandCoverOnly = character()) {
   keyCols <- c("initialEcoregionCode", "speciesCode")
-  usable <- !is.na(cohortData$age) &
-    Reduce(`&`, lapply(modelVars, function(v) !(cohortData[[v]] %in% 0)), TRUE)
+  usable <- .usableAge(cohortData, modelVars)
   knownPairs <- unique(cohortData[usable, keyCols, with = FALSE])
   covered <- unique(needPairs[knownPairs, on = keyCols, nomatch = 0L]$speciesCode)
   orphans <- needPairs[!speciesCode %in% covered & speciesCode %in% knownPairs$speciesCode]
@@ -1728,21 +1733,36 @@ makeAndCleanInitialCohortData <- function(
       )
       predSpecies <- sort(unique(as.character(cohortDataMissingAge$speciesCode)))
       unfitted <- if (is.null(fitSpecies)) character(0) else setdiff(predSpecies, fitSpecies)
+      ## A species with no usable known age anywhere cannot be imputed from any model: its ages stay
+      ## NA, with a warning, rather than stopping the run.
+      usableSpecies <- as.character(unique(cohortData[
+        .usableAge(cohortData, modelFormulaVars(imputeBadAgeModel, colnames(cohortData))),
+        speciesCode
+      ]))
+      noKnownAge <- intersect(unfitted, setdiff(predSpecies, usableSpecies))
+      if (length(noKnownAge) > 0L) {
+        warning("Age model: no known-age cohort of ", paste(shQuote(noKnownAge), collapse = ", "),
+                " (nor, in land cover ", paste(ageDonorSameLandCover, collapse = ", "),
+                ", of any species where it needs ages) in the study area; its missing ages stay NA.",
+                call. = FALSE)
+        unfitted <- setdiff(unfitted, noKnownAge)
+        cohortDataMissingAge <- cohortDataMissingAge[!as.character(speciesCode) %in% noKnownAge]
+      }
       if (length(unfitted) > 0L) {
         stop("Cannot impute missing cohort ages. The age model has no coefficient for ",
              "species ", paste(shQuote(unfitted), collapse = ", "), ", which need ages.\n",
              "  model was fitted on: ", paste(fitSpecies, collapse = ", "), "\n",
              "  ages needed for    : ", paste(predSpecies, collapse = ", "), "\n",
-             "Two causes are known. (1) The model was fitted on a DIFFERENT study area and ",
-             "reached here through the cache -- check that the species above belong to this ",
-             "study area at all. (2) Those species have no known-age cohort anywhere in this ",
-             "study area, so they could not enter the fit, even from a neighbouring ecoregion ",
-             "group. Neither is repaired by imputing from this model.",
+             "The model was probably fitted on a DIFFERENT study area and reached here through ",
+             "the cache -- check that the species above belong to this study area at all. This is ",
+             "not repaired by imputing from this model.",
              call. = FALSE)
       }
 
       ## allow.new.levels = TRUE because some groups will have only NA for age for all species
-      predAge <- predict(outAge$mod, newdata = cohortDataMissingAge, allow.new.levels = TRUE)
+      predAge <- if (NROW(cohortDataMissingAge)) {
+        predict(outAge$mod, newdata = cohortDataMissingAge, allow.new.levels = TRUE)
+      } else numeric()
 
       ## a model fitted on log(age) (e.g. imputeBadAgeModelDefault()) predicts on the log
       ## scale, so it must be back-transformed before the pmax(0L, ...) floor below; a model
