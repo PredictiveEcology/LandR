@@ -11,7 +11,8 @@ makeAndCleanInitialCohortData(
   minCoverThreshold,
   doAssertion = getOption("LandR.assertions", TRUE),
   doSubset = TRUE,
-  minSpeciesEcoregionShare = 0
+  minSpeciesEcoregionShare = 0,
+  rasterToMatch = NULL
 )
 }
 \arguments{
@@ -39,6 +40,13 @@ species' cohorts are removed from every pixel of the ecoregion (their cover goes
 species when cover is rescaled), so the species is also absent when \code{establishprob}, \code{maxB}
 and \code{maxANPP} are estimated there. The ecoregion is \code{initialEcoregionCode} without its land-cover
 suffix. Default 0: no species is removed.}
+
+\item{rasterToMatch}{Optional \code{SpatRaster} whose cells \code{pixelIndex} refers to. Used only when a
+species needs imputed ages but has no known-age cohort in any ecoregion group where it needs them,
+so it could not enter the age model. Its known-age cohorts are then borrowed from the nearest
+ecoregion group (by distance between group centroids) with the same land-cover suffix of
+\code{initialEcoregionCode}, or, if no such group has them, from the nearest group of any land cover.
+Without \code{rasterToMatch}, every such group of the preferred kind is used.}
 }
 \value{
 a \code{cohortData} \code{data.table} with attribute \code{"imputedPixID"}

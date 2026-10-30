@@ -1395,6 +1395,70 @@ modelFormulaVars <- function(model, cols = NULL) {
   vars
 }
 
+#' Ecoregion groups that lend known-age cohorts to the age model
+#'
+#' For each species in `needPairs` that has no usable known-age cohort in any of its own
+#' `needPairs` groups, and for each of those groups, finds the nearest group (centroid distance on
+#' `rasterToMatch`) where the species has usable known-age cohorts, preferring groups with the same
+#' land-cover suffix of `initialEcoregionCode`. Usable: `age` not `NA`, and no zero in `modelVars`,
+#' as for the age model's fitting data. Species with no usable known-age cohort anywhere get no donor.
+#'
+#' @param needPairs `data.table` of `initialEcoregionCode` x `speciesCode` pairs that need ages.
+#' @param cohortData `data.table` with `pixelIndex`, `initialEcoregionCode`, `speciesCode`, `age`
+#'   and `modelVars`.
+#' @param modelVars Columns of `cohortData` the age model uses.
+#' @param rasterToMatch `SpatRaster` of `pixelIndex`, or `NULL` for every candidate of the preferred
+#'   kind.
+#'
+#' @return `data.table` of the donor pairs (`initialEcoregionCode`, `speciesCode`), possibly empty.
+#'
+#' @noRd
+.ageDonorPairs <- function(needPairs, cohortData, modelVars, rasterToMatch = NULL) {
+  keyCols <- c("initialEcoregionCode", "speciesCode")
+  usable <- !is.na(cohortData$age) &
+    Reduce(`&`, lapply(modelVars, function(v) !(cohortData[[v]] %in% 0)), TRUE)
+  knownPairs <- unique(cohortData[usable, keyCols, with = FALSE])
+  covered <- unique(needPairs[knownPairs, on = keyCols, nomatch = 0L]$speciesCode)
+  orphans <- needPairs[!speciesCode %in% covered & speciesCode %in% knownPairs$speciesCode]
+  if (!NROW(orphans)) return(needPairs[0])
+
+  lccOf <- function(x) sub("^.*_", "", as.character(x))
+  cent <- NULL
+  if (!is.null(rasterToMatch)) {
+    groups <- unique(c(
+      as.character(orphans$initialEcoregionCode),
+      as.character(knownPairs[speciesCode %in% orphans$speciesCode]$initialEcoregionCode)
+    ))
+    px <- unique(cohortData[as.character(initialEcoregionCode) %in% groups,
+                            .(pixelIndex, eco = as.character(initialEcoregionCode))])
+    xy <- terra::xyFromCell(rasterToMatch, px$pixelIndex)
+    cent <- px[, `:=`(x = xy[, 1], y = xy[, 2])][, .(x = mean(x), y = mean(y)), by = "eco"]
+  }
+
+  donors <- lapply(seq_len(NROW(orphans)), function(i) {
+    target <- as.character(orphans$initialEcoregionCode[i])
+    cand <- knownPairs[speciesCode == orphans$speciesCode[i]]
+    same <- lccOf(cand$initialEcoregionCode) == lccOf(target)
+    if (any(same)) cand <- cand[same]
+    if (!is.null(cent) && NROW(cand) > 1L) {
+      ct <- cent[eco == target]
+      cc <- cent[match(as.character(cand$initialEcoregionCode), cent$eco)]
+      cand <- cand[which.min((cc$x - ct$x)^2 + (cc$y - ct$y)^2)]
+    }
+    cand
+  })
+  donors <- unique(rbindlist(donors))
+  warning(
+    "Age model: no known-age cohort where these species need ages; borrowing known ages from ",
+    if (is.null(rasterToMatch)) "all ecoregion groups (no rasterToMatch)" else "the nearest ecoregion group",
+    " with the same land cover, else of any land cover:\n  ",
+    paste0(orphans$speciesCode, " in ", orphans$initialEcoregionCode, collapse = ", "),
+    "\n  from: ", paste0(donors$speciesCode, " in ", donors$initialEcoregionCode, collapse = ", "),
+    call. = FALSE
+  )
+  donors
+}
+
 #' Generate initial `cohortData` table
 #'
 #' Takes a single `data.table` input, which has the following columns in addition to
@@ -1441,6 +1505,13 @@ modelFormulaVars <- function(model, cols = NULL) {
 #'   and `maxANPP` are estimated there. The ecoregion is `initialEcoregionCode` without its land-cover
 #'   suffix. Default 0: no species is removed.
 #'
+#' @param rasterToMatch Optional `SpatRaster` whose cells `pixelIndex` refers to. Used only when a
+#'   species needs imputed ages but has no known-age cohort in any ecoregion group where it needs them,
+#'   so it could not enter the age model. Its known-age cohorts are then borrowed from the nearest
+#'   ecoregion group (by distance between group centroids) with the same land-cover suffix of
+#'   `initialEcoregionCode`, or, if no such group has them, from the nearest group of any land cover.
+#'   Without `rasterToMatch`, every such group of the preferred kind is used.
+#'
 #' @return a `cohortData` `data.table` with attribute `"imputedPixID"`
 #'     (a vector of pixel IDs that suffered imputation).
 #'
@@ -1453,7 +1524,8 @@ makeAndCleanInitialCohortData <- function(
   minCoverThreshold,
   doAssertion = getOption("LandR.assertions", TRUE),
   doSubset = TRUE,
-  minSpeciesEcoregionShare = 0
+  minSpeciesEcoregionShare = 0,
+  rasterToMatch = NULL
 ) {
   ## Create groupings
   if (doAssertion) {
@@ -1517,6 +1589,18 @@ makeAndCleanInitialCohortData <- function(
         cohortDataMissingAge,
         by = c("initialEcoregionCode", "speciesCode")
       )[, .(initialEcoregionCode, speciesCode)]
+      ## A species with no known-age cohort in any group where it needs ages would get no coefficient
+      ## (e.g. ELF 4.2.1, 2000: one Abie_las cohort without age, in a group with no other Abie_las).
+      ## Borrow its known-age cohorts from the nearest group that has them.
+      cohortDataMissingAgeUnique <- rbind(
+        cohortDataMissingAgeUnique,
+        .ageDonorPairs(
+          needPairs = cohortDataMissingAgeUnique,
+          cohortData = cohortData,
+          modelVars = modelFormulaVars(imputeBadAgeModel, colnames(cohortData)),
+          rasterToMatch = rasterToMatch
+        )
+      )
       cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[
         cohortData,
         on = c("initialEcoregionCode", "speciesCode"),
@@ -1604,8 +1688,9 @@ makeAndCleanInitialCohortData <- function(
              "  ages needed for    : ", paste(predSpecies, collapse = ", "), "\n",
              "Two causes are known. (1) The model was fitted on a DIFFERENT study area and ",
              "reached here through the cache -- check that the species above belong to this ",
-             "study area at all. (2) Those species have no known-age cohorts here, so they ",
-             "could not enter the fit. Neither is repaired by imputing from this model.",
+             "study area at all. (2) Those species have no known-age cohort anywhere in this ",
+             "study area, so they could not enter the fit, even from a neighbouring ecoregion ",
+             "group. Neither is repaired by imputing from this model.",
              call. = FALSE)
       }
 

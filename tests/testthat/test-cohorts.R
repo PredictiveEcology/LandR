@@ -527,3 +527,98 @@ testthat::test_that(".adjustNewCohortsERG stops when existing cohorts of a pixel
   )
   expect_error(LandR:::.adjustNewCohortsERG(cd2), "2 pixelGroups")
 })
+
+testthat::test_that(".ageDonorPairs borrows from the nearest group with the same land cover, else any", {
+  withr::local_package("data.table")
+  ## one row of 10 cells; the target group A_240 is cell 5
+  ras <- terra::rast(nrows = 1, ncols = 10, xmin = 0, xmax = 10, ymin = 0, ymax = 1)
+  cd <- data.table(
+    pixelIndex = c(5L, 5L, 5L, 5L, 5L, 5L, 6L, 9L, 2L, 6L, 10L, 4L, 8L),
+    initialEcoregionCode = factor(c("A_240", "A_240", "A_240", "A_240", "A_240", "A_240",
+                                    "B_210", "C_240", "D_240", "B_210", "E_220", "F_240", "G_240")),
+    speciesCode = factor(c("S", "T", "U", "U", "V", "W", "S", "S", "S", "T", "T", "W", "W")),
+    age = c(NA, NA, NA, 50L, NA, NA, 40L, 40L, 40L, 40L, 40L, 40L, 40L),
+    totalBiomass = 100,
+    cover = c(100, 100, 50, 50, 100, 100, 50, 50, 50, 50, 50, 0, 50)
+  )
+  need <- unique(cd[is.na(age), .(initialEcoregionCode, speciesCode)])
+  vars <- c("age", "totalBiomass", "cover")
+  key <- function(d) sort(paste(d$speciesCode, d$initialEcoregionCode))
+
+  out <- suppressWarnings(LandR:::.ageDonorPairs(need, cd, vars, ras))
+  ## S: same land cover (C_240, D_240) beats the nearer B_210; D_240 is nearer than C_240.
+  ## T: no 240 group has it, so the nearest of any land cover. U: has its own known ages.
+  ## V: no known age anywhere. W: F_240's only row has cover 0, so G_240.
+  expect_identical(key(out), c("S D_240", "T B_210", "W G_240"))
+  expect_warning(LandR:::.ageDonorPairs(need, cd, vars, ras), "borrowing known ages")
+
+  outNoRas <- suppressWarnings(LandR:::.ageDonorPairs(need, cd, vars))
+  expect_identical(key(outNoRas), c("S C_240", "S D_240", "T B_210", "T E_220", "W G_240"))
+
+  expect_identical(NROW(LandR:::.ageDonorPairs(need[speciesCode %in% c("U", "V")], cd, vars, ras)), 0L)
+})
+
+## ELF 4.2.1, 2000: one Abie_las cohort without an age, alone in its ecoregion group (38_240), while
+## Abie_las had known ages only in 38_210. The species never entered the age model and
+## makeAndCleanInitialCohortData() stopped with "no coefficient for species 'Abie_las'".
+testthat::test_that("makeAndCleanInitialCohortData imputes a species with known ages only in another group", {
+  withr::local_package("data.table")
+  withr::local_options(list(reproducible.useCache = FALSE))
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("MuMIn")
+
+  set.seed(11)
+  n <- 240L
+  nOther <- 10L # other species' cohorts without ages, which do have known ages in their groups
+  ras <- terra::rast(nrows = 1, ncols = n + 1L + nOther, xmin = 0, xmax = n + 1 + nOther, ymin = 0, ymax = 1)
+  eco <- rep(c("38_210", "38_240", "39_220"), length.out = n)
+  p <- runif(n, 0.15, 0.85)
+  totalBiomass <- runif(n, 50, 500)
+  age <- as.integer(round(20 + 18 * log(totalBiomass) + rnorm(n, 0, 5)))
+  abie <- ifelse(eco == "38_210", round(p * 50), 0)
+  dt <- data.table(
+    pixelIndex = seq_len(n),
+    age = age,
+    logAge = log(age),
+    initialEcoregionCode = factor(eco),
+    totalBiomass = totalBiomass,
+    lcc = 210L,
+    cover.Abie_las = abie,
+    cover.Pice_mar = round(p * 100) - abie,
+    cover.Pinu_ban = round((1 - p) * 100)
+  )
+  bad <- data.table(
+    pixelIndex = n + 1L, age = NA_integer_, logAge = NA_real_,
+    initialEcoregionCode = factor("38_240"), totalBiomass = 200, lcc = 210L,
+    cover.Abie_las = 100, cover.Pice_mar = 0, cover.Pinu_ban = 0
+  )
+  pO <- runif(nOther, 0.15, 0.85)
+  other <- data.table(
+    pixelIndex = n + 1L + seq_len(nOther), age = NA_integer_, logAge = NA_real_,
+    initialEcoregionCode = factor(rep(c("38_240", "39_220"), length.out = nOther)),
+    totalBiomass = runif(nOther, 50, 500), lcc = 210L,
+    cover.Abie_las = 0, cover.Pice_mar = round(pO * 100), cover.Pinu_ban = round((1 - pO) * 100)
+  )
+
+  warns <- character()
+  out <- withCallingHandlers(
+    suppressMessages(makeAndCleanInitialCohortData(
+      inputDataTable = rbind(dt, bad, other),
+      sppColumns = c("cover.Abie_las", "cover.Pice_mar", "cover.Pinu_ban"),
+      imputeBadAgeModel = imputeBadAgeModelDefault(),
+      minCoverThreshold = 5,
+      doAssertion = TRUE,
+      doSubset = FALSE,
+      rasterToMatch = ras
+    )),
+    warning = function(w) {
+      warns <<- c(warns, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_true(any(grepl("Abie_las in 38_240\n  from: Abie_las in 38_210", warns, fixed = TRUE)))
+  imputed <- out[pixelIndex == n + 1L & speciesCode == "Abie_las"]$age
+  expect_length(imputed, 1L)
+  expect_true(is.finite(imputed) && imputed >= 1L)
+  expect_true(all(is.finite(out[pixelIndex > n]$age)))
+})
