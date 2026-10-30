@@ -51,8 +51,9 @@ Without \code{rasterToMatch}, every such group of the preferred kind is used.}
 
 \item{ageDonorSameLandCover}{Land-cover suffixes of \code{initialEcoregionCode} whose groups only borrow
 ages from groups with the same suffix (see \code{rasterToMatch}). Default \code{"240"}, the disturbed (recent
-burn) class, whose ages must not come from other land covers. If no such group has the species,
-it still stops.}
+burn) class, whose ages must not come from other land covers. If no group of that land cover has
+the species with known ages, the known ages of the other species in its group (else in the
+nearest group of that land cover that has any) are used for it.}
 }
 \value{
 a \code{cohortData} \code{data.table} with attribute \code{"imputedPixID"}

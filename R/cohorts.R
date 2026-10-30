@@ -1400,20 +1400,26 @@ modelFormulaVars <- function(model, cols = NULL) {
 #' For each species in `needPairs` that has no usable known-age cohort in any of its own
 #' `needPairs` groups, and for each of those groups, finds the nearest group (centroid distance on
 #' `rasterToMatch`) where the species has usable known-age cohorts, preferring groups with the same
-#' land-cover suffix of `initialEcoregionCode`; a group whose suffix is in `sameLandCoverOnly` only
-#' borrows from groups with that same suffix. Usable: `age` not `NA`, and no zero in `modelVars`,
+#' land-cover suffix of `initialEcoregionCode`. Usable: `age` not `NA`, and no zero in `modelVars`,
 #' as for the age model's fitting data. Species with no usable known-age cohort anywhere get no donor.
+#'
+#' A group whose suffix is in `sameLandCoverOnly` never borrows from another land cover. If the
+#' species has no known age in any group of that land cover, the usable cohorts of the other species
+#' of the group itself (else of the nearest group of that land cover that has any) are borrowed
+#' instead, relabelled as the species that needs ages.
 #'
 #' @param needPairs `data.table` of `initialEcoregionCode` x `speciesCode` pairs that need ages.
 #' @param cohortData `data.table` with `pixelIndex`, `initialEcoregionCode`, `speciesCode`, `age`
 #'   and `modelVars`.
 #' @param modelVars Columns of `cohortData` the age model uses.
-#' @param sameLandCoverOnly Land-cover suffixes (e.g. `"240"`, recent burn) whose groups never borrow
-#'   from another land cover.
 #' @param rasterToMatch `SpatRaster` of `pixelIndex`, or `NULL` for every candidate of the preferred
 #'   kind.
+#' @param sameLandCoverOnly Land-cover suffixes (e.g. `"240"`, recent burn) whose groups never borrow
+#'   from another land cover.
 #'
-#' @return `data.table` of the donor pairs (`initialEcoregionCode`, `speciesCode`), possibly empty.
+#' @return `data.table` of the donor pairs (`initialEcoregionCode`, `speciesCode`), possibly empty,
+#'   with attribute `"otherSpecies"`: the borrowed cohorts of other species (a subset of
+#'   `cohortData` with `speciesCode` replaced), possibly with no rows.
 #'
 #' @noRd
 .ageDonorPairs <- function(needPairs, cohortData, modelVars, rasterToMatch = NULL,
@@ -1424,46 +1430,67 @@ modelFormulaVars <- function(model, cols = NULL) {
   knownPairs <- unique(cohortData[usable, keyCols, with = FALSE])
   covered <- unique(needPairs[knownPairs, on = keyCols, nomatch = 0L]$speciesCode)
   orphans <- needPairs[!speciesCode %in% covered & speciesCode %in% knownPairs$speciesCode]
-  if (!NROW(orphans)) return(needPairs[0])
+  noRows <- cohortData[0]
+  if (!NROW(orphans)) return(structure(needPairs[0], otherSpecies = noRows))
 
   lccOf <- function(x) sub("^.*_", "", as.character(x))
   cent <- NULL
   if (!is.null(rasterToMatch)) {
     groups <- unique(c(
       as.character(orphans$initialEcoregionCode),
-      as.character(knownPairs[speciesCode %in% orphans$speciesCode]$initialEcoregionCode)
+      as.character(knownPairs$initialEcoregionCode)
     ))
     px <- unique(cohortData[as.character(initialEcoregionCode) %in% groups,
                             .(pixelIndex, eco = as.character(initialEcoregionCode))])
     xy <- terra::xyFromCell(rasterToMatch, px$pixelIndex)
     cent <- px[, `:=`(x = xy[, 1], y = xy[, 2])][, .(x = mean(x), y = mean(y)), by = "eco"]
   }
+  nearest <- function(cand, target) {
+    if (is.null(cent) || NROW(cand) < 2L) return(cand)
+    ct <- cent[eco == target]
+    cc <- cent[match(as.character(cand$initialEcoregionCode), cent$eco)]
+    cand[which.min((cc$x - ct$x)^2 + (cc$y - ct$y)^2)]
+  }
 
+  borrowed <- list()
   donors <- lapply(seq_len(NROW(orphans)), function(i) {
     target <- as.character(orphans$initialEcoregionCode[i])
-    cand <- knownPairs[speciesCode == orphans$speciesCode[i]]
+    sp <- orphans$speciesCode[i]
+    cand <- knownPairs[speciesCode == sp]
     same <- lccOf(cand$initialEcoregionCode) == lccOf(target)
-    if (any(same) || lccOf(target) %in% sameLandCoverOnly) cand <- cand[same]
-    if (!NROW(cand)) return(NULL)
-    if (!is.null(cent) && NROW(cand) > 1L) {
-      ct <- cent[eco == target]
-      cc <- cent[match(as.character(cand$initialEcoregionCode), cent$eco)]
-      cand <- cand[which.min((cc$x - ct$x)^2 + (cc$y - ct$y)^2)]
+    strict <- lccOf(target) %in% sameLandCoverOnly
+    if (any(same) || !strict) {
+      if (any(same)) cand <- cand[same]
+      return(nearest(cand, target))
     }
-    cand
+    ## Strict land cover and no known age of this species in it: any species of that land cover.
+    others <- knownPairs[lccOf(initialEcoregionCode) == lccOf(target)]
+    from <- if (target %in% as.character(others$initialEcoregionCode)) target else
+      as.character(nearest(unique(others[, "initialEcoregionCode"]), target)$initialEcoregionCode)
+    if (!length(from) || is.na(from)) return(NULL)
+    rows <- cohortData[usable & as.character(initialEcoregionCode) == from]
+    set(rows, j = "speciesCode", value = sp)
+    set(rows, j = "initialEcoregionCode", value = orphans$initialEcoregionCode[i])
+    borrowed[[length(borrowed) + 1L]] <<- rows
+    NULL
   })
   donors <- unique(rbindlist(donors))
-  if (!NROW(donors)) return(needPairs[0])
+  borrowed <- if (length(borrowed)) rbindlist(borrowed) else noRows
+  if (!NROW(donors) && !NROW(borrowed)) return(structure(needPairs[0], otherSpecies = noRows))
   warning(
     "Age model: no known-age cohort where these species need ages; borrowing known ages from ",
     if (is.null(rasterToMatch)) "all ecoregion groups (no rasterToMatch)" else "the nearest ecoregion group",
     " with the same land cover, else of any land cover (never for ",
-    paste(sameLandCoverOnly, collapse = ", "), "):\n  ",
+    paste(sameLandCoverOnly, collapse = ", "), ", which borrows other species instead):\n  ",
     paste0(orphans$speciesCode, " in ", orphans$initialEcoregionCode, collapse = ", "),
     "\n  from: ", paste0(donors$speciesCode, " in ", donors$initialEcoregionCode, collapse = ", "),
+    if (NROW(borrowed)) paste0(
+      "\n  other species borrowed for: ",
+      paste(unique(paste0(borrowed$speciesCode, " in ", borrowed$initialEcoregionCode)), collapse = ", ")
+    ),
     call. = FALSE
   )
-  donors
+  structure(donors, otherSpecies = borrowed)
 }
 
 #' Generate initial `cohortData` table
@@ -1521,8 +1548,9 @@ modelFormulaVars <- function(model, cols = NULL) {
 #'
 #' @param ageDonorSameLandCover Land-cover suffixes of `initialEcoregionCode` whose groups only borrow
 #'   ages from groups with the same suffix (see `rasterToMatch`). Default `"240"`, the disturbed (recent
-#'   burn) class, whose ages must not come from other land covers. If no such group has the species,
-#'   it still stops.
+#'   burn) class, whose ages must not come from other land covers. If no group of that land cover has
+#'   the species with known ages, the known ages of the other species in its group (else in the
+#'   nearest group of that land cover that has any) are used for it.
 #'
 #' @return a `cohortData` `data.table` with attribute `"imputedPixID"`
 #'     (a vector of pixel IDs that suffered imputation).
@@ -1605,16 +1633,15 @@ makeAndCleanInitialCohortData <- function(
       ## A species with no known-age cohort in any group where it needs ages would get no coefficient
       ## (e.g. ELF 4.2.1, 2000: one Abie_las cohort without age, in a group with no other Abie_las).
       ## Borrow its known-age cohorts from the nearest group that has them.
-      cohortDataMissingAgeUnique <- rbind(
-        cohortDataMissingAgeUnique,
-        .ageDonorPairs(
-          needPairs = cohortDataMissingAgeUnique,
-          cohortData = cohortData,
-          modelVars = modelFormulaVars(imputeBadAgeModel, colnames(cohortData)),
-          rasterToMatch = rasterToMatch,
-          sameLandCoverOnly = ageDonorSameLandCover
-        )
+      donorPairs <- .ageDonorPairs(
+        needPairs = cohortDataMissingAgeUnique,
+        cohortData = cohortData,
+        modelVars = modelFormulaVars(imputeBadAgeModel, colnames(cohortData)),
+        rasterToMatch = rasterToMatch,
+        sameLandCoverOnly = ageDonorSameLandCover
       )
+      borrowedOtherSpecies <- attr(donorPairs, "otherSpecies")
+      cohortDataMissingAgeUnique <- rbind(cohortDataMissingAgeUnique, donorPairs)
       cohortDataMissingAgeUnique <- cohortDataMissingAgeUnique[
         cohortData,
         on = c("initialEcoregionCode", "speciesCode"),
@@ -1630,6 +1657,12 @@ makeAndCleanInitialCohortData <- function(
         initialEcoregionCode,
         cover
       )]
+      if (NROW(borrowedOtherSpecies)) {
+        cohortDataMissingAgeUnique <- rbind(
+          cohortDataMissingAgeUnique,
+          borrowedOtherSpecies[, names(cohortDataMissingAgeUnique), with = FALSE]
+        )
+      }
       ## Drop rows with a zero in any variable the model uses, response included: a zero cannot
       ## enter a log-scale term (log(0) is -Inf; the default model logs age and totalBiomass),
       ## and a cohort with zero cover or biomass says nothing about stand age.

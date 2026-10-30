@@ -552,9 +552,15 @@ testthat::test_that(".ageDonorPairs borrows from the nearest group with the same
   expect_identical(key(out), c("S D_240", "T B_210", "W G_240"))
   expect_warning(LandR:::.ageDonorPairs(need, cd, vars, ras), "borrowing known ages")
 
-  ## 240 is recent burn: T would otherwise borrow from B_210, but there is no 240 donor, so none.
+  ## 240 is recent burn: T would otherwise borrow from B_210. It has no known age in any 240 group,
+  ## so it takes the other species' known ages of the nearest 240 group that has any (A_240 has U's
+  ## row, so A_240 itself), relabelled as T.
   out240 <- suppressWarnings(LandR:::.ageDonorPairs(need, cd, vars, ras, sameLandCoverOnly = "240"))
   expect_identical(key(out240), c("S D_240", "W G_240"))
+  oth <- attr(out240, "otherSpecies")
+  expect_identical(as.character(unique(oth$speciesCode)), "T")
+  expect_identical(as.character(unique(oth$initialEcoregionCode)), "A_240")
+  expect_identical(oth$age, 50L)
 
   outNoRas <- suppressWarnings(LandR:::.ageDonorPairs(need, cd, vars))
   expect_identical(key(outNoRas), c("S C_240", "S D_240", "T B_210", "T E_220", "W G_240"))
