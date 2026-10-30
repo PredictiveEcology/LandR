@@ -181,7 +181,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
 
   if (any(is.na(specDat2))) {
     message(cli::col_magenta(
-      "Found NA's in species biomass or maxB model predictors.",
+      "Found NA's in species biomass or maxB model predictors. ",
       "These lines will be removed"
     ))
   }
@@ -353,7 +353,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
   ## linear equation for A, the asymptote (same for CR and Logistic models)
   # lnEqn <- paste("A ~", paste(predictorVars, collapse = " + "))
   if ("CR" %in% models) {
-    message(cli::col_blue("Fitting CR model for", sp))
+    message(cli::col_blue("Fitting CR model for ", sp))
     modelParams <- list(
       ## dpois represents the stochastic component generating B, for any set of conditions.
       nonLinEqn = quote(B ~ dpois(lambda = A * (1 - exp(-k * age))^p)),
@@ -442,7 +442,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
   }
 
   if ("Logistic" %in% models) {
-    message(cli::col_blue("Fitting Logistic model for", sp))
+    message(cli::col_blue("Fitting Logistic model for ", sp))
 
     modelParams <- list(
       ## dpois represents the stochastic component generating B, for any set of conditions.
@@ -486,7 +486,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
       # lnEqn <- paste("A ~ 1") ## testing
       modelParams$linEqn <- list(parse(text = lnEqn))
 
-      message(cli::col_blue("using", lnEqn))
+      message(cli::col_blue("using ", lnEqn))
 
       modelOutputsPrev$Logistic$mllsOuter <- .fitNLMwCovariates(
         data = trainData,
@@ -579,7 +579,7 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
       } else {
         maxBEst <- NA
       }
-      message(cli::col_cyan("    best AIC so far:", round(aicPrev, 0), "; maxB est = ", maxBEst))
+      message(cli::col_cyan("    best AIC so far: ", round(aicPrev, 0), "; maxB est = ", maxBEst))
     }
 
     if (!exists("aicPrev", inherits = FALSE)) {
@@ -668,13 +668,13 @@ fitNLMModels <- function(sp = NULL, predictorVarsData, sppVarsB, predictorVars,
         newdata[, cover := maxCover]
 
         maxBEst <- extractMaxB(mll[[bestModel]], newdata = newdata, average = TRUE, model = model)
-        message(cli::col_cyan("    best AIC so far:", round(aicTry, 0), "; maxB est = ", maxBEst))
+        message(cli::col_cyan("    best AIC so far: ", round(aicTry, 0), "; maxB est = ", maxBEst))
         aicPrev <- aicTry
         mllKeep <- mll[[bestModel]]
       }
     } else {
       warning(
-        "Could not converge. Try increasing Ntries or changing paramRanges values.",
+        "Could not converge. Try increasing Ntries or changing paramRanges values. ",
         "See output for last error message"
       )
       if (!exists("mllKeep", inherits = FALSE)) {

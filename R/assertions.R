@@ -539,7 +539,7 @@ assertSpeciesLayers <- function(speciesLayers, thresh,
 
     if (all(test1)) {
       stop(
-        "no pixels found were found with species % cover >=", thresh,
+        "no pixels found were found with species % cover >= ", thresh,
         ". Try lowering the threshold."
       )
     }

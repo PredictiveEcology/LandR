@@ -124,7 +124,7 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
   ## from sppNameVector to match one spp in sppEquivCol (e.g. merged spp)
   if (isFALSE(all(sppNameVector %in% sppEquiv[[sppEquivCol]]))) {
     warning(
-      "Some species in 'sppNameVector' are not in 'sppEquiv[[sppEquivCol]]'.",
+      "Some species in 'sppNameVector' are not in 'sppEquiv[[sppEquivCol]]'. ",
       "This may be because species are being merged. Please verify."
     )
   }
@@ -168,7 +168,7 @@ sppHarmonize <- function(sppEquiv, sppNameVector, sppEquivCol, sppColorVect,
         missingNames <- names(sppColorVect)[is.na(tempNames)]
         stop(
           "Could not convert 'sppColorVect' names. The following are missing",
-          " from 'sppEquiv' in 'sppEquivCol' (", sppEquivCol, "):",
+          " from 'sppEquiv' in 'sppEquivCol' (", sppEquivCol, "): ",
           paste(missingNames, collapse = ", ")
         )
       }
