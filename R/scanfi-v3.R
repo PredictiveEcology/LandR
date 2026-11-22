@@ -87,3 +87,16 @@ scanfiV3ToCanadaLCC <- data.frame(
     NAflag = 255
   )
 }
+
+#' The years SCANFI publishes
+#'
+#' @param version `"V2"` (every 5 years, 1985-2025; species, biomass, age) or `"V3"` (every
+#'   year, 1985-2025; land cover).
+#'
+#' @return Integer vector of years.
+#'
+#' @export
+scanfiYears <- function(version = c("V2", "V3")) {
+  version <- match.arg(version)
+  as.integer(switch(version, V2 = .scanfi_v2_years, V3 = .scanfi_v3_years))
+}

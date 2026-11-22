@@ -679,3 +679,33 @@ testthat::test_that("makeAndCleanInitialCohortData leaves ages NA, with a warnin
   expect_true(any(grepl("missing ages stay NA", warns, fixed = TRUE)))
   expect_true(is.na(out[pixelIndex == n + 1L & speciesCode == "Abie_las"]$age))
 })
+
+test_that("updateCohortDataPostHarvest() creates a missing B (0), as documented", {
+  spp <- c("Pice_mar", "Pinu_ban")
+  ecos <- factor(c("1_11", "1_12"))
+  pgm <- terra::rast(nrows = 4, ncols = 4, vals = 1, crs = "EPSG:5070",
+                     xmin = 0, xmax = 4000, ymin = 0, ymax = 4000)
+  pgm[] <- c(rep(1L, 8), rep(2L, 8))
+  cd <- data.table::data.table(pixelGroup = rep(1:2, each = 2),
+                               ecoregionGroup = factor(rep(c("1_11", "1_12"), each = 2), levels = levels(ecos)),
+                               speciesCode = factor(rep(spp, 2)), age = 50L, B = 100L,
+                               mortality = 0L, aNPPAct = 0L)
+  se <- data.table::CJ(year = 0, speciesCode = factor(spp), ecoregionGroup = ecos)
+  se[, `:=`(maxB = 1000L, maxANPP = 100L)]
+  ## no B, no age: only pixelIndex, speciesCode, ecoregionGroup
+  newP <- data.table::data.table(pixelIndex = c(1L, 2L, 5L),
+                                 speciesCode = factor(c("Pice_mar", "Pinu_ban", "Pice_mar"), levels = spp),
+                                 ecoregionGroup = factor("1_11", levels = levels(ecos)))
+  prov <- unique(newP[, .(ecoregionGroup, speciesCode)])
+  prov[, Provenance := ecoregionGroup]
+  out <- suppressMessages(updateCohortDataPostHarvest(
+    newP, cd, pgm, currentTime = 1990, speciesEcoregion = se,
+    treedHarvestPixelTable = data.table::data.table(pixelIndex = c(1L, 2L, 5L)),
+    provenanceTable = prov, trackPlanting = TRUE, verbose = 0
+  ))
+  planted <- out$cohortData[planted %in% TRUE]
+  expect_identical(NROW(planted), 2L)
+  expect_true(all(planted$age == 2) && all(planted$B == 10))
+  expect_identical(as.vector(terra::values(out$pixelGroupMap))[c(1, 5)][1],
+                   as.vector(terra::values(out$pixelGroupMap))[5])
+})
