@@ -2535,6 +2535,10 @@ updateCohortDataPostHarvest <- function(
   relevantPixels <- pixelGroupMap[][newPixelCohortData$pixelIndex]
   zeroOnPixelGroupMap <- relevantPixels == 0
 
+  ## documented as optional: a missing `B` is 0 (new cohorts), as `plantNewCohorts()` sets it anyway
+  if (!"B" %in% names(newPixelCohortData)) {
+    newPixelCohortData[, B := 0L]
+  }
   newPixelCohortData[B == 0, age := 1] # this is necessary for now.
   # Can't lose the biomass of non-zero (non harvested) trees
 
