@@ -184,3 +184,10 @@ test_that("prepInputs_SCANFI_LCC_FAO(dataVersion = 'V3') recodes what prepInputs
                                    destinationPath = withr::local_tempdir())
   expect_identical(as.vector(terra::values(out, mat = FALSE)), c(20, 30, 60, 50, 220, 0))
 })
+
+test_that("scanfiYears() returns the years each SCANFI version publishes", {
+  expect_identical(scanfiYears("V2"), seq(1985L, 2025L, 5L))
+  expect_identical(scanfiYears("V3"), 1985L:2025L)
+  expect_identical(scanfiYears(), scanfiYears("V2"))
+  expect_error(scanfiYears("V1"))
+})

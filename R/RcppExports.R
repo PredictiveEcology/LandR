@@ -9,8 +9,12 @@ cellsInPgsCpp <- function(pgv, pgs) {
     .Call(`_LandR_cellsInPgsCpp`, pgv, pgs)
 }
 
-spiralLoopCpp <- function(pixelIndex_in, speciesCode_in, rowOrig_in, colOrig_in, seeddist_max_perRow, spiralRow, spiralCol, spiralCurDist, pgmRows, pgmCols, pgv, srcPg, srcSpeciesCode, numSp, wardProbByDist, activeSpMaxDist, activeSpMax, cellSize, successionTimestep, verbose, wardAlreadyExp, debug = FALSE) {
-    .Call(`_LandR_spiralLoopCpp`, pixelIndex_in, speciesCode_in, rowOrig_in, colOrig_in, seeddist_max_perRow, spiralRow, spiralCol, spiralCurDist, pgmRows, pgmCols, pgv, srcPg, srcSpeciesCode, numSp, wardProbByDist, activeSpMaxDist, activeSpMax, cellSize, successionTimestep, verbose, wardAlreadyExp, debug)
+landisDispHasOpenMP <- function() {
+    .Call(`_LandR_landisDispHasOpenMP`)
+}
+
+spiralLoopCpp <- function(pixelIndex_in, speciesCode_in, rowOrig_in, colOrig_in, seeddist_max_perRow, spiralRow, spiralCol, spiralCurDist, pgmRows, pgmCols, pgv, srcPg, srcSpeciesCode, numSp, wardProbByDist, activeSpMaxDist, activeSpMax, cellSize, successionTimestep, verbose, wardAlreadyExp, debug = FALSE, nThreads = 1L) {
+    .Call(`_LandR_spiralLoopCpp`, pixelIndex_in, speciesCode_in, rowOrig_in, colOrig_in, seeddist_max_perRow, spiralRow, spiralCol, spiralCurDist, pgmRows, pgmCols, pgv, srcPg, srcSpeciesCode, numSp, wardProbByDist, activeSpMaxDist, activeSpMax, cellSize, successionTimestep, verbose, wardAlreadyExp, debug, nThreads)
 }
 
 windowCountsByClassCpp <- function(lccVals, candClasses, nrow, ncol, cells0, kx, ky) {
