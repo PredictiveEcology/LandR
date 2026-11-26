@@ -208,6 +208,9 @@ doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
   resproutingPixelCohortData <- availableToResprout[species_temp, nomatch = 0, on = "speciesCode"]
   resproutingPixelCohortData <- resproutingPixelCohortData[age >= resproutage_min & age <= resproutage_max]
   set(resproutingPixelCohortData, NULL, c("resproutage_min", "resproutage_max", "postfireregen", "age"), NULL)
+  ## one light test and one resprout draw per species and pixel, as in LANDIS-II, however many of the
+  ## species' cohorts there are in the resprout age range
+  resproutingPixelCohortData <- unique(resproutingPixelCohortData, by = c("pixelIndex", "speciesCode"))
 
   if (NROW(resproutingPixelCohortData)) {
     ## assess potential resprouting reg: add reprout probability, siteShade/tolerance to the table and assess who resprouts
@@ -235,7 +238,6 @@ doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
     resproutingPixelCohortData <- resproutingPixelCohortData[lightProb %>>% runif(nrow(resproutingPixelCohortData), 0, 1)]
     resproutingPixelCohortData <- resproutingPixelCohortData[resproutprob %>>% runif(nrow(resproutingPixelCohortData), 0, 1)]
 
-    resproutingPixelCohortData <- unique(resproutingPixelCohortData, by = c("pixelIndex", "speciesCode"))
     set(resproutingPixelCohortData, NULL, c("resproutprob", "shadetolerance", "siteShade", "lightProb"), NULL)
 
     # remove all columns that were used temporarily here
