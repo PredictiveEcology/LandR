@@ -159,43 +159,54 @@ test_that("test Ward dispersal seeding algorithm", {
     env$b <- 0.01
     env$k <- 0.95
 
-    testDists <- list()
+    ## The share of these binomial checks below 0.01 is a property of the distribution of
+    ## runs, not of every run: over 2,000 seeded runs it passed 0.1 once (5 of 49, 0.102),
+    ## and one macOS CI job failed on it (#294). As in "test Ward 4 immediate neighbours",
+    ## keep the draws random but give a failing run one fresh, independent run before
+    ## failing. Two independent failures is ~2.5e-7, while a regression in LANDISDisp() or
+    ## Ward(), which would lift the rate, still fails here.
+    for (attempt in 1:2) {
+      seed <- sample(1e6, 1)
+      withr::local_seed(seed)
+      testDists <- list()
 
-    for (dis in 1:12) {
-      message("Working on ", dis * env$cellSize, " m")
-      ras2 <- raster(reducedPixelGroupMap)
-      ras2[] <- 2
-      ras2[SpaDES.tools::middlePixel(ras2)] <- 1
-      ras2[SpaDES.tools::middlePixel(ras2) + dis] <- 3
-      seedReceive <- data.table(pixelGroup = 3, speciesCode = species$speciesCode)
-      seedSource <- data.table(pixelGroup = 1, speciesCode = species$speciesCode)
-      output <- lapply(1:100, function(x) {
-        LANDISDisp(
-          dtRcv = seedReceive, plot.it = FALSE,
-          dtSrc = seedSource,
-          speciesTable = species,
-          pixelGroupMap = ras2,
-          verbose = FALSE,
-          successionTimestep = successionTimestep
-        )
-      })
-      output <- rbindlist(output)
-      joined <- output[species, on = "speciesCode"]
-      tooFar <- pmax(res(ras2)[1], joined$seeddistance_max) < dis * res(ras2)[1]
-      expect_true(all(is.na(joined$pixelIndex[tooFar])))
+      for (dis in 1:12) {
+        message("Working on ", dis * env$cellSize, " m")
+        ras2 <- raster(reducedPixelGroupMap)
+        ras2[] <- 2
+        ras2[SpaDES.tools::middlePixel(ras2)] <- 1
+        ras2[SpaDES.tools::middlePixel(ras2) + dis] <- 3
+        seedReceive <- data.table(pixelGroup = 3, speciesCode = species$speciesCode)
+        seedSource <- data.table(pixelGroup = 1, speciesCode = species$speciesCode)
+        output <- lapply(1:100, function(x) {
+          LANDISDisp(
+            dtRcv = seedReceive, plot.it = FALSE,
+            dtSrc = seedSource,
+            speciesTable = species,
+            pixelGroupMap = ras2,
+            verbose = FALSE,
+            successionTimestep = successionTimestep
+          )
+        })
+        output <- rbindlist(output)
+        joined <- output[species, on = "speciesCode"]
+        tooFar <- pmax(res(ras2)[1], joined$seeddistance_max) < dis * res(ras2)[1]
+        expect_true(all(is.na(joined$pixelIndex[tooFar])))
 
-      testDists[[dis]] <- sapply(unique(output$speciesCode), function(spCode) {
-        env$effDist <- unique(joined[speciesCode == spCode][["seeddistance_eff"]])
-        env$maxDist <- unique(joined[speciesCode == spCode][["seeddistance_max"]])
-        env$dist <- dis * env$cellSize
-        dispersalProb <- do.call(Ward, as.list(env))
-        dispersalProb <- 1 - (1 - dispersalProb)^successionTimestep
-        probOfThatNumber <- dbinom(x = NROW(output[speciesCode == spCode]), size = 100, prob = dispersalProb)
-      })
+        testDists[[dis]] <- sapply(unique(output$speciesCode), function(spCode) {
+          env$effDist <- unique(joined[speciesCode == spCode][["seeddistance_eff"]])
+          env$maxDist <- unique(joined[speciesCode == spCode][["seeddistance_max"]])
+          env$dist <- dis * env$cellSize
+          dispersalProb <- do.call(Ward, as.list(env))
+          dispersalProb <- 1 - (1 - dispersalProb)^successionTimestep
+          probOfThatNumber <- dbinom(x = NROW(output[speciesCode == spCode]), size = 100, prob = dispersalProb)
+        })
+      }
+      tests <- unlist(testDists)
+      if (sum(tests < 0.01) / length(tests) <= 0.1) break
     }
-    tests <- unlist(testDists)
     ## Fairly conservative test -- the number of tests that fail at p < 0.01 should be about 5% ... really, it should be 1%
-    expect_true(sum(tests < 0.01) / length(tests) <= 0.1)
+    expect_true(sum(tests < 0.01) / length(tests) <= 0.1, info = paste("last seed:", seed))
 
     ## Where rcv can receive a species, but it doesn't exist in Src
     seedReceive <- data.table(pixelGroup = 3, speciesCode = species$speciesCode[1])
