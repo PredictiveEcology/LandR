@@ -163,6 +163,15 @@ doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
     stop("missing postFireRegenSummary table for doResprouting")
   }
 
+  ## resprouting species and their resprout age ranges
+  species_temp <- species[
+    postfireregen == "resprout",
+    .(
+      speciesCode, postfireregen,
+      resproutage_min, resproutage_max, resproutprob
+    )
+  ]
+
   ## make a table of pixels where resprouting occurs.
   if (is.null(serotinyPixel)) {
     resproutingPixelTable <- setkey(treedFirePixelTableSinceLastDisp, pixelGroup)
@@ -173,10 +182,20 @@ doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
     ## -- now only species-pixel combos are removed.
     ## should be done by pixel and species -- Eliot: it works ok now because there are no serotinous
     ## species that are resprouters.
+    ## A species can resprout in a pixelGroup if any of its burned cohorts there is within its
+    ## resprout age range, as in LANDIS-II. Test the age of every cohort before keeping one per
+    ## species and pixelGroup: cohorts are listed oldest first, so the oldest one alone can be past
+    ## resproutage_max while a younger cohort of the same species is in range.
+    resproutCohortData <- burnedPixelCohortData[
+      species_temp[, .(speciesCode, resproutage_min, resproutage_max)],
+      on = "speciesCode", nomatch = 0
+    ]
+    resproutCohortData <- resproutCohortData[age >= resproutage_min & age <= resproutage_max] |>
+      unique(by = c("pixelGroup", "speciesCode"))
+    set(resproutCohortData, NULL, c("resproutage_min", "resproutage_max"), NULL)
+
     full <- treedFirePixelTableSinceLastDisp[
-      unique(burnedPixelCohortData,
-        by = c("pixelGroup", "speciesCode")
-      ),
+      resproutCohortData,
       on = "pixelGroup", allow.cartesian = TRUE
     ]
 
@@ -186,14 +205,6 @@ doResprouting <- function(burnedPixelCohortData, postFirePixelCohortData,
   }
 
   ## assess whether reprouting can occur in burnt pixels
-  species_temp <- species[
-    postfireregen == "resprout",
-    .(
-      speciesCode, postfireregen,
-      resproutage_min, resproutage_max, resproutprob
-    )
-  ]
-
   resproutingPixelCohortData <- availableToResprout[species_temp, nomatch = 0, on = "speciesCode"]
   resproutingPixelCohortData <- resproutingPixelCohortData[age >= resproutage_min & age <= resproutage_max]
   set(resproutingPixelCohortData, NULL, c("resproutage_min", "resproutage_max", "postfireregen", "age"), NULL)
