@@ -23,6 +23,9 @@
 #' @param figurePath Directory to which the `.png` figure is saved.
 #'   Defaults to `figures/` under `outputDir`; a SpaDES module would pass
 #'   `SpaDES.core::figurePath(sim)`.
+#' @param reps Integer vector of the replicates to read, from the folders `rep01`, `rep02`, ...
+#'   under `outputDir`; the leading-change map is the mean over these replicates only.
+#'   Defaults to `seq_len(Nreps)`.
 #'
 #' @return list of filepaths corresponding to the images and/or objects written to disk
 #'
@@ -30,7 +33,18 @@
 plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, outputDir, treeSpecies,
                                defineLeading = .defineLeading, leadingPercentage = 0.8,
                                treeType = NULL, rasterToMatch,
-                               figurePath = file.path(outputDir, "figures")) {
+                               figurePath = file.path(outputDir, "figures"),
+                               reps = seq_len(Nreps)) {
+  if (!is.numeric(reps) || length(reps) == 0 || any(!is.finite(reps)) || any(reps < 1) ||
+      any(reps != round(reps)) || anyDuplicated(reps) > 0) {
+    stop("'reps' must be unique positive whole numbers: the replicate folders rep01, rep02, ...")
+  }
+  reps <- as.integer(reps)
+  repDirs <- file.path(outputDir, sprintf("rep%02d", reps))
+  if (!all(dir.exists(repDirs))) {
+    stop("replicate folders not found: ", paste(repDirs[!dir.exists(repDirs)], collapse = ", "))
+  }
+
   if (requireNamespace("qs2", quietly = TRUE)) {
     if (is.null(treeType)) {
       treeType <- data.frame(
@@ -52,8 +66,8 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
 
     ## 1. for each rep within a scenario, calculate difference -->
     ##    if conifer to decid = 1, if decid to conifer = -1, otherwise 0
-    ## 2. Create one single map of "proportion net conversion" sum of difference / Nreps
-    allReps <- parallel::mclapply(1:Nreps, function(rep) {
+    ## 2. Create one single map of "proportion net conversion": the mean difference over `reps`
+    allReps <- parallel::mclapply(reps, function(rep) {
       resultsDir <- file.path(outputDir, sprintf("rep%02d", rep))
 
       bothYears <- lapply(years, function(year) {
@@ -117,11 +131,12 @@ plotLeadingSpecies <- function(studyAreaName, climateScenario, Nreps, years, out
 
       leadingStackChange
     })
-    names(allReps) <- paste0("rep", 1:Nreps)
+    names(allReps) <- paste0("rep", reps)
 
     if (length(allReps) > 1) {
       allRepsStk <- .stack(allReps)
-      meanLeadingChange <- mean(allRepsStk, na.rm = TRUE)
+      ## not mean(): base::mean() is found first here, and returns NA for a SpatRaster
+      meanLeadingChange <- terra::app(allRepsStk, fun = "mean", na.rm = TRUE)
     } else {
       meanLeadingChange <- allReps[[1]]
     }

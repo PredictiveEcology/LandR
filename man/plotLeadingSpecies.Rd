@@ -15,7 +15,8 @@ plotLeadingSpecies(
   leadingPercentage = 0.8,
   treeType = NULL,
   rasterToMatch,
-  figurePath = file.path(outputDir, "figures")
+  figurePath = file.path(outputDir, "figures"),
+  reps = seq_len(Nreps)
 )
 }
 \arguments{
@@ -25,7 +26,8 @@ plotLeadingSpecies(
 including SSP, formatted as in \code{ClimateNA}, using underscores as separator
 (e.g., 'CanESM5_SSP370').}
 
-\item{Nreps}{the number of simulation replicates/run used to produce summary figures.
+\item{Nreps}{the number of simulation replicates/run used to produce summary figures:
+replicates \code{1} to \code{Nreps} unless \code{reps} is given.
 NOTE: \code{mclapply} is used internally, so you should set \code{options(mc.cores = nReps)}
 to take advantage of parallel processing.}
 
@@ -48,6 +50,10 @@ raster operations (i.e., the one used throughout the simulation).
 \item{figurePath}{Directory to which the \code{.png} figure is saved.
 Defaults to \verb{figures/} under \code{outputDir}; a SpaDES module would pass
 \code{SpaDES.core::figurePath(sim)}.}
+
+\item{reps}{Integer vector of the replicates to read, from the folders \code{rep01}, \code{rep02}, ...
+under \code{outputDir}; the leading-change map is the mean over these replicates only.
+Defaults to \code{seq_len(Nreps)}.}
 }
 \value{
 list of file names corresponding to the figures and/or objects written to disk
