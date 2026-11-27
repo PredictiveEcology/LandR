@@ -221,7 +221,8 @@ CASFRItoSpRasts <- function(
 #' - [prepSpeciesLayers_KNN()] uses the layers from Beaudoin *et al.* (2014, 2017);
 #' - [prepSpeciesLayers_MBFRI()] uses data derived from Manitoba Forest Resource Inventories;
 #' - [prepSpeciesLayers_NTEMS()] uses the National Terrestrial Ecosystem Monitoring System for
-#'   Canada (NTEMS) tree species data described in Hermosilla *et al.* (2024);
+#'   Canada (NTEMS) tree species data described in Hermosilla *et al.* (2024)
+#'   (not yet implemented);
 #' - [prepSpeciesLayers_ONFRI()] uses data derived from Ontario Forest Resource Inventories;
 #' - [prepSpeciesLayers_Pickell()] uses data prepared for Western Canada by Pickell & Coops (2016)
 #'   as part of the LandWeb project;
